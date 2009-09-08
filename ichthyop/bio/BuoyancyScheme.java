@@ -54,7 +54,8 @@ public class BuoyancyScheme {
     final private static double C12 = 8.24493f * Math.pow(10, -1);
     final private static double C13 = 1.6546f * Math.pow(10, -6);
     final private static double C14 = 1.0227f * Math.pow(10, -4);
-    final private static double C15 = 5.72466f * Math.pow(10, -3);///////////////////////////////
+    final private static double C15 = 5.72466f * Math.pow(10, -3);
+///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
@@ -136,62 +137,6 @@ public class BuoyancyScheme {
     }
 
     /**
-     * For Andres OSPINA
-     * Buoyancy as a function a salinity, temperature and particle age.
-     * 
-     */
-    public static double move(double sal, double tp, double age) {
-
-        waterDensity = waterDensity(sal, tp);
-
-        return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f) *
-                (waterDensity - getEggDensity(age))) / 100.0f) * dt);
-    }
-
-    /**
-     * For Andres OSPINA
-     * Compute Egg denstity as function of its age
-     */
-    private static double getEggDensity(double age) {
-
-        double spec_gravity = 0.d;
-        double age_in_day = age / (24 * 3600);
-        //System.out.println("age day: " + age_in_day);
-
-        spec_gravity = age_in_day > age_lim_buoy
-                ? eggDensity
-                : 1.0539d * Math.exp(-0.0018d * age_in_day);
-        
-        //System.out.println(spec_gravity);
-
-        return spec_gravity;
-    }
-    
-    /**
-     * For Andres OSPINA
-     * Compute Egg denstity as function of the spawning density
-     */
-    /*private static double getEggDensity(double spawning_density) {
-
-        double egg_density = 0.d;
-        egg_density = ax + bx + spawning_density; 
-        return egg_density;
-    }*/
-    
-    /**
-     * For Andres OSPINA
-     * Buoyancy as a function a salinity, temperature and particle spawning density.
-     * 
-     */
-    /*public static double move(double sal, double tp, double spawning_density) {
-
-        waterDensity = waterDensity(sal, tp);
-
-        return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f) *
-                (waterDensity - getEggDensity(spawning_density))) / 100.0f) * dt);
-    }*/
-
-    /**
      * Calculates the water density according with the Unesco equation.
      *
      * @param waterSalinity a double, the sea water salinity [psu] at particle
@@ -201,7 +146,7 @@ public class BuoyancyScheme {
      * @return double waterDensity, the sea water density [g.cm-3] at the
      * particle location.
      */
-    public static double waterDensity(double sal, double tp) {
+    private static double waterDensity(double sal, double tp) {
 
         /* Methodology
         1.Estimating water density according with Unesco equation
@@ -219,13 +164,13 @@ public class BuoyancyScheme {
         RHO1 = 1000.0f + SIGMA;
         waterDensity = (RHO1 / 1000.f); in [gr.cm-3]
          */
-         
-        double  R1, R2, R3;
+        double R1, R2, R3;
 
         R1 = ((((C2 * tp - C3) * tp + C4) * tp - C5) * tp + C6) * tp - C7;
         R2 = (((C8 * tp - C9) * tp + C10) * tp - C11) * tp + C12;
-        R3 = ( -C13 * tp + C14) * tp - C15;
+        R3 = (-C13 * tp + C14) * tp - C15;
 
         return ((1000.d + (C1 * sal + R3 * Math.sqrt(Math.abs(sal)) + R2) * sal + R1 + DR350) / 1000.d);
-    }    //---------- End of class
+    }
+    //---------- End of class
 }
