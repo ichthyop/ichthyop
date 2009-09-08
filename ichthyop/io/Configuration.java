@@ -553,39 +553,39 @@ public class Configuration {
             DEPTH_RELEASE_MAX = readInteger(file, section,
                     Structure.DEPTH_MAX,
                     isSerial);
-            BLN_PULSATION = file.getBooleanProperty(section,
-                    Structure.PULSATION);
-            if (BLN_PULSATION) {
-                NB_RELEASE_EVENTS = readInteger(file, section,
-                        Structure.NB_RELEASE_EVENTS,
-                        isSerial);
-                RELEASE_DT = readInteger(file, section,
-                        Structure.RELEASE_DT,
-                        isSerial);
-            } else {
-                NB_RELEASE_EVENTS = new int[]{1};
-                RELEASE_DT = new int[]{0};
-            }
-
-            BLN_PATCHINESS = file.getBooleanProperty(section,
-                    Structure.PATCHINESS);
-            if (BLN_PATCHINESS) {
-                NB_PATCHES = readInteger(file, section,
-                        Structure.NB_PATCHES);
-                PATCH_RADIUS = readInteger(file, section,
-                        Structure.RADIUS_PATCH,
-                        isSerial);
-                if (DIM_SIMU == Constant.SIMU_3D) {
-                    PATCH_THICKNESS = readInteger(file, section,
-                            Structure.THICK_PATCH,
-                            isSerial);
-                }
-            }
+        }
+        BLN_PULSATION = file.getBooleanProperty(section,
+                Structure.PULSATION);
+        if (BLN_PULSATION) {
+            NB_RELEASE_EVENTS = readInteger(file, section,
+                    Structure.NB_RELEASE_EVENTS,
+                    isSerial);
+            RELEASE_DT = readInteger(file, section,
+                    Structure.RELEASE_DT,
+                    isSerial);
         } else {
             NB_RELEASE_EVENTS = new int[]{1};
             RELEASE_DT = new int[]{0};
         }
 
+        BLN_PATCHINESS = file.getBooleanProperty(section,
+                Structure.PATCHINESS);
+        if (BLN_PATCHINESS) {
+            NB_PATCHES = readInteger(file, section,
+                    Structure.NB_PATCHES);
+            PATCH_RADIUS = readInteger(file, section,
+                    Structure.RADIUS_PATCH,
+                    isSerial);
+            if (DIM_SIMU == Constant.SIMU_3D) {
+                PATCH_THICKNESS = readInteger(file, section,
+                        Structure.THICK_PATCH,
+                        isSerial);
+            }
+        }
+        /*} else {
+        NB_RELEASE_EVENTS = new int[]{1};
+        RELEASE_DT = new int[]{0};
+        }*/
     }
 
     /**
