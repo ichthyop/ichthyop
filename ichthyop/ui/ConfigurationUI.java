@@ -5,7 +5,6 @@ import ichthyop.io.Configuration;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
@@ -116,6 +115,8 @@ public class ConfigurationUI extends JFrame implements ActionListener,
     private JButton btnSave, btnSaveas, btnExit;
 
     private StatusBar statusBar;
+    
+    private LogBar logBar;
 
     private TabIO tabIO;
 
@@ -208,6 +209,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
 
         if (file != null) {
             statusBar.setMessage(statusBarMsg = "Loads file " + file.toString());
+            logBar.setMessage(statusBarMsg);
             INIFile cfgIn = new INIFile(file.toString());
             int n = tabbedPane.getTabCount();
             ITab tab;
@@ -231,7 +233,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                              ? "File " + file.getName() + " partially loaded"
                              :
                              "File " + file.getName() + " successfully loaded";
-            statusBar.setMessage(message);
+            logBar.setMessage(message);
             btnSave.setEnabled(false);
         }
     }
@@ -319,6 +321,9 @@ public class ConfigurationUI extends JFrame implements ActionListener,
         /** Status bar */
         statusBar = new StatusBar("");
 
+        /** Log bar */
+        logBar = new LogBar();
+
         panel.add(tabbedPane, new GridBagConstraints(0, 0, 2, 1, 100, 90,
                 GridBagConstraints.NORTH,
                 GridBagConstraints.BOTH,
@@ -330,6 +335,11 @@ public class ConfigurationUI extends JFrame implements ActionListener,
         panel.add(statusBar, new GridBagConstraints(0, 1, 2, 1, 100, 10,
                 GridBagConstraints.WEST,
                 GridBagConstraints.HORIZONTAL,
+                new Insets(5, 5, 5, 5), 0, 0));
+
+        panel.add(logBar.createUI(), new GridBagConstraints(0, 2, 2, 1, 100, 30,
+                GridBagConstraints.WEST,
+                GridBagConstraints.BOTH,
                 new Insets(5, 5, 5, 5), 0, 0));
 
         return panel;
@@ -368,26 +378,19 @@ public class ConfigurationUI extends JFrame implements ActionListener,
      */
     private void printErr(Throwable t, String errTitle) {
 
-        t.printStackTrace();
+        //t.printStackTrace();
         StackTraceElement[] stackTrace = t.getStackTrace();
-        StringBuffer message = new StringBuffer(t.getClass().getSimpleName());
+        StringBuffer message = new StringBuffer(errTitle);
+        message.append('\n');
+        message.append(t.getClass().getSimpleName());
         message.append(" : ");
         message.append(stackTrace[0].toString());
         message.append('\n');
         message.append("  --> ");
         message.append(t.getMessage());
-        System.err.println(message.toString());
+        
+        logBar.setMessage(message.toString());
 
-        statusBar.setMessage(statusBarMsg = t.getClass().getSimpleName() +
-                                            " : " +
-                                            t.getMessage());
-
-        JOptionPane.showMessageDialog(ConfigurationUI.this,
-                                      errTitle + "\n" +
-                                      t.getClass().getSimpleName() + " : " +
-                                      t.getMessage(),
-                                      "Error " + t.getClass().getSimpleName(),
-                                      JOptionPane.ERROR_MESSAGE);
     }
 
     /**
@@ -426,10 +429,12 @@ public class ConfigurationUI extends JFrame implements ActionListener,
 
     public void mouseExited(MouseEvent e) {
 
-        statusBar.setMessage(statusBarMsg);
+        statusBar.setMessage("");
     }
 
     public void actionPerformed(ActionEvent e) {
+
+        logBar.setMessage("");
 
         Object source = e.getSource();
 
@@ -453,9 +458,9 @@ public class ConfigurationUI extends JFrame implements ActionListener,
             if (write(new INIFile(file.toString()))) {
                 setTitle(Resources.TITLE_SHORT + file.toString());
                 btnSave.setEnabled(false);
-                statusBar.setMessage(statusBarMsg = "Saved " + file.toString());
+                logBar.setMessage(statusBarMsg = "Saved " + file.toString());
             } else {
-                statusBar.setMessage(statusBarMsg = "Could not save " +
+                logBar.setMessage(statusBarMsg = "Could not save " +
                         file.toString());
             }
         }
@@ -474,10 +479,10 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                 if (write(new INIFile(file.toString()))) {
                     setTitle(Resources.TITLE_SHORT + file.toString());
                     btnSave.setEnabled(false);
-                    statusBar.setMessage(statusBarMsg = "Saved " +
+                    logBar.setMessage(statusBarMsg = "Saved " +
                             file.toString());
                 } else {
-                    statusBar.setMessage(statusBarMsg = "Could not save " +
+                    logBar.setMessage(statusBarMsg = "Could not save " +
                             file.toString());
                 }
             }
@@ -932,7 +937,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                     hasChanged = true;
                     txtInputpath.setText(chooser.getSelectedFile().toURI().
                                          toString());
-                    statusBar.setMessage(statusBarMsg = "Typed input path " +
+                    logBar.setMessage(statusBarMsg = "Typed input path " +
                             txtInputpath.getText());
                     getInputFiles(txtInputpath.getText(),
                                   txtFilenameFilter.getText());
@@ -954,7 +959,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                     hasChanged = true;
                     txtOutputpath.setText(uriCurrent.relativize(chooser.
                             getSelectedFile().toURI()).getPath());
-                    statusBar.setMessage(statusBarMsg = "Typed output path " +
+                    logBar.setMessage(statusBarMsg = "Typed output path " +
                             txtOutputpath.getText());
                 }
             }
@@ -971,7 +976,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                     hasChanged = true;
                     txtDrifterPathname.setText(uriCurrent.relativize(chooser.
                             getSelectedFile().toURI()).getPath());
-                    statusBar.setMessage(statusBarMsg = "Drifter file: " +
+                    logBar.setMessage(statusBarMsg = "Drifter file: " +
                             txtDrifterPathname.getText());
                 }
             }
@@ -1001,7 +1006,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                         fileMask = DEFAULT_FILTER;
                         txtFilenameFilter.setText(fileMask);
                     }
-                    statusBar.setMessage(statusBarMsg = "Filename filter: " +
+                    logBar.setMessage(statusBarMsg = "Filename filter: " +
                             txtFilenameFilter.getText());
                     getInputFiles(txtInputpath.getText(), fileMask);
                     tabTime.refresh();
@@ -1020,7 +1025,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                     txtInputpath.setText(URI.create(txtInputpath.getText()).
                                          toString());
                 }
-                statusBar.setMessage(statusBarMsg = "Typed input path " +
+                logBar.setMessage(statusBarMsg = "Typed input path " +
                         txtInputpath.getText());
                 getInputFiles(txtInputpath.getText(),
                               txtFilenameFilter.getText());
@@ -1192,14 +1197,13 @@ public class ConfigurationUI extends JFrame implements ActionListener,
             if (tabIO.listInputFiles != null) {
                 try {
                     getNcInfo(tabIO.listInputFiles.get(0));
-                    statusBar.setMessage(statusBarMsg =
+                    logBar.setMessage(statusBarMsg =
                             "Extraction grid boundaries [OK]");
                 } catch (Exception e) {
                     lonMin = latMin = lonMax = latMax = 0.f;
                     printErr(new IOException(
                             "Problem extracting grid boundaries from file " +
-                            tabIO.listInputFiles.get(0) + "\n" +
-                            e.getMessage()),
+                            tabIO.listInputFiles.get(0)),
                              "Configuration editor - Model tab");
                 }
             }
@@ -1775,8 +1779,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                     txtDatasetDt.setText(humanReadable(datasetDt));
                     txtDatasetRecordDt.setText(humanReadable(datasetDtR));
                     txtAcceptableDt.setText(humanReadable(acceptableDt));
-                    statusBar.setMessage(statusBarMsg =
-                            "Extraction time info [OK]");
+                    logBar.setMessage(statusBarMsg = "Extraction time info [OK]");
                 } catch (Exception e) {
                     prmFirst.setValue(0);
                     MaxDuration.setValue(0);
@@ -3953,7 +3956,7 @@ public class ConfigurationUI extends JFrame implements ActionListener,
                                                 1);
                 }
             }
-            statusBar.setMessage(statusBarMsg = "Check out variable names.");
+            //statusBar.setMessage(statusBarMsg = "Check out variable names.");
             return false;
         }
 
