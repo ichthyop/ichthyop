@@ -42,7 +42,8 @@ public class Particle extends RhoPoint implements IParticle {
      * @see constructor Particle(double, double, double,
     double, double, double)
      */
-    private final static int DROP_MAX = 2000;///////////////////////////////
+    private final static int DROP_MAX = 2000;
+///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
@@ -142,24 +143,9 @@ public class Particle extends RhoPoint implements IParticle {
      * Declared as static because it is common to all Particle objects.
      */
     private static float lethal_tp;
-    private static boolean FLAG_GROWTH,  FLAG_LETHAL_TP,  FLAG_ISODEPTH,  FLAG_BUOYANCY,  FLAG_DISPLAY_TP,  FLAG_VDISP,  FLAG_HDISP,  FLAG_MIGRATION,  FLAG_PLANKTON,  FLAG_RECRUITMENT;    // Variables pour Pagode
-    /*
-     * For Simon Henriot in the frame of the PAGODE project
-     * Simuler la dérive de sonde de mesure.
-     */
-    final private double VDOWN = -1.d * 0.22d; // m/s
-    final private double VUP = 0.12d; // m/s
-    final private int DMAXSURFACE = 900;
-    final private int DMAXBOTTOM = 84600;
-    private double duration_stuck = 0.d;
-    private boolean isStuckSurface = true,  isStuckBottom = false;
-    private boolean goDown = true;
-    
-    /*
-     * For Andres OSPINA
-     * Spawning density
-     */
-    private double spawning_density;
+    private static boolean FLAG_GROWTH, FLAG_LETHAL_TP, FLAG_ISODEPTH,
+            FLAG_BUOYANCY, FLAG_DISPLAY_TP, FLAG_VDISP, FLAG_HDISP,
+            FLAG_MIGRATION, FLAG_PLANKTON, FLAG_RECRUITMENT;
 
 ///////////////
 // Constructors
@@ -331,80 +317,6 @@ public class Particle extends RhoPoint implements IParticle {
             smallZoo = plankton[1];
             largeZoo = plankton[2];
         }
-        
-        if (FLAG_BUOYANCY) {
-            spawning_density = BuoyancyScheme.waterDensity(salinity, temperature);
-        }
-    }
-
-    /*
-     * For Simon Henriot in the frame of the PAGODE project
-     * Simuler la dérive de sonde de mesure.
-     */
-    void movePagode(double time) throws ArrayIndexOutOfBoundsException {
-
-        double[] mvt;
-        if (isStuckSurface) {
-            if (duration_stuck < DMAXSURFACE) {
-                duration_stuck += dt;
-                mvt = (Configuration.getScheme() == Constant.EULER)
-                        ? data.advectEuler(getPGrid(), time, dt)
-                        : data.advectRk4(getPGrid(), time, dt);
-                mvt[2] = 0.d;
-                increment(mvt);
-            } else {
-                isStuckSurface = false;
-                duration_stuck = 0;
-                // commencer à faire couler pagode
-                goDown = true;
-                movePagode(time);
-                return;
-            }
-        } else if (isStuckBottom) {
-            if (duration_stuck < DMAXBOTTOM) {
-                duration_stuck += dt;
-            // pas de déplacement
-            } else {
-                isStuckBottom = false;
-                duration_stuck = 0;
-                // commencer à faire remonter pagode
-                goDown = false;
-                movePagode(time);
-                return;
-            }
-        } else {
-            mvt = (Configuration.getScheme() == Constant.EULER)
-                    ? data.advectEuler(getPGrid(), time, dt)
-                    : data.advectRk4(getPGrid(), time, dt);
-            mvt[2] = 0;
-            increment(mvt);
-            double ddepth = goDown
-                    ? VDOWN * dt
-                    : VUP * dt;
-            setZ(Dataset.depth2z(getX(), getY(), getDepth() + ddepth));
-        }
-
-        /** Test if particules is living */
-        if (isOnEdge(Dataset.get_nx(), Dataset.get_ny())) {
-            die(Constant.DEAD_OUT);
-        } else if (!Dataset.isInWater(this)) {
-            die(Constant.DEAD_BEACH);
-        }
-
-        /** Transform (x, y, z) into (lon, lat, depth) */
-        if (living) {
-            grid2Geog();
-        }
-
-        if (!isStuckSurface && !isStuckBottom) {
-            if (goDown && getZ() <= 0.01d) {
-                isStuckBottom = true;
-            }
-            if (!goDown && getZ() >= Dataset.get_nz() - 1.01d) {
-                isStuckSurface = true;
-            }
-        }
-
     }
 
     /**
@@ -626,9 +538,9 @@ public class Particle extends RhoPoint implements IParticle {
             if (Configuration.isStopMoving() && isRecruited()) {
                 return;
             }
+
             try {
                 move(time);
-                //movePagode(time);
 
                 if (FLAG_GROWTH && living) {
                     grow(time);
@@ -704,18 +616,9 @@ public class Particle extends RhoPoint implements IParticle {
             grid2Geog();
             salinity = data.getSalinity(getPGrid(), time);
             temperature = data.getTemperature(getPGrid(), time);
-            /*setZ(Dataset.depth2z(getX(), getY(),
-                    getDepth() +
-                    BuoyancyScheme.move(salinity, temperature)));*/
             setZ(Dataset.depth2z(getX(), getY(),
                     getDepth() +
-                    BuoyancyScheme.move(salinity, temperature, age)));
-            
-            /*setZ(Dataset.depth2z(getX(), getY(),
-                    getDepth() +
-                    BuoyancyScheme.move(salinity, temperature, spawning_density)));*/
-            
-            
+                    BuoyancyScheme.move(salinity, temperature)));
         }
     }
 
@@ -750,7 +653,6 @@ public class Particle extends RhoPoint implements IParticle {
                     temperature = data.getTemperature(
                     getPGrid(),
                     time));
-        //length = GrowthModel.grow(age);
         }
 
         /** checks for lethal water temperature */
@@ -1021,7 +923,7 @@ public class Particle extends RhoPoint implements IParticle {
 
     /**
      * Determines whether a particle is newly recruited.
-     * 
+     *
      * @return {@code true} if the particle is newly recruited,
      *         {@code false} otherwise.
      */
@@ -1034,5 +936,6 @@ public class Particle extends RhoPoint implements IParticle {
      */
     public void resetNewRecruited() {
         isNewRecruited = false;
-    }    //---------- End of class
+    }
+    //---------- End of class
 }
