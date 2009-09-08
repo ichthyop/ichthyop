@@ -28,7 +28,7 @@ public class Configuration {
     /////////////////////
     // Constants
     /////////////////////
-    public static int VERSION = 211;
+    public static int VERSION = 220;
 
     /////////////////////
     // Section SIMULATION
@@ -248,6 +248,9 @@ public class Configuration {
         if (version < 211) {
             ufile = u210To211(ufile);
         }
+        if (version < 220) {
+            ufile = u211To220(ufile);
+        }
 
         try {
             if (getVersion(ufile) == VERSION) {
@@ -335,6 +338,18 @@ public class Configuration {
         ufile.setBooleanProperty(Structure.SECTION_RECRUIT,
                 Structure.STOP,
                 false,
+                null);
+
+        return ufile;
+    }
+
+    private INIFile u211To220(INIFile file) {
+        INIFile ufile = file;
+
+        // Add property [SIMULATION] <version>
+        ufile.setIntegerProperty(Structure.SECTION_SIMULATION,
+                Structure.VERSION,
+                VERSION,
                 null);
 
         return ufile;
