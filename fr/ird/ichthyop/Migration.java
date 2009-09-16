@@ -55,7 +55,8 @@ public class Migration extends AbstractAction {
                 /** diel vertical migration */
                 depth = getDepth(particle.getX(), particle.getY());
             }
-            particle.setZ(particle.depth2z(depth));
+            particle.setDepth(depth);
+            particle.geo2Grid();
         }
     }
 
@@ -75,7 +76,7 @@ public class Migration extends AbstractAction {
     private double getDepth(double x, double y) {
 
         double bottom = getSimulation().getDataset().getDepth(x, y, 0);
-        calendar.setTimeInMillis((long) (getSimulation().getTime() * 1e3));
+        calendar.setTimeInMillis((long) (getSimulation().getStep().getTime() * 1e3));
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
         if (hour >= sunrise && hour < sunset) {

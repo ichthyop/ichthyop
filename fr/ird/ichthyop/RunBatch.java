@@ -79,7 +79,7 @@ public class RunBatch implements Runnable {
 
     public void run() {
         do {
-            simulation.step(step.getTime());
+            simulation.step();
         } while (step.next());
     }
 }

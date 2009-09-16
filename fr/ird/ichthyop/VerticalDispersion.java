@@ -10,16 +10,14 @@ package fr.ird.ichthyop;
  */
 public class VerticalDispersion extends AbstractAction {
 
-    private double dt;
     private MTRandom random;
 
     public void loadParameters() {
-        dt = Integer.valueOf(getParameter("time.timeStep"));
         random = new MTRandom();
     }
 
     public void execute(IBasicParticle particle) {
-        particle.increment(getVDispersion(particle.getGridPoint(), getSimulation().getTime(), dt));
+        particle.increment(getVDispersion(particle.getGridPoint(), getSimulation().getStep().getTime(), getSimulation().getStep().get_dt()));
     }
 
     /**

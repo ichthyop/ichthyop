@@ -14,52 +14,14 @@ package fr.ird.ichthyop;
  * @see ichthyop.core.Particle that implements IParticle
  */
 
-public interface IBasicParticle {
+public interface IBasicParticle extends IRhoPoint {
 
 /////////////////////////////
 // Declaration of the methods
 /////////////////////////////
 
-    /**
-     * Gets the x grid coordinate
-     * @return a double, the x grid coordinate of the particle
-     */
-    public double getX();
-
-    /**
-     * Gets the y grid coordinate
-     * @return a double, the y grid coordinate of the particle
-     */
-    public double getY();
-
-    /**
-     * Gets the z grid coordinate
-     * @return a double, the z grid coordinate of the particle
-     */
-    public double getZ();
-
-    public void setZ(double z);
-
-    public double[] getGridPoint();
-
-    /**
-     * Gets the longitude
-     * @return a double, the longitude of the particle location [East degree]
-     */
-    public double getLon();
-
-    /**
-     * Gets the latitude
-     * @return a double, the latitude of the particle location [North degree
-     */
-    public double getLat();
-
-    /**
-     * Gets the depth
-     * @return a double, the depth of the particle [meter]
-     */
-    public double getDepth();
-
+    public void step();
+    
     /**
      * Checks whether the particle is living or not
      * @return <code>true</code> if the particle is living; <code>false</code>
@@ -73,17 +35,13 @@ public interface IBasicParticle {
      */
     public int index();
 
-    public void step(double time);
-
-    public void increment(double[] move);
-
     //public int getNumZone(int typeZone);
 
     public long getAge();
 
-    public void grid2Geog();
+    public void kill(String cause);
 
-    public double depth2z(double depth);
+    public String getDeathCause();
 
     //---------- End of interface
 }

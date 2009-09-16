@@ -91,14 +91,14 @@ public interface Constant {
     /** Label for alive particle */
     final public static int DEAD_NOT = 0;
     /** Label for out-of-domain particle */
-    final public static int DEAD_OUT = 1;
+    final public static String DEAD_OUT = "out";
     /** Label for dead-cold particle (dead cold egg when growth
      * is simulated).*/
-    final public static int DEAD_COLD = 2;
+    final public static String DEAD_COLD = "frozen";
     /** label for beached particle */
-    final public static int DEAD_BEACH = 4;
+    final public static String DEAD_BEACH = "beached";
     /** Label for old dead particle */
-    final public static int DEAD_OLD = 5;
+    final public static String DEAD_OLD = "old";
     /** Label for dead cold larva, only when growth is simulated */
     final public static int DEAD_COLD_LARVE = 3;
 

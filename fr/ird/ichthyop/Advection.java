@@ -12,20 +12,18 @@ public class Advection extends AbstractAction {
 
     private boolean isEuler = true;
     private boolean isForward = true;
-    private double dt;
 
     public void loadParameters() {
-
-        dt = Integer.valueOf(getParameter("time.timeStep"));
+        
         isEuler = getParameter("model.scheme").matches(getProperty("model.scheme.euler"));
         isForward = getParameter("time.timeArrow").matches(getProperty("time.timeArrow.forward"));
     }
 
     public void execute(IBasicParticle particle) {
         if (isForward) {
-            advectForward(particle, getSimulation().getTime());
+            advectForward(particle, getSimulation().getStep().getTime());
         } else {
-            advectBackward(particle, getSimulation().getTime());
+            advectBackward(particle, getSimulation().getStep().getTime());
         }
     }
 
@@ -33,8 +31,8 @@ public class Advection extends AbstractAction {
             ArrayIndexOutOfBoundsException {
 
         double[] mvt = isEuler
-                ? getSimulation().getDataset().advectEuler(particle.getGridPoint(), time, dt)
-                : getSimulation().getDataset().advectRk4(particle.getGridPoint(), time, dt);
+                ? getSimulation().getDataset().advectEuler(particle.getGridPoint(), time, getSimulation().getStep().get_dt())
+                : getSimulation().getDataset().advectRk4(particle.getGridPoint(), time, getSimulation().getStep().get_dt());
 
         particle.increment(mvt);
     }
@@ -43,6 +41,7 @@ public class Advection extends AbstractAction {
             ArrayIndexOutOfBoundsException {
 
         double[] mvt, pgrid;
+        double dt = getSimulation().getStep().get_dt();
 
         if (isEuler) {
             mvt = getSimulation().getDataset().advectEuler(pgrid = particle.getGridPoint(), time, dt);

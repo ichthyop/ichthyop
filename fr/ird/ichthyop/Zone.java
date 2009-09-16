@@ -156,7 +156,7 @@ public class Zone {
     public void geo2Grid() {
 
         for (int i = 0; i < 4; i++) {
-            double[] po = simulation.getDataset().geo2Grid(lon[i], lat[i]);
+            double[] po = simulation.getDataset().lonlat2xy(lon[i], lat[i]);
             xGrid[i] = po[0];
             yGrid[i] = po[1];
         }

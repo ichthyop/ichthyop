@@ -10,16 +10,7 @@ package fr.ird.ichthyop;
  */
 public abstract class AbstractAction implements IAction {
 
-    private ISimulation simulation;
     private ParameterManager parameterManager = new ParameterManager(this.getClass());
-
-    public AbstractAction(ISimulation simulation) {
-        this.simulation = simulation;
-    }
-
-    public AbstractAction() {
-        this(Simulation.getInstance());
-    }
 
     public String getParameter(String name) {
         return parameterManager.getValue(name);
@@ -30,10 +21,10 @@ public abstract class AbstractAction implements IAction {
     }
 
     public ISimulation getSimulation() {
-        return simulation;
+        return Simulation.getInstance();
     }
 
     public boolean isActivated() {
-        return ActionManager.getAction(getClass().getSimpleName()).isEnabled();
+        return getSimulation().getActionManager().getAction(getClass().getSimpleName()).isEnabled();
     }
 }

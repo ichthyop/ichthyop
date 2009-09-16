@@ -9,10 +9,8 @@ package fr.ird.ichthyop;
  *
  * @author pverley
  */
-public interface IGrowingParticle extends IBasicParticle {
+public interface IActionManager {
 
-    public double getLength();
-
-    public int getStage();
+    public XAction getAction(String key);
 
 }

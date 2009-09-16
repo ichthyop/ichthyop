@@ -20,7 +20,7 @@ import java.util.Calendar;
  *
  * @author P.Verley
  */
-public class Step implements Cloneable {
+public class Step implements IStep {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -240,6 +240,10 @@ public class Step implements Cloneable {
      */
     public int get_dt() {
         return dt;
+    }
+
+    public long getTransportDuration() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     //---------- End of class

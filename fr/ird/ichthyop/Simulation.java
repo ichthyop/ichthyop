@@ -12,11 +12,6 @@ public class Simulation implements ISimulation {
 
     private Population population;
 
-    public void step(long time) {
-
-        population.step(time);
-    }
-
     public void setUp() {}
 
     public void init() {}
@@ -46,6 +41,14 @@ public class Simulation implements ISimulation {
     }
 
     public Step getStep() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void step() {
+        population.step();
+    }
+
+    public IActionManager getActionManager() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

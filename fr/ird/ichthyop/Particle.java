@@ -10,18 +10,15 @@ package fr.ird.ichthyop;
  */
 public class Particle extends RhoPoint implements IBasicParticle {
 
-    ISimulation simulation;
-    private int dead;
+    private int index;
+    private long age;
+    private String deathCause;
+    private boolean living;
     private static Advection advection;
     private static HorizontalDispersion hdispersion;
     private static VerticalDispersion vdispersion;
     private static Buoyancy buoyancy;
-
-    public void step(double time) {
-        if (getAge() <= simulation.getTransportDuration()) {
-            move();
-        }
-    }
+    private static Recruitment recruitment;
 
     private void move() {
 
@@ -37,10 +34,10 @@ public class Particle extends RhoPoint implements IBasicParticle {
             vdispersion.execute(this);
         }
 
-        if (isOnEdge(simulation.getDataset().get_nx(), simulation.getDataset().get_ny())) {
-            die(Constant.DEAD_OUT);
-        } else if (!simulation.getDataset().isInWater(this)) {
-            die(Constant.DEAD_BEACH);
+        if (getSimulation().getDataset().isOnEdge(getGridPoint())) {
+            kill(Constant.DEAD_OUT);
+        } else if (!getSimulation().getDataset().isInWater(getGridPoint())) {
+            kill(Constant.DEAD_BEACH);
         }
 
         if (buoyancy.isActivated() && isLiving()) {
@@ -49,27 +46,37 @@ public class Particle extends RhoPoint implements IBasicParticle {
 
     }
 
-    private void die(int dead) {
+    public void kill(String cause) {
 
-        this.dead = dead;
-        //setLiving(false);
-        setLLD(Double.NaN, Double.NaN, Double.NaN);
-        //length = temperature = salinity = Double.NaN;
+        this.deathCause = cause;
+        living = false;
+        setLon(Double.NaN);
+        setLat(Double.NaN);
+        setDepth(Double.NaN);
     }
 
-    public double[] getGridPoint() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void step() {
+        if (getAge() <= getSimulation().getStep().getTransportDuration()) {
+            
+            
+
+            move();
+        }
     }
 
     public boolean isLiving() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return living;
     }
 
     public int index() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return index;
     }
 
     public long getAge() {
+        return age;
+    }
+
+    public String getDeathCause() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

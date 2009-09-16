@@ -10,11 +10,15 @@ package fr.ird.ichthyop;
  */
 public interface IDataset {
 
-    public double[] geo2Grid(double lon, double lat);
+    //public double[] geo2Grid(double lon, double lat);
+    public double[] lonlat2xy(double lon, double lat);
 
-    public double[] grid2Geo(double xRho, double yRho);
+    //public double[] grid2Geo(double xRho, double yRho);
+    public double[] xy2lonlat(double xRho, double yRho);
 
-    public double[] grid2Geo(double xRho, double yRho, double zRho);
+    public double depth2z(double x, double y, double depth);
+
+    public double z2depth(double x, double y, double z);
 
     double[] advectEuler(double[] pGrid, double time, double dt);
 
@@ -22,11 +26,11 @@ public interface IDataset {
 
     abstract public double adimensionalize(double number, double xRho, double yRho);
 
-    public boolean isInWater(RhoPoint ptRho);
+    public boolean isInWater(double[] pGrid);
 
     public boolean isInWater(int i, int j);
 
-    public double depth2z(double xRho, double yRho, double depth);
+    public boolean isOnEdge(double[] pGrid);
 
     public double getLat(int i, int j);
 

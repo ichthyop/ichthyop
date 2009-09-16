@@ -22,7 +22,7 @@ import java.util.Iterator;
  *
  * @author P.Verley
  */
-public class Population extends HashSet {
+public class Population extends HashSet implements IPopulation {
 
 ////////////////
 // Debug purpose
@@ -40,14 +40,14 @@ public class Population extends HashSet {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    void step(long time) {
+    public void step() {
 
         Iterator<IBasicParticle> iter = iterator();
         IBasicParticle particle;
         while (iter.hasNext()) {
             particle = iter.next();
             if (particle.isLiving()) {
-                particle.step((double) time);
+                particle.step();
             }
         }
     }

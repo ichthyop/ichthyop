@@ -14,7 +14,7 @@ package fr.ird.ichthyop;
  *
  * @author P.Verley
  */
-public class RhoPoint {
+public class RhoPoint implements IRhoPoint, ISimulationAccessor {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -25,6 +25,8 @@ public class RhoPoint {
     private double lon, lat, depth;
     /** <code>true</code> if 3 dimensions point false otherwise */
     private static boolean is3D;
+    private boolean lonlatHaveChanged, depthHasChanged;
+    private boolean xyHaveChanged, zHasChanged;
 
 ///////////////
 // Constructors
@@ -49,10 +51,19 @@ public class RhoPoint {
     /**
      * Transforms geographical coordinates into grid coordinates.
      * (lon, lat, depth) ==> (x, y, z)
-     *
-     * @see ichthyop.io.Dataset#geo2Grid()
      */
-    public void geog2Grid() {
+    public void geo2Grid() {
+
+        if (lonlatHaveChanged) {
+            double[] pGrid = getSimulation().getDataset().lonlat2xy(lon, lat);
+            x = pGrid[0];
+            y = pGrid[1];
+            lonlatHaveChanged = false;
+        }
+        if (is3D && depthHasChanged) {
+            z = getSimulation().getDataset().depth2z(x, y, depth);
+            depthHasChanged = false;
+        }
     }
 
     /**
@@ -61,25 +72,18 @@ public class RhoPoint {
      *
      * @see ichthyop.io.Dataset#grid2Geo()
      */
-    public void grid2Geog() {
-    }
+    public void grid2Geo() {
 
-    public double depth2z(double depth) {
-        return 0;
-    }
-
-    /**
-     * Checks wether the point is on the edge of the grid.
-     *
-     * @param nx an int, the grid length in the x direction
-     * @param ny an int, the grid length in the y direction
-     * @return a boolean, <code>true</code> if the point is on edge
-     */
-    public boolean isOnEdge(int nx, int ny) {
-        return ((x > (nx - 2.0f)) ||
-                (x < 1.0f) ||
-                (y > (ny - 2.0f)) ||
-                (y < 1.0f));
+        if (xyHaveChanged) {
+            double[] pGeog = getSimulation().getDataset().xy2lonlat(x, y);
+            lon = pGeog[1];
+            lat = pGeog[0];
+            xyHaveChanged = false;
+        }
+        if (is3D && zHasChanged) {
+            depth = getSimulation().getDataset().z2depth(x, y, z);
+            zHasChanged = false;
+        }
     }
 
     /**
@@ -94,71 +98,13 @@ public class RhoPoint {
         y += move[1];
         if (move.length > 2) {
             z += move[2];
-            //z = Math.max(0.d, Math.min(z, (double) Dataset.get_nz() - 1.00001f));
+            z = Math.max(0.d, Math.min(z, (double) getSimulation().getDataset().get_nz() - 1.00001f));
         }
     }
 
 //////////
 // Setters
 //////////
-    /**
-     * Sets the horizontal coordinates.
-     *
-     * @param x a double, x coordinate of the grid point
-     * @param y a double, y coordinate of the grid point
-     */
-    public void setXY(double x, double y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    /**
-     * Sets the vertical coordinate
-     * @param z a double, z coordinate of the grid point
-     */
-    public void setZ(double z) {
-        this.z = z;
-    }
-
-    /**
-     * Sets the depth
-     * @param depth a double, depth of the geographical point [meter]
-     */
-    public void setDepth(double depth) {
-        this.depth = depth;
-    }
-
-    /**
-     * Sets the horizontal grid coordinates, the depth and then transforms the
-     * depth into the z vertical grid coordinate.
-     *
-     * @param x a double, x coordinate of the grid point
-     * @param y a double, y coordinate of the grid point
-     * @param depth a double, depth of the geographical point [meter]
-     */
-    public void setXYD(double x, double y, double depth) {
-
-        this.x = x;
-        this.y = y;
-        /*this.z = bln3D
-        ? Math.min(Dataset.depth2z(x, y, depth), Dataset.get_nz() - 1)
-        : 0;*/
-    }
-
-    /**
-     * Sets the geographical coordinates.
-     *
-     * @param lon a double, longitude of the point [degree East]
-     * @param lat a double, latitude of the point [degree North]
-     * @param depth a double, depth of the point [meter]
-     */
-    public void setLLD(double lon, double lat, double depth) {
-
-        this.lon = lon;
-        this.lat = lat;
-        this.depth = depth;
-    }
-
 //////////
 // Getters
 //////////
@@ -211,13 +157,69 @@ public class RhoPoint {
     }
 
     /**
-     * Gets the grid coordinates
-     *
-     * @return double[] {x, y, z} for 3D point and {x, y} for 2D point
+     * Sets the depth
+     * @param depth a double, depth of the geographical point [meter]
      */
-    public double[] getPGrid() {
-        return is3D ? new double[]{x, y, z}
+    public void setDepth(double depth) {
+        if (this.depth != depth) {
+            this.depth = depth;
+            depthHasChanged = true;
+        }
+    }
+
+    public void setX(double x) {
+        if (this.x != x) {
+            this.x = x;
+            xyHaveChanged = true;
+        }
+    }
+
+    public void setY(double y) {
+        if (this.y != y) {
+            this.y = y;
+            xyHaveChanged = true;
+        }
+    }
+
+    /**
+     * Sets the vertical coordinate
+     * @param z a double, z coordinate of the grid point
+     */
+    public void setZ(double z) {
+        if (this.z != z) {
+            this.z = z;
+            zHasChanged = true;
+        }
+    }
+
+    public double[] getGridPoint() {
+        return is3D
+                ? new double[]{x, y, z}
                 : new double[]{x, y};
+    }
+
+    public void setLon(double lon) {
+        if (this.lon != lon) {
+            this.lon = lon;
+            lonlatHaveChanged = true;
+        }
+    }
+
+    public void setLat(double lat) {
+        if (this.lat != lat) {
+            this.lat = lat;
+            lonlatHaveChanged = true;
+        }
+    }
+
+    public double[] getGeoPoint() {
+        return is3D
+                ? new double[]{lon, lat, depth}
+                : new double[]{lon, lat};
+    }
+
+    public ISimulation getSimulation() {
+        return Simulation.getInstance();
     }
     //----------- End of class
 }

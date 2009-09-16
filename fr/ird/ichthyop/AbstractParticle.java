@@ -9,7 +9,7 @@ package fr.ird.ichthyop;
  *
  * @author pverley
  */
-public abstract class AbstractParticle extends RhoPoint implements IBasicParticle {
+public abstract class AbstractParticle  implements IBasicParticle {
 
     private int index;
     
