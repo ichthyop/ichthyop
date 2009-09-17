@@ -13,6 +13,8 @@ public interface IGrowingParticle extends IBasicParticle {
 
     public double getLength();
 
+    public void setLength(double length);
+
     public int getStage();
 
 }

@@ -79,4 +79,8 @@ public class Particle extends RhoPoint implements IBasicParticle {
     public String getDeathCause() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public void init() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

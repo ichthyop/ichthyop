@@ -19,6 +19,10 @@ public interface ISimulation {
 
     public IActionManager getActionManager();
 
+    public IParameterManager getParameterManager();
+
+    public IParameterManager getParameterManager(Class aClass);
+
     public void step();
 
 }

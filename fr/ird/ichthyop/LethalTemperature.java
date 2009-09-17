@@ -12,7 +12,7 @@ public class LethalTemperature extends AbstractAction {
 
     private float lethal_tp, lethalTpEgg, lethalTpLarva;
     private boolean FLAG_GROWTH;
-    private static int EGG;
+    private int egg;
 
     public void loadParameters() {
 
@@ -22,14 +22,16 @@ public class LethalTemperature extends AbstractAction {
         } else {
             lethalTpEgg = Float.valueOf(getParameter("lethal.temperature.egg"));
             lethalTpLarva = Float.valueOf(getParameter("lethal.temperature.larva"));
-            EGG = 0;
+            egg = Integer.valueOf(getSimulation().getParameterManager().getProperty("stage.egg.code"));
         }
     }
 
     public void execute(IBasicParticle particle) {
 
         if (FLAG_GROWTH) {
+            checkTp((IGrowingParticle)particle);
         } else {
+            checkTp(particle);
         }
 
     }
@@ -43,7 +45,7 @@ public class LethalTemperature extends AbstractAction {
 
     private void checkTp(IGrowingParticle particle) {
         double temperature = getSimulation().getDataset().getTemperature(particle.getGridPoint(), getSimulation().getStep().getTime());
-        boolean frozen = ((particle.getStage() == EGG) && (temperature < lethalTpEgg)) || ((particle.getStage() > EGG) && (temperature < lethalTpLarva));
+        boolean frozen = ((particle.getStage() == egg) && (temperature < lethalTpEgg)) || ((particle.getStage() > egg) && (temperature < lethalTpLarva));
         if (frozen) {
             particle.kill(Constant.DEAD_COLD);
         }

@@ -10,7 +10,9 @@ package fr.ird.ichthyop;
  */
 public class Simulation implements ISimulation {
 
-    private Population population;
+    private static Simulation simulation = new Simulation();
+    private static Population population;
+    private static ParameterManager parameterManager = new ParameterManager(fr.ird.ichthyop.ICFile.class);
 
     public void setUp() {}
 
@@ -21,23 +23,11 @@ public class Simulation implements ISimulation {
     }
 
     public static Simulation getInstance() {
-        return null;
+        return simulation;
     }
 
     public IDataset getDataset() {
         return null;
-    }
-
-    public double getTime() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public double getDt() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public long getTransportDuration() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public Step getStep() {
@@ -49,6 +39,14 @@ public class Simulation implements ISimulation {
     }
 
     public IActionManager getActionManager() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return ActionManager.getInstance();
+    }
+
+    public IParameterManager getParameterManager() {
+        return parameterManager;
+    }
+
+    public IParameterManager getParameterManager(Class aClass) {
+        return new ParameterManager(aClass);
     }
 }

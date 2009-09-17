@@ -9,10 +9,10 @@ package fr.ird.ichthyop;
  *
  * @author pverley
  */
-public interface IActionManager {
+public interface IParameterManager {
 
-    public XAction getAction(String key);
+    public String getProperty(String key);
 
-    public AbstractAction getAction(Class actionClass);
+    public String getValue(String key);
 
 }

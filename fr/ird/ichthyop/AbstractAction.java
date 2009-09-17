@@ -17,7 +17,7 @@ public abstract class AbstractAction implements IAction {
     }
 
     public String getProperty(String name) {
-        return parameterManager.getString(name);
+        return parameterManager.getProperty(name);
     }
 
     public ISimulation getSimulation() {

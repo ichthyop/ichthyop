@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class ParameterManager {
+public class ParameterManager implements IParameterManager {
 
     private static final Logger logger = Logger.getLogger(ParameterManager.class.getName());
     private final Class myClass;
@@ -45,7 +45,7 @@ public class ParameterManager {
         return myClass.getSimpleName();
     }
 
-    public String getString(String key) {
+    public String getProperty(String key) {
         if (bundle != null) {
             try {
                 return bundle.getString(key);
@@ -56,6 +56,6 @@ public class ParameterManager {
     }
 
     public String getValue(String key) {
-        return ICFile.getInstance().getParameter(getString(key + ".key")).getValue();
+        return ICFile.getInstance().getParameter(getProperty(key + ".key")).getValue();
     }
 }

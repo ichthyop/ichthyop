@@ -11,8 +11,14 @@ package fr.ird.ichthyop;
 public abstract class RecruitableParticle extends ZoneParticle implements IRecruitableParticle {
 
     private boolean[] isRecruited;
-    private boolean isNewRecruited = false;
-    private int numRecruitmentZone = -1;
+    private boolean isNewRecruited;
+    private int numRecruitmentZone;
+
+    public void init() {
+        isNewRecruited = false;
+        numRecruitmentZone = -1;
+        isRecruited = new boolean[0];
+    }
 
     public boolean isRecruited() {
 
@@ -46,5 +52,9 @@ public abstract class RecruitableParticle extends ZoneParticle implements IRecru
 
     public void setNumRecruitmentZone(int numZone) {
         numRecruitmentZone = numZone;
+    }
+
+    public void setRecruited(int num_zone, boolean recruited) {
+        isRecruited[num_zone] = recruited;
     }
 }
