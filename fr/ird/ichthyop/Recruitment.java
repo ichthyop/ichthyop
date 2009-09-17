@@ -24,6 +24,7 @@ public class Recruitment extends AbstractAction {
     private float ageMinAtRecruitment;
     private float lengthMinAtRecruitment;
     private boolean isAgeCriterion;
+    private boolean stopMovingOnceRecruited;
 
     public void loadParameters() {
 
@@ -35,14 +36,15 @@ public class Recruitment extends AbstractAction {
         } else {
             lengthMinAtRecruitment = Float.valueOf(getParameter("recruitment.limit.length"));
         }
+        stopMovingOnceRecruited = Boolean.valueOf(getParameter("recruitment.stop-moving"));
     }
 
     public void execute(IBasicParticle particle) {
 
         //@todo
         // catch cast exception
-        IRecruitableParticle rParticle = (IRecruitableParticle)particle;
-        int numCurrentZone = rParticle.getNumZone();
+        IRecruitableParticle rParticle = (IRecruitableParticle) particle;
+        int numCurrentZone = rParticle.getNumZone(TypeZone.RECRUITMENT);
         if ((numCurrentZone != -1) && !rParticle.isRecruited(numCurrentZone)) {
 
             if (satisfyRecruitmentCriterion(particle)) {
@@ -62,5 +64,9 @@ public class Recruitment extends AbstractAction {
         } else {
             return (float) (((IGrowingParticle) particle).getLength() / Constant.ONE_DAY) >= lengthMinAtRecruitment;
         }
+    }
+
+    public boolean isStopMoving() {
+        return stopMovingOnceRecruited;
     }
 }

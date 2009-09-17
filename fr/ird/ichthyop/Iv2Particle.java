@@ -8,17 +8,16 @@ package fr.ird.ichthyop;
  *
  * @author pverley
  */
-public class Particle extends RhoPoint implements IBasicParticle {
+public class Iv2Particle extends GrowingParticle {
 
-    private int index;
-    private long age;
-    private String deathCause;
-    private boolean living;
     private static Advection advection;
     private static HorizontalDispersion hdispersion;
     private static VerticalDispersion vdispersion;
     private static Buoyancy buoyancy;
     private static Recruitment recruitment;
+    private static LinearGrowth growth;
+    private static LethalTemperature lethalTp;
+    private static Migration migration;
 
     private void move() {
 
@@ -44,43 +43,42 @@ public class Particle extends RhoPoint implements IBasicParticle {
             buoyancy.execute(this);
         }
 
-    }
+        /** vertical migration */
+        if (migration.isActivated() && isLiving()) {
+            migration.execute(this);
+        }
 
-    public void kill(String cause) {
+        /** Transform (x, y, z) into (lon, lat, depth) */
+        if (isLiving()) {
+            grid2Geo();
+        }
 
-        this.deathCause = cause;
-        living = false;
-        setLon(Double.NaN);
-        setLat(Double.NaN);
-        setDepth(Double.NaN);
     }
 
     public void step() {
+
         if (getAge() <= getSimulation().getStep().getTransportDuration()) {
-            
-            
+
+            if (recruitment.isActivated() && recruitment.isStopMoving() && isRecruited()) {
+                return;
+            }
 
             move();
+
+            if (growth.isActivated() && isLiving()) {
+                growth.execute(this);
+            } else if (lethalTp.isActivated() && isLiving()) {
+                lethalTp.execute(this);
+            }
+
+            if (recruitment.isActivated() && isLiving()) {
+                recruitment.execute(this);
+            }
+
+            incrementAge();
+
+        } else {
+            kill(Constant.DEAD_OLD);
         }
-    }
-
-    public boolean isLiving() {
-        return living;
-    }
-
-    public int index() {
-        return index;
-    }
-
-    public long getAge() {
-        return age;
-    }
-
-    public String getDeathCause() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void init() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

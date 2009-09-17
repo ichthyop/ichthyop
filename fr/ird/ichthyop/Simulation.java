@@ -49,4 +49,8 @@ public class Simulation implements ISimulation {
     public IParameterManager getParameterManager(Class aClass) {
         return new ParameterManager(aClass);
     }
+
+    public IZoneManager getZoneManager() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

@@ -23,6 +23,8 @@ public interface ISimulation {
 
     public IParameterManager getParameterManager(Class aClass);
 
+    public IZoneManager getZoneManager();
+
     public void step();
 
 }

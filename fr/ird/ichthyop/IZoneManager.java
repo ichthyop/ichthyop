@@ -5,11 +5,14 @@
 
 package fr.ird.ichthyop;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author pverley
  */
-public interface IZoneParticle extends IBasicParticle {
+public interface IZoneManager {
 
-    public int getNumZone(TypeZone type);
+    public ArrayList<Zone> getZones(TypeZone type);
+
 }

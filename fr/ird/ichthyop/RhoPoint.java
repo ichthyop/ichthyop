@@ -221,5 +221,20 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
     public ISimulation getSimulation() {
         return Simulation.getInstance();
     }
+
+    @Override
+    public Object clone() {
+
+        RhoPoint point = new RhoPoint(is3D);
+        point.setX(x);
+        point.setY(y);
+        point.setLon(lon);
+        point.setLat(lat);
+        if (is3D) {
+            point.setZ(z);
+            point.setDepth(depth);
+        }
+        return point;
+    }
     //----------- End of class
 }

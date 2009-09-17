@@ -39,6 +39,8 @@ public interface IBasicParticle extends IRhoPoint {
 
     public long getAge();
 
+    public void incrementAge();
+
     public void kill(String cause);
 
     public String getDeathCause();

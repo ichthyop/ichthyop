@@ -15,29 +15,29 @@ public abstract class GrowingParticle extends RecruitableParticle implements IGr
      * Characterized the egg stage. In this model, an egg is particle with a
      * length smaller to the hatch-length defined below.
      */
-    private static int EGG = 0;
+    private static int EGG;
     /**
      * Characterized the "yolk sac" stage. A yolk sac larva has a length ranging
      * from the hatch-length and the yolk-to-feeding-length defined below.
      */
-    private static int YOLK_SAC_LARVA = 1;
+    private static int YOLK_SAC_LARVA;
     /**
      * Characterized the "feeding larva" stage. A feeding larva has a length
      * bigger than the yolk-to-feeding-length defined below.
      */
-    private static int FEEDING_LARVA = 2;
+    private static int FEEDING_LARVA;
     /**
      * Initial length [millimeter] for the particles.
      */
-    private static double length_init = 0.025d; // mm
+    private static double length_init;// = 0.025d; // mm
     /**
      * Threshold [millimiter] to distinguish eggs from larvae
      */
-    private static double hatch_length = 2.8d; //mm
+    private static double hatch_length;// = 2.8d; //mm
     /**
      * Threshold [millimeter] between Yolk-Sac Larvae and Feeding Larvae
      */
-    private static double yolk_to_feeding_length = 4.5d; //mm
+    private static double yolk_to_feeding_length;// = 4.5d; //mm
 
     @Override
     public void init() {

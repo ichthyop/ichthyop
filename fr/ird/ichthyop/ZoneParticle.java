@@ -12,13 +12,13 @@ import java.util.Iterator;
  */
 public abstract class ZoneParticle extends BasicParticle implements IZoneParticle {
 
-    public int getNumZone() {
+    public int getNumZone(TypeZone type) {
         int nZone = -1;
         boolean foundZone = false;
-        Iterator iter = ICFile.getInstance().getZones().iterator();
+        Iterator iter = getSimulation().getZoneManager().getZones(type).iterator();
         while (!foundZone && iter.hasNext()) {
             Zone znTmp = (Zone) iter.next();
-            if (znTmp.isXYInZone(getX(), getY())) {
+            if (znTmp.isPointInZone(this)) {
                 nZone = znTmp.getIndex();
                 foundZone = true;
             }

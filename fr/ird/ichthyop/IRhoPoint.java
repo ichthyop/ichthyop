@@ -9,7 +9,7 @@ package fr.ird.ichthyop;
  *
  * @author pverley
  */
-public interface IRhoPoint {
+public interface IRhoPoint extends Cloneable {
 
     /**
      * Gets the x grid coordinate
