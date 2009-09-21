@@ -1,5 +1,9 @@
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.arch.IRhoPoint;
+import fr.ird.ichthyop.arch.ISimulationAccessor;
+import fr.ird.ichthyop.arch.ISimulation;
+
 /**
  * Both ROMS and MARS use an Arakawa C grid.
  * The Rho point represents a 2D or 3D point within the C grid. It is referenced

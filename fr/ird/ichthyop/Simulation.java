@@ -4,6 +4,17 @@
  */
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.manager.ZoneManager;
+import fr.ird.ichthyop.manager.ParameterManager;
+import fr.ird.ichthyop.manager.ActionManager;
+import fr.ird.ichthyop.arch.ISimulation;
+import fr.ird.ichthyop.arch.IDataset;
+import fr.ird.ichthyop.arch.IZoneManager;
+import fr.ird.ichthyop.arch.IActionManager;
+import fr.ird.ichthyop.arch.IParameterManager;
+import fr.ird.ichthyop.arch.IPropertyManager;
+import fr.ird.ichthyop.manager.PropertyManager;
+
 /**
  *
  * @author pverley
@@ -11,8 +22,8 @@ package fr.ird.ichthyop;
 public class Simulation implements ISimulation {
 
     private static Simulation simulation = new Simulation();
-    private static Population population;
-    private static ParameterManager parameterManager = new ParameterManager(fr.ird.ichthyop.ICFile.class);
+    private Population population;
+    private static ParameterManager parameterManager = new ParameterManager(fr.ird.ichthyop.io.ICFile.class);
 
     public void setUp() {}
 
@@ -50,7 +61,11 @@ public class Simulation implements ISimulation {
         return new ParameterManager(aClass);
     }
 
+    public IPropertyManager getPropertyManager(Class aClass) {
+        return new PropertyManager(aClass);
+    }
+
     public IZoneManager getZoneManager() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return ZoneManager.getInstance();
     }
 }

@@ -1,5 +1,7 @@
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.arch.ISimulationAccessor;
+import fr.ird.ichthyop.arch.ISimulation;
 import java.util.ArrayList;
 
 /** import AWT */
@@ -34,16 +36,15 @@ import java.util.ArrayList;
 public class Zone implements ISimulationAccessor {
 
     private ArrayList<RhoPoint> polygon;
-    
     private TypeZone type;
     /**
      * Lower bathymetric line [meter]
      */
-    private int bathyLineMin;
+    private int inshoreLine;
     /**
      * Higher bathymetric line [meter]
      */
-    private int bathyLineMax;
+    private int offshoreLine;
     /**
      *  [meter]
      */
@@ -52,12 +53,36 @@ public class Zone implements ISimulationAccessor {
      *  [meter]
      */
     private int upperDepth;
-
     int index;
+
+    public Zone(TypeZone type, int index) {
+        this.type = type;
+        this.index = index;
+    }
+
+    public void setInshoreLine(int inshoreLine) {
+        this.inshoreLine = inshoreLine;
+    }
+
+    public void setOffshoreLine(int offshoreLine) {
+        this.offshoreLine = offshoreLine;
+    }
+
+    public void setLowerDepth(int lowerDepth) {
+        this.lowerDepth = lowerDepth;
+    }
+
+    public void setUpperDepth(int upperDepth) {
+        this.upperDepth = upperDepth;
+    }
+
+    public void addPoint(RhoPoint point) {
+        polygon.add(point);
+    }
 
     private void init() {
 
-        for (IRhoPoint rhoPoint : polygon) {
+        for (RhoPoint rhoPoint : polygon) {
             rhoPoint.geo2Grid();
         }
         polygon.add((RhoPoint) polygon.get(0).clone());
@@ -67,9 +92,7 @@ public class Zone implements ISimulationAccessor {
 
         boolean isInZone = false;
 
-        isInZone = isDepthInLayer(point.getDepth()) 
-                && isXYBetweenBathyLines(point.getX(), point.getY())
-                && isXYInPolygon(point.getX(), point.getY());
+        isInZone = isDepthInLayer(point.getDepth()) && isXYBetweenBathyLines(point.getX(), point.getY()) && isXYInPolygon(point.getX(), point.getY());
 
         return isInZone;
     }
@@ -80,9 +103,9 @@ public class Zone implements ISimulationAccessor {
 
     private boolean isXYBetweenBathyLines(double x, double y) {
         return (getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
-                bathyLineMin &
+                inshoreLine &
                 getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
-                bathyLineMax);
+                offshoreLine);
     }
 
     private boolean isXYInPolygon(double x, double y) {
@@ -122,9 +145,9 @@ public class Zone implements ISimulationAccessor {
 
         if (isInBox) {
             isInBox = (getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
-                    bathyLineMin &
+                    inshoreLine &
                     getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
-                    bathyLineMax);
+                    offshoreLine);
         }
 
         return (isInBox);

@@ -1,6 +1,8 @@
 package fr.ird.ichthyop;
 
 /** import java.util */
+import fr.ird.ichthyop.arch.IBasicParticle;
+import fr.ird.ichthyop.arch.IPopulation;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -30,6 +32,7 @@ public class Population extends HashSet implements IPopulation {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
+    ActionPool actionPool = new ActionPool();
 ///////////////
 // Constructors
 ///////////////
@@ -47,7 +50,7 @@ public class Population extends HashSet implements IPopulation {
         while (iter.hasNext()) {
             particle = iter.next();
             if (particle.isLiving()) {
-                particle.step();
+                particle.step(actionPool);
             }
         }
     }

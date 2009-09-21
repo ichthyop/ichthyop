@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.io.ICFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;

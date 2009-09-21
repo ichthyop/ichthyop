@@ -1,6 +1,7 @@
 package fr.ird.ichthyop;
 
 /** import java.text */
+import fr.ird.ichthyop.arch.IStep;
 import java.text.SimpleDateFormat;
 
 /** import java.util */

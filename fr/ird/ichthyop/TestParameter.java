@@ -5,7 +5,10 @@
 
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.action.AbstractAction;
+import fr.ird.ichthyop.io.ICFile;
 import java.io.File;
+import java.util.Iterator;
 
 /**
  *
@@ -21,9 +24,11 @@ public class TestParameter {
         file = new File(filename);
 
         ICFile.setFile(file);
-        AbstractAction action = new Advection();
-        System.out.println(action.isActivated());
-        //action.loadParameters();
+        ActionPool actionPool = new ActionPool();
+        Iterator<AbstractAction> it = actionPool.values().iterator();
+        while (it.hasNext())
+            System.out.println(it.next().getClass().getName());
+
         
     }
     
