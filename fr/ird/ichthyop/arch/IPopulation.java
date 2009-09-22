@@ -5,11 +5,13 @@
 
 package fr.ird.ichthyop.arch;
 
+import java.util.Set;
+
 /**
  *
  * @author pverley
  */
-public interface IPopulation {
+public interface IPopulation extends Set {
 
     public void step();
 

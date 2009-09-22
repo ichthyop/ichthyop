@@ -69,4 +69,6 @@ public interface IRhoPoint extends Cloneable {
 
     public void increment(double[] move);
 
+    public void make2D();
+
 }

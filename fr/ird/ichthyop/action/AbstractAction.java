@@ -8,6 +8,8 @@ import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.manager.ParameterManager;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.IAction;
+import fr.ird.ichthyop.io.XParameter;
+import java.util.ArrayList;
 
 /**
  *
@@ -31,5 +33,9 @@ public abstract class AbstractAction implements IAction {
 
     public boolean isActivated() {
         return getSimulation().getActionManager().getAction(getClass().getCanonicalName()).isEnabled();
+    }
+
+    public ArrayList<XParameter> getParameters() {
+        return parameterManager.getParameters();
     }
 }

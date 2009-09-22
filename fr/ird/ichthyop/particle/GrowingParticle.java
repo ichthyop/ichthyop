@@ -5,6 +5,7 @@
 package fr.ird.ichthyop.particle;
 
 import fr.ird.ichthyop.arch.IGrowingParticle;
+import fr.ird.ichthyop.arch.IParameterManager;
 import fr.ird.ichthyop.arch.IPropertyManager;
 
 /**
@@ -51,13 +52,15 @@ public abstract class GrowingParticle extends RecruitableParticle implements IGr
     
     private void loadParameters() {
         
-        IPropertyManager propertyManager = getSimulation().getPropertyManager(getClass());
+        IPropertyManager propertyManager = getSimulation().getPropertyManager(this.getClass());
         EGG = Integer.valueOf(propertyManager.getProperty("stage.egg.code"));
         YOLK_SAC_LARVA = Integer.valueOf(propertyManager.getProperty("stage.yolk-sac-larva.code"));
         FEEDING_LARVA = Integer.valueOf(propertyManager.getProperty("stage.feeding-larva.code"));
-        length_init = Float.valueOf(getSimulation().getParameterManager().getValue("length.initial"));
-        hatch_length = Float.valueOf(getSimulation().getParameterManager().getValue("length.hatch"));
-        yolk_to_feeding_length = Float.valueOf(getSimulation().getParameterManager().getValue("length.yolk-to-feeding"));
+
+        IParameterManager parameterManager = getSimulation().getParameterManager(this.getClass());
+        length_init = Float.valueOf(parameterManager.getValue("length.initial"));
+        hatch_length = Float.valueOf(parameterManager.getValue("length.hatch"));
+        yolk_to_feeding_length = Float.valueOf(parameterManager.getValue("length.yolk-to-feeding"));
     }
 
     public double getLength() {

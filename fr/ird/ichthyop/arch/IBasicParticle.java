@@ -35,7 +35,9 @@ public interface IBasicParticle extends IRhoPoint {
      * Gets the index of the particle.
      * @return the particle index.
      */
-    public int index();
+    public int getIndex();
+
+    public void setIndex(int index);
 
     //public int getNumZone(int typeZone);
 

@@ -109,6 +109,10 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
 //////////
 // Setters
 //////////
+
+    public void make2D() {
+        is3D = false;
+    }
 //////////
 // Getters
 //////////

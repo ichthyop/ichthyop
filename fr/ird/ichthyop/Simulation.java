@@ -46,7 +46,7 @@ public class Simulation implements ISimulation {
     }
 
     public void step() {
-        population.step();
+        getPopulation().step();
     }
 
     public IActionManager getActionManager() {

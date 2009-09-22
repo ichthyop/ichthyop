@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package fr.ird.ichthyop;
 
 import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.io.ICFile;
+import fr.ird.ichthyop.io.XParameter;
 import java.io.File;
 import java.util.Iterator;
 
@@ -15,7 +15,7 @@ import java.util.Iterator;
  * @author pverley
  */
 public class TestParameter {
-    
+
     File file;
 
     public TestParameter() {
@@ -26,14 +26,20 @@ public class TestParameter {
         ICFile.setFile(file);
         ActionPool actionPool = new ActionPool();
         Iterator<AbstractAction> it = actionPool.values().iterator();
-        while (it.hasNext())
-            System.out.println(it.next().getClass().getName());
+        while (it.hasNext()) {
+            AbstractAction action = it.next();
+            System.out.println("====================");
+            System.out.println(action.getClass().getCanonicalName() + " " + action.isActivated());
+            for (XParameter param : action.getParameters()) {
+                System.out.println("+++");
+                System.out.println(param.getKey() + " " + param.getValue());
+            }
+        }
 
-        
+
     }
-    
+
     public static void main(String[] arg) {
         new TestParameter();
     }
-
 }
