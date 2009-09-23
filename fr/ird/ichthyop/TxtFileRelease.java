@@ -20,7 +20,7 @@ import java.util.Locale;
  */
 public class TxtFileRelease implements IReleaseProcess {
 
-    public void release() throws IOException {
+    public void release(ReleaseEvent event) throws IOException {
 
         File fDrifter = new File(getSimulation().getParameterManager().getValue("release.drifter.pathname"));
         if (!fDrifter.exists() || !fDrifter.canRead()) {

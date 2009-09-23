@@ -7,12 +7,12 @@ package fr.ird.ichthyop.io;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom.Element;
+import org.jdom.filter.Filter;
 import org.jdom.input.SAXBuilder;
 
 /**
@@ -41,7 +41,7 @@ public class ICFile {
             Element racine = sxb.build(file).getRootElement();
             racine.detach();
             icstructure = new ICStructure(racine);
-            icstructure.createMaps();
+            //icstructure.createMaps();
         } catch (Exception e) {
             Logger.getLogger(ICFile.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -68,9 +68,10 @@ public class ICFile {
         public final static String PARAMETERS = "parameters";
         public final static String ACTIONS = "actions";
         public final static String ZONES = "zones";
-        private HashMap<String, XParameter> mapParameters;
-        private HashMap<String, XAction> mapActions;
-        private HashMap<String, XZone> mapZones;
+        public final static String RELEASE_PROCESSES = "release_processes";
+        //private HashMap<String, XParameter> mapParameters;
+        //private HashMap<String, XAction> mapActions;
+        //private HashMap<String, XZone> mapZones;
 
         public ICStructure(Element root) {
             super(root);
@@ -80,27 +81,79 @@ public class ICFile {
             this(new Element(root));
         }
 
-        private XParameter getParameter(String key) {
-            return mapParameters.get(key);
+        private XParameter getParameter(final String key) {
+            Filter filtre = new Filter() {
+
+                public boolean matches(Object obj) {
+                    if (!(obj instanceof Element)) {
+                        return false;
+                    }
+                    Element element = (Element) obj;
+                    if (element.getChildTextNormalize(XParameter.KEY).matches(key)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            };
+            List searchResult = getRootElement().getChild(PARAMETERS).getContent(filtre);
+            if (searchResult != null && searchResult.size() < 2) {
+                return new XParameter((Element) searchResult.get(0));
+            } else {
+                return null;
+            }
         }
 
-        private XAction getAction(String key) {
-            return mapActions.get(key);
+        private XAction getAction(final String key) {
+            Filter filtre = new Filter() {
+
+                public boolean matches(Object obj) {
+                    if (!(obj instanceof Element)) {
+                        return false;
+                    }
+                    Element element = (Element) obj;
+                    if (element.getChildTextNormalize(XParameter.KEY).matches(key)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            };
+            List searchResult = getRootElement().getChild(PARAMETERS).getContent(filtre);
+            if (searchResult != null && searchResult.size() < 2) {
+                return new XAction((Element) searchResult.get(0));
+            } else {
+                return null;
+            }
         }
 
-        private Collection<XAction> getActions() {
-            return mapActions.values();
+        private ArrayList<XAction> getActions() {
+            ArrayList<XAction> list = new ArrayList();
+            try {
+                for (Object elt : getRootElement().getChild(ACTIONS).getChildren(XParameter.PARAMETER)) {
+                    list.add(new XAction((Element) elt));
+                }
+            } catch (java.lang.NullPointerException ex) {
+            }
+            return list;
         }
 
         private Collection<XZone> getZones() {
-            return mapZones.values();
+            ArrayList<XZone> list = new ArrayList();
+            try {
+                for (Object elt : getRootElement().getChild(ZONES).getChildren(XZone.ZONE)) {
+                    list.add(new XZone((Element) elt));
+                }
+            } catch (java.lang.NullPointerException ex) {
+            }
+            return list;
         }
 
         private Element get(String arg) {
             return getRootElement().getChild(arg);
         }
 
-        private List<XParameter> readParameters() {
+        /*private List<XParameter> readParameters() {
 
             List list = get(PARAMETERS).getChildren();
             ArrayList<XParameter> listvar = new ArrayList();
@@ -158,6 +211,6 @@ public class ICFile {
                 XZone zone = itZ.next();
                 mapZones.put(zone.getKey(), zone);
             }
-        }
+        }*/
     }
 }

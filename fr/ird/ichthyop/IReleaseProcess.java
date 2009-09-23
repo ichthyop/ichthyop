@@ -14,6 +14,6 @@ import java.io.IOException;
  */
 public interface IReleaseProcess extends ISimulationAccessor {
 
-    public void release() throws IOException;
+    public void release(ReleaseEvent event) throws IOException;
 
 }

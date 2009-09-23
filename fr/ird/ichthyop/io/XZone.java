@@ -15,7 +15,7 @@ import org.jdom.Element;
  */
 public class XZone extends org.jdom.Element {
 
-    private static final String ZONE = "zone";
+    public static final String ZONE = "zone";
     final public static String TYPE = "type";
     final public static String INDEX = "index";
     final public static String POLYGON = "polygon";
