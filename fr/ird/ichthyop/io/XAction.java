@@ -4,68 +4,29 @@
  */
 package fr.ird.ichthyop.io;
 
-import fr.ird.ichthyop.io.ICFile.ICStructure;
-import java.util.ArrayList;
-import java.util.List;
+import fr.ird.ichthyop.TypeBlock;
 import org.jdom.Element;
-import org.jdom.filter.Filter;
 
 /**
  *
  * @author pverley
  */
-public class XAction extends org.jdom.Element {
+public class XAction extends XBlock {
 
-    private static final String ACTION = "action";
-    final public static String KEY = "key";
-    final public static String ENABLED = "enabled";
+    private static final String CLASS_NAME = "class_name";
 
     XAction(Element xaction) {
-        super(ACTION);
+        super(TypeBlock.ACTION, xaction);
         if (xaction != null) {
             addContent(xaction.cloneContent());
         }
     }
 
-    public String getKey() {
-        return getChildTextNormalize(KEY);
+    public String getClassName() {
+        return this.getChildTextNormalize(CLASS_NAME);
     }
 
-    public boolean isEnabled() {
-        return Boolean.valueOf(getChildTextNormalize(ENABLED));
-    }
-
-    public ArrayList<XParameter> getParameters() {
-        ArrayList<XParameter> list = new ArrayList();
-        try {
-            for (Object elt : getChild(ICStructure.PARAMETERS).getChildren(XParameter.PARAMETER)) {
-                list.add(new XParameter((Element) elt));
-            }
-        } catch (java.lang.NullPointerException ex) {}
-        return list;
-    }
-
-    public XParameter getParameter(final String key) {
-
-        Filter filtre = new Filter() {
-
-            public boolean matches(Object obj) {
-                if (!(obj instanceof Element)) {
-                    return false;
-                }
-                Element element = (Element) obj;
-                if (element.getChildTextNormalize(XParameter.KEY).matches(key)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        };
-        List searchResult = getChild(ICStructure.PARAMETERS).getContent(filtre);
-        if (searchResult != null && searchResult.size() < 2) {
-            return new XParameter((Element) searchResult.get(0));
-        } else {
-            return null;
-        }
+    public Class getActionClass() throws ClassNotFoundException {
+        return Class.forName(getClassName());
     }
 }

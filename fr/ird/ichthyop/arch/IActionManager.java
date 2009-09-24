@@ -18,7 +18,7 @@ public interface IActionManager {
 
     public XAction getAction(String key);
 
-    public AbstractAction getAction(Class actionClass);
+    public AbstractAction createAction(String key);
 
     public Collection<XAction> getActions();
 

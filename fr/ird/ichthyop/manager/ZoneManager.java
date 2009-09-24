@@ -7,9 +7,11 @@ package fr.ird.ichthyop.manager;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IZoneManager;
+import fr.ird.ichthyop.io.XBlock;
 import fr.ird.ichthyop.io.XZone;
 import fr.ird.ichthyop.io.XZone.XPoint;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -32,18 +34,18 @@ public class ZoneManager implements IZoneManager {
 
     private void loadZones() {
 
-        Iterator<XZone> it = ICFile.getInstance().getZones().iterator();
+        Iterator<XZone> it = getZones().iterator();
         map = new HashMap();
         while (it.hasNext()) {
             XZone xzone = it.next();
-            if (!map.containsKey(xzone.getType())) {
-                map.put(xzone.getType(), new ArrayList());
+            if (!map.containsKey(xzone.getTypeZone())) {
+                map.put(xzone.getTypeZone(), new ArrayList());
             }
         }
-        it = ICFile.getInstance().getZones().iterator();
+        it = getZones().iterator();
         while (it.hasNext()) {
             XZone xzone = it.next();
-            Zone zone = new Zone(xzone.getType(), xzone.getIndex());
+            Zone zone = new Zone(xzone.getTypeZone(), xzone.getIndex());
             zone.setOffshoreLine(xzone.getBathyMask().getOffshoreLine());
             zone.setInshoreLine(xzone.getBathyMask().getInshoreLine());
             zone.setLowerDepth(xzone.getBathyMask().getLowerDepth());
@@ -53,6 +55,15 @@ public class ZoneManager implements IZoneManager {
             }
             map.get(zone.getType()).add(zone.getIndex(), zone);
         }
+    }
+
+    private Collection<XZone> getZones() {
+        Collection<XZone> collection = new ArrayList();
+        for (XBlock block : ICFile.getInstance().getBlocks(TypeBlock.ZONE)) {
+            collection.add((XZone) block);
+
+        }
+        return collection;
     }
 
     public ArrayList<Zone> getZones(TypeZone type) {

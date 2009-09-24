@@ -25,25 +25,25 @@ public class ParameterManager extends PropertyManager implements IParameterManag
     public String getValue(String key) {
 
         XParameter param;
-        param = getParameter(className, key);
+        param = getXParameter(className, key);
         if (param != null) {
             return param.getValue();
-        } else if ((param = getParameter(key)) != null) {
+        } else if ((param = getXParameter(key)) != null) {
             return param.getValue();
         } else {
             return "";
         }
     }
 
-    public ArrayList<XParameter> getParameters() {
+    public ArrayList<XParameter> getXParameters() {
         return ICFile.getInstance().getAction(className).getParameters();
     }
 
-    private XParameter getParameter(String actionName, String key) {
-        return ICFile.getInstance().getAction(actionName).getParameter(getProperty(key + ".key"));
+    private XParameter getXParameter(String actionName, String key) {
+        return ICFile.getInstance().getAction(actionName).getParameter(key);
     }
 
-    private XParameter getParameter(String key) {
-        return ICFile.getInstance().getParameter(getProperty(key + ".key"));
+    private XParameter getXParameter(String key) {
+        return ICFile.getInstance().getParameter(key);
     }
 }

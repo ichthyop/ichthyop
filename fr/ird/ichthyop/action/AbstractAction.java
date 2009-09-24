@@ -18,6 +18,11 @@ import java.util.ArrayList;
 public abstract class AbstractAction implements IAction {
 
     private ParameterManager parameterManager = new ParameterManager(this.getClass());
+    private String actionKey;
+
+    public AbstractAction() {
+        actionKey = this.getProperty("action.key");
+    }
 
     public String getParameter(String name) {
         return parameterManager.getValue(name);
@@ -31,11 +36,11 @@ public abstract class AbstractAction implements IAction {
         return Simulation.getInstance();
     }
 
-    public boolean isActivated() {
-        return getSimulation().getActionManager().getAction(getClass().getCanonicalName()).isEnabled();
+    public boolean isEnabled() {
+        return getSimulation().getActionManager().getAction(actionKey).isEnabled();
     }
 
     public ArrayList<XParameter> getParameters() {
-        return parameterManager.getParameters();
+        return parameterManager.getXParameters();
     }
 }

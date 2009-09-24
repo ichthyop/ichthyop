@@ -18,7 +18,7 @@ public class Iv2Particle extends GrowingParticle {
 
         if (getAge() <= getSimulation().getStep().getTransportDuration()) {
 
-            if (actionPool.get("Recruitment").isActivated()) {
+            if (actionPool.get("Recruitment").isEnabled()) {
                 if (((Recruitment) actionPool.get("Recruitment")).isStopMoving() && isRecruited()) {
                     return;
                 }

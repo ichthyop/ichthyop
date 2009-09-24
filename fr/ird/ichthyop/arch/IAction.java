@@ -15,6 +15,6 @@ public interface IAction extends ISimulationAccessor {
     
     public void execute(IBasicParticle particle);
 
-    public boolean isActivated();
+    public boolean isEnabled();
 
 }

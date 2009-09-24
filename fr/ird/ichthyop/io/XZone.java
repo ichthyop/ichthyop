@@ -13,26 +13,25 @@ import org.jdom.Element;
  *
  * @author pverley
  */
-public class XZone extends org.jdom.Element {
+public class XZone extends XBlock {
 
-    public static final String ZONE = "zone";
-    final public static String TYPE = "type";
+    final public static String TYPE_ZONE = "type";
     final public static String INDEX = "index";
     final public static String POLYGON = "polygon";
     private XBathyMask bathyMask;
 
     public XZone(Element xzone) {
-        super(ZONE);
+        super(TypeBlock.ZONE, xzone);
         if (xzone != null) {
             addContent(xzone.cloneContent());
             bathyMask = new XBathyMask(getChild(XBathyMask.BATHY_MASK));
         }
     }
 
-    public TypeZone getType() {
+    public TypeZone getTypeZone() {
 
         for (TypeZone type : TypeZone.values()) {
-            if (type.name().matches(getChildTextNormalize(TYPE))) {
+            if (type.name().matches(getChildTextNormalize(TYPE_ZONE))) {
                 return type;
             }
         }
@@ -41,10 +40,6 @@ public class XZone extends org.jdom.Element {
 
     public XBathyMask getBathyMask() {
         return bathyMask;
-    }
-
-    public String getKey() {
-        return getChildTextNormalize(TYPE).concat(getChildTextNormalize(INDEX));
     }
 
     public ArrayList<XPoint> getPolygon() {

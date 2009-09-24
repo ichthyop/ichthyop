@@ -29,7 +29,7 @@ public class TestParameter {
         while (it.hasNext()) {
             AbstractAction action = it.next();
             System.out.println("====================");
-            System.out.println(action.getClass().getCanonicalName() + " " + action.isActivated());
+            System.out.println(action.getClass().getCanonicalName() + " " + action.isEnabled());
             for (XParameter param : action.getParameters()) {
                 System.out.println("+++");
                 System.out.println(param.getKey() + " " + param.getValue());

@@ -58,7 +58,7 @@ public class Buoyancy extends AbstractAction {
     private static double waterDensity;
 
     public void loadParameters() {
-        eggDensity = Float.valueOf(getParameter("buoyancy.eggDensity"));
+        eggDensity = Float.valueOf(getParameter("egg_density"));
     }
 
     public void execute(IBasicParticle particle) {
