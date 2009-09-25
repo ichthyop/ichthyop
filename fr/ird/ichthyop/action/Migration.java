@@ -4,7 +4,6 @@
  */
 package fr.ird.ichthyop.action;
 
-import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IGrowingParticle;
 import fr.ird.ichthyop.arch.IBasicParticle;
 import java.util.Calendar;
@@ -28,7 +27,7 @@ public class Migration extends AbstractAction {
     public void loadParameters() {
 
         calendar = getSimulation().getStep().getCalendar();
-        isAgeLimitation = getParameter("migration.criterion").matches(getProperty("migration.criterion.age"));
+        isAgeLimitation = getParameter("migration.criterion").matches("age");
         if (isAgeLimitation) {
             limitAge = Float.valueOf(getParameter("migration.limit.age"));
         } else {

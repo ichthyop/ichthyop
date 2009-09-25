@@ -9,8 +9,8 @@ package fr.ird.ichthyop.arch;
  *
  * @author pverley
  */
-public interface IParameterManager extends IPropertyManager {
+public interface IParameterManager {
 
-    public String getValue(String key);
+    public String getValue(String blockName, String key);
 
 }

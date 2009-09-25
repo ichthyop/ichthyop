@@ -79,5 +79,6 @@ public class XBlock extends org.jdom.Element {
         } else {
             return null;
         }
+
     }
 }

@@ -7,6 +7,7 @@ package fr.ird.ichthyop;
 import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XParameter;
+import fr.ird.ichthyop.manager.ParameterManager;
 import java.io.File;
 import java.util.Iterator;
 
@@ -20,7 +21,7 @@ public class TestParameter {
 
     public TestParameter() {
 
-        String filename = System.getProperty("user.dir") + File.separator + "cfg1.xic";
+        String filename = System.getProperty("user.dir") + File.separator + "cfg2.xic";
         file = new File(filename);
 
         ICFile.setFile(file);
@@ -35,7 +36,8 @@ public class TestParameter {
                 System.out.println(param.getKey() + " " + param.getValue());
             }
         }
-
+        System.out.println("-------------------------------------");
+        System.out.println(ParameterManager.getInstance().getValue("app.time", "simulation_dt"));
 
     }
 

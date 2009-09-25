@@ -22,14 +22,15 @@ import java.util.logging.Logger;
  */
 public class ActionManager implements IActionManager {
 
-    private static ActionManager actionManager = new ActionManager();
+    final private static ActionManager actionManager = new ActionManager();
 
     public static ActionManager getInstance() {
         return actionManager;
     }
 
-    public XAction getAction(String key) {
-        return (XAction) ICFile.getInstance().getBlock(TypeBlock.ACTION, key);
+    public XAction getXAction(String key) {
+        //return (XAction) ICFile.getInstance().getBlock(TypeBlock.ACTION, key);
+        return new XAction(ICFile.getInstance().getBlock(TypeBlock.ACTION, key));
     }
 
     /*public AbstractAction getAction(Class actionClass) {
@@ -42,15 +43,13 @@ public class ActionManager implements IActionManager {
     }
     return null;
     }*/
-    public AbstractAction createAction(String key) {
+    public AbstractAction createAction(Class actionClass) {
 
         try {
-            return (AbstractAction) getAction(key).getActionClass().newInstance();
+            return (AbstractAction) actionClass.newInstance();
         } catch (InstantiationException ex) {
             Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
             Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
@@ -60,7 +59,7 @@ public class ActionManager implements IActionManager {
     public Collection<XAction> getActions() {
         Collection<XAction> collection = new ArrayList();
         for (XBlock block : ICFile.getInstance().getBlocks(TypeBlock.ACTION)) {
-            collection.add((XAction) block);
+            collection.add(new XAction(block));
 
         }
         return collection;

@@ -36,7 +36,7 @@ public class Recruitment extends AbstractAction {
 
         timeInZone = 0;
         durationMinInRecruitArea = Integer.valueOf(getParameter("recruitment.durationMinInRecruitArea"));
-        isAgeCriterion = getParameter("recruitment.criterion").matches(getProperty("recruitment.criterion.age"));
+        isAgeCriterion = getParameter("recruitment.criterion").matches("age");
         if (isAgeCriterion) {
             ageMinAtRecruitment = Float.valueOf(getParameter("recruitment.limit.age"));
         } else {

@@ -15,7 +15,7 @@ public class XAction extends XBlock {
 
     private static final String CLASS_NAME = "class_name";
 
-    XAction(Element xaction) {
+    public XAction(Element xaction) {
         super(TypeBlock.ACTION, xaction);
         if (xaction != null) {
             addContent(xaction.cloneContent());
@@ -23,7 +23,7 @@ public class XAction extends XBlock {
     }
 
     public String getClassName() {
-        return this.getChildTextNormalize(CLASS_NAME);
+        return getParameter(CLASS_NAME).getValue();
     }
 
     public Class getActionClass() throws ClassNotFoundException {

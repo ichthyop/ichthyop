@@ -18,11 +18,11 @@ import java.util.Locale;
  *
  * @author pverley
  */
-public class TxtFileRelease implements IReleaseProcess {
+public class TxtFileRelease extends AbstractReleaseProcess {
 
     public void release(ReleaseEvent event) throws IOException {
 
-        File fDrifter = new File(getSimulation().getParameterManager().getValue("release.drifter.pathname"));
+        File fDrifter = new File(getParameter("release.drifter.pathname"));
         if (!fDrifter.exists() || !fDrifter.canRead()) {
             throw new IOException("Drifter file " + fDrifter + " cannot be read");
         }

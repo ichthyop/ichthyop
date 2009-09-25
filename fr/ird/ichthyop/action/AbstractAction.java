@@ -5,7 +5,6 @@
 package fr.ird.ichthyop.action;
 
 import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.manager.ParameterManager;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.IAction;
 import fr.ird.ichthyop.io.XParameter;
@@ -17,19 +16,18 @@ import java.util.ArrayList;
  */
 public abstract class AbstractAction implements IAction {
 
-    private ParameterManager parameterManager = new ParameterManager(this.getClass());
     private String actionKey;
 
     public AbstractAction() {
-        actionKey = this.getProperty("action.key");
+        actionKey = getSimulation().getPropertyManager(getClass()).getProperty("action.key");
     }
 
-    public String getParameter(String name) {
-        return parameterManager.getValue(name);
+    public String getParameter(String key) {
+        return getSimulation().getActionManager().getXAction(actionKey).getParameter(key).getValue();
     }
 
-    public String getProperty(String name) {
-        return parameterManager.getProperty(name);
+    public ArrayList<XParameter> getParameters() {
+        return getSimulation().getActionManager().getXAction(actionKey).getParameters();
     }
 
     public ISimulation getSimulation() {
@@ -37,10 +35,6 @@ public abstract class AbstractAction implements IAction {
     }
 
     public boolean isEnabled() {
-        return getSimulation().getActionManager().getAction(actionKey).isEnabled();
-    }
-
-    public ArrayList<XParameter> getParameters() {
-        return parameterManager.getXParameters();
+        return getSimulation().getActionManager().getXAction(actionKey).isEnabled();
     }
 }

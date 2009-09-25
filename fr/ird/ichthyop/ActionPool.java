@@ -11,6 +11,8 @@ import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.IBasicParticle;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,16 +25,17 @@ public class ActionPool extends HashMap<String, AbstractAction> implements ISimu
         while (it.hasNext()) {
             XAction xaction = it.next();
             if (xaction.isEnabled()) {
-                put(xaction.getKey(), getSimulation().getActionManager().createAction(xaction.getClassName()));
+                try {
+                    put(xaction.getKey(), getSimulation().getActionManager().createAction(xaction.getActionClass()));
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(ActionPool.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
 
     public void execute(String actionName, IBasicParticle particle) {
-        AbstractAction action = get(actionName);
-        if (action.isEnabled()) {
-            action.execute(particle);
-        }
+        get(actionName).execute(particle);
     }
 
     public ISimulation getSimulation() {

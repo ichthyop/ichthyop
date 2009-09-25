@@ -7,7 +7,6 @@ package fr.ird.ichthyop.arch;
 
 import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.io.XAction;
-import fr.ird.ichthyop.*;
 import java.util.Collection;
 
 /**
@@ -16,9 +15,9 @@ import java.util.Collection;
  */
 public interface IActionManager {
 
-    public XAction getAction(String key);
+    public XAction getXAction(String key);
 
-    public AbstractAction createAction(String key);
+    public AbstractAction createAction(Class actionClass);
 
     public Collection<XAction> getActions();
 

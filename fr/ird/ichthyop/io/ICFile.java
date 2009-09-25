@@ -105,21 +105,11 @@ public class ICFile {
                     }
                 }
             };
-            return getRootElement().getContent(filtre);
-        }
-
-        private XAction getAction(final String key) {
-            return (XAction) getBlock(TypeBlock.ACTION, key);
-        }
-
-        private ArrayList<XAction> getActions() {
-
-            return null;
-        }
-
-        private Collection<XZone> getZones() {
-
-            return null;
+            List<XBlock> list = new ArrayList();
+            for (Object elt : getRootElement().getContent(filtre)) {
+                list.add(new XBlock(type, (Element) elt));
+            }
+            return list;
         }
 
         private Element get(String arg) {

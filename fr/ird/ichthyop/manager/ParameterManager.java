@@ -1,7 +1,9 @@
 package fr.ird.ichthyop.manager;
 
+import fr.ird.ichthyop.TypeBlock;
 import fr.ird.ichthyop.arch.IParameterManager;
 import fr.ird.ichthyop.io.ICFile;
+import fr.ird.ichthyop.io.XBlock;
 import fr.ird.ichthyop.io.XParameter;
 import java.util.ArrayList;
 
@@ -13,37 +15,34 @@ import java.util.ArrayList;
  *
  * @author pverley
  */
-public class ParameterManager extends PropertyManager implements IParameterManager {
+public class ParameterManager implements IParameterManager {
 
-    private String className;
+    private static ParameterManager parameterManager = new ParameterManager();
 
-    public ParameterManager(Class myClass) {
-        super(myClass);
-        className = myClass.getCanonicalName();
+    public static ParameterManager getInstance() {
+        return parameterManager;
     }
 
-    public String getValue(String key) {
+    public String getValue(String blockName, String key) {
 
         XParameter param;
-        param = getXParameter(className, key);
+        param = getXParameter(blockName, key);
         if (param != null) {
-            return param.getValue();
-        } else if ((param = getXParameter(key)) != null) {
             return param.getValue();
         } else {
             return "";
         }
     }
 
-    public ArrayList<XParameter> getXParameters() {
-        return ICFile.getInstance().getAction(className).getParameters();
+    public ArrayList<XParameter> getXParameters(String blockName) {
+        return getBlock(blockName).getParameters();
     }
 
-    private XParameter getXParameter(String actionName, String key) {
-        return ICFile.getInstance().getAction(actionName).getParameter(key);
+    private XParameter getXParameter(String blockName, String key) {
+        return getBlock(blockName).getParameter(key);
     }
 
-    private XParameter getXParameter(String key) {
-        return ICFile.getInstance().getParameter(key);
+    private XBlock getBlock(String blockName) {
+        return ICFile.getInstance().getBlock(TypeBlock.OPTION, blockName);
     }
 }

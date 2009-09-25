@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.manager.ZoneManager;
 import fr.ird.ichthyop.manager.ParameterManager;
 import fr.ird.ichthyop.manager.ActionManager;
@@ -23,8 +24,7 @@ public class Simulation implements ISimulation {
 
     private static Simulation simulation = new Simulation();
     private Population population;
-    private static ParameterManager parameterManager = new ParameterManager(fr.ird.ichthyop.io.ICFile.class);
-
+    
     public void setUp() {}
 
     public void init() {}
@@ -54,18 +54,18 @@ public class Simulation implements ISimulation {
     }
 
     public IParameterManager getParameterManager() {
-        return parameterManager;
+        return ParameterManager.getInstance();
     }
 
-    public IParameterManager getParameterManager(Class aClass) {
-        return new ParameterManager(aClass);
-    }
-
-    public IPropertyManager getPropertyManager(Class aClass) {
-        return new PropertyManager(aClass);
+    public IPropertyManager getPropertyManager(Class forClass) {
+        return PropertyManager.getInstance(forClass);
     }
 
     public IZoneManager getZoneManager() {
         return ZoneManager.getInstance();
+    }
+
+    public IReleaseManager getReleaseManager() {
+        return ReleaseManager.getInstance();
     }
 }

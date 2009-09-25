@@ -25,7 +25,7 @@ public class PropertyManager implements IPropertyManager {
     private ResourceBundle bundle = null;
     private ResourceBundle generalBundle = null;
 
-    public PropertyManager(Class myClass) {
+    private PropertyManager(Class myClass) {
         this.myClass = myClass;
 
         String bundleName = myClass.getPackage().getName() + ".resources." + myClass.getSimpleName();
@@ -42,6 +42,10 @@ public class PropertyManager implements IPropertyManager {
         } catch (MissingResourceException e) {
             logger.log(Level.SEVERE, "Couldn't load bundle: " + bundleName);
         }
+    }
+
+    public static PropertyManager getInstance(Class forClass) {
+        return new PropertyManager(forClass);
     }
 
     public String getBundleClass() {

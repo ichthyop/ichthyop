@@ -5,6 +5,8 @@
 
 package fr.ird.ichthyop.arch;
 
+import fr.ird.ichthyop.ReleaseManager;
+
 /**
  *
  * @author pverley
@@ -20,12 +22,12 @@ public interface ISimulation {
     public IActionManager getActionManager();
 
     public IParameterManager getParameterManager();
-
-    public IParameterManager getParameterManager(Class aClass);
     
     public IPropertyManager getPropertyManager(Class aClass);
 
     public IZoneManager getZoneManager();
+
+    public IReleaseManager getReleaseManager();
 
     public void step();
 
