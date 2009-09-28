@@ -8,6 +8,7 @@ import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XParameter;
 import fr.ird.ichthyop.manager.ParameterManager;
+import fr.ird.ichthyop.manager.ZoneManager;
 import java.io.File;
 import java.util.Iterator;
 
@@ -26,9 +27,9 @@ public class TestParameter {
 
         ICFile.setFile(file);
         ActionPool actionPool = new ActionPool();
-        Iterator<AbstractAction> it = actionPool.values().iterator();
-        while (it.hasNext()) {
-            AbstractAction action = it.next();
+        Iterator<AbstractAction> itA = actionPool.values().iterator();
+        while (itA.hasNext()) {
+            AbstractAction action = itA.next();
             System.out.println("====================");
             System.out.println(action.getClass().getCanonicalName() + " " + action.isEnabled());
             for (XParameter param : action.getParameters()) {
@@ -37,7 +38,17 @@ public class TestParameter {
             }
         }
         System.out.println("-------------------------------------");
+        
         System.out.println(ParameterManager.getInstance().getValue("app.time", "simulation_dt"));
+
+        System.out.println("-------------------------------------");
+
+        Iterator<Zone> itZ = ZoneManager.getInstance().getZones(TypeZone.RELEASE).iterator();
+        while(itZ.hasNext()) {
+            Zone zone = itZ.next();
+            System.out.println("====================");
+            System.out.println(zone.toString());
+        }
 
     }
 

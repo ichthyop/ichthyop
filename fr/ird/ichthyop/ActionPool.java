@@ -5,6 +5,7 @@
 package fr.ird.ichthyop;
 
 import fr.ird.ichthyop.action.AbstractAction;
+import fr.ird.ichthyop.arch.IActionPool;
 import fr.ird.ichthyop.io.XAction;
 import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.arch.ISimulation;
@@ -18,7 +19,9 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class ActionPool extends HashMap<String, AbstractAction> implements ISimulationAccessor {
+public class ActionPool extends HashMap<String, AbstractAction> implements IActionPool, ISimulationAccessor {
+
+    final private static ActionPool actionPool = new ActionPool();
 
     public ActionPool() {
         Iterator<XAction> it = getSimulation().getActionManager().getActions().iterator();
@@ -32,6 +35,10 @@ public class ActionPool extends HashMap<String, AbstractAction> implements ISimu
                 }
             }
         }
+    }
+
+    public static ActionPool getInstance() {
+        return actionPool;
     }
 
     public void execute(String actionName, IBasicParticle particle) {

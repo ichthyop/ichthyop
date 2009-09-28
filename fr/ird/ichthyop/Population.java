@@ -3,6 +3,8 @@ package fr.ird.ichthyop;
 /** import java.util */
 import fr.ird.ichthyop.arch.IBasicParticle;
 import fr.ird.ichthyop.arch.IPopulation;
+import fr.ird.ichthyop.arch.ISimulation;
+import fr.ird.ichthyop.arch.ISimulationAccessor;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -24,7 +26,7 @@ import java.util.Iterator;
  *
  * @author P.Verley
  */
-public class Population extends HashSet implements IPopulation {
+public class Population extends HashSet implements IPopulation, ISimulationAccessor {
 
 ////////////////
 // Debug purpose
@@ -32,27 +34,36 @@ public class Population extends HashSet implements IPopulation {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    ActionPool actionPool = new ActionPool();
+    private final static Population population = new Population();
+    
 ///////////////
 // Constructors
 ///////////////
-    public Population(int nbParticles) {
-        super(nbParticles);
-    }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+
+    public static Population getInstance() {
+        return population;
+    }
+
     public void step() {
+
+        getSimulation().getReleaseManager().getSchedule().step();
 
         Iterator<IBasicParticle> iter = iterator();
         IBasicParticle particle;
         while (iter.hasNext()) {
             particle = iter.next();
             if (particle.isLiving()) {
-                particle.step(actionPool);
+                particle.step(getSimulation().getActionPool());
             }
         }
+    }
+
+    public ISimulation getSimulation() {
+        return Simulation.getInstance();
     }
     //------- End of class
 }

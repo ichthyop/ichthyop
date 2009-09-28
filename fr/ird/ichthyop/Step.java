@@ -1,6 +1,8 @@
 package fr.ird.ichthyop;
 
 /** import java.text */
+import fr.ird.ichthyop.arch.ISimulation;
+import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.arch.IStep;
 import java.text.SimpleDateFormat;
 
@@ -21,12 +23,12 @@ import java.util.Calendar;
  *
  * @author P.Verley
  */
-public class Step implements IStep {
+public class Step implements IStep, ISimulationAccessor {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
+    private final static Step step = new Step();
     /**
      * Current time of the simulation [second]
      */
@@ -35,6 +37,10 @@ public class Step implements IStep {
      * Begining of the simulation [second]
      */
     private long t0;
+    /**
+     * Transport duration [second]
+     */
+    private long transportDuration;
     /**
      * Simulation duration [second]
      */
@@ -87,10 +93,36 @@ public class Step implements IStep {
 ///////////////
 // Constructors
 ///////////////
+    Step() {
+        loadParameters();
+    }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    public static Step getInstance() {
+        return step;
+    }
+
+    private void loadParameters() {
+        dt = Integer.valueOf(getParameter("app.time", "time_step"));
+        boolean isForward = getParameter("app.time", "time_arrow").matches("forward");
+        if (!isForward) dt *= -1;
+        t0 = Integer.valueOf(getParameter("app.time", "initial_time"));
+        transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
+        simuDuration = transportDuration + getSimulation().getReleaseManager().getSchedule().getReleaseDuration();
+        //calendar = ;
+
+        i_step = 0;
+        time = t0;
+        nb_steps = (int) (simuDuration / dt);
+        cpu_start = System.currentTimeMillis();
+
+    }
+
+    private String getParameter(String blockName, String key) {
+        return getSimulation().getParameterManager().getValue(blockName, key);
+    }
 
     /**
      * Increments the current time of the simulation and checks whether the
@@ -99,7 +131,7 @@ public class Step implements IStep {
      * @return <code>true</code> if the incremented time is still smaller than
      * the end time of the simulation; <code>false</code> otherwise.
      */
-    public boolean next() {
+    public boolean hasNext() {
 
         time += dt;
         if (Math.abs(time - t0) < simuDuration) {
@@ -118,16 +150,16 @@ public class Step implements IStep {
     @Override
     public Step clone() {
 
-        Step step = null;
+        Step clone = null;
         try {
-            step = (Step)super.clone();
+            clone = (Step) super.clone();
         } catch (CloneNotSupportedException ex) {
             ex.printStackTrace();
         }
-        step.calendar = (Calendar) calendar.clone();
-        step.dateFormat = (SimpleDateFormat) dateFormat.clone();
+        clone.calendar = (Calendar) calendar.clone();
+        clone.dateFormat = (SimpleDateFormat) dateFormat.clone();
 
-        return step;
+        return clone;
     }
 
     /**
@@ -154,7 +186,6 @@ public class Step implements IStep {
      * @return <code>true</code>if the screen should be refreshed;
      * <code>false</code> otherwise.
      */
-
     public boolean hasToRefresh() {
         return ((time - t0) % dt_refresh) == 0;
     }
@@ -207,8 +238,7 @@ public class Step implements IStep {
      * @return the progress of the whole sets of simulations as a percent
      */
     public int progressGlobal() {
-        return (int) (100.f * (i_simulation + (i_step + 1) / (float) nb_steps)
-                      / nb_simulations);
+        return (int) (100.f * (i_simulation + (i_step + 1) / (float) nb_steps) / nb_simulations);
     }
 
     /**
@@ -247,5 +277,17 @@ public class Step implements IStep {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public void next() {
+        if (this.hasToRefresh()) {
+            //fireRefreshUIEvent();
+        }
+        if (this.hasToRecord()) {
+            //fireRecordEvent();
+        }
+    }
+
+    public ISimulation getSimulation() {
+        return Simulation.getInstance();
+    }
     //---------- End of class
 }

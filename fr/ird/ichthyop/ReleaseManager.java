@@ -21,17 +21,22 @@ public class ReleaseManager implements IReleaseManager {
 
     private static ReleaseManager releaseManager = new ReleaseManager();
     private IReleaseProcess releaseProcess;
+    private XBlock releaseBlock;
 
     public static IReleaseManager getInstance() {
         return releaseManager;
     }
 
+    public ReleaseSchedule getSchedule() {
+        return ReleaseSchedule.getInstance();
+    }
+
     private IReleaseProcess getReleaseProcess() {
         if (releaseProcess == null) {
             try {
-                XBlock block = findActiveReleaseProcess();
-                if (block != null) {
-                    releaseProcess = (IReleaseProcess) Class.forName(block.getChildTextNormalize("class_name")).newInstance();
+                releaseBlock = findActiveReleaseProcess();
+                if (releaseBlock != null) {
+                    releaseProcess = (IReleaseProcess) Class.forName(releaseBlock.getChildTextNormalize("class_name")).newInstance();
                 }
             } catch (InstantiationException ex) {
                 Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -46,6 +51,10 @@ public class ReleaseManager implements IReleaseManager {
 
     public XBlock getXReleaseProcess(String key) {
         return ICFile.getInstance().getBlock(TypeBlock.ZONE, key);
+    }
+
+    public String getParameter(String key) {
+        return releaseBlock.getParameter(key).getValue();
     }
 
     private XBlock findActiveReleaseProcess() {

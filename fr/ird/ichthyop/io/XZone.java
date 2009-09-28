@@ -31,7 +31,7 @@ public class XZone extends XBlock {
     public TypeZone getTypeZone() {
 
         for (TypeZone type : TypeZone.values()) {
-            if (type.name().matches(getChildTextNormalize(TYPE_ZONE))) {
+            if (type.toString().matches(getChildTextNormalize(TYPE_ZONE))) {
                 return type;
             }
         }
@@ -73,19 +73,19 @@ public class XZone extends XBlock {
         }
 
         public int getInshoreLine() {
-            return Integer.valueOf(LINE_INSHORE);
+            return Integer.valueOf(getChildTextNormalize(LINE_INSHORE));
         }
 
         public int getOffshoreLine() {
-            return Integer.valueOf(LINE_OFFSHORE);
+            return Integer.valueOf(getChildTextNormalize(LINE_OFFSHORE));
         }
 
         public int getLowerDepth() {
-            return Integer.valueOf(LOWER_DEPTH);
+            return Integer.valueOf(getChildTextNormalize(LOWER_DEPTH));
         }
 
         public int getUpperDepth() {
-            return Integer.valueOf(UPPER_DEPTH);
+            return Integer.valueOf(getChildTextNormalize(UPPER_DEPTH));
         }
     }
 

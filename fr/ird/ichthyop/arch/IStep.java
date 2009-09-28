@@ -21,4 +21,8 @@ public interface IStep extends Cloneable {
 
     public Calendar getCalendar();
 
+    public boolean hasNext();
+
+    public void next();
+
 }

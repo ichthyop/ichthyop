@@ -12,7 +12,6 @@ import fr.ird.ichthyop.arch.IActionManager;
 import fr.ird.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

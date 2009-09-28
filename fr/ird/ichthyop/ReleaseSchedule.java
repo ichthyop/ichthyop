@@ -14,27 +14,44 @@ import javax.swing.event.EventListenerList;
  */
 public class ReleaseSchedule implements ISimulationAccessor {
 
+    private final static ReleaseSchedule releaseSchedule = new ReleaseSchedule();
     /** Stores time of the release events */
     private long[] timeEvent;
     /** Index of the current release event */
     private int indexEvent;
     /** Set to true once all released events happened */
     private boolean isAllReleased;
-    EventListenerList listeners;
+    /** */
+    private EventListenerList listeners;
 
     ReleaseSchedule() {
 
         indexEvent = 0;
         isAllReleased = false;
         schedule();
+        addReleaseListener(getSimulation().getReleaseManager());
+    }
+
+    public static ReleaseSchedule getInstance() {
+        return releaseSchedule;
     }
 
     private void schedule() {
-        timeEvent = new long[1];
-        timeEvent[0] = 0;
+        
+        timeEvent = new long[findNumberReleaseEvents()];
+        for (int i = 0; i < timeEvent.length; i++) {
+            timeEvent[i] = Integer.valueOf(getSimulation().getParameterManager().getValue("release.schedule", "event" + i));
+        }
     }
 
-    private void step() {
+    private int findNumberReleaseEvents() {
+        int i = 0;
+        while (!getSimulation().getParameterManager().getValue("release.schedule", "event" + i).isEmpty())
+            i++;
+        return i;
+    }
+
+    public void step() {
 
         if (!isAllReleased) {
             long time = getSimulation().getStep().getTime();
@@ -85,5 +102,9 @@ public class ReleaseSchedule implements ISimulationAccessor {
 
     public int getNbReleaseEvents() {
         return timeEvent.length;
+    }
+
+    public long getReleaseDuration() {
+        return timeEvent[getNbReleaseEvents() - 1] - timeEvent[0];
     }
 }

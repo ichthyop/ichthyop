@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.arch.IActionPool;
 import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.manager.ZoneManager;
 import fr.ird.ichthyop.manager.ParameterManager;
@@ -13,7 +14,9 @@ import fr.ird.ichthyop.arch.IDataset;
 import fr.ird.ichthyop.arch.IZoneManager;
 import fr.ird.ichthyop.arch.IActionManager;
 import fr.ird.ichthyop.arch.IParameterManager;
+import fr.ird.ichthyop.arch.IPopulation;
 import fr.ird.ichthyop.arch.IPropertyManager;
+import fr.ird.ichthyop.arch.IStep;
 import fr.ird.ichthyop.manager.PropertyManager;
 
 /**
@@ -22,15 +25,10 @@ import fr.ird.ichthyop.manager.PropertyManager;
  */
 public class Simulation implements ISimulation {
 
-    private static Simulation simulation = new Simulation();
-    private Population population;
-    
-    public void setUp() {}
+    final private static Simulation simulation = new Simulation();
 
-    public void init() {}
-
-    public Population getPopulation() {
-        return population;
+    public IPopulation getPopulation() {
+        return Population.getInstance();
     }
 
     public static Simulation getInstance() {
@@ -41,12 +39,13 @@ public class Simulation implements ISimulation {
         return null;
     }
 
-    public Step getStep() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public IStep getStep() {
+        return Step.getInstance();
     }
 
     public void step() {
         getPopulation().step();
+        getStep().next();
     }
 
     public IActionManager getActionManager() {
@@ -67,5 +66,9 @@ public class Simulation implements ISimulation {
 
     public IReleaseManager getReleaseManager() {
         return ReleaseManager.getInstance();
+    }
+
+    public IActionPool getActionPool() {
+       return ActionPool.getInstance();
     }
 }

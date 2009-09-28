@@ -5,7 +5,6 @@
 package fr.ird.ichthyop;
 
 import fr.ird.ichthyop.arch.IBasicParticle;
-import fr.ird.ichthyop.arch.ISimulation;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -61,9 +60,5 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         } catch (java.io.IOException e) {
             throw new IOException("Problem reading drifter file " + fDrifter);
         }
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
     }
 }

@@ -1,7 +1,5 @@
 package fr.ird.ichthyop.arch;
 
-import fr.ird.ichthyop.*;
-
 /**
  * Public interface that lists the methods a Particle of the model will have
  * to provide, as a minimum.
@@ -22,7 +20,7 @@ public interface IBasicParticle extends IRhoPoint {
 // Declaration of the methods
 /////////////////////////////
 
-    public void step(ActionPool pool);
+    public void step(IActionPool pool);
     
     /**
      * Checks whether the particle is living or not

@@ -6,6 +6,7 @@
 package fr.ird.ichthyop.arch;
 
 import fr.ird.ichthyop.ReleaseListener;
+import fr.ird.ichthyop.ReleaseSchedule;
 import fr.ird.ichthyop.io.XBlock;
 
 /**
@@ -15,4 +16,8 @@ import fr.ird.ichthyop.io.XBlock;
 public interface IReleaseManager extends ReleaseListener {
     
     public XBlock getXReleaseProcess(String key);
+
+    public ReleaseSchedule getSchedule();
+
+    public String getParameter(String key);
 }

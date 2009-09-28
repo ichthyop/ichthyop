@@ -55,12 +55,19 @@ public class ZoneManager implements IZoneManager {
             }
             map.get(zone.getType()).add(zone.getIndex(), zone);
         }
+
+        /*for (TypeZone type : map.keySet()) {
+            System.out.println(type.toString());
+            for (Zone zone : map.get(type)) {
+                System.out.println(zone.toString());
+            }
+        }*/
     }
 
     private Collection<XZone> getZones() {
         Collection<XZone> collection = new ArrayList();
         for (XBlock block : ICFile.getInstance().getBlocks(TypeBlock.ZONE)) {
-            collection.add((XZone) block);
+            collection.add(new XZone(block));
 
         }
         return collection;

@@ -18,7 +18,7 @@ public class Advection extends AbstractAction {
     public void loadParameters() {
 
         isEuler = getParameter("numerical_scheme").matches("Euler");
-        isForward = getSimulation().getParameterManager().getValue("app.time", "time_arrow").matches("forward");
+        isForward = getSimulation().getStep().get_dt() < 0;
     }
 
     public void execute(IBasicParticle particle) {

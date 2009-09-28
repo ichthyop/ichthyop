@@ -109,13 +109,17 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
 //////////
 // Setters
 //////////
-
     public void make2D() {
         is3D = false;
     }
 //////////
 // Getters
 //////////
+
+    public boolean is3D() {
+        return is3D;
+    }
+
     /**
      * Gets x coordinate
      * @return double x, the x coordinate of the grid point
@@ -245,4 +249,11 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
         return point;
     }
     //----------- End of class
+
+    @Override
+    public String toString() {
+        return is3D
+                ? "(" + lon + ", " + lat + ", " + depth + ")"
+                : "(" + lon + ", " + lat + ")";
+    }
 }

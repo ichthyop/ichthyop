@@ -12,4 +12,9 @@ public enum TypeZone {
 
     RELEASE,
     RECRUITMENT;
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
 }

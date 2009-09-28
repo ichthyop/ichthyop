@@ -35,7 +35,7 @@ import java.util.ArrayList;
  */
 public class Zone implements ISimulationAccessor {
 
-    private ArrayList<RhoPoint> polygon;
+    private ArrayList<RhoPoint> polygon = new ArrayList(3);
     private TypeZone type;
     /**
      * Lower bathymetric line [meter]
@@ -72,6 +72,14 @@ public class Zone implements ISimulationAccessor {
         this.lowerDepth = lowerDepth;
     }
 
+    public int getUpperDepth() {
+        return upperDepth;
+    }
+
+    public int getLowerDepth() {
+        return lowerDepth;
+    }
+
     public void setUpperDepth(int upperDepth) {
         this.upperDepth = upperDepth;
     }
@@ -90,9 +98,11 @@ public class Zone implements ISimulationAccessor {
 
     public boolean isPointInZone(RhoPoint point) {
 
-        boolean isInZone = false;
-
-        isInZone = isDepthInLayer(point.getDepth()) && isXYBetweenBathyLines(point.getX(), point.getY()) && isXYInPolygon(point.getX(), point.getY());
+        boolean isInZone = true;
+        if (point.is3D()) {
+            isInZone = isDepthInLayer(point.getDepth());
+        }
+        isInZone = isInZone && isXYBetweenBathyLines(point.getX(), point.getY()) && isXYInPolygon(point.getX(), point.getY());
 
         return isInZone;
     }
@@ -175,6 +185,91 @@ public class Zone implements ISimulationAccessor {
      */
     public int getIndex() {
         return index;
+    }
+
+    /**
+     * Gets the smallest x-coordinate of the demarcation points.
+     *
+     * @return a double, the x-coordinate of the demarcation point closest to
+     * the grid origin.
+     */
+    public double getXmin() {
+
+        double xmin = polygon.get(0).getX();
+        for (int k = 0; k < polygon.size(); k++) {
+            xmin = Math.min(xmin, polygon.get(k).getX());
+        }
+        return xmin;
+    }
+
+    /**
+     * Gets the smallest y-coordinate of the demarcation points.
+     *
+     * @return a double, the y-coordinate of the demarcation point closest to
+     * the grid origin.
+     */
+    public double getYmin() {
+
+        double ymin = polygon.get(0).getY();
+        for (int i = 1; i < 4; i++) {
+            ymin = Math.min(ymin, polygon.get(i).getY());
+        }
+        return ymin;
+    }
+
+    /**
+     * Gets the biggest x-coordinate of the demarcation points.
+     *
+     * @return a double, the x-coordinate of the demarcation point farthest from
+     * the grid origin.
+     */
+    public double getXmax() {
+        double xmax = polygon.get(0).getX();
+        for (int i = 1; i < 4; i++) {
+            xmax = Math.max(xmax, polygon.get(i).getX());
+        }
+        return xmax;
+    }
+
+    /**
+     * Gets the biggest y-coordinate of the demarcation points.
+     *
+     * @return a double, the y-coordinate of the demarcation point farthest from
+     * the grid origin.
+     */
+    public double getYmax() {
+        double ymax = polygon.get(0).getY();
+        for (int i = 1; i < 4; i++) {
+            ymax = Math.max(ymax, polygon.get(i).getY());
+        }
+        return ymax;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer zoneStr = new StringBuffer(getType().toString());
+        zoneStr.append(' ');
+        zoneStr.append("zone ");
+        zoneStr.append(getIndex());
+        zoneStr.append('\n');
+        zoneStr.append("Polygon [");
+        for (RhoPoint point : polygon) {
+            zoneStr.append(point.toString());
+            zoneStr.append(" ");
+        }
+        zoneStr.append(']');
+        zoneStr.append('\n');
+        zoneStr.append("shore-lines (");
+        zoneStr.append(inshoreLine);
+        zoneStr.append("m, ");
+        zoneStr.append(offshoreLine);
+        zoneStr.append("m) depth-lines (");
+        zoneStr.append(upperDepth);
+        zoneStr.append("m, ");
+        zoneStr.append(lowerDepth);
+        zoneStr.append("m)");
+
+        return zoneStr.toString();
     }
     //---------- End of class
 }
