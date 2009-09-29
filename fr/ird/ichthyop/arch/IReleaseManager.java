@@ -5,8 +5,8 @@
 
 package fr.ird.ichthyop.arch;
 
-import fr.ird.ichthyop.ReleaseListener;
-import fr.ird.ichthyop.ReleaseSchedule;
+import fr.ird.ichthyop.release.ReleaseListener;
+import fr.ird.ichthyop.release.ReleaseSchedule;
 import fr.ird.ichthyop.io.XBlock;
 
 /**

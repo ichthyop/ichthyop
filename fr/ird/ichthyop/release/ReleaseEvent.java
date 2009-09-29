@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.release;
 
+import fr.ird.ichthyop.*;
 import java.util.EventObject;
 
 /**

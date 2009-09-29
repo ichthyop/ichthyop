@@ -39,7 +39,8 @@ public class RunBatch implements Runnable, ISimulationAccessor {
      * setup SwingWorker.
      * @see inner class SetupSwingWorker
      */
-    public void setUp() throws Exception {}
+    public void setUp() throws Exception {
+    }
 
     public void run() {
         do {
@@ -49,5 +50,10 @@ public class RunBatch implements Runnable, ISimulationAccessor {
 
     public ISimulation getSimulation() {
         return Simulation.getInstance();
+    }
+
+    public static void main(String... args) {
+        String filename = System.getProperty("user.dir") + File.separator + "cfg2.xic";
+        new RunBatch(filename);
     }
 }

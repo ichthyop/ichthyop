@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.manager.ReleaseManager;
 import fr.ird.ichthyop.arch.IActionPool;
 import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.manager.ZoneManager;

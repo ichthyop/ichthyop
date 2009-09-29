@@ -74,7 +74,7 @@ public class XBlock extends org.jdom.Element {
             }
         };
         List searchResult = getChild(PARAMETERS).getContent(filtre);
-        if (searchResult != null && searchResult.size() < 2) {
+        if (searchResult != null && searchResult.size() > 0 && searchResult.size() < 2) {
             return new XParameter((Element) searchResult.get(0));
         } else {
             return null;

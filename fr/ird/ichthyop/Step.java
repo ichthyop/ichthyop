@@ -108,7 +108,7 @@ public class Step implements IStep, ISimulationAccessor {
         dt = Integer.valueOf(getParameter("app.time", "time_step"));
         boolean isForward = getParameter("app.time", "time_arrow").matches("forward");
         if (!isForward) dt *= -1;
-        t0 = Integer.valueOf(getParameter("app.time", "initial_time"));
+        t0 = Long.valueOf(getParameter("app.time", "initial_time"));
         transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
         simuDuration = transportDuration + getSimulation().getReleaseManager().getSchedule().getReleaseDuration();
         //calendar = ;
@@ -136,7 +136,7 @@ public class Step implements IStep, ISimulationAccessor {
         time += dt;
         if (Math.abs(time - t0) < simuDuration) {
             i_step++;
-            calendar.setTimeInMillis(time * 1000L);
+            //calendar.setTimeInMillis(time * 1000L);
             cpu_now = System.currentTimeMillis();
             return true;
         }
@@ -278,12 +278,12 @@ public class Step implements IStep, ISimulationAccessor {
     }
 
     public void next() {
-        if (this.hasToRefresh()) {
+        /*if (this.hasToRefresh()) {
             //fireRefreshUIEvent();
         }
         if (this.hasToRecord()) {
             //fireRecordEvent();
-        }
+        }*/
     }
 
     public ISimulation getSimulation() {

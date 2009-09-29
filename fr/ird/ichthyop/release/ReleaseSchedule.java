@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.release;
 
+import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;
 import javax.swing.event.EventListenerList;
@@ -22,7 +23,7 @@ public class ReleaseSchedule implements ISimulationAccessor {
     /** Set to true once all released events happened */
     private boolean isAllReleased;
     /** */
-    private EventListenerList listeners;
+    private EventListenerList listeners = new EventListenerList();
 
     ReleaseSchedule() {
 
@@ -48,6 +49,7 @@ public class ReleaseSchedule implements ISimulationAccessor {
         int i = 0;
         while (!getSimulation().getParameterManager().getValue("release.schedule", "event" + i).isEmpty())
             i++;
+        //Logger.getLogger(ReleaseSchedule.class.getName()).log(Level.CONFIG, "Number release events: " + i);
         return i;
     }
 

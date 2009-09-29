@@ -2,8 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.manager;
 
+import fr.ird.ichthyop.release.*;
+import fr.ird.ichthyop.*;
+import fr.ird.ichthyop.release.ReleaseEvent;
+import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
@@ -19,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class ReleaseManager implements IReleaseManager {
 
-    private static ReleaseManager releaseManager = new ReleaseManager();
+    private static final ReleaseManager releaseManager = new ReleaseManager();
     private IReleaseProcess releaseProcess;
     private XBlock releaseBlock;
 
@@ -36,7 +40,7 @@ public class ReleaseManager implements IReleaseManager {
             try {
                 releaseBlock = findActiveReleaseProcess();
                 if (releaseBlock != null) {
-                    releaseProcess = (IReleaseProcess) Class.forName(releaseBlock.getChildTextNormalize("class_name")).newInstance();
+                    releaseProcess = (IReleaseProcess) Class.forName(releaseBlock.getParameter("class_name").getValue()).newInstance();
                 }
             } catch (InstantiationException ex) {
                 Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -50,7 +54,7 @@ public class ReleaseManager implements IReleaseManager {
     }
 
     public XBlock getXReleaseProcess(String key) {
-        return ICFile.getInstance().getBlock(TypeBlock.ZONE, key);
+        return ICFile.getInstance().getBlock(TypeBlock.RELEASE, key);
     }
 
     public String getParameter(String key) {

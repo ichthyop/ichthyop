@@ -3,8 +3,10 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.release;
 
+import fr.ird.ichthyop.*;
+import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.ISimulation;
 
 /**
