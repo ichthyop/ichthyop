@@ -260,7 +260,7 @@ public class Population extends HashSet {
         double xmin, xmax, ymin, ymax;
         double depthMin = 0.d, depthMax = 0.d;
         Zone zone;
-        Particle particle, particlePatch;
+        Turtle particle, particlePatch;
         boolean bln3D = Configuration.is3D();
 
         /** Initilization of the parameters */
@@ -339,7 +339,7 @@ public class Population extends HashSet {
             /** Loop on the number of particle to be released */
             for (int p = 0; p < nbReleased; p++) {
                 /** Instantiate a new Particle */
-                particle = new Particle(index,
+                particle = new Turtle(index,
                                         bln3D,
                                         xmin, xmax, ymin, ymax,
                                         depthMin, depthMax);
@@ -363,7 +363,7 @@ public class Population extends HashSet {
                             depth = particle.getDepth() +
                                     thickness_patch * (Math.random() - 0.5f);
                         }
-                        particlePatch = new Particle(index,
+                        particlePatch = new Turtle(index,
                                 bln3D,
                                 particle.getNumZoneInit(),
                                 particle.getX() + r * Math.cos(teta),
@@ -452,7 +452,7 @@ public class Population extends HashSet {
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.getDefault());
-        Particle particle;
+        Turtle particle;
         boolean bln3D = Configuration.is3D();
         double depth = 0.d;
         try {
@@ -479,7 +479,7 @@ public class Population extends HashSet {
                                     : -1.f * Simulation.getDepthNight();
                         }
                     }
-                    particle = new Particle(index,
+                    particle = new Turtle(index,
                                             bln3D,
                                             coord[0], coord[1], depth,
                                             true);
@@ -576,7 +576,7 @@ public class Population extends HashSet {
             ArrayInt.D2
                     deathArr = (ArrayInt.D2) nc.findVariable("death").read();
             double lon, lat, depth = 0.d;
-            Particle particle;
+            Turtle particle;
             boolean bln3D = Configuration.is3D();
             int nb_particles = Configuration.getNbParticles();
 
@@ -611,7 +611,7 @@ public class Population extends HashSet {
                 }
 
                 living = (deathArr.get(rank, i) == Constant.DEAD_NOT);
-                particle = new Particle(i,
+                particle = new Turtle(i,
                                         bln3D,
                                         lon, lat, depth,
                                         living);

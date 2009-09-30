@@ -271,6 +271,10 @@ public class RunBatch {
             if (Configuration.isMigration()) {
                 DVMPattern.setCalendar((Calendar) step.getCalendar().clone());
             }
+
+            if (Configuration.isActiveOrientation()) {
+                Turtle.setCalendar((Calendar) step.getCalendar().clone());
+            }
         }
         //----------- End of inner class SerialSwingWorker
     }

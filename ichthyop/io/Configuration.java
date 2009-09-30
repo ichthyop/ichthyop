@@ -28,8 +28,7 @@ public class Configuration {
     /////////////////////
     // Constants
     /////////////////////
-    public static int VERSION = 212;
-
+    public static int VERSION = 221;
     /////////////////////
     // Section SIMULATION
     /////////////////////
@@ -38,15 +37,13 @@ public class Configuration {
      */
     private static int TYPE_RUN;
     private static int NB_REPLICA;
-
     ////////////////
     // Section MODEL
     ////////////////
     private static int TYPE_MODEL;
     private static int TYPE_SCHEME;
     private static boolean BLN_RANGE;
-    private static float lon1,  lat1,  lon2,  lat2;
-
+    private static float lon1, lat1, lon2, lat2;
     /////////////
     // Section IO
     /////////////
@@ -60,7 +57,6 @@ public class Configuration {
     private static String OUTPUT_FILENAME;
     //private static int RECORD_DT;
     private static int RECORD_FREQUENCY;
-
     ////////////////////
     // Section TRANSPORT
     ////////////////////
@@ -74,7 +70,6 @@ public class Configuration {
     private static float MIGRATION_AGE_LIMIT;
     private static float[] DEPTH_DAY;
     private static float[] DEPTH_NIGHT;
-
     //////////////////
     // Section RELEASE
     //////////////////
@@ -90,7 +85,6 @@ public class Configuration {
     private static int[] PATCH_RADIUS;
     private static int[] PATCH_THICKNESS;
     private static ArrayList<Zone> listReleaseZone;
-
     //////////////////////
     // Section RECRUITMENT
     //////////////////////
@@ -103,7 +97,6 @@ public class Configuration {
     private static float[] MAX_DEPTH_RECRUITMENT;
     private static boolean BLN_STOP_MOVING;
     private static ArrayList<Zone> listRecruitmentZone;
-
     //////////////////
     // Section BIOLOGY
     //////////////////
@@ -112,7 +105,6 @@ public class Configuration {
     private static boolean BLN_LETHAL_TP;
     private static float[] LETHAL_TP_EGG;
     private static float[] LETHAL_TP_LARVA;
-
     ///////////////
     // Section TIME
     ///////////////
@@ -122,6 +114,15 @@ public class Configuration {
     private static long[] TIME_T0;
     private static long TRANSPORT_DURATION;
     private static int DT;
+    /////////////////
+    // Section TURTLE
+    /////////////////
+    private static boolean BLN_ACTIVE_ORIENTATION;
+    private static String[] ACTIVE_PERIOD;
+    private static float[] SPEED_INTENSITY;
+    private static int[] SPEED_ACTIVITY;
+    private static float[] ORIENTATION;
+    private static int[] ORIENTATION_ACTIVITY;
 
 //////////////
 // Constructor
@@ -189,7 +190,7 @@ public class Configuration {
                     Structure.VERSION);
             return version;
         } catch (NullPointerException e) {
-        // version < 2.1.1
+            // version < 2.1.1
         }
 
         if (isV210(file)) {
@@ -203,7 +204,7 @@ public class Configuration {
         errMsg.append("Version might be prior to 2.0.0 either the file is corrupted.");
         throw new IOException(errMsg.toString());
     }
-    
+
     /**
      * 
      * @param file
@@ -252,6 +253,9 @@ public class Configuration {
         }
         if (version < 212) {
             ufile = u211To212(ufile);
+        }
+        if (version < 221) {
+            ufile = u212To221(ufile);
         }
 
         try {
@@ -359,12 +363,28 @@ public class Configuration {
                 Structure.PATH_GRIDFILE,
                 "null",
                 null);
-        
+
         // Update the version number
         ufile.setIntegerProperty(Structure.SECTION_SIMULATION,
                 Structure.VERSION,
                 212,
                 null);
+
+        return ufile;
+    }
+
+    private INIFile u212To221(INIFile file) {
+
+        INIFile ufile = file;
+
+        // Add [TURTLE] section
+        ufile.addSection(Structure.SECTION_TURTLE, null);
+
+        // Add property [TURTLE] <active orientation>
+        ufile.setBooleanProperty(Structure.SECTION_TURTLE, Structure.ACTIVE_ORIENTATTION, false, null);
+
+        // Update the version number
+        ufile.setIntegerProperty(Structure.SECTION_SIMULATION, Structure.VERSION, 221, null);
 
         return ufile;
     }
@@ -419,6 +439,7 @@ public class Configuration {
         readVariable(file, Structure.SECTION_VARIABLE);
         readRelease(file, Structure.SECTION_RELEASE, isSerial);
         readRecruitment(file, Structure.SECTION_RECRUIT, isSerial);
+        readTurtle(file, Structure.SECTION_TURTLE, isSerial);
     }
 
     /**
@@ -738,6 +759,19 @@ public class Configuration {
         }
     }
 
+    private void readTurtle(INIFile file, String section, boolean isSerial) {
+
+        BLN_ACTIVE_ORIENTATION = file.getBooleanProperty(section, Structure.ACTIVE_ORIENTATTION);
+        if (BLN_ACTIVE_ORIENTATION) {
+            ACTIVE_PERIOD = readString(file, section, Structure.ACTIVE_PERIOD, false);
+            SPEED_INTENSITY = readFloat(file, section, Structure.SPEED_INTENSITY, true);
+            SPEED_ACTIVITY = readInteger(file, section, Structure.SPEED_ACTIVITY, true);
+            ORIENTATION = readFloat(file, section, Structure.ORIENTATION, true);
+            ORIENTATION_ACTIVITY = readInteger(file, section, Structure.ORIENTATION_ACTIVITY, true);
+        }
+
+    }
+
     /**
      * Reads the value(s) of the specified property as {@code long}.
      * The method is specially designed for reading parameters that take
@@ -962,6 +996,43 @@ public class Configuration {
         }
 
         return str;
+    }
+
+    /**
+     * Reads the value of the specified property as a {@code String}.
+     *
+     * @param file an INIFile, the configuration file
+     * @param section a String, the section name
+     * @param property a String, the property name
+     * @return a String, the value of the specified property
+     */
+    private String[] readString(INIFile file, String section, String property, boolean isSerial) {
+
+        String[] array = null;
+        String str;
+        if (isSerial) {
+            ArrayList list = new ArrayList();
+            int i = 0;
+            while ((str = file.getStringProperty(section, property + " " + String.valueOf(i))) != null) {
+                list.add(str);
+                i++;
+            }
+            if (list.size() == 0) {
+                throw new NullPointerException("Problem reading property [" + section + "] <" + property + ">");
+            }
+            array = new String[list.size()];
+            for (int n = 0; n < list.size(); n++) {
+                str = (String) list.get(n);
+                array[n] = str;
+            }
+        } else {
+            str = file.getStringProperty(section, property);
+            if (str == null) {
+                throw new NullPointerException("Problem reading property [" + section + "] <" + property + ">");
+            }
+            array = new String[]{str};
+        }
+        return array;
     }
 
     /**
@@ -1227,6 +1298,10 @@ public class Configuration {
         return BLN_HDISP;
     }
 
+    //---------------------------------------------------------
+    public static boolean isActiveOrientation() {
+        return BLN_ACTIVE_ORIENTATION;
+    }
 
     //---------------------------------------------------------
     public static int getTypeRecord() {
@@ -1428,6 +1503,31 @@ public class Configuration {
         return PATH_FILE_DRIFTERS;
     }
 
+    //----------------------------------------------------------
+    public static String getActivePeriod() {
+        return ACTIVE_PERIOD[0];
+    }
+
+    //----------------------------------------------------------
+    public static float[] getSwimmingSpeed() {
+        return SPEED_INTENSITY;
+    }
+
+    //----------------------------------------------------------
+    public static int[] getSwimmingSpeedActivity() {
+        return SPEED_ACTIVITY;
+    }
+
+    //----------------------------------------------------------
+    public static float[] getSwimmingOrientation() {
+        return ORIENTATION;
+    }
+
+    //----------------------------------------------------------
+    public static int[] getSwimmingOrientationActivity() {
+        return ORIENTATION_ACTIVITY;
+    }
+
     //--------------------------------------------------------------------------
     public static String getStrXiDim() {
         return NCField.xiDim.getName(TYPE_MODEL);
@@ -1535,6 +1635,5 @@ public class Configuration {
     public static String getStrKv() {
         return NCField.kv.getName(TYPE_MODEL);
     }
-
     //---------- End of class
 }

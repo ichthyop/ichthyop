@@ -75,6 +75,7 @@ import ichthyop.util.Resources;
 import ichthyop.util.SafeSwingWorker;
 import ichthyop.util.Constant;
 import ichthyop.bio.DVMPattern;
+import ichthyop.core.Turtle;
 import ichthyop.util.FileNameExtensionFilter;
 import java.awt.event.WindowEvent;
 
@@ -197,15 +198,15 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
     /**
      * Current extreme value for particle color range
      */
-    private static float valmin,  valmax;
+    private static float valmin, valmax;
     /**
      * Extreme value for temperature color range
      */
-    private float valmin_tp,  valmax_tp;
+    private float valmin_tp, valmax_tp;
     /**
      * Extreme value for depth color range
      */
-    private float valmin_bathy,  valmax_bathy;
+    private float valmin_bathy, valmax_bathy;
     /**
      * The time arrow read in configuration file (since v2.1)
      */
@@ -216,7 +217,6 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
      * characterizing the display options.
      */
     private static int displayColor = Constant.NONE;
-
     // Common components to SERIAL and SINGLE
     private Dimension windows;
     private JButton btnStart;
@@ -224,9 +224,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
     private JButton btnExit;
     private JPanel toolbar;
     private static StatusBar statusbar;
-    private JMenuItem itemNew,  itemOpen,  itemEdit,  itemPath,  itemExit;
+    private JMenuItem itemNew, itemOpen, itemEdit, itemPath, itemExit;
     private JMenu menuFile;
-
     // Components for SINGLE
     private JPanel singleUI;
     private JCheckBox ckBoxCapture;
@@ -236,14 +235,13 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
     private JLabel lblDate;
     private static IntegerParameter prmRefresh;
     private ReplayPanel viewer;
-    private static JCheckBoxMenuItem itemBgRecruitmentZone,  itemBgReleaseZone;
-    private JCheckBoxMenuItem itemDepthChart,  itemEdgeChart,  itemRecruitChart,  itemLengthChart,  itemDeadChart,  itemStageChart;
-    private JRadioButtonMenuItem itemRdBtnBathy,  itemRdBtnTp;
-    private JRadioButtonMenuItem itemRdBtnZone,  itemRdBtnNoColor;
+    private static JCheckBoxMenuItem itemBgRecruitmentZone, itemBgReleaseZone;
+    private JCheckBoxMenuItem itemDepthChart, itemEdgeChart, itemRecruitChart, itemLengthChart, itemDeadChart, itemStageChart;
+    private JRadioButtonMenuItem itemRdBtnBathy, itemRdBtnTp;
+    private JRadioButtonMenuItem itemRdBtnZone, itemRdBtnNoColor;
     private JMenuItem itemPreferences;
     private JMenu menuSingleUI;
-    private ColorBar colorbarBathy,  colorbarParticle;
-
+    private ColorBar colorbarBathy, colorbarParticle;
     // Components for SERIAL
     private JPanel serialUI;
     private JLabel lblSimulation;
@@ -1089,7 +1087,6 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
     public void windowDeactivated(WindowEvent e) {
     }
 
-
 //////////////////////
 // Getters and setters
 //////////////////////
@@ -1239,10 +1236,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             updateUI();
             (MainFrame.this).setVisible(true);
         }
-
         //----------- End of inner class SetupSwingWorker
     }
-
 
     ////////////////////////////////////////////////////////////////////////////
     /**
@@ -1445,6 +1440,10 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             if (Configuration.isMigration()) {
                 DVMPattern.setCalendar((Calendar) step.getCalendar().clone());
             }
+
+            if (Configuration.isActiveOrientation()) {
+                Turtle.setCalendar((Calendar) step.getCalendar().clone());
+            }
         }
 
         /**
@@ -1494,10 +1493,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             g2.dispose();
             return image;
         }
-
         //----------- End of inner class SingleSwingWorker
     }
-
 
     ////////////////////////////////////////////////////////////////////////////
     /**
@@ -1663,11 +1660,13 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             if (Configuration.isMigration()) {
                 DVMPattern.setCalendar((Calendar) step.getCalendar().clone());
             }
-        }
 
+            if (Configuration.isActiveOrientation()) {
+                Turtle.setCalendar((Calendar) step.getCalendar().clone());
+            }
+        }
         //----------- End of inner class SerialSwingWorker
     }
-
 
     ////////////////////////////////////////////////////////////////////////////
     /**
@@ -1676,10 +1675,10 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
      */
     public class PreferenceFrame extends JFrame implements ActionListener {
 
-        private  String lblMin,   lblMax ;
+        private String lblMin, lblMax;
         private String strUnit;
-        private  FloatParameter prmMin,   prmMax ;
-        private  JButton btnOk,   btnCancel ;
+        private FloatParameter prmMin, prmMax;
+        private JButton btnOk, btnCancel;
         /**
          * <code>true</code> to set up the range of particle depth, false to
          * set up the range of sea water temperature at particle location.
@@ -1792,9 +1791,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
                 this.dispose();
             }
         }
-
         //---------- Enf of inner class Preference frame
     }
-
     //---------- End of class
 }

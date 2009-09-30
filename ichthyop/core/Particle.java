@@ -43,7 +43,6 @@ public class Particle extends RhoPoint implements IParticle {
     double, double, double)
      */
     private final static int DROP_MAX = 2000;
-
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -92,7 +91,7 @@ public class Particle extends RhoPoint implements IParticle {
     /**
      * Particle is alive or not.
      */
-    private boolean living;
+    boolean living;
     /**
      * Information about particle death.
      * <ul>
@@ -138,17 +137,21 @@ public class Particle extends RhoPoint implements IParticle {
      * Model time step [second]. Declared static because it is common
      * to all Particle objects.
      */
-    private static double dt;
+    static double dt;
     /**
      * Lethal water temperature when growth is not simulated.
      * Declared as static because it is common to all Particle objects.
      */
     private static float lethal_tp;
-    private static boolean FLAG_GROWTH,  FLAG_LETHAL_TP,  FLAG_ISODEPTH,  FLAG_BUOYANCY,  FLAG_DISPLAY_TP,  FLAG_VDISP,  FLAG_HDISP,  FLAG_MIGRATION,  FLAG_PLANKTON,  FLAG_RECRUITMENT;
+    static boolean FLAG_GROWTH, FLAG_LETHAL_TP, FLAG_ISODEPTH, FLAG_BUOYANCY, FLAG_DISPLAY_TP, FLAG_VDISP, FLAG_HDISP, FLAG_MIGRATION, FLAG_PLANKTON, FLAG_RECRUITMENT;
 
 ///////////////
 // Constructors
 ///////////////
+    public Particle() {
+        super(true);
+    }
+
     /**
      * Constructs a new particle by random
      * release within the volume delimited by (xmin, ymin), (xmax, ymax)
@@ -399,7 +402,7 @@ public class Particle extends RhoPoint implements IParticle {
      * @see ichthyop.io.Dataset#advectRk4() for details about the Runge Kutta 4
      * advection scheme.
      */
-    private void advectForward(double time) throws
+    void advectForward(double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt = (Configuration.getScheme() == Constant.EULER)
@@ -428,7 +431,7 @@ public class Particle extends RhoPoint implements IParticle {
      * @see ichthyop.io.Dataset#advectRk4() for details about the Runge Kutta 4
      * advection scheme.
      */
-    private void advectBackward(double time) throws
+    void advectBackward(double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt, pgrid;
@@ -512,7 +515,7 @@ public class Particle extends RhoPoint implements IParticle {
      * @see util.Constant for details about the labels characterizing the death
      * causes.
      */
-    private void die(int dead) {
+    void die(int dead) {
 
         this.dead = dead;
         living = false;
@@ -577,7 +580,7 @@ public class Particle extends RhoPoint implements IParticle {
      * @see ichthyop.bio.DVMPattern for details about the Diel Vertical
      * Migration.
      */
-    private void migrate(double time) {
+    void migrate(double time) {
 
         /** Ensures larva stage */
         boolean isLarva = FLAG_GROWTH
@@ -605,7 +608,7 @@ public class Particle extends RhoPoint implements IParticle {
      * @see ichthyop.bio.BuoyancyScheme for details about the buoyancy scheme.
      *
      */
-    private void addBuoyancy(double time) {
+    void addBuoyancy(double time) {
 
         /** Ensures egg stage */
         if (FLAG_GROWTH

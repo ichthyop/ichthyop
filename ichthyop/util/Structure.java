@@ -251,6 +251,17 @@ public interface Structure {
 
     final public static String LETHAL_TP_LARVA = "temperature larva";
 
+    /////////
+    // TURTLE
+    /////////
+    final public static String SECTION_TURTLE = "TURTLE";
+    final public static String ACTIVE_ORIENTATTION = "active orientation";
+    final public static String ACTIVE_PERIOD = "active period";
+    final public static String SPEED_INTENSITY = "speed";
+    final public static String SPEED_ACTIVITY = "speed activity";
+    final public static String ORIENTATION = "orientation";
+    final public static String ORIENTATION_ACTIVITY = "orientation activity";
+
     ///////
     // ZONE
     ///////
