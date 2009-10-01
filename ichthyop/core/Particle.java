@@ -467,9 +467,17 @@ public class Particle extends RhoPoint implements IParticle {
 
         int nZone = -1;
         boolean foundZone = false;
-        Iterator iter = typeZone == Constant.RELEASE
-                ? Configuration.getReleaseZones().iterator()
-                : Configuration.getRecruitmentZones().iterator();
+        Iterator iter = null;
+        switch (typeZone) {
+            case Constant.RELEASE:
+                iter = Configuration.getReleaseZones().iterator();
+                break;
+            case Constant.RECRUITMENT:
+                iter = Configuration.getRecruitmentZones().iterator();
+                break;
+            case Constant.ORIENTATION:
+                iter = Configuration.getOrientationZones().iterator();
+        }
         while (!foundZone && iter.hasNext()) {
             Zone znTmp = (Zone) iter.next();
             if (znTmp.isXYInZone(getX(), getY())) {

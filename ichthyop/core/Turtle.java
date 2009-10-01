@@ -112,19 +112,24 @@ public class Turtle extends Particle {
 
     private void swimTurtle(double time) {
 
+        // check wether it is active period
         if (isActivePeriod(time)) {
             if (!isActive) {
                 isActive = true;
             }
-            // go swim !!
-            double speed = getSpeed();
-            double orientation = getOrientation();
-            //System.out.println(speed + " " + orientation);
-            double newLon = getLon() + getdlon(speed, orientation);
-            double newLat = getLat() + getdlat(speed, orientation);
-            //System.out.println(getLon() + " " + newLon + " - " + getLat() + " " + newLat);
-            this.setLLD(newLon, newLat, getDepth());
-            geog2Grid();
+            // check wether the turtle is located in an orientation zone
+            //System.out.println(getNumZone(Constant.ORIENTATION));
+            if (getNumZone(Constant.ORIENTATION) != -1) {
+                // go swim !!
+                double speed = getSpeed();
+                double orientation = getOrientation();
+                //System.out.println(speed + " " + orientation);
+                double newLon = getLon() + getdlon(speed, orientation);
+                double newLat = getLat() + getdlat(speed, orientation);
+                //System.out.println(getLon() + " " + newLon + " - " + getLat() + " " + newLat);
+                this.setLLD(newLon, newLat, getDepth());
+                geog2Grid();
+            }
         } else {
             if (isActive) {
                 resetActivity();
