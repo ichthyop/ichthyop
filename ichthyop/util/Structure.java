@@ -270,8 +270,10 @@ public interface Structure {
     final public static String MAN_RELEASE_ZONE = "Definition of the release zone";
 
     final public static String SECTION_RECRUITMENT_ZONE = "RECRUITMENT ZONE ";
-    final public static String MAN_RECRUITMENT_ZONE =
-            "Definition of the recruitment zone";
+    final public static String MAN_RECRUITMENT_ZONE = "Definition of the recruitment zone";
+
+    final public static String SECTION_ORIENTATION_ZONE = "ORIENTATION ZONE ";
+    final public static String MAN_ORIENTATION_ZONE = "Definition of the orientation zone";
 
     final public static String LON_ZONE = "lonP";
 

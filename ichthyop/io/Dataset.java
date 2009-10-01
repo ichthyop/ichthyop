@@ -2041,8 +2041,7 @@ public abstract class Dataset {
                                          - 2.d *
                                          Math.cos(Math.PI * lat1 / 180.d) *
                                          Math.cos(Math.PI * lat2 / 180.d) *
-                                         Math.cos(Math.PI * (lon1 - lon2) /
-                                                  180.d)
+                                         Math.cos(Math.PI * (lon1 - lon2) / 180.d)
                                          - 2.d *
                                          Math.sin(Math.PI * lat1 / 180.d) *
                                          Math.sin(Math.PI * lat2 / 180.d));

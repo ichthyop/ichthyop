@@ -7,8 +7,8 @@ package ichthyop.core;
 import ichthyop.io.Configuration;
 import ichthyop.io.Dataset;
 import ichthyop.util.Constant;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  *
@@ -19,6 +19,10 @@ public class Turtle extends Particle {
     private static int startHour, startMinute, endHour, endMinute;
     private static Calendar now, startTime, endTime;
     private static boolean FLAG_ACTIVE_ORIENTATION;
+    private int durationActivePeriod;
+    private int[] durationSwimmingSpeed, durationSwimmingOrientation;
+    private int[] currentSpeedActivity, currentOrientationActivity;
+    private int[] speedActivity, orientationActivity;
 
     public Turtle(int index, boolean is3D, double xmin, double xmax, double ymin, double ymax, double depthMin, double depthMax) {
         super(index, is3D, xmin, xmax, ymin, ymax, depthMin, depthMax);
@@ -44,7 +48,38 @@ public class Turtle extends Particle {
             startMinute = Integer.valueOf(activePeriod[0].split(":")[1]);
             endHour = Integer.valueOf(activePeriod[1].split(":")[0]);
             endMinute = Integer.valueOf(activePeriod[1].split(":")[1]);
+            durationActivePeriod = computeActivePeriodDuration();
+            speedActivity = Configuration.getSwimmingSpeedActivity();
+            orientationActivity = Configuration.getSwimmingOrientationActivity();
+            
+            durationSwimmingSpeed = new int[speedActivity.length];
+            for (int i = 0; i < speedActivity.length; i++) {
+                durationSwimmingSpeed[i] = (int) ((speedActivity[i] / 100.f) * durationActivePeriod);
+            }
+
+            durationSwimmingOrientation = new int[orientationActivity.length + 1];
+            int durationTotalOrientation = 0;
+            for (int i = 0; i < orientationActivity.length; i++) {
+                durationSwimmingOrientation[i] = (int) ((orientationActivity[i] / 100.f) * durationActivePeriod);
+                durationTotalOrientation += durationSwimmingOrientation[i];
+            }
+            durationSwimmingOrientation[orientationActivity.length] = Math.max(0, durationActivePeriod - durationTotalOrientation);
+
+            resetActivity();
+            
         }
+    }
+
+    private void resetActivity() {
+        currentSpeedActivity = new int[durationSwimmingSpeed.length];
+        currentOrientationActivity = new int[durationSwimmingOrientation.length];
+    }
+
+    private int computeActivePeriodDuration() {
+        GregorianCalendar start, end;
+        start = new GregorianCalendar(1982, 05, 13, startHour, startMinute);
+        end = new GregorianCalendar(1982, 05, 13, endHour, endMinute);
+        return (int) (end.getTimeInMillis() - start.getTimeInMillis());
     }
 
     @Override
@@ -97,6 +132,23 @@ public class Turtle extends Particle {
         if (isActivePeriod(time)) {
             // go swim !!
         }
+    }
+
+    private double getdlat(double speed, double direction) {
+
+        double dlat = 0.d;
+        double alpha = Math.PI * (5.d / 2.d - direction / 180.d);
+        dlat = speed * Math.sin(alpha) / Constant.ONE_DEG_LATITUDE_IN_METER;
+        return dlat;
+    }
+
+    private double getdlon(double speed, double direction) {
+
+        double dlon = 0.d;
+        double alpha = Math.PI * (5.d / 2.d - direction / 180.d);
+        double one_deg_lon_meter = Constant.ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * getLat() / 180.d);
+        dlon = speed * Math.cos(alpha) / one_deg_lon_meter;
+        return dlon;
     }
 
     public boolean isActivePeriod(double time) {

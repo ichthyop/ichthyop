@@ -123,6 +123,7 @@ public class Configuration {
     private static int[] SPEED_ACTIVITY;
     private static float[] ORIENTATION;
     private static int[] ORIENTATION_ACTIVITY;
+    private static ArrayList<Zone> listOrientationZone;
 
 //////////////
 // Constructor
@@ -769,6 +770,7 @@ public class Configuration {
             ORIENTATION = readFloat(file, section, Structure.ORIENTATION, true);
             ORIENTATION_ACTIVITY = readInteger(file, section, Structure.ORIENTATION_ACTIVITY, true);
         }
+        listOrientationZone = readZone(file, Constant.ORIENTATION);
 
     }
 
@@ -1053,9 +1055,17 @@ public class Configuration {
         int colorR, colorG, colorB;
         int numberZones = 0;
 
-        String prefix = (type == Constant.RELEASE)
-                ? Structure.SECTION_RELEASE_ZONE
-                : Structure.SECTION_RECRUITMENT_ZONE;
+        String prefix = "";
+        switch (type) {
+            case Constant.RELEASE:
+                prefix = Structure.SECTION_RELEASE_ZONE;
+                break;
+            case Constant.RECRUITMENT:
+                prefix = Structure.SECTION_RECRUITMENT_ZONE;
+                break;
+            case Constant.ORIENTATION:
+                prefix = Structure.SECTION_ORIENTATION_ZONE;
+        }
 
         String[] sections = file.getAllSectionNames();
         for (String section : sections) {
@@ -1482,6 +1492,11 @@ public class Configuration {
     //---------------------------------------------------------
     public static ArrayList<Zone> getReleaseZones() {
         return listReleaseZone;
+    }
+
+    //---------------------------------------------------------
+    public static ArrayList<Zone> getOrientationZones() {
+        return listOrientationZone;
     }
 
     //----------------------------------------------------------
