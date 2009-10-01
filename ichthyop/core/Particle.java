@@ -764,14 +764,15 @@ public class Particle extends RhoPoint implements IParticle {
      */
     private void printErr(Throwable t) {
 
-        StackTraceElement[] stackTrace = t.getStackTrace();
+        /*StackTraceElement[] stackTrace = t.getStackTrace();
         StringBuffer message = new StringBuffer(t.getClass().getSimpleName());
         message.append(" : ");
         message.append(stackTrace[0].toString());
         message.append('\n');
         message.append("  --> ");
         message.append(t.getMessage());
-        System.err.println(message.toString());
+        System.err.println(message.toString());*/
+        t.printStackTrace();
     }
 
 //////////

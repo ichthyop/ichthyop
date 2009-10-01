@@ -23,6 +23,8 @@ public class Turtle extends Particle {
     private int[] durationSwimmingSpeed, durationSwimmingOrientation;
     private int[] currentSpeedActivity, currentOrientationActivity;
     private int[] speedActivity, orientationActivity;
+    private float[] swimmingSpeed, swimmingOrientation;
+    private boolean isActive;
 
     public Turtle(int index, boolean is3D, double xmin, double xmax, double ymin, double ymax, double depthMin, double depthMax) {
         super(index, is3D, xmin, xmax, ymin, ymax, depthMin, depthMax);
@@ -40,7 +42,6 @@ public class Turtle extends Particle {
     void init() {
 
         super.init();
-
         FLAG_ACTIVE_ORIENTATION = Configuration.isActiveOrientation();
         if (FLAG_ACTIVE_ORIENTATION) {
             String activePeriod[] = Configuration.getActivePeriod().split(" ");
@@ -51,7 +52,9 @@ public class Turtle extends Particle {
             durationActivePeriod = computeActivePeriodDuration();
             speedActivity = Configuration.getSwimmingSpeedActivity();
             orientationActivity = Configuration.getSwimmingOrientationActivity();
-            
+            swimmingSpeed = Configuration.getSwimmingSpeed();
+            swimmingOrientation = Configuration.getSwimmingOrientation();
+
             durationSwimmingSpeed = new int[speedActivity.length];
             for (int i = 0; i < speedActivity.length; i++) {
                 durationSwimmingSpeed[i] = (int) ((speedActivity[i] / 100.f) * durationActivePeriod);
@@ -64,13 +67,17 @@ public class Turtle extends Particle {
                 durationTotalOrientation += durationSwimmingOrientation[i];
             }
             durationSwimmingOrientation[orientationActivity.length] = Math.max(0, durationActivePeriod - durationTotalOrientation);
+            /*for (int i : durationSwimmingOrientation) {
+            System.out.println(i + " / " + durationActivePeriod);
+            }*/
 
             resetActivity();
-            
+
         }
     }
 
     private void resetActivity() {
+        isActive = false;
         currentSpeedActivity = new int[durationSwimmingSpeed.length];
         currentOrientationActivity = new int[durationSwimmingOrientation.length];
     }
@@ -86,19 +93,12 @@ public class Turtle extends Particle {
     void move(double time) throws ArrayIndexOutOfBoundsException {
 
         /** Advection diffusion */
-        if (dt >= 0) {
-            advectForward(time);
-        } else {
-            advectBackward(time);
+        advectForward(time);
+        grid2Geog();
+        if (FLAG_ACTIVE_ORIENTATION) {
+            swimTurtle(time);
         }
 
-        if (FLAG_HDISP) {
-            increment(data.getHDispersion(getPGrid(), dt));
-        }
-
-        if (FLAG_VDISP) {
-            increment(data.getVDispersion(getPGrid(), time, dt));
-        }
 
         /** Test if particules is living */
         if (isOnEdge(Dataset.get_nx(), Dataset.get_ny())) {
@@ -106,31 +106,54 @@ public class Turtle extends Particle {
         } else if (!Dataset.isInWater(this)) {
             die(Constant.DEAD_BEACH);
         }
-
-        /** buoyancy */
-        if (FLAG_BUOYANCY && living) {
-            addBuoyancy(time);
-        }
-
-        /** vertical migration */
-        if (FLAG_MIGRATION && living) {
-            migrate(time);
-        }
-
-        if (FLAG_ACTIVE_ORIENTATION) {
-            swimTurtle(time);
-        }
-
-        /** Transform (x, y, z) into (lon, lat, depth) */
-        if (living) {
-            grid2Geog();
-        }
     }
 
     private void swimTurtle(double time) {
 
         if (isActivePeriod(time)) {
+            if (!isActive) {
+                isActive = true;
+            }
             // go swim !!
+            double speed = getSpeed();
+            double orientation = getOrientation();
+            //System.out.println(speed + " " + orientation);
+            double newLon = getLon() + getdlon(speed, orientation);
+            double newLat = getLat() + getdlat(speed, orientation);
+            //System.out.println(getLon() + " " + newLon + " - " + getLat() + " " + newLat);
+            this.setLLD(newLon, newLat, getDepth());
+            geog2Grid();
+        } else {
+            if (isActive) {
+                resetActivity();
+            }
+        }
+    }
+
+    private double getSpeed() {
+
+        int rank = (int) (Math.random() * durationSwimmingSpeed.length);
+        //System.out.println("particle " + index() + " " + rank);
+        if (currentSpeedActivity[rank] < durationSwimmingSpeed[rank]) {
+            currentSpeedActivity[rank] += dt;
+            return swimmingSpeed[rank];
+        } else {
+            return getSpeed();
+        }
+    }
+
+    private double getOrientation() {
+
+        int rank = (int) (Math.random() * durationSwimmingOrientation.length);
+
+        if (currentOrientationActivity[rank] < durationSwimmingOrientation[rank]) {
+            if (rank < swimmingOrientation.length) {
+                return swimmingOrientation[rank];
+            } else {
+                return Math.random() * 360.d;
+            }
+        } else {
+            return getOrientation();
         }
     }
 
@@ -138,7 +161,15 @@ public class Turtle extends Particle {
 
         double dlat = 0.d;
         double alpha = Math.PI * (5.d / 2.d - direction / 180.d);
-        dlat = speed * Math.sin(alpha) / Constant.ONE_DEG_LATITUDE_IN_METER;
+        double sin = Math.sin(alpha);
+        if (Math.abs(sin) < 1E-8) {
+            sin = 0.d;
+        }
+        dlat = speed * sin / Constant.ONE_DEG_LATITUDE_IN_METER * dt;
+        /*System.out.println(speed + " " + direction);
+        System.out.println("sin(alpha): " + sin);
+        System.out.println("dlat(m): " + (speed * sin) + " dlat(°): " + dlat + " lat: " + (float) getLat());*/
+        //System.out.println("dlat " + (float) dlat + " " + direction);
         return dlat;
     }
 
@@ -147,7 +178,15 @@ public class Turtle extends Particle {
         double dlon = 0.d;
         double alpha = Math.PI * (5.d / 2.d - direction / 180.d);
         double one_deg_lon_meter = Constant.ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * getLat() / 180.d);
-        dlon = speed * Math.cos(alpha) / one_deg_lon_meter;
+        double cos = Math.cos(alpha);
+        if (Math.abs(cos) < 1E-8) {
+            cos = 0.d;
+        }
+        dlon = speed * cos / one_deg_lon_meter * dt;
+        /*System.out.println(speed + " " + direction);
+        System.out.println("cos(alpha): " + cos);
+        System.out.println("dlon(m): " + (speed * cos) + " dlon(°): " + dlon + " lon: " + (float) getLon());*/
+        //System.out.println("dlon " + (float) dlon);
         return dlon;
     }
 
@@ -160,7 +199,7 @@ public class Turtle extends Particle {
         syncCalendars();
         //SimpleDateFormat dtf = new SimpleDateFormat("HH:mm");
         //System.out.println(dtf.format(startTime.getTime()) + " " + dtf.format(now.getTime()) + " " + dtf.format(endTime.getTime()) + " " + (now.after(startTime) && now.before(endTime)));
-        return now.after(startTime) && now.before(endTime);
+        return (now.equals(startTime) || now.after(startTime)) && now.before(endTime);
     }
 
     private void syncCalendars() {

@@ -149,7 +149,7 @@ public interface Constant {
     public static final String OUTPUT_FILENAME_SERIAL = "serial_simu";
 
     // Geographic
-    public static final double ONE_DEG_LATITUDE_IN_METER = 11138.d;
+    public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
 ///////////////////////////
 // ROMS default field names
