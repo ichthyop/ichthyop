@@ -235,7 +235,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
     private JLabel lblDate;
     private static IntegerParameter prmRefresh;
     private ReplayPanel viewer;
-    private static JCheckBoxMenuItem itemBgRecruitmentZone, itemBgReleaseZone;
+    private static JCheckBoxMenuItem itemBgRecruitmentZone, itemBgReleaseZone, itemBgOrientationZone;
     private JCheckBoxMenuItem itemDepthChart, itemEdgeChart, itemRecruitChart, itemLengthChart, itemDeadChart, itemStageChart;
     private JRadioButtonMenuItem itemRdBtnBathy, itemRdBtnTp;
     private JRadioButtonMenuItem itemRdBtnZone, itemRdBtnNoColor;
@@ -580,6 +580,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         JMenu menu = new JMenu(Resources.MENU_DISPLAY);
         itemBgReleaseZone = new JCheckBoxMenuItem(Resources.MENU_DISPLAY_BG_S, false);
         itemBgRecruitmentZone = new JCheckBoxMenuItem(Resources.MENU_DISPLAY_BG_R, false);
+        itemBgOrientationZone = new JCheckBoxMenuItem(Resources.MENU_DISPLAY_BG_O, false);
         itemDepthChart = new JCheckBoxMenuItem(Resources.MENU_CHART_DEPTH, false);
         itemEdgeChart = new JCheckBoxMenuItem(Resources.MENU_CHART_EDGE, false);
         itemRecruitChart = new JCheckBoxMenuItem(Resources.MENU_CHART_RECRUIT, false);
@@ -600,6 +601,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         itemPreferences = new JMenuItem(Resources.MENU_DISPLAY_PREFERENCE);
         menu.add(itemBgReleaseZone);
         menu.add(itemBgRecruitmentZone);
+        menu.add(itemBgOrientationZone);
         menu.addSeparator();
         menu.add(itemDepthChart);
         menu.add(itemEdgeChart);
@@ -617,6 +619,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
 
         itemBgReleaseZone.setEnabled(false);
         itemBgRecruitmentZone.setEnabled(false);
+        itemBgOrientationZone.setEnabled(false);
         itemPreferences.setEnabled(false);
 
         itemDepthChart.setEnabled(false);
@@ -644,6 +647,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         itemPreferences.addActionListener(this);
         itemBgReleaseZone.addActionListener(this);
         itemBgRecruitmentZone.addActionListener(this);
+        itemBgOrientationZone.addActionListener(this);
 
         valmin_tp = Constant.TP_MIN;
         valmax_tp = Constant.TP_MAX;
@@ -706,6 +710,12 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         }
         itemRecruitChart.setEnabled(bln);
         itemBgRecruitmentZone.setEnabled(bln);
+
+
+        if (!Configuration.isActiveOrientation()) {
+            itemBgOrientationZone.setSelected(false);
+        }
+        itemBgOrientationZone.setEnabled(Configuration.isActiveOrientation());
 
         bln = Configuration.isGrowth();
         if (!bln) {
@@ -966,7 +976,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             }
         }
 
-        if (source == itemBgReleaseZone || source == itemBgRecruitmentZone) {
+        if (source == itemBgReleaseZone || source == itemBgRecruitmentZone || source == itemBgOrientationZone) {
             simulationUI.repaintBackground();
         }
 
@@ -1112,6 +1122,14 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
      */
     public static boolean isBgRecruitmentZone() {
         return itemBgRecruitmentZone.isSelected();
+    }
+
+    /**
+     * Determines whether the menu item "display orientation zones" is selected
+     * @return <code>true</code> if selected, <code>false</code> otherwise.
+     */
+    public static boolean isBgOrientationZone() {
+        return itemBgOrientationZone.isSelected();
     }
 
     /**

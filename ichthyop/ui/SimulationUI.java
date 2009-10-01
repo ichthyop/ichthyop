@@ -303,6 +303,9 @@ public class SimulationUI extends JPanel {
                 listZones.addAll(Configuration.
                                  getRecruitmentZones());
             }
+            if (MainFrame.isBgOrientationZone()) {
+                listZones.addAll(Configuration.getOrientationZones());
+            }
             Iterator<Zone> iter = listZones.iterator();
             while(iter.hasNext()) {
                 iter.next().geo2Grid();

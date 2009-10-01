@@ -94,6 +94,8 @@ public class Resources {
 
     final public static String MENU_DISPLAY_BG_R = "Display recruitment zones";
 
+    final public static String MENU_DISPLAY_BG_O = "Display orientation zones";
+
     final public static String MENU_CHART_DEPTH = "Chart - Depth distribution";
 
     final public static String MENU_CHART_EDGE = "Chart - Out of domain";
