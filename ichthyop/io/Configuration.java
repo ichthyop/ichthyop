@@ -60,6 +60,7 @@ public class Configuration {
     ////////////////////
     // Section TRANSPORT
     ////////////////////
+    private static boolean BLN_ADVECTION;
     private static int DIM_SIMU;
     private static boolean BLN_VDISP;
     private static boolean BLN_HDISP;
@@ -378,6 +379,9 @@ public class Configuration {
 
         INIFile ufile = file;
 
+        // ADD property [TRANSPORT] <advection>
+        ufile.setBooleanProperty(Structure.SECTION_TRANSPORT, Structure.ADVECTION, true, null);
+
         // Add [TURTLE] section
         ufile.addSection(Structure.SECTION_TURTLE, null);
 
@@ -518,6 +522,7 @@ public class Configuration {
 
         DIM_SIMU = readInteger(file, section, Structure.DIMENSION);
 
+        BLN_ADVECTION = file.getBooleanProperty(section, Structure.ADVECTION);
         BLN_HDISP = file.getBooleanProperty(section, Structure.HDISP);
         BLN_VDISP = file.getBooleanProperty(section, Structure.VDISP);
         BLN_BUOYANCY = file.getBooleanProperty(section, Structure.BUOYANCY);
@@ -1306,6 +1311,11 @@ public class Configuration {
     //---------------------------------------------------------
     public static boolean isHDisp() {
         return BLN_HDISP;
+    }
+
+    //---------------------------------------------------------
+    public static boolean isAdvection() {
+        return BLN_ADVECTION;
     }
 
     //---------------------------------------------------------

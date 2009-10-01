@@ -18,7 +18,7 @@ public class Turtle extends Particle {
 
     private static int startHour, startMinute, endHour, endMinute;
     private static Calendar now, startTime, endTime;
-    private static boolean FLAG_ACTIVE_ORIENTATION;
+    private static boolean FLAG_ACTIVE_ORIENTATION, FLAG_ADVECTION;
     private int durationActivePeriod;
     private int[] durationSwimmingSpeed, durationSwimmingOrientation;
     private int[] currentSpeedActivity, currentOrientationActivity;
@@ -42,6 +42,7 @@ public class Turtle extends Particle {
     void init() {
 
         super.init();
+        FLAG_ADVECTION = Configuration.isAdvection();
         FLAG_ACTIVE_ORIENTATION = Configuration.isActiveOrientation();
         if (FLAG_ACTIVE_ORIENTATION) {
             String activePeriod[] = Configuration.getActivePeriod().split(" ");
@@ -93,12 +94,13 @@ public class Turtle extends Particle {
     void move(double time) throws ArrayIndexOutOfBoundsException {
 
         /** Advection diffusion */
-        advectForward(time);
-        grid2Geog();
+        if (FLAG_ADVECTION) {
+            advectForward(time);
+            grid2Geog();
+        }
         if (FLAG_ACTIVE_ORIENTATION) {
             swimTurtle(time);
         }
-
 
         /** Test if particules is living */
         if (isOnEdge(Dataset.get_nx(), Dataset.get_ny())) {

@@ -124,6 +124,8 @@ public interface Structure {
 
     final public static String VDISP = "vertical dispersion";
 
+    final public static String ADVECTION = "advection";
+
 
     ///////
     // TIME
