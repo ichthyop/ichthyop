@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class PropertyManager implements IPropertyManager {
 
-    private static final Logger logger = Logger.getLogger(ParameterManager.class.getName());
+    private static final Logger logger = Logger.getLogger(PropertyManager.class.getName());
     private final Class myClass;
     private final Class icfileClass = fr.ird.ichthyop.io.ICFile.class;
     // Resource bundle for internationalized and accessible text

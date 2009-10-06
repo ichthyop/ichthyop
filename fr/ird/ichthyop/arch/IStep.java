@@ -15,6 +15,8 @@ public interface IStep extends Cloneable {
 
     public long getTime();
 
+    public long get_tO();
+
     public int get_dt();
 
     public long getTransportDuration();

@@ -18,6 +18,7 @@ import fr.ird.ichthyop.arch.IParameterManager;
 import fr.ird.ichthyop.arch.IPopulation;
 import fr.ird.ichthyop.arch.IPropertyManager;
 import fr.ird.ichthyop.arch.IStep;
+import fr.ird.ichthyop.manager.DatasetManager;
 import fr.ird.ichthyop.manager.PropertyManager;
 
 /**
@@ -37,7 +38,7 @@ public class Simulation implements ISimulation {
     }
 
     public IDataset getDataset() {
-        return null;
+        return DatasetManager.getInstance().getDataset();
     }
 
     public IStep getStep() {

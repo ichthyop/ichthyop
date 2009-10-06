@@ -4,11 +4,15 @@
  */
 package fr.ird.ichthyop.arch;
 
+import fr.ird.ichthyop.NextStepListener;
+
 /**
  *
  * @author pverley
  */
-public interface IDataset {
+public interface IDataset extends NextStepListener {
+
+    public void setUp();
 
     //public double[] geo2Grid(double lon, double lat);
     public double[] lonlat2xy(double lon, double lat);

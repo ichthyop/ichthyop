@@ -13,7 +13,7 @@ import javax.swing.event.EventListenerList;
  *
  * @author pverley
  */
-public class ReleaseSchedule implements ISimulationAccessor {
+public class ReleaseSchedule implements ISimulationAccessor, NextStepListener {
 
     private final static ReleaseSchedule releaseSchedule = new ReleaseSchedule();
     /** Stores time of the release events */
@@ -51,19 +51,6 @@ public class ReleaseSchedule implements ISimulationAccessor {
             i++;
         //Logger.getLogger(ReleaseSchedule.class.getName()).log(Level.CONFIG, "Number release events: " + i);
         return i;
-    }
-
-    public void step() {
-
-        if (!isAllReleased) {
-            long time = getSimulation().getStep().getTime();
-
-            while (!isAllReleased && timeEvent[indexEvent] >= time && timeEvent[indexEvent] < (time + getSimulation().getStep().get_dt())) {
-                fireReleaseTriggered();
-                indexEvent++;
-                isAllReleased = indexEvent >= timeEvent.length;
-            }
-        }
     }
 
     public ISimulation getSimulation() {
@@ -108,5 +95,18 @@ public class ReleaseSchedule implements ISimulationAccessor {
 
     public long getReleaseDuration() {
         return timeEvent[getNbReleaseEvents() - 1] - timeEvent[0];
+    }
+
+    public void nextStepTriggered(NextStepEvent e) {
+
+        if (!isAllReleased) {
+            long time = e.getSource().getTime();
+
+            while (!isAllReleased && timeEvent[indexEvent] >= time && timeEvent[indexEvent] < (time + e.getSource().get_dt())) {
+                fireReleaseTriggered();
+                indexEvent++;
+                isAllReleased = indexEvent >= timeEvent.length;
+            }
+        }
     }
 }

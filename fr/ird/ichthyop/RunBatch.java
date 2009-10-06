@@ -24,7 +24,7 @@ public class RunBatch implements Runnable, ISimulationAccessor {
             File file = new File(path);
             if (file.exists()) {
                 ICFile.setFile(file);
-                //setUp();
+                setUp();
             } else {
                 throw new IOException("Configuration file not found");
             }
@@ -40,6 +40,7 @@ public class RunBatch implements Runnable, ISimulationAccessor {
      * @see inner class SetupSwingWorker
      */
     public void setUp() throws Exception {
+        getSimulation().getDataset().setUp();
     }
 
     public void run() {

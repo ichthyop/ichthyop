@@ -50,8 +50,6 @@ public class Population extends HashSet implements IPopulation, ISimulationAcces
 
     public void step() {
 
-        getSimulation().getReleaseManager().getSchedule().step();
-
         Iterator<IBasicParticle> iter = iterator();
         IBasicParticle particle;
         while (iter.hasNext()) {

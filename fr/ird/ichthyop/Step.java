@@ -1,6 +1,8 @@
 package fr.ird.ichthyop;
 
 /** import java.text */
+import fr.ichthyop.calendar.Calendar1900;
+import fr.ichthyop.calendar.ClimatoCalendar;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.arch.IStep;
@@ -8,6 +10,7 @@ import java.text.SimpleDateFormat;
 
 /** import java.util */
 import java.util.Calendar;
+import javax.swing.event.EventListenerList;
 
 /**
  * The class handles the march of the simulation throught time. It deals with
@@ -89,12 +92,15 @@ public class Step implements IStep, ISimulationAccessor {
      * The simple date format parses and formats dates in human readable format.
      */
     private SimpleDateFormat dateFormat;
+    private EventListenerList listeners = new EventListenerList();
 
 ///////////////
 // Constructors
 ///////////////
     Step() {
         loadParameters();
+        addNextStepListener(getSimulation().getReleaseManager().getSchedule());
+        addNextStepListener(getSimulation().getDataset());
     }
 
 ////////////////////////////
@@ -104,20 +110,31 @@ public class Step implements IStep, ISimulationAccessor {
         return step;
     }
 
-    private void loadParameters() {
-        dt = Integer.valueOf(getParameter("app.time", "time_step"));
-        boolean isForward = getParameter("app.time", "time_arrow").matches("forward");
-        if (!isForward) dt *= -1;
-        t0 = Long.valueOf(getParameter("app.time", "initial_time"));
-        transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
-        simuDuration = transportDuration + getSimulation().getReleaseManager().getSchedule().getReleaseDuration();
-        //calendar = ;
+    public void init() {
 
         i_step = 0;
         time = t0;
         nb_steps = (int) (simuDuration / dt);
         cpu_start = System.currentTimeMillis();
+        fireNextStepTriggered();
+    }
 
+    private void loadParameters() {
+        dt = Integer.valueOf(getParameter("app.time", "time_step"));
+        boolean isForward = getParameter("app.time", "time_arrow").matches("forward");
+        if (!isForward) {
+            dt *= -1;
+        }
+        t0 = Long.valueOf(getParameter("app.time", "initial_time"));
+        transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
+        simuDuration = transportDuration + getSimulation().getReleaseManager().getSchedule().getReleaseDuration();
+        calendar = new ClimatoCalendar();
+        calendar.setTimeInMillis(t0 * 1000L);
+        dateFormat = new SimpleDateFormat(
+                (calendar.getClass() == Calendar1900.class)
+                ? "yyyy/MM/dd HH:mm:ss"
+                : "yy/MM/dd HH:mm:ss");
+        dateFormat.setCalendar(calendar);
     }
 
     private String getParameter(String blockName, String key) {
@@ -138,6 +155,7 @@ public class Step implements IStep, ISimulationAccessor {
             i_step++;
             //calendar.setTimeInMillis(time * 1000L);
             cpu_now = System.currentTimeMillis();
+            fireNextStepTriggered();
             return true;
         }
         return false;
@@ -249,6 +267,10 @@ public class Step implements IStep, ISimulationAccessor {
         return time;
     }
 
+    public long get_tO() {
+        return t0;
+    }
+
     /**
      * Gets the calendar used for time management
      * @return the Calendar of the simulation
@@ -279,15 +301,37 @@ public class Step implements IStep, ISimulationAccessor {
 
     public void next() {
         /*if (this.hasToRefresh()) {
-            //fireRefreshUIEvent();
+        //fireRefreshUIEvent();
         }
         if (this.hasToRecord()) {
-            //fireRecordEvent();
+        //fireRecordEvent();
         }*/
     }
 
     public ISimulation getSimulation() {
         return Simulation.getInstance();
+    }
+
+    public void addNextStepListener(NextStepListener listener) {
+        listeners.add(NextStepListener.class, listener);
+    }
+
+    /**
+     * Removes the specified listener from the parameter
+     * @param listener the ValueListener
+     */
+    public void removeNextListenerListener(NextStepListener listener) {
+        listeners.remove(NextStepListener.class, listener);
+    }
+
+    private void fireNextStepTriggered() {
+
+        NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(
+                NextStepListener.class);
+
+        for (NextStepListener listener : listenerList) {
+            listener.nextStepTriggered(new NextStepEvent(this));
+        }
     }
     //---------- End of class
 }
