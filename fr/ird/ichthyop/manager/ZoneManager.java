@@ -53,6 +53,7 @@ public class ZoneManager implements IZoneManager {
             for (XPoint point : xzone.getPolygon()) {
                 zone.addPoint(point.createRhoPoint());
             }
+            zone.setUp();
             map.get(zone.getType()).add(zone.getIndex(), zone);
         }
 

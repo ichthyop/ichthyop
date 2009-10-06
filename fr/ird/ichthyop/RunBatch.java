@@ -20,6 +20,7 @@ public class RunBatch implements Runnable, ISimulationAccessor {
 
     public RunBatch(String path) {
 
+        path = System.getProperty("user.dir") + File.separator + "cfg2.xic";
         try {
             File file = new File(path);
             if (file.exists()) {
@@ -41,11 +42,13 @@ public class RunBatch implements Runnable, ISimulationAccessor {
      */
     public void setUp() throws Exception {
         getSimulation().getDataset().setUp();
+        getSimulation().getStep().setUp();
     }
 
     public void run() {
         do {
             getSimulation().step();
+            Logger.getLogger(RunBatch.class.getName()).info("Step " + getSimulation().getStep().timeToString());
         } while (getSimulation().getStep().hasNext());
     }
 

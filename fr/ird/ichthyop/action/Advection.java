@@ -5,6 +5,7 @@
 package fr.ird.ichthyop.action;
 
 import fr.ird.ichthyop.arch.IBasicParticle;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,8 +18,8 @@ public class Advection extends AbstractAction {
 
     public void loadParameters() {
 
-        isEuler = getParameter("numerical_scheme").matches("Euler");
-        isForward = getSimulation().getStep().get_dt() < 0;
+        isEuler = getParameter("numerical_scheme").matches("euler");
+        isForward = getSimulation().getStep().get_dt() >= 0;
     }
 
     public void execute(IBasicParticle particle) {
@@ -35,7 +36,7 @@ public class Advection extends AbstractAction {
         double[] mvt = isEuler
                 ? getSimulation().getDataset().advectEuler(particle.getGridPoint(), time, getSimulation().getStep().get_dt())
                 : advectRk4(particle.getGridPoint(), time, getSimulation().getStep().get_dt());
-
+        //Logger.getAnonymousLogger().info("dx " + mvt[0] + " dy " + mvt[1] + " dz " + mvt[2]);
         particle.increment(mvt);
     }
 

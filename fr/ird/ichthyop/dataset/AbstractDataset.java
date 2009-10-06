@@ -5,6 +5,8 @@
 
 package fr.ird.ichthyop.dataset;
 
+import fr.ird.ichthyop.NextStepEvent;
+import fr.ird.ichthyop.NextStepListener;
 import fr.ird.ichthyop.Simulation;
 import fr.ird.ichthyop.arch.IDataset;
 import fr.ird.ichthyop.arch.ISimulation;
@@ -14,7 +16,7 @@ import fr.ird.ichthyop.arch.ISimulationAccessor;
  *
  * @author pverley
  */
-public abstract class AbstractDataset implements IDataset, ISimulationAccessor {
+public abstract class AbstractDataset implements IDataset, ISimulationAccessor, NextStepListener {
 
     private String datasetKey;
 
@@ -25,7 +27,7 @@ public abstract class AbstractDataset implements IDataset, ISimulationAccessor {
     }
 
     public String getParameter(String key) {
-        return getSimulation().getParameterManager().getValue(datasetKey, key);
+        return getSimulation().getDatasetManager().getParameter(key);
     }
 
     public ISimulation getSimulation() {

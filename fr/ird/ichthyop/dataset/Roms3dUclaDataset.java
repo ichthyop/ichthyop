@@ -192,17 +192,18 @@ public class Roms3dUclaDataset extends AbstractDataset {
      */
     private static boolean FLAG_3D;
 
+    private static boolean FLAG_VDISP;
+
     @Override
     void loadParameters() {
 
-        FLAG_3D = Boolean.valueOf(getSimulation().getParameterManager().getValue("app.transport", "three-dimension"));
+        FLAG_3D = Boolean.valueOf(getSimulation().getParameterManager().getValue("app.transport", "three_dimension"));
 
     }
 
     private void openLocation(String rawPath) throws IOException {
 
         URI uriCurrent = new File("").toURI();
-        //String path = URI.create(rawPath).getPath();
         String path = uriCurrent.resolve(URI.create(rawPath)).getPath();
 
         if (isDirectory(path)) {
@@ -283,7 +284,7 @@ public class Roms3dUclaDataset extends AbstractDataset {
 
             long t0 = getSimulation().getStep().get_tO();
             open(getFile(t0));
-            FLAG_TP = FLAG_SAL = false;
+            FLAG_TP = FLAG_SAL = FLAG_VDISP = true;
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
@@ -615,9 +616,10 @@ public class Roms3dUclaDataset extends AbstractDataset {
                     ? ncIn.findDimension(strZDim).getLength()
                     : 1;
         } catch (NullPointerException e) {
-            throw new IOException("Problem reading dimensions from dataset " + ncIn.getLocation() + " : " + e.getMessage());
+            e.printStackTrace();
+            //throw new IOException("Problem reading dimensions from dataset " + ncIn.getLocation() + " : " + e.getMessage());
         }
-
+        Logger.getLogger(getClass().getName()).info("nx " + nx + " - ny " + ny + " - nz " + nz);
         ipo = jpo = 0;
     }
 
@@ -1238,6 +1240,7 @@ public class Roms3dUclaDataset extends AbstractDataset {
     public void nextStepTriggered(NextStepEvent e) {
 
         long time = e.getSource().getTime();
+        //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
 
         if (time_arrow * time < time_arrow * time_tp1) {
@@ -1322,10 +1325,10 @@ public class Roms3dUclaDataset extends AbstractDataset {
                         new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
             }
 
-            /*if (FLAG_VDISP) {
+            if (FLAG_VDISP) {
             kv_tp1 = (float[][][]) ncIn.findVariable(strKv).read(origin,
             new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }*/
+            }
 
 
         } catch (IOException e) {

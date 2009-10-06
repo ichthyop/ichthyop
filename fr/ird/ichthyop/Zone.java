@@ -88,7 +88,7 @@ public class Zone implements ISimulationAccessor {
         polygon.add(point);
     }
 
-    private void init() {
+    public void setUp() {
 
         for (RhoPoint rhoPoint : polygon) {
             rhoPoint.geo2Grid();
@@ -100,7 +100,8 @@ public class Zone implements ISimulationAccessor {
 
         boolean isInZone = true;
         if (point.is3D()) {
-            isInZone = isDepthInLayer(point.getDepth());
+            isInZone = isDepthInLayer(Math.abs(point.getDepth()));
+            //System.out.println("depth in layer " + (float)Math.abs(point.getDepth()) + " " + isDepthInLayer(Math.abs(point.getDepth())));
         }
         isInZone = isInZone && isXYBetweenBathyLines(point.getX(), point.getY()) && isXYInPolygon(point.getX(), point.getY());
 
@@ -108,7 +109,7 @@ public class Zone implements ISimulationAccessor {
     }
 
     private boolean isDepthInLayer(double depth) {
-        return depth >= lowerDepth & depth < upperDepth;
+        return depth <= lowerDepth & depth > upperDepth;
     }
 
     private boolean isXYBetweenBathyLines(double x, double y) {
@@ -127,7 +128,7 @@ public class Zone implements ISimulationAccessor {
         isInBox = true;
         crossings = 0;
 
-        for (int k = 0; k < polygon.size(); k++) {
+        for (int k = 0; k < polygon.size() - 1; k++) {
             if (polygon.get(k).getX() != polygon.get(k + 1).getX()) {
                 dx1 = x - polygon.get(k).getX();
                 dx2 = polygon.get(k + 1).getX() - x;

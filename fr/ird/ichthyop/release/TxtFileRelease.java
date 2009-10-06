@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  *
@@ -63,5 +64,6 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         } catch (java.io.IOException e) {
             throw new IOException("Problem reading drifter file " + fDrifter);
         }
+        Logger.getAnonymousLogger().info("Released " + index + " particles.");
     }
 }

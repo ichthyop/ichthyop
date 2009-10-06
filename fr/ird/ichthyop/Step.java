@@ -1,8 +1,8 @@
 package fr.ird.ichthyop;
 
 /** import java.text */
-import fr.ichthyop.calendar.Calendar1900;
-import fr.ichthyop.calendar.ClimatoCalendar;
+import fr.ird.ichthyop.calendar.Calendar1900;
+import fr.ird.ichthyop.calendar.ClimatoCalendar;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.arch.IStep;
@@ -110,7 +110,7 @@ public class Step implements IStep, ISimulationAccessor {
         return step;
     }
 
-    public void init() {
+    public void setUp() {
 
         i_step = 0;
         time = t0;
@@ -153,7 +153,7 @@ public class Step implements IStep, ISimulationAccessor {
         time += dt;
         if (Math.abs(time - t0) < simuDuration) {
             i_step++;
-            //calendar.setTimeInMillis(time * 1000L);
+            calendar.setTimeInMillis(time * 1000L);
             cpu_now = System.currentTimeMillis();
             fireNextStepTriggered();
             return true;
@@ -296,7 +296,7 @@ public class Step implements IStep, ISimulationAccessor {
     }
 
     public long getTransportDuration() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return transportDuration;
     }
 
     public void next() {

@@ -37,8 +37,12 @@ public class Simulation implements ISimulation {
         return simulation;
     }
 
+    public DatasetManager getDatasetManager() {
+        return DatasetManager.getInstance();
+    }
+
     public IDataset getDataset() {
-        return DatasetManager.getInstance().getDataset();
+        return getDatasetManager().getDataset();
     }
 
     public IStep getStep() {

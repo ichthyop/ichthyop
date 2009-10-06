@@ -14,9 +14,9 @@ import fr.ird.ichthyop.arch.IBasicParticle;
 public abstract class BasicParticle extends RhoPoint implements IBasicParticle {
 
     private int index;
-    private long age;
+    private long age = 0;
     private String deathCause;
-    private boolean living;
+    private boolean living = true;
 
     public boolean isLiving() {
         return living;

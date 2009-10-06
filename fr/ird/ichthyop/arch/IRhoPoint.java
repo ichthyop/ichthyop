@@ -71,4 +71,8 @@ public interface IRhoPoint extends Cloneable {
 
     public void make2D();
 
+    public boolean isInWater();
+
+    public boolean isOnEdge();
+
 }

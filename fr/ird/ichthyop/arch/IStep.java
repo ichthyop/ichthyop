@@ -27,4 +27,8 @@ public interface IStep extends Cloneable {
 
     public void next();
 
+    public String timeToString();
+
+    public void setUp();
+
 }

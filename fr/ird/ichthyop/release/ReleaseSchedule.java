@@ -7,6 +7,7 @@ package fr.ird.ichthyop.release;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;
+import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -76,6 +77,8 @@ public class ReleaseSchedule implements ISimulationAccessor, NextStepListener {
     }
 
     private void fireReleaseTriggered() {
+
+        //Logger.getLogger(getClass().getName()).info("Triggered release event " + indexEvent);
 
         ReleaseListener[] listenerList = (ReleaseListener[]) listeners.getListeners(
                 ReleaseListener.class);

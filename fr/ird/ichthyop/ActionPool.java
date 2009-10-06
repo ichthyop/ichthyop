@@ -42,7 +42,10 @@ public class ActionPool extends HashMap<String, AbstractAction> implements IActi
     }
 
     public void execute(String actionName, IBasicParticle particle) {
-        get(actionName).execute(particle);
+        AbstractAction action = get(actionName);
+        if (action != null) {
+            action.execute(particle);
+        }
     }
 
     public ISimulation getSimulation() {

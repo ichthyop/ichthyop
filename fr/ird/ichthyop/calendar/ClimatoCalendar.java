@@ -1,4 +1,4 @@
-package fr.ichthyop.calendar;
+package fr.ird.ichthyop.calendar;
 
 /** Import the abstract class Calendar */
 import java.util.Calendar;

@@ -45,6 +45,7 @@ public class ReleaseManager implements IReleaseManager {
             } catch (InstantiationException ex) {
                 Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
                 Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(ActionPool.class.getName()).log(Level.SEVERE, null, ex);

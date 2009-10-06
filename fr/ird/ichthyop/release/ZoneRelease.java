@@ -5,8 +5,6 @@
 package fr.ird.ichthyop.release;
 
 import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.release.ReleaseEvent;
-import fr.ird.ichthyop.release.AbstractReleaseProcess;
 import fr.ird.ichthyop.arch.IBasicParticle;
 import java.io.IOException;
 
@@ -18,18 +16,23 @@ public class ZoneRelease extends AbstractReleaseProcess {
 
     private int nbReleasedNow, nbReleaseZones, nbTotalToRelease;
     private int nbReleaseEvents;
-
-    ZoneRelease() {
-        loadParameters();
-    }
+    private boolean is3D;
+    private boolean paramLoaded = false;
 
     private void loadParameters() {
         nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
         nbReleaseZones = getSimulation().getZoneManager().getZones(TypeZone.RELEASE).size();
         nbReleaseEvents = getSimulation().getReleaseManager().getSchedule().getNbReleaseEvents();
+        is3D = Boolean.valueOf(getSimulation().getParameterManager().getValue("app.transport", "three_dimension"));
+        paramLoaded = true;
+
     }
 
     public void release(ReleaseEvent event) throws IOException {
+
+        if (!paramLoaded) {
+            loadParameters();
+        }
 
         int indexEvent = event.getSource().getIndexEvent();
 
@@ -50,14 +53,18 @@ public class ZoneRelease extends AbstractReleaseProcess {
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());
             ymax = Math.max(ymax, zone.getYmax());
-            upDepth = Math.min(upDepth, zone.getUpperDepth());
-            lowDepth = Math.max(lowDepth, zone.getLowerDepth());
+            if (is3D) {
+                upDepth = Math.min(upDepth, zone.getUpperDepth());
+                lowDepth = Math.max(lowDepth, zone.getLowerDepth());
+            } else {
+                upDepth = lowDepth = Double.NaN;
+            }
         }
 
         int index = Math.max(getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nbReleasedNow; p++) {
             /** Instantiate a new Particle */
-            IBasicParticle particle = null;// = ParticleFactory.createParticle(index, true, xmin, xmax, ymin, ymax, upDepth, lowDepth);
+            IBasicParticle particle = ParticleFactory.createParticle(index, xmin, xmax, ymin, ymax, upDepth, lowDepth);
             getSimulation().getPopulation().add(particle);
             index++;
         }

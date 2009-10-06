@@ -26,7 +26,7 @@ public class HorizontalDispersion extends AbstractAction {
 
     public void loadParameters() {
         random = new MTRandom();
-        epsilon = Double.valueOf(getParameter("hdispersion.dissipationRate"));
+        epsilon = Double.valueOf(getParameter("dissipation_rate"));
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);
     }
 

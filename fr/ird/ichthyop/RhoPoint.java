@@ -29,7 +29,7 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
     private double lon, lat, depth;
     /** <code>true</code> if 3 dimensions point false otherwise */
     private static boolean is3D;
-    private boolean lonlatHaveChanged, depthHasChanged;
+    private boolean lonlatHaveChanged,  depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
 
 ///////////////
@@ -43,6 +43,10 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
      */
     public RhoPoint(boolean bln3D) {
         is3D = bln3D;
+        lonlatHaveChanged = false;
+        depthHasChanged = false;
+        xyHaveChanged = false;
+        zHasChanged = false;
     }
 
     public RhoPoint() {
@@ -100,9 +104,11 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
 
         x += move[0];
         y += move[1];
+        xyHaveChanged = true;
         if (move.length > 2) {
             z += move[2];
             z = Math.max(0.d, Math.min(z, (double) getSimulation().getDataset().get_nz() - 1.00001f));
+            zHasChanged = true;
         }
     }
 
@@ -255,5 +261,13 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
         return is3D
                 ? "(" + lon + ", " + lat + ", " + depth + ")"
                 : "(" + lon + ", " + lat + ")";
+    }
+
+    public boolean isInWater() {
+        return getSimulation().getDataset().isInWater(getGridPoint());
+    }
+
+    public boolean isOnEdge() {
+        return getSimulation().getDataset().isOnEdge(getGridPoint());
     }
 }

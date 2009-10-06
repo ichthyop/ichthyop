@@ -20,6 +20,7 @@ public abstract class AbstractAction implements IAction {
 
     public AbstractAction() {
         actionKey = getSimulation().getPropertyManager(getClass()).getProperty("action.key");
+        loadParameters();
     }
 
     public String getParameter(String key) {
