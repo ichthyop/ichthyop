@@ -5,7 +5,8 @@
 package fr.ird.ichthyop.release;
 
 import fr.ird.ichthyop.particle.ParticleFactory;
-import fr.ird.ichthyop.*;
+import fr.ird.ichthyop.TypeZone;
+import fr.ird.ichthyop.Zone;
 import fr.ird.ichthyop.arch.IBasicParticle;
 import java.io.IOException;
 
@@ -13,26 +14,37 @@ import java.io.IOException;
  *
  * @author pverley
  */
-public class ZoneRelease extends AbstractReleaseProcess {
+public class PatchyRelease extends AbstractReleaseProcess {
 
-    private int nbReleasedNow, nbReleaseZones, nbTotalToRelease;
+    private int nb_patches;
+    private int nb_agregated;
+    private double radius_patch, thickness_patch;
+    private int nbPatchesNow, nbReleaseZones;
     private int nbReleaseEvents;
     private boolean is3D;
+    private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
-    public void loadParameters() {
-        nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
+    @Override
+    void loadParameters() {
+        
+        nb_patches = Integer.valueOf(getParameter("number_patches"));
+        nb_agregated = Integer.valueOf(getParameter("number_agregated"));
+        radius_patch = Float.valueOf(getParameter("radius_patch"));
+        thickness_patch = Float.valueOf(getParameter("thickness_patch"));
+
         nbReleaseZones = getSimulation().getZoneManager().getZones(TypeZone.RELEASE).size();
         nbReleaseEvents = getSimulation().getReleaseManager().getSchedule().getNbReleaseEvents();
         is3D = Boolean.valueOf(getSimulation().getParameterManager().getValue("app.transport", "three_dimension"));
     }
 
-    public void proceedToRelease(ReleaseEvent event) throws IOException {
+    @Override
+    void proceedToRelease(ReleaseEvent event) throws IOException {
 
         int indexEvent = event.getSource().getIndexEvent();
 
-        nbReleasedNow = nbTotalToRelease / nbReleaseEvents;
-        int mod = nbTotalToRelease % nbReleaseEvents;
-        nbReleasedNow += (indexEvent < mod) ? 1 : 0;
+        nbPatchesNow = nb_patches / nbReleaseEvents;
+        int mod = nb_patches % nbReleaseEvents;
+        nbPatchesNow += (indexEvent < mod) ? 1 : 0;
 
         double xmin, xmax, ymin, ymax;
         double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
@@ -56,15 +68,29 @@ public class ZoneRelease extends AbstractReleaseProcess {
         }
 
         int index = Math.max(getSimulation().getPopulation().size() - 1, 0);
-        for (int p = 0; p < nbReleasedNow; p++) {
+        for (int p = 0; p < nbPatchesNow; p++) {
             /** Instantiate a new Particle */
             IBasicParticle particle = ParticleFactory.createParticle(index, xmin, xmax, ymin, ymax, upDepth, lowDepth);
             getSimulation().getPopulation().add(particle);
             index++;
+            for (int f = 0; f < nb_agregated - 1; f++) {
+                double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+                double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
+                double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
+                double depth = Double.NaN;
+                if (is3D) {
+                    depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
+                }
+                IBasicParticle particlePatch = ParticleFactory.createParticle(index, lon, lat, depth);
+                getSimulation().getPopulation().add(particlePatch);
+                index++;
+            }
         }
     }
 
     public int getNbParticles() {
-        return Integer.valueOf(getParameter("number_particles"));
+        nb_patches = Integer.valueOf(getParameter("number_patches"));
+        nb_agregated = Integer.valueOf(getParameter("number_agregated"));
+        return nb_patches * nb_agregated;
     }
 }

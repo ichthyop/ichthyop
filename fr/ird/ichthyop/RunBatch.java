@@ -43,6 +43,7 @@ public class RunBatch implements Runnable, ISimulationAccessor {
     public void setUp() throws Exception {
         getSimulation().getDataset().setUp();
         getSimulation().getStep().setUp();
+        getSimulation().getOutputManager().setUp();
     }
 
     public void run() {

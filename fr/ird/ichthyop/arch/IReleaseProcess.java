@@ -6,9 +6,6 @@
 package fr.ird.ichthyop.arch;
 
 import fr.ird.ichthyop.release.ReleaseEvent;
-import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.arch.ISimulationAccessor;
-import java.io.IOException;
 
 /**
  *
@@ -16,6 +13,8 @@ import java.io.IOException;
  */
 public interface IReleaseProcess extends ISimulationAccessor {
 
-    public void release(ReleaseEvent event) throws IOException;
+    public void release(ReleaseEvent event);
+
+    public int getNbParticles();
 
 }

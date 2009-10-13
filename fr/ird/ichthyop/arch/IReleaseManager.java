@@ -20,4 +20,6 @@ public interface IReleaseManager extends ReleaseListener {
     public ReleaseSchedule getSchedule();
 
     public String getParameter(String key);
+
+    public int getNbParticles();
 }

@@ -6,6 +6,7 @@ package fr.ird.ichthyop.manager;
 
 import fr.ird.ichthyop.TypeBlock;
 import fr.ird.ichthyop.arch.IDataset;
+import fr.ird.ichthyop.arch.IDatasetManager;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class DatasetManager {
+public class DatasetManager implements IDatasetManager {
 
     final private static DatasetManager datasetManager = new DatasetManager();
     private IDataset dataset;

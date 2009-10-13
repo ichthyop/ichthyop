@@ -4,9 +4,8 @@
  */
 package fr.ird.ichthyop.release;
 
+import fr.ird.ichthyop.particle.ParticleFactory;
 import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.release.ReleaseEvent;
-import fr.ird.ichthyop.release.AbstractReleaseProcess;
 import fr.ird.ichthyop.arch.IBasicParticle;
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -23,12 +23,26 @@ import java.util.logging.Logger;
  */
 public class TxtFileRelease extends AbstractReleaseProcess {
 
-    public void release(ReleaseEvent event) throws IOException {
+    private String pathname;
 
-        File fDrifter = new File(getParameter("release.drifter.pathname"));
-        if (!fDrifter.exists() || !fDrifter.canRead()) {
-            throw new IOException("Drifter file " + fDrifter + " cannot be read");
+    @Override
+    void loadParameters() {
+        pathname = getParameter("release.drifter.pathname");
+    }
+
+    private File getFile(String pathname) throws IOException {
+
+        File file = new File(pathname);
+        if (!file.exists() || !file.canRead()) {
+            throw new IOException("Drifter file " + file + " cannot be read");
         }
+        return file;
+    }
+
+    @Override
+    void proceedToRelease(ReleaseEvent event) throws IOException {
+
+        File fDrifter = getFile(pathname);
 
         int index = 0;
         String[] strCoord;
@@ -65,5 +79,19 @@ public class TxtFileRelease extends AbstractReleaseProcess {
             throw new IOException("Problem reading drifter file " + fDrifter);
         }
         Logger.getAnonymousLogger().info("Released " + index + " particles.");
+    }
+
+    public int getNbParticles() {
+        int nbParticles = 0;
+        try {
+            BufferedReader bfIn = new BufferedReader(new FileReader(getFile(pathname)));
+            while ((bfIn.readLine()) != null) {
+                nbParticles++;
+            }
+
+        } catch (IOException ex) {
+            Logger.getLogger(TxtFileRelease.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return nbParticles;
     }
 }

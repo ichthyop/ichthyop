@@ -5,8 +5,6 @@
 
 package fr.ird.ichthyop.arch;
 
-import fr.ird.ichthyop.manager.DatasetManager;
-
 /**
  *
  * @author pverley
@@ -21,7 +19,7 @@ public interface ISimulation {
 
     public IActionManager getActionManager();
 
-    public DatasetManager getDatasetManager();
+    public IDatasetManager getDatasetManager();
 
     public IParameterManager getParameterManager();
     
@@ -32,6 +30,8 @@ public interface ISimulation {
     public IReleaseManager getReleaseManager();
 
     public IActionPool getActionPool();
+
+    public IOutputManager getOutputManager();
 
     public void step();
 

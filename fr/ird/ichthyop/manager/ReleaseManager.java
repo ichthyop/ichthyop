@@ -77,10 +77,10 @@ public class ReleaseManager implements IReleaseManager {
     }
 
     public void releaseTriggered(ReleaseEvent event) {
-        try {
-            getReleaseProcess().release(event);
-        } catch (IOException ex) {
-            Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        getReleaseProcess().release(event);
+    }
+
+    public int getNbParticles() {
+        return releaseProcess.getNbParticles();
     }
 }

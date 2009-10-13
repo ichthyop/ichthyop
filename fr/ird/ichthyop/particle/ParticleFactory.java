@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.particle;
 
+import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IBasicParticle;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;

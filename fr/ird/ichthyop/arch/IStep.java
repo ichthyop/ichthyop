@@ -5,6 +5,7 @@
 
 package fr.ird.ichthyop.arch;
 
+import fr.ird.ichthyop.NextStepListener;
 import java.util.Calendar;
 
 /**
@@ -30,5 +31,7 @@ public interface IStep extends Cloneable {
     public String timeToString();
 
     public void setUp();
+
+    public void addNextStepListener(NextStepListener listener);
 
 }
