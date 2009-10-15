@@ -1,4 +1,4 @@
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.util;
 
 /** import java.util */
 import java.util.Comparator;

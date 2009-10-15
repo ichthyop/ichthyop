@@ -12,7 +12,7 @@ import java.util.Calendar;
  *
  * @author pverley
  */
-public class Migration extends AbstractAction {
+public class MigrationAction extends AbstractAction {
 
     private float depthDay;
     private float depthNight;

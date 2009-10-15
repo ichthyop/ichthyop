@@ -5,7 +5,7 @@
 package fr.ird.ichthyop.particle;
 
 import fr.ird.ichthyop.util.Constant;
-import fr.ird.ichthyop.action.Recruitment;
+import fr.ird.ichthyop.action.RecruitmentAction;
 import fr.ird.ichthyop.arch.IActionPool;
 import java.util.logging.Logger;
 
@@ -20,7 +20,7 @@ public class Iv2Particle extends GrowingParticle {
         if (getAge() <= getSimulation().getStep().getTransportDuration()) {
 
             if (actionPool.get("action.recruitment") != null) {
-                if (((Recruitment) actionPool.get("action.recruitment")).isStopMoving() && isRecruited()) {
+                if (((RecruitmentAction) actionPool.get("action.recruitment")).isStopMoving() && isRecruited()) {
                     return;
                 }
             }

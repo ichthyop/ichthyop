@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.action.ActionPool;
 import fr.ird.ichthyop.arch.IOutputManager;
 import fr.ird.ichthyop.manager.ReleaseManager;
 import fr.ird.ichthyop.arch.IActionPool;

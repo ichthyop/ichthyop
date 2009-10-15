@@ -12,7 +12,7 @@ import fr.ird.ichthyop.arch.IBasicParticle;
  *
  * @author pverley
  */
-public class HorizontalDispersion extends AbstractAction {
+public class HDispAction extends AbstractAction {
 
     private static final boolean DEBUG_HDISP = false;
     /**

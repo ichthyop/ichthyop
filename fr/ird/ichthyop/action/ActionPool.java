@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.action;
 
+import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.arch.IActionPool;
 import fr.ird.ichthyop.io.XAction;

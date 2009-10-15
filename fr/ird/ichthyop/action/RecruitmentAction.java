@@ -14,7 +14,7 @@ import fr.ird.ichthyop.arch.IBasicParticle;
  *
  * @author pverley
  */
-public class Recruitment extends AbstractAction {
+public class RecruitmentAction extends AbstractAction {
 
     /**
      * Minimum duration [second] a particle has to spend within the same zone

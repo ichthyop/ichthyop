@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class Advection extends AbstractAction {
+public class AdvectionAction extends AbstractAction {
 
     private boolean isEuler = true;
     private boolean isForward = true;

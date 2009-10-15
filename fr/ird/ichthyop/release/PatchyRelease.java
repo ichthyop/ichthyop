@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop.release;
 
+import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.particle.ParticleFactory;
 import fr.ird.ichthyop.TypeZone;
 import fr.ird.ichthyop.Zone;

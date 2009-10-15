@@ -4,6 +4,10 @@
  */
 package fr.ird.ichthyop.release;
 
+import fr.ird.ichthyop.event.ReleaseListener;
+import fr.ird.ichthyop.event.ReleaseEvent;
+import fr.ird.ichthyop.event.NextStepEvent;
+import fr.ird.ichthyop.event.NextStepListener;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;

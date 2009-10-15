@@ -4,9 +4,9 @@
  */
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.NextStepEvent;
+import fr.ird.ichthyop.event.NextStepEvent;
 import fr.ird.ichthyop.Simulation;
-import fr.ird.ichthyop.TypeBlock;
+import fr.ird.ichthyop.io.TypeBlock;
 import fr.ird.ichthyop.arch.IOutputManager;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.IStep;

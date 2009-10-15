@@ -5,6 +5,7 @@
 
 package fr.ird.ichthyop.release;
 
+import fr.ird.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
 
 /**

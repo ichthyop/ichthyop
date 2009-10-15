@@ -12,7 +12,7 @@ import fr.ird.ichthyop.arch.IBasicParticle;
  *
  * @author pverley
  */
-public class LinearGrowth extends AbstractAction {
+public class LinearGrowthAction extends AbstractAction {
 
     /**
      * The growth function assumed the sea water temperature must not be

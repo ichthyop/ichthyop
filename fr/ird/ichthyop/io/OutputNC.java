@@ -1,8 +1,8 @@
 package fr.ird.ichthyop.io;
 
 /** import java.io */
-import fr.ird.ichthyop.NextStepEvent;
-import fr.ird.ichthyop.NextStepListener;
+import fr.ird.ichthyop.event.NextStepEvent;
+import fr.ird.ichthyop.event.NextStepListener;
 import fr.ird.ichthyop.Simulation;
 import fr.ird.ichthyop.TypeZone;
 import fr.ird.ichthyop.arch.IBasicParticle;

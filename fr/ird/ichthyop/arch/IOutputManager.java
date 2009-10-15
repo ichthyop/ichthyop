@@ -5,7 +5,7 @@
 
 package fr.ird.ichthyop.arch;
 
-import fr.ird.ichthyop.NextStepListener;
+import fr.ird.ichthyop.event.NextStepListener;
 
 /**
  *

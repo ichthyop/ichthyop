@@ -1,6 +1,6 @@
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.TypeBlock;
+import fr.ird.ichthyop.io.TypeBlock;
 import fr.ird.ichthyop.arch.IParameterManager;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;

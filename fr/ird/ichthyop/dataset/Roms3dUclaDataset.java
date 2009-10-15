@@ -4,9 +4,9 @@
  */
 package fr.ird.ichthyop.dataset;
 
-import fr.ird.ichthyop.MetaFilenameFilter;
-import fr.ird.ichthyop.NCComparator;
-import fr.ird.ichthyop.NextStepEvent;
+import fr.ird.ichthyop.util.MetaFilenameFilter;
+import fr.ird.ichthyop.util.NCComparator;
+import fr.ird.ichthyop.event.NextStepEvent;
 import fr.ird.ichthyop.util.Constant;
 import java.io.File;
 import java.io.IOException;

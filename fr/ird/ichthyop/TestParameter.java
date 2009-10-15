@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop;
 
+import fr.ird.ichthyop.action.ActionPool;
 import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XParameter;

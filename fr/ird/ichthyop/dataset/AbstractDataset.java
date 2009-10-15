@@ -5,8 +5,8 @@
 
 package fr.ird.ichthyop.dataset;
 
-import fr.ird.ichthyop.NextStepEvent;
-import fr.ird.ichthyop.NextStepListener;
+import fr.ird.ichthyop.event.NextStepEvent;
+import fr.ird.ichthyop.event.NextStepListener;
 import fr.ird.ichthyop.Simulation;
 import fr.ird.ichthyop.arch.IDataset;
 import fr.ird.ichthyop.arch.ISimulation;

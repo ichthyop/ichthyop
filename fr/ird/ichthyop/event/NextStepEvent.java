@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop;
+package fr.ird.ichthyop.event;
 
 import fr.ird.ichthyop.arch.IStep;
 import java.util.EventObject;

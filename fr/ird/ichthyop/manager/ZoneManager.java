@@ -4,6 +4,7 @@
  */
 package fr.ird.ichthyop.manager;
 
+import fr.ird.ichthyop.io.TypeBlock;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IZoneManager;

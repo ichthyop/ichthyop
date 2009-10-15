@@ -4,7 +4,6 @@
  */
 package fr.ird.ichthyop.io;
 
-import fr.ird.ichthyop.TypeBlock;
 import org.jdom.Element;
 
 /**

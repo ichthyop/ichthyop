@@ -10,7 +10,7 @@ import fr.ird.ichthyop.arch.IBasicParticle;
  *
  * @author pverley
  */
-public class Buoyancy extends AbstractAction {
+public class BuoyancyAction extends AbstractAction {
 
 ///////////////////////////////
 // Declaration of the constants

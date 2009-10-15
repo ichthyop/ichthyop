@@ -4,9 +4,11 @@
  */
 package fr.ird.ichthyop.manager;
 
+import fr.ird.ichthyop.action.ActionPool;
+import fr.ird.ichthyop.io.TypeBlock;
 import fr.ird.ichthyop.release.*;
 import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.release.ReleaseEvent;
+import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.io.ICFile;

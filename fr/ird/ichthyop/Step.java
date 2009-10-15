@@ -1,6 +1,8 @@
 package fr.ird.ichthyop;
 
 /** import java.text */
+import fr.ird.ichthyop.event.NextStepEvent;
+import fr.ird.ichthyop.event.NextStepListener;
 import fr.ird.ichthyop.calendar.Calendar1900;
 import fr.ird.ichthyop.calendar.ClimatoCalendar;
 import fr.ird.ichthyop.arch.ISimulation;

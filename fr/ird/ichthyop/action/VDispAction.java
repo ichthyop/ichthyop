@@ -11,7 +11,7 @@ import fr.ird.ichthyop.arch.IBasicParticle;
  *
  * @author pverley
  */
-public class VerticalDispersion extends AbstractAction {
+public class VDispAction extends AbstractAction {
 
     private MTRandom random;
 

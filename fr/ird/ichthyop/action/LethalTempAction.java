@@ -13,7 +13,7 @@ import fr.ird.ichthyop.particle.GrowingParticle;
  *
  * @author pverley
  */
-public class LethalTemperature extends AbstractAction {
+public class LethalTempAction extends AbstractAction {
 
     private float lethal_tp, lethalTpEgg, lethalTpLarva;
     private boolean FLAG_GROWTH;
