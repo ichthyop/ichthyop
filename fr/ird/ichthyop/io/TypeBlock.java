@@ -15,7 +15,8 @@ public enum TypeBlock {
     ACTION,
     ZONE,
     RELEASE,
-    DATASET;
+    DATASET,
+    TRACKER;
 
     @Override
     public String toString() {

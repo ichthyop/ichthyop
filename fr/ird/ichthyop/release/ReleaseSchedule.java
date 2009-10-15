@@ -11,7 +11,6 @@ import fr.ird.ichthyop.event.NextStepListener;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;
-import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -35,7 +34,7 @@ public class ReleaseSchedule implements ISimulationAccessor, NextStepListener {
         indexEvent = 0;
         isAllReleased = false;
         schedule();
-        addReleaseListener(getSimulation().getReleaseManager());
+        getSimulation().getStep().addNextStepListener(this);
     }
 
     public static ReleaseSchedule getInstance() {

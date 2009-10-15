@@ -6,6 +6,7 @@
 package fr.ird.ichthyop.arch;
 
 import fr.ird.ichthyop.event.NextStepListener;
+import fr.ird.ichthyop.io.XBlock;
 
 /**
  *
@@ -14,6 +15,8 @@ import fr.ird.ichthyop.event.NextStepListener;
 public interface IOutputManager extends ISimulationAccessor, NextStepListener {
 
     public String getParameter(String key);
+
+    public XBlock getXTracker(String key);
 
     public void setUp();
 

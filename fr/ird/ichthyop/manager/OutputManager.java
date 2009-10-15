@@ -12,6 +12,7 @@ import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.IStep;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.OutputNC;
+import fr.ird.ichthyop.io.XBlock;
 import fr.ird.ichthyop.util.Constant;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -60,5 +61,9 @@ public class OutputManager implements IOutputManager {
         if (((step.getTime() - step.get_tO()) % dt_record) == 0) {
             output.write(step.getTime());
         }
+    }
+
+    public XBlock getXTracker(String key) {
+        return ICFile.getInstance().getBlock(TypeBlock.TRACKER, key);
     }
 }

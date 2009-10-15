@@ -101,8 +101,6 @@ public class Step implements IStep, ISimulationAccessor {
 ///////////////
     Step() {
         loadParameters();
-        addNextStepListener(getSimulation().getReleaseManager().getSchedule());
-        addNextStepListener(getSimulation().getDataset());
     }
 
 ////////////////////////////

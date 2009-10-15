@@ -5,12 +5,14 @@
 package fr.ird.ichthyop.manager;
 
 import fr.ird.ichthyop.action.ActionPool;
+import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.io.TypeBlock;
 import fr.ird.ichthyop.release.*;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.IReleaseManager;
+import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
 import java.io.IOException;
@@ -28,6 +30,10 @@ public class ReleaseManager implements IReleaseManager {
     private static final ReleaseManager releaseManager = new ReleaseManager();
     private IReleaseProcess releaseProcess;
     private XBlock releaseBlock;
+
+    public ReleaseManager() {
+        getSchedule().addReleaseListener(this);
+    }
 
     public static IReleaseManager getInstance() {
         return releaseManager;
