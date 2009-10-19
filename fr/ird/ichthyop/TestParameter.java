@@ -4,10 +4,10 @@
  */
 package fr.ird.ichthyop;
 
-import fr.ird.ichthyop.action.ActionPool;
 import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XParameter;
+import fr.ird.ichthyop.manager.ActionManager;
 import fr.ird.ichthyop.manager.ParameterManager;
 import fr.ird.ichthyop.manager.ZoneManager;
 import java.io.File;
@@ -27,7 +27,7 @@ public class TestParameter {
         file = new File(filename);
 
         ICFile.setFile(file);
-        ActionPool actionPool = new ActionPool();
+        ActionManager actionPool = ActionManager.getInstance();
         Iterator<AbstractAction> itA = actionPool.values().iterator();
         while (itA.hasNext()) {
             AbstractAction action = itA.next();

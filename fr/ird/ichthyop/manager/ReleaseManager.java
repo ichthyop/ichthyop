@@ -4,7 +4,6 @@
  */
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.action.ActionPool;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.io.TypeBlock;
 import fr.ird.ichthyop.release.*;
@@ -56,7 +55,7 @@ public class ReleaseManager implements IReleaseManager {
                 ex.printStackTrace();
                 Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
-                Logger.getLogger(ActionPool.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return releaseProcess;

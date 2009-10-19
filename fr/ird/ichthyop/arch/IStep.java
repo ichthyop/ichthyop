@@ -5,6 +5,7 @@
 
 package fr.ird.ichthyop.arch;
 
+import fr.ird.ichthyop.event.LastStepListener;
 import fr.ird.ichthyop.event.NextStepListener;
 import java.util.Calendar;
 
@@ -33,5 +34,7 @@ public interface IStep extends Cloneable {
     public void setUp();
 
     public void addNextStepListener(NextStepListener listener);
+
+    public void addLastStepListener(LastStepListener listener);
 
 }

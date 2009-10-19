@@ -20,7 +20,7 @@ public interface IBasicParticle extends IRhoPoint {
 // Declaration of the methods
 /////////////////////////////
 
-    public void step(IActionPool pool);
+    public void step();
     
     /**
      * Checks whether the particle is living or not
@@ -47,7 +47,7 @@ public interface IBasicParticle extends IRhoPoint {
 
     public String getDeathCause();
 
-    public void init();
+    //public void init();
 
     //---------- End of interface
 }

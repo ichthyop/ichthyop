@@ -6,7 +6,7 @@
 package fr.ird.ichthyop.arch;
 
 import fr.ird.ichthyop.action.AbstractAction;
-import fr.ird.ichthyop.io.XAction;
+import fr.ird.ichthyop.io.XBlock;
 import java.util.Collection;
 
 /**
@@ -15,10 +15,16 @@ import java.util.Collection;
  */
 public interface IActionManager {
 
-    public XAction getXAction(String key);
+    public XBlock getXAction(String key);
 
     public AbstractAction createAction(Class actionClass);
 
-    public Collection<XAction> getActions();
+    public Collection<XBlock> getXActions();
+
+    public void execute(String actionName, IBasicParticle particle);
+
+    public AbstractAction get(Object key);
+
+    public void setUp();
 
 }

@@ -7,6 +7,7 @@ package fr.ird.ichthyop.arch;
 
 import fr.ird.ichthyop.event.NextStepListener;
 import fr.ird.ichthyop.io.XBlock;
+import fr.ird.ichthyop.manager.OutputManager.NCDimFactory;
 
 /**
  *
@@ -19,5 +20,7 @@ public interface IOutputManager extends ISimulationAccessor, NextStepListener {
     public XBlock getXTracker(String key);
 
     public void setUp();
+
+    public NCDimFactory getDimensionFactory();
 
 }

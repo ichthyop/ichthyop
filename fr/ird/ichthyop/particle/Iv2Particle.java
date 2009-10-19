@@ -6,8 +6,7 @@ package fr.ird.ichthyop.particle;
 
 import fr.ird.ichthyop.util.Constant;
 import fr.ird.ichthyop.action.RecruitmentAction;
-import fr.ird.ichthyop.arch.IActionPool;
-import java.util.logging.Logger;
+import fr.ird.ichthyop.arch.IActionManager;
 
 /**
  *
@@ -15,19 +14,21 @@ import java.util.logging.Logger;
  */
 public class Iv2Particle extends GrowingParticle {
 
-    public void step(IActionPool actionPool) {
+    public void step() {
+
+        IActionManager actionManager = getSimulation().getActionManager();
 
         if (getAge() <= getSimulation().getStep().getTransportDuration()) {
 
-            if (actionPool.get("action.recruitment") != null) {
-                if (((RecruitmentAction) actionPool.get("action.recruitment")).isStopMoving() && isRecruited()) {
+            if (actionManager.get("action.recruitment") != null) {
+                if (((RecruitmentAction) actionManager.get("action.recruitment")).isStopMoving() && isRecruited()) {
                     return;
                 }
             }
 
-            actionPool.execute("action.advection", this);
-            actionPool.execute("action.hdisp", this);
-            actionPool.execute("action.vdisp", this);
+            actionManager.execute("action.advection", this);
+            actionManager.execute("action.hdisp", this);
+            actionManager.execute("action.vdisp", this);
 
             if (isOnEdge()) {
                 kill(Constant.DEAD_OUT);
@@ -35,8 +36,8 @@ public class Iv2Particle extends GrowingParticle {
                 kill(Constant.DEAD_BEACH);
             }
 
-            actionPool.execute("action.buoyancy", this);
-            actionPool.execute("action.migration", this);
+            actionManager.execute("action.buoyancy", this);
+            actionManager.execute("action.migration", this);
 
             /** Transform (x, y, z) into (lon, lat, depth) */
             if (isLiving()) {
@@ -44,12 +45,12 @@ public class Iv2Particle extends GrowingParticle {
             }
 
             if (isLiving()) {
-                actionPool.execute("action.growth", this);
-                actionPool.execute("action.lethal_temperature", this);
+                actionManager.execute("action.growth", this);
+                actionManager.execute("action.lethal_temperature", this);
             }
 
             if (isLiving()) {
-                actionPool.execute("action.recruitment", this);
+                actionManager.execute("action.recruitment", this);
             }
 
             incrementAge();

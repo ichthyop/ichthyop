@@ -29,10 +29,10 @@ public interface ISimulation {
 
     public IReleaseManager getReleaseManager();
 
-    public IActionPool getActionPool();
-
     public IOutputManager getOutputManager();
 
     public void step();
+
+    public void setUp();
 
 }

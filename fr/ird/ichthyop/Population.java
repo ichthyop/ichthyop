@@ -55,7 +55,7 @@ public class Population extends HashSet implements IPopulation, ISimulationAcces
         while (iter.hasNext()) {
             particle = iter.next();
             if (particle.isLiving()) {
-                particle.step(getSimulation().getActionPool());
+                particle.step();
             }
         }
     }

@@ -8,6 +8,8 @@ import fr.ird.ichthyop.calendar.ClimatoCalendar;
 import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.arch.IStep;
+import fr.ird.ichthyop.event.LastStepEvent;
+import fr.ird.ichthyop.event.LastStepListener;
 import java.text.SimpleDateFormat;
 
 /** import java.util */
@@ -116,6 +118,7 @@ public class Step implements IStep, ISimulationAccessor {
         time = t0;
         nb_steps = (int) (simuDuration / dt);
         cpu_start = System.currentTimeMillis();
+        addNextStepListener(getSimulation().getReleaseManager().getSchedule());
         fireNextStepTriggered();
     }
 
@@ -158,6 +161,7 @@ public class Step implements IStep, ISimulationAccessor {
             fireNextStepTriggered();
             return true;
         }
+        fireLastStepTriggered();
         return false;
     }
 
@@ -324,6 +328,18 @@ public class Step implements IStep, ISimulationAccessor {
         listeners.remove(NextStepListener.class, listener);
     }
 
+    public void addLastStepListener(LastStepListener listener) {
+        listeners.add(LastStepListener.class, listener);
+    }
+
+    /**
+     * Removes the specified listener from the parameter
+     * @param listener the ValueListener
+     */
+    public void removeLastListenerListener(LastStepListener listener) {
+        listeners.remove(LastStepListener.class, listener);
+    }
+
     private void fireNextStepTriggered() {
 
         NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(
@@ -331,6 +347,15 @@ public class Step implements IStep, ISimulationAccessor {
 
         for (NextStepListener listener : listenerList) {
             listener.nextStepTriggered(new NextStepEvent(this));
+        }
+    }
+
+    private void fireLastStepTriggered() {
+
+        LastStepListener[] listenerList = (LastStepListener[]) listeners.getListeners(LastStepListener.class);
+
+        for (LastStepListener listener : listenerList) {
+            listener.lastStepOccurred(new LastStepEvent(this));
         }
     }
     //---------- End of class

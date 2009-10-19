@@ -6,7 +6,6 @@ package fr.ird.ichthyop.io;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +18,8 @@ import org.jdom.input.SAXBuilder;
  * @author pverley
  */
 public class ICFile {
+
+    final public static String CLASS_NAME = "class_name";
 
     private static ICFile icfile = new ICFile();
     private static File file;

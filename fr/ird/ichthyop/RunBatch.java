@@ -36,14 +36,11 @@ public class RunBatch implements Runnable, ISimulationAccessor {
     }
 
     /**
-     * Sets up the main frame. It loads a configuration file and calls for the
-     * setup SwingWorker.
+     * Set up the simulation.
      * @see inner class SetupSwingWorker
      */
     public void setUp() throws Exception {
-        getSimulation().getDataset().setUp();
-        getSimulation().getStep().setUp();
-        getSimulation().getOutputManager().setUp();
+        getSimulation().setUp();
     }
 
     public void run() {

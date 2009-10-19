@@ -27,7 +27,11 @@ public interface ITracker extends ISimulationAccessor {
      * @param time
      * @return
      */
-    public Array track();
+    public void track();
+
+    public Array getArray();
+
+    public int[] origin(int index_record);
 
     /**
      * Gets the name of the variable.

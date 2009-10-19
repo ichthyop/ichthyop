@@ -2,6 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package fr.ird.ichthyop.dataset;
 
 import fr.ird.ichthyop.util.MetaFilenameFilter;
@@ -18,7 +19,6 @@ import java.util.logging.Logger;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
@@ -26,7 +26,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class Roms3dUclaDataset extends AbstractDataset {
+public abstract class Roms3dDataset extends AbstractDataset {
 
     /**
      * Grid dimension
@@ -106,7 +106,7 @@ public class Roms3dUclaDataset extends AbstractDataset {
      */
     private static float[][][] temp_tp1;
     /**
-     * 
+     *
      */
     private double[][] pm, pn;
     /**
@@ -172,7 +172,7 @@ public class Roms3dUclaDataset extends AbstractDataset {
      * Name of the Variable in NetCDF file
      */
     static String strKv;
-    private String strPn, strPm;
+    private String strThetaS, strThetaB, strHc, strPn, strPm;
     /**
      * Determines whether or not the temperature field should be read in the
      * NetCDF file, function of the user's options.
@@ -187,15 +187,10 @@ public class Roms3dUclaDataset extends AbstractDataset {
      * Determines whether or not the turbulent diffusivity should be read in the
      * NetCDF file, function of the user's options.
      */
-    private static boolean FLAG_3D;
 
     private static boolean FLAG_VDISP;
 
-    @Override
-    void loadParameters() {
-        FLAG_3D = Boolean.valueOf(getSimulation().getParameterManager().getValue("app.transport", "three_dimension"));
-
-    }
+    public abstract void loadFieldNames();
 
     private void openLocation(String rawPath) throws IOException {
 
@@ -237,27 +232,6 @@ public class Roms3dUclaDataset extends AbstractDataset {
         return f.isDirectory();
     }
 
-    private void loadFieldNames() {
-
-        strXiDim = getParameter("field_dim_xi");
-        strEtaDim = getParameter("field_dim_eta");
-        strZDim = getParameter("field_dim_z");
-        strTimeDim = getParameter("field_dim_time");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strBathy = getParameter("field_var_bathy");
-        strMask = getParameter("field_var_mask");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
-        strZeta = getParameter("field_var_zeta");
-        strTp = getParameter("field_var_tp");
-        strSal = getParameter("field_var_sal");
-        strTime = getParameter("field_var_time");
-        strKv = getParameter("field_var_kv");
-        strPn = getParameter("field_var_pn");
-        strPm = getParameter("field_var_pm");
-    }
-
     public void setUp() {
 
         loadParameters();
@@ -271,10 +245,7 @@ public class Roms3dUclaDataset extends AbstractDataset {
             readConstantField();
             //getDimGeogArea();
             getCstSigLevels();
-            if (FLAG_3D) {
-                z_w_tp0 = getSigLevels();
-            }
-
+            z_w_tp0 = getSigLevels();
             long t0 = getSimulation().getStep().get_tO();
             open(getFile(t0));
             FLAG_TP = FLAG_SAL = FLAG_VDISP = true;
@@ -408,36 +379,53 @@ public class Roms3dUclaDataset extends AbstractDataset {
      */
     void getCstSigLevels() throws IOException {
 
-        double hc;
-        double sc_r;
+        double thetas = 0, thetab = 0, hc = 0;
+        double cff1, cff2;
+        double[] sc_r = new double[nz];
         double[] Cs_r = new double[nz];
         double[] cff_r = new double[nz];
-        double sc_w;
+        double[] sc_w = new double[nz + 1];
         double[] Cs_w = new double[nz + 1];
         double[] cff_w = new double[nz + 1];
 
         //-----------------------------------------------------------
         // Read the Param in ncIn
-        hc = ncIn.findGlobalAttribute(getParameter("field_attrib_hc")).getNumericValue().floatValue();
-        Attribute attrib_sc_w = ncIn.findGlobalAttribute(getParameter("field_attrib_scw"));
-        Attribute attrib_sc_r = ncIn.findGlobalAttribute(getParameter("field_attrib_scr"));
-        Attribute attrib_cs_w = ncIn.findGlobalAttribute(getParameter("field_attrib_csw"));
-        Attribute attrib_cs_r = ncIn.findGlobalAttribute(getParameter("field_attrib_csr"));
-
+        try {
+            if (ncIn.findGlobalAttribute(strThetaS) == null) {
+                System.out.println("ROMS Rutgers");
+                thetas = ncIn.findVariable(strThetaS).readScalarDouble();
+                thetab = ncIn.findVariable(strThetaB).readScalarDouble();
+                hc = ncIn.findVariable(strHc).readScalarDouble();
+            } else {
+                System.out.println("ROMS UCLA");
+                thetas = (ncIn.findGlobalAttribute(strThetaS).getNumericValue()).doubleValue();
+                thetab = (ncIn.findGlobalAttribute(strThetaB).getNumericValue()).doubleValue();
+                hc = (ncIn.findGlobalAttribute(strHc).getNumericValue()).doubleValue();
+            }
+        } catch (IOException e) {
+            throw new IOException(
+                    "Problem reading thetaS/thetaB/hc at location " + ncIn.getLocation().toString() + " : " + e.getMessage());
+        } catch (NullPointerException e) {
+            throw new IOException(
+                    "Problem reading thetaS/thetaB/hc at location " + ncIn.getLocation().toString() + " : " + e.getMessage());
+        }
 
         //-----------------------------------------------------------
-        // Calculation of the Coeff;
+        // Calculation of the Coeff
+        cff1 = 1.d / sinh(thetas);
+        cff2 = .5d / tanh(.5d * thetas);
         for (int k = nz; k-- > 0;) {
-            sc_r = attrib_sc_r.getNumericValue(k).floatValue();
-            Cs_r[k] = attrib_cs_r.getNumericValue(k).floatValue();
-            cff_r[k] = hc * (sc_r - Cs_r[k]);
+            sc_r[k] = ((double) (k - nz) + .5d) / (double) nz;
+            Cs_r[k] = (1.d - thetab) * cff1 * sinh(thetas * sc_r[k]) + thetab * (cff2 * tanh((thetas * (sc_r[k] + .5d))) - .5d);
+            cff_r[k] = hc * (sc_r[k] - Cs_r[k]);
         }
 
         for (int k = nz + 1; k-- > 0;) {
-            sc_w = attrib_sc_w.getNumericValue(k).floatValue();
-            Cs_w[k] = attrib_cs_w.getNumericValue(k).floatValue();
-            cff_w[k] = hc * (sc_w - Cs_w[k]);
+            sc_w[k] = (double) (k - nz) / (double) nz;
+            Cs_w[k] = (1.d - thetab) * cff1 * sinh(thetas * sc_w[k]) + thetab * (cff2 * tanh((thetas * (sc_w[k] + .5d))) - .5d);
+            cff_w[k] = hc * (sc_w[k] - Cs_w[k]);
         }
+        sc_w[0] = -1.d;
         Cs_w[0] = -1.d;
 
         //------------------------------------------------------------
@@ -588,9 +576,7 @@ public class Roms3dUclaDataset extends AbstractDataset {
         try {
             nx = ncIn.findDimension(strXiDim).getLength();
             ny = ncIn.findDimension(strEtaDim).getLength();
-            nz = (FLAG_3D)
-                    ? ncIn.findDimension(strZDim).getLength()
-                    : 1;
+            nz = ncIn.findDimension(strZDim).getLength();
         } catch (NullPointerException e) {
             e.printStackTrace();
             //throw new IOException("Problem reading dimensions from dataset " + ncIn.getLocation() + " : " + e.getMessage());
@@ -1503,4 +1489,5 @@ public class Roms3dUclaDataset extends AbstractDataset {
     private long skipSeconds(long time) {
         return time - time % 60L;
     }
+
 }

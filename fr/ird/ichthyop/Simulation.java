@@ -4,10 +4,8 @@
  */
 package fr.ird.ichthyop;
 
-import fr.ird.ichthyop.action.ActionPool;
 import fr.ird.ichthyop.arch.IOutputManager;
 import fr.ird.ichthyop.manager.ReleaseManager;
-import fr.ird.ichthyop.arch.IActionPool;
 import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.manager.ZoneManager;
 import fr.ird.ichthyop.manager.ParameterManager;
@@ -39,6 +37,13 @@ public class Simulation implements ISimulation {
 
     public static Simulation getInstance() {
         return simulation;
+    }
+
+    public void setUp() {
+        getDataset().setUp();
+        getStep().setUp();
+        getActionManager().setUp();
+        getOutputManager().setUp();
     }
 
     public IDatasetManager getDatasetManager() {
@@ -76,10 +81,6 @@ public class Simulation implements ISimulation {
 
     public IReleaseManager getReleaseManager() {
         return ReleaseManager.getInstance();
-    }
-
-    public IActionPool getActionPool() {
-       return ActionPool.getInstance();
     }
 
     public IOutputManager getOutputManager() {
