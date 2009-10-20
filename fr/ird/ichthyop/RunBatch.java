@@ -41,9 +41,11 @@ public class RunBatch implements Runnable, ISimulationAccessor {
      */
     public void setUp() throws Exception {
         getSimulation().setUp();
+        getSimulation().init();
     }
 
     public void run() {
+        getSimulation().getStep().firstStepTriggered();
         do {
             getSimulation().step();
             //Logger.getLogger(RunBatch.class.getName()).info("Step " + getSimulation().getStep().timeToString());

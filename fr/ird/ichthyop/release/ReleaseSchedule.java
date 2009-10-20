@@ -29,8 +29,7 @@ public class ReleaseSchedule implements ISimulationAccessor, NextStepListener {
     /** */
     private EventListenerList listeners = new EventListenerList();
 
-    ReleaseSchedule() {
-
+    public void setUp() {
         indexEvent = 0;
         isAllReleased = false;
         schedule();
@@ -86,7 +85,7 @@ public class ReleaseSchedule implements ISimulationAccessor, NextStepListener {
                 ReleaseListener.class);
 
         for (ReleaseListener listener : listenerList) {
-            listener.releaseTriggered(new ReleaseEvent(this));
+            //listener.releaseTriggered(new ReleaseEvent(this));
         }
     }
 

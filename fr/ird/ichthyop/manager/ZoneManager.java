@@ -4,7 +4,7 @@
  */
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.io.TypeBlock;
+import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IZoneManager;
@@ -68,7 +68,7 @@ public class ZoneManager implements IZoneManager {
 
     private Collection<XZone> getZones() {
         Collection<XZone> collection = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(TypeBlock.ZONE)) {
+        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.ZONE)) {
             collection.add(new XZone(block));
 
         }

@@ -23,4 +23,6 @@ public interface IOutputManager extends ISimulationAccessor, NextStepListener {
 
     public NCDimFactory getDimensionFactory();
 
+    public void init();
+
 }

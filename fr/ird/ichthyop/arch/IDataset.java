@@ -51,4 +51,6 @@ public interface IDataset extends NextStepListener {
     public double getdeta(int j, int i);
 
     public double[] getKv(double[] pGrid, double time, double dt);
+
+    public void init();
 }

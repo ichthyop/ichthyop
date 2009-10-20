@@ -4,8 +4,7 @@
  */
 package fr.ird.ichthyop.event;
 
-import fr.ird.ichthyop.release.*;
-import fr.ird.ichthyop.*;
+import fr.ird.ichthyop.manager.ReleaseManager;
 import java.util.EventObject;
 
 /**
@@ -14,12 +13,12 @@ import java.util.EventObject;
  */
 public class ReleaseEvent extends EventObject {
 
-    public ReleaseEvent(ReleaseSchedule source) {
+    public ReleaseEvent(ReleaseManager source) {
         super(source);
     }
 
     @Override
-    public ReleaseSchedule getSource() {
-        return (ReleaseSchedule) source;
+    public ReleaseManager getSource() {
+        return (ReleaseManager) source;
     }
 }

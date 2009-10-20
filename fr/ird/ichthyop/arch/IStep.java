@@ -37,4 +37,8 @@ public interface IStep extends Cloneable {
 
     public void addLastStepListener(LastStepListener listener);
 
+    public void firstStepTriggered();
+
+    public void init();
+
 }

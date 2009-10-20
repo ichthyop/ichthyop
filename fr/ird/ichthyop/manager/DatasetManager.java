@@ -4,7 +4,7 @@
  */
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.io.TypeBlock;
+import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.arch.IDataset;
 import fr.ird.ichthyop.arch.IDatasetManager;
 import fr.ird.ichthyop.io.ICFile;
@@ -47,7 +47,7 @@ public class DatasetManager implements IDatasetManager {
     }
 
     public XBlock getXDataset(String key) {
-        return ICFile.getInstance().getBlock(TypeBlock.DATASET, key);
+        return ICFile.getInstance().getBlock(BlockType.DATASET, key);
     }
 
     public String getParameter(String key) {
@@ -60,7 +60,7 @@ public class DatasetManager implements IDatasetManager {
     }
 
     private XBlock findActiveDataset() {
-        List<XBlock> list = ICFile.getInstance().getBlocks(TypeBlock.DATASET);
+        List<XBlock> list = ICFile.getInstance().getBlocks(BlockType.DATASET);
         if (list.size() > 0 && list.size() < 2) {
             return list.get(0);
         } else {

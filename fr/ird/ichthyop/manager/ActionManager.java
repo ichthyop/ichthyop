@@ -5,7 +5,7 @@
 package fr.ird.ichthyop.manager;
 
 import fr.ird.ichthyop.arch.IBasicParticle;
-import fr.ird.ichthyop.io.TypeBlock;
+import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.action.AbstractAction;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.arch.IActionManager;
@@ -49,7 +49,7 @@ public class ActionManager extends HashMap<String, AbstractAction> implements IA
     }
 
     public XBlock getXAction(String key) {
-        return ICFile.getInstance().getBlock(TypeBlock.ACTION, key);
+        return ICFile.getInstance().getBlock(BlockType.ACTION, key);
     }
 
     public AbstractAction createAction(Class actionClass) {
@@ -67,7 +67,7 @@ public class ActionManager extends HashMap<String, AbstractAction> implements IA
 
     public Collection<XBlock> getXActions() {
         Collection<XBlock> collection = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(TypeBlock.ACTION)) {
+        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.ACTION)) {
             collection.add(block);
 
         }

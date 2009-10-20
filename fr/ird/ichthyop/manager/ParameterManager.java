@@ -1,6 +1,6 @@
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.io.TypeBlock;
+import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.arch.IParameterManager;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
@@ -43,6 +43,6 @@ public class ParameterManager implements IParameterManager {
     }
 
     private XBlock getBlock(String blockName) {
-        return ICFile.getInstance().getBlock(TypeBlock.OPTION, blockName);
+        return ICFile.getInstance().getBlock(BlockType.OPTION, blockName);
     }
 }

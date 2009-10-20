@@ -22,9 +22,9 @@ public class XBlock extends org.jdom.Element {
     final public static String ENABLED = "enabled";
     final public static String TYPE = "type";
     public final static String PARAMETERS = "parameters";
-    private final TypeBlock block_type;
+    private final BlockType block_type;
 
-    public XBlock(TypeBlock block_type, Element element) {
+    public XBlock(BlockType block_type, Element element) {
         super(BLOCK);
         this.block_type = block_type;
         this.setAttribute(TYPE, block_type.toString());
@@ -33,7 +33,7 @@ public class XBlock extends org.jdom.Element {
         }
     }
 
-    public TypeBlock getType() {
+    public BlockType getType() {
         return block_type;
     }
 
@@ -42,7 +42,12 @@ public class XBlock extends org.jdom.Element {
     }
 
     public boolean isEnabled() {
-        return Boolean.valueOf(getChildTextNormalize(ENABLED));
+        
+        if (null != getChild(ENABLED)) {
+            return Boolean.valueOf(getChildTextNormalize(ENABLED));
+        } else {
+            return true;
+        }
     }
 
     public ArrayList<XParameter> getParameters() {
@@ -53,6 +58,28 @@ public class XBlock extends org.jdom.Element {
             }
         } catch (java.lang.NullPointerException ex) {
             Logger.getLogger(XBlock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+
+    public List<XParameter> getParameters(final ParamType type) {
+        Filter filtre = new Filter() {
+
+            public boolean matches(Object obj) {
+                if (!(obj instanceof Element)) {
+                    return false;
+                }
+                Element element = (Element) obj;
+                if (element.getAttribute(XParameter.TYPE) != null && element.getAttributeValue(XParameter.TYPE).matches(type.toString())) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        };
+        List<XParameter> list = new ArrayList();
+        for (Object elt : getChild(PARAMETERS).getContent(filtre)) {
+            list.add(new XParameter((Element) elt));
         }
         return list;
     }

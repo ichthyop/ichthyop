@@ -8,7 +8,7 @@ import fr.ird.ichthyop.event.LastStepEvent;
 import fr.ird.ichthyop.event.NextStepEvent;
 import fr.ird.ichthyop.Simulation;
 import fr.ird.ichthyop.TypeZone;
-import fr.ird.ichthyop.io.TypeBlock;
+import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.arch.IOutputManager;
 import fr.ird.ichthyop.arch.IStep;
 import fr.ird.ichthyop.io.ICFile;
@@ -40,6 +40,8 @@ public class OutputManager implements IOutputManager, LastStepListener {
     private int dt_record;
     private NCDimFactory dimensionFactory;
     private int i_record;
+    private boolean isRecord;
+    private int record_frequency;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -50,10 +52,10 @@ public class OutputManager implements IOutputManager, LastStepListener {
     private List<ITracker> trackers;
 
     private OutputManager() {
-        try {
-            ncOut = NetcdfFileWriteable.createNew("");
-        } catch (IOException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+        isRecord = ICFile.getInstance().getBlock(BlockType.OPTION, block_key).isEnabled();
+        if (isRecord()) {
+            getSimulation().getStep().addNextStepListener(this);
+            getSimulation().getStep().addLastStepListener(this);
         }
     }
 
@@ -80,22 +82,29 @@ public class OutputManager implements IOutputManager, LastStepListener {
         return getParameter("directory_out") + getParameter("output_filename") + ".nc";
     }
 
+    private boolean isRecord() {
+        return isRecord;
+    }
+
     public void setUp() {
-        if (ICFile.getInstance().getBlock(TypeBlock.OPTION, block_key).isEnabled()) {
-            getSimulation().getStep().addNextStepListener(this);
-            int record_frequency = Integer.valueOf(getParameter("record_frequency"));
-            dt_record = record_frequency * getSimulation().getStep().get_dt();
-            ncOut.setLocation(getPathName());
-            i_record = 0;
-            addTrackers();
+        
+        if (isRecord()) {
             try {
+                ncOut = NetcdfFileWriteable.createNew("");
+                record_frequency = Integer.valueOf(getParameter("record_frequency"));
+                ncOut.setLocation(getPathName());
+                addTrackers();
                 ncOut.create();
             } catch (IOException ex) {
                 Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-            getSimulation().getStep().addLastStepListener(this);
+            Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
         }
-        Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
+    }
+
+    public void init() {
+        i_record = 0;
+        dt_record = record_frequency * getSimulation().getStep().get_dt();
     }
 
     /**
@@ -190,12 +199,12 @@ public class OutputManager implements IOutputManager, LastStepListener {
     }
 
     public XBlock getXTracker(String key) {
-        return ICFile.getInstance().getBlock(TypeBlock.TRACKER, key);
+        return ICFile.getInstance().getBlock(BlockType.TRACKER, key);
     }
 
     public Collection<XBlock> getXTrackers() {
         Collection<XBlock> collection = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(TypeBlock.TRACKER)) {
+        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.TRACKER)) {
             collection.add(block);
 
         }

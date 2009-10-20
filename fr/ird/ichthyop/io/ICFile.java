@@ -58,11 +58,11 @@ public class ICFile {
     public Collection<XZone> getZones() {
     return icstructure.getZones();
     }*/
-    public XBlock getBlock(TypeBlock type, String key) {
+    public XBlock getBlock(BlockType type, String key) {
         return icstructure.getBlock(type, key);
     }
 
-    public List<XBlock> getBlocks(TypeBlock type) {
+    public List<XBlock> getBlocks(BlockType type) {
         return icstructure.getBlocks(type);
     }
 
@@ -76,7 +76,7 @@ public class ICFile {
             this(new Element(root));
         }
 
-        private XBlock getBlock(final TypeBlock type, final String key) {
+        private XBlock getBlock(final BlockType type, final String key) {
             List<XBlock> list = new ArrayList();
             for (XBlock block : getBlocks(type)) {
                 if (block.getKey().matches(key)) {
@@ -90,7 +90,7 @@ public class ICFile {
             }
         }
 
-        private List<XBlock> getBlocks(final TypeBlock type) {
+        private List<XBlock> getBlocks(final BlockType type) {
             Filter filtre = new Filter() {
 
                 public boolean matches(Object obj) {

@@ -9,6 +9,7 @@ import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XParameter;
 import fr.ird.ichthyop.manager.ActionManager;
 import fr.ird.ichthyop.manager.ParameterManager;
+import fr.ird.ichthyop.manager.SimulationManager;
 import fr.ird.ichthyop.manager.ZoneManager;
 import java.io.File;
 import java.util.Iterator;
@@ -27,7 +28,7 @@ public class TestParameter {
         file = new File(filename);
 
         ICFile.setFile(file);
-        ActionManager actionPool = ActionManager.getInstance();
+        /*ActionManager actionPool = ActionManager.getInstance();
         Iterator<AbstractAction> itA = actionPool.values().iterator();
         while (itA.hasNext()) {
             AbstractAction action = itA.next();
@@ -37,19 +38,22 @@ public class TestParameter {
                 System.out.println("+++");
                 System.out.println(param.getKey() + " " + param.getValue());
             }
-        }
+        }*/
         System.out.println("-------------------------------------");
         
-        System.out.println(ParameterManager.getInstance().getValue("app.time", "simulation_dt"));
+        System.out.println(ParameterManager.getInstance().getValue("app.time", "time_step"));
 
         System.out.println("-------------------------------------");
 
-        Iterator<Zone> itZ = ZoneManager.getInstance().getZones(TypeZone.RELEASE).iterator();
+        /*Iterator<Zone> itZ = ZoneManager.getInstance().getZones(TypeZone.RELEASE).iterator();
         while(itZ.hasNext()) {
             Zone zone = itZ.next();
             System.out.println("====================");
             System.out.println(zone.toString());
-        }
+        }*/
+
+
+        System.out.println(SimulationManager.getInstance().getNumberOfSimulations());
 
     }
 

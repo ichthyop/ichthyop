@@ -9,7 +9,7 @@ package fr.ird.ichthyop.io;
  *
  * @author pverley
  */
-public enum TypeBlock {
+public enum BlockType {
 
     OPTION,
     ACTION,

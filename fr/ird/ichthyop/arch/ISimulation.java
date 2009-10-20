@@ -35,4 +35,6 @@ public interface ISimulation {
 
     public void setUp();
 
+    public void init();
+
 }

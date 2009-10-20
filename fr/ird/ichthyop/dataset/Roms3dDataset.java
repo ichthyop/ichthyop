@@ -288,13 +288,20 @@ public abstract class Roms3dDataset extends AbstractDataset {
             //getDimGeogArea();
             getCstSigLevels();
             z_w_tp0 = getSigLevels();
+        } catch (IOException ex) {
+            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void init() {
+        try {
             long t0 = getSimulation().getStep().get_tO();
             open(getFile(t0));
             FLAG_TP = FLAG_SAL = FLAG_VDISP = true;
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
-            Logger.getLogger(Roms3dUclaDataset.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

@@ -58,22 +58,6 @@ public class Step implements IStep, ISimulationAccessor {
      */
     private int dt;
     /**
-     * Time between two records in the output file [second]
-     */
-    private int dt_record;
-    /**
-     * Time between two refreshes of the screen [second]
-     */
-    private int dt_refresh;
-    /**
-     * Computer time when the simulation starts [millisecond]
-     */
-    private long cpu_start;
-    /**
-     * Computer time at the current step of the simulation [millisecond]
-     */
-    private long cpu_now;
-    /**
      * Index of the current step
      */
     private int i_step;
@@ -85,10 +69,6 @@ public class Step implements IStep, ISimulationAccessor {
      * Index of the current simulation (always 0 for SINGLE mode)
      */
     private int i_simulation;
-    /***
-     * Number of simulations (always 1 for SERIAL mode)
-     */
-    private int nb_simulations;
     /**
      * A Calendar for time management
      */
@@ -102,9 +82,6 @@ public class Step implements IStep, ISimulationAccessor {
 ///////////////
 // Constructors
 ///////////////
-    Step() {
-        loadParameters();
-    }
 
 ////////////////////////////
 // Definition of the methods
@@ -115,11 +92,17 @@ public class Step implements IStep, ISimulationAccessor {
 
     public void setUp() {
 
+        loadParameters();
+    }
+
+    public void init() {
+        simuDuration = transportDuration + getSimulation().getReleaseManager().getReleaseDuration();
         i_step = 0;
         time = t0;
         nb_steps = (int) (simuDuration / dt);
-        cpu_start = System.currentTimeMillis();
-        addNextStepListener(getSimulation().getReleaseManager().getSchedule());
+    }
+
+    public void firstStepTriggered() {
         fireNextStepTriggered();
     }
 
@@ -131,7 +114,6 @@ public class Step implements IStep, ISimulationAccessor {
         }
         t0 = Long.valueOf(getParameter("app.time", "initial_time"));
         transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
-        simuDuration = transportDuration + getSimulation().getReleaseManager().getSchedule().getReleaseDuration();
         calendar = new ClimatoCalendar();
         calendar.setTimeInMillis(t0 * 1000L);
         dateFormat = new SimpleDateFormat(
@@ -158,7 +140,6 @@ public class Step implements IStep, ISimulationAccessor {
         if (Math.abs(time - t0) < simuDuration) {
             i_step++;
             calendar.setTimeInMillis(time * 1000L);
-            cpu_now = System.currentTimeMillis();
             fireNextStepTriggered();
             return true;
         }
@@ -194,26 +175,6 @@ public class Step implements IStep, ISimulationAccessor {
     }
 
     /**
-     * Checks whether it is time to write down a new record in the output file,
-     * function of <code>dt_record</code>
-     * @return <code>true</code>if a new record should be added to the output
-     * file;<code>false</code> otherwise.
-     */
-    public boolean hasToRecord() {
-        return ((time - t0) % dt_record) == 0;
-    }
-
-    /**
-     * Checks whether it is time to refresh the screen, function of
-     * <code>dt_refresh</code>
-     * @return <code>true</code>if the screen should be refreshed;
-     * <code>false</code> otherwise.
-     */
-    public boolean hasToRefresh() {
-        return ((time - t0) % dt_refresh) == 0;
-    }
-
-    /**
      * Gets the index of the current step
      * @return the index of the current step
      */
@@ -231,37 +192,11 @@ public class Step implements IStep, ISimulationAccessor {
     }
 
     /**
-     * Gets the number of simulations (which equals the number of sets of
-     * parameters predefined by the user). Returns 1 for SINGLE mode.
-     * @return the number of simulations.
-     */
-    public int getNumberOfSimulations() {
-        return nb_simulations;
-    }
-
-    /**
      * The number of steps of the current simulation.
      * @return the number of steps of the current simulation.
      */
     public int getNumberOfSteps() {
         return nb_steps;
-    }
-
-    /**
-     * Calculates the progress of the current simulation
-     * @return the progress of the current simulation as a percent
-     */
-    public int progressCurrent() {
-        return (int) (100.f * (i_step + 1) / nb_steps);
-    }
-
-    /**
-     * Calculates the progress of the current simulation compared to the whole
-     * sets of simulations.
-     * @return the progress of the whole sets of simulations as a percent
-     */
-    public int progressGlobal() {
-        return (int) (100.f * (i_simulation + (i_step + 1) / (float) nb_steps) / nb_simulations);
     }
 
     /**
@@ -343,7 +278,7 @@ public class Step implements IStep, ISimulationAccessor {
 
     private void fireNextStepTriggered() {
 
-        Logger.getAnonymousLogger().info("fire for time: " + getTime() + " " + timeToString());
+        Logger.getAnonymousLogger().info("-----< " + step.timeToString() + " >-----");
 
         NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(
                 NextStepListener.class);

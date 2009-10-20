@@ -4,17 +4,21 @@
  */
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.io.TypeBlock;
-import fr.ird.ichthyop.release.*;
+import fr.ird.ichthyop.Simulation;
+import fr.ird.ichthyop.event.NextStepEvent;
+import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.IReleaseManager;
+import fr.ird.ichthyop.arch.ISimulation;
+import fr.ird.ichthyop.event.ReleaseListener;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.event.EventListenerList;
 
 /**
  *
@@ -25,17 +29,22 @@ public class ReleaseManager implements IReleaseManager {
     private static final ReleaseManager releaseManager = new ReleaseManager();
     private IReleaseProcess releaseProcess;
     private XBlock releaseBlock;
+    /** Stores time of the release events */
+    private long[] timeEvent;
+    /** Index of the current release event */
+    private int indexEvent;
+    /** Set to true once all released events happened */
+    private boolean isAllReleased;
+    /** */
+    private EventListenerList listeners = new EventListenerList();
 
     public ReleaseManager() {
-        getSchedule().addReleaseListener(this);
+        getSimulation().getStep().addNextStepListener(this);
+        addReleaseListener(this);
     }
 
     public static IReleaseManager getInstance() {
         return releaseManager;
-    }
-
-    public ReleaseSchedule getSchedule() {
-        return ReleaseSchedule.getInstance();
     }
 
     private IReleaseProcess getReleaseProcess() {
@@ -58,7 +67,7 @@ public class ReleaseManager implements IReleaseManager {
     }
 
     public XBlock getXReleaseProcess(String key) {
-        return ICFile.getInstance().getBlock(TypeBlock.RELEASE, key);
+        return ICFile.getInstance().getBlock(BlockType.RELEASE, key);
     }
 
     public String getParameter(String key) {
@@ -67,7 +76,7 @@ public class ReleaseManager implements IReleaseManager {
 
     private XBlock findActiveReleaseProcess() {
         List<XBlock> list = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(TypeBlock.RELEASE)) {
+        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.RELEASE)) {
             if (block.isEnabled()) {
                 list.add(block);
             }
@@ -85,5 +94,86 @@ public class ReleaseManager implements IReleaseManager {
 
     public int getNbParticles() {
         return getReleaseProcess().getNbParticles();
+    }
+
+    public void nextStepTriggered(NextStepEvent e) {
+
+        if (!isAllReleased) {
+            long time = e.getSource().getTime();
+
+            while (!isAllReleased && timeEvent[indexEvent] >= time && timeEvent[indexEvent] < (time + e.getSource().get_dt())) {
+                fireReleaseTriggered();
+                indexEvent++;
+                isAllReleased = indexEvent >= timeEvent.length;
+            }
+        }
+    }
+
+    public void setUp() {
+        indexEvent = 0;
+        isAllReleased = false;
+        schedule();
+    }
+
+    private void schedule() {
+
+        timeEvent = new long[findNumberReleaseEvents()];
+        for (int i = 0; i < timeEvent.length; i++) {
+            timeEvent[i] = Integer.valueOf(getSimulation().getParameterManager().getValue("release.schedule", "event" + i));
+        }
+    }
+
+    private int findNumberReleaseEvents() {
+        int i = 0;
+        while (!getSimulation().getParameterManager().getValue("release.schedule", "event" + i).isEmpty())
+            i++;
+        //Logger.getLogger(ReleaseSchedule.class.getName()).log(Level.CONFIG, "Number release events: " + i);
+        return i;
+    }
+
+    public ISimulation getSimulation() {
+        return Simulation.getInstance();
+    }
+
+    /**
+     * Adds the specified value listener to receive ValueChanged events from
+     * the paremeter.
+     *
+     * @param listener the ValueListener
+     */
+    public void addReleaseListener(ReleaseListener listener) {
+        listeners.add(ReleaseListener.class, listener);
+    }
+
+    /**
+     * Removes the specified listener from the parameter
+     * @param listener the ValueListener
+     */
+    public void removeReleaseListener(ReleaseListener listener) {
+        listeners.remove(ReleaseListener.class, listener);
+    }
+
+    private void fireReleaseTriggered() {
+
+        //Logger.getLogger(getClass().getName()).info("Triggered release event " + indexEvent);
+
+        ReleaseListener[] listenerList = (ReleaseListener[]) listeners.getListeners(
+                ReleaseListener.class);
+
+        for (ReleaseListener listener : listenerList) {
+            listener.releaseTriggered(new ReleaseEvent(this));
+        }
+    }
+
+    public int getIndexEvent() {
+        return indexEvent;
+    }
+
+    public int getNbReleaseEvents() {
+        return timeEvent.length;
+    }
+
+    public long getReleaseDuration() {
+        return timeEvent[getNbReleaseEvents() - 1] - timeEvent[0];
     }
 }

@@ -21,7 +21,7 @@ public class XZone extends XBlock {
     private XBathyMask bathyMask;
 
     public XZone(Element xzone) {
-        super(TypeBlock.ZONE, xzone);
+        super(BlockType.ZONE, xzone);
         if (xzone != null) {
             addContent(xzone.cloneContent());
             bathyMask = new XBathyMask(getChild(XBathyMask.BATHY_MASK));
