@@ -41,9 +41,10 @@ public class Simulation implements ISimulation {
 
     public void setUp() {
         getDataset().setUp();
+        getOutputManager().setUp();
         getStep().setUp();
         getActionManager().setUp();
-        getOutputManager().setUp();
+        
     }
 
     public IDatasetManager getDatasetManager() {

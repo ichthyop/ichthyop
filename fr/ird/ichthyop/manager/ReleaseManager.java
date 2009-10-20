@@ -4,17 +4,13 @@
  */
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.io.TypeBlock;
 import fr.ird.ichthyop.release.*;
-import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.IReleaseManager;
-import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -88,6 +84,6 @@ public class ReleaseManager implements IReleaseManager {
     }
 
     public int getNbParticles() {
-        return releaseProcess.getNbParticles();
+        return getReleaseProcess().getNbParticles();
     }
 }

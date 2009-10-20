@@ -34,7 +34,6 @@ public class ReleaseSchedule implements ISimulationAccessor, NextStepListener {
         indexEvent = 0;
         isAllReleased = false;
         schedule();
-        //getSimulation().getStep().addNextStepListener(this);
     }
 
     public static ReleaseSchedule getInstance() {

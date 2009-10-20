@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 
 /** import java.util */
 import java.util.Calendar;
+import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -341,6 +342,8 @@ public class Step implements IStep, ISimulationAccessor {
     }
 
     private void fireNextStepTriggered() {
+
+        Logger.getAnonymousLogger().info("fire for time: " + getTime() + " " + timeToString());
 
         NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(
                 NextStepListener.class);

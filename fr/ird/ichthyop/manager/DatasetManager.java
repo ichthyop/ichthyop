@@ -9,6 +9,7 @@ import fr.ird.ichthyop.arch.IDataset;
 import fr.ird.ichthyop.arch.IDatasetManager;
 import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
+import fr.ird.ichthyop.io.XParameter;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +51,12 @@ public class DatasetManager implements IDatasetManager {
     }
 
     public String getParameter(String key) {
-        return datasetBlock.getParameter(key).getValue();
+        XParameter xparam = datasetBlock.getParameter(key);
+        if (null != xparam) {
+            return datasetBlock.getParameter(key).getValue();
+        } else {
+            return null;
+        }
     }
 
     private XBlock findActiveDataset() {

@@ -33,9 +33,15 @@ public class DepthTracker extends AbstractTracker {
         Iterator<IBasicParticle> iter = getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            Index index = Index.factory(new int[]{0, particle.getIndex()});
-            getArray().setFloat(index, (float) particle.getDepth());
+            //Index index = Index.factory(new int[]{0, particle.getIndex()});
+            //getArray().setFloat(index, (float) particle.getDepth());
+            getArray().set(0, particle.getIndex(), (float) particle.getDepth());
         }
+    }
+
+    @Override
+    public ArrayFloat.D2 getArray() {
+        return (ArrayFloat.D2) super.getArray();
     }
 
     @Override

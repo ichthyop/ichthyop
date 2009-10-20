@@ -6,6 +6,7 @@ package fr.ird.ichthyop.io;
 
 import fr.ird.ichthyop.arch.IBasicParticle;
 import java.util.Iterator;
+import java.util.logging.Logger;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
@@ -32,9 +33,16 @@ public class LonTracker extends AbstractTracker {
         Iterator<IBasicParticle> iter = getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            Index index = Index.factory(new int[]{0, particle.getIndex()});
-            getArray().setFloat(index, (float) particle.getLon());
+            //Index index = Index.factory(new int[]{0, particle.getIndex()});
+            //Logger.getAnonymousLogger().info("tracking particle " + particle.getIndex() + " " + (float) particle.getLon());
+            //getArray().setFloat(index, (float) particle.getLon());
+            getArray().set(0, particle.getIndex(), (float) particle.getLon());
         }
+    }
+
+    @Override
+    public ArrayFloat.D2 getArray() {
+        return (ArrayFloat.D2) super.getArray();
     }
 
     @Override

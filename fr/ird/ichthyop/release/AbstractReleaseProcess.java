@@ -23,6 +23,7 @@ public abstract class AbstractReleaseProcess implements IReleaseProcess {
 
     public AbstractReleaseProcess() {
         releaseKey = getSimulation().getPropertyManager(getClass()).getProperty("release.key");
+        loadParameters();
     }
 
     abstract void loadParameters();
@@ -30,10 +31,10 @@ public abstract class AbstractReleaseProcess implements IReleaseProcess {
     abstract void proceedToRelease(ReleaseEvent event) throws IOException;
 
     final public void release(ReleaseEvent event) {
-        if (!paramLoaded) {
+        /*if (!paramLoaded) {
             loadParameters();
             paramLoaded = true;
-        }
+        }*/
         try {
             proceedToRelease(event);
         } catch (IOException ex) {

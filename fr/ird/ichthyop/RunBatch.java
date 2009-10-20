@@ -46,7 +46,7 @@ public class RunBatch implements Runnable, ISimulationAccessor {
     public void run() {
         do {
             getSimulation().step();
-            Logger.getLogger(RunBatch.class.getName()).info("Step " + getSimulation().getStep().timeToString());
+            //Logger.getLogger(RunBatch.class.getName()).info("Step " + getSimulation().getStep().timeToString());
         } while (getSimulation().getStep().hasNext());
     }
 

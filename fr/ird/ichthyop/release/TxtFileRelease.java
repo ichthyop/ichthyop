@@ -58,8 +58,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                     coord = new double[strCoord.length];
                     for (int i = 0; i < strCoord.length; i++) {
                         try {
-                            coord[i] = nbFormat.parse(strCoord[i].trim()).
-                                    doubleValue();
+                            coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
                         } catch (ParseException ex) {
                             ex.printStackTrace();
                         }
@@ -69,6 +68,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                             : ParticleFactory.createParticle(index, coord[0], coord[1]);
 
                     if (getSimulation().getDataset().isInWater(particle.getGridPoint())) {
+                        //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
                         getSimulation().getPopulation().add(particle);
                         index++;
                     } else {
@@ -86,8 +86,11 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         int nbParticles = 0;
         try {
             BufferedReader bfIn = new BufferedReader(new FileReader(getFile(pathname)));
-            while ((bfIn.readLine()) != null) {
-                nbParticles++;
+            String line;
+            while ((line = bfIn.readLine()) != null) {
+                if (!line.startsWith("#") & !(line.length() < 1)) {
+                    nbParticles++;
+                }
             }
 
         } catch (IOException ex) {

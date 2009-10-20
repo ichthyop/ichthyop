@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package fr.ird.ichthyop.dataset;
 
 import fr.ird.ichthyop.util.MetaFilenameFilter;
@@ -21,6 +20,7 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.Attribute;
 
 /**
  *
@@ -172,7 +172,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
      * Name of the Variable in NetCDF file
      */
     static String strKv;
-    private String strThetaS, strThetaB, strHc, strPn, strPm;
+    String strCs_r, strCs_w, strSc_r, strSc_w, strPn, strPm;
     /**
      * Determines whether or not the temperature field should be read in the
      * NetCDF file, function of the user's options.
@@ -187,10 +187,35 @@ public abstract class Roms3dDataset extends AbstractDataset {
      * Determines whether or not the turbulent diffusivity should be read in the
      * NetCDF file, function of the user's options.
      */
-
     private static boolean FLAG_VDISP;
+    private String gridFile;
 
-    public abstract void loadFieldNames();
+    abstract float getHc();
+
+    void loadParameters() {
+
+        strXiDim = getParameter("field_dim_xi");
+        strEtaDim = getParameter("field_dim_eta");
+        strZDim = getParameter("field_dim_z");
+        strTimeDim = getParameter("field_dim_time");
+        strLon = getParameter("field_var_lon");
+        strLat = getParameter("field_var_lat");
+        strBathy = getParameter("field_var_bathy");
+        strMask = getParameter("field_var_mask");
+        strU = getParameter("field_var_u");
+        strV = getParameter("field_var_v");
+        strZeta = getParameter("field_var_zeta");
+        strTp = getParameter("field_var_tp");
+        strSal = getParameter("field_var_sal");
+        strTime = getParameter("field_var_time");
+        strKv = getParameter("field_var_kv");
+        strPn = getParameter("field_var_pn");
+        strPm = getParameter("field_var_pm");
+        strCs_r = getParameter("field_attrib_csr");
+        strCs_w = getParameter("field_attrib_csw");
+        strSc_r = getParameter("field_attrib_scr");
+        strSc_w = getParameter("field_attrib_scw");
+    }
 
     private void openLocation(String rawPath) throws IOException {
 
@@ -199,8 +224,23 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
         if (isDirectory(path)) {
             listInputFiles = getInputList(path);
+            if (null != getParameter("grid_file")) {
+                gridFile = getGridFile(getParameter("grid_file"));
+            } else {
+                gridFile = listInputFiles.get(0);
+            }
         }
         open(listInputFiles.get(0));
+    }
+
+    private String getGridFile(String rawFile) throws IOException {
+
+        File filename = new File(rawFile);
+        if (!filename.exists()) {
+            throw new IOException("Grid file " + rawFile + " does not exist");
+        }
+
+        return filename.toString();
     }
 
     private ArrayList<String> getInputList(String path) throws IOException {
@@ -235,14 +275,16 @@ public abstract class Roms3dDataset extends AbstractDataset {
     public void setUp() {
 
         loadParameters();
-        loadFieldNames();
+
         try {
             openLocation(getParameter("input_path"));
             getDimNC();
-            /*if (Boolean.valueOf(getParameter("is_ranged"))) {
-            //range(Configuration.getP1(), Configuration.getP2());
-            }*/
-            readConstantField();
+            if (Boolean.valueOf(getParameter("is_ranged"))) {
+                float[] p1 = new float[]{Float.valueOf(getParameter("range_P1_lon")), Float.valueOf(getParameter("range_P1_lat"))};
+                float[] p2 = new float[]{Float.valueOf(getParameter("range_P2_lon")), Float.valueOf(getParameter("range_P2_lat"))};
+                range(p1, p2);
+            }
+            readConstantField(gridFile);
             //getDimGeogArea();
             getCstSigLevels();
             z_w_tp0 = getSigLevels();
@@ -379,53 +421,36 @@ public abstract class Roms3dDataset extends AbstractDataset {
      */
     void getCstSigLevels() throws IOException {
 
-        double thetas = 0, thetab = 0, hc = 0;
-        double cff1, cff2;
-        double[] sc_r = new double[nz];
+        double hc;
+        double sc_r;
         double[] Cs_r = new double[nz];
         double[] cff_r = new double[nz];
-        double[] sc_w = new double[nz + 1];
+        double sc_w;
         double[] Cs_w = new double[nz + 1];
         double[] cff_w = new double[nz + 1];
 
         //-----------------------------------------------------------
         // Read the Param in ncIn
-        try {
-            if (ncIn.findGlobalAttribute(strThetaS) == null) {
-                System.out.println("ROMS Rutgers");
-                thetas = ncIn.findVariable(strThetaS).readScalarDouble();
-                thetab = ncIn.findVariable(strThetaB).readScalarDouble();
-                hc = ncIn.findVariable(strHc).readScalarDouble();
-            } else {
-                System.out.println("ROMS UCLA");
-                thetas = (ncIn.findGlobalAttribute(strThetaS).getNumericValue()).doubleValue();
-                thetab = (ncIn.findGlobalAttribute(strThetaB).getNumericValue()).doubleValue();
-                hc = (ncIn.findGlobalAttribute(strHc).getNumericValue()).doubleValue();
-            }
-        } catch (IOException e) {
-            throw new IOException(
-                    "Problem reading thetaS/thetaB/hc at location " + ncIn.getLocation().toString() + " : " + e.getMessage());
-        } catch (NullPointerException e) {
-            throw new IOException(
-                    "Problem reading thetaS/thetaB/hc at location " + ncIn.getLocation().toString() + " : " + e.getMessage());
-        }
+        hc = getHc();
+        Attribute attrib_sc_w = ncIn.findGlobalAttribute(strSc_w);
+        Attribute attrib_sc_r = ncIn.findGlobalAttribute(strSc_r);
+        Attribute attrib_cs_w = ncIn.findGlobalAttribute(strCs_w);
+        Attribute attrib_cs_r = ncIn.findGlobalAttribute(strCs_r);
+
 
         //-----------------------------------------------------------
-        // Calculation of the Coeff
-        cff1 = 1.d / sinh(thetas);
-        cff2 = .5d / tanh(.5d * thetas);
+        // Calculation of the Coeff;
         for (int k = nz; k-- > 0;) {
-            sc_r[k] = ((double) (k - nz) + .5d) / (double) nz;
-            Cs_r[k] = (1.d - thetab) * cff1 * sinh(thetas * sc_r[k]) + thetab * (cff2 * tanh((thetas * (sc_r[k] + .5d))) - .5d);
-            cff_r[k] = hc * (sc_r[k] - Cs_r[k]);
+            sc_r = attrib_sc_r.getNumericValue(k).floatValue();
+            Cs_r[k] = attrib_cs_r.getNumericValue(k).floatValue();
+            cff_r[k] = hc * (sc_r - Cs_r[k]);
         }
 
         for (int k = nz + 1; k-- > 0;) {
-            sc_w[k] = (double) (k - nz) / (double) nz;
-            Cs_w[k] = (1.d - thetab) * cff1 * sinh(thetas * sc_w[k]) + thetab * (cff2 * tanh((thetas * (sc_w[k] + .5d))) - .5d);
-            cff_w[k] = hc * (sc_w[k] - Cs_w[k]);
+            sc_w = attrib_sc_w.getNumericValue(k).floatValue();
+            Cs_w[k] = attrib_cs_w.getNumericValue(k).floatValue();
+            cff_w[k] = hc * (sc_w - Cs_w[k]);
         }
-        sc_w[0] = -1.d;
         Cs_w[0] = -1.d;
 
         //------------------------------------------------------------
@@ -458,7 +483,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
     }
 
-    void readConstantField() throws IOException {
+    void readConstantField(String gridFile) throws IOException {
 
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
@@ -478,14 +503,17 @@ public abstract class Roms3dDataset extends AbstractDataset {
         list.append(", ");
         list.append(strPn);
         try {
-            arrLon = ncIn.findVariable(strLon).read(origin, size);
-            arrLat = ncIn.findVariable(strLat).read(origin, size);
-            arrMask = ncIn.findVariable(strMask).read(origin, size);
-            arrH = ncIn.findVariable(strBathy).read(origin, size);
-            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo},
-                    new int[]{1, ny, nx}).reduce();
-            arrPm = ncIn.findVariable(strPm).read(origin, size);
-            arrPn = ncIn.findVariable(strPn).read(origin, size);
+
+            NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
+            arrLon = ncGrid.findVariable(strLon).read(origin, size);
+            arrLat = ncGrid.findVariable(strLat).read(origin, size);
+            arrMask = ncGrid.findVariable(strMask).read(origin, size);
+            arrH = ncGrid.findVariable(strBathy).read(origin, size);
+            arrPm = ncGrid.findVariable(strPm).read(origin, size);
+            arrPn = ncGrid.findVariable(strPn).read(origin, size);
+            ncGrid.close();
+
+            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
 
             if (arrLon.getElementType() == double.class) {
                 lonRho = (double[][]) arrLon.copyToNDJavaArray();
@@ -556,14 +584,11 @@ public abstract class Roms3dDataset extends AbstractDataset {
             }
             zeta_tp1 = zeta_tp0;
         } catch (IOException e) {
-            throw new IOException("Problem reading one of the fields " + list.toString() + " at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem reading one of the fields " + list.toString() + " at location: " + e.getMessage());
         } catch (InvalidRangeException e) {
-            throw new IOException("Problem reading one of the fields " + list.toString() + " at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem reading one of the fields " + list.toString() + " at location: " + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem reading one of the fields " + list.toString() + " at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem reading one of the fields " + list.toString() + " at location: " + e.getMessage());
         }
     }
 
@@ -1288,8 +1313,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
             }
 
             if (FLAG_VDISP) {
-            kv_tp1 = (float[][][]) ncIn.findVariable(strKv).read(origin,
-            new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
+                kv_tp1 = (float[][][]) ncIn.findVariable(strKv).read(origin,
+                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
             }
 
 
@@ -1433,11 +1458,15 @@ public abstract class Roms3dDataset extends AbstractDataset {
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      */
-    void readLonLat() throws IOException {
+    void readLonLat(String gridFile) throws IOException {
         Array arrLon, arrLat;
         try {
+
+            NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
             arrLon = ncIn.findVariable(strLon).read();
             arrLat = ncIn.findVariable(strLat).read();
+            ncGrid.close();
+
             if (arrLon.getElementType() == double.class) {
                 lonRho = (double[][]) arrLon.copyToNDJavaArray();
                 latRho = (double[][]) arrLat.copyToNDJavaArray();
@@ -1456,13 +1485,48 @@ public abstract class Roms3dDataset extends AbstractDataset {
             arrLon = null;
             arrLat = null;
         } catch (IOException e) {
-            throw new IOException("Problem reading lon/lat fields at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem reading lon/lat fields at location: " + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem reading lon/lat at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem reading lon/lat at location: " + e.getMessage());
         }
+    }
 
+    /**
+     * Resizes the domain and determines the range of the grid indexes
+     * taht will be used in the simulation.
+     * The new domain is limited by the Northwest and the Southeast corners.
+     * @param pGeog1 a float[], the geodesic coordinates of the domain
+     * Northwest corner
+     * @param pGeog2  a float[], the geodesic coordinates of the domain
+     * Southeast corner
+     * @throws an IOException if the new domain is not strictly nested
+     * within the NetCDF dataset domain.
+     */
+    private void range(float[] pGeog1, float[] pGeog2) throws IOException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        readLonLat(gridFile);
+
+        pGrid1 = lonlat2xy(pGeog1[0], pGeog1[1]);
+        pGrid2 = lonlat2xy(pGeog2[0], pGeog2[1]);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException(
+                    "Impossible to proportion the simulation area : points out of domain");
+        }
+        lonRho = null;
+        latRho = null;
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        nx = Math.min(nx, ipn - ipo + 1);
+        ny = Math.min(ny, jpn - jpo + 1);
+        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 
     /**
@@ -1489,5 +1553,4 @@ public abstract class Roms3dDataset extends AbstractDataset {
     private long skipSeconds(long time) {
         return time - time % 60L;
     }
-
 }

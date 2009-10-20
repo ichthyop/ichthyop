@@ -139,13 +139,17 @@ public class OutputManager implements IOutputManager, LastStepListener {
     public void nextStepTriggered(NextStepEvent e) {
 
         IStep step = e.getSource();
+        //Logger.getAnonymousLogger().info(step.getTime() + " " + step.get_tO());
         if (((step.getTime() - step.get_tO()) % dt_record) == 0) {
-            Logger.getAnonymousLogger().info("  --> record " + i_record + " - time " + getSimulation().getStep().timeToString());
-            for (ITracker tracker : trackers) {
-                tracker.track();
-                write2NcOut(tracker, i_record);
-            }
-            i_record++;
+            write(i_record++);
+        }
+    }
+
+    private void write(int i_record) {
+        Logger.getAnonymousLogger().info("  --> record " + i_record + " - time " + getSimulation().getStep().timeToString());
+        for (ITracker tracker : trackers) {
+            tracker.track();
+            write2NcOut(tracker, i_record);
         }
     }
 
@@ -159,6 +163,7 @@ public class OutputManager implements IOutputManager, LastStepListener {
      */
     private void write2NcOut(ITracker tracker, int index) {
         try {
+
             ncOut.write(tracker.short_name(), tracker.origin(index), tracker.getArray());
         } catch (IOException ex) {
             Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -198,6 +203,7 @@ public class OutputManager implements IOutputManager, LastStepListener {
     }
 
     public void lastStepOccurred(LastStepEvent e) {
+        write(i_record);
         close();
     }
 
