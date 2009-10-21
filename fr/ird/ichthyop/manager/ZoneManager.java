@@ -4,8 +4,9 @@
  */
 package fr.ird.ichthyop.manager;
 
+import fr.ird.ichthyop.event.InitializeEvent;
+import fr.ird.ichthyop.event.SetupEvent;
 import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IZoneManager;
 import fr.ird.ichthyop.io.XBlock;
@@ -15,22 +16,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  *
  * @author pverley
  */
-public class ZoneManager implements IZoneManager {
+public class ZoneManager extends AbstractManager implements IZoneManager {
 
     private static ZoneManager zoneManager = new ZoneManager();
     private HashMap<TypeZone, ArrayList<Zone>> map;
 
-    ZoneManager() {
+    public static ZoneManager getInstance() {
+        return zoneManager;
+    }
+
+    private ZoneManager() {
+        super();
         loadZones();
     }
 
-    public static ZoneManager getInstance() {
-        return zoneManager;
+    public void init() {
+        for (List<Zone> listZone : map.values()) {
+            for (Zone zone : listZone) {
+                zone.init();
+            }
+        }
     }
 
     private void loadZones() {
@@ -54,21 +65,21 @@ public class ZoneManager implements IZoneManager {
             for (XPoint point : xzone.getPolygon()) {
                 zone.addPoint(point.createRhoPoint());
             }
-            zone.setUp();
+            //zone.init();
             map.get(zone.getType()).add(zone.getIndex(), zone);
         }
 
         /*for (TypeZone type : map.keySet()) {
-            System.out.println(type.toString());
-            for (Zone zone : map.get(type)) {
-                System.out.println(zone.toString());
-            }
+        System.out.println(type.toString());
+        for (Zone zone : map.get(type)) {
+        System.out.println(zone.toString());
+        }
         }*/
     }
 
     private Collection<XZone> getZones() {
         Collection<XZone> collection = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.ZONE)) {
+        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.ZONE)) {
             collection.add(new XZone(block));
 
         }
@@ -77,5 +88,17 @@ public class ZoneManager implements IZoneManager {
 
     public ArrayList<Zone> getZones(TypeZone type) {
         return map.get(type);
+    }
+
+    public void setupPerformed(SetupEvent e) {
+        // do nothing
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        for (List<Zone> listZone : map.values()) {
+            for (Zone zone : listZone) {
+                zone.init();
+            }
+        }
     }
 }

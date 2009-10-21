@@ -16,9 +16,9 @@ public class Iv2Particle extends GrowingParticle {
 
     public void step() {
 
-        IActionManager actionManager = getSimulation().getActionManager();
+        IActionManager actionManager = getSimulationManager().getActionManager();
 
-        if (getAge() <= getSimulation().getStep().getTransportDuration()) {
+        if (getAge() <= getSimulationManager().getTimeManager().getTransportDuration()) {
 
             if (actionManager.get("action.recruitment") != null) {
                 if (((RecruitmentAction) actionManager.get("action.recruitment")).isStopMoving() && isRecruited()) {

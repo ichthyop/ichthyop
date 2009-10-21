@@ -11,7 +11,7 @@ import fr.ird.ichthyop.event.ReleaseEvent;
  *
  * @author pverley
  */
-public interface IReleaseProcess extends ISimulationAccessor {
+public interface IReleaseProcess {
 
     public void release(ReleaseEvent event);
 

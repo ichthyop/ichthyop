@@ -19,8 +19,6 @@ import org.jdom.input.SAXBuilder;
  */
 public class ICFile {
 
-    final public static String CLASS_NAME = "class_name";
-
     private static ICFile icfile = new ICFile();
     private static File file;
     private static ICStructure icstructure;
@@ -47,17 +45,6 @@ public class ICFile {
         }
     }
 
-    /*public XAction getAction(String key) {
-    return icstructure.getAction(key);
-    }
-
-    public Collection<XAction> getActions() {
-    return icstructure.getActions();
-    }
-
-    public Collection<XZone> getZones() {
-    return icstructure.getZones();
-    }*/
     public XBlock getBlock(BlockType type, String key) {
         return icstructure.getBlock(type, key);
     }

@@ -5,7 +5,7 @@
 
 package fr.ird.ichthyop.event;
 
-import fr.ird.ichthyop.arch.IStep;
+import fr.ird.ichthyop.arch.ITimeManager;
 import java.util.EventObject;
 
 /**
@@ -14,13 +14,13 @@ import java.util.EventObject;
  */
 public class NextStepEvent extends EventObject {
 
-    public NextStepEvent(IStep source) {
+    public NextStepEvent(Object source) {
         super(source);
     }
 
     @Override
-    public IStep getSource() {
-        return (IStep) source;
+    public ITimeManager getSource() {
+        return (ITimeManager) source;
     }
 
 }

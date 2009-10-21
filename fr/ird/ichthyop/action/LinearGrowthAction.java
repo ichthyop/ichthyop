@@ -30,12 +30,12 @@ public class LinearGrowthAction extends AbstractAction {
 
     public void execute(IBasicParticle particle) {
         IGrowingParticle gParticle = (IGrowingParticle) particle;
-        gParticle.setLength(grow(gParticle.getLength(), getSimulation().getDataset().getTemperature(gParticle.getGridPoint(), getSimulation().getStep().getTime())));
+        gParticle.setLength(grow(gParticle.getLength(), getSimulationManager().getDataset().getTemperature(gParticle.getGridPoint(), getSimulationManager().getTimeManager().getTime())));
     }
 
     private double grow(double length, double temperature) {
 
-        double dt_day = (double) getSimulation().getStep().get_dt() / (double) Constant.ONE_DAY;
+        double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
         length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
         return length;
 

@@ -39,7 +39,11 @@ public class Simulation implements ISimulation {
         return simulation;
     }
 
-    public void setUp() {
+    public void step() {
+        getPopulation().step();
+    }
+
+    /*public void setUp() {
         getReleaseManager().setUp();
         getOutputManager().setUp();
         getDataset().setUp();
@@ -51,46 +55,6 @@ public class Simulation implements ISimulation {
         getStep().init();
         getOutputManager().init();
         getDataset().init();
-    }
-
-    public IDatasetManager getDatasetManager() {
-        return DatasetManager.getInstance();
-    }
-
-    public IDataset getDataset() {
-        return getDatasetManager().getDataset();
-    }
-
-    public IStep getStep() {
-        return Step.getInstance();
-    }
-
-    public void step() {
-        getPopulation().step();
-        getStep().next();
-    }
-
-    public IActionManager getActionManager() {
-        return ActionManager.getInstance();
-    }
-
-    public IParameterManager getParameterManager() {
-        return ParameterManager.getInstance();
-    }
-
-    public IPropertyManager getPropertyManager(Class forClass) {
-        return PropertyManager.getInstance(forClass);
-    }
-
-    public IZoneManager getZoneManager() {
-        return ZoneManager.getInstance();
-    }
-
-    public IReleaseManager getReleaseManager() {
-        return ReleaseManager.getInstance();
-    }
-
-    public IOutputManager getOutputManager() {
-        return OutputManager.getInstance();
-    }
+        getZoneManager().init();
+    }*/
 }

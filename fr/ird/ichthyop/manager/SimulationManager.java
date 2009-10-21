@@ -5,21 +5,31 @@
 package fr.ird.ichthyop.manager;
 
 import fr.ird.ichthyop.Simulation;
+import fr.ird.ichthyop.arch.IActionManager;
+import fr.ird.ichthyop.arch.IDataset;
+import fr.ird.ichthyop.arch.IDatasetManager;
+import fr.ird.ichthyop.arch.IOutputManager;
+import fr.ird.ichthyop.arch.IParameterManager;
+import fr.ird.ichthyop.arch.IPropertyManager;
+import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.arch.ISimulationAccessor;
-import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.io.ICFile;
+import fr.ird.ichthyop.arch.ISimulationManager;
+import fr.ird.ichthyop.arch.ITimeManager;
+import fr.ird.ichthyop.arch.IZoneManager;
+import fr.ird.ichthyop.event.InitializeEvent;
+import fr.ird.ichthyop.event.InitializeListener;
+import fr.ird.ichthyop.event.SetupEvent;
+import fr.ird.ichthyop.event.SetupListener;
 import fr.ird.ichthyop.io.ParamType;
-import fr.ird.ichthyop.io.XBlock;
 import fr.ird.ichthyop.io.XParameter;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import javax.swing.event.EventListenerList;
 
 /**
  *
  * @author pverley
  */
-public class SimulationManager implements Runnable, ISimulationAccessor {
+public class SimulationManager implements ISimulationManager {
 
     final private static SimulationManager simulationManager = new SimulationManager();
     /**
@@ -33,17 +43,17 @@ public class SimulationManager implements Runnable, ISimulationAccessor {
     /**
      *
      */
-    private List<XParameter> serialParameters;
-
-    private SimulationManager() {
-        serialParameters = getSerialParameters();
-        for (XParameter xparam : serialParameters) {
-            nb_simulations *= xparam.getLength();
-        }
-    }
+    private EventListenerList listeners = new EventListenerList();
 
     public static SimulationManager getInstance() {
         return simulationManager;
+    }
+
+    public void setConfigurationFile(File file) {
+        getParameterManager().setConfigurationFile(file);
+        for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
+            nb_simulations *= xparam.getLength();
+        }
     }
 
     /**
@@ -54,7 +64,7 @@ public class SimulationManager implements Runnable, ISimulationAccessor {
      */
     public boolean hasNextSimulation() {
 
-        for (XParameter xparam : serialParameters) {
+        for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
             if (xparam.hasNext()) {
                 xparam.increment();
                 this.reset();
@@ -64,19 +74,6 @@ public class SimulationManager implements Runnable, ISimulationAccessor {
             }
         }
         return false;
-    }
-
-    public List<XParameter> getSerialParameters() {
-
-        List<XParameter> list = new ArrayList();
-        for (BlockType type : BlockType.values()) {
-            for (XBlock xblock : ICFile.getInstance().getBlocks(type)) {
-                if (xblock.isEnabled()) {
-                    list.addAll(xblock.getParameters(ParamType.SERIAL));
-                }
-            }
-        }
-        return list;
     }
 
     /**
@@ -95,17 +92,108 @@ public class SimulationManager implements Runnable, ISimulationAccessor {
         i_simulation++;
     }
 
+    private void mobiliseManagers() {
+        getActionManager();
+        getDatasetManager();
+        getOutputManager();
+        getReleaseManager();
+        getTimeManager();
+        getZoneManager();
+    }
+
+    private String indexSimulation() {
+        return (i_simulation + 1) + " / " + nb_simulations;
+    }
+
     public void run() {
+        mobiliseManagers();
         do {
-            getSimulation().setUp();
-            getSimulation().getStep().firstStepTriggered();
+            System.out.println("=========================");
+            System.out.println("Simulation " + indexSimulation());
+            System.out.println("=========================");
+            fireSetupPerformed();
+            fireInitializePerformed();
+            getTimeManager().firstStepTriggered();
             do {
+                System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
                 getSimulation().step();
-            } while (getSimulation().getStep().hasNext());
+            } while (getTimeManager().hasNextStep());
+            System.out.println("End of simulation");
         } while (hasNextSimulation());
     }
 
     public ISimulation getSimulation() {
         return Simulation.getInstance();
+    }
+
+    public void addSetupListener(SetupListener listener) {
+        listeners.add(SetupListener.class, listener);
+    }
+
+    public void removeSetupListener(SetupListener listener) {
+        listeners.remove(SetupListener.class, listener);
+    }
+
+    private void fireSetupPerformed() {
+        System.out.println("Setup...");
+        SetupListener[] listenerList = (SetupListener[]) listeners.getListeners(SetupListener.class);
+
+        for (SetupListener listener : listenerList) {
+            //System.out.println("fire setup to " + listener.getClass().getCanonicalName());
+            listener.setupPerformed(new SetupEvent(this));
+        }
+    }
+
+    public void addInitializeListener(InitializeListener listener) {
+        listeners.add(InitializeListener.class, listener);
+    }
+
+    public void removeInitializeListener(InitializeListener listener) {
+        listeners.remove(InitializeListener.class, listener);
+    }
+
+    private void fireInitializePerformed() {
+        System.out.println("Initialization...");
+        InitializeListener[] listenerList = (InitializeListener[]) listeners.getListeners(InitializeListener.class);
+
+        for (InitializeListener listener : listenerList) {
+            listener.initializePerformed(new InitializeEvent(this));
+        }
+    }
+
+     public IDatasetManager getDatasetManager() {
+        return DatasetManager.getInstance();
+    }
+
+    public IDataset getDataset() {
+        return getDatasetManager().getDataset();
+    }
+
+    public IActionManager getActionManager() {
+        return ActionManager.getInstance();
+    }
+
+    public IParameterManager getParameterManager() {
+        return ParameterManager.getInstance();
+    }
+
+    public IPropertyManager getPropertyManager(Class forClass) {
+        return PropertyManager.getInstance(forClass);
+    }
+
+    public IZoneManager getZoneManager() {
+        return ZoneManager.getInstance();
+    }
+
+    public IReleaseManager getReleaseManager() {
+        return ReleaseManager.getInstance();
+    }
+
+    public IOutputManager getOutputManager() {
+        return OutputManager.getInstance();
+    }
+
+    public ITimeManager getTimeManager() {
+        return TimeManager.getInstance();
     }
 }

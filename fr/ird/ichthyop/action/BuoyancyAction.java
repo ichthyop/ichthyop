@@ -67,11 +67,11 @@ public class BuoyancyAction extends AbstractAction {
             /** update geog coordinates */
             particle.grid2Geo();
             
-            double time = getSimulation().getStep().getTime();
-            double sal = getSimulation().getDataset().getSalinity(particle.getGridPoint(), time);
-            double tp = getSimulation().getDataset().getSalinity(particle.getGridPoint(), time);
+            double time = getSimulationManager().getTimeManager().getTime();
+            double sal = getSimulationManager().getDataset().getSalinity(particle.getGridPoint(), time);
+            double tp = getSimulationManager().getDataset().getSalinity(particle.getGridPoint(), time);
             
-            particle.setZ(getSimulation().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp)));
+            particle.setZ(getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp)));
         }
     }
 

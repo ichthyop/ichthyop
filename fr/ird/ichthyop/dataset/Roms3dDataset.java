@@ -295,7 +295,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
     public void init() {
         try {
-            long t0 = getSimulation().getStep().get_tO();
+            long t0 = getSimulationManager().getTimeManager().get_tO();
             open(getFile(t0));
             FLAG_TP = FLAG_SAL = FLAG_VDISP = true;
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
@@ -308,7 +308,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
     private int findCurrentRank(long time) throws IOException {
 
         int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulation().getStep().get_dt());
+        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         long time_rank;
         Array timeArr;
         try {
@@ -341,7 +341,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
     private String getFile(long time) throws IOException {
 
         int indexLast = listInputFiles.size() - 1;
-        int time_arrow = (int) Math.signum(getSimulation().getStep().get_dt());
+        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
 
         for (int i = 0; i < indexLast; i++) {
             if (isTimeIntoFile(time, i)) {
@@ -613,7 +613,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             e.printStackTrace();
             //throw new IOException("Problem reading dimensions from dataset " + ncIn.getLocation() + " : " + e.getMessage());
         }
-        Logger.getLogger(getClass().getName()).info("nx " + nx + " - ny " + ny + " - nz " + nz);
+        //Logger.getLogger(getClass().getName()).info("nx " + nx + " - ny " + ny + " - nz " + nz);
         ipo = jpo = 0;
     }
 

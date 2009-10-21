@@ -3,8 +3,6 @@ package fr.ird.ichthyop;
 /** import java.util */
 import fr.ird.ichthyop.arch.IBasicParticle;
 import fr.ird.ichthyop.arch.IPopulation;
-import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.arch.ISimulationAccessor;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -26,7 +24,7 @@ import java.util.Iterator;
  *
  * @author P.Verley
  */
-public class Population extends HashSet implements IPopulation, ISimulationAccessor {
+public class Population extends HashSet implements IPopulation {
 
 ////////////////
 // Debug purpose
@@ -58,10 +56,6 @@ public class Population extends HashSet implements IPopulation, ISimulationAcces
                 particle.step();
             }
         }
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
     }
     //------- End of class
 }

@@ -10,6 +10,7 @@ import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.ITracker;
 import fr.ird.ichthyop.manager.OutputManager.NCDimFactory;
 import fr.ird.ichthyop.manager.PropertyManager;
+import fr.ird.ichthyop.SimulationManagerAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import ucar.ma2.Array;
@@ -21,21 +22,21 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public abstract class AbstractTracker implements ITracker {
+public abstract class AbstractTracker extends SimulationManagerAccessor implements ITracker {
 
     private String trackerKey;
     private ArrayList<Dimension> dimensions = new ArrayList();
     final private DataType type;
     private PropertyManager propertyManager = PropertyManager.getInstance(getClass());
     private Array array;
-    private NCDimFactory dimFactory = getSimulation().getOutputManager().getDimensionFactory();
+    private NCDimFactory dimFactory = getSimulationManager().getOutputManager().getDimensionFactory();
 
     abstract void setDimensions();
 
     abstract Array createArray();
 
     public AbstractTracker(DataType type) {
-        trackerKey = getSimulation().getPropertyManager(getClass()).getProperty("tracker.key");
+        trackerKey = getSimulationManager().getPropertyManager(getClass()).getProperty("tracker.key");
         this.type = type;
         setDimensions();
         array = createArray();
@@ -73,11 +74,7 @@ public abstract class AbstractTracker implements ITracker {
     }
 
     public boolean isEnabled() {
-        return getSimulation().getOutputManager().getXTracker(trackerKey).isEnabled();
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
+        return getSimulationManager().getOutputManager().getXTracker(trackerKey).isEnabled();
     }
 
     public String short_name() {

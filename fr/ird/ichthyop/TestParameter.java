@@ -41,7 +41,7 @@ public class TestParameter {
         }*/
         System.out.println("-------------------------------------");
         
-        System.out.println(ParameterManager.getInstance().getValue("app.time", "time_step"));
+        System.out.println(ParameterManager.getInstance().getParameter("app.time", "time_step"));
 
         System.out.println("-------------------------------------");
 

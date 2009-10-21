@@ -30,7 +30,7 @@ public class TimeTracker extends AbstractTracker {
     }
 
     public void track() {
-        getArray().setDouble(0, getSimulation().getStep().getTime());
+        getArray().setDouble(0, getSimulationManager().getTimeManager().getTime());
     }
 
 }

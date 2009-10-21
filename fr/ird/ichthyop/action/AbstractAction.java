@@ -4,38 +4,34 @@
  */
 package fr.ird.ichthyop.action;
 
-import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.arch.IAction;
 import fr.ird.ichthyop.io.XParameter;
+import fr.ird.ichthyop.SimulationManagerAccessor;
 import java.util.ArrayList;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractAction implements IAction {
+public abstract class AbstractAction extends SimulationManagerAccessor implements IAction {
 
     private String actionKey;
 
     public AbstractAction() {
-        actionKey = getSimulation().getPropertyManager(getClass()).getProperty("action.key");
+        actionKey = getSimulationManager().getPropertyManager(getClass()).getProperty("action.key");
         loadParameters();
     }
 
     public String getParameter(String key) {
-        return getSimulation().getActionManager().getXAction(actionKey).getParameter(key).getValue();
+        return getSimulationManager().getActionManager().getXAction(actionKey).getParameter(key).getValue();
     }
 
     public ArrayList<XParameter> getParameters() {
-        return getSimulation().getActionManager().getXAction(actionKey).getParameters();
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
+        return getSimulationManager().getActionManager().getXAction(actionKey).getParameters();
     }
 
     public boolean isEnabled() {
-        return getSimulation().getActionManager().getXAction(actionKey).isEnabled();
+        return getSimulationManager().getActionManager().getXAction(actionKey).isEnabled();
     }
+
 }

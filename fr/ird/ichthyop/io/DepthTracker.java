@@ -30,7 +30,7 @@ public class DepthTracker extends AbstractTracker {
 
     public void track() {
         IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulation().getPopulation().iterator();
+        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             //Index index = Index.factory(new int[]{0, particle.getIndex()});

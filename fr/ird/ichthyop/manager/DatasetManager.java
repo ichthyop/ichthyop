@@ -4,10 +4,11 @@
  */
 package fr.ird.ichthyop.manager;
 
+import fr.ird.ichthyop.event.InitializeEvent;
+import fr.ird.ichthyop.event.SetupEvent;
 import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.arch.IDataset;
 import fr.ird.ichthyop.arch.IDatasetManager;
-import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
 import fr.ird.ichthyop.io.XParameter;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class DatasetManager implements IDatasetManager {
+public class DatasetManager extends AbstractManager implements IDatasetManager {
 
     final private static DatasetManager datasetManager = new DatasetManager();
     private IDataset dataset;
@@ -47,7 +48,7 @@ public class DatasetManager implements IDatasetManager {
     }
 
     public XBlock getXDataset(String key) {
-        return ICFile.getInstance().getBlock(BlockType.DATASET, key);
+        return getSimulationManager().getParameterManager().getBlock(BlockType.DATASET, key);
     }
 
     public String getParameter(String key) {
@@ -60,11 +61,19 @@ public class DatasetManager implements IDatasetManager {
     }
 
     private XBlock findActiveDataset() {
-        List<XBlock> list = ICFile.getInstance().getBlocks(BlockType.DATASET);
+        List<XBlock> list = getSimulationManager().getParameterManager().getBlocks(BlockType.DATASET);
         if (list.size() > 0 && list.size() < 2) {
             return list.get(0);
         } else {
             return null;
         }
+    }
+
+    public void setupPerformed(SetupEvent e) {
+        getDataset().setUp();
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        getDataset().init();
     }
 }

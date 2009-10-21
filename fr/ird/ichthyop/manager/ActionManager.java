@@ -5,10 +5,12 @@
 package fr.ird.ichthyop.manager;
 
 import fr.ird.ichthyop.arch.IBasicParticle;
+import fr.ird.ichthyop.event.InitializeEvent;
+import fr.ird.ichthyop.event.SetupEvent;
 import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.action.AbstractAction;
-import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.arch.IActionManager;
+import fr.ird.ichthyop.event.SetupListener;
 import fr.ird.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,9 +23,10 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class ActionManager extends HashMap<String, AbstractAction> implements IActionManager {
+public class ActionManager extends AbstractManager implements IActionManager, SetupListener {
 
     final private static ActionManager actionManager = new ActionManager();
+    private HashMap<String, AbstractAction> actionMap;
 
     public static ActionManager getInstance() {
         return actionManager;
@@ -34,13 +37,14 @@ public class ActionManager extends HashMap<String, AbstractAction> implements IA
     }
 
     private void loadActions() {
+        actionMap = new HashMap();
         Iterator<XBlock> it = getXActions().iterator();
         while (it.hasNext()) {
             XBlock xaction = it.next();
             if (xaction.isEnabled()) {
                 try {
-                    Class actionClass = Class.forName(xaction.getParameter(ICFile.CLASS_NAME).getValue());
-                    put(xaction.getKey(), createAction(actionClass));
+                    Class actionClass = Class.forName(xaction.getParameter("class_name").getValue());
+                    actionMap.put(xaction.getKey(), createAction(actionClass));
                 } catch (ClassNotFoundException ex) {
                     Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -49,7 +53,7 @@ public class ActionManager extends HashMap<String, AbstractAction> implements IA
     }
 
     public XBlock getXAction(String key) {
-        return ICFile.getInstance().getBlock(BlockType.ACTION, key);
+        return getSimulationManager().getParameterManager().getBlock(BlockType.ACTION, key);
     }
 
     public AbstractAction createAction(Class actionClass) {
@@ -67,7 +71,7 @@ public class ActionManager extends HashMap<String, AbstractAction> implements IA
 
     public Collection<XBlock> getXActions() {
         Collection<XBlock> collection = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.ACTION)) {
+        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.ACTION)) {
             collection.add(block);
 
         }
@@ -79,5 +83,17 @@ public class ActionManager extends HashMap<String, AbstractAction> implements IA
         if (action != null) {
             action.execute(particle);
         }
+    }
+
+    public AbstractAction get(Object key) {
+        return actionMap.get((String) key);
+    }
+
+    public void setupPerformed(SetupEvent e) {
+        loadActions();
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        // do nothing
     }
 }

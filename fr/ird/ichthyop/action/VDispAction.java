@@ -20,7 +20,7 @@ public class VDispAction extends AbstractAction {
     }
 
     public void execute(IBasicParticle particle) {
-        particle.increment(getVDispersion(particle.getGridPoint(), getSimulation().getStep().getTime(), getSimulation().getStep().get_dt()));
+        particle.increment(getVDispersion(particle.getGridPoint(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt()));
     }
 
     /**
@@ -68,7 +68,7 @@ public class VDispAction extends AbstractAction {
      */
     public double[] getVDispersion(double[] pGrid, double time, double dt) {
 
-        double[] kvSpline = getSimulation().getDataset().getKv(pGrid, time, dt);
+        double[] kvSpline = getSimulationManager().getDataset().getKv(pGrid, time, dt);
         double R = 2.d * random.nextDouble() - 1.d;
         double dz = kvSpline[0] * dt + R * Math.sqrt(6.d * kvSpline[1] * dt);
 
@@ -82,7 +82,7 @@ public class VDispAction extends AbstractAction {
         if (newz < 0) {
             dz = -(2.d * pGrid[2] + dz);
         }
-        int nz = getSimulation().getDataset().get_nz();
+        int nz = getSimulationManager().getDataset().get_nz();
         if (newz >= nz - 1) {
             dz = 2.d * (nz - 1 - pGrid[2]) - dz;
         }

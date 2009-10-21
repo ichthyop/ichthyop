@@ -4,15 +4,15 @@
  */
 package fr.ird.ichthyop.manager;
 
-import fr.ird.ichthyop.Simulation;
+import fr.ird.ichthyop.event.InitializeEvent;
 import fr.ird.ichthyop.event.NextStepEvent;
+import fr.ird.ichthyop.event.SetupEvent;
 import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.IReleaseManager;
-import fr.ird.ichthyop.arch.ISimulation;
 import fr.ird.ichthyop.event.ReleaseListener;
-import fr.ird.ichthyop.io.ICFile;
+import fr.ird.ichthyop.event.SetupListener;
 import fr.ird.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import javax.swing.event.EventListenerList;
  *
  * @author pverley
  */
-public class ReleaseManager implements IReleaseManager {
+public class ReleaseManager extends AbstractManager implements IReleaseManager, SetupListener {
 
     private static final ReleaseManager releaseManager = new ReleaseManager();
     private IReleaseProcess releaseProcess;
@@ -39,7 +39,7 @@ public class ReleaseManager implements IReleaseManager {
     private EventListenerList listeners = new EventListenerList();
 
     public ReleaseManager() {
-        getSimulation().getStep().addNextStepListener(this);
+        super();
         addReleaseListener(this);
     }
 
@@ -67,7 +67,7 @@ public class ReleaseManager implements IReleaseManager {
     }
 
     public XBlock getXReleaseProcess(String key) {
-        return ICFile.getInstance().getBlock(BlockType.RELEASE, key);
+        return getSimulationManager().getParameterManager().getBlock(BlockType.RELEASE, key);
     }
 
     public String getParameter(String key) {
@@ -76,7 +76,7 @@ public class ReleaseManager implements IReleaseManager {
 
     private XBlock findActiveReleaseProcess() {
         List<XBlock> list = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.RELEASE)) {
+        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.RELEASE)) {
             if (block.isEnabled()) {
                 list.add(block);
             }
@@ -119,20 +119,16 @@ public class ReleaseManager implements IReleaseManager {
 
         timeEvent = new long[findNumberReleaseEvents()];
         for (int i = 0; i < timeEvent.length; i++) {
-            timeEvent[i] = Integer.valueOf(getSimulation().getParameterManager().getValue("release.schedule", "event" + i));
+            timeEvent[i] = Integer.valueOf(getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i));
         }
     }
 
     private int findNumberReleaseEvents() {
         int i = 0;
-        while (!getSimulation().getParameterManager().getValue("release.schedule", "event" + i).isEmpty())
+        while (!getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i).isEmpty())
             i++;
         //Logger.getLogger(ReleaseSchedule.class.getName()).log(Level.CONFIG, "Number release events: " + i);
         return i;
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
     }
 
     /**
@@ -175,5 +171,15 @@ public class ReleaseManager implements IReleaseManager {
 
     public long getReleaseDuration() {
         return timeEvent[getNbReleaseEvents() - 1] - timeEvent[0];
+    }
+
+    public void setupPerformed(SetupEvent e) {
+        indexEvent = 0;
+        isAllReleased = false;
+        schedule();
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        // do nothing
     }
 }

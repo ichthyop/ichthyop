@@ -1,8 +1,6 @@
 package fr.ird.ichthyop;
 
 import fr.ird.ichthyop.arch.IRhoPoint;
-import fr.ird.ichthyop.arch.ISimulationAccessor;
-import fr.ird.ichthyop.arch.ISimulation;
 
 /**
  * Both ROMS and MARS use an Arakawa C grid.
@@ -18,7 +16,7 @@ import fr.ird.ichthyop.arch.ISimulation;
  *
  * @author P.Verley
  */
-public class RhoPoint implements IRhoPoint, ISimulationAccessor {
+public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -63,13 +61,13 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
     public void geo2Grid() {
 
         if (lonlatHaveChanged) {
-            double[] pGrid = getSimulation().getDataset().lonlat2xy(lon, lat);
+            double[] pGrid = getSimulationManager().getDataset().lonlat2xy(lon, lat);
             x = pGrid[0];
             y = pGrid[1];
             lonlatHaveChanged = false;
         }
         if (is3D && depthHasChanged) {
-            z = getSimulation().getDataset().depth2z(x, y, depth);
+            z = getSimulationManager().getDataset().depth2z(x, y, depth);
             depthHasChanged = false;
         }
     }
@@ -83,13 +81,13 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
     public void grid2Geo() {
 
         if (xyHaveChanged) {
-            double[] pGeog = getSimulation().getDataset().xy2lonlat(x, y);
+            double[] pGeog = getSimulationManager().getDataset().xy2lonlat(x, y);
             lon = pGeog[1];
             lat = pGeog[0];
             xyHaveChanged = false;
         }
         if (is3D && zHasChanged) {
-            depth = getSimulation().getDataset().z2depth(x, y, z);
+            depth = getSimulationManager().getDataset().z2depth(x, y, z);
             zHasChanged = false;
         }
     }
@@ -107,7 +105,7 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
         xyHaveChanged = true;
         if (move.length > 2) {
             z += move[2];
-            z = Math.max(0.d, Math.min(z, (double) getSimulation().getDataset().get_nz() - 1.00001f));
+            z = Math.max(0.d, Math.min(z, (double) getSimulationManager().getDataset().get_nz() - 1.00001f));
             zHasChanged = true;
         }
     }
@@ -236,10 +234,6 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
                 : new double[]{lon, lat};
     }
 
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
-    }
-
     @Override
     public Object clone() {
 
@@ -264,10 +258,10 @@ public class RhoPoint implements IRhoPoint, ISimulationAccessor {
     }
 
     public boolean isInWater() {
-        return getSimulation().getDataset().isInWater(getGridPoint());
+        return getSimulationManager().getDataset().isInWater(getGridPoint());
     }
 
     public boolean isOnEdge() {
-        return getSimulation().getDataset().isOnEdge(getGridPoint());
+        return getSimulationManager().getDataset().isOnEdge(getGridPoint());
     }
 }

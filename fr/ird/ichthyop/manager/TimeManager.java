@@ -1,42 +1,30 @@
-package fr.ird.ichthyop;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package fr.ird.ichthyop.manager;
 
-/** import java.text */
+import fr.ird.ichthyop.arch.ITimeManager;
 import fr.ird.ichthyop.event.NextStepEvent;
 import fr.ird.ichthyop.event.NextStepListener;
 import fr.ird.ichthyop.calendar.Calendar1900;
 import fr.ird.ichthyop.calendar.ClimatoCalendar;
-import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.arch.ISimulationAccessor;
-import fr.ird.ichthyop.arch.IStep;
+import fr.ird.ichthyop.event.InitializeEvent;
 import fr.ird.ichthyop.event.LastStepEvent;
 import fr.ird.ichthyop.event.LastStepListener;
+import fr.ird.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
-
-/** import java.util */
 import java.util.Calendar;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 
 /**
- * The class handles the march of the simulation throught time. It deals with
- * the timing of the simulation: beginning, time-step, current time, index of
- * the current step, existence of next step, time to refresh the display,
- * time to write a new record in output file, etc...
- * <p>The class is connected to the Configuration fil and informs the MainFrame
- * about the number of sets of parameters predefined by the user (a single
- * set for SINGLE mode and several sets for the SERIAL). It returns
- * the appropriate set of parameters for each simulation.</p>
  *
- * <p>Copyright: Copyright (c) 2007 - Free software under GNU GPL</p>
- *
- * @author P.Verley
+ * @author pverley
  */
-public class Step implements IStep, ISimulationAccessor {
+public class TimeManager extends AbstractManager implements ITimeManager {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
-    private final static Step step = new Step();
+    private final static TimeManager timeManager = new TimeManager();
     /**
      * Current time of the simulation [second]
      */
@@ -82,12 +70,11 @@ public class Step implements IStep, ISimulationAccessor {
 ///////////////
 // Constructors
 ///////////////
-
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    public static Step getInstance() {
-        return step;
+    public static TimeManager getInstance() {
+        return timeManager;
     }
 
     public void setUp() {
@@ -96,7 +83,7 @@ public class Step implements IStep, ISimulationAccessor {
     }
 
     public void init() {
-        simuDuration = transportDuration + getSimulation().getReleaseManager().getReleaseDuration();
+        simuDuration = transportDuration + getSimulationManager().getReleaseManager().getReleaseDuration();
         i_step = 0;
         time = t0;
         nb_steps = (int) (simuDuration / dt);
@@ -113,6 +100,7 @@ public class Step implements IStep, ISimulationAccessor {
             dt *= -1;
         }
         t0 = Long.valueOf(getParameter("app.time", "initial_time"));
+        //Logger.getAnonymousLogger().info("time-step: " + dt + " - t0: " + t0);
         transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
         calendar = new ClimatoCalendar();
         calendar.setTimeInMillis(t0 * 1000L);
@@ -124,7 +112,7 @@ public class Step implements IStep, ISimulationAccessor {
     }
 
     private String getParameter(String blockName, String key) {
-        return getSimulation().getParameterManager().getValue(blockName, key);
+        return getSimulationManager().getParameterManager().getParameter(blockName, key);
     }
 
     /**
@@ -134,7 +122,7 @@ public class Step implements IStep, ISimulationAccessor {
      * @return <code>true</code> if the incremented time is still smaller than
      * the end time of the simulation; <code>false</code> otherwise.
      */
-    public boolean hasNext() {
+    public boolean hasNextStep() {
 
         time += dt;
         if (Math.abs(time - t0) < simuDuration) {
@@ -145,25 +133,6 @@ public class Step implements IStep, ISimulationAccessor {
         }
         fireLastStepTriggered();
         return false;
-    }
-
-    /**
-     * Creates and returns a copy of this object.
-     * @return an Object, a clone of this instance.
-     */
-    @Override
-    public Step clone() {
-
-        Step clone = null;
-        try {
-            clone = (Step) super.clone();
-        } catch (CloneNotSupportedException ex) {
-            ex.printStackTrace();
-        }
-        clone.calendar = (Calendar) calendar.clone();
-        clone.dateFormat = (SimpleDateFormat) dateFormat.clone();
-
-        return clone;
     }
 
     /**
@@ -239,19 +208,6 @@ public class Step implements IStep, ISimulationAccessor {
         return transportDuration;
     }
 
-    public void next() {
-        /*if (this.hasToRefresh()) {
-        //fireRefreshUIEvent();
-        }
-        if (this.hasToRecord()) {
-        //fireRecordEvent();
-        }*/
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
-    }
-
     public void addNextStepListener(NextStepListener listener) {
         listeners.add(NextStepListener.class, listener);
     }
@@ -278,10 +234,9 @@ public class Step implements IStep, ISimulationAccessor {
 
     private void fireNextStepTriggered() {
 
-        Logger.getAnonymousLogger().info("-----< " + step.timeToString() + " >-----");
+        //Logger.getAnonymousLogger().info("-----< " + timeManager.timeToString() + " >-----");
 
-        NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(
-                NextStepListener.class);
+        NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(NextStepListener.class);
 
         for (NextStepListener listener : listenerList) {
             listener.nextStepTriggered(new NextStepEvent(this));
@@ -295,6 +250,17 @@ public class Step implements IStep, ISimulationAccessor {
         for (LastStepListener listener : listenerList) {
             listener.lastStepOccurred(new LastStepEvent(this));
         }
+    }
+
+    public void setupPerformed(SetupEvent e) {
+        loadParameters();
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        simuDuration = transportDuration + getSimulationManager().getReleaseManager().getReleaseDuration();
+        i_step = 0;
+        time = t0;
+        nb_steps = (int) (simuDuration / dt);
     }
     //---------- End of class
 }

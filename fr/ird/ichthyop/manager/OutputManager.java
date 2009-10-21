@@ -4,22 +4,22 @@
  */
 package fr.ird.ichthyop.manager;
 
+import fr.ird.ichthyop.event.InitializeEvent;
 import fr.ird.ichthyop.event.LastStepEvent;
 import fr.ird.ichthyop.event.NextStepEvent;
-import fr.ird.ichthyop.Simulation;
 import fr.ird.ichthyop.TypeZone;
+import fr.ird.ichthyop.event.SetupEvent;
 import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.arch.IOutputManager;
-import fr.ird.ichthyop.arch.IStep;
-import fr.ird.ichthyop.io.ICFile;
 import fr.ird.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.nc2.NetcdfFileWriteable;
-import fr.ird.ichthyop.arch.ISimulation;
+import fr.ird.ichthyop.arch.ITimeManager;
 import fr.ird.ichthyop.arch.ITracker;
 import fr.ird.ichthyop.event.LastStepListener;
+import fr.ird.ichthyop.event.SetupListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -32,7 +32,7 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public class OutputManager implements IOutputManager, LastStepListener {
+public class OutputManager extends AbstractManager implements IOutputManager, LastStepListener, SetupListener {
 
     private static final String CLASS_NAME = "class_name";
     final private static OutputManager outputManager = new OutputManager();
@@ -52,10 +52,11 @@ public class OutputManager implements IOutputManager, LastStepListener {
     private List<ITracker> trackers;
 
     private OutputManager() {
-        isRecord = ICFile.getInstance().getBlock(BlockType.OPTION, block_key).isEnabled();
+        super();
+        isRecord = getSimulationManager().getParameterManager().getBlock(BlockType.OPTION, block_key).isEnabled();
         if (isRecord()) {
-            getSimulation().getStep().addNextStepListener(this);
-            getSimulation().getStep().addLastStepListener(this);
+            getSimulationManager().getTimeManager().addNextStepListener(this);
+            getSimulationManager().getTimeManager().addLastStepListener(this);
         }
     }
 
@@ -71,11 +72,7 @@ public class OutputManager implements IOutputManager, LastStepListener {
     }
 
     public String getParameter(String key) {
-        return getSimulation().getParameterManager().getValue(block_key, key);
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
+        return getSimulationManager().getParameterManager().getParameter(block_key, key);
     }
 
     private String getPathName() {
@@ -87,7 +84,7 @@ public class OutputManager implements IOutputManager, LastStepListener {
     }
 
     public void setUp() {
-        
+
         if (isRecord()) {
             try {
                 ncOut = NetcdfFileWriteable.createNew("");
@@ -104,7 +101,7 @@ public class OutputManager implements IOutputManager, LastStepListener {
 
     public void init() {
         i_record = 0;
-        dt_record = record_frequency * getSimulation().getStep().get_dt();
+        dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
     }
 
     /**
@@ -147,15 +144,15 @@ public class OutputManager implements IOutputManager, LastStepListener {
 
     public void nextStepTriggered(NextStepEvent e) {
 
-        IStep step = e.getSource();
+        ITimeManager timeManager = e.getSource();
         //Logger.getAnonymousLogger().info(step.getTime() + " " + step.get_tO());
-        if (((step.getTime() - step.get_tO()) % dt_record) == 0) {
+        if (((timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
             write(i_record++);
         }
     }
 
     private void write(int i_record) {
-        Logger.getAnonymousLogger().info("  --> record " + i_record + " - time " + getSimulation().getStep().timeToString());
+        Logger.getAnonymousLogger().info("  --> record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
         for (ITracker tracker : trackers) {
             tracker.track();
             write2NcOut(tracker, i_record);
@@ -179,7 +176,6 @@ public class OutputManager implements IOutputManager, LastStepListener {
         } catch (InvalidRangeException ex) {
             Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     /**
@@ -199,12 +195,12 @@ public class OutputManager implements IOutputManager, LastStepListener {
     }
 
     public XBlock getXTracker(String key) {
-        return ICFile.getInstance().getBlock(BlockType.TRACKER, key);
+        return getSimulationManager().getParameterManager().getBlock(BlockType.TRACKER, key);
     }
 
     public Collection<XBlock> getXTrackers() {
         Collection<XBlock> collection = new ArrayList();
-        for (XBlock block : ICFile.getInstance().getBlocks(BlockType.TRACKER)) {
+        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.TRACKER)) {
             collection.add(block);
 
         }
@@ -216,25 +212,32 @@ public class OutputManager implements IOutputManager, LastStepListener {
         close();
     }
 
+    public void setupPerformed(SetupEvent e) {
+
+        if (isRecord()) {
+            try {
+                ncOut = NetcdfFileWriteable.createNew("");
+                record_frequency = Integer.valueOf(getParameter("record_frequency"));
+                ncOut.setLocation(getPathName());
+                addTrackers();
+                ncOut.create();
+            } catch (IOException ex) {
+                Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
+        }
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        i_record = 0;
+        dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
+    }
+
     public class NCDimFactory {
 
         private Dimension time, drifter;
         private Hashtable<TypeZone, Dimension> zoneDimension = new Hashtable();
         private Hashtable<String, Dimension> dimensions = new Hashtable();
-
-        private NCDimFactory() {
-            createMainDimensions();
-            fillHashtable();
-        }
-
-        private void createMainDimensions() {
-            time = ncOut.addUnlimitedDimension("time");
-            drifter = ncOut.addDimension("drifter", getSimulation().getReleaseManager().getNbParticles());
-            for (TypeZone type : TypeZone.values()) {
-                String name = type.toString() + "_zone";
-                zoneDimension.put(type, ncOut.addDimension(name, getSimulation().getZoneManager().getZones(type).size()));
-            }
-        }
 
         private void fillHashtable() {
             dimensions.put(time.getName(), time);
@@ -245,6 +248,9 @@ public class OutputManager implements IOutputManager, LastStepListener {
         }
 
         public Dimension addDimension(Dimension dim) {
+            if (dimensions.isEmpty()) {
+                fillHashtable();
+            }
             if (dimensions.containsKey(dim.getName())) {
                 if (dim.getLength() != dimensions.get(dim.getName()).getLength()) {
                     throw new IllegalArgumentException("Variable name (" + dim.getName() + ") has already been defined with a different length.");
@@ -259,14 +265,24 @@ public class OutputManager implements IOutputManager, LastStepListener {
         }
 
         public Dimension getTimeDimension() {
+            if (null == time) {
+                time = ncOut.addUnlimitedDimension("time");
+            }
             return time;
         }
 
         public Dimension getDrifterDimension() {
+            if (null == drifter) {
+                drifter = ncOut.addDimension("drifter", getSimulationManager().getReleaseManager().getNbParticles());
+            }
             return drifter;
         }
 
         public Dimension getZoneDimension(TypeZone type) {
+            if (null == zoneDimension.get(type)) {
+                String name = type.toString() + "_zone";
+                zoneDimension.put(type, ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size()));
+            }
             return zoneDimension.get(type);
         }
     }

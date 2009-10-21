@@ -21,13 +21,13 @@ public class LethalTempAction extends AbstractAction {
 
     public void loadParameters() {
 
-        FLAG_GROWTH = getSimulation().getActionManager().getXAction("growth").isEnabled();
+        FLAG_GROWTH = getSimulationManager().getActionManager().getXAction("growth").isEnabled();
         if (!FLAG_GROWTH) {
             lethal_tp = Float.valueOf(getParameter("lethal.temperature"));
         } else {
             lethalTpEgg = Float.valueOf(getParameter("lethal.temperature.egg"));
             lethalTpLarva = Float.valueOf(getParameter("lethal.temperature.larva"));
-            egg = Integer.valueOf(getSimulation().getPropertyManager(GrowingParticle.class).getProperty("stage.egg.code"));
+            egg = Integer.valueOf(getSimulationManager().getPropertyManager(GrowingParticle.class).getProperty("stage.egg.code"));
         }
     }
 
@@ -42,14 +42,14 @@ public class LethalTempAction extends AbstractAction {
     }
 
     private void checkTp(IBasicParticle particle) {
-        double temperature = getSimulation().getDataset().getTemperature(particle.getGridPoint(), getSimulation().getStep().getTime());
+        double temperature = getSimulationManager().getDataset().getTemperature(particle.getGridPoint(), getSimulationManager().getTimeManager().getTime());
         if (temperature < lethal_tp) {
             particle.kill(Constant.DEAD_COLD);
         }
     }
 
     private void checkTp(IGrowingParticle particle) {
-        double temperature = getSimulation().getDataset().getTemperature(particle.getGridPoint(), getSimulation().getStep().getTime());
+        double temperature = getSimulationManager().getDataset().getTemperature(particle.getGridPoint(), getSimulationManager().getTimeManager().getTime());
         boolean frozen = ((particle.getStage() == egg) && (temperature < lethalTpEgg)) || ((particle.getStage() > egg) && (temperature < lethalTpLarva));
         if (frozen) {
             particle.kill(Constant.DEAD_COLD);

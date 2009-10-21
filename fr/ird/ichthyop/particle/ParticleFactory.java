@@ -6,16 +6,13 @@ package fr.ird.ichthyop.particle;
 
 import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IBasicParticle;
-import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.arch.ISimulationAccessor;
 import fr.ird.ichthyop.particle.Iv2Particle;
-import java.util.logging.Logger;
 
 /**
  *
  * @author pverley
  */
-public class ParticleFactory implements ISimulationAccessor {
+public class ParticleFactory {
 
     public static IBasicParticle createParticle(int index, double lon, double lat, double depth, boolean living) {
 
@@ -83,9 +80,5 @@ public class ParticleFactory implements ISimulationAccessor {
         particle.grid2Geo();
 
         return particle;
-    }
-
-    public ISimulation getSimulation() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

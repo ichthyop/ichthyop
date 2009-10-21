@@ -19,14 +19,14 @@ public class AdvectionAction extends AbstractAction {
     public void loadParameters() {
 
         isEuler = getParameter("numerical_scheme").matches("euler");
-        isForward = getSimulation().getStep().get_dt() >= 0;
+        isForward = getSimulationManager().getTimeManager().get_dt() >= 0;
     }
 
     public void execute(IBasicParticle particle) {
         if (isForward) {
-            advectForward(particle, getSimulation().getStep().getTime());
+            advectForward(particle, getSimulationManager().getTimeManager().getTime());
         } else {
-            advectBackward(particle, getSimulation().getStep().getTime());
+            advectBackward(particle, getSimulationManager().getTimeManager().getTime());
         }
     }
 
@@ -34,8 +34,8 @@ public class AdvectionAction extends AbstractAction {
             ArrayIndexOutOfBoundsException {
 
         double[] mvt = isEuler
-                ? getSimulation().getDataset().advectEuler(particle.getGridPoint(), time, getSimulation().getStep().get_dt())
-                : advectRk4(particle.getGridPoint(), time, getSimulation().getStep().get_dt());
+                ? getSimulationManager().getDataset().advectEuler(particle.getGridPoint(), time, getSimulationManager().getTimeManager().get_dt())
+                : advectRk4(particle.getGridPoint(), time, getSimulationManager().getTimeManager().get_dt());
         //Logger.getAnonymousLogger().info("dx " + mvt[0] + " dy " + mvt[1] + " dz " + mvt[2]);
         particle.increment(mvt);
     }
@@ -44,14 +44,14 @@ public class AdvectionAction extends AbstractAction {
             ArrayIndexOutOfBoundsException {
 
         double[] mvt, pgrid;
-        double dt = getSimulation().getStep().get_dt();
+        double dt = getSimulationManager().getTimeManager().get_dt();
 
         if (isEuler) {
-            mvt = getSimulation().getDataset().advectEuler(pgrid = particle.getGridPoint(), time, dt);
+            mvt = getSimulationManager().getDataset().advectEuler(pgrid = particle.getGridPoint(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }
-            mvt = getSimulation().getDataset().advectEuler(pgrid, time, dt);
+            mvt = getSimulationManager().getDataset().advectEuler(pgrid, time, dt);
         } else {
             mvt = advectRk4(pgrid = particle.getGridPoint(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
@@ -81,34 +81,34 @@ public class AdvectionAction extends AbstractAction {
         double[] dU = new double[dim];
         double[] pk = new double[dim];
 
-        double[] k1 = getSimulation().getDataset().advectEuler(p0, time, dt);
+        double[] k1 = getSimulationManager().getDataset().advectEuler(p0, time, dt);
 
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + .5d * k1[i];
         }
-        if (getSimulation().getDataset().isOnEdge(pk)) {
+        if (getSimulationManager().getDataset().isOnEdge(pk)) {
             return new double[]{.5d * k1[0], .5d * k1[1], 0};
         }
 
-        double[] k2 = getSimulation().getDataset().advectEuler(pk, time + dt / 2, dt);
+        double[] k2 = getSimulationManager().getDataset().advectEuler(pk, time + dt / 2, dt);
 
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + .5d * k2[i];
         }
-        if (getSimulation().getDataset().isOnEdge(pk)) {
+        if (getSimulationManager().getDataset().isOnEdge(pk)) {
             return new double[]{.5d * k2[0], .5d * k2[1], 0};
         }
 
-        double[] k3 = getSimulation().getDataset().advectEuler(pk, time + dt / 2, dt);
+        double[] k3 = getSimulationManager().getDataset().advectEuler(pk, time + dt / 2, dt);
 
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + k3[i];
         }
-        if (getSimulation().getDataset().isOnEdge(pk)) {
+        if (getSimulationManager().getDataset().isOnEdge(pk)) {
             return new double[]{k3[0], k3[1], 0};
         }
 
-        double[] k4 = getSimulation().getDataset().advectEuler(pk, time + dt, dt);
+        double[] k4 = getSimulationManager().getDataset().advectEuler(pk, time + dt, dt);
 
         for (int i = 0; i < dim; i++) {
             dU[i] = (k1[i] + 2.d * k2[i] + 2.d * k3[i] + k4[i]) / 6.d;

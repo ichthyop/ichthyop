@@ -17,7 +17,7 @@ public abstract class ZoneParticle extends BasicParticle implements IZoneParticl
     public int getNumZone(TypeZone type) {
         int nZone = -1;
         boolean foundZone = false;
-        Iterator iter = getSimulation().getZoneManager().getZones(type).iterator();
+        Iterator iter = getSimulationManager().getZoneManager().getZones(type).iterator();
         while (!foundZone && iter.hasNext()) {
             Zone znTmp = (Zone) iter.next();
             if (znTmp.isPointInZone(this)) {

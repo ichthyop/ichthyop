@@ -16,4 +16,6 @@ public interface IZoneManager {
 
     public ArrayList<Zone> getZones(TypeZone type);
 
+    public void init();
+
 }

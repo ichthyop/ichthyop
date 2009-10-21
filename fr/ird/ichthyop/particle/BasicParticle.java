@@ -35,7 +35,7 @@ public abstract class BasicParticle extends RhoPoint implements IBasicParticle {
     }
 
     public void incrementAge() {
-        age += getSimulation().getStep().get_dt();
+        age += getSimulationManager().getTimeManager().get_dt();
     }
 
     public void kill(String cause) {

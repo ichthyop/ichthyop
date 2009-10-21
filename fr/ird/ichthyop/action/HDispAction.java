@@ -31,7 +31,7 @@ public class HDispAction extends AbstractAction {
     }
 
     public void execute(IBasicParticle particle) {
-        particle.increment(getHDispersion(particle.getGridPoint(), getSimulation().getStep().get_dt()));
+        particle.increment(getHDispersion(particle.getGridPoint(), getSimulationManager().getTimeManager().get_dt()));
     }
 
     public double[] getHDispersion(double[] pGrid, double dt) {
@@ -43,15 +43,15 @@ public class HDispAction extends AbstractAction {
             double my_epsilon16 = Math.pow(1e-6, 1.d / 6.d);
             return new double[]{
                         R * Math.sqrt(2.d * dt) * my_epsilon16 *
-                        Math.pow(getSimulation().getDataset().getdxi(j, i), -1.d / 3.d),
+                        Math.pow(getSimulationManager().getDataset().getdxi(j, i), -1.d / 3.d),
                         R * Math.sqrt(2.d * dt) * my_epsilon16 *
-                        Math.pow(getSimulation().getDataset().getdeta(j, i), -1.d / 3.d)};
+                        Math.pow(getSimulationManager().getDataset().getdeta(j, i), -1.d / 3.d)};
         }
 
         return new double[]{
                     R * Math.sqrt(2.d * dt) * epsilon16 *
-                    Math.pow(getSimulation().getDataset().getdxi(j, i), -1.d / 3.d),
+                    Math.pow(getSimulationManager().getDataset().getdxi(j, i), -1.d / 3.d),
                     R * Math.sqrt(2.d * dt) * epsilon16 *
-                    Math.pow(getSimulation().getDataset().getdeta(j, i), -1.d / 3.d)};
+                    Math.pow(getSimulationManager().getDataset().getdeta(j, i), -1.d / 3.d)};
     }
 }

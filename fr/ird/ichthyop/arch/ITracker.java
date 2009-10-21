@@ -14,7 +14,7 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public interface ITracker extends ISimulationAccessor {
+public interface ITracker {
 
     /**
      * Determines whether the tracker is enabled.

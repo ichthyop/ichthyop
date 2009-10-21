@@ -22,9 +22,9 @@ public class ZoneRelease extends AbstractReleaseProcess {
 
     public void loadParameters() {
         nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
-        nbReleaseZones = getSimulation().getZoneManager().getZones(TypeZone.RELEASE).size();
-        nbReleaseEvents = getSimulation().getReleaseManager().getNbReleaseEvents();
-        is3D = Boolean.valueOf(getSimulation().getParameterManager().getValue("app.transport", "three_dimension"));
+        nbReleaseZones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size();
+        nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
+        is3D = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("app.transport", "three_dimension"));
     }
 
     public void proceedToRelease(ReleaseEvent event) throws IOException {
@@ -43,7 +43,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
         xmax = 0.d;
         ymax = 0.d;
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-            Zone zone = getSimulation().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
+            Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
             xmin = Math.min(xmin, zone.getXmin());
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());
@@ -56,11 +56,11 @@ public class ZoneRelease extends AbstractReleaseProcess {
             }
         }
 
-        int index = Math.max(getSimulation().getPopulation().size() - 1, 0);
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nbReleasedNow; p++) {
             /** Instantiate a new Particle */
             IBasicParticle particle = ParticleFactory.createParticle(index, xmin, xmax, ymin, ymax, upDepth, lowDepth);
-            getSimulation().getPopulation().add(particle);
+            getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
         }
     }

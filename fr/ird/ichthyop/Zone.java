@@ -1,7 +1,5 @@
 package fr.ird.ichthyop;
 
-import fr.ird.ichthyop.arch.ISimulationAccessor;
-import fr.ird.ichthyop.arch.ISimulation;
 import java.util.ArrayList;
 
 /** import AWT */
@@ -33,7 +31,7 @@ import java.util.ArrayList;
  *
  * @author P.Verley
  */
-public class Zone implements ISimulationAccessor {
+public class Zone extends SimulationManagerAccessor {
 
     private ArrayList<RhoPoint> polygon = new ArrayList(3);
     private TypeZone type;
@@ -88,7 +86,7 @@ public class Zone implements ISimulationAccessor {
         polygon.add(point);
     }
 
-    public void setUp() {
+    public void init() {
 
         for (RhoPoint rhoPoint : polygon) {
             rhoPoint.geo2Grid();
@@ -113,9 +111,9 @@ public class Zone implements ISimulationAccessor {
     }
 
     private boolean isXYBetweenBathyLines(double x, double y) {
-        return (getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
+        return (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
                 inshoreLine &
-                getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
+                getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
                 offshoreLine);
     }
 
@@ -155,17 +153,13 @@ public class Zone implements ISimulationAccessor {
         }
 
         if (isInBox) {
-            isInBox = (getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
+            isInBox = (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
                     inshoreLine &
-                    getSimulation().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
+                    getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
                     offshoreLine);
         }
 
         return (isInBox);
-    }
-
-    public ISimulation getSimulation() {
-        return Simulation.getInstance();
     }
 
     /**

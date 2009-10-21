@@ -9,7 +9,7 @@ package fr.ird.ichthyop.arch;
  *
  * @author pverley
  */
-public interface IAction extends ISimulationAccessor {
+public interface IAction {
 
     public void loadParameters();
     

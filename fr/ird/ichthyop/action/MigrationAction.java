@@ -26,7 +26,7 @@ public class MigrationAction extends AbstractAction {
 
     public void loadParameters() {
 
-        calendar = getSimulation().getStep().getCalendar();
+        calendar = getSimulationManager().getTimeManager().getCalendar();
         isAgeLimitation = getParameter("migration.criterion").matches("age");
         if (isAgeLimitation) {
             limitAge = Float.valueOf(getParameter("migration.limit.age"));
@@ -77,8 +77,8 @@ public class MigrationAction extends AbstractAction {
      */
     private double getDepth(double x, double y) {
 
-        double bottom = getSimulation().getDataset().getDepth(x, y, 0);
-        calendar.setTimeInMillis((long) (getSimulation().getStep().getTime() * 1e3));
+        double bottom = getSimulationManager().getDataset().getDepth(x, y, 0);
+        calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
         if (hour >= sunrise && hour < sunset) {

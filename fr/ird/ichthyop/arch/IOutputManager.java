@@ -13,7 +13,7 @@ import fr.ird.ichthyop.manager.OutputManager.NCDimFactory;
  *
  * @author pverley
  */
-public interface IOutputManager extends ISimulationAccessor, NextStepListener {
+public interface IOutputManager extends NextStepListener {
 
     public String getParameter(String key);
 

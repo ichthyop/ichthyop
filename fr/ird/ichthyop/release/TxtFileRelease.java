@@ -6,7 +6,6 @@ package fr.ird.ichthyop.release;
 
 import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.particle.ParticleFactory;
-import fr.ird.ichthyop.*;
 import fr.ird.ichthyop.arch.IBasicParticle;
 import java.io.BufferedReader;
 import java.io.File;
@@ -67,9 +66,9 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                             ? ParticleFactory.createParticle(index, coord[0], coord[1], -coord[2])
                             : ParticleFactory.createParticle(index, coord[0], coord[1]);
 
-                    if (getSimulation().getDataset().isInWater(particle.getGridPoint())) {
+                    if (getSimulationManager().getDataset().isInWater(particle.getGridPoint())) {
                         //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
-                        getSimulation().getPopulation().add(particle);
+                        getSimulationManager().getSimulation().getPopulation().add(particle);
                         index++;
                     } else {
                         throw new IOException("Drifter at line " + (index + 1) + "is not in water");
