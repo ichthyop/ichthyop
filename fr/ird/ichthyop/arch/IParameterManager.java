@@ -22,10 +22,13 @@ public interface IParameterManager {
 
     public String getParameter(String blockName, String key);
 
-    public XBlock getBlock(BlockType type, String key);
+    //public XBlock getBlock(BlockType type, String key);
+    public boolean isBlockEnabled(BlockType type, String key);
 
-    public List<XBlock> getBlocks(BlockType type);
+    public Iterable<XBlock> getBlocks(BlockType type);
 
     public List<XParameter> getParameters(ParamType paramType);
+
+    public XParameter getXParameter(BlockType blockType, String OPTION, String string);
 
 }

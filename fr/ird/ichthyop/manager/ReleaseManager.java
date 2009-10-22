@@ -12,7 +12,6 @@ import fr.ird.ichthyop.event.ReleaseEvent;
 import fr.ird.ichthyop.arch.IReleaseProcess;
 import fr.ird.ichthyop.arch.IReleaseManager;
 import fr.ird.ichthyop.event.ReleaseListener;
-import fr.ird.ichthyop.event.SetupListener;
 import fr.ird.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +23,10 @@ import javax.swing.event.EventListenerList;
  *
  * @author pverley
  */
-public class ReleaseManager extends AbstractManager implements IReleaseManager, SetupListener {
+public class ReleaseManager extends AbstractManager implements IReleaseManager {
 
     private static final ReleaseManager releaseManager = new ReleaseManager();
     private IReleaseProcess releaseProcess;
-    private XBlock releaseBlock;
     /** Stores time of the release events */
     private long[] timeEvent;
     /** Index of the current release event */
@@ -50,9 +48,9 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager, 
     private IReleaseProcess getReleaseProcess() {
         if (releaseProcess == null) {
             try {
-                releaseBlock = findActiveReleaseProcess();
+                XBlock releaseBlock = findActiveReleaseProcess();
                 if (releaseBlock != null) {
-                    releaseProcess = (IReleaseProcess) Class.forName(releaseBlock.getParameter("class_name").getValue()).newInstance();
+                    releaseProcess = (IReleaseProcess) Class.forName(releaseBlock.getXParameter("class_name").getValue()).newInstance();
                 }
             } catch (InstantiationException ex) {
                 Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -66,12 +64,8 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager, 
         return releaseProcess;
     }
 
-    public XBlock getXReleaseProcess(String key) {
-        return getSimulationManager().getParameterManager().getBlock(BlockType.RELEASE, key);
-    }
-
-    public String getParameter(String key) {
-        return releaseBlock.getParameter(key).getValue();
+    public String getParameter(String releaseKey, String key) {
+        return getSimulationManager().getParameterManager().getXParameter(BlockType.RELEASE, releaseKey, key).getValue();
     }
 
     private XBlock findActiveReleaseProcess() {
@@ -107,12 +101,6 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager, 
                 isAllReleased = indexEvent >= timeEvent.length;
             }
         }
-    }
-
-    public void setUp() {
-        indexEvent = 0;
-        isAllReleased = false;
-        schedule();
     }
 
     private void schedule() {

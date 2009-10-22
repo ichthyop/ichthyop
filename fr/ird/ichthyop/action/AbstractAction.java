@@ -23,15 +23,11 @@ public abstract class AbstractAction extends SimulationManagerAccessor implement
     }
 
     public String getParameter(String key) {
-        return getSimulationManager().getActionManager().getXAction(actionKey).getParameter(key).getValue();
-    }
-
-    public ArrayList<XParameter> getParameters() {
-        return getSimulationManager().getActionManager().getXAction(actionKey).getParameters();
+        return getSimulationManager().getActionManager().getParameter(actionKey, key);
     }
 
     public boolean isEnabled() {
-        return getSimulationManager().getActionManager().getXAction(actionKey).isEnabled();
+        return getSimulationManager().getActionManager().isEnabled(actionKey);
     }
 
 }

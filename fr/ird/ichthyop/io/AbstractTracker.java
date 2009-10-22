@@ -74,7 +74,7 @@ public abstract class AbstractTracker extends SimulationManagerAccessor implemen
     }
 
     public boolean isEnabled() {
-        return getSimulationManager().getOutputManager().getXTracker(trackerKey).isEnabled();
+        return getSimulationManager().getOutputManager().isTrackerEnabled(trackerKey);
     }
 
     public String short_name() {

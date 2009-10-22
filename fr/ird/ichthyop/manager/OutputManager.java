@@ -53,7 +53,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     private OutputManager() {
         super();
-        isRecord = getSimulationManager().getParameterManager().getBlock(BlockType.OPTION, block_key).isEnabled();
+        isRecord = getSimulationManager().getParameterManager().isBlockEnabled(BlockType.OPTION, block_key);
         if (isRecord()) {
             getSimulationManager().getTimeManager().addNextStepListener(this);
             getSimulationManager().getTimeManager().addLastStepListener(this);
@@ -81,6 +81,10 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     private boolean isRecord() {
         return isRecord;
+    }
+
+    public boolean isTrackerEnabled(String trackerKey) {
+        return getSimulationManager().getParameterManager().isBlockEnabled(BlockType.TRACKER, trackerKey);
     }
 
     public void setUp() {
@@ -120,7 +124,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     private void addTrackers() {
         trackers = new ArrayList();
-        for (XBlock xtrack : getXTrackers()) {
+        for (XBlock xtrack : getSimulationManager().getParameterManager().getBlocks(BlockType.TRACKER)) {
             if (xtrack.isEnabled()) {
                 ITracker tracker = createTracker(xtrack);
                 trackers.add(tracker);
@@ -131,7 +135,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     private ITracker createTracker(XBlock xtracker) {
         try {
-            return (ITracker) Class.forName(xtracker.getParameter(CLASS_NAME).getValue()).newInstance();
+            return (ITracker) Class.forName(xtracker.getXParameter(CLASS_NAME).getValue()).newInstance();
         } catch (InstantiationException ex) {
             Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
@@ -192,19 +196,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         for (Attribute attribute : tracker.attributes()) {
             ncOut.addVariableAttribute(tracker.short_name(), attribute);
         }
-    }
-
-    public XBlock getXTracker(String key) {
-        return getSimulationManager().getParameterManager().getBlock(BlockType.TRACKER, key);
-    }
-
-    public Collection<XBlock> getXTrackers() {
-        Collection<XBlock> collection = new ArrayList();
-        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.TRACKER)) {
-            collection.add(block);
-
-        }
-        return collection;
     }
 
     public void lastStepOccurred(LastStepEvent e) {

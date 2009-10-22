@@ -5,6 +5,8 @@
 package fr.ird.ichthyop.io;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +25,7 @@ public class XBlock extends org.jdom.Element {
     final public static String TYPE = "type";
     public final static String PARAMETERS = "parameters";
     private final BlockType block_type;
+    private HashMap<String, XParameter> map;
 
     public XBlock(BlockType block_type, Element element) {
         super(BLOCK);
@@ -30,6 +33,7 @@ public class XBlock extends org.jdom.Element {
         this.setAttribute(TYPE, block_type.toString());
         if (element != null) {
             addContent(element.cloneContent());
+            map = createMap();
         }
     }
 
@@ -50,7 +54,15 @@ public class XBlock extends org.jdom.Element {
         }
     }
 
-    public ArrayList<XParameter> getParameters() {
+    private HashMap<String, XParameter> createMap() {
+        HashMap<String, XParameter> lmap = new HashMap();
+        for (XParameter xparam : readParameters()) {
+            lmap.put(xparam.getKey(), xparam);
+        }
+        return lmap;
+    }
+
+    private ArrayList<XParameter> readParameters() {
         ArrayList<XParameter> list = new ArrayList();
         try {
             for (Object elt : getChild(PARAMETERS).getChildren(XParameter.PARAMETER)) {
@@ -62,7 +74,15 @@ public class XBlock extends org.jdom.Element {
         return list;
     }
 
-    public List<XParameter> getParameters(final ParamType type) {
+    public XParameter getXParameter(final String key) {
+        return map.get(key);
+    }
+
+    public Iterable<XParameter> getXParameters() {
+        return map.values();
+    }
+
+    /*public List<XParameter> getParameters(final ParamType type) {
         Filter filtre = new Filter() {
 
             public boolean matches(Object obj) {
@@ -106,5 +126,5 @@ public class XBlock extends org.jdom.Element {
             return null;
         }
 
-    }
+    }*/
 }

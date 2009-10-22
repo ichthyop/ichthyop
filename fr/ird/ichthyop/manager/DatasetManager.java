@@ -10,7 +10,7 @@ import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.arch.IDataset;
 import fr.ird.ichthyop.arch.IDatasetManager;
 import fr.ird.ichthyop.io.XBlock;
-import fr.ird.ichthyop.io.XParameter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +23,6 @@ public class DatasetManager extends AbstractManager implements IDatasetManager {
 
     final private static DatasetManager datasetManager = new DatasetManager();
     private IDataset dataset;
-    private XBlock datasetBlock;
 
     public static DatasetManager getInstance() {
         return datasetManager;
@@ -32,9 +31,9 @@ public class DatasetManager extends AbstractManager implements IDatasetManager {
     public IDataset getDataset() {
         if (dataset == null) {
             try {
-                datasetBlock = findActiveDataset();
+                XBlock datasetBlock = findActiveDataset();
                 if (datasetBlock != null) {
-                    dataset = (IDataset) Class.forName(datasetBlock.getParameter("class_name").getValue()).newInstance();
+                    dataset = (IDataset) Class.forName(datasetBlock.getXParameter("class_name").getValue()).newInstance();
                 }
             } catch (InstantiationException ex) {
                 Logger.getLogger(DatasetManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -47,21 +46,17 @@ public class DatasetManager extends AbstractManager implements IDatasetManager {
         return dataset;
     }
 
-    public XBlock getXDataset(String key) {
-        return getSimulationManager().getParameterManager().getBlock(BlockType.DATASET, key);
-    }
-
-    public String getParameter(String key) {
-        XParameter xparam = datasetBlock.getParameter(key);
-        if (null != xparam) {
-            return datasetBlock.getParameter(key).getValue();
-        } else {
-            return null;
-        }
+    public String getParameter(String datasetKey, String key) {
+        return getSimulationManager().getParameterManager().getXParameter(BlockType.DATASET, datasetKey, key).getValue();
     }
 
     private XBlock findActiveDataset() {
-        List<XBlock> list = getSimulationManager().getParameterManager().getBlocks(BlockType.DATASET);
+        List<XBlock> list = new ArrayList();
+        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.DATASET)) {
+            if (block.isEnabled()) {
+                list.add(block);
+            }
+        }
         if (list.size() > 0 && list.size() < 2) {
             return list.get(0);
         } else {

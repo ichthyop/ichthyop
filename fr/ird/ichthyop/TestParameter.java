@@ -4,21 +4,15 @@
  */
 package fr.ird.ichthyop;
 
-import fr.ird.ichthyop.action.AbstractAction;
-import fr.ird.ichthyop.io.ICFile;
+import fr.ird.ichthyop.io.BlockType;
 import fr.ird.ichthyop.io.XParameter;
-import fr.ird.ichthyop.manager.ActionManager;
-import fr.ird.ichthyop.manager.ParameterManager;
-import fr.ird.ichthyop.manager.SimulationManager;
-import fr.ird.ichthyop.manager.ZoneManager;
 import java.io.File;
-import java.util.Iterator;
 
 /**
  *
  * @author pverley
  */
-public class TestParameter {
+public class TestParameter extends SimulationManagerAccessor {
 
     File file;
 
@@ -27,35 +21,16 @@ public class TestParameter {
         String filename = System.getProperty("user.dir") + File.separator + "cfg2.xic";
         file = new File(filename);
 
-        ICFile.setFile(file);
-        /*ActionManager actionPool = ActionManager.getInstance();
-        Iterator<AbstractAction> itA = actionPool.values().iterator();
-        while (itA.hasNext()) {
-            AbstractAction action = itA.next();
-            System.out.println("====================");
-            System.out.println(action.getClass().getCanonicalName() + " " + action.isEnabled());
-            for (XParameter param : action.getParameters()) {
-                System.out.println("+++");
-                System.out.println(param.getKey() + " " + param.getValue());
-            }
-        }*/
-        System.out.println("-------------------------------------");
-        
-        System.out.println(ParameterManager.getInstance().getParameter("app.time", "time_step"));
-
-        System.out.println("-------------------------------------");
-
-        /*Iterator<Zone> itZ = ZoneManager.getInstance().getZones(TypeZone.RELEASE).iterator();
-        while(itZ.hasNext()) {
-            Zone zone = itZ.next();
-            System.out.println("====================");
-            System.out.println(zone.toString());
-        }*/
-
-
-        System.out.println(SimulationManager.getInstance().getNumberOfSimulations());
+        getSimulationManager().setConfigurationFile(file);
+        XParameter xparam = getSimulationManager().getParameterManager().getXParameter(BlockType.OPTION, "app.time", "time_step");
+        //xparam = getSimulationManager().getParameterManager().getXParameter(BlockType.TRACKER, "tracker.time", "class_name");
+        //xparam = getSimulationManager().getParameterManager().getXParameter(BlockType.DATASET, "dataset.roms_3d_ucla", "input_path");
+        System.out.println(getSimulationManager().getDatasetManager().getParameter("dataset.roms_3d_ucla", "input_path"));
+        System.out.println(xparam.getKey() + " " + xparam.getValue() + " " + xparam.isSerial());
 
     }
+
+
 
     public static void main(String[] arg) {
         new TestParameter();

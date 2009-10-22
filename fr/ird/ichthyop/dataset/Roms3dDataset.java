@@ -21,6 +21,7 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -1559,5 +1560,20 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
     private long skipSeconds(long time) {
         return time - time % 60L;
+    }
+
+    public Number get(String variableName, double[] pGrid, double time) {
+        Variable variable = ncIn.findVariable(variableName);
+        if (!variable.getDataType().isNumeric()) {
+            throw new NumberFormatException(variableName + " is not a numeric variable");
+        }
+        Class variableClass = variable.getDataType().getPrimitiveClassType();
+        int[] origin = new int[variable.getShape().length];
+        int[] shape = variable.getShape();
+        if (variable.isUnlimited()) {
+            shape[0] = 1;
+            origin[0] = rank;
+        }
+        return null;
     }
 }

@@ -21,7 +21,7 @@ public class LethalTempAction extends AbstractAction {
 
     public void loadParameters() {
 
-        FLAG_GROWTH = getSimulationManager().getActionManager().getXAction("growth").isEnabled();
+        FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!FLAG_GROWTH) {
             lethal_tp = Float.valueOf(getParameter("lethal.temperature"));
         } else {

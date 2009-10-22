@@ -17,7 +17,6 @@ public class RunBatch extends SimulationManagerAccessor {
 
     public RunBatch(String path) {
 
-        path = System.getProperty("user.dir") + File.separator + "cfg2.xic";
         try {
             File file = new File(path);
             if (file.exists()) {

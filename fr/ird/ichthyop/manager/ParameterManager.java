@@ -7,6 +7,7 @@ import fr.ird.ichthyop.io.XBlock;
 import fr.ird.ichthyop.io.XParameter;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;
@@ -36,24 +37,12 @@ public class ParameterManager implements IParameterManager {
     }
 
     public List<XParameter> getParameters(ParamType paramType) {
-
-        if (!parameters.containsKey(paramType)) {
-            List<XParameter> list = new ArrayList();
-            for (BlockType type : BlockType.values()) {
-                for (XBlock xblock : getBlocks(type)) {
-                    if (xblock.isEnabled()) {
-                        list.addAll(xblock.getParameters(paramType));
-                    }
-                }
-            }
-            parameters.put(paramType, list);
-        }
-        return parameters.get(paramType);
+        return cfgFile.getParameters(paramType);
     }
 
     public String getParameter(String blockName, String key) {
 
-        XParameter xparam = getBlock(BlockType.OPTION, blockName).getParameter(key);
+        XParameter xparam = cfgFile.getBlock(BlockType.OPTION, blockName).getXParameter(key);
         if (xparam != null) {
             return xparam.getValue();
         } else {
@@ -61,18 +50,23 @@ public class ParameterManager implements IParameterManager {
         }
     }
 
-    public XBlock getBlock(BlockType type, String key) {
-        return cfgFile.getBlock(type, key);
+    public boolean isBlockEnabled(BlockType type, String key) {
+        return cfgFile.getBlock(type, key).isEnabled();
     }
 
-    public List<XBlock> getBlocks(BlockType type) {
+    public Iterable<XBlock> getBlocks(BlockType type) {
         return cfgFile.getBlocks(type);
+    }
+
+    public XParameter getXParameter(BlockType type, String blockName, String key) {
+        return cfgFile.getXParameter(type, blockName, key);
     }
 
     private class ConfigurationFile {
 
         private File file;
         private Document structure;
+        private HashMap<String, XBlock> map;
 
         ConfigurationFile(File file) {
             this.file = file;
@@ -86,27 +80,46 @@ public class ParameterManager implements IParameterManager {
                 Element racine = sxb.build(file).getRootElement();
                 racine.detach();
                 structure = new Document(racine);
-                //structure.createMaps();
+                map = createMap();
             } catch (Exception e) {
                 Logger.getLogger(ConfigurationFile.class.getName()).log(Level.SEVERE, null, e);
             }
         }
 
-        private XBlock getBlock(final BlockType type, final String key) {
-            List<XBlock> list = new ArrayList();
-            for (XBlock block : getBlocks(type)) {
-                if (block.getKey().matches(key)) {
-                    list.add(block);
+        public List<XParameter> getParameters(ParamType paramType) {
+            List<XParameter> list = new ArrayList();
+            for (XBlock xblock : map.values()) {
+                if (xblock.isEnabled()) {
+                    for (XParameter xparam : xblock.getXParameters()) {
+                        if (xparam.getType().equals(paramType)) {
+                            list.add(xparam);
+                        }
+                    }
                 }
             }
-            if (list.size() > 0 && list.size() < 2) {
-                return list.get(0);
-            } else {
-                return null;
-            }
+            return list;
         }
 
-        private List<XBlock> getBlocks(final BlockType type) {
+        private XParameter getXParameter(BlockType type, String blockKey, String key) {
+            return map.get(new BlockId(type, blockKey).toString()).getXParameter(key);
+        }
+
+        private Iterable getBlocks(BlockType type) {
+            ArrayList<XBlock> list = new ArrayList();
+            for (XBlock xblock : map.values()) {
+                if (xblock.getType().equals(type)) {
+                    list.add(xblock);
+                }
+            }
+            return list;
+        }
+
+        private XBlock getBlock(final BlockType type, final String key) {
+            return map.get(new BlockId(type, key).toString());
+        }
+
+        private List<XBlock> readBlocks(final BlockType type) {
+
             Filter filtre = new Filter() {
 
                 public boolean matches(Object obj) {
@@ -126,6 +139,81 @@ public class ParameterManager implements IParameterManager {
                 list.add(new XBlock(type, (Element) elt));
             }
             return list;
+        }
+
+        private HashMap<String, XBlock> createMap() {
+            HashMap<String, XBlock> lmap = new HashMap();
+            for (BlockType type : BlockType.values()) {
+                for (XBlock xblock : readBlocks(type)) {
+                    lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
+                }
+            }
+            return lmap;
+        }
+    }
+
+    private class BlockId {
+
+        private BlockType blockType;
+        private String blockKey;
+
+        BlockId(BlockType type, String blockName) {
+            this.blockType = type;
+            this.blockKey = blockName;
+        }
+
+        private BlockType getBlockType() {
+            return blockType;
+        }
+
+        private String getBlockKey() {
+            return blockKey.trim().toLowerCase();
+        }
+
+        @Override
+        public String toString() {
+            StringBuffer id = new StringBuffer(getBlockType().toString());
+            id.append('/');
+            id.append(getBlockKey());
+            return id.toString();
+        }
+    }
+
+    private class ParameterId {
+
+        private BlockType type;
+        private String blockName;
+        private String key;
+
+        ParameterId(BlockType type, String blockName, String key) {
+            this.type = type;
+            this.blockName = blockName;
+            this.key = key;
+        }
+
+        private BlockType getBlockType() {
+            return type;
+        }
+
+        private String getBlockName() {
+            return blockName.trim().toLowerCase();
+        }
+
+        /**
+         * @return the key
+         */
+        private String getKey() {
+            return key.trim().toLowerCase();
+        }
+
+        @Override
+        public String toString() {
+            StringBuffer id = new StringBuffer(getBlockType().toString());
+            id.append('/');
+            id.append(getBlockName());
+            id.append('/');
+            id.append(getKey());
+            return id.toString();
         }
     }
 }

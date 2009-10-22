@@ -18,10 +18,12 @@ public class XParameter extends org.jdom.Element {
     final public static String VALUE = "value";
     final public static String TYPE = "type";
     private int index;
+    private final ParamType param_type;
     private List<Element> values;
 
     XParameter(Element xparameter) {
         super(PARAMETER);
+        param_type = getType(xparameter);
         if (xparameter != null) {
             addContent(xparameter.cloneContent());
             values = getChildren(VALUE);
@@ -34,8 +36,12 @@ public class XParameter extends org.jdom.Element {
     }
 
     public ParamType getType() {
-        if (null != getAttribute(TYPE)) {
-            return ParamType.getType(getAttribute(TYPE).getValue());
+        return param_type;
+    }
+
+    private ParamType getType(Element element) {
+        if (null != element && null != element.getAttribute(TYPE)) {
+            return ParamType.getType(element.getAttribute(TYPE).getValue());
         } else {
             return ParamType.SINGLE;
         }

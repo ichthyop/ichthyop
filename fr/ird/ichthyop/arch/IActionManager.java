@@ -15,16 +15,16 @@ import java.util.Collection;
  */
 public interface IActionManager {
 
-    public XBlock getXAction(String key);
+    //public XBlock getXAction(String key);
 
     public AbstractAction createAction(Class actionClass);
-
-    public Collection<XBlock> getXActions();
 
     public void execute(String actionName, IBasicParticle particle);
 
     public AbstractAction get(Object key);
 
-    public void setUp();
+    public boolean isEnabled(String actionName);
+
+    public String getParameter(String actionName, String key);
 
 }

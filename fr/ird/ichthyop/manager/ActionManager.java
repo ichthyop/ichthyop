@@ -32,28 +32,20 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         return actionManager;
     }
 
-    public void setUp() {
-        loadActions();
-    }
-
     private void loadActions() {
         actionMap = new HashMap();
-        Iterator<XBlock> it = getXActions().iterator();
+        Iterator<XBlock> it = getSimulationManager().getParameterManager().getBlocks(BlockType.ACTION).iterator();
         while (it.hasNext()) {
             XBlock xaction = it.next();
             if (xaction.isEnabled()) {
                 try {
-                    Class actionClass = Class.forName(xaction.getParameter("class_name").getValue());
+                    Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
                     actionMap.put(xaction.getKey(), createAction(actionClass));
                 } catch (ClassNotFoundException ex) {
                     Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
-    }
-
-    public XBlock getXAction(String key) {
-        return getSimulationManager().getParameterManager().getBlock(BlockType.ACTION, key);
     }
 
     public AbstractAction createAction(Class actionClass) {
@@ -67,15 +59,6 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         }
         return null;
 
-    }
-
-    public Collection<XBlock> getXActions() {
-        Collection<XBlock> collection = new ArrayList();
-        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.ACTION)) {
-            collection.add(block);
-
-        }
-        return collection;
     }
 
     public void execute(String actionName, IBasicParticle particle) {
@@ -95,5 +78,13 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
 
     public void initializePerformed(InitializeEvent e) {
         // do nothing
+    }
+
+    public boolean isEnabled(String actionKey) {
+        return getSimulationManager().getParameterManager().isBlockEnabled(BlockType.ACTION, actionKey);
+    }
+
+    public String getParameter(String actionKey, String key) {
+        return getSimulationManager().getParameterManager().getXParameter(BlockType.ACTION, actionKey, key).getValue();
     }
 }

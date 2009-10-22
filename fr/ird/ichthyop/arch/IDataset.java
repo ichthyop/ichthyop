@@ -53,4 +53,6 @@ public interface IDataset extends NextStepListener {
     public double[] getKv(double[] pGrid, double time, double dt);
 
     public void init();
+
+    public Number get(String variableName, double[] pGrid, double time);
 }

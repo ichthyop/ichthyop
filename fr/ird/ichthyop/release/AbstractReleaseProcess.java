@@ -44,6 +44,6 @@ public abstract class AbstractReleaseProcess extends SimulationManagerAccessor i
     }
 
     String getParameter(String key) {
-        return getSimulationManager().getReleaseManager().getXReleaseProcess(releaseKey).getParameter(key).getValue();
+        return getSimulationManager().getReleaseManager().getParameter(releaseKey, key);
     }
 }

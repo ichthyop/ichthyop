@@ -5,8 +5,6 @@
 
 package fr.ird.ichthyop.arch;
 
-import fr.ird.ichthyop.io.XBlock;
-
 /**
  *
  * @author pverley
@@ -15,8 +13,6 @@ public interface IDatasetManager {
 
     public IDataset getDataset();
 
-    public XBlock getXDataset(String key);
-
-    public String getParameter(String key);
+    public String getParameter(String datasetKey, String key);
 
 }
