@@ -47,7 +47,7 @@ public class DatasetManager extends AbstractManager implements IDatasetManager {
     }
 
     public String getParameter(String datasetKey, String key) {
-        return getSimulationManager().getParameterManager().getXParameter(BlockType.DATASET, datasetKey, key).getValue();
+        return getSimulationManager().getParameterManager().getParameter(BlockType.DATASET, datasetKey, key);
     }
 
     private XBlock findActiveDataset() {

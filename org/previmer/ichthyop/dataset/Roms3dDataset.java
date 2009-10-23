@@ -225,7 +225,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
         if (isDirectory(path)) {
             listInputFiles = getInputList(path);
-            if (null != getParameter("grid_file")) {
+            if (!getParameter("grid_file").isEmpty()) {
                 gridFile = getGridFile(getParameter("grid_file"));
             } else {
                 gridFile = listInputFiles.get(0);

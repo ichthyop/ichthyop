@@ -29,6 +29,6 @@ public interface IParameterManager {
 
     public List<XParameter> getParameters(ParamType paramType);
 
-    public XParameter getXParameter(BlockType blockType, String OPTION, String string);
+    public String getParameter(BlockType blockType, String blockKey, String key);
 
 }

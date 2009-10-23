@@ -22,11 +22,9 @@ public class TestParameter extends SimulationManagerAccessor {
         file = new File(filename);
 
         getSimulationManager().setConfigurationFile(file);
-        XParameter xparam = getSimulationManager().getParameterManager().getXParameter(BlockType.OPTION, "app.time", "time_step");
-        //xparam = getSimulationManager().getParameterManager().getXParameter(BlockType.TRACKER, "tracker.time", "class_name");
-        //xparam = getSimulationManager().getParameterManager().getXParameter(BlockType.DATASET, "dataset.roms_3d_ucla", "input_path");
+        String xparam = getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "app.time", "time_step");
         System.out.println(getSimulationManager().getDatasetManager().getParameter("dataset.roms_3d_ucla", "input_path"));
-        System.out.println(xparam.getKey() + " " + xparam.getValue() + " " + xparam.isSerial());
+        System.out.println(xparam);
 
     }
 

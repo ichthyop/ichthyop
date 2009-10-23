@@ -65,7 +65,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     }
 
     public String getParameter(String releaseKey, String key) {
-        return getSimulationManager().getParameterManager().getXParameter(BlockType.RELEASE, releaseKey, key).getValue();
+        return getSimulationManager().getParameterManager().getParameter(BlockType.RELEASE, releaseKey, key);
     }
 
     private XBlock findActiveReleaseProcess() {

@@ -85,6 +85,6 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
     }
 
     public String getParameter(String actionKey, String key) {
-        return getSimulationManager().getParameterManager().getXParameter(BlockType.ACTION, actionKey, key).getValue();
+        return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
     }
 }

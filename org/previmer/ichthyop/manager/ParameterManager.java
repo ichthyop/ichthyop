@@ -40,9 +40,13 @@ public class ParameterManager implements IParameterManager {
         return cfgFile.getParameters(paramType);
     }
 
-    public String getParameter(String blockName, String key) {
+    public String getParameter(String blockKey, String key) {
+        return getParameter(BlockType.OPTION, blockKey, key);
+    }
 
-        XParameter xparam = cfgFile.getBlock(BlockType.OPTION, blockName).getXParameter(key);
+    public String getParameter(BlockType blockType, String blockKey, String key) {
+
+        XParameter xparam = cfgFile.getBlock(blockType, blockKey).getXParameter(key);
         if (xparam != null) {
             return xparam.getValue();
         } else {
@@ -56,10 +60,6 @@ public class ParameterManager implements IParameterManager {
 
     public Iterable<XBlock> getBlocks(BlockType type) {
         return cfgFile.getBlocks(type);
-    }
-
-    public XParameter getXParameter(BlockType type, String blockName, String key) {
-        return cfgFile.getXParameter(type, blockName, key);
     }
 
     private class ConfigurationFile {
