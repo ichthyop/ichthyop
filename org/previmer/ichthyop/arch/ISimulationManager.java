@@ -3,10 +3,10 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.arch;
+package org.previmer.ichthyop.arch;
 
-import fr.ird.ichthyop.event.InitializeListener;
-import fr.ird.ichthyop.event.SetupListener;
+import org.previmer.ichthyop.event.InitializeListener;
+import org.previmer.ichthyop.event.SetupListener;
 import java.io.File;
 
 /**

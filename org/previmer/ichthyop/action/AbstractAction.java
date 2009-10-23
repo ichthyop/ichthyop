@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.action;
+package org.previmer.ichthyop.action;
 
-import fr.ird.ichthyop.arch.IAction;
-import fr.ird.ichthyop.io.XParameter;
-import fr.ird.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.arch.IAction;
+import org.previmer.ichthyop.io.XParameter;
+import org.previmer.ichthyop.SimulationManagerAccessor;
 import java.util.ArrayList;
 
 /**

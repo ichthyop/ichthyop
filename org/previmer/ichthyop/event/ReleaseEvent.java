@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.event;
+package org.previmer.ichthyop.event;
 
-import fr.ird.ichthyop.manager.ReleaseManager;
+import org.previmer.ichthyop.manager.ReleaseManager;
 import java.util.EventObject;
 
 /**

@@ -2,16 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.arch.IBasicParticle;
-import fr.ird.ichthyop.event.InitializeEvent;
-import fr.ird.ichthyop.event.SetupEvent;
-import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.action.AbstractAction;
-import fr.ird.ichthyop.arch.IActionManager;
-import fr.ird.ichthyop.event.SetupListener;
-import fr.ird.ichthyop.io.XBlock;
+import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.action.AbstractAction;
+import org.previmer.ichthyop.arch.IActionManager;
+import org.previmer.ichthyop.event.SetupListener;
+import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

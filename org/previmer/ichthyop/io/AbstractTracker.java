@@ -2,15 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.io;
+package org.previmer.ichthyop.io;
 
-import fr.ird.ichthyop.Simulation;
-import fr.ird.ichthyop.TypeZone;
-import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.arch.ITracker;
-import fr.ird.ichthyop.manager.OutputManager.NCDimFactory;
-import fr.ird.ichthyop.manager.PropertyManager;
-import fr.ird.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.Simulation;
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.arch.ISimulation;
+import org.previmer.ichthyop.arch.ITracker;
+import org.previmer.ichthyop.manager.OutputManager.NCDimFactory;
+import org.previmer.ichthyop.manager.PropertyManager;
+import org.previmer.ichthyop.SimulationManagerAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import ucar.ma2.Array;

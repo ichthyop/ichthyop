@@ -2,24 +2,24 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.event.InitializeEvent;
-import fr.ird.ichthyop.event.LastStepEvent;
-import fr.ird.ichthyop.event.NextStepEvent;
-import fr.ird.ichthyop.TypeZone;
-import fr.ird.ichthyop.event.SetupEvent;
-import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.arch.IOutputManager;
-import fr.ird.ichthyop.io.XBlock;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.LastStepEvent;
+import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.arch.IOutputManager;
+import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.nc2.NetcdfFileWriteable;
-import fr.ird.ichthyop.arch.ITimeManager;
-import fr.ird.ichthyop.arch.ITracker;
-import fr.ird.ichthyop.event.LastStepListener;
-import fr.ird.ichthyop.event.SetupListener;
+import org.previmer.ichthyop.arch.ITimeManager;
+import org.previmer.ichthyop.arch.ITracker;
+import org.previmer.ichthyop.event.LastStepListener;
+import org.previmer.ichthyop.event.SetupListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;

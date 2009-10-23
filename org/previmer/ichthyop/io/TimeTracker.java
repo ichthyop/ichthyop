@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.io;
+package org.previmer.ichthyop.io;
 
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;

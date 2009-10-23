@@ -3,11 +3,11 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.dataset;
+package org.previmer.ichthyop.dataset;
 
-import fr.ird.ichthyop.event.NextStepListener;
-import fr.ird.ichthyop.arch.IDataset;
-import fr.ird.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.SimulationManagerAccessor;
 
 /**
  *

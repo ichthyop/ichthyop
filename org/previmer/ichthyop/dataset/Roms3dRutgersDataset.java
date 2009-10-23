@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.dataset;
+package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.logging.Level;

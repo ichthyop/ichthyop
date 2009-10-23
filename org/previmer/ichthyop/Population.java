@@ -1,8 +1,8 @@
-package fr.ird.ichthyop;
+package org.previmer.ichthyop;
 
 /** import java.util */
-import fr.ird.ichthyop.arch.IBasicParticle;
-import fr.ird.ichthyop.arch.IPopulation;
+import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IPopulation;
 import java.util.HashSet;
 import java.util.Iterator;
 

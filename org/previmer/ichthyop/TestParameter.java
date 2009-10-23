@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package org.previmer.ichthyop;
 
-import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.io.XParameter;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
 
 /**

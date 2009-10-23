@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.arch.IPropertyManager;
+import org.previmer.ichthyop.arch.IPropertyManager;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;

@@ -2,26 +2,26 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package org.previmer.ichthyop;
 
-import fr.ird.ichthyop.arch.IOutputManager;
-import fr.ird.ichthyop.manager.ReleaseManager;
-import fr.ird.ichthyop.arch.IReleaseManager;
-import fr.ird.ichthyop.manager.ZoneManager;
-import fr.ird.ichthyop.manager.ParameterManager;
-import fr.ird.ichthyop.manager.ActionManager;
-import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.arch.IDataset;
-import fr.ird.ichthyop.arch.IZoneManager;
-import fr.ird.ichthyop.arch.IActionManager;
-import fr.ird.ichthyop.arch.IDatasetManager;
-import fr.ird.ichthyop.arch.IParameterManager;
-import fr.ird.ichthyop.arch.IPopulation;
-import fr.ird.ichthyop.arch.IPropertyManager;
-import fr.ird.ichthyop.arch.IStep;
-import fr.ird.ichthyop.manager.DatasetManager;
-import fr.ird.ichthyop.manager.OutputManager;
-import fr.ird.ichthyop.manager.PropertyManager;
+import org.previmer.ichthyop.arch.IOutputManager;
+import org.previmer.ichthyop.manager.ReleaseManager;
+import org.previmer.ichthyop.arch.IReleaseManager;
+import org.previmer.ichthyop.manager.ZoneManager;
+import org.previmer.ichthyop.manager.ParameterManager;
+import org.previmer.ichthyop.manager.ActionManager;
+import org.previmer.ichthyop.arch.ISimulation;
+import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.arch.IZoneManager;
+import org.previmer.ichthyop.arch.IActionManager;
+import org.previmer.ichthyop.arch.IDatasetManager;
+import org.previmer.ichthyop.arch.IParameterManager;
+import org.previmer.ichthyop.arch.IPopulation;
+import org.previmer.ichthyop.arch.IPropertyManager;
+import org.previmer.ichthyop.arch.IStep;
+import org.previmer.ichthyop.manager.DatasetManager;
+import org.previmer.ichthyop.manager.OutputManager;
+import org.previmer.ichthyop.manager.PropertyManager;
 
 /**
  *

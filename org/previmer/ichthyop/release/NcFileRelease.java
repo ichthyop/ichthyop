@@ -3,9 +3,9 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.release;
+package org.previmer.ichthyop.release;
 
-import fr.ird.ichthyop.event.ReleaseEvent;
+import org.previmer.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
 
 /**

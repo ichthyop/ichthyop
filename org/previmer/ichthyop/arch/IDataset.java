@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.arch;
+package org.previmer.ichthyop.arch;
 
-import fr.ird.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.event.NextStepListener;
 
 /**
  *

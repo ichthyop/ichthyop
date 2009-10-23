@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.io;
+package org.previmer.ichthyop.io;
 
 import java.io.File;
 import java.util.ArrayList;

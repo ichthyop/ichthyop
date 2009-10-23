@@ -1,4 +1,4 @@
-package fr.ird.ichthyop.arch;
+package org.previmer.ichthyop.arch;
 
 /**
  * Public interface that lists the methods a Particle of the model will have

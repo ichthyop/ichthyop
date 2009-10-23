@@ -3,10 +3,10 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop;
+package org.previmer.ichthyop;
 
-import fr.ird.ichthyop.manager.*;
-import fr.ird.ichthyop.arch.ISimulationManager;
+import org.previmer.ichthyop.manager.*;
+import org.previmer.ichthyop.arch.ISimulationManager;
 
 /**
  *

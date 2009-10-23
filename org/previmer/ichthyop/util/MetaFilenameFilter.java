@@ -1,4 +1,4 @@
-package fr.ird.ichthyop.util;
+package org.previmer.ichthyop.util;
 
 /** import java.util */
 import java.util.regex.Pattern;

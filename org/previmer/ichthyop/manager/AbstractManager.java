@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.SimulationManagerAccessor;
-import fr.ird.ichthyop.event.InitializeListener;
-import fr.ird.ichthyop.event.SetupListener;
+import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.event.InitializeListener;
+import org.previmer.ichthyop.event.SetupListener;
 
 /**
  *

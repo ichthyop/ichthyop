@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.particle;
+package org.previmer.ichthyop.particle;
 
-import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.*;
+import org.previmer.ichthyop.arch.IBasicParticle;
 
 /**
  *

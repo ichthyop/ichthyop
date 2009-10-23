@@ -2,17 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.arch.ITimeManager;
-import fr.ird.ichthyop.event.NextStepEvent;
-import fr.ird.ichthyop.event.NextStepListener;
-import fr.ird.ichthyop.calendar.Calendar1900;
-import fr.ird.ichthyop.calendar.ClimatoCalendar;
-import fr.ird.ichthyop.event.InitializeEvent;
-import fr.ird.ichthyop.event.LastStepEvent;
-import fr.ird.ichthyop.event.LastStepListener;
-import fr.ird.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.arch.ITimeManager;
+import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.calendar.Calendar1900;
+import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.LastStepEvent;
+import org.previmer.ichthyop.event.LastStepListener;
+import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.Logger;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop;
+package org.previmer.ichthyop;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class RunBatch extends SimulationManagerAccessor {
     }
 
     public static void main(String... args) {
-        String filename = System.getProperty("user.dir") + File.separator + "cfg2.xic";
+        String filename = System.getProperty("user.dir") + File.separator + "cfg.xic";
         new RunBatch(filename);
     }
 }

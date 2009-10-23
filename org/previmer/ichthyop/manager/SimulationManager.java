@@ -2,26 +2,26 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.Simulation;
-import fr.ird.ichthyop.arch.IActionManager;
-import fr.ird.ichthyop.arch.IDataset;
-import fr.ird.ichthyop.arch.IDatasetManager;
-import fr.ird.ichthyop.arch.IOutputManager;
-import fr.ird.ichthyop.arch.IParameterManager;
-import fr.ird.ichthyop.arch.IPropertyManager;
-import fr.ird.ichthyop.arch.IReleaseManager;
-import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.arch.ISimulationManager;
-import fr.ird.ichthyop.arch.ITimeManager;
-import fr.ird.ichthyop.arch.IZoneManager;
-import fr.ird.ichthyop.event.InitializeEvent;
-import fr.ird.ichthyop.event.InitializeListener;
-import fr.ird.ichthyop.event.SetupEvent;
-import fr.ird.ichthyop.event.SetupListener;
-import fr.ird.ichthyop.io.ParamType;
-import fr.ird.ichthyop.io.XParameter;
+import org.previmer.ichthyop.Simulation;
+import org.previmer.ichthyop.arch.IActionManager;
+import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.arch.IDatasetManager;
+import org.previmer.ichthyop.arch.IOutputManager;
+import org.previmer.ichthyop.arch.IParameterManager;
+import org.previmer.ichthyop.arch.IPropertyManager;
+import org.previmer.ichthyop.arch.IReleaseManager;
+import org.previmer.ichthyop.arch.ISimulation;
+import org.previmer.ichthyop.arch.ISimulationManager;
+import org.previmer.ichthyop.arch.ITimeManager;
+import org.previmer.ichthyop.arch.IZoneManager;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.InitializeListener;
+import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.event.SetupListener;
+import org.previmer.ichthyop.io.ParamType;
+import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
 import javax.swing.event.EventListenerList;
 

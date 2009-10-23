@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.dataset;
+package org.previmer.ichthyop.dataset;
 
-import fr.ird.ichthyop.util.MetaFilenameFilter;
-import fr.ird.ichthyop.util.NCComparator;
-import fr.ird.ichthyop.event.NextStepEvent;
-import fr.ird.ichthyop.util.Constant;
+import org.previmer.ichthyop.util.MetaFilenameFilter;
+import org.previmer.ichthyop.util.NCComparator;
+import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.util.Constant;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;

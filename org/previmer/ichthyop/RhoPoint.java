@@ -1,6 +1,6 @@
-package fr.ird.ichthyop;
+package org.previmer.ichthyop;
 
-import fr.ird.ichthyop.arch.IRhoPoint;
+import org.previmer.ichthyop.arch.IRhoPoint;
 
 /**
  * Both ROMS and MARS use an Arakawa C grid.

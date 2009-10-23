@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.particle;
+package org.previmer.ichthyop.particle;
 
-import fr.ird.ichthyop.arch.IGrowingParticle;
-import fr.ird.ichthyop.arch.IParameterManager;
-import fr.ird.ichthyop.arch.IPropertyManager;
+import org.previmer.ichthyop.arch.IGrowingParticle;
+import org.previmer.ichthyop.arch.IParameterManager;
+import org.previmer.ichthyop.arch.IPropertyManager;
 
 /**
  *

@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.particle;
+package org.previmer.ichthyop.particle;
 
-import fr.ird.ichthyop.arch.IRecruitableParticle;
+import org.previmer.ichthyop.arch.IRecruitableParticle;
 
 /**
  *

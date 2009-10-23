@@ -1,4 +1,4 @@
-package fr.ird.ichthyop;
+package org.previmer.ichthyop;
 
 import java.util.ArrayList;
 

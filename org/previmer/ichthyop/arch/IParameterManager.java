@@ -3,12 +3,12 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.arch;
+package org.previmer.ichthyop.arch;
 
-import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.io.ParamType;
-import fr.ird.ichthyop.io.XBlock;
-import fr.ird.ichthyop.io.XParameter;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.io.ParamType;
+import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
 import java.util.List;
 

@@ -2,17 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.event.InitializeEvent;
-import fr.ird.ichthyop.event.NextStepEvent;
-import fr.ird.ichthyop.event.SetupEvent;
-import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.event.ReleaseEvent;
-import fr.ird.ichthyop.arch.IReleaseProcess;
-import fr.ird.ichthyop.arch.IReleaseManager;
-import fr.ird.ichthyop.event.ReleaseListener;
-import fr.ird.ichthyop.io.XBlock;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.event.ReleaseEvent;
+import org.previmer.ichthyop.arch.IReleaseProcess;
+import org.previmer.ichthyop.arch.IReleaseManager;
+import org.previmer.ichthyop.event.ReleaseListener;
+import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

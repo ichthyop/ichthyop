@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.release;
+package org.previmer.ichthyop.release;
 
-import fr.ird.ichthyop.event.ReleaseEvent;
-import fr.ird.ichthyop.particle.ParticleFactory;
-import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.event.ReleaseEvent;
+import org.previmer.ichthyop.particle.ParticleFactory;
+import org.previmer.ichthyop.*;
+import org.previmer.ichthyop.arch.IBasicParticle;
 import java.io.IOException;
 
 /**

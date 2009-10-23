@@ -3,9 +3,9 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.io;
+package org.previmer.ichthyop.io;
 
-import fr.ird.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IBasicParticle;
 import java.util.Iterator;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;

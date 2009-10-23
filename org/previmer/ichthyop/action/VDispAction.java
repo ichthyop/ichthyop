@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.action;
+package org.previmer.ichthyop.action;
 
-import fr.ird.ichthyop.util.MTRandom;
-import fr.ird.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.util.MTRandom;
+import org.previmer.ichthyop.arch.IBasicParticle;
 
 /**
  *

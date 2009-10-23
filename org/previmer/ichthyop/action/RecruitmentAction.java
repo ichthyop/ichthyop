@@ -2,13 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.action;
+package org.previmer.ichthyop.action;
 
-import fr.ird.ichthyop.util.Constant;
-import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.arch.IGrowingParticle;
-import fr.ird.ichthyop.arch.IRecruitableParticle;
-import fr.ird.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.util.Constant;
+import org.previmer.ichthyop.*;
+import org.previmer.ichthyop.arch.IGrowingParticle;
+import org.previmer.ichthyop.arch.IRecruitableParticle;
+import org.previmer.ichthyop.arch.IBasicParticle;
 
 /**
  *

@@ -1,10 +1,10 @@
-package fr.ird.ichthyop.manager;
+package org.previmer.ichthyop.manager;
 
-import fr.ird.ichthyop.io.BlockType;
-import fr.ird.ichthyop.arch.IParameterManager;
-import fr.ird.ichthyop.io.ParamType;
-import fr.ird.ichthyop.io.XBlock;
-import fr.ird.ichthyop.io.XParameter;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.arch.IParameterManager;
+import org.previmer.ichthyop.io.ParamType;
+import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;

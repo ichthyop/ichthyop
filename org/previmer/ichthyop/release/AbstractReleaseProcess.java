@@ -2,13 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.release;
+package org.previmer.ichthyop.release;
 
-import fr.ird.ichthyop.event.ReleaseEvent;
-import fr.ird.ichthyop.*;
-import fr.ird.ichthyop.arch.IReleaseProcess;
-import fr.ird.ichthyop.arch.ISimulation;
-import fr.ird.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.event.ReleaseEvent;
+import org.previmer.ichthyop.*;
+import org.previmer.ichthyop.arch.IReleaseProcess;
+import org.previmer.ichthyop.arch.ISimulation;
+import org.previmer.ichthyop.SimulationManagerAccessor;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

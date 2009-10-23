@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.ichthyop.arch;
+package org.previmer.ichthyop.arch;
 
 import java.util.List;
 import ucar.ma2.Array;

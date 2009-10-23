@@ -3,10 +3,10 @@
  * and open the template in the editor.
  */
 
-package fr.ird.ichthyop.arch;
+package org.previmer.ichthyop.arch;
 
-import fr.ird.ichthyop.action.AbstractAction;
-import fr.ird.ichthyop.io.XBlock;
+import org.previmer.ichthyop.action.AbstractAction;
+import org.previmer.ichthyop.io.XBlock;
 import java.util.Collection;
 
 /**
