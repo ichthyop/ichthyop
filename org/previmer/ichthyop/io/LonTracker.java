@@ -31,9 +31,6 @@ public class LonTracker extends AbstractTracker {
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            //Index index = Index.factory(new int[]{0, particle.getIndex()});
-            //Logger.getAnonymousLogger().info("tracking particle " + particle.getIndex() + " " + (float) particle.getLon());
-            //getArray().setFloat(index, (float) particle.getLon());
             getArray().set(0, particle.getIndex(), (float) particle.getLon());
         }
     }

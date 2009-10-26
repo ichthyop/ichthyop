@@ -10,7 +10,6 @@ import java.util.Iterator;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
-import ucar.ma2.Index;
 
 /**
  *
@@ -33,8 +32,6 @@ public class DepthTracker extends AbstractTracker {
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            //Index index = Index.factory(new int[]{0, particle.getIndex()});
-            //getArray().setFloat(index, (float) particle.getDepth());
             getArray().set(0, particle.getIndex(), (float) particle.getDepth());
         }
     }

@@ -4,9 +4,7 @@
  */
 package org.previmer.ichthyop.io;
 
-import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.arch.ISimulation;
 import org.previmer.ichthyop.arch.ITracker;
 import org.previmer.ichthyop.manager.OutputManager.NCDimFactory;
 import org.previmer.ichthyop.manager.PropertyManager;

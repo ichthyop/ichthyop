@@ -125,9 +125,9 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     public boolean hasNextStep() {
 
         time += dt;
+        calendar.setTimeInMillis(time * 1000L);
         if (Math.abs(time - t0) < simuDuration) {
             i_step++;
-            calendar.setTimeInMillis(time * 1000L);
             fireNextStepTriggered();
             return true;
         }

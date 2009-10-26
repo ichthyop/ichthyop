@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
+import org.previmer.ichthyop.io.UserDefinedTracker;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -126,24 +127,24 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         trackers = new ArrayList();
         for (XBlock xtrack : getSimulationManager().getParameterManager().getBlocks(BlockType.TRACKER)) {
             if (xtrack.isEnabled()) {
-                ITracker tracker = createTracker(xtrack);
-                trackers.add(tracker);
-                addVar2NcOut(tracker);
+                try {
+                    ITracker tracker = createTracker(xtrack);
+                    trackers.add(tracker);
+                    addVar2NcOut(tracker);
+                } catch (Exception ex) {
+                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
 
-    private ITracker createTracker(XBlock xtracker) {
-        try {
+    private ITracker createTracker(XBlock xtracker) throws Exception {
+
+        if (Boolean.valueOf(xtracker.getXParameter("user_defined").getValue())) {
+            return new UserDefinedTracker(xtracker.getKey());
+        } else {
             return (ITracker) Class.forName(xtracker.getXParameter(CLASS_NAME).getValue()).newInstance();
-        } catch (InstantiationException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -151,15 +152,16 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         ITimeManager timeManager = e.getSource();
         //Logger.getAnonymousLogger().info(step.getTime() + " " + step.get_tO());
         if (((timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
-            write(i_record++);
+            writeToNetCDF(i_record++);
         }
     }
 
-    private void write(int i_record) {
-        Logger.getAnonymousLogger().info("  --> record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
+    private void writeToNetCDF(int i_record) {
+        System.out.println("  --> record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
+        //Logger.getAnonymousLogger().info("  --> record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
         for (ITracker tracker : trackers) {
             tracker.track();
-            write2NcOut(tracker, i_record);
+            writeTrackerToNetCDF(tracker, i_record);
         }
     }
 
@@ -171,7 +173,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
      * @param array the Array that will be written; must be same type and
      * rank as Field
      */
-    private void write2NcOut(ITracker tracker, int index) {
+    private void writeTrackerToNetCDF(ITracker tracker, int index) {
         try {
 
             ncOut.write(tracker.short_name(), tracker.origin(index), tracker.getArray());
@@ -193,13 +195,15 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         ncOut.addVariableAttribute(tracker.short_name(), "long_name",
                 tracker.long_name());
         ncOut.addVariableAttribute(tracker.short_name(), "unit", tracker.unit());
-        for (Attribute attribute : tracker.attributes()) {
-            ncOut.addVariableAttribute(tracker.short_name(), attribute);
+        if (tracker.attributes() != null) {
+            for (Attribute attribute : tracker.attributes()) {
+                ncOut.addVariableAttribute(tracker.short_name(), attribute);
+            }
         }
     }
 
     public void lastStepOccurred(LastStepEvent e) {
-        write(i_record);
+        writeToNetCDF(i_record);
         close();
     }
 
