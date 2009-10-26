@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.Array;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayFloat.D2;
+import ucar.ma2.ArrayFloat.D4;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -1567,13 +1570,107 @@ public abstract class Roms3dDataset extends AbstractDataset {
         if (!variable.getDataType().isNumeric()) {
             throw new NumberFormatException(variableName + " is not a numeric variable");
         }
-        Class variableClass = variable.getDataType().getPrimitiveClassType();
         int[] origin = new int[variable.getShape().length];
         int[] shape = variable.getShape();
-        if (variable.isUnlimited()) {
-            shape[0] = 1;
-            origin[0] = rank;
+        int i = (int) pGrid[0];
+        int j = (int) pGrid[1];
+        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
+        int k = (int) kz;
+        shape = new int[]{2, 2, 2, 2};
+        origin = new int[]{rank - 1, k, j, i};
+        /*if (variable.isUnlimited()) {
+        shape[0] = 2;
+        origin[0] = rank;
+        }*/
+        try {
+            //
+            ArrayFloat.D4 array = (D4) variable.read(origin, shape);
+            //
+            double co, CO, x, frac, value;
+            int n = isCloseToCost(pGrid) ? 1 : 2;
+            frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
+            //-----------------------------------------------------------
+            // Interpolate the fields
+            // in the computational grid.
+
+            double dx = pGrid[0] - (double) i;
+            double dy = pGrid[1] - (double) j;
+            double dz = kz - (double) k;
+            value = 0.d;
+            CO = 0.d;
+            for (int kk = 0; kk < 2; kk++) {
+                for (int jj = 0; jj < n; jj++) {
+                    for (int ii = 0; ii < n; ii++) {
+                        co = Math.abs((1.d - (double) ii - dx) *
+                                (1.d - (double) jj - dy) *
+                                (1.d - (double) kk - dz));
+                        CO += co;
+                        x = 0.d;
+                        try {
+                            x = (1.d - frac) * array.get(0, kk, jj, ii) +
+                                    frac * array.get(1, kk, jj, ii);
+                            value += x * co;
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            throw new ArrayIndexOutOfBoundsException("Problem interpolating " + variableName + " field : " + e.getMessage());
+                        }
+                    }
+                }
+            }
+            if (CO != 0) {
+                value /= CO;
+            }
+            return value;
+
+        } catch (IOException ex) {
+            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    private double interpTime(double value_t0, double value_t1, double time) {
+        double frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        return (1.d - frac) * value_t0 + frac * value_t1;
+    }
+
+    private double interp2D(ArrayFloat.D2 array, double dx, double dy, int n) {
+        double value = 0.d;
+        double CO = 0.d;
+
+        for (int jj = 0; jj < n; jj++) {
+            for (int ii = 0; ii < n; ii++) {
+                double co = Math.abs((1.d - (double) ii - dx) *
+                        (1.d - (double) jj - dy));
+                CO += co;
+                value += array.get(jj, ii) * co;
+            }
+        }
+
+        if (CO != 0) {
+            value /= CO;
+        }
+        return value;
+    }
+
+    private double interp3D(ArrayFloat.D3 array, double dx, double dy, double dz, int n) {
+        double value = 0.d;
+        double CO = 0.d;
+        for (int kk = 0; kk < 2; kk++) {
+            for (int jj = 0; jj < n; jj++) {
+                for (int ii = 0; ii < n; ii++) {
+                    double co = Math.abs((1.d - (double) ii - dx) *
+                            (1.d - (double) jj - dy) *
+                            (1.d - (double) kk - dz));
+                    CO += co;
+                    value += array.get(kk, jj, ii) * co;
+                }
+            }
+        }
+        if (CO != 0) {
+            value /= CO;
+        }
+        return value;
     }
 }
