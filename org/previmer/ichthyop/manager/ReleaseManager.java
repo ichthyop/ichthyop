@@ -39,6 +39,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     public ReleaseManager() {
         super();
         addReleaseListener(this);
+        getSimulationManager().getTimeManager().addNextStepListener(this);
     }
 
     public static IReleaseManager getInstance() {
