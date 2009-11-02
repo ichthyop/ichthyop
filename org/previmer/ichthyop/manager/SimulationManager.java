@@ -24,6 +24,7 @@ import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
 import javax.swing.event.EventListenerList;
+import org.previmer.ichthyop.calendar.Calendar1900;
 
 /**
  *
@@ -44,6 +45,10 @@ public class SimulationManager implements ISimulationManager {
      *
      */
     private EventListenerList listeners = new EventListenerList();
+    /**
+     * Computer time when the simulation starts [millisecond]
+     */
+    private long cpu_start;
 
     public static SimulationManager getInstance() {
         return simulationManager;
@@ -92,6 +97,57 @@ public class SimulationManager implements ISimulationManager {
         i_simulation++;
     }
 
+    /**
+     * Calculates the progress of the current simulation
+     * @return the progress of the current simulation as a percent
+     */
+    public int progressCurrent() {
+        return (int) (100.f * (getTimeManager().index() + 1) / getTimeManager().getNumberOfSteps());
+    }
+
+    /**
+     * Calculates the progress of the current simulation compared to the whole
+     * sets of simulations.
+     * @return the progress of the whole sets of simulations as a percent
+     */
+    public int progressGlobal() {
+        return (int) (100.f * (i_simulation + (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps()) / nb_simulations);
+    }
+
+    /**
+     * Estimates the time left to end up the run.
+     *
+     * @return the time left, formatted in a String
+     */
+    public String timeLeft() {
+
+        StringBuffer strBf;
+        
+        float x = progressGlobal() / 100.f;
+        long nbMilliSecLeft = 0L;
+        if (x != 0) {
+            nbMilliSecLeft = (long) ((System.currentTimeMillis() - cpu_start) * (1 - x) / x);
+        }
+        int nbHourLeft = (int) (nbMilliSecLeft / Calendar1900.ONE_HOUR);
+        int nbMinLeft = (int) ((nbMilliSecLeft - Calendar1900.ONE_HOUR * nbHourLeft) / Calendar1900.ONE_MINUTE);
+        int nbSecLeft = (int) ((nbMilliSecLeft - Calendar1900.ONE_HOUR * nbHourLeft - Calendar1900.ONE_MINUTE * nbMinLeft) / Calendar1900.ONE_SECOND);
+
+        strBf = new StringBuffer("Time left ");
+        if (nbHourLeft == 0) {
+            strBf.append(nbMinLeft);
+            strBf.append("min ");
+            strBf.append(nbSecLeft);
+            strBf.append("s");
+        } else {
+            strBf.append(nbHourLeft);
+            strBf.append("h ");
+            strBf.append(nbMinLeft);
+            strBf.append("min");
+        }
+
+        return strBf.toString();
+    }
+
     private void mobiliseManagers() {
         getActionManager();
         getDatasetManager();
@@ -114,9 +170,11 @@ public class SimulationManager implements ISimulationManager {
             fireSetupPerformed();
             fireInitializePerformed();
             getTimeManager().firstStepTriggered();
+            cpu_start = System.currentTimeMillis();
             do {
                 System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
                 getSimulation().step();
+                System.out.println(timeLeft());
             } while (getTimeManager().hasNextStep());
             System.out.println("End of simulation");
         } while (hasNextSimulation());
@@ -161,7 +219,7 @@ public class SimulationManager implements ISimulationManager {
         }
     }
 
-     public IDatasetManager getDatasetManager() {
+    public IDatasetManager getDatasetManager() {
         return DatasetManager.getInstance();
     }
 

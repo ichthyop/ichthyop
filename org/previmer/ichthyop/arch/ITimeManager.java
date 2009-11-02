@@ -35,5 +35,9 @@ public interface ITimeManager {
 
     public void firstStepTriggered();
 
+    public int index();
+
+    public int getNumberOfSteps();
+
 
 }
