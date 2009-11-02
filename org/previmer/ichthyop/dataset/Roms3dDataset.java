@@ -1574,54 +1574,47 @@ public abstract class Roms3dDataset extends AbstractDataset {
         int[] shape = variable.getShape();
         int i = (int) pGrid[0];
         int j = (int) pGrid[1];
-        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        shape = new int[]{2, 2, 2, 2};
-        origin = new int[]{rank - 1, k, j, i};
-        /*if (variable.isUnlimited()) {
-        shape[0] = 2;
-        origin[0] = rank;
-        }*/
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
+        double kz, dz, value_t0, value_t1;
+        int k;
+        Array array;
         try {
-            //
-            ArrayFloat.D4 array = (D4) variable.read(origin, shape);
-            //
-            double co, CO, x, frac, value;
-            int n = isCloseToCost(pGrid) ? 1 : 2;
-            frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-            //-----------------------------------------------------------
-            // Interpolate the fields
-            // in the computational grid.
-
-            double dx = pGrid[0] - (double) i;
-            double dy = pGrid[1] - (double) j;
-            double dz = kz - (double) k;
-            value = 0.d;
-            CO = 0.d;
-            for (int kk = 0; kk < 2; kk++) {
-                for (int jj = 0; jj < n; jj++) {
-                    for (int ii = 0; ii < n; ii++) {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * array.get(0, kk, jj, ii) +
-                                    frac * array.get(1, kk, jj, ii);
-                            value += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException("Problem interpolating " + variableName + " field : " + e.getMessage());
-                        }
+            switch (variable.getShape().length) {
+                case 4:
+                    kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
+                    k = (int) kz;
+                    dz = kz - (double) k;
+                    shape = new int[]{2, 2, 2, 2};
+                    origin = new int[]{rank - 1, k, j, i};
+                    array = variable.read(origin, shape);
+                    value_t0 = interp3D((ArrayFloat.D3) array.section(new int[]{0, 0, 0, 0}, new int[]{1, 2, 2, 2}).reduce(), dx, dy, dz, n);
+                    value_t1 = interp3D((ArrayFloat.D3) array.section(new int[]{1, 0, 0, 0}, new int[]{1, 2, 2, 2}).reduce(), dx, dy, dz, n);
+                    return interpTime(value_t0, value_t1, time);
+                case 3:
+                    if (variable.isUnlimited()) {
+                        shape = new int[]{2, 2, 2};
+                        origin = new int[]{rank - 1, j, i};
+                        array = variable.read(origin, shape);
+                        value_t0 = interp2D((ArrayFloat.D2) array.section(new int[]{0, 0, 0}, new int[]{1, 2, 2}).reduce(), dx, dy, n);
+                        value_t1 = interp2D((ArrayFloat.D2) array.section(new int[]{1, 0, 0}, new int[]{1, 2, 2}).reduce(), dx, dy, n);
+                        return interpTime(value_t0, value_t1, time);
+                    } else {
+                        kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
+                        k = (int) kz;
+                        dz = kz - (double) k;
+                        shape = new int[]{2, 2, 2};
+                        origin = new int[]{k, j, i};
+                        array = variable.read(origin, shape);
+                        return interp3D((ArrayFloat.D3) array, dx, dy, dz, n);
                     }
-                }
+                case 2:
+                    shape = new int[]{2, 2};
+                    origin = new int[]{j, i};
+                    array = variable.read(origin, shape);
+                    return interp2D((ArrayFloat.D2) array, dx, dy, n);
             }
-            if (CO != 0) {
-                value /= CO;
-            }
-            return value;
-
         } catch (IOException ex) {
             Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
