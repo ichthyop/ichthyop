@@ -14,17 +14,19 @@ public interface IDataset extends NextStepListener {
 
     public void setUp();
 
-    //public double[] geo2Grid(double lon, double lat);
     public double[] lonlat2xy(double lon, double lat);
 
-    //public double[] grid2Geo(double xRho, double yRho);
     public double[] xy2lonlat(double xRho, double yRho);
 
     public double depth2z(double x, double y, double depth);
 
     public double z2depth(double x, double y, double z);
 
-    double[] advectEuler(double[] pGrid, double time, double dt);
+    double get_dUx(double[] pGrid, double time);
+
+    double get_dVy(double[] pGrid, double time);
+
+    double get_dWz(double[] pGrid, double time);
 
     abstract public double adimensionalize(double number, double xRho, double yRho);
 

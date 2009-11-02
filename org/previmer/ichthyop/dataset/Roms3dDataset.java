@@ -17,8 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayFloat.D2;
-import ucar.ma2.ArrayFloat.D4;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -759,121 +757,113 @@ public abstract class Roms3dDataset extends AbstractDataset {
         return depth;
     }
 
-    public double[] advectEuler(double[] pGrid, double time, double dt) {
+    public double get_dWz(double[] pGrid, double time) {
 
-        double co, CO, x, dw, du, dv, x_euler;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        //-----------------------------------------------------------
-        // Interpolate the velocity, temperature and salinity fields
-        // in the computational grid.
-
+        double dw = 0.d;
         double ix, jy, kz;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        du = 0.d;
-        dv = 0.d;
-        dw = 0.d;
-        x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        try {
-            //-----------------------
-            //Get dw
-            int i = (int) ix;
-            int j = (int) jy;
-            int k = (int) Math.round(kz);
-            double dx = ix - (double) i;
-            double dy = jy - (double) j;
-            double dz = kz - (double) k;
-            CO = 0.d;
-            for (int ii = 0; ii < n; ii++) {
-                for (int jj = 0; jj < n; jj++) {
-                    for (int kk = 0; kk < 2; kk++) {
-                        co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
-                        CO += co;
-                        x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                        dw += 2.d * x * co / (z_w_tp0[Math.min(k + kk + 1, nz)][j + jj][i + ii] - z_w_tp0[Math.max(k + kk - 1, 0)][j + jj][i + ii]);
-                    }
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        int i = (int) ix;
+        int j = (int) jy;
+        int k = (int) Math.round(kz);
+        double dx = ix - (double) i;
+        double dy = jy - (double) j;
+        double dz = kz - (double) k;
+        double CO = 0.d;
+        double co = 0.d;
+        double x = 0.d;
+        for (int ii = 0; ii < n; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                    CO += co;
+                    x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
+                    dw += 2.d * x * co / (z_w_tp0[Math.min(k + kk + 1, nz)][j + jj][i + ii] - z_w_tp0[Math.max(k + kk - 1, 0)][j + jj][i + ii]);
                 }
             }
-            dw *= dt;
-            if (CO != 0) {
-                dw /= CO;
-            }
-
-            //------------------------
-            // Get du
-            //kz = Math.min(kz, nz - 1.00001f);
-            i = (int) Math.round(ix);
-            k = (int) kz;
-            dx = ix - (double) i;
-            dz = kz - (double) k;
-            CO = 0.d;
-            for (int ii = 0; ii < 2; ii++) {
-                for (int jj = 0; jj < n; jj++) {
-                    for (int kk = 0; kk < 2; kk++) {
-                        //if (isInWater(i + ii, j + jj)) {
-                        {
-                            co = Math.abs((.5d - (double) ii - dx) *
-                                    (1.d - (double) jj - dy) *
-                                    (1.d - (double) kk - dz));
-                            CO += co;
-                            x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii -
-                                    1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                            du += .5d * x * co *
-                                    (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j +
-                                    jj][i + ii]);
-                        }
-                    }
-                }
-            }
-            du *= dt;
-            if (CO != 0) {
-                du /= CO;
-            }
-
-            //-------------------------
-            // Get dv
-            i = (int) ix;
-            j = (int) Math.round(jy);
-            dx = ix - (double) i;
-            dy = jy - (double) j;
-            CO = 0.d;
-            for (int kk = 0; kk < 2; kk++) {
-                for (int jj = 0; jj < 2; jj++) {
-                    for (int ii = 0; ii < n; ii++) {
-                        //if (isInWater(i + ii, j + jj)) {
-                        {
-                            co = Math.abs((1.d - (double) ii - dx) *
-                                    (.5d - (double) jj - dy) *
-                                    (1.d - (double) kk - dz));
-                            CO += co;
-                            x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i +
-                                    ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                            dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
-                        }
-                    }
-                }
-            }
-            dv *= dt;
-            if (CO != 0) {
-                dv /= CO;
-            }
-        } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-            throw new ArrayIndexOutOfBoundsException(
-                    "Problem interpolating velocity fields : " + e.getMessage());
         }
-        if (du > Constant.THRESHOLD_CFL) {
-            System.err.println("! WARNING : CFL broken for u " + (float) du);
+        if (CO != 0) {
+            dw /= CO;
         }
-        if (dv > Constant.THRESHOLD_CFL) {
-            System.err.println("! WARNING : CFL broken for v " + (float) dv);
-        }
-
-        return (new double[]{du, dv, dw});
+        return dw;
     }
+
+    public double get_dVy(double[] pGrid, double time) {
+        double dv = 0.d;
+        double ix, jy, kz;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        ix = pGrid[0];
+        jy = pGrid[1];
+        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        int i = (int) ix;
+        int j = (int) Math.round(jy);
+        int k = (int) kz;
+        double dx = ix - (double) i;
+        double dy = jy - (double) j;
+        double dz = kz - (double) k;
+        double CO = 0.d;
+        double co = 0.d;
+        double x = 0.d;
+        for (int kk = 0; kk < 2; kk++) {
+            for (int jj = 0; jj < 2; jj++) {
+                for (int ii = 0; ii < n; ii++) {
+                    co = Math.abs((1.d - (double) ii - dx) *
+                            (.5d - (double) jj - dy) *
+                            (1.d - (double) kk - dz));
+                    CO += co;
+                    x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                    dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                }
+            }
+        }
+        if (CO != 0) {
+            dv /= CO;
+        }
+        return dv;
+    }
+
+    public double get_dUx(double[] pGrid, double time) {
+
+        double du = 0.d;
+        double ix, jy, kz;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        ix = pGrid[0];
+        jy = pGrid[1];
+        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        int i = (int) Math.round(ix);
+        int j = (int) jy;
+        int k = (int) kz;
+        double dx = ix - (double) i;
+        double dy = jy - (double) j;
+        double dz = kz - (double) k;
+        double CO = 0.d;
+        double co = 0.d;
+        double x = 0.d;
+        for (int ii = 0; ii < 2; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    co = Math.abs((.5d - (double) ii - dx) *
+                            (1.d - (double) jj - dy) *
+                            (1.d - (double) kk - dz));
+                    CO += co;
+                    x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                    du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                }
+            }
+        }
+        if (CO != 0) {
+            du /= CO;
+        }
+        return du;
+    }        
 
     public double adimensionalize(double number, double xRho, double yRho) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -1108,7 +1098,6 @@ public abstract class Roms3dDataset extends AbstractDataset {
         shft = jmax - jmin + 2 * imax - imin;
         for (int i = imax; i >= (imin + 1); i--) {
             xb[shft - i] = lonRho[jmax][i];
-            ;
             yb[shft - i] = latRho[jmax][i];
         }
         shft = 2 * jmax - jmin + 2 * (imax - imin);
