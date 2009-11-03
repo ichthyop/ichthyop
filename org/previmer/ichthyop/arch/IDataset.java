@@ -36,8 +36,6 @@ public interface IDataset extends NextStepListener {
 
     public double getBathy(int i, int j);
 
-    public double getDepth(double xRho, double yRho, int k);
-
     public double getTemperature(double[] pGrid, double time);
 
     public double getSalinity(double[] pGrid, double time);

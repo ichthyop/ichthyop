@@ -863,7 +863,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             du /= CO;
         }
         return du;
-    }        
+    }
 
     public double adimensionalize(double number, double xRho, double yRho) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -891,7 +891,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         return Double.NaN;
     }
 
-    public double getDepth(double xRho, double yRho, int k) {
+    private double getDepth(double xRho, double yRho, int k) {
 
         final int i = (int) xRho;
         final int j = (int) yRho;
@@ -1225,7 +1225,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
     }
 
     public void nextStepTriggered(NextStepEvent e) {
-
+        
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());

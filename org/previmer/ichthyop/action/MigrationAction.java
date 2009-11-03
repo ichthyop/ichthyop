@@ -77,7 +77,7 @@ public class MigrationAction extends AbstractAction {
      */
     private double getDepth(double x, double y) {
 
-        double bottom = getSimulationManager().getDataset().getDepth(x, y, 0);
+        double bottom = getSimulationManager().getDataset().z2depth(x, y, 0);
         calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
