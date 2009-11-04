@@ -8,6 +8,7 @@ package org.previmer.ichthyop.arch;
 import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -15,7 +16,7 @@ import java.util.Collection;
  */
 public interface IActionManager {
 
-    //public XBlock getXAction(String key);
+    public List<AbstractAction> getSortedActions();
 
     public AbstractAction createAction(Class actionClass);
 

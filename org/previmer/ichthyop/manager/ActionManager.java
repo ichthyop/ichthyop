@@ -13,11 +13,14 @@ import org.previmer.ichthyop.arch.IActionManager;
 import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.previmer.ichthyop.arch.IAction;
 
 /**
  *
@@ -46,6 +49,12 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
                 }
             }
         }
+    }
+
+    public List<AbstractAction> getSortedActions() {
+        List<AbstractAction> actions = new ArrayList(actionMap.values());
+        Collections.sort(actions, new ActionComparator());
+        return actions;
     }
 
     public AbstractAction createAction(Class actionClass) {
@@ -77,7 +86,9 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
     }
 
     public void initializePerformed(InitializeEvent e) {
-        // do nothing
+        for (AbstractAction action : getSortedActions()) {
+            System.out.println(action.getClass() + " " + action.getPriority().toString());
+        }
     }
 
     public boolean isEnabled(String actionKey) {
@@ -86,5 +97,12 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
 
     public String getParameter(String actionKey, String key) {
         return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
+    }
+
+    private class ActionComparator implements Comparator<IAction> {
+
+        public int compare(IAction action1, IAction action2) {
+            return action2.getPriority().rank().compareTo(action1.getPriority().rank());
+        }
     }
 }
