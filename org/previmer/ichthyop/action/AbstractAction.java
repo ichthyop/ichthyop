@@ -5,9 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.arch.IAction;
-import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.SimulationManagerAccessor;
-import java.util.ArrayList;
 
 /**
  *
@@ -26,8 +24,17 @@ public abstract class AbstractAction extends SimulationManagerAccessor implement
         return getSimulationManager().getActionManager().getParameter(actionKey, key);
     }
 
+    public ActionPriority getPriority() {
+        String priority = getParameter("priority");
+        for (ActionPriority actionPriority : ActionPriority.values()) {
+            if (priority.matches(actionPriority.toString())) {
+                return actionPriority;
+            }
+        }
+        return ActionPriority.NORMAL;
+    }
+
     public boolean isEnabled() {
         return getSimulationManager().getActionManager().isEnabled(actionKey);
     }
-
 }
