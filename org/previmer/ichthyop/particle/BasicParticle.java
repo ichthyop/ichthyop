@@ -17,6 +17,7 @@ public abstract class BasicParticle extends RhoPoint implements IBasicParticle {
     private long age = 0;
     private String deathCause;
     private boolean living = true;
+    private boolean locked = false;
 
     public boolean isLiving() {
         return living;
@@ -53,5 +54,17 @@ public abstract class BasicParticle extends RhoPoint implements IBasicParticle {
         } else {
             return "not-dead-yet";
         }
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void lock() {
+        locked = true;
+    }
+
+    public void unlock() {
+        locked = false;
     }
 }

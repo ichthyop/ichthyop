@@ -51,7 +51,7 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         }
     }
 
-    public List<AbstractAction> getSortedActions() {
+    private List<AbstractAction> getSortedActions() {
         List<AbstractAction> actions = new ArrayList(actionMap.values());
         Collections.sort(actions, new ActionComparator());
         return actions;
@@ -70,10 +70,11 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
 
     }
 
-    public void execute(String actionName, IBasicParticle particle) {
-        AbstractAction action = get(actionName);
-        if (action != null) {
-            action.execute(particle);
+    public void executeActions(IBasicParticle particle) {
+        for (IAction action : getSortedActions()) {
+            if (!particle.isLocked()) {
+                action.execute(particle);
+            }
         }
     }
 
@@ -86,9 +87,7 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
     }
 
     public void initializePerformed(InitializeEvent e) {
-        for (AbstractAction action : getSortedActions()) {
-            System.out.println(action.getClass() + " " + action.getPriority().toString());
-        }
+        // nothing to do
     }
 
     public boolean isEnabled(String actionKey) {

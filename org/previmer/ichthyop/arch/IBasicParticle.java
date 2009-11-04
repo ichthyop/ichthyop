@@ -47,6 +47,12 @@ public interface IBasicParticle extends IRhoPoint {
 
     public String getDeathCause();
 
+    public boolean isLocked();
+
+    public void lock();
+
+    public void unlock();
+
     //public void init();
 
     //---------- End of interface

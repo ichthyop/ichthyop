@@ -6,9 +6,6 @@
 package org.previmer.ichthyop.arch;
 
 import org.previmer.ichthyop.action.AbstractAction;
-import org.previmer.ichthyop.io.XBlock;
-import java.util.Collection;
-import java.util.List;
 
 /**
  *
@@ -16,11 +13,9 @@ import java.util.List;
  */
 public interface IActionManager {
 
-    public List<AbstractAction> getSortedActions();
-
     public AbstractAction createAction(Class actionClass);
 
-    public void execute(String actionName, IBasicParticle particle);
+    public void executeActions(IBasicParticle particle);
 
     public AbstractAction get(Object key);
 
