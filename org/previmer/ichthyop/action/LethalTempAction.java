@@ -23,10 +23,10 @@ public class LethalTempAction extends AbstractAction {
 
         FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!FLAG_GROWTH) {
-            lethal_tp = Float.valueOf(getParameter("lethal.temperature"));
+            lethal_tp = Float.valueOf(getParameter("lethal_temperature"));
         } else {
-            lethalTpEgg = Float.valueOf(getParameter("lethal.temperature.egg"));
-            lethalTpLarva = Float.valueOf(getParameter("lethal.temperature.larva"));
+            lethalTpEgg = Float.valueOf(getParameter("lethal_temperature_egg"));
+            lethalTpLarva = Float.valueOf(getParameter("lethal_temperature_larva"));
             egg = Integer.valueOf(getSimulationManager().getPropertyManager(GrowingParticle.class).getProperty("stage.egg.code"));
         }
     }

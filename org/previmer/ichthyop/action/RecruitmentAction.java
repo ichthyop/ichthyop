@@ -35,14 +35,14 @@ public class RecruitmentAction extends AbstractAction {
     public void loadParameters() {
 
         timeInZone = 0;
-        durationMinInRecruitArea = Integer.valueOf(getParameter("recruitment.durationMinInRecruitArea"));
-        isAgeCriterion = getParameter("recruitment.criterion").matches("age");
+        durationMinInRecruitArea = Integer.valueOf(getParameter("duration_min"));
+        isAgeCriterion = getParameter("recruitment_criterion").matches("age_criterion");
         if (isAgeCriterion) {
-            ageMinAtRecruitment = Float.valueOf(getParameter("recruitment.limit.age"));
+            ageMinAtRecruitment = Float.valueOf(getParameter("recruitment_limit_age"));
         } else {
-            lengthMinAtRecruitment = Float.valueOf(getParameter("recruitment.limit.length"));
+            lengthMinAtRecruitment = Float.valueOf(getParameter("recruitment_limit_length"));
         }
-        stopMovingOnceRecruited = Boolean.valueOf(getParameter("recruitment.stop-moving"));
+        stopMovingOnceRecruited = Boolean.valueOf(getParameter("recruitment_stop_moving"));
     }
 
     public void execute(IBasicParticle particle) {

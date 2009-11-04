@@ -23,9 +23,9 @@ public class LinearGrowthAction extends AbstractAction {
     private double coeff2; //0.03d
 
     public void loadParameters() {
-        tp_threshold = Float.valueOf(getParameter("growth.temperature.threshold"));
-        coeff1 = Float.valueOf(getParameter("growth.equation.coeff1"));
-        coeff2 = Float.valueOf(getParameter("growth.equation.coeff2"));
+        tp_threshold = Float.valueOf(getParameter("growth_tp_threshold"));
+        coeff1 = Float.valueOf(getParameter("growth_coeff1"));
+        coeff2 = Float.valueOf(getParameter("growth_coeff2"));
     }
 
     public void execute(IBasicParticle particle) {

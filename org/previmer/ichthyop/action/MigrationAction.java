@@ -27,16 +27,16 @@ public class MigrationAction extends AbstractAction {
     public void loadParameters() {
 
         calendar = getSimulationManager().getTimeManager().getCalendar();
-        isAgeLimitation = getParameter("migration.criterion").matches("age");
+        isAgeLimitation = getParameter("migration_criterion").matches("age_criterion");
         if (isAgeLimitation) {
-            limitAge = Float.valueOf(getParameter("migration.limit.age"));
+            limitAge = Float.valueOf(getParameter("migration_limit_age"));
         } else {
-            limitLength = Float.valueOf(getParameter("migration.limit.length"));
+            limitLength = Float.valueOf(getParameter("migration_limit_length"));
         }
-        depthDay = Float.valueOf(getParameter("migration.depth.day"));
-        depthNight = Float.valueOf(getParameter("migration.depth.night"));
-        sunset = Integer.valueOf(getParameter("migration.sunset"));
-        sunrise = Integer.valueOf(getParameter("migration.sunrise"));
+        depthDay = Float.valueOf(getParameter("migration_depth_day"));
+        depthNight = Float.valueOf(getParameter("migration_depth_night"));
+        sunset = Integer.valueOf(getParameter("sunset_hour"));
+        sunrise = Integer.valueOf(getParameter("sunrise_hour"));
 
         isodepth = (depthDay == depthNight);
     }
