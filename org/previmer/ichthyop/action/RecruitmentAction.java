@@ -50,6 +50,11 @@ public class RecruitmentAction extends AbstractAction {
         //@todo
         // catch cast exception
         IRecruitableParticle rParticle = (IRecruitableParticle) particle;
+        if (stopMovingOnceRecruited && rParticle.isRecruited()) {
+            particle.lock();
+            return;
+        }
+
         int numCurrentZone = rParticle.getNumZone(TypeZone.RECRUITMENT);
         if ((numCurrentZone != -1) && !rParticle.isRecruited(numCurrentZone)) {
 
