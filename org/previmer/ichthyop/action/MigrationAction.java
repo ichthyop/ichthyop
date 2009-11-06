@@ -61,8 +61,8 @@ public class MigrationAction extends AbstractAction {
                 /** diel vertical migration */
                 depth = getDepth(particle.getX(), particle.getY());
             }
-            particle.setDepth(depth);
-            particle.geo2Grid();
+            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
+            particle.increment(new double[] {0.d, 0.d, dz});
         }
     }
 

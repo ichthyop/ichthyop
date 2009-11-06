@@ -64,8 +64,6 @@ public class BuoyancyAction extends AbstractAction {
     public void execute(IBasicParticle particle) {
 
         if (true) {
-            /** update geog coordinates */
-            particle.grid2Geo();
             
             double time = getSimulationManager().getTimeManager().getTime();
             double sal = getSimulationManager().getDataset().getSalinity(particle.getGridCoordinates(), time);
