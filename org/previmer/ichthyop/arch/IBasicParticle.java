@@ -15,15 +15,47 @@ import org.previmer.ichthyop.particle.ParticleLayer;
  * @author P.Verley
  * @see ichthyop.core.Particle that implements IParticle
  */
-
-public interface IBasicParticle extends IGridPoint {
+public interface IBasicParticle {
 
 /////////////////////////////
 // Declaration of the methods
 /////////////////////////////
+    /**
+     * Gets the x grid coordinate
+     * @return a double, the x grid coordinate of the particle
+     */
+    public double getX();
 
-    public void step();
-    
+    /**
+     * Gets the y grid coordinate
+     * @return a double, the y grid coordinate of the particle
+     */
+    public double getY();
+
+    /**
+     * Gets the z grid coordinate
+     * @return a double, the z grid coordinate of the particle
+     */
+    public double getZ();
+
+    /**
+     * Gets the longitude
+     * @return a double, the longitude of the particle location [East degree]
+     */
+    public double getLon();
+
+    /**
+     * Gets the latitude
+     * @return a double, the latitude of the particle location [North degree
+     */
+    public double getLat();
+
+    /**
+     * Gets the depth
+     * @return a double, the depth of the particle [meter]
+     */
+    public double getDepth();
+
     /**
      * Checks whether the particle is living or not
      * @return <code>true</code> if the particle is living; <code>false</code>
@@ -37,17 +69,19 @@ public interface IBasicParticle extends IGridPoint {
      */
     public int getIndex();
 
-    public void setIndex(int index);
-
-    //public int getNumZone(int typeZone);
-
+    /**
+     * Gets the age of the particle.
+     * @return the age in seconds.
+     */
     public long getAge();
 
-    public void incrementAge();
-
+    /**
+     * Kills the particle and specify the cause of the death.
+     * Sets <code>living</code> status to <code>false</code>.
+     * And sets longitude, latitude and depth to NaN.
+     * @param the cause of death.
+     */
     public void kill(String cause);
-
-    public String getDeathCause();
 
     public boolean isLocked();
 
@@ -57,5 +91,11 @@ public interface IBasicParticle extends IGridPoint {
 
     public ParticleLayer getLayer(Class layerClass);
 
+    public double[] getGridCoordinates();
+
+    public double[] getGeoCoordinates();
+
+    public void increment(double[] move);
+    
     //---------- End of interface
 }

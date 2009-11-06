@@ -1,7 +1,5 @@
 package org.previmer.ichthyop;
 
-import org.previmer.ichthyop.arch.IGridPoint;
-
 /**
  * Both ROMS and MARS use an Arakawa C grid.
  * The Rho point represents a 2D or 3D point within the C grid. It is referenced
@@ -16,7 +14,7 @@ import org.previmer.ichthyop.arch.IGridPoint;
  *
  * @author P.Verley
  */
-public class GridPoint extends SimulationManagerAccessor implements IGridPoint {
+public class GridPoint extends SimulationManagerAccessor {
 
 ///////////////////////////////
 // Declaration of the variables

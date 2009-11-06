@@ -6,6 +6,7 @@ package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IMasterParticle;
 import org.previmer.ichthyop.arch.IZoneParticle;
 
 /**
@@ -16,7 +17,7 @@ public class ParticleFactory {
 
     public static IBasicParticle createParticle(int index, double lon, double lat, double depth, boolean living) {
 
-        IBasicParticle particle = new BasicParticle();
+        IMasterParticle particle = new MasterParticle();
         particle.setIndex(index);
         if (living) {
             particle.setLon(lon);
@@ -44,7 +45,7 @@ public class ParticleFactory {
 
         int DROP_MAX = 2000;
         /** Constructs a new Particle */
-        IBasicParticle particle = new BasicParticle();
+        IMasterParticle particle = new MasterParticle();
         particle.setIndex(index);
         boolean is3D = !Double.isNaN(upDepth);
         if (!is3D) {

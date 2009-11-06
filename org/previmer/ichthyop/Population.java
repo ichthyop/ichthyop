@@ -5,6 +5,7 @@ import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IPopulation;
 import java.util.HashSet;
 import java.util.Iterator;
+import org.previmer.ichthyop.arch.IMasterParticle;
 
 /**
  * <p> The Population is the intermediate level of the hierarchy of the IBM:
@@ -48,8 +49,8 @@ public class Population extends HashSet implements IPopulation {
 
     public void step() {
 
-        Iterator<IBasicParticle> iter = iterator();
-        IBasicParticle particle;
+        Iterator<IMasterParticle> iter = iterator();
+        IMasterParticle particle;
         while (iter.hasNext()) {
             particle = iter.next();
             if (particle.isLiving()) {

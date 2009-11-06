@@ -25,7 +25,7 @@ public class ZoneParticleLayer extends ParticleLayer implements IZoneParticle {
         Iterator iter = getSimulationManager().getZoneManager().getZones(type).iterator();
         while (!foundZone && iter.hasNext()) {
             Zone znTmp = (Zone) iter.next();
-            if (znTmp.isPointInZone(particle())) {
+            if (znTmp.isParticleInZone(particle())) {
                 nZone = znTmp.getIndex();
                 foundZone = true;
             }

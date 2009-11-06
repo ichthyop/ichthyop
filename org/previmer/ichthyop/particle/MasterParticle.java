@@ -11,13 +11,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IMasterParticle;
 import org.previmer.ichthyop.util.Constant;
 
 /**
  *
  * @author pverley
  */
-public class BasicParticle extends GridPoint implements IBasicParticle {
+public class MasterParticle extends GridPoint implements IMasterParticle {
 
     private int index;
     private long age = 0;
@@ -37,17 +38,17 @@ public class BasicParticle extends GridPoint implements IBasicParticle {
             layers.add(layer);
             return layer;
         } catch (InstantiationException ex) {
-            Logger.getLogger(BasicParticle.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MasterParticle.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            Logger.getLogger(BasicParticle.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MasterParticle.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalArgumentException ex) {
-            Logger.getLogger(BasicParticle.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MasterParticle.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvocationTargetException ex) {
-            Logger.getLogger(BasicParticle.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MasterParticle.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchMethodException ex) {
-            Logger.getLogger(BasicParticle.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MasterParticle.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SecurityException ex) {
-            Logger.getLogger(BasicParticle.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MasterParticle.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

@@ -1,7 +1,7 @@
 package org.previmer.ichthyop;
 
 import java.util.ArrayList;
-import org.previmer.ichthyop.arch.IGridPoint;
+import org.previmer.ichthyop.arch.IBasicParticle;
 
 /** import AWT */
 /**
@@ -95,14 +95,14 @@ public class Zone extends SimulationManagerAccessor {
         polygon.add((GridPoint) polygon.get(0).clone());
     }
 
-    public boolean isPointInZone(IGridPoint point) {
+    public boolean isParticleInZone(IBasicParticle particle) {
 
         boolean isInZone = true;
-        if (point.is3D()) {
-            isInZone = isDepthInLayer(Math.abs(point.getDepth()));
+        if (particle.getGridCoordinates().length > 2) {
+            isInZone = isDepthInLayer(Math.abs(particle.getDepth()));
             //System.out.println("depth in layer " + (float)Math.abs(point.getDepth()) + " " + isDepthInLayer(Math.abs(point.getDepth())));
         }
-        isInZone = isInZone && isXYBetweenBathyLines(point.getX(), point.getY()) && isXYInPolygon(point.getX(), point.getY());
+        isInZone = isInZone && isXYBetweenBathyLines(particle.getX(), particle.getY()) && isXYInPolygon(particle.getX(), particle.getY());
 
         return isInZone;
     }
