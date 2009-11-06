@@ -52,15 +52,15 @@ public abstract class GrowingParticle extends RecruitableParticle implements IGr
     
     private void loadParameters() {
         
-        IPropertyManager propertyManager = getSimulationManager().getPropertyManager(this.getClass());
+        IPropertyManager propertyManager = getSimulationManager().getPropertyManager(GrowingParticle.class);
         EGG = Integer.valueOf(propertyManager.getProperty("stage.egg.code"));
         YOLK_SAC_LARVA = Integer.valueOf(propertyManager.getProperty("stage.yolk-sac-larva.code"));
         FEEDING_LARVA = Integer.valueOf(propertyManager.getProperty("stage.feeding-larva.code"));
 
         IParameterManager parameterManager = getSimulationManager().getParameterManager();
-        length_init = Float.valueOf(parameterManager.getParameter("particle.length", "length.initial"));
-        hatch_length = Float.valueOf(parameterManager.getParameter("particle.length", "length.hatch"));
-        yolk_to_feeding_length = Float.valueOf(parameterManager.getParameter("particle.length", "length.yolk-to-feeding"));
+        length_init = Float.valueOf(parameterManager.getParameter("particle.growth", "initial_length"));
+        hatch_length = Float.valueOf(parameterManager.getParameter("particle.growth", "hatch_length"));
+        yolk_to_feeding_length = Float.valueOf(parameterManager.getParameter("particle.growth", "yolk_to_feeding_length"));
     }
 
     public double getLength() {

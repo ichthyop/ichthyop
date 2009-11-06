@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.particle;
 
+import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.arch.IRecruitableParticle;
 
 /**
@@ -19,7 +20,7 @@ public abstract class RecruitableParticle extends ZoneParticle implements IRecru
     public void init() {
         isNewRecruited = false;
         numRecruitmentZone = -1;
-        isRecruited = new boolean[0];
+        isRecruited = new boolean[getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT).size()];
     }
 
     public boolean isRecruited() {

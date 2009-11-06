@@ -12,6 +12,10 @@ import org.previmer.ichthyop.util.Constant;
  */
 public class Iv2Particle extends GrowingParticle {
 
+    public Iv2Particle() {
+        init();
+    }
+
     public void step() {
 
         if (getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
