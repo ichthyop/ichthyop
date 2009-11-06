@@ -75,4 +75,6 @@ public interface IGridPoint extends Cloneable {
 
     public boolean isOnEdge();
 
+    public boolean is3D();
+
 }

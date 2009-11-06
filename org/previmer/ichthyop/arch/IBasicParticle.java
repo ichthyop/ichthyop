@@ -1,5 +1,7 @@
 package org.previmer.ichthyop.arch;
 
+import org.previmer.ichthyop.particle.ParticleLayer;
+
 /**
  * Public interface that lists the methods a Particle of the model will have
  * to provide, as a minimum.
@@ -53,7 +55,7 @@ public interface IBasicParticle extends IGridPoint {
 
     public void unlock();
 
-    //public void init();
+    public ParticleLayer getLayer(Class layerClass);
 
     //---------- End of interface
 }

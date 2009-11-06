@@ -1,6 +1,7 @@
 package org.previmer.ichthyop;
 
 import java.util.ArrayList;
+import org.previmer.ichthyop.arch.IGridPoint;
 
 /** import AWT */
 /**
@@ -94,7 +95,7 @@ public class Zone extends SimulationManagerAccessor {
         polygon.add((GridPoint) polygon.get(0).clone());
     }
 
-    public boolean isPointInZone(GridPoint point) {
+    public boolean isPointInZone(IGridPoint point) {
 
         boolean isInZone = true;
         if (point.is3D()) {
