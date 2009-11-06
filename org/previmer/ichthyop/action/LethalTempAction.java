@@ -7,7 +7,7 @@ package org.previmer.ichthyop.action;
 import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.particle.GrowingParticle;
+import org.previmer.ichthyop.particle.GrowingParticleLayer;
 
 /**
  *
@@ -27,14 +27,14 @@ public class LethalTempAction extends AbstractAction {
         } else {
             lethalTpEgg = Float.valueOf(getParameter("lethal_temperature_egg"));
             lethalTpLarva = Float.valueOf(getParameter("lethal_temperature_larva"));
-            egg = Integer.valueOf(getSimulationManager().getPropertyManager(GrowingParticle.class).getProperty("stage.egg.code"));
+            egg = Integer.valueOf(getSimulationManager().getPropertyManager(GrowingParticleLayer.class).getProperty("stage.egg.code"));
         }
     }
 
     public void execute(IBasicParticle particle) {
 
         if (FLAG_GROWTH) {
-            checkTp((IGrowingParticle)particle);
+            checkTpGrowingParticle(particle);
         } else {
             checkTp(particle);
         }
@@ -48,9 +48,11 @@ public class LethalTempAction extends AbstractAction {
         }
     }
 
-    private void checkTp(IGrowingParticle particle) {
+    private void checkTpGrowingParticle(IBasicParticle particle) {
+
         double temperature = getSimulationManager().getDataset().getTemperature(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
-        boolean frozen = ((particle.getStage() == egg) && (temperature < lethalTpEgg)) || ((particle.getStage() > egg) && (temperature < lethalTpLarva));
+        int stage = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getStage();
+        boolean frozen = ((stage == egg) && (temperature < lethalTpEgg)) || ((stage > egg) && (temperature < lethalTpLarva));
         if (frozen) {
             particle.kill(Constant.DEAD_COLD);
         }

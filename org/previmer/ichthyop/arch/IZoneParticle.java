@@ -11,7 +11,7 @@ import org.previmer.ichthyop.*;
  *
  * @author pverley
  */
-public interface IZoneParticle extends IBasicParticle {
+public interface IZoneParticle {
 
     public int getNumZone(TypeZone type);
 }

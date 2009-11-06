@@ -9,7 +9,7 @@ package org.previmer.ichthyop.arch;
  *
  * @author pverley
  */
-public interface IGrowingParticle extends IBasicParticle {
+public interface IGrowingParticle {
 
     public double getLength();
 

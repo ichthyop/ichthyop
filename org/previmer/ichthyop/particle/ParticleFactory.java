@@ -6,7 +6,7 @@ package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.particle.Iv2Particle;
+import org.previmer.ichthyop.arch.IZoneParticle;
 
 /**
  *
@@ -16,7 +16,7 @@ public class ParticleFactory {
 
     public static IBasicParticle createParticle(int index, double lon, double lat, double depth, boolean living) {
 
-        Iv2Particle particle = new Iv2Particle();
+        IBasicParticle particle = new BasicParticle();
         particle.setIndex(index);
         if (living) {
             particle.setLon(lon);
@@ -44,7 +44,7 @@ public class ParticleFactory {
 
         int DROP_MAX = 2000;
         /** Constructs a new Particle */
-        Iv2Particle particle = new Iv2Particle();
+        IBasicParticle particle = new BasicParticle();
         particle.setIndex(index);
         boolean is3D = !Double.isNaN(upDepth);
         if (!is3D) {
@@ -67,7 +67,7 @@ public class ParticleFactory {
             //Logger.getAnonymousLogger().info("x " + x + " y " + y + " depth " + depth);
             //Logger.getAnonymousLogger().info("water " + particle.isInWater() + " edge " + particle.isOnEdge());
             //Logger.getAnonymousLogger().info(index + " - num zone " + particle.getNumZone(TypeZone.RELEASE));
-            int numReleaseZone = particle.getNumZone(TypeZone.RELEASE);
+            int numReleaseZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
             outZone = !particle.isInWater() || (numReleaseZone == -1) || particle.isOnEdge();
 
             if (counter++ > DROP_MAX) {

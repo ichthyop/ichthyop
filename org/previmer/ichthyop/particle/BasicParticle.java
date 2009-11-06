@@ -5,24 +5,26 @@
 package org.previmer.ichthyop.particle;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  *
  * @author pverley
  */
-public abstract class BasicParticle extends GridPoint implements IBasicParticle {
+public class BasicParticle extends GridPoint implements IBasicParticle {
 
     private int index;
     private long age = 0;
     private String deathCause;
     private boolean living = true;
     private boolean locked = false;
-    private List<ParticleLayer> layers;
+    private List<ParticleLayer> layers = new ArrayList();
 
     public ParticleLayer getLayer(Class layerClass) {
         for (ParticleLayer layer : layers) {
@@ -31,7 +33,9 @@ public abstract class BasicParticle extends GridPoint implements IBasicParticle 
             }
         }
         try {
-            return (ParticleLayer) layerClass.getConstructor(IBasicParticle.class).newInstance(this);
+            ParticleLayer layer = (ParticleLayer) layerClass.getConstructor(IBasicParticle.class).newInstance(this);
+            layers.add(layer);
+            return layer;
         } catch (InstantiationException ex) {
             Logger.getLogger(BasicParticle.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
@@ -95,5 +99,26 @@ public abstract class BasicParticle extends GridPoint implements IBasicParticle 
 
     public void unlock() {
         locked = false;
+    }
+
+    public void step() {
+
+        if (getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
+            kill(Constant.DEAD_OLD);
+            return;
+        }
+        if (isOnEdge()) {
+            kill(Constant.DEAD_OUT);
+            return;
+        } else if (!isInWater()) {
+            kill(Constant.DEAD_BEACH);
+            return;
+        }
+
+        getSimulationManager().getActionManager().executeActions(this);
+
+        grid2Geo();
+        incrementAge();
+
     }
 }

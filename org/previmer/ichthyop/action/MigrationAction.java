@@ -7,6 +7,7 @@ package org.previmer.ichthyop.action;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import java.util.Calendar;
+import org.previmer.ichthyop.particle.GrowingParticleLayer;
 
 /**
  *
@@ -44,9 +45,12 @@ public class MigrationAction extends AbstractAction {
     public void execute(IBasicParticle particle) {
 
         /** Ensures larva stage */
-        boolean isSatisfiedCriterion = isAgeLimitation
-                ? ((IGrowingParticle) particle).getLength() > limitLength
-                : particle.getAge() > limitAge;
+        boolean isSatisfiedCriterion = false;
+        if (isAgeLimitation) {
+            isSatisfiedCriterion = particle.getAge() > limitAge;
+        } else {
+            isSatisfiedCriterion = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength() > limitLength;
+        }
 
         if (isSatisfiedCriterion) {
             double depth = 0.d;

@@ -9,7 +9,7 @@ package org.previmer.ichthyop.arch;
  *
  * @author pverley
  */
-public interface IRecruitableParticle extends IZoneParticle {
+public interface IRecruitableParticle {
 
     public boolean isRecruited();
 

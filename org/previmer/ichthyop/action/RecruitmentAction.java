@@ -9,6 +9,10 @@ import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IZoneParticle;
+import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.RecruitableParticleLayer;
+import org.previmer.ichthyop.particle.ZoneParticleLayer;
 
 /**
  *
@@ -49,13 +53,13 @@ public class RecruitmentAction extends AbstractAction {
 
         //@todo
         // catch cast exception
-        IRecruitableParticle rParticle = (IRecruitableParticle) particle;
+        IRecruitableParticle rParticle = (IRecruitableParticle) particle.getLayer(RecruitableParticleLayer.class);
         if (stopMovingOnceRecruited && rParticle.isRecruited()) {
             particle.lock();
             return;
         }
 
-        int numCurrentZone = rParticle.getNumZone(TypeZone.RECRUITMENT);
+        int numCurrentZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RECRUITMENT);
         if ((numCurrentZone != -1) && !rParticle.isRecruited(numCurrentZone)) {
 
             if (satisfyRecruitmentCriterion(particle)) {
@@ -73,7 +77,7 @@ public class RecruitmentAction extends AbstractAction {
         if (isAgeCriterion) {
             return (float) (particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
-            return (float) (((IGrowingParticle) particle).getLength() / Constant.ONE_DAY) >= lengthMinAtRecruitment;
+            return (((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
         }
     }
 

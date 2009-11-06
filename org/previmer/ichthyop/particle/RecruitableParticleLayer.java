@@ -5,13 +5,18 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IRecruitableParticle;
 
 /**
  *
  * @author pverley
  */
-public abstract class RecruitableParticle extends ZoneParticle implements IRecruitableParticle {
+    public class RecruitableParticleLayer extends ParticleLayer implements IRecruitableParticle {
+
+    public RecruitableParticleLayer(IBasicParticle particle) {
+        super(particle);
+    }
 
     private boolean[] isRecruited;
     private boolean isNewRecruited;

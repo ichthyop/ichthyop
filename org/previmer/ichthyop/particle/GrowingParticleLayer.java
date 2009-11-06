@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.particle;
 
+import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IParameterManager;
 import org.previmer.ichthyop.arch.IPropertyManager;
@@ -12,7 +13,7 @@ import org.previmer.ichthyop.arch.IPropertyManager;
  *
  * @author pverley
  */
-public abstract class GrowingParticle extends RecruitableParticle implements IGrowingParticle {
+public class GrowingParticleLayer extends ParticleLayer implements IGrowingParticle {
 
     double length;
     /**
@@ -43,16 +44,18 @@ public abstract class GrowingParticle extends RecruitableParticle implements IGr
      */
     private static double yolk_to_feeding_length;// = 4.5d; //mm
 
-    @Override
+    public GrowingParticleLayer(IBasicParticle particle) {
+        super(particle);
+    }
+
     public void init() {
-        super.init();
         loadParameters();
         length = length_init;
     }
     
     private void loadParameters() {
         
-        IPropertyManager propertyManager = getSimulationManager().getPropertyManager(GrowingParticle.class);
+        IPropertyManager propertyManager = getSimulationManager().getPropertyManager(GrowingParticleLayer.class);
         EGG = Integer.valueOf(propertyManager.getProperty("stage.egg.code"));
         YOLK_SAC_LARVA = Integer.valueOf(propertyManager.getProperty("stage.yolk-sac-larva.code"));
         FEEDING_LARVA = Integer.valueOf(propertyManager.getProperty("stage.feeding-larva.code"));
