@@ -91,20 +91,4 @@ public class MigrationAction extends AbstractAction {
             return Math.max(bottom, depthNight);
         }
     }
-
-    /**
-     * Determines whether the specified time is daytime or nighttime.
-     *
-     * @param time a double, the specified time [second]
-     * @return <code>true</code> if daytime, <code>false</code> otherwise.
-     */
-    private boolean isDaytime(double time) {
-
-        if (calendar == null) {
-            return false;
-        }
-        calendar.setTimeInMillis((long) (time * 1e3));
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        return (hour >= sunrise && hour < sunset);
-    }
 }
