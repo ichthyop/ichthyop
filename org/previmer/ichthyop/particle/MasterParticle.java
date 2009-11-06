@@ -108,6 +108,10 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
             kill(Constant.DEAD_OLD);
             return;
         }
+
+        getSimulationManager().getActionManager().executeActions(this);
+
+        applyMove();
         if (isOnEdge()) {
             kill(Constant.DEAD_OUT);
             return;
@@ -115,11 +119,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
             kill(Constant.DEAD_BEACH);
             return;
         }
-
-        getSimulationManager().getActionManager().executeActions(this);
-
         grid2Geo();
         incrementAge();
-
     }
 }

@@ -21,6 +21,7 @@ public class GridPoint extends SimulationManagerAccessor {
 ///////////////////////////////
     /** Grid coordinate */
     private double x, y, z;
+    private double dx, dy, dz;
     /** Geographical coordinate */
     private double lon, lat, depth;
     /** <code>true</code> if 3 dimensions point false otherwise */
@@ -43,6 +44,7 @@ public class GridPoint extends SimulationManagerAccessor {
         depthHasChanged = false;
         xyHaveChanged = false;
         zHasChanged = false;
+        dx = dy = dz = 0.d;
     }
 
     public GridPoint() {
@@ -90,6 +92,14 @@ public class GridPoint extends SimulationManagerAccessor {
         }
     }
 
+    public void applyMove() {
+        setX(x + dx);
+        setY(y + dy);
+        if (is3D) {
+            setZ(z + dz);
+        }
+    }
+
     /**
      * Increments (x, y, z) with (dx, dy, dz) if 3 dimensions move.
      * Increments (x, y) with (dx, dy) if 2 dimensions move.
@@ -98,13 +108,10 @@ public class GridPoint extends SimulationManagerAccessor {
      */
     public void increment(double[] move) {
 
-        x += move[0];
-        y += move[1];
-        xyHaveChanged = true;
+        dx += move[0];
+        dy += move[1];
         if (move.length > 2) {
-            z += move[2];
-            z = Math.max(0.d, Math.min(z, (double) getSimulationManager().getDataset().get_nz() - 1.00001f));
-            zHasChanged = true;
+            dz += move[2];
         }
     }
 
