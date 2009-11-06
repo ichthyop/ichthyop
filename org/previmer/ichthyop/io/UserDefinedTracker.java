@@ -37,7 +37,7 @@ public class UserDefinedTracker extends SimulationManagerAccessor implements ITr
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            float valueTracked = getSimulationManager().getDataset().get(variableName, particle.getGridPoint(), getSimulationManager().getTimeManager().getTime()).floatValue();
+            float valueTracked = getSimulationManager().getDataset().get(variableName, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).floatValue();
             getArray().set(0, particle.getIndex(), valueTracked);
         }
     }

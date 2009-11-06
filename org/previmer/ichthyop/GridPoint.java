@@ -1,6 +1,6 @@
 package org.previmer.ichthyop;
 
-import org.previmer.ichthyop.arch.IRhoPoint;
+import org.previmer.ichthyop.arch.IGridPoint;
 
 /**
  * Both ROMS and MARS use an Arakawa C grid.
@@ -16,7 +16,7 @@ import org.previmer.ichthyop.arch.IRhoPoint;
  *
  * @author P.Verley
  */
-public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
+public class GridPoint extends SimulationManagerAccessor implements IGridPoint {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -39,7 +39,7 @@ public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
      * @param bln3D a boolean, <code>true</code> if 3 dimensions point,
      * false otherwise
      */
-    public RhoPoint(boolean bln3D) {
+    public GridPoint(boolean bln3D) {
         is3D = bln3D;
         lonlatHaveChanged = false;
         depthHasChanged = false;
@@ -47,7 +47,7 @@ public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
         zHasChanged = false;
     }
 
-    public RhoPoint() {
+    public GridPoint() {
         this(true);
     }
 
@@ -208,7 +208,7 @@ public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
         }
     }
 
-    public double[] getGridPoint() {
+    public double[] getGridCoordinates() {
         return is3D
                 ? new double[]{x, y, z}
                 : new double[]{x, y};
@@ -228,7 +228,7 @@ public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
         }
     }
 
-    public double[] getGeoPoint() {
+    public double[] getGeoCoordinates() {
         return is3D
                 ? new double[]{lon, lat, depth}
                 : new double[]{lon, lat};
@@ -237,7 +237,7 @@ public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
     @Override
     public Object clone() {
 
-        RhoPoint point = new RhoPoint(is3D);
+        GridPoint point = new GridPoint(is3D);
         point.setX(x);
         point.setY(y);
         point.setLon(lon);
@@ -258,10 +258,10 @@ public class RhoPoint extends SimulationManagerAccessor implements IRhoPoint {
     }
 
     public boolean isInWater() {
-        return getSimulationManager().getDataset().isInWater(getGridPoint());
+        return getSimulationManager().getDataset().isInWater(getGridCoordinates());
     }
 
     public boolean isOnEdge() {
-        return getSimulationManager().getDataset().isOnEdge(getGridPoint());
+        return getSimulationManager().getDataset().isOnEdge(getGridCoordinates());
     }
 }

@@ -115,8 +115,8 @@ public class XZone extends XBlock {
             return Integer.valueOf(getChildTextNormalize(INDEX));
         }
 
-        public RhoPoint createRhoPoint() {
-            RhoPoint rhoPoint = new RhoPoint(false);
+        public GridPoint createRhoPoint() {
+            GridPoint rhoPoint = new GridPoint(false);
             rhoPoint.setLat(getLat());
             rhoPoint.setLon(getLon());
             return rhoPoint;

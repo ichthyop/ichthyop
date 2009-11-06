@@ -31,7 +31,7 @@ public class HDispAction extends AbstractAction {
     }
 
     public void execute(IBasicParticle particle) {
-        particle.increment(getHDispersion(particle.getGridPoint(), getSimulationManager().getTimeManager().get_dt()));
+        particle.increment(getHDispersion(particle.getGridCoordinates(), getSimulationManager().getTimeManager().get_dt()));
     }
 
     public double[] getHDispersion(double[] pGrid, double dt) {

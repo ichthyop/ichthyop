@@ -66,7 +66,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                             ? ParticleFactory.createParticle(index, coord[0], coord[1], -coord[2])
                             : ParticleFactory.createParticle(index, coord[0], coord[1]);
 
-                    if (getSimulationManager().getDataset().isInWater(particle.getGridPoint())) {
+                    if (getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {
                         //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
                         getSimulationManager().getSimulation().getPopulation().add(particle);
                         index++;

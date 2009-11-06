@@ -9,7 +9,7 @@ package org.previmer.ichthyop.arch;
  *
  * @author pverley
  */
-public interface IRhoPoint extends Cloneable {
+public interface IGridPoint extends Cloneable {
 
     /**
      * Gets the x grid coordinate
@@ -35,7 +35,7 @@ public interface IRhoPoint extends Cloneable {
 
     public void setZ(double z);
 
-    public double[] getGridPoint();
+    public double[] getGridCoordinates();
 
     /**
      * Gets the longitude
@@ -61,7 +61,7 @@ public interface IRhoPoint extends Cloneable {
 
     public void setDepth(double depth);
     
-    public double[] getGeoPoint();
+    public double[] getGeoCoordinates();
 
     public void grid2Geo();
 

@@ -33,7 +33,7 @@ import java.util.ArrayList;
  */
 public class Zone extends SimulationManagerAccessor {
 
-    private ArrayList<RhoPoint> polygon = new ArrayList(3);
+    private ArrayList<GridPoint> polygon = new ArrayList(3);
     private TypeZone type;
     /**
      * Lower bathymetric line [meter]
@@ -82,19 +82,19 @@ public class Zone extends SimulationManagerAccessor {
         this.upperDepth = upperDepth;
     }
 
-    public void addPoint(RhoPoint point) {
+    public void addPoint(GridPoint point) {
         polygon.add(point);
     }
 
     public void init() {
 
-        for (RhoPoint rhoPoint : polygon) {
+        for (GridPoint rhoPoint : polygon) {
             rhoPoint.geo2Grid();
         }
-        polygon.add((RhoPoint) polygon.get(0).clone());
+        polygon.add((GridPoint) polygon.get(0).clone());
     }
 
-    public boolean isPointInZone(RhoPoint point) {
+    public boolean isPointInZone(GridPoint point) {
 
         boolean isInZone = true;
         if (point.is3D()) {
@@ -248,7 +248,7 @@ public class Zone extends SimulationManagerAccessor {
         zoneStr.append(getIndex());
         zoneStr.append('\n');
         zoneStr.append("Polygon [");
-        for (RhoPoint point : polygon) {
+        for (GridPoint point : polygon) {
             zoneStr.append(point.toString());
             zoneStr.append(" ");
         }

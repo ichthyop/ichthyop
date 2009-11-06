@@ -11,7 +11,7 @@ import org.previmer.ichthyop.arch.IBasicParticle;
  *
  * @author pverley
  */
-public abstract class BasicParticle extends RhoPoint implements IBasicParticle {
+public abstract class BasicParticle extends GridPoint implements IBasicParticle {
 
     private int index;
     private long age = 0;

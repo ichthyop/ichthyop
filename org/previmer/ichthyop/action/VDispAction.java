@@ -20,7 +20,7 @@ public class VDispAction extends AbstractAction {
     }
 
     public void execute(IBasicParticle particle) {
-        particle.increment(getVDispersion(particle.getGridPoint(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt()));
+        particle.increment(getVDispersion(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt()));
     }
 
     /**

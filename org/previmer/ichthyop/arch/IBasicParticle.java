@@ -14,7 +14,7 @@ package org.previmer.ichthyop.arch;
  * @see ichthyop.core.Particle that implements IParticle
  */
 
-public interface IBasicParticle extends IRhoPoint {
+public interface IBasicParticle extends IGridPoint {
 
 /////////////////////////////
 // Declaration of the methods

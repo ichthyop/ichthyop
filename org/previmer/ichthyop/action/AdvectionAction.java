@@ -34,8 +34,8 @@ public class AdvectionAction extends AbstractAction {
             ArrayIndexOutOfBoundsException {
 
         double[] mvt = isEuler
-                ? advectEuler(particle.getGridPoint(), time, getSimulationManager().getTimeManager().get_dt())
-                : advectRk4(particle.getGridPoint(), time, getSimulationManager().getTimeManager().get_dt());
+                ? advectEuler(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt())
+                : advectRk4(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt());
         //Logger.getAnonymousLogger().info("dx " + mvt[0] + " dy " + mvt[1] + " dz " + mvt[2]);
         particle.increment(mvt);
     }
@@ -64,13 +64,13 @@ public class AdvectionAction extends AbstractAction {
         double dt = getSimulationManager().getTimeManager().get_dt();
 
         if (isEuler) {
-            mvt = advectEuler(pgrid = particle.getGridPoint(), time, dt);
+            mvt = advectEuler(pgrid = particle.getGridCoordinates(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }
             mvt = advectEuler(pgrid, time, dt);
         } else {
-            mvt = advectRk4(pgrid = particle.getGridPoint(), time, dt);
+            mvt = advectRk4(pgrid = particle.getGridCoordinates(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }

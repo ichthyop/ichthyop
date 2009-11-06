@@ -30,7 +30,7 @@ public class LinearGrowthAction extends AbstractAction {
 
     public void execute(IBasicParticle particle) {
         IGrowingParticle gParticle = (IGrowingParticle) particle;
-        gParticle.setLength(grow(gParticle.getLength(), getSimulationManager().getDataset().getTemperature(gParticle.getGridPoint(), getSimulationManager().getTimeManager().getTime())));
+        gParticle.setLength(grow(gParticle.getLength(), getSimulationManager().getDataset().getTemperature(gParticle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime())));
     }
 
     private double grow(double length, double temperature) {
