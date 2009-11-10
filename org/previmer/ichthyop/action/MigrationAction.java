@@ -62,7 +62,7 @@ public class MigrationAction extends AbstractAction {
                 depth = getDepth(particle.getX(), particle.getY());
             }
             double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
-            particle.increment(new double[] {0.d, 0.d, dz});
+            particle.increment(new double[] {0.d, 0.d, dz}, false, true);
         }
     }
 
