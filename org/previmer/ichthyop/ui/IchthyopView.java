@@ -14,7 +14,11 @@ import java.awt.event.ActionListener;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import org.previmer.ichthyop.arch.ISimulationManager;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  * The application's main frame.
@@ -81,6 +85,10 @@ public class IchthyopView extends FrameView {
         });
     }
 
+    public ISimulationManager getSimulationManager() {
+        return SimulationManager.getInstance();
+    }
+
     @Action
     public void showAboutBox() {
         if (aboutBox == null) {
@@ -89,6 +97,18 @@ public class IchthyopView extends FrameView {
             aboutBox.setLocationRelativeTo(mainFrame);
         }
         IchthyopApp.getApplication().show(aboutBox);
+    }
+
+    @Action
+    public void openCfgFile() {
+        JFileChooser chooser = new JFileChooser(".");
+            chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+            chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
+            int returnPath = chooser.showOpenDialog(getFrame());
+            if (returnPath == JFileChooser.APPROVE_OPTION) {
+                getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
+                //new Thread(getSimulationManager()).start();
+            }
     }
 
     /** This method is called from within the constructor to
@@ -103,6 +123,8 @@ public class IchthyopView extends FrameView {
         mainPanel = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
+        newMenuItem = new javax.swing.JMenuItem();
+        openMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
@@ -122,7 +144,7 @@ public class IchthyopView extends FrameView {
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 252, Short.MAX_VALUE)
+            .addGap(0, 240, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -131,7 +153,15 @@ public class IchthyopView extends FrameView {
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
+        newMenuItem.setName("newMenuItem"); // NOI18N
+        fileMenu.add(newMenuItem);
+
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
+        openMenuItem.setAction(actionMap.get("openCfgFile")); // NOI18N
+        openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        openMenuItem.setName("openMenuItem"); // NOI18N
+        fileMenu.add(openMenuItem);
+
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
         fileMenu.add(exitMenuItem);
@@ -166,7 +196,7 @@ public class IchthyopView extends FrameView {
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 226, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 214, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -192,6 +222,8 @@ public class IchthyopView extends FrameView {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem newMenuItem;
+    private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
