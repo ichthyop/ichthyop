@@ -111,15 +111,18 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
 
         getSimulationManager().getActionManager().executeActions(this);
 
-        applyMove();
-        if (isOnEdge()) {
-            kill(Constant.DEAD_OUT);
-            return;
-        } else if (!isInWater()) {
-            kill(Constant.DEAD_BEACH);
-            return;
+        if (!isLocked()) {
+            applyMove();
+            if (isOnEdge()) {
+                kill(Constant.DEAD_OUT);
+                return;
+            } else if (!isInWater()) {
+                kill(Constant.DEAD_BEACH);
+                return;
+            }
+            grid2Geo();
         }
-        grid2Geo();
         incrementAge();
+        unlock();
     }
 }
