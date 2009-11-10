@@ -26,8 +26,9 @@ public class GridPoint extends SimulationManagerAccessor {
     private double lon, lat, depth;
     /** <code>true</code> if 3 dimensions point false otherwise */
     private static boolean is3D;
-    private boolean lonlatHaveChanged,  depthHasChanged;
+    private boolean lonlatHaveChanged, depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
+    private boolean exclusivityH, exclusivityV;
 
 ///////////////
 // Constructors
@@ -98,6 +99,8 @@ public class GridPoint extends SimulationManagerAccessor {
         if (is3D) {
             setZ(z + dz);
         }
+        this.exclusivityH = false;
+        this.exclusivityV = false;
     }
 
     /**
@@ -107,11 +110,37 @@ public class GridPoint extends SimulationManagerAccessor {
      * @param move a double[] array {dx, dy, dz} or {dx, dy}
      */
     public void increment(double[] move) {
+        increment(move, false, false);
+    }
 
-        dx += move[0];
-        dy += move[1];
-        if (move.length > 2) {
-            dz += move[2];
+    public void increment(double[] move, boolean exclusivityH, boolean exclusivityV) {
+
+        if (this.exclusivityH & exclusivityH) {
+            throw new UnsupportedOperationException("Two actions are requesting exclusivity on horizontal transport");
+        }
+        if (!this.exclusivityH) {
+            if (exclusivityH) {
+                dx = move[0];
+                dy = move[1];
+                this.exclusivityH = true;
+            } else {
+                dx += move[0];
+                dy += move[1];
+            }
+        }
+
+        if (this.exclusivityV & exclusivityV) {
+            throw new UnsupportedOperationException("Two actions are requesting exclusivity on vertical transport");
+        }
+        if (!this.exclusivityV) {
+            if (move.length > 2) {
+                if (exclusivityV) {
+                    dz = move[2];
+                    this.exclusivityV = true;
+                } else {
+                    dz += move[2];
+                }
+            }
         }
     }
 
