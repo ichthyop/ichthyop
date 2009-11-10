@@ -102,13 +102,32 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         t0 = Long.valueOf(getParameter("app.time", "initial_time"));
         //Logger.getAnonymousLogger().info("time-step: " + dt + " - t0: " + t0);
         transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
-        calendar = new ClimatoCalendar();
+        if (getParameter("app.time", "calendar_type").matches("climato")) {
+            calendar = new ClimatoCalendar();
+        } else {
+            String time_origin = getParameter("app.time", "calendar_time_origin");
+            new Calendar1900(getTimeOrigin(time_origin, Calendar.YEAR),
+                    getTimeOrigin(time_origin, Calendar.MONTH),
+                    getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+        }
         calendar.setTimeInMillis(t0 * 1000L);
         dateFormat = new SimpleDateFormat(
                 (calendar.getClass() == Calendar1900.class)
                 ? "yyyy/MM/dd HH:mm:ss"
                 : "yy/MM/dd HH:mm:ss");
         dateFormat.setCalendar(calendar);
+    }
+
+    private int getTimeOrigin(String time_origin, int field) {
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        Calendar1900 cld = new Calendar1900();
+        dtFormat.setCalendar(cld);
+        cld.setTimeInMillis(0);
+        try {
+            cld.setTime(dtFormat.parse(time_origin));
+        } catch (Exception ex) {
+        }
+        return cld.get(field);
     }
 
     private String getParameter(String blockName, String key) {
