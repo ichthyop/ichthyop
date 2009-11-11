@@ -22,6 +22,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.jdesktop.application.Application;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 
@@ -91,6 +92,11 @@ public class IchthyopView extends FrameView {
 
         newMenuItem.getAction().setEnabled(false);
         editMenuItem.getAction().setEnabled(false);
+        btnSimulaction.getAction().setEnabled(false);
+        btnPrevious.getAction().setEnabled(false);
+        btnFirst.getAction().setEnabled(false);
+        btnLast.getAction().setEnabled(false);
+        btnNext.getAction().setEnabled(false);
 
         setMessage("Please, open a configuration file or create a new one");
 
@@ -119,7 +125,8 @@ public class IchthyopView extends FrameView {
             if (returnPath == JFileChooser.APPROVE_OPTION) {
                 getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
                 cfgPath = new File(chooser.getSelectedFile().getParent());
-                //new Thread(getSimulationManager()).start();
+                setMessage("Open " + chooser.getSelectedFile().toString());
+                btnSimulaction.getAction().setEnabled(true);
             }
     }
 
@@ -128,6 +135,41 @@ public class IchthyopView extends FrameView {
 
     @Action
     public void editCfgFile() {}
+
+    @Action
+    public void next() {}
+
+    @Action
+    public void last() {}
+
+    @Action
+    public void previous() {}
+
+    @Action
+    public void first() {}
+
+    @Action
+    public void simulAction() {
+        simulate(isRunning);
+    }
+
+    private void simulate(boolean isRunning) {
+
+        ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+        if (!isRunning) {
+            new Thread(getSimulationManager()).start();
+            btnSimulaction.setIcon(resourceMap.getIcon("simulAction.Action.icon.stop"));
+            this.isRunning = true;
+            simuThread = new Thread(getSimulationManager());
+            simuThread.start();
+            setMessage("Simulation started");
+        } else {
+            simuThread.interrupt();
+            btnSimulaction.setIcon(resourceMap.getIcon("simulAction.Action.icon.play"));
+            this.isRunning = false;
+            setMessage("Simulation interrupted");
+        }
+    }
 
     public void savePreferences() {
         savePreference(openMenuItem, cfgPath.getPath());
@@ -180,6 +222,14 @@ public class IchthyopView extends FrameView {
     private void initComponents() {
 
         mainPanel = new javax.swing.JPanel();
+        toolBar = new javax.swing.JToolBar();
+        btnFirst = new javax.swing.JButton();
+        btnPrevious = new javax.swing.JButton();
+        btnSimulaction = new javax.swing.JButton();
+        btnNext = new javax.swing.JButton();
+        btnLast = new javax.swing.JButton();
+        jSeparator8 = new javax.swing.JToolBar.Separator();
+        sliderTime = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
@@ -197,36 +247,90 @@ public class IchthyopView extends FrameView {
 
         mainPanel.setName("mainPanel"); // NOI18N
 
+        toolBar.setRollover(true);
+        toolBar.setName("toolBar"); // NOI18N
+
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
+        btnFirst.setAction(actionMap.get("first")); // NOI18N
+        btnFirst.setFocusable(false);
+        btnFirst.setHideActionText(true);
+        btnFirst.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnFirst.setName("btnFirst"); // NOI18N
+        btnFirst.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnFirst);
+
+        btnPrevious.setAction(actionMap.get("previous")); // NOI18N
+        btnPrevious.setFocusable(false);
+        btnPrevious.setHideActionText(true);
+        btnPrevious.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnPrevious.setName("btnPrevious"); // NOI18N
+        btnPrevious.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnPrevious);
+
+        btnSimulaction.setAction(actionMap.get("simulAction")); // NOI18N
+        btnSimulaction.setFocusable(false);
+        btnSimulaction.setHideActionText(true);
+        btnSimulaction.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnSimulaction.setName("btnSimulaction"); // NOI18N
+        btnSimulaction.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnSimulaction);
+
+        btnNext.setAction(actionMap.get("next")); // NOI18N
+        btnNext.setFocusable(false);
+        btnNext.setHideActionText(true);
+        btnNext.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnNext.setName("btnNext"); // NOI18N
+        btnNext.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnNext);
+
+        btnLast.setAction(actionMap.get("last")); // NOI18N
+        btnLast.setFocusable(false);
+        btnLast.setHideActionText(true);
+        btnLast.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnLast.setName("btnLast"); // NOI18N
+        btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnLast);
+
+        jSeparator8.setName("jSeparator8"); // NOI18N
+        toolBar.add(jSeparator8);
+
+        sliderTime.setPaintTrack(false);
+        sliderTime.setSnapToTicks(true);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+        sliderTime.setToolTipText(resourceMap.getString("sliderTime.toolTipText")); // NOI18N
+        sliderTime.setAutoscrolls(true);
+        sliderTime.setEnabled(false);
+        sliderTime.setName("sliderTime"); // NOI18N
+        sliderTime.setPreferredSize(new java.awt.Dimension(400, 44));
+        toolBar.add(sliderTime);
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 639, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 240, Short.MAX_VALUE)
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addComponent(toolBar, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(279, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
         newMenuItem.setAction(actionMap.get("newCfgFile")); // NOI18N
-        newMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
         newMenuItem.setName("newMenuItem"); // NOI18N
         fileMenu.add(newMenuItem);
 
         openMenuItem.setAction(actionMap.get("openCfgFile")); // NOI18N
-        openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
         openMenuItem.setName("openMenuItem"); // NOI18N
         fileMenu.add(openMenuItem);
 
         editMenuItem.setAction(actionMap.get("editCfgFile")); // NOI18N
-        editMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
         editMenuItem.setName("editMenuItem"); // NOI18N
         fileMenu.add(editMenuItem);
 
@@ -263,11 +367,11 @@ public class IchthyopView extends FrameView {
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 639, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 214, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 453, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -291,16 +395,24 @@ public class IchthyopView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnFirst;
+    private javax.swing.JButton btnLast;
+    private javax.swing.JButton btnNext;
+    private javax.swing.JButton btnPrevious;
+    private javax.swing.JButton btnSimulaction;
     private javax.swing.JMenuItem editMenuItem;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator8;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem newMenuItem;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JProgressBar progressBar;
+    private javax.swing.JSlider sliderTime;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
+    private javax.swing.JToolBar toolBar;
     // End of variables declaration//GEN-END:variables
 
     private final Timer messageTimer;
@@ -311,4 +423,6 @@ public class IchthyopView extends FrameView {
     private JDialog aboutBox;
     private static final Logger logger = Logger.getLogger(IchthyopApp.class.getName());
     private File cfgPath = new File(System.getProperty("user.dir"));
+    private boolean isRunning = false;
+    private Thread simuThread;
 }
