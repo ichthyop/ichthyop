@@ -4,6 +4,7 @@
 
 package org.previmer.ichthyop.ui;
 
+import java.awt.Component;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -11,6 +12,10 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -83,6 +88,12 @@ public class IchthyopView extends FrameView {
                 }
             }
         });
+
+        newMenuItem.getAction().setEnabled(false);
+        editMenuItem.getAction().setEnabled(false);
+
+        setMessage("Please, open a configuration file or create a new one");
+
     }
 
     public ISimulationManager getSimulationManager() {
@@ -101,14 +112,62 @@ public class IchthyopView extends FrameView {
 
     @Action
     public void openCfgFile() {
-        JFileChooser chooser = new JFileChooser(".");
+        JFileChooser chooser = new JFileChooser(cfgPath);
             chooser.setDialogType(JFileChooser.OPEN_DIALOG);
             chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
             int returnPath = chooser.showOpenDialog(getFrame());
             if (returnPath == JFileChooser.APPROVE_OPTION) {
                 getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
+                cfgPath = new File(chooser.getSelectedFile().getParent());
                 //new Thread(getSimulationManager()).start();
             }
+    }
+
+    @Action
+    public void newCfgFile() {}
+
+    @Action
+    public void editCfgFile() {}
+
+    public void savePreferences() {
+        savePreference(openMenuItem, cfgPath.getPath());
+    }
+
+    private void savePreference(Component bean, Object property) {
+        try {
+            String filename = beanFilename(bean);
+            if (filename != null) {
+                getContext().getLocalStorage().save(property, filename);
+            }
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private String beanFilename(Component bean) {
+        String name = bean.getName();
+        return (name == null) ? null : name + "." + getResourceMap().getString("preferences.filename");
+    }
+
+    public void restorePreferences() {
+        Object property = restorePreference(openMenuItem);
+        if (property != null) {
+            cfgPath = new File((String) property);
+        }
+    }
+
+    private Object restorePreference(Component bean) {
+        try {
+            return getContext().getLocalStorage().load(beanFilename(bean));
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+
+    public void setMessage(String text) {
+        statusMessageLabel.setText((text == null) ? "" : text);
+        messageTimer.restart();
     }
 
     /** This method is called from within the constructor to
@@ -125,6 +184,8 @@ public class IchthyopView extends FrameView {
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
         openMenuItem = new javax.swing.JMenuItem();
+        editMenuItem = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JSeparator();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
@@ -153,14 +214,24 @@ public class IchthyopView extends FrameView {
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
+        newMenuItem.setAction(actionMap.get("newCfgFile")); // NOI18N
+        newMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
         newMenuItem.setName("newMenuItem"); // NOI18N
         fileMenu.add(newMenuItem);
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
         openMenuItem.setAction(actionMap.get("openCfgFile")); // NOI18N
         openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
         openMenuItem.setName("openMenuItem"); // NOI18N
         fileMenu.add(openMenuItem);
+
+        editMenuItem.setAction(actionMap.get("editCfgFile")); // NOI18N
+        editMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
+        editMenuItem.setName("editMenuItem"); // NOI18N
+        fileMenu.add(editMenuItem);
+
+        jSeparator1.setName("jSeparator1"); // NOI18N
+        fileMenu.add(jSeparator1);
 
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
@@ -220,6 +291,8 @@ public class IchthyopView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem editMenuItem;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem newMenuItem;
@@ -235,6 +308,7 @@ public class IchthyopView extends FrameView {
     private final Icon idleIcon;
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
-
     private JDialog aboutBox;
+    private static final Logger logger = Logger.getLogger(IchthyopApp.class.getName());
+    private File cfgPath = new File(System.getProperty("user.dir"));
 }
