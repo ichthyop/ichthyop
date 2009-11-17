@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.previmer.ichthyop.arch;
 
 import org.previmer.ichthyop.event.InitializeListener;
@@ -13,7 +12,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public interface ISimulationManager extends Runnable {
+public interface ISimulationManager {
 
     public IActionManager getActionManager();
 
@@ -45,5 +44,5 @@ public interface ISimulationManager extends Runnable {
 
     public void setConfigurationFile(File file);
 
-
+    public void runBatch();
 }

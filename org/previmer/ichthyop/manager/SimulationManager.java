@@ -59,6 +59,7 @@ public class SimulationManager implements ISimulationManager {
         for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
             nb_simulations *= xparam.getLength();
         }
+        mobiliseManagers();
     }
 
     /**
@@ -122,7 +123,7 @@ public class SimulationManager implements ISimulationManager {
     public String timeLeft() {
 
         StringBuffer strBf;
-        
+
         float x = progressGlobal() / 100.f;
         long nbMilliSecLeft = 0L;
         if (x != 0) {
@@ -161,23 +162,28 @@ public class SimulationManager implements ISimulationManager {
         return (i_simulation + 1) + " / " + nb_simulations;
     }
 
-    public void run() {
-        mobiliseManagers();
-        do {
-            System.out.println("=========================");
-            System.out.println("Simulation " + indexSimulation());
-            System.out.println("=========================");
-            fireSetupPerformed();
-            fireInitializePerformed();
-            getTimeManager().firstStepTriggered();
-            cpu_start = System.currentTimeMillis();
-            do {
-                System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
-                getSimulation().step();
-                System.out.println(timeLeft());
-            } while (getTimeManager().hasNextStep());
-            System.out.println("End of simulation");
-        } while (hasNextSimulation());
+    public void runBatch() {
+        
+        new Thread(new Runnable() {
+
+            public void run() {
+                do {
+                    System.out.println("=========================");
+                    System.out.println("Simulation " + indexSimulation());
+                    System.out.println("=========================");
+                    fireSetupPerformed();
+                    fireInitializePerformed();
+                    getTimeManager().firstStepTriggered();
+                    cpu_start = System.currentTimeMillis();
+                    do {
+                        System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
+                        getSimulation().step();
+                        System.out.println(timeLeft());
+                    } while (getTimeManager().hasNextStep());
+                } while (hasNextSimulation());
+                System.out.println("End of simulation");
+            }
+        }).start();
     }
 
     public ISimulation getSimulation() {

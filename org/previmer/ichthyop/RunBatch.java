@@ -21,7 +21,7 @@ public class RunBatch extends SimulationManagerAccessor {
             File file = new File(path);
             if (file.exists()) {
                 getSimulationManager().setConfigurationFile(file);
-                new Thread(getSimulationManager()).start();
+                getSimulationManager().runBatch();
             } else {
                 throw new IOException("Configuration file not found");
             }
