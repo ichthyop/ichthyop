@@ -1,7 +1,6 @@
 /*
  * IchthyopView.java
  */
-
 package org.previmer.ichthyop.ui;
 
 import java.awt.Component;
@@ -23,23 +22,34 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
+import org.jdesktop.application.Task;
 import org.previmer.ichthyop.arch.ISimulationManager;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.InitializeListener;
+import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  * The application's main frame.
  */
-public class IchthyopView extends FrameView {
+public class IchthyopView extends FrameView implements SetupListener, InitializeListener, NextStepListener {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
 
         initComponents();
+        getSimulationManager().addSetupListener(this);
+        getSimulationManager().addInitializeListener(this);
+        getSimulationManager().getTimeManager().addNextStepListener(this);
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
         ResourceMap resourceMap = getResourceMap();
         int messageTimeout = resourceMap.getInteger("StatusBar.messageTimeout");
         messageTimer = new Timer(messageTimeout, new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 statusMessageLabel.setText("");
             }
@@ -50,6 +60,7 @@ public class IchthyopView extends FrameView {
             busyIcons[i] = resourceMap.getIcon("StatusBar.busyIcons[" + i + "]");
         }
         busyIconTimer = new Timer(busyAnimationRate, new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
                 statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
@@ -62,6 +73,7 @@ public class IchthyopView extends FrameView {
         // connecting action tasks to status bar via TaskMonitor
         TaskMonitor taskMonitor = new TaskMonitor(getApplication().getContext());
         taskMonitor.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 String propertyName = evt.getPropertyName();
                 if ("started".equals(propertyName)) {
@@ -78,11 +90,11 @@ public class IchthyopView extends FrameView {
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
                 } else if ("message".equals(propertyName)) {
-                    String text = (String)(evt.getNewValue());
+                    String text = (String) (evt.getNewValue());
                     statusMessageLabel.setText((text == null) ? "" : text);
                     messageTimer.restart();
                 } else if ("progress".equals(propertyName)) {
-                    int value = (Integer)(evt.getNewValue());
+                    int value = (Integer) (evt.getNewValue());
                     progressBar.setVisible(true);
                     progressBar.setIndeterminate(false);
                     progressBar.setValue(value);
@@ -119,55 +131,107 @@ public class IchthyopView extends FrameView {
     @Action
     public void openCfgFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
-            chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-            chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
-            int returnPath = chooser.showOpenDialog(getFrame());
-            if (returnPath == JFileChooser.APPROVE_OPTION) {
-                getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
-                cfgPath = new File(chooser.getSelectedFile().getParent());
-                setMessage("Open " + chooser.getSelectedFile().toString());
-                btnSimulaction.getAction().setEnabled(true);
-            }
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
+        int returnPath = chooser.showOpenDialog(getFrame());
+        if (returnPath == JFileChooser.APPROVE_OPTION) {
+            getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
+            cfgPath = new File(chooser.getSelectedFile().getParent());
+            setMessage("Open " + chooser.getSelectedFile().toString());
+            btnSimulaction.getAction().setEnabled(true);
+        }
+
+    }
+
+    public void setupPerformed(SetupEvent e) {
+        setMessage("Setting up...");
+        btnSimulaction.setEnabled(false);
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        setMessage("Initializing...");
+    }
+
+    public void nextStepTriggered(NextStepEvent e) {
+        if (!btnSimulaction.isEnabled()) {
+            btnSimulaction.setEnabled(true);
+        }
+
     }
 
     @Action
-    public void newCfgFile() {}
-
-    @Action
-    public void editCfgFile() {}
-
-    @Action
-    public void next() {}
-
-    @Action
-    public void last() {}
-
-    @Action
-    public void previous() {}
-
-    @Action
-    public void first() {}
-
-    @Action
-    public void simulAction() {
-        simulate(isRunning);
+    public void newCfgFile() {
     }
 
-    private void simulate(boolean isRunning) {
+    @Action
+    public void editCfgFile() {
+    }
+
+    @Action
+    public void next() {
+    }
+
+    @Action
+    public void last() {
+    }
+
+    @Action
+    public void previous() {
+    }
+
+    @Action
+    public void first() {
+    }
+
+    @Action
+    public Task simulAction() {
+        if (!isRunning) {
+            return simulActionTask = new SimulActionTask(getApplication());
+        } else {
+            simulActionTask.cancel(true);
+            return null;
+        }
+    }
+
+    public class SimulActionTask extends Task {
 
         ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
-        if (!isRunning) {
-            new Thread(getSimulationManager()).start();
-            btnSimulaction.setIcon(resourceMap.getIcon("simulAction.Action.icon.stop"));
-            this.isRunning = true;
-            simuThread = new Thread(getSimulationManager());
-            simuThread.start();
+
+        SimulActionTask(Application instance) {
+            super(instance);
             setMessage("Simulation started");
-        } else {
-            simuThread.interrupt();
+            btnSimulaction.setIcon(resourceMap.getIcon("simulAction.Action.icon.stop"));
+            isRunning = true;
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            do {
+                setMessage("Simulation " + getSimulationManager().getIndexSimulation());
+                getSimulationManager().setup();
+                getSimulationManager().init();
+                getSimulationManager().getTimeManager().firstStepTriggered();
+                getSimulationManager().resetTimer();
+                do {
+                    getSimulationManager().getSimulation().step();
+                    setProgress(getSimulationManager().progressGlobal());
+                    setMessage(getSimulationManager().timeLeft());
+                } while (!getSimulationManager().isStopped() && getSimulationManager().getTimeManager().hasNextStep());
+            } while (!getSimulationManager().isStopped() && getSimulationManager().hasNextSimulation());
+            return null;
+        }
+
+        @Override
+        protected void cancelled() {
+            getSimulationManager().stop();
             btnSimulaction.setIcon(resourceMap.getIcon("simulAction.Action.icon.play"));
-            this.isRunning = false;
+            isRunning = false;
             setMessage("Simulation interrupted");
+        }
+
+        @Override
+        protected void succeeded(Object obj) {
+            setMessage("End of simulation");
         }
     }
 
@@ -393,7 +457,6 @@ public class IchthyopView extends FrameView {
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
     }// </editor-fold>//GEN-END:initComponents
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirst;
     private javax.swing.JButton btnLast;
@@ -414,7 +477,6 @@ public class IchthyopView extends FrameView {
     private javax.swing.JPanel statusPanel;
     private javax.swing.JToolBar toolBar;
     // End of variables declaration//GEN-END:variables
-
     private final Timer messageTimer;
     private final Timer busyIconTimer;
     private final Icon idleIcon;
@@ -424,5 +486,5 @@ public class IchthyopView extends FrameView {
     private static final Logger logger = Logger.getLogger(IchthyopApp.class.getName());
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
-    private Thread simuThread;
+    private Task simulActionTask;
 }

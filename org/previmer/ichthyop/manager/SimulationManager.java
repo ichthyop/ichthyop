@@ -49,6 +49,7 @@ public class SimulationManager implements ISimulationManager {
      * Computer time when the simulation starts [millisecond]
      */
     private long cpu_start;
+    private boolean flagStop = false;
 
     public static SimulationManager getInstance() {
         return simulationManager;
@@ -111,8 +112,8 @@ public class SimulationManager implements ISimulationManager {
      * sets of simulations.
      * @return the progress of the whole sets of simulations as a percent
      */
-    public int progressGlobal() {
-        return (int) (100.f * (i_simulation + (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps()) / nb_simulations);
+    public float progressGlobal() {
+        return (i_simulation + (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps()) / nb_simulations;
     }
 
     /**
@@ -124,7 +125,7 @@ public class SimulationManager implements ISimulationManager {
 
         StringBuffer strBf;
 
-        float x = progressGlobal() / 100.f;
+        float x = progressGlobal();
         long nbMilliSecLeft = 0L;
         if (x != 0) {
             nbMilliSecLeft = (long) ((System.currentTimeMillis() - cpu_start) * (1 - x) / x);
@@ -158,32 +159,47 @@ public class SimulationManager implements ISimulationManager {
         getZoneManager();
     }
 
-    private String indexSimulation() {
+    public String getIndexSimulation() {
         return (i_simulation + 1) + " / " + nb_simulations;
     }
 
-    public void runBatch() {
-        
-        new Thread(new Runnable() {
+    public void run() {
+        do {
+            System.out.println("=========================");
+            System.out.println("Simulation " + getIndexSimulation());
+            System.out.println("=========================");
+            setup();
+            init();
+            getTimeManager().firstStepTriggered();
+            resetTimer();
+            do {
+                System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
+                getSimulation().step();
+                System.out.println(timeLeft());
+            } while (!isStopped() && getTimeManager().hasNextStep());
+        } while (!isStopped() && hasNextSimulation());
+        System.out.println("End of simulation");
+    }
 
-            public void run() {
-                do {
-                    System.out.println("=========================");
-                    System.out.println("Simulation " + indexSimulation());
-                    System.out.println("=========================");
-                    fireSetupPerformed();
-                    fireInitializePerformed();
-                    getTimeManager().firstStepTriggered();
-                    cpu_start = System.currentTimeMillis();
-                    do {
-                        System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
-                        getSimulation().step();
-                        System.out.println(timeLeft());
-                    } while (getTimeManager().hasNextStep());
-                } while (hasNextSimulation());
-                System.out.println("End of simulation");
-            }
-        }).start();
+    public void setup() {
+        flagStop = false;
+        fireSetupPerformed();
+    }
+
+    public void init() {
+        fireInitializePerformed();
+    }
+
+    public void stop() {
+        flagStop = true;
+    }
+
+    public boolean isStopped() {
+        return flagStop;
+    }
+
+    public void resetTimer() {
+        cpu_start = System.currentTimeMillis();
     }
 
     public ISimulation getSimulation() {

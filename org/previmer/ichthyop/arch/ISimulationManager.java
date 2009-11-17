@@ -12,7 +12,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public interface ISimulationManager {
+public interface ISimulationManager extends Runnable {
 
     public IActionManager getActionManager();
 
@@ -44,5 +44,21 @@ public interface ISimulationManager {
 
     public void setConfigurationFile(File file);
 
-    public void runBatch();
+    public void setup();
+
+    public void init();
+
+    public void stop();
+
+    public boolean hasNextSimulation();
+
+    public boolean isStopped();
+
+    public String getIndexSimulation();
+
+    public void resetTimer();
+
+    public String timeLeft();
+
+    public float progressGlobal();
 }
