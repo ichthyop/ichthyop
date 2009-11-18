@@ -166,6 +166,20 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     }
 
     @Action
+    public void showSimulation() {
+        if (simulationView == null) {
+            simulationView = new SimulationView(IchthyopApp.getApplication());
+        }
+        if (simulationView.getFrame().isVisible()) {
+            getApplication().hide(simulationView);
+            //btnSimulationView.setIcon(getResourceMap().getIcon("showSimulation.Action.icon.off"));
+        } else {
+            getApplication().show(simulationView);
+            //btnSimulationView.setIcon(getResourceMap().getIcon("showSimulation.Action.icon.on"));
+        }
+    }
+
+    @Action
     public void openCfgFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -479,6 +493,8 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         btnSimulaction = new javax.swing.JButton();
         btnProgress = new javax.swing.JButton();
         jSeparator3 = new javax.swing.JToolBar.Separator();
+        btnSimulationView = new javax.swing.JButton();
+        jSeparator4 = new javax.swing.JToolBar.Separator();
         btnExit = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
@@ -565,6 +581,16 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
 
         jSeparator3.setName("jSeparator3"); // NOI18N
         toolBar.add(jSeparator3);
+
+        btnSimulationView.setAction(actionMap.get("showSimulation")); // NOI18N
+        btnSimulationView.setFocusable(false);
+        btnSimulationView.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnSimulationView.setName("btnSimulationView"); // NOI18N
+        btnSimulationView.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnSimulationView);
+
+        jSeparator4.setName("jSeparator4"); // NOI18N
+        toolBar.add(jSeparator4);
 
         btnExit.setAction(actionMap.get("quit")); // NOI18N
         btnExit.setIcon(resourceMap.getIcon("btnExit.icon")); // NOI18N
@@ -772,11 +798,13 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     private javax.swing.JButton btnOpenCfgFile;
     private javax.swing.JButton btnProgress;
     private javax.swing.JButton btnSimulaction;
+    private javax.swing.JButton btnSimulationView;
     private javax.swing.JMenuItem editMenuItem;
     private javax.swing.JRadioButtonMenuItem gtkMenuItem;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
+    private javax.swing.JToolBar.Separator jSeparator4;
     private javax.swing.JMenu lafMenu;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
@@ -811,4 +839,5 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
     private Task simulActionTask;
+    private FrameView simulationView;
 }
