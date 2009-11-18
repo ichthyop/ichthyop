@@ -10,14 +10,14 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="toolBar" alignment="0" pref="639" max="32767" attributes="0"/>
+              <Component id="toolBar" alignment="0" pref="613" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <Component id="toolBar" min="-2" pref="35" max="-2" attributes="0"/>
-                  <EmptySpace pref="279" max="32767" attributes="0"/>
+                  <Component id="toolBar" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -31,28 +31,48 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JButton" name="btnFirst">
+            <Component class="javax.swing.JButton" name="btnOpenCfgFile">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="fr.ird.aebus.ui.AebusView" id="first" methodName="first"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openCfgFile" methodName="openCfgFile"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="btnOpenCfgFile.icon"/>
+                <Property name="text" type="java.lang.String" resourceKey="btnOpenCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="hideActionText" type="boolean" value="true"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnFirst" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="btnOpenCfgFile" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JButton" name="btnPrevious">
+            <Component class="javax.swing.JButton" name="btnNewCfgFile">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="fr.ird.aebus.ui.AebusView" id="previous" methodName="previous"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="newCfgFile" methodName="newCfgFile"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="btnNewCfgFile.icon"/>
+                <Property name="text" type="java.lang.String" resourceKey="btnNewCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="hideActionText" type="boolean" value="true"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnPrevious" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="btnNewCfgFile" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnEditCfgFile">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="editCfgFile" methodName="editCfgFile"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="btnEditCfgFile.icon"/>
+                <Property name="text" type="java.lang.String" resourceKey="btnEditCfgFile.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnEditCfgFile" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator2" noResource="true"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JButton" name="btnSimulaction">
@@ -67,46 +87,33 @@
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JButton" name="btnNext">
+            <Component class="javax.swing.JButton" name="btnProgress">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="fr.ird.aebus.ui.AebusView" id="next" methodName="next"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="showProgress" methodName="showProgress"/>
                 </Property>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="hideActionText" type="boolean" value="true"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnNext" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="btnProgress" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JButton" name="btnLast">
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator3">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator3" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnExit">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="fr.ird.aebus.ui.ABrowserView" id="last" methodName="last"/>
+                  <action class="org.jdesktop.application.Application" id="quit" methodName="quit"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="btnExit.icon"/>
+                <Property name="text" type="java.lang.String" resourceKey="btnExit.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="hideActionText" type="boolean" value="true"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnLast" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="btnExit" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JToolBar$Separator" name="jSeparator8">
-              <Properties>
-                <Property name="name" type="java.lang.String" value="jSeparator8" noResource="true"/>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JSlider" name="sliderTime">
-              <Properties>
-                <Property name="paintTrack" type="boolean" value="false"/>
-                <Property name="snapToTicks" type="boolean" value="true"/>
-                <Property name="toolTipText" type="java.lang.String" resourceKey="sliderTime.toolTipText"/>
-                <Property name="autoscrolls" type="boolean" value="true"/>
-                <Property name="enabled" type="boolean" value="false"/>
-                <Property name="name" type="java.lang.String" value="sliderTime" noResource="true"/>
-                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[400, 44]"/>
-                </Property>
               </Properties>
             </Component>
           </SubComponents>
@@ -166,6 +173,7 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.jdesktop.application.Application" id="quit" methodName="quit"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="exitMenuItem.icon"/>
                 <Property name="name" type="java.lang.String" value="exitMenuItem" noResource="true"/>
               </Properties>
               <AuxValues>
@@ -209,11 +217,11 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="statusPanelSeparator" alignment="0" pref="639" max="32767" attributes="0"/>
+              <Component id="statusPanelSeparator" alignment="0" pref="613" max="32767" attributes="0"/>
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="statusMessageLabel" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="453" max="32767" attributes="0"/>
+                  <EmptySpace pref="427" max="32767" attributes="0"/>
                   <Component id="progressBar" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="statusAnimationLabel" min="-2" max="-2" attributes="0"/>
@@ -264,6 +272,109 @@
         </Component>
       </SubComponents>
     </Container>
+    <Container class="javax.swing.JPopupMenu" name="popupProgress">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="popupProgress" noResource="true"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="popupProgress.add(pnlProgress);"/>
+      </AuxValues>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
+        <Property name="useNullLayout" type="boolean" value="true"/>
+      </Layout>
+    </Container>
+    <Container class="javax.swing.JPanel" name="pnlProgress">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="pnlProgress" noResource="true"/>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="lblProgressCurrent" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="lblProgressGlobal" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="progressBarGlobal" pref="356" max="32767" attributes="1"/>
+                      <Component id="progressBarCurrent" alignment="0" pref="356" max="32767" attributes="1"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="lblTimeLeftCurrent" min="-2" max="-2" attributes="0"/>
+                      <Component id="lblTimeLeftGlobal" alignment="1" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="lblProgressCurrent" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                          <Component id="progressBarCurrent" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblTimeLeftCurrent" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="lblProgressGlobal" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="lblTimeLeftGlobal" min="-2" max="-2" attributes="0"/>
+                      <Component id="progressBarGlobal" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="32767" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JLabel" name="lblProgressCurrent">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="lblProgressCurrent.text"/>
+            <Property name="name" type="java.lang.String" value="lblProgressCurrent" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JProgressBar" name="progressBarCurrent">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="progressBarCurrent" noResource="true"/>
+            <Property name="stringPainted" type="boolean" value="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblTimeLeftCurrent">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="lblTimeLeftCurrent.text"/>
+            <Property name="horizontalTextPosition" type="int" value="2"/>
+            <Property name="name" type="java.lang.String" value="lblTimeLeftCurrent" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblProgressGlobal">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="lblProgressGlobal.text"/>
+            <Property name="name" type="java.lang.String" value="lblProgressGlobal" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JProgressBar" name="progressBarGlobal">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="progressBarGlobal" noResource="true"/>
+            <Property name="stringPainted" type="boolean" value="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblTimeLeftGlobal">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="lblTimeLeftGlobal.text"/>
+            <Property name="horizontalTextPosition" type="int" value="2"/>
+            <Property name="name" type="java.lang.String" value="lblTimeLeftGlobal" noResource="true"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
   </NonVisualComponents>
   <Properties>
     <Property name="component" type="javax.swing.JComponent" editor="org.netbeans.modules.form.ComponentChooserEditor">
@@ -286,6 +397,6 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,118,0,0,2,127"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,0,119,0,0,2,101"/>
   </AuxValues>
 </Form>

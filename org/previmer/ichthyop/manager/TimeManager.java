@@ -15,7 +15,6 @@ import org.previmer.ichthyop.event.LastStepListener;
 import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -53,10 +52,6 @@ public class TimeManager extends AbstractManager implements ITimeManager {
      * Number of simulated steps
      */
     private int nb_steps;
-    /**
-     * Index of the current simulation (always 0 for SINGLE mode)
-     */
-    private int i_simulation;
     /**
      * A Calendar for time management
      */
@@ -146,8 +141,8 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         time += dt;
         calendar.setTimeInMillis(time * 1000L);
         if (Math.abs(time - t0) < simuDuration) {
-            i_step++;
             fireNextStepTriggered();
+            i_step++;
             return true;
         }
         fireLastStepTriggered();
@@ -170,13 +165,12 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         return i_step;
     }
 
-    /**
-     * Gets the index of the current simulation
-     * @return the index of the current simulation. Systematically returns
-     * zero for SINGLE mode.
-     */
-    public int indexSimulation() {
-        return i_simulation;
+    public String stepToString() {
+        StringBuffer strBf = new StringBuffer("Step ");
+        strBf.append(index() + 1);
+        strBf.append(" / ");
+        strBf.append(getNumberOfSteps());
+        return strBf.toString();
     }
 
     /**

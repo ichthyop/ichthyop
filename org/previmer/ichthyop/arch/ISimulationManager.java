@@ -54,11 +54,19 @@ public interface ISimulationManager extends Runnable {
 
     public boolean isStopped();
 
-    public String getIndexSimulation();
+    public String indexSimulationToString();
 
-    public void resetTimer();
+    public int getNumberOfSimulations();
 
-    public String timeLeft();
+    public void resetTimerCurrent();
+
+    public void resetTimerGlobal();
+
+    public String timeLeftCurrent();
+
+    public String timeLeftGlobal();
 
     public float progressGlobal();
+
+    public float progressCurrent();
 }

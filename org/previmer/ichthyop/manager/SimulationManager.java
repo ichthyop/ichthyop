@@ -48,7 +48,8 @@ public class SimulationManager implements ISimulationManager {
     /**
      * Computer time when the simulation starts [millisecond]
      */
-    private long cpu_start;
+    private long cpu_start_current;
+    private long cpu_start_global;
     private boolean flagStop = false;
 
     public static SimulationManager getInstance() {
@@ -103,8 +104,9 @@ public class SimulationManager implements ISimulationManager {
      * Calculates the progress of the current simulation
      * @return the progress of the current simulation as a percent
      */
-    public int progressCurrent() {
-        return (int) (100.f * (getTimeManager().index() + 1) / getTimeManager().getNumberOfSteps());
+    public float progressCurrent() {
+        float progress =  (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps();
+        return Math.min(Math.max(progress, 0.f), 1.f);
     }
 
     /**
@@ -113,22 +115,37 @@ public class SimulationManager implements ISimulationManager {
      * @return the progress of the whole sets of simulations as a percent
      */
     public float progressGlobal() {
-        return (i_simulation + (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps()) / nb_simulations;
+        float progress = (i_simulation + (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps()) / nb_simulations;
+        return Math.min(Math.max(progress, 0.f), 1.f);
     }
 
     /**
-     * Estimates the time left to end up the run.
+     * Estimates the time left to end up the current simulation.
      *
      * @return the time left, formatted in a String
      */
-    public String timeLeft() {
+    public String timeLeftCurrent() {
+
+        return timeLeft(progressCurrent(), cpu_start_current);
+    }
+
+    /**
+     * Estimates the time left to end up the current simulation.
+     *
+     * @return the time left, formatted in a String
+     */
+    public String timeLeftGlobal() {
+
+       return timeLeft(progressGlobal(), cpu_start_global);
+    }
+
+    private String timeLeft(float progress, long cpu_start) {
 
         StringBuffer strBf;
 
-        float x = progressGlobal();
         long nbMilliSecLeft = 0L;
-        if (x != 0) {
-            nbMilliSecLeft = (long) ((System.currentTimeMillis() - cpu_start) * (1 - x) / x);
+        if (progress != 0) {
+            nbMilliSecLeft = (long) ((System.currentTimeMillis() - cpu_start) * (1 - progress) / progress);
         }
         int nbHourLeft = (int) (nbMilliSecLeft / Calendar1900.ONE_HOUR);
         int nbMinLeft = (int) ((nbMilliSecLeft - Calendar1900.ONE_HOUR * nbHourLeft) / Calendar1900.ONE_MINUTE);
@@ -159,23 +176,24 @@ public class SimulationManager implements ISimulationManager {
         getZoneManager();
     }
 
-    public String getIndexSimulation() {
+    public String indexSimulationToString() {
         return (i_simulation + 1) + " / " + nb_simulations;
     }
 
     public void run() {
+        resetTimerGlobal();
         do {
             System.out.println("=========================");
-            System.out.println("Simulation " + getIndexSimulation());
+            System.out.println("Simulation " + indexSimulationToString());
             System.out.println("=========================");
             setup();
             init();
             getTimeManager().firstStepTriggered();
-            resetTimer();
+            resetTimerCurrent();
             do {
                 System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
                 getSimulation().step();
-                System.out.println(timeLeft());
+                System.out.println(timeLeftGlobal());
             } while (!isStopped() && getTimeManager().hasNextStep());
         } while (!isStopped() && hasNextSimulation());
         System.out.println("End of simulation");
@@ -198,8 +216,12 @@ public class SimulationManager implements ISimulationManager {
         return flagStop;
     }
 
-    public void resetTimer() {
-        cpu_start = System.currentTimeMillis();
+    public void resetTimerCurrent() {
+        cpu_start_current = System.currentTimeMillis();
+    }
+
+    public void resetTimerGlobal() {
+        cpu_start_global = System.currentTimeMillis();
     }
 
     public ISimulation getSimulation() {

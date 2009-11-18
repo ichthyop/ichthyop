@@ -39,5 +39,7 @@ public interface ITimeManager {
 
     public int getNumberOfSteps();
 
+    public String stepToString();
+
 
 }
