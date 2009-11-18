@@ -291,7 +291,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             getCstSigLevels();
             z_w_tp0 = getSigLevels();
         } catch (IOException ex) {
-            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
@@ -303,7 +303,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
-            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1252,7 +1252,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             }
             setAllFieldsTp1AtTime(rank);
         } catch (IOException ex) {
-            Logger.getLogger(Roms3dUclaDataset.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1273,7 +1273,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
                 ncIn = NetcdfDataset.openFile(filename, null);
                 nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             }
-            System.out.print("Open dataset " + filename + "\n");
+            getLogger().info("Open dataset " + filename);
         } catch (IOException e) {
             throw new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
         } catch (NullPointerException e) {
@@ -1605,9 +1605,9 @@ public abstract class Roms3dDataset extends AbstractDataset {
                     return interp2D((ArrayFloat.D2) array, dx, dy, n);
             }
         } catch (IOException ex) {
-            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(Roms3dDataset.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
         return null;
     }

@@ -23,6 +23,7 @@ import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
+import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.previmer.ichthyop.calendar.Calendar1900;
 
@@ -237,7 +238,7 @@ public class SimulationManager implements ISimulationManager {
     }
 
     private void fireSetupPerformed() {
-        System.out.println("Setup...");
+        Logger.getLogger(ISimulationManager.class.getName()).info("Setting up simulation");
         SetupListener[] listenerList = (SetupListener[]) listeners.getListeners(SetupListener.class);
 
         for (SetupListener listener : listenerList) {
@@ -255,7 +256,7 @@ public class SimulationManager implements ISimulationManager {
     }
 
     private void fireInitializePerformed() {
-        System.out.println("Initialization...");
+        Logger.getLogger(ISimulationManager.class.getName()).info("Initializing simulation");
         InitializeListener[] listenerList = (InitializeListener[]) listeners.getListeners(InitializeListener.class);
 
         for (InitializeListener listener : listenerList) {

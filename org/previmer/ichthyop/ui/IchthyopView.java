@@ -12,12 +12,16 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -38,6 +42,7 @@ import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.event.SetupListener;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -48,7 +53,10 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     public IchthyopView(SingleFrameApplication app) {
         super(app);
 
+        createLogfile();
+
         initComponents();
+
         getSimulationManager().addSetupListener(this);
         getSimulationManager().addInitializeListener(this);
         getSimulationManager().getTimeManager().addNextStepListener(this);
@@ -123,6 +131,30 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         return SimulationManager.getInstance();
     }
 
+    private void createLogfile() {
+        try {
+            String logPath = System.getProperty("user.dir") + File.separator + "log" + File.separator;
+            Calendar calendar = new GregorianCalendar();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            SimpleDateFormat dtformatter = new SimpleDateFormat("yyyyMMddHHmm");
+            dtformatter.setCalendar(calendar);
+            StringBuffer logfile = new StringBuffer(logPath);
+            logfile.append("ichthyop-");
+            logfile.append(dtformatter.format(calendar.getTime()));
+            logfile.append(".log");
+            IOTools.makeDirectories(logfile.toString());
+            FileHandler fh = new FileHandler(logfile.toString());
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+            logger.info("Created log file " + logfile.toString());
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
+    }
+
     @Action
     public void showAboutBox() {
         if (aboutBox == null) {
@@ -142,7 +174,8 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
             cfgPath = new File(chooser.getSelectedFile().getParent());
-            setMessage("Open " + chooser.getSelectedFile().toString());
+            setMessage("Opened " + chooser.getSelectedFile().toString());
+            logger.info("Opened " + chooser.getSelectedFile().toString());
             btnSimulaction.getAction().setEnabled(true);
         }
 
@@ -179,9 +212,9 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
                 }
             });
         } catch (InterruptedException ex) {
-            Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         } catch (InvocationTargetException ex) {
-            Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
 
     }
@@ -774,7 +807,7 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
     private JDialog aboutBox;
-    private static final Logger logger = Logger.getLogger(IchthyopApp.class.getName());
+    private static final Logger logger = Logger.getLogger(ISimulationManager.class.getName());
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
     private Task simulActionTask;
