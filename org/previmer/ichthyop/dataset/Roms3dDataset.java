@@ -192,6 +192,11 @@ public abstract class Roms3dDataset extends AbstractDataset {
     private static boolean FLAG_VDISP;
     private String gridFile;
 
+    /**
+     * Geographical boundary of the domain
+     */
+    private double latMin, lonMin, latMax, lonMax, depthMax;
+
     abstract float getHc();
 
     void loadParameters() {
@@ -287,7 +292,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
                 range(p1, p2);
             }
             readConstantField(gridFile);
-            //getDimGeogArea();
+            getDimGeogArea();
             getCstSigLevels();
             z_w_tp0 = getSigLevels();
         } catch (IOException ex) {
@@ -1141,7 +1146,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         return (isInPolygone);
     }
 
-    private boolean isInWater(int i, int j) {
+    public boolean isInWater(int i, int j) {
         return (maskRho[j][i] > 0);
     }
 
@@ -1654,5 +1659,120 @@ public abstract class Roms3dDataset extends AbstractDataset {
             value /= CO;
         }
         return value;
+    }
+
+    /**
+     * Determines the geographical boundaries of the domain in longitude,
+     * latitude and depth.
+     */
+    private void getDimGeogArea() {
+
+        //--------------------------------------
+        // Calculate the Physical Space extrema
+
+        lonMin = Double.MAX_VALUE;
+        lonMax = -lonMin;
+        latMin = Double.MAX_VALUE;
+        latMax = -latMin;
+        depthMax = 0.d;
+        int i = nx;
+        int j = 0;
+
+        while (i-- > 0) {
+            j = ny;
+            while (j-- > 0) {
+                if (lonRho[j][i] >= lonMax) {
+                    lonMax = lonRho[j][i];
+                }
+                if (lonRho[j][i] <= lonMin) {
+                    lonMin = lonRho[j][i];
+                }
+                if (latRho[j][i] >= latMax) {
+                    latMax = latRho[j][i];
+                }
+                if (latRho[j][i] <= latMin) {
+                    latMin = latRho[j][i];
+                }
+                if (hRho[j][i] >= depthMax) {
+                    depthMax = hRho[j][i];
+                }
+            }
+        }
+        //System.out.println("lonmin " + lonMin + " lonmax " + lonMax + " latmin " + latMin + " latmax " + latMax);
+        //System.out.println("depth max " + depthMax);
+
+        double double_tmp;
+        if (lonMin > lonMax) {
+            double_tmp = lonMin;
+            lonMin = lonMax;
+            lonMax = double_tmp;
+        }
+
+        if (latMin > latMax) {
+            double_tmp = latMin;
+            latMin = latMax;
+            latMax = double_tmp;
+        }
+    }
+
+    /**
+     * Gets domain minimum latitude.
+     * @return a double, the domain minimum latitude [north degree]
+     */
+    public double getLatMin() {
+        return latMin;
+    }
+
+    /**
+     * Gets domain maximum latitude.
+     * @return a double, the domain maximum latitude [north degree]
+     */
+    public double getLatMax() {
+        return latMax;
+    }
+
+    /**
+     * Gets domain minimum longitude.
+     * @return a double, the domain minimum longitude [east degree]
+     */
+    public double getLonMin() {
+        return lonMin;
+    }
+
+    /**
+     * Gets domain maximum longitude.
+     * @return a double, the domain maximum longitude [east degree]
+     */
+    public double getLonMax() {
+        return lonMax;
+    }
+
+    /**
+     * Gets domain maximum depth.
+     * @return a float, the domain maximum depth [meter]
+     */
+    public double getDepthMax() {
+        return depthMax;
+    }
+
+    /**
+     * Gets the latitude at (i, j) grid point.
+     * @param i an int, the i-ccordinate
+     * @param j an int, the j-coordinate
+     * @return a double, the latitude [north degree] at (i, j) grid point.
+     */
+    public double getLat(int i, int j) {
+        return latRho[j][i];
+    }
+
+    /**
+     * Gets the longitude at (i, j) grid point.
+     * @param i an int, the i-ccordinate
+     * @param j an int, the j-coordinate
+     * @return a double, the longitude [east degree] at (i, j) grid point.
+     */
+
+    public double getLon(int i, int j) {
+        return lonRho[j][i];
     }
 }

@@ -32,6 +32,8 @@ public interface IDataset extends NextStepListener {
 
     public boolean isInWater(double[] pGrid);
 
+    public boolean isInWater(int i, int j);
+
     public boolean isOnEdge(double[] pGrid);
 
     public double getBathy(int i, int j);
@@ -55,4 +57,18 @@ public interface IDataset extends NextStepListener {
     public void init();
 
     public Number get(String variableName, double[] pGrid, double time);
+
+    public double getLatMin();
+
+    public double getLatMax();
+
+    public double getLonMin();
+
+    public double getLonMax();
+
+    public double getLon(int igrid, int jgrid);
+
+    public double getLat(int igrid, int jgrid);
+
+    public double getDepthMax();
 }

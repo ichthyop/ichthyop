@@ -15,4 +15,6 @@ public interface IPopulation extends Set {
 
     public void step();
 
+    public void clear();
+
 }

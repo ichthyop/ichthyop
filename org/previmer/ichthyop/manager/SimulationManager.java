@@ -211,6 +211,7 @@ public class SimulationManager implements ISimulationManager {
 
     public void stop() {
         flagStop = true;
+        getSimulation().getPopulation().clear();
     }
 
     public boolean isStopped() {
