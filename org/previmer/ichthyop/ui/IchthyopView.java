@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -22,7 +23,11 @@ import javax.swing.Icon;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
@@ -291,6 +296,7 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
 
     public void savePreferences() {
         savePreference(openMenuItem, cfgPath.getPath());
+        savePreference(lafMenu, UIManager.getLookAndFeel().getClass().getName());
     }
 
     private void savePreference(Component bean, Object property) {
@@ -314,6 +320,16 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         if (property != null) {
             cfgPath = new File((String) property);
         }
+
+        property = restorePreference(lafMenu);
+        disableUnsupportedLaF();
+        if (property != null && isSupportedLookAndFeel((String) property)) {
+            getMapLaF().get((String) property).doClick();
+        } else {
+            if (isSupportedLookAndFeel(getResourceMap().getString("metalLaF.classpath"))) {
+                metalMenuItem.doClick();
+            }
+        }
     }
 
     private Object restorePreference(Component bean) {
@@ -328,6 +344,88 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     public void setMessage(String text) {
         statusMessageLabel.setText((text == null) ? "" : text);
         messageTimer.restart();
+    }
+
+    private void updateLookAndFeel(String laf) {
+        try {
+            UIManager.setLookAndFeel(laf);
+            SwingUtilities.updateComponentTreeUI(getFrame());
+            SwingUtilities.updateComponentTreeUI(getMenuBar());
+            SwingUtilities.updateComponentTreeUI(getStatusBar());
+            SwingUtilities.updateComponentTreeUI(getToolBar());
+        } catch (ClassNotFoundException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Action
+    public void gtkLaF() {
+        updateLookAndFeel(getResourceMap().getString("gtkLaF.classpath"));
+    }
+
+    @Action
+    public void nimbusLaF() {
+        updateLookAndFeel(getResourceMap().getString("nimbusLaF.classpath"));
+    }
+
+    @Action
+    public void metalLaF() {
+        updateLookAndFeel(getResourceMap().getString("metalLaF.classpath"));
+    }
+
+    @Action
+    public void motifLaF() {
+        updateLookAndFeel(getResourceMap().getString("motifLaF.classpath"));
+    }
+
+    @Action
+    public void windowsLaF() {
+        updateLookAndFeel(getResourceMap().getString("windowsLaF.classpath"));
+    }
+
+    @Action
+    public void macLaF() {
+        updateLookAndFeel(getResourceMap().getString("macLaF.classpath"));
+    }
+
+    private HashMap<String, JMenuItem> getMapLaF() {
+
+        HashMap<String, JMenuItem> map = new HashMap(lafMenu.getMenuComponentCount());
+        map.put(getResourceMap().getString("nimbusLaF.classpath"), nimbusMenuItem);
+        map.put(getResourceMap().getString("gtkLaF.classpath"), gtkMenuItem);
+        map.put(getResourceMap().getString("metalLaF.classpath"), metalMenuItem);
+        map.put(getResourceMap().getString("motifLaF.classpath"), motifMenuItem);
+        map.put(getResourceMap().getString("windowsLaF.classpath"), windowsMenuItem);
+        map.put(getResourceMap().getString("macLaF.classpath"), macMenuItem);
+        return map;
+    }
+
+    private void disableUnsupportedLaF() {
+        nimbusMenuItem.getAction().setEnabled(isSupportedLookAndFeel(getResourceMap().getString("nimbusLaF.classpath")));
+        metalMenuItem.getAction().setEnabled(isSupportedLookAndFeel(getResourceMap().getString("metalLaF.classpath")));
+        motifMenuItem.getAction().setEnabled(isSupportedLookAndFeel(getResourceMap().getString("motifLaF.classpath")));
+        windowsMenuItem.getAction().setEnabled(isSupportedLookAndFeel(getResourceMap().getString("windowsLaF.classpath")));
+        macMenuItem.getAction().setEnabled(isSupportedLookAndFeel(getResourceMap().getString("macLaF.classpath")));
+    }
+
+    protected boolean isSupportedLookAndFeel(String laf) {
+        try {
+            Class lnfClass = Class.forName(laf);
+            if (lnfClass != null) {
+                LookAndFeel newLAF = (LookAndFeel) (lnfClass.newInstance());
+                if (newLAF != null) {
+                    return newLAF.isSupportedLookAndFeel();
+                }
+            }
+        } catch (Throwable t) {
+        }
+        return false;
     }
 
     /** This method is called from within the constructor to
@@ -356,6 +454,13 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         editMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
+        lafMenu = new javax.swing.JMenu();
+        nimbusMenuItem = new javax.swing.JRadioButtonMenuItem();
+        gtkMenuItem = new javax.swing.JRadioButtonMenuItem();
+        metalMenuItem = new javax.swing.JRadioButtonMenuItem();
+        motifMenuItem = new javax.swing.JRadioButtonMenuItem();
+        macMenuItem = new javax.swing.JRadioButtonMenuItem();
+        windowsMenuItem = new javax.swing.JRadioButtonMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
         statusPanel = new javax.swing.JPanel();
@@ -371,10 +476,11 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         lblProgressGlobal = new javax.swing.JLabel();
         progressBarGlobal = new javax.swing.JProgressBar();
         lblTimeLeftGlobal = new javax.swing.JLabel();
+        btnGroupLaf = new javax.swing.ButtonGroup();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
-        toolBar.setRollover(true);
+        toolBar.setFloatable(false);
         toolBar.setName("toolBar"); // NOI18N
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
@@ -475,6 +581,43 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
+
+        lafMenu.setText(resourceMap.getString("lafMenu.text")); // NOI18N
+        lafMenu.setToolTipText(resourceMap.getString("lafMenu.toolTipText")); // NOI18N
+        lafMenu.setName("lafMenu"); // NOI18N
+
+        nimbusMenuItem.setAction(actionMap.get("nimbusLaF")); // NOI18N
+        btnGroupLaf.add(nimbusMenuItem);
+        nimbusMenuItem.setSelected(true);
+        nimbusMenuItem.setName("nimbusMenuItem"); // NOI18N
+        lafMenu.add(nimbusMenuItem);
+
+        gtkMenuItem.setAction(actionMap.get("gtkLaF")); // NOI18N
+        btnGroupLaf.add(gtkMenuItem);
+        gtkMenuItem.setName("gtkMenuItem"); // NOI18N
+        lafMenu.add(gtkMenuItem);
+
+        metalMenuItem.setAction(actionMap.get("metalLaF")); // NOI18N
+        btnGroupLaf.add(metalMenuItem);
+        metalMenuItem.setName("metalMenuItem"); // NOI18N
+        lafMenu.add(metalMenuItem);
+
+        motifMenuItem.setAction(actionMap.get("motifLaF")); // NOI18N
+        btnGroupLaf.add(motifMenuItem);
+        motifMenuItem.setName("motifMenuItem"); // NOI18N
+        lafMenu.add(motifMenuItem);
+
+        macMenuItem.setAction(actionMap.get("macLaF")); // NOI18N
+        btnGroupLaf.add(macMenuItem);
+        macMenuItem.setName("macMenuItem"); // NOI18N
+        lafMenu.add(macMenuItem);
+
+        windowsMenuItem.setAction(actionMap.get("windowsLaF")); // NOI18N
+        btnGroupLaf.add(windowsMenuItem);
+        windowsMenuItem.setName("windowsMenuItem"); // NOI18N
+        lafMenu.add(windowsMenuItem);
+
+        menuBar.add(lafMenu);
 
         helpMenu.setText(resourceMap.getString("helpMenu.text")); // NOI18N
         helpMenu.setName("helpMenu"); // NOI18N
@@ -586,25 +729,33 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
+        setToolBar(toolBar);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEditCfgFile;
     private javax.swing.JButton btnExit;
+    private javax.swing.ButtonGroup btnGroupLaf;
     private javax.swing.JButton btnNewCfgFile;
     private javax.swing.JButton btnOpenCfgFile;
     private javax.swing.JButton btnProgress;
     private javax.swing.JButton btnSimulaction;
     private javax.swing.JMenuItem editMenuItem;
+    private javax.swing.JRadioButtonMenuItem gtkMenuItem;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
+    private javax.swing.JMenu lafMenu;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
     private javax.swing.JLabel lblTimeLeftCurrent;
     private javax.swing.JLabel lblTimeLeftGlobal;
+    private javax.swing.JRadioButtonMenuItem macMenuItem;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JRadioButtonMenuItem metalMenuItem;
+    private javax.swing.JRadioButtonMenuItem motifMenuItem;
     private javax.swing.JMenuItem newMenuItem;
+    private javax.swing.JRadioButtonMenuItem nimbusMenuItem;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel pnlProgress;
     private javax.swing.JPopupMenu popupProgress;
@@ -615,6 +766,7 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
     private javax.swing.JToolBar toolBar;
+    private javax.swing.JRadioButtonMenuItem windowsMenuItem;
     // End of variables declaration//GEN-END:variables
     private final Timer messageTimer;
     private final Timer busyIconTimer;
