@@ -6,29 +6,18 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 /** import java.util */
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /** import Swing */
-import java.util.Calendar;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 /** local import */
-import javax.swing.SwingUtilities;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.InitializeListener;
-import org.previmer.ichthyop.event.NextStepEvent;
-import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -46,7 +35,7 @@ import org.previmer.ichthyop.manager.SimulationManager;
  * @see inner class CellUI
  * @see inner class ParticleUI
  */
-public class SimulationUI extends JPanel implements InitializeListener {
+public class SimulationUI extends JPanel {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -80,6 +69,8 @@ public class SimulationUI extends JPanel implements InitializeListener {
      * Associated {@code RenderingHints} object
      */
     private static RenderingHints hints = null;
+    private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    private int height = 500, width = 500;
 
 ///////////////
 // Constructors
@@ -89,9 +80,6 @@ public class SimulationUI extends JPanel implements InitializeListener {
      * the domain and the {@code RenderingHints}.
      */
     public SimulationUI() {
-
-        //getSimulationManager().getTimeManager().addNextStepListener(this);
-        getSimulationManager().addInitializeListener(this);
 
         hi = -1;
         wi = -1;
@@ -187,7 +175,6 @@ public class SimulationUI extends JPanel implements InitializeListener {
         repaint();
     }
 
-
     /**
      * Transforms particle (x, y) coordinates into a screen point.
      *
@@ -240,14 +227,36 @@ public class SimulationUI extends JPanel implements InitializeListener {
         return (point);
     }
 
-    public void initializePerformed(InitializeEvent e) {
+    public void init() {
 
         latmin = getSimulationManager().getDataset().getLatMin();
         latmax = getSimulationManager().getDataset().getLatMax();
         lonmin = getSimulationManager().getDataset().getLonMin();
         lonmax = getSimulationManager().getDataset().getLonMax();
 
-        repaintBackground();
+        double avgLat = 0.5d * (latmin + latmax);
+
+        double dlon = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
+        double dlat = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
+
+        double ratio = dlon / dlat;
+        width = (int) (height * ratio);
+        /*if (ratio > 1) {
+            width = (int) (height * ratio);
+        } else if (ratio != 0.d) {
+            height = (int) (width / ratio);
+        }*/
+        //setPreferredSize(new Dimension(width, height));
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
     }
 
 //////////

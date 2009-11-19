@@ -26,6 +26,7 @@
                   <Component id="pnlProgress" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="pnlSimulationView" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -253,11 +254,11 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="scrollPaneSimulationUI" alignment="0" pref="613" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" alignment="0" pref="610" max="32767" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="lblRefresh1" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="animationSpeed" min="-2" pref="77" max="-2" attributes="0"/>
+                              <Component id="refreshFrequency" min="-2" pref="63" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="lblRefresh2" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -275,30 +276,33 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="lblRefresh1" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="animationSpeed" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="refreshFrequency" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="lblRefresh2" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="ckBoxReplay" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="ckBoxCapture" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
-                      <Component id="scrollPaneSimulationUI" pref="269" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jScrollPane1" pref="481" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JSpinner" name="animationSpeed">
+            <Component class="javax.swing.JSpinner" name="refreshFrequency">
               <Properties>
-                <Property name="toolTipText" type="java.lang.String" resourceKey="animationSpeed.toolTipText"/>
+                <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                  <SpinnerModel initial="4" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                </Property>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="refreshFrequency.toolTipText"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[77, 30]"/>
                 </Property>
-                <Property name="name" type="java.lang.String" value="animationSpeed" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="refreshFrequency" noResource="true"/>
               </Properties>
               <Events>
-                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="animationSpeedStateChanged"/>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="refreshFrequencyStateChanged"/>
               </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="lblRefresh1">
@@ -333,9 +337,12 @@
                 <Property name="name" type="java.lang.String" value="ckBoxCapture" noResource="true"/>
               </Properties>
             </Component>
-            <Container class="javax.swing.JScrollPane" name="scrollPaneSimulationUI">
+            <Container class="javax.swing.JScrollPane" name="jScrollPane1">
               <Properties>
-                <Property name="name" type="java.lang.String" value="scrollPaneSimulationUI" noResource="true"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="null"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="jScrollPane1" noResource="true"/>
               </Properties>
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
@@ -343,24 +350,18 @@
                 <Container class="javax.swing.JPanel" name="pnlSimulationUI">
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                      <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
-                        <LineBorder/>
-                      </Border>
+                      <Border info="null"/>
                     </Property>
                     <Property name="name" type="java.lang.String" value="pnlSimulationUI" noResource="true"/>
-                    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                      <Dimension value="[500, 500]"/>
-                    </Property>
                   </Properties>
                   <AuxValues>
                     <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new SimulationUI();"/>
-                    <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="pnlSimulationUI.setVisible(false);"/>
                   </AuxValues>
 
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <EmptySpace min="0" pref="592" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="591" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                     <DimensionLayout dim="1">
@@ -631,6 +632,6 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,39,0,0,2,125"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,3,5,0,0,2,125"/>
   </AuxValues>
 </Form>
