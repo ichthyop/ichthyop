@@ -106,7 +106,7 @@ public class SimulationManager implements ISimulationManager {
      * @return the progress of the current simulation as a percent
      */
     public float progressCurrent() {
-        float progress =  (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps();
+        float progress = (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps();
         return Math.min(Math.max(progress, 0.f), 1.f);
     }
 
@@ -137,7 +137,7 @@ public class SimulationManager implements ISimulationManager {
      */
     public String timeLeftGlobal() {
 
-       return timeLeft(progressGlobal(), cpu_start_global);
+        return timeLeft(progressGlobal(), cpu_start_global);
     }
 
     private String timeLeft(float progress, long cpu_start) {
@@ -179,6 +179,10 @@ public class SimulationManager implements ISimulationManager {
 
     public String indexSimulationToString() {
         return (i_simulation + 1) + " / " + nb_simulations;
+    }
+
+    public int getIndexSimulation() {
+        return i_simulation;
     }
 
     public void run() {

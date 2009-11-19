@@ -132,13 +132,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private void createLogfile() {
         try {
             String logPath = System.getProperty("user.dir") + File.separator + "log" + File.separator;
-            Calendar calendar = new GregorianCalendar();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            SimpleDateFormat dtformatter = new SimpleDateFormat("yyyyMMddHHmm");
-            dtformatter.setCalendar(calendar);
             StringBuffer logfile = new StringBuffer(logPath);
-            logfile.append("ichthyop-");
-            logfile.append(dtformatter.format(calendar.getTime()));
+            logfile.append(getRunId());
             logfile.append(".log");
             IOTools.makeDirectories(logfile.toString());
             FileHandler fh = new FileHandler(logfile.toString());
@@ -151,6 +146,21 @@ public class IchthyopView extends FrameView implements NextStepListener {
         } catch (SecurityException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
+    }
+
+    private String getRunId() {
+
+        if (null == runId) {
+        StringBuffer strBfRunId = new StringBuffer(getResourceMap().getString("Application.name"));
+        strBfRunId.append("-run");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        SimpleDateFormat dtformatter = new SimpleDateFormat("yyyyMMddHHmm");
+        dtformatter.setCalendar(calendar);
+        strBfRunId.append(dtformatter.format(calendar.getTime()));
+        runId = strBfRunId.toString();
+        }
+        return runId;
     }
 
     @Action
@@ -231,12 +241,13 @@ public class IchthyopView extends FrameView implements NextStepListener {
                         btnProgress.getAction().setEnabled(true);
                     }
                     setProgress();
-                    int dt_refresh = ((Integer) refreshFrequency.getValue()) * getSimulationManager().getTimeManager().get_dt();
-                    if (((getSimulationManager().getTimeManager().getTime() - getSimulationManager().getTimeManager().get_tO()) % dt_refresh) == 0) {
-                        //getSimulationUI().repaint();
-                        jScrollPane1.repaint();
-                        if (ckBoxCapture.isSelected()) {
-                            screen2File(pnlSimulationUI, getSimulationManager().getTimeManager().getCalendar());
+                    if (pnlSimulationView.isVisible()) {
+                        int dt_refresh = ((Integer) refreshFrequency.getValue()) * getSimulationManager().getTimeManager().get_dt();
+                        if (((getSimulationManager().getTimeManager().getTime() - getSimulationManager().getTimeManager().get_tO()) % dt_refresh) == 0) {
+                            jScrollPane1.repaint();
+                            if (ckBoxCapture.isSelected()) {
+                                screen2File(pnlSimulationUI, getSimulationManager().getTimeManager().getCalendar());
+                            }
                         }
                     }
                 }
@@ -259,10 +270,20 @@ public class IchthyopView extends FrameView implements NextStepListener {
      */
     private void screen2File(Component component, Calendar calendar) {
 
-        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd_HHmm");
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
         dtFormat.setCalendar(calendar);
-        String fileName = System.getProperty("user.dir") + File.separator + "img" + File.separator +
-                "img_" + dtFormat.format(calendar.getTime()) + ".png";
+        StringBuffer fileName = new StringBuffer(System.getProperty("user.dir"));
+        fileName.append(File.separator);
+        fileName.append("img");
+        fileName.append(File.separator);
+        fileName.append(getRunId());
+        if (getSimulationManager().getNumberOfSimulations() > 1) {
+            fileName.append("_s");
+            fileName.append(getSimulationManager().getIndexSimulation() + 1);
+        }
+        fileName.append('_');
+        fileName.append(dtFormat.format(calendar.getTime()));
+        fileName.append(".png");
 
         BufferedImage bi = new BufferedImage(component.getWidth(),
                 component.getHeight(),
@@ -270,7 +291,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         Graphics g = bi.getGraphics();
         component.paintAll(g);
         try {
-            ImageIO.write(bi, "PNG", new File(fileName));
+            ImageIO.write(bi, "PNG", new File(fileName.toString()));
         } catch (IOException ex) {
             Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1020,4 +1041,5 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
     private Task simulActionTask;
+    private String runId;
 }

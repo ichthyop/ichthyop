@@ -56,6 +56,8 @@ public interface ISimulationManager extends Runnable {
 
     public String indexSimulationToString();
 
+    public int getIndexSimulation();
+
     public int getNumberOfSimulations();
 
     public void resetTimerCurrent();
