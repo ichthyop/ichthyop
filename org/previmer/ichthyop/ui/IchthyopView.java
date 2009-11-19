@@ -53,7 +53,7 @@ import javax.swing.JSpinner;
 /**
  * The application's main frame.
  */
-public class IchthyopView extends FrameView implements SetupListener, InitializeListener, NextStepListener {
+public class IchthyopView extends FrameView implements NextStepListener {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -62,8 +62,6 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
 
         initComponents();
 
-        getSimulationManager().addSetupListener(this);
-        getSimulationManager().addInitializeListener(this);
         getSimulationManager().getTimeManager().addNextStepListener(this);
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
@@ -127,12 +125,9 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         editMenuItem.getAction().setEnabled(false);
         btnSimulaction.getAction().setEnabled(false);
         btnProgress.getAction().setEnabled(false);
+        btnSimulationView.getAction().setEnabled(false);
 
         setMessage("Please, open a configuration file or create a new one");
-
-        getFrame().pack();
-        getFrame().validate();
-
     }
 
     public ISimulationManager getSimulationManager() {
@@ -177,41 +172,57 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
     public void showSimulation() {
         pnlSimulationView.setVisible(!pnlSimulationView.isVisible());
         getFrame().pack();
+        pnlSimulationUI.repaint();
     }
 
     @Action
-    public void openCfgFile() {
+    public void replay() {
+    }
+
+    @Action
+    public void capture() {
+    }
+
+    @Action
+    public Task openCfgFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
-            cfgPath = new File(chooser.getSelectedFile().getParent());
-            setMessage("Opened " + chooser.getSelectedFile().toString());
-            logger.info("Opened " + chooser.getSelectedFile().toString());
-            btnSimulaction.getAction().setEnabled(true);
-            btnSimulationView.getAction().setEnabled(true);
+            return new SetupTask(getApplication(), chooser.getSelectedFile());
+        } else {
+            return null;
+        }
+    }
+
+    private class SetupTask extends Task {
+
+        private File cfgFile;
+
+        SetupTask(Application instance, File cfgFile) {
+            super(instance);
+            this.cfgFile = cfgFile;
+            setMessage("Opened " + cfgFile.toString());
+            logger.info("Opened " + cfgFile.toString());
         }
 
-    }
+        @Override
+        protected Object doInBackground() throws Exception {
+            getSimulationManager().setConfigurationFile(cfgFile);
+            setMessage("Setting up...");
+            getSimulationManager().setup();
+            return null;
+        }
 
-    public void setupPerformed(SetupEvent e) {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                setMessage("Setting up...");
-            }
-        });
-    }
-
-    public void initializePerformed(InitializeEvent e) {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                setMessage("Initializing...");
-            }
-        });
+        @Override
+        protected void succeeded(Object obj) {
+            btnSimulaction.getAction().setEnabled(true);
+            btnSimulationView.getAction().setEnabled(true);
+            btnProgress.getAction().setEnabled(true);
+            btnSimulationView.getAction().setEnabled(true);
+            setMessage("Setup [OK]");
+        }
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -237,28 +248,34 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
 
     private void setProgress() {
 
-        progressBarCurrent.setValue((int) (getSimulationManager().progressCurrent() * 100));
-        StringBuffer strBf = new StringBuffer();
-        strBf.append(getSimulationManager().getTimeManager().stepToString());
-        strBf.append(" - ");
-        strBf.append(getSimulationManager().timeLeftCurrent());
-        lblTimeLeftCurrent.setText(strBf.toString());
+        if (progressBarCurrent.isVisible()) {
+            progressBarCurrent.setValue((int) (getSimulationManager().progressCurrent() * 100));
+            StringBuffer strBf = new StringBuffer();
+            strBf.append(getSimulationManager().getTimeManager().stepToString());
+            strBf.append(" - ");
+            strBf.append(getSimulationManager().timeLeftCurrent());
+            lblTimeLeftCurrent.setText(strBf.toString());
+        }
 
-        if (getSimulationManager().getNumberOfSimulations() > 1) {
-            lblProgressGlobal.setVisible(true);
-            progressBarGlobal.setVisible(true);
-            lblTimeLeftGlobal.setVisible(true);
+        if (progressBarGlobal.isVisible()) {
             progressBarGlobal.setValue((int) (getSimulationManager().progressGlobal() * 100));
-            strBf = new StringBuffer("Simulation ");
+            StringBuffer strBf = new StringBuffer("Simulation ");
             strBf.append(getSimulationManager().indexSimulationToString());
             strBf.append(" - ");
             strBf.append(getSimulationManager().timeLeftGlobal());
             lblTimeLeftGlobal.setText(strBf.toString());
-        } else {
-            lblProgressGlobal.setVisible(false);
-            progressBarGlobal.setVisible(false);
-            lblTimeLeftGlobal.setVisible(false);
         }
+    }
+
+    @Action
+    public void exit() {
+        if (pnlProgress.isVisible()) {
+            btnProgress.doClick();
+        }
+        if (pnlSimulationView.isVisible()) {
+            btnSimulationView.doClick();
+        }
+        getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(btnExit, 0, null));
     }
 
     @Action
@@ -287,6 +304,15 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
 
     @Action
     public void showProgress() {
+        if (getSimulationManager().getNumberOfSimulations() > 1) {
+            lblProgressGlobal.setVisible(true);
+            progressBarGlobal.setVisible(true);
+            lblTimeLeftGlobal.setVisible(true);
+        } else {
+            lblProgressGlobal.setVisible(false);
+            progressBarGlobal.setVisible(false);
+            lblTimeLeftGlobal.setVisible(false);
+        }
         pnlProgress.setVisible(!pnlProgress.isVisible());
         getFrame().pack();
     }
@@ -309,7 +335,7 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
             getSimulationManager().resetTimerGlobal();
             do {
                 setMessage("Simulation " + getSimulationManager().indexSimulationToString());
-                getSimulationManager().setup();
+                setMessage("Initializing...");
                 getSimulationManager().init();
                 getSimulationManager().getTimeManager().firstStepTriggered();
                 getSimulationManager().resetTimerCurrent();
@@ -600,6 +626,7 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
 
         toolBar.setFloatable(false);
         toolBar.setName("toolBar"); // NOI18N
+        toolBar.setPreferredSize(new java.awt.Dimension(400, 62));
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
         btnOpenCfgFile.setAction(actionMap.get("openCfgFile")); // NOI18N
@@ -660,7 +687,7 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         jSeparator4.setName("jSeparator4"); // NOI18N
         toolBar.add(jSeparator4);
 
-        btnExit.setAction(actionMap.get("quit")); // NOI18N
+        btnExit.setAction(actionMap.get("exit")); // NOI18N
         btnExit.setIcon(resourceMap.getIcon("btnExit.icon")); // NOI18N
         btnExit.setText(resourceMap.getString("btnExit.text")); // NOI18N
         btnExit.setFocusable(false);
@@ -694,10 +721,10 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         lblRefresh2.setText(resourceMap.getString("lblRefresh2.text")); // NOI18N
         lblRefresh2.setName("lblRefresh2"); // NOI18N
 
-        ckBoxReplay.setText(resourceMap.getString("ckBoxReplay.text")); // NOI18N
+        ckBoxReplay.setAction(actionMap.get("replay")); // NOI18N
         ckBoxReplay.setName("ckBoxReplay"); // NOI18N
 
-        ckBoxCapture.setText(resourceMap.getString("ckBoxCapture.text")); // NOI18N
+        ckBoxCapture.setAction(actionMap.get("capture")); // NOI18N
         ckBoxCapture.setName("ckBoxCapture"); // NOI18N
 
         scrollPaneSimulationUI.setName("scrollPaneSimulationUI"); // NOI18N
@@ -794,7 +821,7 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
         jSeparator1.setName("jSeparator1"); // NOI18N
         fileMenu.add(jSeparator1);
 
-        exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
+        exitMenuItem.setAction(actionMap.get("exit")); // NOI18N
         exitMenuItem.setIcon(resourceMap.getIcon("exitMenuItem.icon")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
         fileMenu.add(exitMenuItem);
@@ -901,7 +928,6 @@ public class IchthyopView extends FrameView implements SetupListener, Initialize
             animationSpeed.setValue(1.5f);
         }
 }//GEN-LAST:event_lblRefresh1MouseClicked
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSpinner animationSpeed;
     private javax.swing.JButton btnEditCfgFile;

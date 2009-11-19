@@ -129,6 +129,9 @@
           <Properties>
             <Property name="floatable" type="boolean" value="false"/>
             <Property name="name" type="java.lang.String" value="toolBar" noResource="true"/>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[400, 62]"/>
+            </Property>
           </Properties>
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
@@ -224,7 +227,7 @@
             <Component class="javax.swing.JButton" name="btnExit">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.jdesktop.application.Application" id="quit" methodName="quit"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exit" methodName="exit"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" resourceKey="btnExit.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="btnExit.text"/>
@@ -316,13 +319,17 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="ckBoxReplay">
               <Properties>
-                <Property name="text" type="java.lang.String" resourceKey="ckBoxReplay.text"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="replay" methodName="replay"/>
+                </Property>
                 <Property name="name" type="java.lang.String" value="ckBoxReplay" noResource="true"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JCheckBox" name="ckBoxCapture">
               <Properties>
-                <Property name="text" type="java.lang.String" resourceKey="ckBoxCapture.text"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="capture" methodName="capture"/>
+                </Property>
                 <Property name="name" type="java.lang.String" value="ckBoxCapture" noResource="true"/>
               </Properties>
             </Component>
@@ -420,7 +427,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="exitMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.jdesktop.application.Application" id="quit" methodName="quit"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exit" methodName="exit"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" resourceKey="exitMenuItem.icon"/>
                 <Property name="name" type="java.lang.String" value="exitMenuItem" noResource="true"/>
