@@ -31,6 +31,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -56,6 +57,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         createLogfile();
 
         initComponents();
+        getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
 
         getSimulationManager().getTimeManager().addNextStepListener(this);
 
@@ -120,8 +122,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
         editMenuItem.getAction().setEnabled(false);
         btnSimulaction.getAction().setEnabled(false);
         btnProgress.getAction().setEnabled(false);
-        btnSimulationView.getAction().setEnabled(false);
-        setViewToolBarEnabled(false);
+        btnVisualControl.getAction().setEnabled(false);
+        btnRefreshFrequency.getAction().setEnabled(false);
 
         setMessage("Please, open a configuration file or create a new one");
     }
@@ -175,22 +177,20 @@ public class IchthyopView extends FrameView implements NextStepListener {
     }
 
     @Action
-    public void showSimulation() {
-        boolean isVisible = !pnlSimulationView.isVisible();
-        pnlSimulationView.setVisible(isVisible);
-        setViewToolBarEnabled(isVisible);
-        getFrame().pack();
-        getSimulationUI().repaintBackground();
-    }
-
-    private void setViewToolBarEnabled(boolean enabled) {
-        btnReplay.setEnabled(enabled);
-        btnCapture.setEnabled(enabled);
-        btnRefresh.setEnabled(enabled);
-    }
+    public void showSimulationPlayer() { }
 
     @Action
-    public void replay() {
+    public void showVisualControl() {
+        boolean isEnabled = btnVisualControl.isSelected();
+        pnlSimulationView.setVisible(isEnabled);
+        btnRefreshFrequency.getAction().setEnabled(isEnabled);
+        if (isEnabled) {
+            pnlSimulationView.add(scrollPaneSimulationUI, StackLayout.TOP);
+            getSimulationUI().repaintBackground();
+        } else {
+            pnlSimulationView.remove(scrollPaneSimulationUI);
+        }
+        getFrame().pack();
     }
 
     @Action
@@ -198,9 +198,9 @@ public class IchthyopView extends FrameView implements NextStepListener {
     }
 
     @Action
-    public void refresh() {
+    public void setRefreshFrequency() {
         if (!blnRefreshPopupVisible) {
-            popupRefresh.show(btnRefresh, 0, btnRefresh.getHeight());
+            popupRefresh.show(btnRefreshFrequency, 0, btnRefreshFrequency.getHeight());
         } else {
             popupRefresh.setVisible(false);
         }
@@ -242,10 +242,9 @@ public class IchthyopView extends FrameView implements NextStepListener {
         @Override
         protected void succeeded(Object obj) {
             btnSimulaction.getAction().setEnabled(true);
-            btnSimulationView.getAction().setEnabled(true);
             btnProgress.getAction().setEnabled(true);
             getSimulationUI().init();
-            btnSimulationView.getAction().setEnabled(true);
+            btnVisualControl.getAction().setEnabled(true);
             setMessage("Setup [OK]");
         }
     }
@@ -263,8 +262,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
                     if (pnlSimulationView.isVisible()) {
                         int dt_refresh = ((Integer) refreshFrequency.getValue()) * getSimulationManager().getTimeManager().get_dt();
                         if (((getSimulationManager().getTimeManager().getTime() - getSimulationManager().getTimeManager().get_tO()) % dt_refresh) == 0) {
-                            jScrollPane1.repaint();
-                            if (btnCapture.isSelected()) {
+                            scrollPaneSimulationUI.repaint();
+                            if (btnVisualControl.isSelected()) {
                                 screen2File(pnlSimulationUI, getSimulationManager().getTimeManager().getCalendar());
                             }
                         }
@@ -276,7 +275,6 @@ public class IchthyopView extends FrameView implements NextStepListener {
         } catch (InvocationTargetException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-
     }
 
     /**
@@ -347,8 +345,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
         if (pnlProgress.isVisible()) {
             btnProgress.doClick();
         }
-        if (pnlSimulationView.isVisible()) {
-            btnSimulationView.doClick();
+        if (btnVisualControl.isSelected()) {
+            btnVisualControl.doClick();
         }
         getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(btnExit, 0, null));
     }
@@ -403,6 +401,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
             btnSimulaction.setIcon(resourceMap.getIcon("simulAction.Action.icon.stop"));
             isRunning = true;
             btnSimulaction.getAction().setEnabled(false);
+            btnRefreshFrequency.getAction().setEnabled(false);
         }
 
         @Override
@@ -439,8 +438,12 @@ public class IchthyopView extends FrameView implements NextStepListener {
             //setMenuEnabled(true);
             btnSimulaction.setIcon(resourceMap.getIcon("simulAction.Action.icon.play"));
             openMenuItem.getAction().setEnabled(true);
-            btnProgress.getAction().setEnabled(false);
+            btnRefreshFrequency.getAction().setEnabled(btnVisualControl.isSelected());
             isRunning = false;
+            if (btnVisualControl.isSelected()) {
+                pnlSimulationView.remove(scrollPaneSimulationUI);
+                pnlSimulationView.add(viewerPanel = new ViewerPanel());
+            }
         }
     }
 
@@ -603,15 +606,11 @@ public class IchthyopView extends FrameView implements NextStepListener {
         btnSimulaction = new javax.swing.JButton();
         btnProgress = new javax.swing.JToggleButton();
         jSeparator3 = new javax.swing.JToolBar.Separator();
-        btnSimulationView = new javax.swing.JToggleButton();
-        btnReplay = new javax.swing.JToggleButton();
-        btnCapture = new javax.swing.JToggleButton();
-        btnRefresh = new javax.swing.JButton();
-        jSeparator4 = new javax.swing.JToolBar.Separator();
+        btnVisualControl = new javax.swing.JToggleButton();
+        btnRefreshFrequency = new javax.swing.JButton();
+        jSeparator5 = new javax.swing.JToolBar.Separator();
         btnExit = new javax.swing.JButton();
         pnlSimulationView = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        pnlSimulationUI = new SimulationUI();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
@@ -639,6 +638,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
         refreshFrequency = new javax.swing.JSpinner();
         lblSteps = new javax.swing.JLabel();
         popupRefresh = new javax.swing.JPopupMenu();
+        scrollPaneSimulationUI = new javax.swing.JScrollPane();
+        pnlSimulationUI = new SimulationUI();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -677,8 +678,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
                     .addComponent(lblProgressGlobal))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressBarGlobal, javax.swing.GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE)
-                    .addComponent(progressBarCurrent, javax.swing.GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE))
+                    .addComponent(progressBarGlobal, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE)
+                    .addComponent(progressBarCurrent, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(lblTimeLeftCurrent)
@@ -755,36 +756,22 @@ public class IchthyopView extends FrameView implements NextStepListener {
         jSeparator3.setName("jSeparator3"); // NOI18N
         toolBar.add(jSeparator3);
 
-        btnSimulationView.setAction(actionMap.get("showSimulation")); // NOI18N
-        btnSimulationView.setFocusable(false);
-        btnSimulationView.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnSimulationView.setName("btnSimulationView"); // NOI18N
-        btnSimulationView.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(btnSimulationView);
+        btnVisualControl.setAction(actionMap.get("showVisualControl")); // NOI18N
+        btnVisualControl.setFocusable(false);
+        btnVisualControl.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnVisualControl.setName("btnVisualControl"); // NOI18N
+        btnVisualControl.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnVisualControl);
 
-        btnReplay.setAction(actionMap.get("replay")); // NOI18N
-        btnReplay.setFocusable(false);
-        btnReplay.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnReplay.setName("btnReplay"); // NOI18N
-        btnReplay.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(btnReplay);
+        btnRefreshFrequency.setAction(actionMap.get("setRefreshFrequency")); // NOI18N
+        btnRefreshFrequency.setFocusable(false);
+        btnRefreshFrequency.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnRefreshFrequency.setName("btnRefreshFrequency"); // NOI18N
+        btnRefreshFrequency.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnRefreshFrequency);
 
-        btnCapture.setAction(actionMap.get("capture")); // NOI18N
-        btnCapture.setFocusable(false);
-        btnCapture.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnCapture.setName("btnCapture"); // NOI18N
-        btnCapture.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(btnCapture);
-
-        btnRefresh.setAction(actionMap.get("refresh")); // NOI18N
-        btnRefresh.setFocusable(false);
-        btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnRefresh.setName("btnRefresh"); // NOI18N
-        btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(btnRefresh);
-
-        jSeparator4.setName("jSeparator4"); // NOI18N
-        toolBar.add(jSeparator4);
+        jSeparator5.setName("jSeparator5"); // NOI18N
+        toolBar.add(jSeparator5);
 
         btnExit.setAction(actionMap.get("exit")); // NOI18N
         btnExit.setIcon(resourceMap.getIcon("btnExit.icon")); // NOI18N
@@ -795,49 +782,29 @@ public class IchthyopView extends FrameView implements NextStepListener {
         btnExit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(btnExit);
 
+        pnlSimulationView.setBorder(null);
         pnlSimulationView.setName("pnlSimulationView"); // NOI18N
         pnlSimulationView.setVisible(false);
-
-        jScrollPane1.setBorder(null);
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        pnlSimulationUI.setBorder(null);
-        pnlSimulationUI.setName("pnlSimulationUI"); // NOI18N
-
-        javax.swing.GroupLayout pnlSimulationUILayout = new javax.swing.GroupLayout(pnlSimulationUI);
-        pnlSimulationUI.setLayout(pnlSimulationUILayout);
-        pnlSimulationUILayout.setHorizontalGroup(
-            pnlSimulationUILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 806, Short.MAX_VALUE)
-        );
-        pnlSimulationUILayout.setVerticalGroup(
-            pnlSimulationUILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 521, Short.MAX_VALUE)
-        );
-
-        jScrollPane1.setViewportView(pnlSimulationUI);
 
         javax.swing.GroupLayout pnlSimulationViewLayout = new javax.swing.GroupLayout(pnlSimulationView);
         pnlSimulationView.setLayout(pnlSimulationViewLayout);
         pnlSimulationViewLayout.setHorizontalGroup(
             pnlSimulationViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlSimulationViewLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 808, Short.MAX_VALUE)
-                .addContainerGap())
+            .addGap(0, 638, Short.MAX_VALUE)
         );
         pnlSimulationViewLayout.setVerticalGroup(
             pnlSimulationViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlSimulationViewLayout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 517, Short.MAX_VALUE)
-                .addContainerGap())
+            .addGap(0, 201, Short.MAX_VALUE)
         );
+
+        pnlSimulationView.setLayout(new StackLayout());
+        pnlSimulationView.add(new GradientPanel(), StackLayout.TOP);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 832, Short.MAX_VALUE)
+            .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 638, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                 .addComponent(pnlProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -850,8 +817,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlSimulationView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(pnlSimulationView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -942,11 +908,11 @@ public class IchthyopView extends FrameView implements NextStepListener {
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 832, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 638, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 646, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 452, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -1016,6 +982,26 @@ public class IchthyopView extends FrameView implements NextStepListener {
         popupRefresh.setName("popupRefresh"); // NOI18N
         popupRefresh.add(pnlRefresh);
 
+        scrollPaneSimulationUI.setBorder(null);
+        scrollPaneSimulationUI.setName("scrollPaneSimulationUI"); // NOI18N
+
+        pnlSimulationUI.setBorder(null);
+        pnlSimulationUI.setName("pnlSimulationUI"); // NOI18N
+        pnlSimulationUI.setPreferredSize(new java.awt.Dimension(500, 500));
+
+        javax.swing.GroupLayout pnlSimulationUILayout = new javax.swing.GroupLayout(pnlSimulationUI);
+        pnlSimulationUI.setLayout(pnlSimulationUILayout);
+        pnlSimulationUILayout.setHorizontalGroup(
+            pnlSimulationUILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 698, Short.MAX_VALUE)
+        );
+        pnlSimulationUILayout.setVerticalGroup(
+            pnlSimulationUILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 500, Short.MAX_VALUE)
+        );
+
+        scrollPaneSimulationUI.setViewportView(pnlSimulationUI);
+
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
@@ -1034,24 +1020,21 @@ public class IchthyopView extends FrameView implements NextStepListener {
         }
 }//GEN-LAST:event_lblRefreshFrequencyMouseClicked
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton btnCapture;
     private javax.swing.JButton btnEditCfgFile;
     private javax.swing.JButton btnExit;
     private javax.swing.ButtonGroup btnGroupLaf;
     private javax.swing.JButton btnNewCfgFile;
     private javax.swing.JButton btnOpenCfgFile;
     private javax.swing.JToggleButton btnProgress;
-    private javax.swing.JButton btnRefresh;
-    private javax.swing.JToggleButton btnReplay;
+    private javax.swing.JButton btnRefreshFrequency;
     private javax.swing.JButton btnSimulaction;
-    private javax.swing.JToggleButton btnSimulationView;
+    private javax.swing.JToggleButton btnVisualControl;
     private javax.swing.JMenuItem editMenuItem;
     private javax.swing.JRadioButtonMenuItem gtkMenuItem;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
-    private javax.swing.JToolBar.Separator jSeparator4;
+    private javax.swing.JToolBar.Separator jSeparator5;
     private javax.swing.JMenu lafMenu;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
@@ -1076,6 +1059,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private javax.swing.JProgressBar progressBarCurrent;
     private javax.swing.JProgressBar progressBarGlobal;
     private javax.swing.JSpinner refreshFrequency;
+    private javax.swing.JScrollPane scrollPaneSimulationUI;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
@@ -1094,4 +1078,5 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private Task simulActionTask;
     private String runId;
     private boolean blnRefreshPopupVisible = false;
+    private JPanel viewerPanel;
 }
