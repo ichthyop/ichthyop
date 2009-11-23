@@ -124,6 +124,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         btnProgress.getAction().setEnabled(false);
         btnVisualControl.getAction().setEnabled(false);
         btnRefreshFrequency.getAction().setEnabled(false);
+        btnRefreshFrequency.setVisible(false);
 
         setMessage("Please, open a configuration file or create a new one");
     }
@@ -177,20 +178,48 @@ public class IchthyopView extends FrameView implements NextStepListener {
     }
 
     @Action
-    public void showSimulationPlayer() { }
+    public Task showVisualControl() {
+        return new VisualControlTask(getApplication(), btnVisualControl.isSelected());
+    }
 
-    @Action
-    public void showVisualControl() {
-        boolean isEnabled = btnVisualControl.isSelected();
-        pnlSimulationView.setVisible(isEnabled);
-        btnRefreshFrequency.getAction().setEnabled(isEnabled);
-        if (isEnabled) {
-            pnlSimulationView.add(scrollPaneSimulationUI, StackLayout.TOP);
-            getSimulationUI().repaintBackground();
-        } else {
-            pnlSimulationView.remove(scrollPaneSimulationUI);
+    private class VisualControlTask extends Task {
+
+        boolean isEnabled;
+
+        VisualControlTask(Application instance, boolean isEnabled) {
+            super(instance);
+            this.isEnabled = isEnabled;
         }
-        getFrame().pack();
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            if (!isSetup) {
+                setMessage("Setting up...");
+                getSimulationManager().setup();
+                isSetup = true;
+                setMessage("Setup [OK]");
+            }
+            getSimulationUI().init();
+            return null;
+        }
+
+        @Override
+        protected void succeeded(Object obj) {
+            pnlSimulationView.setVisible(isEnabled);
+            btnRefreshFrequency.getAction().setEnabled(isEnabled);
+            btnRefreshFrequency.setVisible(isEnabled);
+            if (viewerPanel != null) {
+                pnlSimulationView.remove(viewerPanel);
+                viewerPanel = null;
+            }
+            if (isEnabled) {
+                pnlSimulationView.add(scrollPaneSimulationUI, StackLayout.TOP);
+                getSimulationUI().repaintBackground();
+            } else {
+                pnlSimulationView.remove(scrollPaneSimulationUI);
+            }
+            getFrame().pack();
+        }
     }
 
     @Action
@@ -208,44 +237,23 @@ public class IchthyopView extends FrameView implements NextStepListener {
     }
 
     @Action
-    public Task openCfgFile() {
+    public void openCfgFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            return new SetupTask(getApplication(), chooser.getSelectedFile());
-        } else {
-            return null;
-        }
-    }
-
-    private class SetupTask extends Task {
-
-        private File cfgFile;
-
-        SetupTask(Application instance, File cfgFile) {
-            super(instance);
-            this.cfgFile = cfgFile;
-            setMessage("Opened " + cfgFile.toString());
-            logger.info("Opened " + cfgFile.toString());
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-            getSimulationManager().setConfigurationFile(cfgFile);
-            setMessage("Setting up...");
-            getSimulationManager().setup();
-            return null;
-        }
-
-        @Override
-        protected void succeeded(Object obj) {
+            setMessage("Opened " + chooser.getSelectedFile().toString());
+            logger.info("Opened " + chooser.getSelectedFile().toString());
+            getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
+            isSetup = false;
             btnSimulaction.getAction().setEnabled(true);
             btnProgress.getAction().setEnabled(true);
-            getSimulationUI().init();
-            btnVisualControl.getAction().setEnabled(true);
-            setMessage("Setup [OK]");
+            if (getSimulationManager().getNumberOfSimulations() > 1) {
+                btnProgress.doClick();
+            } else {
+                btnVisualControl.getAction().setEnabled(true);
+            }
         }
     }
 
@@ -402,6 +410,12 @@ public class IchthyopView extends FrameView implements NextStepListener {
             isRunning = true;
             btnSimulaction.getAction().setEnabled(false);
             btnRefreshFrequency.getAction().setEnabled(false);
+            if (btnVisualControl.isSelected() && viewerPanel != null) {
+                pnlSimulationView.remove(viewerPanel);
+                viewerPanel = null;
+                pnlSimulationView.add(scrollPaneSimulationUI, StackLayout.TOP);
+                getSimulationUI().repaintBackground();
+            }
         }
 
         @Override
@@ -410,6 +424,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
             do {
                 setMessage("Simulation " + getSimulationManager().indexSimulationToString());
                 setMessage("Initializing...");
+                getSimulationManager().setup();
+                isSetup = true;
                 getSimulationManager().init();
                 getSimulationManager().getTimeManager().firstStepTriggered();
                 getSimulationManager().resetTimerCurrent();
@@ -1079,4 +1095,5 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private String runId;
     private boolean blnRefreshPopupVisible = false;
     private JPanel viewerPanel;
+    private boolean isSetup;
 }
