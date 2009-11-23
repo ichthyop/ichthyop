@@ -167,11 +167,11 @@ public class ViewerPanel extends JPanel {
         repaint();
     }
 
-    /*@Override
+    @Override
     public Dimension getPreferredSize() {
         //return new Dimension(128 * 3, 128 * 2);
         return new Dimension(250 * 3, 350 * 2);
-    }*/
+    }
 
     @Override
     public Dimension getMaximumSize() {

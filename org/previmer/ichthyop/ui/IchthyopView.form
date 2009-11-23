@@ -10,12 +10,18 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="toolBar" alignment="0" pref="638" max="32767" attributes="0"/>
+              <Component id="toolBar" alignment="0" pref="980" max="32767" attributes="0"/>
               <Group type="102" alignment="1" attributes="0">
+                  <Component id="simulationRecordToolBar" pref="452" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="simulationReplayToolBar" pref="522" max="32767" attributes="0"/>
+              </Group>
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="pnlProgress" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
-              <Component id="pnlSimulationView" alignment="0" max="32767" attributes="0"/>
+              <Component id="pnlSimulation" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -23,9 +29,14 @@
               <Group type="102" alignment="0" attributes="0">
                   <Component id="toolBar" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="simulationRecordToolBar" max="32767" attributes="1"/>
+                      <Component id="simulationReplayToolBar" alignment="0" max="32767" attributes="1"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="pnlProgress" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="pnlSimulationView" max="32767" attributes="0"/>
+                  <Component id="pnlSimulation" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -50,8 +61,8 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="progressBarGlobal" pref="347" max="32767" attributes="1"/>
-                          <Component id="progressBarCurrent" alignment="0" pref="347" max="32767" attributes="1"/>
+                          <Component id="progressBarGlobal" pref="677" max="32767" attributes="1"/>
+                          <Component id="progressBarCurrent" alignment="0" pref="677" max="32767" attributes="1"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="1" attributes="0">
@@ -139,9 +150,8 @@
             <Component class="javax.swing.JButton" name="btnOpenCfgFile">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openCfgFile" methodName="openCfgFile"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openConfigurationFile" methodName="openConfigurationFile"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="btnOpenCfgFile.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="btnOpenCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -152,9 +162,8 @@
             <Component class="javax.swing.JButton" name="btnNewCfgFile">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="newCfgFile" methodName="newCfgFile"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="newConfigurationFile" methodName="newConfigurationFile"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="btnNewCfgFile.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="btnNewCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -165,9 +174,8 @@
             <Component class="javax.swing.JButton" name="btnEditCfgFile">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="editCfgFile" methodName="editCfgFile"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="editConfigurationFile" methodName="editConfigurationFile"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="btnEditCfgFile.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="btnEditCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -180,26 +188,36 @@
                 <Property name="name" type="java.lang.String" value="jSeparator2" noResource="true"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JButton" name="btnSimulaction">
+            <Component class="javax.swing.JButton" name="btnSimulationRun">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="simulAction" methodName="simulAction"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="simulationRun" methodName="simulationRun"/>
                 </Property>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="hideActionText" type="boolean" value="true"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnSimulaction" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="btnSimulationRun" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JToggleButton" name="btnProgress">
+            <Component class="javax.swing.JToggleButton" name="btnSimulationRecord">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="showProgress" methodName="showProgress"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="simulationRecord" methodName="simulationRecord"/>
                 </Property>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnProgress" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="btnSimulationRecord" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="btnSimulationProgress">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="simulationProgress" methodName="simulationProgress"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnSimulationProgress" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
             </Component>
@@ -208,25 +226,14 @@
                 <Property name="name" type="java.lang.String" value="jSeparator3" noResource="true"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JToggleButton" name="btnVisualControl">
+            <Component class="javax.swing.JToggleButton" name="btnSimulationReplay">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="showVisualControl" methodName="showVisualControl"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="simulationReplay" methodName="simulationReplay"/>
                 </Property>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnVisualControl" noResource="true"/>
-                <Property name="verticalTextPosition" type="int" value="3"/>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JButton" name="btnRefreshFrequency">
-              <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="setRefreshFrequency" methodName="setRefreshFrequency"/>
-                </Property>
-                <Property name="focusable" type="boolean" value="false"/>
-                <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="btnRefreshFrequency" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="btnSimulationReplay" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
             </Component>
@@ -238,9 +245,8 @@
             <Component class="javax.swing.JButton" name="btnExit">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exit" methodName="exit"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exitApplication" methodName="exitApplication"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="btnExit.icon"/>
                 <Property name="text" type="java.lang.String" resourceKey="btnExit.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -250,30 +256,164 @@
             </Component>
           </SubComponents>
         </Container>
-        <Container class="javax.swing.JPanel" name="pnlSimulationView">
+        <Container class="javax.swing.JPanel" name="pnlSimulation">
           <Properties>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="null"/>
             </Property>
-            <Property name="name" type="java.lang.String" value="pnlSimulationView" noResource="true"/>
+            <Property name="name" type="java.lang.String" value="pnlSimulation" noResource="true"/>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_AddingCodePre" type="java.lang.String" value="pnlSimulationView.setLayout(new StackLayout());&#xa;pnlSimulationView.add(new GradientPanel(), StackLayout.TOP);"/>
-            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="pnlSimulationView.setVisible(false);"/>
+            <AuxValue name="JavaCodeGenerator_AddingCodePre" type="java.lang.String" value="pnlSimulation.setLayout(new StackLayout());&#xa;pnlSimulation.add(new GradientPanel(), StackLayout.TOP);"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="pnlSimulation.setVisible(false);"/>
           </AuxValues>
 
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="638" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="980" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="207" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="257" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
           </Layout>
+        </Container>
+        <Container class="javax.swing.JToolBar" name="simulationRecordToolBar">
+          <Properties>
+            <Property name="floatable" type="boolean" value="false"/>
+            <Property name="rollover" type="boolean" value="true"/>
+            <Property name="name" type="java.lang.String" value="simulationRecordToolBar" noResource="true"/>
+          </Properties>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JLabel" name="lblSimulationRecord">
+              <Properties>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="lblSimulationRecord.icon"/>
+                <Property name="text" type="java.lang.String" resourceKey="lblSimulationRecord.text"/>
+                <Property name="enabled" type="boolean" value="false"/>
+                <Property name="name" type="java.lang.String" value="lblSimulationRecord" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator4">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator4" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="lblRefreshFrequency">
+              <Properties>
+                <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+                  <ComponentRef name="refreshFrequency"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="lblRefreshFrequency.text"/>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="lblRefreshFrequency.toolTipText"/>
+                <Property name="name" type="java.lang.String" value="lblRefreshFrequency" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JSpinner" name="refreshFrequency">
+              <Properties>
+                <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                  <SpinnerModel initial="4" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[77, 30]"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="refreshFrequency" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="refreshFrequencyStateChanged"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JLabel" name="lblSteps">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="lblSteps.text"/>
+                <Property name="name" type="java.lang.String" value="lblSteps" noResource="true"/>
+              </Properties>
+            </Component>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JToolBar" name="simulationReplayToolBar">
+          <Properties>
+            <Property name="floatable" type="boolean" value="false"/>
+            <Property name="rollover" type="boolean" value="true"/>
+            <Property name="name" type="java.lang.String" value="simulationReplayToolBar" noResource="true"/>
+          </Properties>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JLabel" name="lblSimulationReplay">
+              <Properties>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="lblSimulationReplay.icon"/>
+                <Property name="text" type="java.lang.String" resourceKey="lblSimulationReplay.text"/>
+                <Property name="enabled" type="boolean" value="false"/>
+                <Property name="name" type="java.lang.String" value="lblSimulationReplay" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator6">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator6" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnFirst">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="first" methodName="first"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnFirst" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnPrevious">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="previous" methodName="previous"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnPrevious" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnAnimaction">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="animAction" methodName="animAction"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnAnimaction" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnNext">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="next" methodName="next"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnNext" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnLast">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="last" methodName="last"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnLast" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+          </SubComponents>
         </Container>
       </SubComponents>
     </Container>
@@ -299,7 +439,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="newMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="newCfgFile" methodName="newCfgFile"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="newConfigurationFile" methodName="newConfigurationFile"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="newMenuItem" noResource="true"/>
               </Properties>
@@ -307,7 +447,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="openMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openCfgFile" methodName="openCfgFile"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openConfigurationFile" methodName="openConfigurationFile"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="openMenuItem" noResource="true"/>
               </Properties>
@@ -315,7 +455,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="editMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="editCfgFile" methodName="editCfgFile"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="editConfigurationFile" methodName="editConfigurationFile"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="editMenuItem" noResource="true"/>
               </Properties>
@@ -328,9 +468,8 @@
             <MenuItem class="javax.swing.JMenuItem" name="exitMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exit" methodName="exit"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exitApplication" methodName="exitApplication"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="exitMenuItem.icon"/>
                 <Property name="name" type="java.lang.String" value="exitMenuItem" noResource="true"/>
               </Properties>
               <AuxValues>
@@ -450,11 +589,11 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="statusPanelSeparator" alignment="0" pref="638" max="32767" attributes="0"/>
+              <Component id="statusPanelSeparator" alignment="0" pref="980" max="32767" attributes="0"/>
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="statusMessageLabel" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="452" max="32767" attributes="0"/>
+                  <EmptySpace pref="794" max="32767" attributes="0"/>
                   <Component id="progressBar" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="statusAnimationLabel" min="-2" max="-2" attributes="0"/>
@@ -507,94 +646,15 @@
     </Container>
     <Component class="javax.swing.ButtonGroup" name="btnGroupLaf">
     </Component>
-    <Container class="javax.swing.JPanel" name="pnlRefresh">
-      <Properties>
-        <Property name="name" type="java.lang.String" value="pnlRefresh" noResource="true"/>
-      </Properties>
-
-      <Layout>
-        <DimensionLayout dim="0">
-          <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="lblRefreshFrequency" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="refreshFrequency" min="-2" pref="76" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="lblSteps" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
-              </Group>
-          </Group>
-        </DimensionLayout>
-        <DimensionLayout dim="1">
-          <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="lblRefreshFrequency" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="refreshFrequency" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblSteps" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="32767" attributes="0"/>
-              </Group>
-          </Group>
-        </DimensionLayout>
-      </Layout>
-      <SubComponents>
-        <Component class="javax.swing.JLabel" name="lblRefreshFrequency">
-          <Properties>
-            <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-              <ComponentRef name="refreshFrequency"/>
-            </Property>
-            <Property name="text" type="java.lang.String" resourceKey="lblRefreshFrequency.text"/>
-            <Property name="toolTipText" type="java.lang.String" resourceKey="lblRefreshFrequency.toolTipText"/>
-            <Property name="name" type="java.lang.String" value="lblRefreshFrequency" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="lblRefreshFrequencyMouseClicked"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JSpinner" name="refreshFrequency">
-          <Properties>
-            <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-              <SpinnerModel initial="4" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
-            </Property>
-            <Property name="focusable" type="boolean" value="false"/>
-            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[77, 30]"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="refreshFrequency" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="refreshFrequencyStateChanged"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblSteps">
-          <Properties>
-            <Property name="text" type="java.lang.String" resourceKey="lblSteps.text"/>
-            <Property name="name" type="java.lang.String" value="lblSteps" noResource="true"/>
-          </Properties>
-        </Component>
-      </SubComponents>
-    </Container>
-    <Container class="javax.swing.JPopupMenu" name="popupRefresh">
-      <Properties>
-        <Property name="name" type="java.lang.String" value="popupRefresh" noResource="true"/>
-      </Properties>
-      <AuxValues>
-        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="popupRefresh.add(pnlRefresh);"/>
-      </AuxValues>
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
-        <Property name="useNullLayout" type="boolean" value="true"/>
-      </Layout>
-    </Container>
     <Container class="javax.swing.JScrollPane" name="scrollPaneSimulationUI">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="null"/>
         </Property>
         <Property name="name" type="java.lang.String" value="scrollPaneSimulationUI" noResource="true"/>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[500, 500]"/>
+        </Property>
       </Properties>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
@@ -616,7 +676,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="698" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="500" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
@@ -653,6 +713,6 @@
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
-    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,-79,0,0,2,126"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,45,0,0,3,-44"/>
   </AuxValues>
 </Form>
