@@ -296,10 +296,13 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
     @Action
     public void first() {
+        sliderTime.setValue(0);
     }
 
     @Action
     public void previous() {
+        int index = sliderTime.getValue();
+        sliderTime.setValue(index - 1);
     }
 
     @Action
@@ -308,10 +311,14 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
     @Action
     public void next() {
+        int index = sliderTime.getValue();
+        sliderTime.setValue(index + 1);
+
     }
 
     @Action
     public void last() {
+        sliderTime.setValue(sliderTime.getMaximum());
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -714,6 +721,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
         btnAnimaction = new javax.swing.JButton();
         btnNext = new javax.swing.JButton();
         btnLast = new javax.swing.JButton();
+        jSeparator9 = new javax.swing.JToolBar.Separator();
+        sliderTime = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
@@ -999,6 +1008,12 @@ public class IchthyopView extends FrameView implements NextStepListener {
         btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         simulationReplayToolBar.add(btnLast);
 
+        jSeparator9.setName("jSeparator9"); // NOI18N
+        simulationReplayToolBar.add(jSeparator9);
+
+        sliderTime.setName("sliderTime"); // NOI18N
+        simulationReplayToolBar.add(sliderTime);
+
         pnlSimulation.setLayout(new StackLayout());
         pnlSimulation.add(new GradientPanel(), StackLayout.TOP);
 
@@ -1192,6 +1207,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private javax.swing.JToolBar.Separator jSeparator6;
     private javax.swing.JToolBar.Separator jSeparator7;
     private javax.swing.JToolBar.Separator jSeparator8;
+    private javax.swing.JToolBar.Separator jSeparator9;
     private javax.swing.JMenu lafMenu;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
@@ -1221,6 +1237,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private javax.swing.JScrollPane scrollPaneSimulationUI;
     private javax.swing.JToolBar simulationRecordToolBar;
     private javax.swing.JToolBar simulationReplayToolBar;
+    private javax.swing.JSlider sliderTime;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
