@@ -192,37 +192,68 @@ public class IchthyopView extends FrameView implements NextStepListener {
     }
 
     @Action
-    public Task simulationReplay() {
-        boolean isEnabled = btnSimulationReplay.isSelected();
+    public void simulationReplay() {
+        if (btnSimulationReplay.isSelected()) {
+            showSimulationReplay();
+        } else {
+            hideSimulationReplay();
+        }
+    }
+
+    private void showSimulationReplay() {
         if (btnSimulationRecord.isSelected()) {
             btnSimulationRecord.doClick();
         }
-        setSimulationReplayBarVisible(isEnabled);
-        pnlSimulation.setVisible(isEnabled);
-        if (isEnabled) {
-            pnlSimulation.remove(viewerPanel);
-            pnlSimulation.add(viewerPanel = new ViewerPanel(), StackLayout.TOP);
-        }
+        simulationReplayToolBar.setVisible(true);
+        pnlSimulation.removeAll();
+        pnlSimulation.add(new GradientPanel(), StackLayout.TOP);
+        pnlSimulation.add(viewerPanel = new ViewerPanel(), StackLayout.TOP);
+        pnlSimulation.setVisible(true);
         getFrame().pack();
-        return null;
     }
 
-    @Action
-    public Task simulationRecord() {
+    private void hideSimulationReplay() {
+        simulationReplayToolBar.setVisible(false);
+        pnlSimulation.removeAll();
+        pnlSimulation.setVisible(false);
+        getFrame().pack();
+    }
+
+    private void showSimulationRecord() {
         if (btnSimulationReplay.isSelected()) {
             btnSimulationReplay.doClick();
         }
-        return new SimulationRecordTask(getApplication(), btnSimulationRecord.isSelected());
+        simulationRecordToolBar.setVisible(true);
+        pnlSimulation.removeAll();
+        pnlSimulation.add(scrollPaneSimulationUI, StackLayout.TOP);
+        pnlSimulation.setVisible(true);
+        getFrame().pack();
+    }
+
+    private void hideSimulationRecord() {
+        simulationRecordToolBar.setVisible(false);
+        pnlSimulation.removeAll();
+        pnlSimulation.setVisible(false);
+        getFrame().pack();
+    }
+
+    @Action
+    public void simulationRecord() {
+        if (btnSimulationRecord.isSelected()) {
+            if (!isSetup) {
+                getApplication().getContext().getTaskService().execute(new SimulationRecordTask(getApplication(), btnSimulationRecord.isSelected()));
+            } else {
+                showSimulationRecord();
+            }
+        } else {
+            hideSimulationRecord();
+        }
     }
 
     private class SimulationRecordTask extends Task {
 
-        boolean isEnabled;
-
         SimulationRecordTask(Application instance, boolean isEnabled) {
             super(instance);
-            this.isEnabled = isEnabled;
-            setSimulationRecordBarVisible(isEnabled);
         }
 
         @Override
@@ -239,13 +270,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
         @Override
         protected void succeeded(Object obj) {
-            pnlSimulation.setVisible(isEnabled);
-            if (isEnabled) {
-                pnlSimulation.remove(scrollPaneSimulationUI);
-                pnlSimulation.add(scrollPaneSimulationUI, StackLayout.TOP);
-                getSimulationUI().repaintBackground();
-            }
-            getFrame().pack();
+            showSimulationRecord();
         }
     }
 
