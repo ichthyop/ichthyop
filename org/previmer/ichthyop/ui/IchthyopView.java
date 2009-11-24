@@ -766,6 +766,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
         btnOpenCfgFile.setAction(actionMap.get("openConfigurationFile")); // NOI18N
+        btnOpenCfgFile.setIcon(resourceMap.getIcon("openConfigurationFile.Action.toolBarIcon")); // NOI18N
         btnOpenCfgFile.setText(resourceMap.getString("btnOpenCfgFile.text")); // NOI18N
         btnOpenCfgFile.setFocusable(false);
         btnOpenCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -774,6 +775,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         toolBar.add(btnOpenCfgFile);
 
         btnNewCfgFile.setAction(actionMap.get("newConfigurationFile")); // NOI18N
+        btnNewCfgFile.setIcon(resourceMap.getIcon("newConfigurationFile.Action.toolBarIcon")); // NOI18N
         btnNewCfgFile.setText(resourceMap.getString("btnNewCfgFile.text")); // NOI18N
         btnNewCfgFile.setFocusable(false);
         btnNewCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -782,6 +784,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         toolBar.add(btnNewCfgFile);
 
         btnEditCfgFile.setAction(actionMap.get("editConfigurationFile")); // NOI18N
+        btnEditCfgFile.setIcon(resourceMap.getIcon("editConfigurationFile.Action.toolBarIcon")); // NOI18N
         btnEditCfgFile.setText(resourceMap.getString("btnEditCfgFile.text")); // NOI18N
         btnEditCfgFile.setFocusable(false);
         btnEditCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -827,6 +830,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         toolBar.add(jSeparator5);
 
         btnExit.setAction(actionMap.get("exitApplication")); // NOI18N
+        btnExit.setIcon(resourceMap.getIcon("exitApplication.Action.toolBarIcon")); // NOI18N
         btnExit.setText(resourceMap.getString("btnExit.text")); // NOI18N
         btnExit.setFocusable(false);
         btnExit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -846,7 +850,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 257, Short.MAX_VALUE)
+            .addGap(0, 273, Short.MAX_VALUE)
         );
 
         simulationRecordToolBar.setFloatable(false);
