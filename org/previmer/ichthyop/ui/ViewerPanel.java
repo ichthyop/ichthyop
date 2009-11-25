@@ -106,6 +106,7 @@ public class ViewerPanel extends JPanel {
     private CursorChanger cursorChanger;
     private MouseWheelScroller wheelScroller;
     private KeyScroller keyScroller;
+    private Snapshots snapshots;
 
     public ViewerPanel() {
         GridBagLayout layout = new GridBagLayout();
@@ -210,7 +211,7 @@ public class ViewerPanel extends JPanel {
         drawAvatars(g2, drawableAvatars);
 
         if (drawableAvatars.length > 0) {
-            //drawAvatarName(g2);
+            drawAvatarName(g2);
         }
 
         g2.setComposite(oldComposite);
@@ -250,9 +251,10 @@ public class ViewerPanel extends JPanel {
         double bulletHeight = 30.0;
 
         double x = (getWidth() - bulletWidth) / 2.0;
-        double y = (getHeight() - 164) / 2.0 - bulletHeight * 1.4;
+        //double y = (getHeight() - 164) / 2.0 - bulletHeight * 1.4;
+        double y = 20;
 
-        drawAvatarBullet(g2, x, y, bulletWidth, bulletHeight);
+        //drawAvatarBullet(g2, x, y, bulletWidth, bulletHeight);
         drawAvatarText(g2, y, bulletHeight);
 
         g2.setComposite(composite);
@@ -293,16 +295,18 @@ public class ViewerPanel extends JPanel {
                 bulletHeight + 4, bulletHeight + 4));
         g2.translate(1, 2);
 
-        Color startColor = new Color(10, 0, 40);
-        Color endColor = new Color(175, 165, 225);
+        //Color startColor = new Color(10, 0, 40);
+        Color startColor = new Color(165, 165, 165);
+        //Color endColor = new Color(175, 165, 225);
+        Color endColor = new Color(40, 40, 40);
 
         Paint paint = g2.getPaint();
         g2.setPaint(new GradientPaint(0.0f, 0.0f, startColor,
                 0.0f, (float) bulletHeight, endColor));
         g2.fill(bullet);
 
-        startColor = new Color(5, 0, 50);
-        endColor = new Color(105, 100, 155);
+        startColor = new Color(20, 20, 20);
+        endColor = new Color(145, 145, 145);
         g2.setPaint(new GradientPaint(0.0f, 0.0f, startColor,
                 0.0f, (float) bulletHeight, endColor));
 
@@ -418,6 +422,7 @@ public class ViewerPanel extends JPanel {
     }
 
     public void setSnapshots(Snapshots snapshots) {
+        this.snapshots = snapshots;
         if (snapshots != null) {
             findAvatars(snapshots.getId());
         } else {
@@ -428,7 +433,7 @@ public class ViewerPanel extends JPanel {
 
     private void setAvatarIndex(int index) {
         avatarIndex = index;
-        textAvatar = "Photo " + index;
+        textAvatar = snapshots.getTime(index);
     }
 
     public void scrollBy(int increment) {
@@ -781,7 +786,6 @@ public class ViewerPanel extends JPanel {
 
             if (textAlphaLevel < 0.1f) {
                 textAlphaLevel = 0.1f;
-                textAvatar = "LoginName" + index;
             }
 
             double newPosition = (elapsed / ANIM_SCROLL_DELAY) * -position;

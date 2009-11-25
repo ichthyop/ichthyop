@@ -25,6 +25,7 @@ public class Snapshots {
     private File[] listFiles;
     private static SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
     private static SimpleDateFormat dtformatterReadableId = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    private static SimpleDateFormat dtformatterTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 
     public Snapshots(String id) {
         this.id = id;
@@ -85,6 +86,26 @@ public class Snapshots {
         } else {
             return listFiles = path.listFiles(new MetaFilenameFilter(getId() + "*.png"));
         }
+    }
+
+    public String getTime(int index) {
+        if (index > getNumberImages() - 1) {
+            return "";
+        }
+        String date = getImages()[index].getName().split("_")[1];
+        date = date.substring(0, date.indexOf(".png"));
+        String[] dateToken = date.split("-");
+        StringBuffer time = new StringBuffer("Year ");
+        time.append(dateToken[0]);
+        time.append(" Month ");
+        time.append(dateToken[1]);
+        time.append(" Day ");
+        time.append(dateToken[2]);
+        time.append(" - ");
+        time.append(dateToken[3]);
+        time.append(":");
+        time.append(dateToken[4]);
+        return time.toString();
     }
 
     public int getNumberImages() {

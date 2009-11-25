@@ -193,12 +193,10 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
     @Action
     public void changeSimulationReplay() {
-        String id = (String) cbBoxRunId.getSelectedItem();
-        setMessage(id);
-        if (!id.startsWith("Please")) {
+        snapshots = createSnapshots();
+        if (snapshots != null) {
             setReplayToolbarEnabled(true);
             sliderTime.setValue(0);
-            Snapshots snapshots = new Snapshots(Snapshots.readableIdToId(id));
             sliderTime.setMaximum(snapshots.getNumberImages() - 1);
             viewerPanel.setSnapshots(snapshots);
         } else {
@@ -341,6 +339,10 @@ public class IchthyopView extends FrameView implements NextStepListener {
     }
 
     private Snapshots getSnapshots() {
+        return snapshots;
+    }
+
+    private Snapshots createSnapshots() {
         String id = (String) cbBoxRunId.getSelectedItem();
         setMessage(id);
         sliderTime.setValue(0);
@@ -1340,4 +1342,5 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private boolean isSetup;
     private ViewerPanel viewerPanel = new ViewerPanel();
     private int index = 0;
+    private Snapshots snapshots;
 }
