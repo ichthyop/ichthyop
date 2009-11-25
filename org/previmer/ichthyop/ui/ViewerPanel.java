@@ -111,7 +111,7 @@ public class ViewerPanel extends JPanel {
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
 
-        findAvatars();
+        //findAvatars();
         setSigma(0.5);
 
         addComponentListener(new DamageManager());
@@ -411,11 +411,19 @@ public class ViewerPanel extends JPanel {
         removeKeyListener(keyScroller);
     }
 
-    private void findAvatars() {
+    private void findAvatars(String runId) {
         avatars = new ArrayList<Image>();
-
-        picturesFinder = new Thread(new PicturesFinderThread());
+        picturesFinder = new Thread(new PicturesFinderThread(runId.concat("*.png")));
         picturesFinder.start();
+    }
+
+    public void setSnapshots(Snapshots snapshots) {
+        if (snapshots != null) {
+            findAvatars(snapshots.getId());
+        } else {
+            avatars = new ArrayList<Image>();
+        }
+        damaged = true;
     }
 
     private void setAvatarIndex(int index) {
@@ -423,7 +431,7 @@ public class ViewerPanel extends JPanel {
         textAvatar = "Photo " + index;
     }
 
-    private void scrollBy(int increment) {
+    public void scrollBy(int increment) {
         if (loadingDone) {
             setAvatarIndex(avatarIndex + increment);
 
@@ -438,7 +446,7 @@ public class ViewerPanel extends JPanel {
         }
     }
 
-    private void scrollAndAnimateBy(int increment) {
+    public void scrollAndAnimateBy(int increment) {
         if (loadingDone && (scrollerTimer == null || !scrollerTimer.isRunning())) {
             int index = avatarIndex + increment;
             if (index < 0) {
@@ -502,8 +510,8 @@ public class ViewerPanel extends JPanel {
     private BufferedImage createReflection(BufferedImage avatar,
             int avatarWidth,
             int avatarHeight) {
-        /*BufferedImage buffer = new BufferedImage(avatarWidth, avatarHeight << 1,
-        BufferedImage.TYPE_INT_ARGB);
+        BufferedImage buffer = new BufferedImage(avatarWidth, avatarHeight << 1,
+                BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g = buffer.createGraphics();
         g.drawImage(avatar, null, null);
@@ -513,14 +521,14 @@ public class ViewerPanel extends JPanel {
         g.drawImage(avatar, reflectTransform, null);
         g.translate(0, -(avatarHeight << 1));
 
-        g.dispose();*/
-        BufferedImage buffer = new BufferedImage(avatarWidth, avatarHeight,
-                BufferedImage.TYPE_INT_ARGB);
+        g.dispose();
+        /*BufferedImage buffer = new BufferedImage(avatarWidth, avatarHeight,
+        BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g = buffer.createGraphics();
         g.drawImage(avatar, null, null);
 
-        g.dispose();
+        g.dispose();*/
 
         return buffer;
     }
@@ -555,19 +563,25 @@ public class ViewerPanel extends JPanel {
 
     private class PicturesFinderThread implements Runnable {
 
+        String strFilter;
+
+        PicturesFinderThread(String strFilter) {
+            this.strFilter = strFilter;
+        }
+
         public void run() {
 
             try {
-                MetaFilenameFilter filter = new MetaFilenameFilter("*.png");
+                MetaFilenameFilter filter = new MetaFilenameFilter(strFilter);
 
                 List<File> files = Arrays.asList(new File("./img").listFiles(filter));
                 Collections.sort(files);
                 for (int i = 0; i < files.size(); i++) {
                     File file = files.get(i);
                     BufferedImage image = ImageIO.read(file);
-                    //avatars.add(createReflectedPicture(image));
                     avatars.add(image);
-                    if (i == 0) {
+                    if (i > 2) {
+                        damaged = true;
                         setAvatarIndex(0);
                         startFader();
                     }
@@ -710,7 +724,7 @@ public class ViewerPanel extends JPanel {
     private class FocusGrabber extends MouseAdapter {
 
         @Override
-        public void mouseClicked(MouseEvent e) {
+        public void mouseEntered(MouseEvent e) {
             requestFocus();
         }
     }

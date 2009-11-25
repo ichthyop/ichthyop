@@ -6,6 +6,7 @@ package org.previmer.ichthyop.ui;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -17,14 +18,18 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.imageio.ImageIO;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -45,6 +50,7 @@ import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
+import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
  * The application's main frame.
@@ -165,16 +171,14 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private String getRunId() {
 
         if (null == runId) {
-            StringBuffer strBfRunId = new StringBuffer(getResourceMap().getString("Application.name"));
-            strBfRunId.append("-run");
-            Calendar calendar = new GregorianCalendar();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            SimpleDateFormat dtformatter = new SimpleDateFormat("yyyyMMddHHmm");
-            dtformatter.setCalendar(calendar);
-            strBfRunId.append(dtformatter.format(calendar.getTime()));
-            runId = strBfRunId.toString();
+            runId = Snapshots.newId();
         }
         return runId;
+    }
+
+    private void resetRunId() {
+        runId = null;
+        getRunId();
     }
 
     @Action
@@ -185,6 +189,31 @@ public class IchthyopView extends FrameView implements NextStepListener {
             aboutBox.setLocationRelativeTo(mainFrame);
         }
         IchthyopApp.getApplication().show(aboutBox);
+    }
+
+    @Action
+    public void changeSimulationReplay() {
+        String id = (String) cbBoxRunId.getSelectedItem();
+        setMessage(id);
+        if (!id.startsWith("Please")) {
+            setReplayToolbarEnabled(true);
+            sliderTime.setValue(0);
+            Snapshots snapshots = new Snapshots(Snapshots.readableIdToId(id));
+            sliderTime.setMaximum(snapshots.getNumberImages() - 1);
+            viewerPanel.setSnapshots(snapshots);
+        } else {
+            setReplayToolbarEnabled(false);
+            viewerPanel.setSnapshots(null);
+        }
+    }
+
+    private void setReplayToolbarEnabled(boolean enabled) {
+        btnFirst.setEnabled(enabled);
+        btnPrevious.setEnabled(enabled);
+        btnAnimaction.setEnabled(enabled);
+        btnNext.setEnabled(enabled);
+        btnLast.setEnabled(enabled);
+        sliderTime.setEnabled(enabled);
     }
 
     @Action
@@ -200,10 +229,27 @@ public class IchthyopView extends FrameView implements NextStepListener {
         if (btnSimulationRecord.isSelected()) {
             btnSimulationRecord.doClick();
         }
+        File imgFolder = new File("./img");
+        List listRunId = new ArrayList();
+        listRunId.add("Please select a run");
+        for (File file : imgFolder.listFiles(new MetaFilenameFilter("*.png"))) {
+            String strRunId = Snapshots.getReadableIdFromFile(file);
+            if (!listRunId.contains(strRunId)) {
+                listRunId.add(strRunId);
+            }
+        }
+        Collections.sort(listRunId);
+        Collections.reverse(listRunId);
+        cbBoxRunId.setModel(new DefaultComboBoxModel(listRunId.toArray()));
         simulationReplayToolBar.setVisible(true);
         pnlSimulation.removeAll();
         pnlSimulation.add(new GradientPanel(), StackLayout.TOP);
         pnlSimulation.add(viewerPanel = new ViewerPanel(), StackLayout.TOP);
+        if (getRunId().matches(Snapshots.readableIdToId((String) cbBoxRunId.getItemAt(0)))) {
+            cbBoxRunId.setSelectedIndex(0);
+        } else {
+            cbBoxRunId.setSelectedIndex(cbBoxRunId.getItemCount() - 1);
+        }
         pnlSimulation.setVisible(true);
         getFrame().pack();
     }
@@ -294,15 +340,26 @@ public class IchthyopView extends FrameView implements NextStepListener {
         }
     }
 
+    private Snapshots getSnapshots() {
+        String id = (String) cbBoxRunId.getSelectedItem();
+        setMessage(id);
+        sliderTime.setValue(0);
+        if (!id.startsWith("Please")) {
+            return new Snapshots(Snapshots.readableIdToId(id));
+        } else {
+            return null;
+        }
+
+    }
+
     @Action
     public void first() {
-        sliderTime.setValue(0);
+        viewerPanel.scrollBy(Integer.MIN_VALUE);
     }
 
     @Action
     public void previous() {
-        int index = sliderTime.getValue();
-        sliderTime.setValue(index - 1);
+        viewerPanel.scrollAndAnimateBy(-1);
     }
 
     @Action
@@ -311,14 +368,12 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
     @Action
     public void next() {
-        int index = sliderTime.getValue();
-        sliderTime.setValue(index + 1);
-
+        viewerPanel.scrollAndAnimateBy(1);
     }
 
     @Action
     public void last() {
-        sliderTime.setValue(sliderTime.getMaximum());
+        viewerPanel.scrollBy(Integer.MAX_VALUE);
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -490,6 +545,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
                 btnSimulationReplay.doClick();
             }
             btnSimulationReplay.getAction().setEnabled(false);
+            resetRunId();
         }
 
         @Override
@@ -716,6 +772,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
         simulationReplayToolBar = new javax.swing.JToolBar();
         lblSimulationReplay = new javax.swing.JLabel();
         jSeparator6 = new javax.swing.JToolBar.Separator();
+        cbBoxRunId = new javax.swing.JComboBox();
+        jSeparator10 = new javax.swing.JToolBar.Separator();
         btnFirst = new javax.swing.JButton();
         btnPrevious = new javax.swing.JButton();
         btnAnimaction = new javax.swing.JButton();
@@ -973,6 +1031,14 @@ public class IchthyopView extends FrameView implements NextStepListener {
         jSeparator6.setName("jSeparator6"); // NOI18N
         simulationReplayToolBar.add(jSeparator6);
 
+        cbBoxRunId.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbBoxRunId.setAction(actionMap.get("changeSimulationReplay")); // NOI18N
+        cbBoxRunId.setName("cbBoxRunId"); // NOI18N
+        simulationReplayToolBar.add(cbBoxRunId);
+
+        jSeparator10.setName("jSeparator10"); // NOI18N
+        simulationReplayToolBar.add(jSeparator10);
+
         btnFirst.setAction(actionMap.get("first")); // NOI18N
         btnFirst.setFocusable(false);
         btnFirst.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1011,7 +1077,13 @@ public class IchthyopView extends FrameView implements NextStepListener {
         jSeparator9.setName("jSeparator9"); // NOI18N
         simulationReplayToolBar.add(jSeparator9);
 
+        sliderTime.setValue(0);
         sliderTime.setName("sliderTime"); // NOI18N
+        sliderTime.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sliderTimeStateChanged(evt);
+            }
+        });
         simulationReplayToolBar.add(sliderTime);
 
         pnlSimulation.setLayout(new StackLayout());
@@ -1181,6 +1253,13 @@ public class IchthyopView extends FrameView implements NextStepListener {
         // TODO add your handling code here:
         JSpinner source = (JSpinner) evt.getSource();
 }//GEN-LAST:event_refreshFrequencyStateChanged
+
+    private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
+        // TODO add your handling code here:
+        int increment = sliderTime.getValue() - index;
+        viewerPanel.scrollBy(increment);
+        index = sliderTime.getValue();
+    }//GEN-LAST:event_sliderTimeStateChanged
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnEditCfgFile;
@@ -1196,10 +1275,12 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private javax.swing.JToggleButton btnSimulationRecord;
     private javax.swing.JToggleButton btnSimulationReplay;
     private javax.swing.JButton btnSimulationRun;
+    private javax.swing.JComboBox cbBoxRunId;
     private javax.swing.JCheckBox ckBoxWorkBackground;
     private javax.swing.JMenuItem editMenuItem;
     private javax.swing.JRadioButtonMenuItem gtkMenuItem;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator10;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
     private javax.swing.JToolBar.Separator jSeparator4;
@@ -1257,5 +1338,6 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private Task simulActionTask;
     private String runId;
     private boolean isSetup;
-    private JPanel viewerPanel = new JPanel();
+    private ViewerPanel viewerPanel = new ViewerPanel();
+    private int index = 0;
 }
