@@ -50,12 +50,14 @@ import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
+import org.jdesktop.animation.timing.Animator;
+import org.jdesktop.animation.timing.TimingTarget;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
  * The application's main frame.
  */
-public class IchthyopView extends FrameView implements NextStepListener {
+public class IchthyopView extends FrameView implements NextStepListener, TimingTarget {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -366,6 +368,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
     @Action
     public void animAction() {
+        animate(!animator.isRunning());
     }
 
     @Action
@@ -376,6 +379,82 @@ public class IchthyopView extends FrameView implements NextStepListener {
     @Action
     public void last() {
         viewerPanel.scrollBy(getSnapshots().getNumberImages());
+    }
+
+    private void animate(boolean animated) {
+
+        ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+        if (animated) {
+            //animator.setStartDelay(1000);
+            animator.setAcceleration(0.01f);
+            setReplayToolbarEnabled(false);
+            btnAnimaction.setEnabled(true);
+            cbBoxRunId.setEnabled(false);
+            viewerPanel.initAnim();
+            animator.start();
+            btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
+        } else {
+            btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.play"));
+            if (animator.isRunning()) {
+                animator.stop();
+            }
+        }
+    }
+
+    private void startAccelerationProgress() {
+        progressTimer = new Timer(100, new ProgressAction());
+        progressTimer.start();
+    }
+
+    public void timingEvent(float fraction) {
+        float ellpased_time = (fraction * TEN_MINUTES - time) * nbfps;
+        if (ellpased_time > 1) {
+            time = fraction * TEN_MINUTES;
+            if (viewerPanel.getAvatarIndex() < viewerPanel.getIndexMax()) {
+                viewerPanel.scrollBy(1);
+            } else {
+                viewerPanel.setAvatarIndex(0);
+            }
+        }
+    }
+
+    public void begin() {
+        nbfps = (Float) animationSpeed.getValue();
+        time = 0;
+        setMessage(getResourceMap().getString("animAction.started.message") + " " + getResourceMap().getString("animAction.speedup.message"));
+        startAccelerationProgress();
+    }
+
+    public void end() {
+        setReplayToolbarEnabled(true);
+        cbBoxRunId.setEnabled(true);
+        viewerPanel.endAnim();
+        setMessage(getResourceMap().getString("animAction.stopped.message"));
+
+    }
+
+    public void repeat() {
+    }
+
+    private class ProgressAction implements ActionListener {
+
+        float duration;
+        int progress;
+
+        ProgressAction() {
+            duration = animator.getAcceleration() / 2;
+            progressBar.setVisible(true);
+            progressBar.setIndeterminate(false);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            progress = (int) (100.f * animator.getTimingFraction() / duration);
+            progressBar.setValue(progress);
+            if (progress >= 100) {
+                progressTimer.stop();
+                progressBar.setVisible(false);
+            }
+        }
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -599,6 +678,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
     public void savePreferences() {
         savePreference(openMenuItem, cfgPath.getPath());
         savePreference(lafMenu, UIManager.getLookAndFeel().getClass().getName());
+        savePreference(animationSpeed, animationSpeed.getValue());
     }
 
     private void savePreference(Component bean, Object property) {
@@ -621,6 +701,11 @@ public class IchthyopView extends FrameView implements NextStepListener {
         Object property = restorePreference(openMenuItem);
         if (property != null) {
             cfgPath = new File((String) property);
+        }
+
+        property = restorePreference(animationSpeed);
+        if (property != null) {
+            animationSpeed.setValue(property);
         }
 
         property = restorePreference(lafMenu);
@@ -783,6 +868,9 @@ public class IchthyopView extends FrameView implements NextStepListener {
         btnLast = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         sliderTime = new javax.swing.JSlider();
+        jSeparator11 = new javax.swing.JToolBar.Separator();
+        lblFramePerSecond = new javax.swing.JLabel();
+        animationSpeed = new javax.swing.JSpinner();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
@@ -923,8 +1011,8 @@ public class IchthyopView extends FrameView implements NextStepListener {
                     .addComponent(lblProgressGlobal))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressBarGlobal, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
-                    .addComponent(progressBarCurrent, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE))
+                    .addComponent(progressBarGlobal, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE)
+                    .addComponent(progressBarCurrent, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(lblTimeLeftCurrent)
@@ -956,11 +1044,11 @@ public class IchthyopView extends FrameView implements NextStepListener {
         pnlSimulation.setLayout(pnlSimulationLayout);
         pnlSimulationLayout.setHorizontalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 760, Short.MAX_VALUE)
+            .addGap(0, 881, Short.MAX_VALUE)
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 239, Short.MAX_VALUE)
+            .addGap(0, 233, Short.MAX_VALUE)
         );
 
         simulationRecordToolBar.setFloatable(false);
@@ -1096,6 +1184,31 @@ public class IchthyopView extends FrameView implements NextStepListener {
         });
         simulationReplayToolBar.add(sliderTime);
 
+        jSeparator11.setName("jSeparator11"); // NOI18N
+        simulationReplayToolBar.add(jSeparator11);
+
+        lblFramePerSecond.setText(resourceMap.getString("lblFramePerSecond.text")); // NOI18N
+        lblFramePerSecond.setToolTipText(resourceMap.getString("lblFramePerSecond.toolTipText")); // NOI18N
+        lblFramePerSecond.setName("lblFramePerSecond"); // NOI18N
+        lblFramePerSecond.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblFramePerSecondMouseClicked(evt);
+            }
+        });
+        simulationReplayToolBar.add(lblFramePerSecond);
+
+        animationSpeed.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(1.5f), Float.valueOf(0.5f), Float.valueOf(24.0f), Float.valueOf(0.1f)));
+        animationSpeed.setToolTipText(resourceMap.getString("animationSpeed.toolTipText")); // NOI18N
+        animationSpeed.setFocusable(false);
+        animationSpeed.setMaximumSize(new java.awt.Dimension(77, 30));
+        animationSpeed.setName("animationSpeed"); // NOI18N
+        animationSpeed.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                animationSpeedStateChanged(evt);
+            }
+        });
+        simulationReplayToolBar.add(animationSpeed);
+
         pnlSimulation.setLayout(new StackLayout());
         pnlSimulation.add(new GradientPanel(), StackLayout.TOP);
 
@@ -1103,9 +1216,9 @@ public class IchthyopView extends FrameView implements NextStepListener {
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 760, Short.MAX_VALUE)
-            .addComponent(simulationRecordToolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 760, Short.MAX_VALUE)
-            .addComponent(simulationReplayToolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 760, Short.MAX_VALUE)
+            .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
+            .addComponent(simulationRecordToolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
+            .addComponent(simulationReplayToolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
             .addComponent(pnlProgress, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(pnlSimulation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -1210,11 +1323,11 @@ public class IchthyopView extends FrameView implements NextStepListener {
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 760, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 574, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 695, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -1281,7 +1394,21 @@ public class IchthyopView extends FrameView implements NextStepListener {
         viewerPanel.endAnim();
     }//GEN-LAST:event_sliderTimeMouseReleased
 
+    private void lblFramePerSecondMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblFramePerSecondMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount() > 1) {
+            animationSpeed.setValue(1.5f);
+        }
+}//GEN-LAST:event_lblFramePerSecondMouseClicked
+
+    private void animationSpeedStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_animationSpeedStateChanged
+        // TODO add your handling code here:
+        JSpinner source = (JSpinner) evt.getSource();
+        nbfps = (Float) source.getValue();
+}//GEN-LAST:event_animationSpeedStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JSpinner animationSpeed;
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnEditCfgFile;
     private javax.swing.JButton btnExit;
@@ -1302,6 +1429,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private javax.swing.JRadioButtonMenuItem gtkMenuItem;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator10;
+    private javax.swing.JToolBar.Separator jSeparator11;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
     private javax.swing.JToolBar.Separator jSeparator4;
@@ -1311,6 +1439,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private javax.swing.JToolBar.Separator jSeparator8;
     private javax.swing.JToolBar.Separator jSeparator9;
     private javax.swing.JMenu lafMenu;
+    private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
     private javax.swing.JLabel lblRecordBulb;
@@ -1362,4 +1491,9 @@ public class IchthyopView extends FrameView implements NextStepListener {
     private ViewerPanel viewerPanel = new ViewerPanel();
     private int index = 0;
     private Snapshots snapshots;
+    private final float TEN_MINUTES = 10.f * 60.f;
+    private Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
+    private float nbfps = 1.f;
+    private float time;
+    private Timer progressTimer;
 }

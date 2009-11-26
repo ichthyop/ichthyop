@@ -437,7 +437,15 @@ public class ViewerPanel extends JPanel {
         damaged = true;
     }
 
-    private void setAvatarIndex(int index) {
+    public int getIndexMax() {
+        return snapshots.getNumberImages() - 1;
+    }
+
+    public int getAvatarIndex() {
+        return avatarIndex;
+    }
+
+    public void setAvatarIndex(int index) {
         avatarIndex = index;
         textAvatar = snapshots.getTime(index);
     }
