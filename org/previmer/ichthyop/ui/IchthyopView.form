@@ -58,6 +58,19 @@
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
             </Component>
+            <Component class="javax.swing.JButton" name="btnClose">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="closeConfigurationFile" methodName="closeConfigurationFile"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="closeConfigurationFile.Action.toolBarIcon"/>
+                <Property name="text" type="java.lang.String" resourceKey="btnClose.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnClose" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
             <Component class="javax.swing.JButton" name="btnNewCfgFile">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -272,7 +285,7 @@
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="239" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="233" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
           </Layout>
@@ -401,6 +414,11 @@
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="changeSimulationReplay" methodName="changeSimulationReplay"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="cbBoxRunId" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator12">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator12" noResource="true"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JButton" name="btnDeleteSnapshots">
@@ -561,6 +579,14 @@
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="newConfigurationFile" methodName="newConfigurationFile"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="newMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="closeMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="closeConfigurationFile" methodName="closeConfigurationFile"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="closeMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="openMenuItem">

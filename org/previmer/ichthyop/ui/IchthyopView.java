@@ -136,7 +136,8 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
             }
         });
 
-        newMenuItem.getAction().setEnabled(false);
+        //newMenuItem.getAction().setEnabled(false);
+        closeMenuItem.getAction().setEnabled(false);
         editMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
         btnSimulationProgress.getAction().setEnabled(false);
@@ -356,6 +357,26 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     }
 
     @Action
+    public void closeConfigurationFile() {
+        if (null == getSimulationManager().getConfigurationFile()) {
+            return;
+        }
+        setMessage("Closed " + getSimulationManager().getConfigurationFile().toString());
+        getSimulationManager().setConfigurationFile(null);
+        if (btnSimulationRecord.isSelected()) {
+            btnSimulationRecord.doClick();
+        }
+        if (!btnSimulationReplay.isSelected()) {
+            getFrame().setTitle(getResourceMap().getString("Application.title"));
+        }
+        btnSimulationRun.getAction().setEnabled(false);
+        btnSimulationProgress.getAction().setEnabled(false);
+        btnSimulationRecord.getAction().setEnabled(false);
+        btnEditCfgFile.getAction().setEnabled(false);
+        closeMenuItem.getAction().setEnabled(false);
+    }
+
+    @Action
     public void openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -367,6 +388,8 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
             getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + chooser.getSelectedFile().getName());
             getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
             isSetup = false;
+            editMenuItem.getAction().setEnabled(true);
+            closeMenuItem.getAction().setEnabled(true);
             btnSimulationRun.getAction().setEnabled(true);
             btnSimulationProgress.getAction().setEnabled(true);
             if (getSimulationManager().getNumberOfSimulations() > 1) {
@@ -611,10 +634,12 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
 
     @Action
     public void newConfigurationFile() {
+        setMessage("New configuration file - not supported yet.");
     }
 
     @Action
     public void editConfigurationFile() {
+        setMessage("Edit configuration file - not supported yet.");
     }
 
     @Action
@@ -865,6 +890,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         mainPanel = new javax.swing.JPanel();
         toolBar = new javax.swing.JToolBar();
         btnOpenCfgFile = new javax.swing.JButton();
+        btnClose = new javax.swing.JButton();
         btnNewCfgFile = new javax.swing.JButton();
         btnEditCfgFile = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JToolBar.Separator();
@@ -898,6 +924,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         lblSimulationReplay = new javax.swing.JLabel();
         jSeparator6 = new javax.swing.JToolBar.Separator();
         cbBoxRunId = new javax.swing.JComboBox();
+        jSeparator12 = new javax.swing.JToolBar.Separator();
         btnDeleteSnapshots = new javax.swing.JButton();
         btnSaveAsSnapshots = new javax.swing.JButton();
         jSeparator10 = new javax.swing.JToolBar.Separator();
@@ -914,6 +941,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
+        closeMenuItem = new javax.swing.JMenuItem();
         openMenuItem = new javax.swing.JMenuItem();
         editMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
@@ -952,6 +980,15 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         btnOpenCfgFile.setName("btnOpenCfgFile"); // NOI18N
         btnOpenCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(btnOpenCfgFile);
+
+        btnClose.setAction(actionMap.get("closeConfigurationFile")); // NOI18N
+        btnClose.setIcon(resourceMap.getIcon("closeConfigurationFile.Action.toolBarIcon")); // NOI18N
+        btnClose.setText(resourceMap.getString("btnClose.text")); // NOI18N
+        btnClose.setFocusable(false);
+        btnClose.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnClose.setName("btnClose"); // NOI18N
+        btnClose.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnClose);
 
         btnNewCfgFile.setAction(actionMap.get("newConfigurationFile")); // NOI18N
         btnNewCfgFile.setIcon(resourceMap.getIcon("newConfigurationFile.Action.toolBarIcon")); // NOI18N
@@ -1088,7 +1125,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 209, Short.MAX_VALUE)
+            .addGap(0, 233, Short.MAX_VALUE)
         );
 
         simulationRecordToolBar.setFloatable(false);
@@ -1166,6 +1203,9 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         cbBoxRunId.setName("cbBoxRunId"); // NOI18N
         simulationReplayToolBar.add(cbBoxRunId);
 
+        jSeparator12.setName("jSeparator12"); // NOI18N
+        simulationReplayToolBar.add(jSeparator12);
+
         btnDeleteSnapshots.setAction(actionMap.get("deleteSnapshots")); // NOI18N
         btnDeleteSnapshots.setFocusable(false);
         btnDeleteSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1174,7 +1214,6 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         simulationReplayToolBar.add(btnDeleteSnapshots);
 
         btnSaveAsSnapshots.setAction(actionMap.get("saveAsSnapshots")); // NOI18N
-        btnSaveAsSnapshots.setText(resourceMap.getString("btnSaveAsSnapshots.text")); // NOI18N
         btnSaveAsSnapshots.setFocusable(false);
         btnSaveAsSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnSaveAsSnapshots.setName("btnSaveAsSnapshots"); // NOI18N
@@ -1299,6 +1338,10 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         newMenuItem.setAction(actionMap.get("newConfigurationFile")); // NOI18N
         newMenuItem.setName("newMenuItem"); // NOI18N
         fileMenu.add(newMenuItem);
+
+        closeMenuItem.setAction(actionMap.get("closeConfigurationFile")); // NOI18N
+        closeMenuItem.setName("closeMenuItem"); // NOI18N
+        fileMenu.add(closeMenuItem);
 
         openMenuItem.setAction(actionMap.get("openConfigurationFile")); // NOI18N
         openMenuItem.setName("openMenuItem"); // NOI18N
@@ -1464,6 +1507,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSpinner animationSpeed;
     private javax.swing.JButton btnAnimaction;
+    private javax.swing.JButton btnClose;
     private javax.swing.JButton btnDeleteSnapshots;
     private javax.swing.JButton btnEditCfgFile;
     private javax.swing.JButton btnExit;
@@ -1481,11 +1525,13 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     private javax.swing.JButton btnSimulationRun;
     private javax.swing.JComboBox cbBoxRunId;
     private javax.swing.JCheckBox ckBoxWorkBackground;
+    private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem editMenuItem;
     private javax.swing.JRadioButtonMenuItem gtkMenuItem;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator10;
     private javax.swing.JToolBar.Separator jSeparator11;
+    private javax.swing.JToolBar.Separator jSeparator12;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
     private javax.swing.JToolBar.Separator jSeparator4;
