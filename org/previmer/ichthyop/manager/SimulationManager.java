@@ -52,17 +52,25 @@ public class SimulationManager implements ISimulationManager {
     private long cpu_start_current;
     private long cpu_start_global;
     private boolean flagStop = false;
+    private File cfgFile;
 
     public static SimulationManager getInstance() {
         return simulationManager;
     }
 
     public void setConfigurationFile(File file) {
-        getParameterManager().setConfigurationFile(file);
-        for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
-            nb_simulations *= xparam.getLength();
+        cfgFile = file;
+        if (file != null) {
+            getParameterManager().setConfigurationFile(file);
+            for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
+                nb_simulations *= xparam.getLength();
+            }
+            mobiliseManagers();
         }
-        mobiliseManagers();
+    }
+
+    public File getConfigurationFile() {
+        return cfgFile;
     }
 
     /**

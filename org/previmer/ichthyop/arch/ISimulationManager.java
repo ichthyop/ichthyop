@@ -44,6 +44,8 @@ public interface ISimulationManager extends Runnable {
 
     public void setConfigurationFile(File file);
 
+    public File getConfigurationFile();
+
     public void setup();
 
     public void init();

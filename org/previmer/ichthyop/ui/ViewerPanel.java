@@ -433,8 +433,10 @@ public class ViewerPanel extends JPanel {
             findAvatars(snapshots.getId());
         } else {
             avatars = new ArrayList<Image>();
+            damaged = true;
+            repaint();
         }
-        damaged = true;
+        //damaged = true;
     }
 
     public int getIndexMax() {

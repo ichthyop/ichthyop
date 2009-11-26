@@ -36,6 +36,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
@@ -139,7 +140,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         editMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
         btnSimulationProgress.getAction().setEnabled(false);
-        btnSimulationReplay.getAction().setEnabled(false);
+        //btnSimulationReplay.getAction().setEnabled(false);
         btnSimulationRecord.getAction().setEnabled(false);
         simulationReplayToolBar.setVisible(false);
         simulationRecordToolBar.setVisible(false);
@@ -197,17 +198,48 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     public void changeSimulationReplay() {
         snapshots = createSnapshots();
         if (snapshots != null) {
+            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (String) cbBoxRunId.getSelectedItem());
             setReplayToolbarEnabled(true);
             sliderTime.setValue(0);
             sliderTime.setMaximum(snapshots.getNumberImages() - 1);
             viewerPanel.setSnapshots(snapshots);
         } else {
+            getFrame().setTitle(getResourceMap().getString("Application.title") + " - Snapshots viewer");
             setReplayToolbarEnabled(false);
             viewerPanel.setSnapshots(null);
         }
     }
 
+    @Action
+    public void deleteSnapshots() {
+        StringBuffer message = new StringBuffer("Delete run ");
+        message.append(getSnapshots().getReadableId());
+        message.append(" ?");
+        /*message.append('\n');
+        message.append(getSnapshots().getNumberImages());
+        message.append(" snapshots will be deleted from your computer.");*/
+        int dialog = JOptionPane.showConfirmDialog(getFrame(), message.toString(), "Ichthytop - Delete snapshots", JOptionPane.OK_CANCEL_OPTION);
+        if (dialog == JOptionPane.OK_OPTION) {
+            for (File file : getSnapshots().getImages()) {
+                if (file.delete()) {
+                    setMessage("Deleted " + file.toString());
+                }
+            }
+            setMessage("Run " + getSnapshots().getReadableId() + " deleted.");
+            //viewerPanel.setSnapshots(null);
+            Object obj = cbBoxRunId.getSelectedItem();
+            cbBoxRunId.setSelectedIndex(cbBoxRunId.getItemCount() - 1);
+            cbBoxRunId.removeItem(obj);
+        }
+    }
+
+    @Action
+    public void saveAsSnapshots() {
+    }
+
     private void setReplayToolbarEnabled(boolean enabled) {
+        btnDeleteSnapshots.setEnabled(enabled);
+        btnSaveAsSnapshots.setEnabled(enabled);
         btnFirst.setEnabled(enabled);
         btnPrevious.setEnabled(enabled);
         btnAnimaction.setEnabled(enabled);
@@ -245,7 +277,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         pnlSimulation.removeAll();
         pnlSimulation.add(new GradientPanel(), StackLayout.TOP);
         pnlSimulation.add(viewerPanel = new ViewerPanel(), StackLayout.TOP);
-        if (getRunId().matches(Snapshots.readableIdToId((String) cbBoxRunId.getItemAt(0)))) {
+        if (!((String) cbBoxRunId.getItemAt(0)).startsWith("Please") && getRunId().matches(Snapshots.readableIdToId((String) cbBoxRunId.getItemAt(0)))) {
             cbBoxRunId.setSelectedIndex(0);
         } else {
             cbBoxRunId.setSelectedIndex(cbBoxRunId.getItemCount() - 1);
@@ -255,6 +287,11 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     }
 
     private void hideSimulationReplay() {
+        if (getSimulationManager().getConfigurationFile() != null) {
+            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + getSimulationManager().getConfigurationFile().getName());
+        } else {
+            getFrame().setTitle(getResourceMap().getString("Application.title"));
+        }
         simulationReplayToolBar.setVisible(false);
         pnlSimulation.removeAll();
         pnlSimulation.setVisible(false);
@@ -327,6 +364,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             setMessage("Opened " + chooser.getSelectedFile().toString());
             logger.info("Opened " + chooser.getSelectedFile().toString());
+            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + chooser.getSelectedFile().getName());
             getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
             isSetup = false;
             btnSimulationRun.getAction().setEnabled(true);
@@ -860,6 +898,8 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         lblSimulationReplay = new javax.swing.JLabel();
         jSeparator6 = new javax.swing.JToolBar.Separator();
         cbBoxRunId = new javax.swing.JComboBox();
+        btnDeleteSnapshots = new javax.swing.JButton();
+        btnSaveAsSnapshots = new javax.swing.JButton();
         jSeparator10 = new javax.swing.JToolBar.Separator();
         btnFirst = new javax.swing.JButton();
         btnPrevious = new javax.swing.JButton();
@@ -1048,7 +1088,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 233, Short.MAX_VALUE)
+            .addGap(0, 209, Short.MAX_VALUE)
         );
 
         simulationRecordToolBar.setFloatable(false);
@@ -1125,6 +1165,21 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         cbBoxRunId.setAction(actionMap.get("changeSimulationReplay")); // NOI18N
         cbBoxRunId.setName("cbBoxRunId"); // NOI18N
         simulationReplayToolBar.add(cbBoxRunId);
+
+        btnDeleteSnapshots.setAction(actionMap.get("deleteSnapshots")); // NOI18N
+        btnDeleteSnapshots.setFocusable(false);
+        btnDeleteSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnDeleteSnapshots.setName("btnDeleteSnapshots"); // NOI18N
+        btnDeleteSnapshots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        simulationReplayToolBar.add(btnDeleteSnapshots);
+
+        btnSaveAsSnapshots.setAction(actionMap.get("saveAsSnapshots")); // NOI18N
+        btnSaveAsSnapshots.setText(resourceMap.getString("btnSaveAsSnapshots.text")); // NOI18N
+        btnSaveAsSnapshots.setFocusable(false);
+        btnSaveAsSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnSaveAsSnapshots.setName("btnSaveAsSnapshots"); // NOI18N
+        btnSaveAsSnapshots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        simulationReplayToolBar.add(btnSaveAsSnapshots);
 
         jSeparator10.setName("jSeparator10"); // NOI18N
         simulationReplayToolBar.add(jSeparator10);
@@ -1406,10 +1461,10 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         JSpinner source = (JSpinner) evt.getSource();
         nbfps = (Float) source.getValue();
 }//GEN-LAST:event_animationSpeedStateChanged
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSpinner animationSpeed;
     private javax.swing.JButton btnAnimaction;
+    private javax.swing.JButton btnDeleteSnapshots;
     private javax.swing.JButton btnEditCfgFile;
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnFirst;
@@ -1419,6 +1474,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     private javax.swing.JButton btnNext;
     private javax.swing.JButton btnOpenCfgFile;
     private javax.swing.JButton btnPrevious;
+    private javax.swing.JButton btnSaveAsSnapshots;
     private javax.swing.JToggleButton btnSimulationProgress;
     private javax.swing.JToggleButton btnSimulationRecord;
     private javax.swing.JToggleButton btnSimulationReplay;

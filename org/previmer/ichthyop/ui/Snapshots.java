@@ -81,7 +81,7 @@ public class Snapshots {
         return idToReadableId(getId());
     }
 
-    private File[] getImages() {
+    public File[] getImages() {
 
         if (listFiles != null) {
             return listFiles;
