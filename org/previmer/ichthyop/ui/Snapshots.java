@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -84,12 +86,14 @@ public class Snapshots {
         if (listFiles != null) {
             return listFiles;
         } else {
-            return listFiles = path.listFiles(new MetaFilenameFilter(getId() + "*.png"));
+            listFiles = path.listFiles(new MetaFilenameFilter(getId() + "*.png"));
+            Arrays.sort(listFiles);
+            return listFiles;
         }
     }
 
     public String getTime(int index) {
-        if (index > getNumberImages() - 1) {
+        if (index > getNumberImages() - 1 | index < 0) {
             return "";
         }
         String date = getImages()[index].getName().split("_")[1];

@@ -78,6 +78,9 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import org.jdesktop.animation.timing.Animator;
+import org.jdesktop.animation.timing.Animator.Direction;
+import org.jdesktop.animation.timing.TimingTarget;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 public class ViewerPanel extends JPanel {
@@ -95,6 +98,7 @@ public class ViewerPanel extends JPanel {
     private double avatarPosition = 0.0;
     private double avatarSpacing = 0.7;
     private double sigma;
+    private double originalSigma;
     private double rho;
     private double exp_multiplier;
     private double exp_member;
@@ -107,6 +111,7 @@ public class ViewerPanel extends JPanel {
     private MouseWheelScroller wheelScroller;
     private KeyScroller keyScroller;
     private Snapshots snapshots;
+    private VanishAction vanishTimer = new VanishAction();
 
     public ViewerPanel() {
         GridBagLayout layout = new GridBagLayout();
@@ -114,6 +119,7 @@ public class ViewerPanel extends JPanel {
 
         //findAvatars();
         setSigma(0.5);
+        originalSigma = sigma;
 
         addComponentListener(new DamageManager());
 
@@ -623,6 +629,76 @@ public class ViewerPanel extends JPanel {
             }
 
             repaint();
+        }
+    }
+
+    void initAnim() {
+
+        removeInputListeners();
+
+        if (vanishTimer.isRunning()) {
+            vanishTimer.stop();
+        }
+
+        vanishTimer.start(VanishAction.FADINGDOWN);
+    }
+
+    void endAnim() {
+        if (vanishTimer.isRunning()) {
+            vanishTimer.stop();
+        }
+
+        vanishTimer.start(VanishAction.SHOWINGUP);
+
+        addInputListeners();
+    }
+
+    private class VanishAction implements TimingTarget {
+
+        Animator animator = new Animator(1000, this);
+        int action;
+        final static int SHOWINGUP = 1;
+        final static int FADINGDOWN = 0;
+
+        public void timingEvent(float fraction) {
+            setSigma(originalSigma * fraction);
+            if (action == FADINGDOWN && sigma < 0.1) {
+                animator.stop();
+            }
+        }
+
+        public void begin() {
+            //System.out.println("b - orig: " + originalSigma + " sigma: " + sigma);
+        }
+
+        public void end() {
+            //System.out.println("e - orig: " + originalSigma + " sigma: " + sigma);
+        }
+
+        public void repeat() {
+        }
+
+        public void start(int action) {
+            this.action = action;
+            switch (action) {
+                case SHOWINGUP:
+                    animator.setStartFraction(0.0f);
+                    animator.setStartDirection(Direction.FORWARD);
+                    break;
+                case FADINGDOWN:
+                    animator.setStartFraction((float) (1.0f));
+                    animator.setStartDirection(Direction.BACKWARD);
+                    break;
+            }
+            animator.start();
+        }
+
+        public void stop() {
+            animator.stop();
+        }
+
+        public boolean isRunning() {
+            return animator.isRunning();
         }
     }
 

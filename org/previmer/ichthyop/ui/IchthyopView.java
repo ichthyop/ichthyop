@@ -356,7 +356,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
     @Action
     public void first() {
-        viewerPanel.scrollBy(Integer.MIN_VALUE);
+        viewerPanel.scrollBy(-1 * getSnapshots().getNumberImages());
     }
 
     @Action
@@ -375,7 +375,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
     @Action
     public void last() {
-        viewerPanel.scrollBy(Integer.MAX_VALUE);
+        viewerPanel.scrollBy(getSnapshots().getNumberImages());
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -960,7 +960,7 @@ public class IchthyopView extends FrameView implements NextStepListener {
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 233, Short.MAX_VALUE)
+            .addGap(0, 239, Short.MAX_VALUE)
         );
 
         simulationRecordToolBar.setFloatable(false);
@@ -1081,6 +1081,14 @@ public class IchthyopView extends FrameView implements NextStepListener {
 
         sliderTime.setValue(0);
         sliderTime.setName("sliderTime"); // NOI18N
+        sliderTime.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                sliderTimeMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                sliderTimeMouseReleased(evt);
+            }
+        });
         sliderTime.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 sliderTimeStateChanged(evt);
@@ -1262,6 +1270,17 @@ public class IchthyopView extends FrameView implements NextStepListener {
         viewerPanel.scrollBy(increment);
         index = sliderTime.getValue();
     }//GEN-LAST:event_sliderTimeStateChanged
+
+    private void sliderTimeMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sliderTimeMousePressed
+        // TODO add your handling code here:
+        viewerPanel.initAnim();
+    }//GEN-LAST:event_sliderTimeMousePressed
+
+    private void sliderTimeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sliderTimeMouseReleased
+        // TODO add your handling code here:
+        viewerPanel.endAnim();
+    }//GEN-LAST:event_sliderTimeMouseReleased
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnEditCfgFile;
