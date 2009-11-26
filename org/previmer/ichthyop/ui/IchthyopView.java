@@ -236,6 +236,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
 
     @Action
     public void saveAsSnapshots() {
+        getApplication().show(new BackupSnapshotsView(IchthyopApp.getApplication(), getSnapshots()));
     }
 
     private void setReplayToolbarEnabled(boolean enabled) {

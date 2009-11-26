@@ -815,7 +815,7 @@ public class ViewerPanel extends JPanel {
     private class FocusGrabber extends MouseAdapter {
 
         @Override
-        public void mouseEntered(MouseEvent e) {
+        public void mouseClicked(MouseEvent e) {
             requestFocus();
         }
     }

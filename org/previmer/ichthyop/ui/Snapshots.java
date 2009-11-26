@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -23,11 +24,10 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 public class Snapshots {
 
     private String id;
-    private File path = new File("./img");
+    private File path = new File(System.getProperty("user.dir") + File.separator + "img");
     private File[] listFiles;
     private static SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
     private static SimpleDateFormat dtformatterReadableId = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-    private static SimpleDateFormat dtformatterTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 
     public Snapshots(String id) {
         this.id = id;
@@ -83,6 +83,10 @@ public class Snapshots {
 
     public File[] getImages() {
 
+        if (!path.exists()) {
+            IOTools.makeDirectories(path.getPath());
+        }
+
         if (listFiles != null) {
             return listFiles;
         } else {
@@ -114,18 +118,5 @@ public class Snapshots {
 
     public int getNumberImages() {
         return getImages().length;
-    }
-
-    public void setPath(String strPath) {
-        this.path = new File(strPath);
-        if (!path.isDirectory()) {
-            try {
-                throw new IOException(path.toString() + " is not a valid directory");
-            } catch (IOException ex) {
-                Logger.getLogger(Snapshots.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            path = new File("./img");
-        }
-        listFiles = null;
     }
 }
