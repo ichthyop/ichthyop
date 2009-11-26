@@ -389,10 +389,15 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            setMessage("Opened " + chooser.getSelectedFile().toString());
-            logger.info("Opened " + chooser.getSelectedFile().toString());
-            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + chooser.getSelectedFile().getName());
-            getSimulationManager().setConfigurationFile(chooser.getSelectedFile());
+            loadConfigurationFile(chooser.getSelectedFile());
+        }
+    }
+
+    private void loadConfigurationFile(File file) {
+        setMessage("Opened " + file.toString());
+            logger.info("Opened " + file.toString());
+            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
+            getSimulationManager().setConfigurationFile(file);
             isSetup = false;
             editMenuItem.getAction().setEnabled(true);
             closeMenuItem.getAction().setEnabled(true);
@@ -404,7 +409,6 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
                 btnSimulationReplay.getAction().setEnabled(true);
                 btnSimulationRecord.getAction().setEnabled(true);
             }
-        }
     }
 
     private Snapshots getSnapshots() {
@@ -462,7 +466,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
         } else {
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.play"));
-            if (progressTimer.isRunning()) {
+            if (progressTimer != null && progressTimer.isRunning()) {
                 progressTimer.stop();
                 progressBar.setValue(0);
                 progressBar.setVisible(false);
@@ -750,7 +754,13 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     }
 
     public void savePreferences() {
-        savePreference(openMenuItem, cfgPath.getPath());
+
+        if (null != getSimulationManager().getConfigurationFile()) {
+            savePreference(openMenuItem, getSimulationManager().getConfigurationFile().getPath());
+        } else {
+            savePreference(openMenuItem, cfgPath.getPath());
+        }
+
         savePreference(lafMenu, UIManager.getLookAndFeel().getClass().getName());
         savePreference(animationSpeed, animationSpeed.getValue());
     }
@@ -774,7 +784,13 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     public void restorePreferences() {
         Object property = restorePreference(openMenuItem);
         if (property != null) {
-            cfgPath = new File((String) property);
+            File file = new File((String) property);
+            if (file.isFile()) {
+                cfgPath = file.getParentFile();
+                loadConfigurationFile(file);
+            } else if (file.isDirectory()) {
+                cfgPath = file;
+            }
         }
 
         property = restorePreference(animationSpeed);
