@@ -156,6 +156,22 @@
                 <Property name="name" type="java.lang.String" value="jSeparator5" noResource="true"/>
               </Properties>
             </Component>
+            <Component class="javax.swing.JButton" name="btnCharts">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="showChartsPopup" methodName="showChartsPopup"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="btnCharts" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="jSeparator13">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator13" noResource="true"/>
+              </Properties>
+            </Component>
             <Component class="javax.swing.JButton" name="btnExit">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -285,7 +301,7 @@
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="239" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="233" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
           </Layout>
@@ -831,6 +847,53 @@
             </DimensionLayout>
           </Layout>
         </Container>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JPopupMenu" name="popupCharts">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="popupCharts" noResource="true"/>
+      </Properties>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
+        <Property name="useNullLayout" type="boolean" value="true"/>
+      </Layout>
+      <SubComponents>
+        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="itemDepthChart">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="itemDepthChart.text"/>
+            <Property name="name" type="java.lang.String" value="itemDepthChart" noResource="true"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="itemEdgeChart">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="itemEdgeChart.text"/>
+            <Property name="name" type="java.lang.String" value="itemEdgeChart" noResource="true"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="itemRecruitChart">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="itemRecruitChart.text"/>
+            <Property name="name" type="java.lang.String" value="itemRecruitChart" noResource="true"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="itemLengthChart">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="itemLengthChart.text"/>
+            <Property name="name" type="java.lang.String" value="itemLengthChart" noResource="true"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="itemDeadChart">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="itemDeadChart.text"/>
+            <Property name="name" type="java.lang.String" value="itemDeadChart" noResource="true"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JCheckBoxMenuItem" name="itemStageChart">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="itemStageChart.text"/>
+            <Property name="name" type="java.lang.String" value="itemStageChart" noResource="true"/>
+          </Properties>
+        </MenuItem>
       </SubComponents>
     </Container>
   </NonVisualComponents>

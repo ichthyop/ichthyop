@@ -395,20 +395,20 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
 
     private void loadConfigurationFile(File file) {
         setMessage("Opened " + file.toString());
-            logger.info("Opened " + file.toString());
-            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
-            getSimulationManager().setConfigurationFile(file);
-            isSetup = false;
-            editMenuItem.getAction().setEnabled(true);
-            closeMenuItem.getAction().setEnabled(true);
-            btnSimulationRun.getAction().setEnabled(true);
-            btnSimulationProgress.getAction().setEnabled(true);
-            if (getSimulationManager().getNumberOfSimulations() > 1) {
-                btnSimulationProgress.doClick();
-            } else {
-                btnSimulationReplay.getAction().setEnabled(true);
-                btnSimulationRecord.getAction().setEnabled(true);
-            }
+        logger.info("Opened " + file.toString());
+        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
+        getSimulationManager().setConfigurationFile(file);
+        isSetup = false;
+        editMenuItem.getAction().setEnabled(true);
+        closeMenuItem.getAction().setEnabled(true);
+        btnSimulationRun.getAction().setEnabled(true);
+        btnSimulationProgress.getAction().setEnabled(true);
+        if (getSimulationManager().getNumberOfSimulations() > 1) {
+            btnSimulationProgress.doClick();
+        } else {
+            btnSimulationReplay.getAction().setEnabled(true);
+            btnSimulationRecord.getAction().setEnabled(true);
+        }
     }
 
     private Snapshots getSnapshots() {
@@ -425,6 +425,11 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
             return null;
         }
 
+    }
+
+    @Action
+    public void showChartsPopup() {
+        popupCharts.show(btnCharts, 0, btnCharts.getHeight());
     }
 
     @Action
@@ -927,6 +932,8 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         jSeparator3 = new javax.swing.JToolBar.Separator();
         btnSimulationReplay = new javax.swing.JToggleButton();
         jSeparator5 = new javax.swing.JToolBar.Separator();
+        btnCharts = new javax.swing.JButton();
+        jSeparator13 = new javax.swing.JToolBar.Separator();
         btnExit = new javax.swing.JButton();
         pnlProgress = new javax.swing.JPanel();
         lblProgressCurrent = new javax.swing.JLabel();
@@ -990,6 +997,13 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         btnGroupLaf = new javax.swing.ButtonGroup();
         scrollPaneSimulationUI = new javax.swing.JScrollPane();
         pnlSimulationUI = new SimulationUI();
+        popupCharts = new javax.swing.JPopupMenu();
+        itemDepthChart = new javax.swing.JCheckBoxMenuItem();
+        itemEdgeChart = new javax.swing.JCheckBoxMenuItem();
+        itemRecruitChart = new javax.swing.JCheckBoxMenuItem();
+        itemLengthChart = new javax.swing.JCheckBoxMenuItem();
+        itemDeadChart = new javax.swing.JCheckBoxMenuItem();
+        itemStageChart = new javax.swing.JCheckBoxMenuItem();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1071,6 +1085,16 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
 
         jSeparator5.setName("jSeparator5"); // NOI18N
         toolBar.add(jSeparator5);
+
+        btnCharts.setAction(actionMap.get("showChartsPopup")); // NOI18N
+        btnCharts.setFocusable(false);
+        btnCharts.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnCharts.setName("btnCharts"); // NOI18N
+        btnCharts.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(btnCharts);
+
+        jSeparator13.setName("jSeparator13"); // NOI18N
+        toolBar.add(jSeparator13);
 
         btnExit.setAction(actionMap.get("exitApplication")); // NOI18N
         btnExit.setIcon(resourceMap.getIcon("exitApplication.Action.toolBarIcon")); // NOI18N
@@ -1491,6 +1515,32 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
 
         scrollPaneSimulationUI.setViewportView(pnlSimulationUI);
 
+        popupCharts.setName("popupCharts"); // NOI18N
+
+        itemDepthChart.setText(resourceMap.getString("itemDepthChart.text")); // NOI18N
+        itemDepthChart.setName("itemDepthChart"); // NOI18N
+        popupCharts.add(itemDepthChart);
+
+        itemEdgeChart.setText(resourceMap.getString("itemEdgeChart.text")); // NOI18N
+        itemEdgeChart.setName("itemEdgeChart"); // NOI18N
+        popupCharts.add(itemEdgeChart);
+
+        itemRecruitChart.setText(resourceMap.getString("itemRecruitChart.text")); // NOI18N
+        itemRecruitChart.setName("itemRecruitChart"); // NOI18N
+        popupCharts.add(itemRecruitChart);
+
+        itemLengthChart.setText(resourceMap.getString("itemLengthChart.text")); // NOI18N
+        itemLengthChart.setName("itemLengthChart"); // NOI18N
+        popupCharts.add(itemLengthChart);
+
+        itemDeadChart.setText(resourceMap.getString("itemDeadChart.text")); // NOI18N
+        itemDeadChart.setName("itemDeadChart"); // NOI18N
+        popupCharts.add(itemDeadChart);
+
+        itemStageChart.setText(resourceMap.getString("itemStageChart.text")); // NOI18N
+        itemStageChart.setName("itemStageChart"); // NOI18N
+        popupCharts.add(itemStageChart);
+
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
@@ -1534,6 +1584,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSpinner animationSpeed;
     private javax.swing.JButton btnAnimaction;
+    private javax.swing.JButton btnCharts;
     private javax.swing.JButton btnClose;
     private javax.swing.JButton btnDeleteSnapshots;
     private javax.swing.JButton btnEditCfgFile;
@@ -1555,10 +1606,17 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem editMenuItem;
     private javax.swing.JRadioButtonMenuItem gtkMenuItem;
+    private javax.swing.JCheckBoxMenuItem itemDeadChart;
+    private javax.swing.JCheckBoxMenuItem itemDepthChart;
+    private javax.swing.JCheckBoxMenuItem itemEdgeChart;
+    private javax.swing.JCheckBoxMenuItem itemLengthChart;
+    private javax.swing.JCheckBoxMenuItem itemRecruitChart;
+    private javax.swing.JCheckBoxMenuItem itemStageChart;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator10;
     private javax.swing.JToolBar.Separator jSeparator11;
     private javax.swing.JToolBar.Separator jSeparator12;
+    private javax.swing.JToolBar.Separator jSeparator13;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
     private javax.swing.JToolBar.Separator jSeparator4;
@@ -1590,6 +1648,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     private javax.swing.JPanel pnlProgress;
     private javax.swing.JPanel pnlSimulation;
     private javax.swing.JPanel pnlSimulationUI;
+    private javax.swing.JPopupMenu popupCharts;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JProgressBar progressBarCurrent;
     private javax.swing.JProgressBar progressBarGlobal;
