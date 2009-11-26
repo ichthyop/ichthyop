@@ -289,6 +289,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     }
 
     private void hideSimulationReplay() {
+        animate(false);
         if (getSimulationManager().getConfigurationFile() != null) {
             getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + getSimulationManager().getConfigurationFile().getName());
         } else {
@@ -297,13 +298,16 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         simulationReplayToolBar.setVisible(false);
         pnlSimulation.removeAll();
         pnlSimulation.setVisible(false);
+        setMessage("");
         getFrame().pack();
     }
 
     private void showSimulationRecord() {
         if (btnSimulationReplay.isSelected()) {
             btnSimulationReplay.doClick();
+
         }
+        btnSimulationReplay.getAction().setEnabled(false);
         simulationRecordToolBar.setVisible(true);
         pnlSimulation.removeAll();
         pnlSimulation.add(scrollPaneSimulationUI, StackLayout.TOP);
@@ -317,6 +321,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         simulationRecordToolBar.setVisible(false);
         pnlSimulation.removeAll();
         pnlSimulation.setVisible(false);
+        btnSimulationReplay.getAction().setEnabled(true);
         getFrame().pack();
     }
 
@@ -457,6 +462,11 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
         } else {
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.play"));
+            if (progressTimer.isRunning()) {
+                progressTimer.stop();
+                progressBar.setValue(0);
+                progressBar.setVisible(false);
+            }
             if (animator.isRunning()) {
                 animator.stop();
             }
