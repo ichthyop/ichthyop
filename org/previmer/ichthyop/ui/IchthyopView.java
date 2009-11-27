@@ -3,8 +3,12 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import org.jdesktop.application.Action;
@@ -14,6 +18,7 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +58,14 @@ import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
+import org.jdesktop.swingx.JXMapViewer;
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.jdesktop.swingx.mapviewer.TileFactory;
+import org.jdesktop.swingx.mapviewer.wms.WMSService;
+import org.jdesktop.swingx.mapviewer.wms.WMSTileFactory;
+import org.jdesktop.swingx.painter.CompoundPainter;
+import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -316,6 +329,21 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         getSimulationUI().repaintBackground();
         getFrame().pack();
     }
+
+    /*private void showSimulationRecord() {
+        if (btnSimulationReplay.isSelected()) {
+            btnSimulationReplay.doClick();
+
+        }
+        btnSimulationReplay.getAction().setEnabled(false);
+        simulationRecordToolBar.setVisible(true);
+        pnlSimulation.removeAll();
+        pnlSimulation.add(mapViewer = new SimuMapViewer(), StackLayout.TOP);
+        mapViewer.init();
+        pnlSimulation.setVisible(true);
+        mapViewer.drawRegion();
+        getFrame().pack();
+    }*/
 
     private void hideSimulationRecord() {
         simulationRecordToolBar.setVisible(false);
@@ -1166,6 +1194,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
 
         pnlSimulation.setBorder(null);
         pnlSimulation.setName("pnlSimulation"); // NOI18N
+        pnlSimulation.setPreferredSize(new java.awt.Dimension(800, 600));
         pnlSimulation.setVisible(false);
 
         javax.swing.GroupLayout pnlSimulationLayout = new javax.swing.GroupLayout(pnlSimulation);
@@ -1176,7 +1205,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 233, Short.MAX_VALUE)
+            .addGap(0, 547, Short.MAX_VALUE)
         );
 
         simulationRecordToolBar.setFloatable(false);
@@ -1365,7 +1394,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
             .addComponent(simulationRecordToolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
             .addComponent(simulationReplayToolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
             .addComponent(pnlProgress, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(pnlSimulation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pnlSimulation, javax.swing.GroupLayout.DEFAULT_SIZE, 881, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1378,7 +1407,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlSimulation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(pnlSimulation, javax.swing.GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE))
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -1684,4 +1713,5 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     private float nbfps = 1.f;
     private float time;
     private Timer progressTimer;
+    //private SimuMapViewer mapViewer;
 }

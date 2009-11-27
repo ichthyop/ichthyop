@@ -191,7 +191,6 @@ public abstract class Roms3dDataset extends AbstractDataset {
      */
     private static boolean FLAG_VDISP;
     private String gridFile;
-
     /**
      * Geographical boundary of the domain
      */
@@ -455,13 +454,21 @@ public abstract class Roms3dDataset extends AbstractDataset {
         //-----------------------------------------------------------
         // Calculation of the Coeff;
         for (int k = nz; k-- > 0;) {
-            sc_r = attrib_sc_r.getNumericValue(k).floatValue();
+            if (null != attrib_sc_r) {
+                sc_r = attrib_sc_r.getNumericValue(k).floatValue();
+            } else {
+                sc_r = ((double) (k - nz) + .5d) / (double) nz;
+            }
             Cs_r[k] = attrib_cs_r.getNumericValue(k).floatValue();
             cff_r[k] = hc * (sc_r - Cs_r[k]);
         }
 
         for (int k = nz + 1; k-- > 0;) {
-            sc_w = attrib_sc_w.getNumericValue(k).floatValue();
+            if (null != attrib_sc_w) {
+                sc_w = attrib_sc_w.getNumericValue(k).floatValue();
+            } else {
+                sc_w = (double) (k - nz) / (double) nz;
+            }
             Cs_w[k] = attrib_cs_w.getNumericValue(k).floatValue();
             cff_w[k] = hc * (sc_w - Cs_w[k]);
         }
@@ -1230,7 +1237,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
     }
 
     public void nextStepTriggered(NextStepEvent e) {
-        
+
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
@@ -1771,7 +1778,6 @@ public abstract class Roms3dDataset extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
