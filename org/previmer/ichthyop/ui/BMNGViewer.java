@@ -14,6 +14,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -110,7 +111,7 @@ public class BMNGViewer extends JXMapKit {
 
     private void drawRegion(Graphics2D g, JXMapViewer map) {
         Polygon poly = new Polygon();
-        for (GeoPosition gp : getRoughRegion()) {
+        for (GeoPosition gp : getRegion()) {
             //convert geo to world bitmap pixel
             Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
             poly.addPoint((int) pt.getX(), (int) pt.getY());
@@ -121,6 +122,20 @@ public class BMNGViewer extends JXMapKit {
         g.fill(poly);
         g.setColor(Color.WHITE);
         g.draw(poly);
+    }
+
+    private void drawGrid(Graphics2D g, JXMapViewer map) {
+
+        IDataset dataset = getSimulationManager().getDataset();
+        for (int i = 10; i < dataset.get_nx() - 1; i += 10) {
+            for (int j = 10; j < dataset.get_ny() - 1; j += 10) {
+                Point2D pt = map.getTileFactory().geoToPixel(new GeoPosition(dataset.getLat(i, j), dataset.getLon(i, j)), map.getZoom());
+                Rectangle2D rectangle = new Rectangle2D.Double(pt.getX(), pt.getY(), 2, 2);
+                //do the drawing
+                g.setColor(Color.WHITE);
+                g.draw(rectangle);
+            }
+        }
     }
 
     private void drawZone(List<GeoPosition> zoneEdge, Graphics2D g, JXMapViewer map) {
@@ -148,7 +163,7 @@ public class BMNGViewer extends JXMapKit {
         IDataset dataset = getSimulationManager().getDataset();
         int refinement = 5;
         float incr = 1 / (float) refinement;
-         int nx = (xmax - xmin + 1) * refinement;
+        int nx = (xmax - xmin + 1) * refinement;
         int ny = (ymax - ymin + 1) * refinement;
         boolean[][] bzone = new boolean[nx][ny];
         boolean[][] ezone = new boolean[nx][ny];
@@ -165,7 +180,7 @@ public class BMNGViewer extends JXMapKit {
                 int im1 = Math.max(i - 1, 0);
                 int ip1 = Math.min(i + 1, nx - 1);
                 int jm1 = Math.max(j - 1, 0);
-                int jp1 = Math.min(j + 1, ny -  1);
+                int jp1 = Math.min(j + 1, ny - 1);
                 ezone[i][j] = bzone[i][j] && !(bzone[im1][j] && bzone[ip1][j] && bzone[i][jm1] && bzone[i][jp1]);
                 if (ezone[i][j]) {
                     listPt.add(new Point2D.Float(xmin + i * incr, ymin + j * incr));
@@ -204,6 +219,7 @@ public class BMNGViewer extends JXMapKit {
     public void drawZones(Graphics2D g, JXMapViewer map) {
         if (firstCall) {
             for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE)) {
+                System.out.println(zone);
                 zone.init();
                 zones.add(getZoneEdge(zone));
             }
@@ -212,7 +228,7 @@ public class BMNGViewer extends JXMapKit {
         for (List<GeoPosition> zoneEdge : zones) {
             drawZone(zoneEdge, g, map);
         }
-        
+
     }
 
     public void drawParticles() {
@@ -228,6 +244,7 @@ public class BMNGViewer extends JXMapKit {
 
                     drawRegion(g, map);
                     drawZones(g, map);
+                    //drawGrid(g, map);
 
                     if (getSimulationManager().getSimulation().getPopulation() != null) {
                         Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();
