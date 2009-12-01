@@ -3,14 +3,9 @@
  */
 package org.previmer.ichthyop.ui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -18,7 +13,10 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Point2D;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -42,7 +39,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -58,14 +54,6 @@ import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
-import org.jdesktop.swingx.JXMapViewer;
-import org.jdesktop.swingx.mapviewer.GeoPosition;
-import org.jdesktop.swingx.mapviewer.TileFactory;
-import org.jdesktop.swingx.mapviewer.wms.WMSService;
-import org.jdesktop.swingx.mapviewer.wms.WMSTileFactory;
-import org.jdesktop.swingx.painter.CompoundPainter;
-import org.jdesktop.swingx.painter.Painter;
-import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -299,6 +287,8 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             cbBoxRunId.setSelectedIndex(cbBoxRunId.getItemCount() - 1);
         }
         pnlSimulation.setVisible(true);
+        replayPanel.addKeyListener(new KeyScroller());
+        replayPanel.addMouseWheelListener(new MouseWheelScroller());
         getFrame().pack();
     }
 
@@ -317,20 +307,19 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     }
 
     /*private void showSimulationRecord() {
-        if (btnSimulationReplay.isSelected()) {
-            btnSimulationReplay.doClick();
+    if (btnSimulationReplay.isSelected()) {
+    btnSimulationReplay.doClick();
 
-        }
-        btnSimulationReplay.getAction().setEnabled(false);
-        simulationRecordToolBar.setVisible(true);
-        pnlSimulation.removeAll();
-        pnlSimulation.add(scrollPaneSimulationUI, StackLayout.TOP);
-        pnlSimulation.setVisible(true);
-        getSimulationUI().init();
-        getSimulationUI().repaintBackground();
-        getFrame().pack();
+    }
+    btnSimulationReplay.getAction().setEnabled(false);
+    simulationRecordToolBar.setVisible(true);
+    pnlSimulation.removeAll();
+    pnlSimulation.add(scrollPaneSimulationUI, StackLayout.TOP);
+    pnlSimulation.setVisible(true);
+    getSimulationUI().init();
+    getSimulationUI().repaintBackground();
+    getFrame().pack();
     }*/
-
     private void showSimulationRecord() {
         if (btnSimulationReplay.isSelected()) {
             btnSimulationReplay.doClick();
@@ -938,6 +927,40 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         } catch (Throwable t) {
         }
         return false;
+    }
+
+    private class MouseWheelScroller implements MouseWheelListener {
+
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            int increment = e.getWheelRotation();
+            int index = sliderTime.getValue();
+            int newIndex = index + increment;
+            newIndex = Math.min(sliderTime.getMaximum(), Math.max(0, newIndex));
+            sliderTime.setValue(newIndex);
+        }
+    }
+
+    private class KeyScroller extends KeyAdapter {
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            int keyCode = e.getKeyCode();
+            switch (keyCode) {
+                case KeyEvent.VK_RIGHT:
+                case KeyEvent.VK_UP:
+                    next();
+                    break;
+                case KeyEvent.VK_LEFT:
+                case KeyEvent.VK_DOWN:
+                    previous();
+                    break;
+                case KeyEvent.VK_PAGE_DOWN:
+                    first();
+                    break;
+                case KeyEvent.VK_PAGE_UP:
+                    last();
+            }
+        }
     }
 
     /** This method is called from within the constructor to
