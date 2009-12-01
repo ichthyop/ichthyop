@@ -6,6 +6,7 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.MouseListener;
@@ -26,6 +27,8 @@ import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.arch.ISimulationManager;
@@ -40,6 +43,8 @@ public class BMNGViewer extends JXMapKit {
     private TileFactory tileFactory = new NasaTileFactory();
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     List<GeoPosition> region, roughRegion;
+    List<List<GeoPosition>> zones;
+    boolean firstCall = true;
 
     public BMNGViewer() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
@@ -69,6 +74,8 @@ public class BMNGViewer extends JXMapKit {
 
         int zoom = (int) Math.round(1.17 * Math.log(dlat_meter * 1.25) - 4.8);
         setZoom(zoom);
+
+        zones = new ArrayList(getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size());
     }
 
     private List<GeoPosition> getRegion() {
@@ -116,6 +123,92 @@ public class BMNGViewer extends JXMapKit {
         g.draw(poly);
     }
 
+    private void drawZone(List<GeoPosition> zoneEdge, Graphics2D g, JXMapViewer map) {
+
+        Polygon polygon = new Polygon();
+        for (GeoPosition gp : zoneEdge) {
+            //convert geo to world bitmap pixel
+            Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
+            polygon.addPoint((int) pt.getX(), (int) pt.getY());
+        }
+        //do the drawing
+        g.setColor(new Color(255, 0, 0, 50));
+        g.fill(polygon);
+        g.setColor(Color.RED);
+        g.draw(polygon);
+
+    }
+
+    private List<GeoPosition> getZoneEdge(Zone zone) {
+        List<GeoPosition> list = new ArrayList();
+        int xmin = (int) Math.floor(zone.getXmin());
+        int xmax = (int) Math.ceil(zone.getXmax());
+        int ymin = (int) Math.floor(zone.getYmin());
+        int ymax = (int) Math.ceil(zone.getYmax());
+        IDataset dataset = getSimulationManager().getDataset();
+        boolean[][] bzone = new boolean[xmax - xmin + 1][ymax - ymin + 1];
+        boolean[][] ezone = new boolean[xmax - xmin + 1][ymax - ymin + 1];
+        for (int i = xmin; i < xmax; i++) {
+            for (int j = ymin; j < ymax; j++) {
+                bzone[i - xmin][j - ymin] = zone.isGridPointInZone(i, j);
+            }
+        }
+        List<Point> listPt = new ArrayList();
+        for (int i = xmin; i < xmax; i++) {
+            for (int j = ymin; j < ymax; j++) {
+                int ii = i - xmin;
+                int jj = j - ymin;
+                int im1 = Math.max(ii - 1, 0);
+                int ip1 = Math.min(ii + 1, xmax - xmin);
+                int jm1 = Math.max(jj - 1, 0);
+                int jp1 = Math.min(jj + 1, ymax - ymin);
+                ezone[ii][jj] = bzone[ii][jj] && !(bzone[im1][jj] && bzone[ip1][jj] && bzone[ii][jm1] && bzone[ii][jp1]);
+                if (ezone[ii][jj]) {
+                    listPt.add(new Point(i, j));
+                }
+            }
+        }
+
+        Point pt1 = listPt.get(0);
+        GeoPosition gp = new GeoPosition(dataset.getLat(pt1.x, pt1.y), dataset.getLon(pt1.x, pt1.y));
+        list.add(gp);
+        listPt.remove(pt1);
+        while (!listPt.isEmpty()) {
+            Point closestToP1 = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            double distMin = getDistance(pt1, closestToP1);
+            for (Point pt2 : listPt) {
+                double dist = Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
+                if (dist < distMin) {
+                    closestToP1 = pt2;
+                    distMin = dist;
+                }
+            }
+            gp = new GeoPosition(dataset.getLat(closestToP1.x, closestToP1.y), dataset.getLon(closestToP1.x, closestToP1.y));
+            list.add(gp);
+            listPt.remove(closestToP1);
+            pt1 = closestToP1;
+        }
+        return list;
+    }
+
+    private double getDistance(Point pt1, Point pt2) {
+        return Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
+    }
+
+    public void drawZones(Graphics2D g, JXMapViewer map) {
+        if (firstCall) {
+            for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE)) {
+                zone.init();
+                zones.add(getZoneEdge(zone));
+            }
+        }
+        firstCall = false;
+        for (List<GeoPosition> zoneEdge : zones) {
+            drawZone(zoneEdge, g, map);
+        }
+        
+    }
+
     public void drawParticles() {
 
         if (getSimulationManager().getSimulation().getPopulation() != null) {
@@ -128,6 +221,7 @@ public class BMNGViewer extends JXMapKit {
                     g.translate(-rect.x, -rect.y);
 
                     drawRegion(g, map);
+                    //drawZones(g, map);
 
                     if (getSimulationManager().getSimulation().getPopulation() != null) {
                         Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();

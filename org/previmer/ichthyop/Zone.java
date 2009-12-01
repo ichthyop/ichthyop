@@ -111,6 +111,10 @@ public class Zone extends SimulationManagerAccessor {
         return depth <= lowerDepth & depth > upperDepth;
     }
 
+    public boolean isGridPointInZone(double x, double y) {
+        return isXYInPolygon(x, y) && isXYBetweenBathyLines(x, y);
+    }
+
     private boolean isXYBetweenBathyLines(double x, double y) {
         return (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
                 inshoreLine &
@@ -192,7 +196,7 @@ public class Zone extends SimulationManagerAccessor {
     public double getXmin() {
 
         double xmin = polygon.get(0).getX();
-        for (int k = 0; k < polygon.size(); k++) {
+        for (int k = 0; k < polygon.size() - 1; k++) {
             xmin = Math.min(xmin, polygon.get(k).getX());
         }
         return xmin;
@@ -207,7 +211,7 @@ public class Zone extends SimulationManagerAccessor {
     public double getYmin() {
 
         double ymin = polygon.get(0).getY();
-        for (int i = 1; i < 4; i++) {
+        for (int i = 1; i < polygon.size() - 1; i++) {
             ymin = Math.min(ymin, polygon.get(i).getY());
         }
         return ymin;
@@ -221,7 +225,7 @@ public class Zone extends SimulationManagerAccessor {
      */
     public double getXmax() {
         double xmax = polygon.get(0).getX();
-        for (int i = 1; i < 4; i++) {
+        for (int i = 1; i < polygon.size() - 1; i++) {
             xmax = Math.max(xmax, polygon.get(i).getX());
         }
         return xmax;
@@ -235,7 +239,7 @@ public class Zone extends SimulationManagerAccessor {
      */
     public double getYmax() {
         double ymax = polygon.get(0).getY();
-        for (int i = 1; i < 4; i++) {
+        for (int i = 1; i < polygon.size() - 1; i++) {
             ymax = Math.max(ymax, polygon.get(i).getY());
         }
         return ymax;
