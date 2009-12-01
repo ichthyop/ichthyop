@@ -146,44 +146,50 @@ public class BMNGViewer extends JXMapKit {
         int ymin = (int) Math.floor(zone.getYmin());
         int ymax = (int) Math.ceil(zone.getYmax());
         IDataset dataset = getSimulationManager().getDataset();
-        boolean[][] bzone = new boolean[xmax - xmin + 1][ymax - ymin + 1];
-        boolean[][] ezone = new boolean[xmax - xmin + 1][ymax - ymin + 1];
-        for (int i = xmin; i < xmax; i++) {
-            for (int j = ymin; j < ymax; j++) {
-                bzone[i - xmin][j - ymin] = zone.isGridPointInZone(i, j);
+        int refinement = 5;
+        float incr = 1 / (float) refinement;
+         int nx = (xmax - xmin + 1) * refinement;
+        int ny = (ymax - ymin + 1) * refinement;
+        boolean[][] bzone = new boolean[nx][ny];
+        boolean[][] ezone = new boolean[nx][ny];
+        for (float i = xmin; i < xmax; i += incr) {
+            for (float j = ymin; j < ymax; j += incr) {
+                int ii = (int) Math.round((i - xmin) * refinement);
+                int jj = (int) Math.round((j - ymin) * refinement);
+                bzone[ii][jj] = zone.isGridPointInZone(i, j);
             }
         }
-        List<Point> listPt = new ArrayList();
-        for (int i = xmin; i < xmax; i++) {
-            for (int j = ymin; j < ymax; j++) {
-                int ii = i - xmin;
-                int jj = j - ymin;
-                int im1 = Math.max(ii - 1, 0);
-                int ip1 = Math.min(ii + 1, xmax - xmin);
-                int jm1 = Math.max(jj - 1, 0);
-                int jp1 = Math.min(jj + 1, ymax - ymin);
-                ezone[ii][jj] = bzone[ii][jj] && !(bzone[im1][jj] && bzone[ip1][jj] && bzone[ii][jm1] && bzone[ii][jp1]);
-                if (ezone[ii][jj]) {
-                    listPt.add(new Point(i, j));
+        List<Point2D.Float> listPt = new ArrayList();
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                int im1 = Math.max(i - 1, 0);
+                int ip1 = Math.min(i + 1, nx - 1);
+                int jm1 = Math.max(j - 1, 0);
+                int jp1 = Math.min(j + 1, ny -  1);
+                ezone[i][j] = bzone[i][j] && !(bzone[im1][j] && bzone[ip1][j] && bzone[i][jm1] && bzone[i][jp1]);
+                if (ezone[i][j]) {
+                    listPt.add(new Point2D.Float(xmin + i * incr, ymin + j * incr));
                 }
             }
         }
 
-        Point pt1 = listPt.get(0);
-        GeoPosition gp = new GeoPosition(dataset.getLat(pt1.x, pt1.y), dataset.getLon(pt1.x, pt1.y));
+        Point2D.Float pt1 = listPt.get(0);
+        double[] lonlat = dataset.xy2lonlat(pt1.x, pt1.y);
+        GeoPosition gp = new GeoPosition(lonlat[0], lonlat[1]);
         list.add(gp);
         listPt.remove(pt1);
         while (!listPt.isEmpty()) {
-            Point closestToP1 = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            Point2D.Float closestToP1 = new Point2D.Float(Integer.MAX_VALUE, Integer.MAX_VALUE);
             double distMin = getDistance(pt1, closestToP1);
-            for (Point pt2 : listPt) {
+            for (Point2D.Float pt2 : listPt) {
                 double dist = Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
                 if (dist < distMin) {
                     closestToP1 = pt2;
                     distMin = dist;
                 }
             }
-            gp = new GeoPosition(dataset.getLat(closestToP1.x, closestToP1.y), dataset.getLon(closestToP1.x, closestToP1.y));
+            lonlat = dataset.xy2lonlat(closestToP1.x, closestToP1.y);
+            gp = new GeoPosition(lonlat[0], lonlat[1]);
             list.add(gp);
             listPt.remove(closestToP1);
             pt1 = closestToP1;
@@ -191,7 +197,7 @@ public class BMNGViewer extends JXMapKit {
         return list;
     }
 
-    private double getDistance(Point pt1, Point pt2) {
+    private double getDistance(Point2D.Float pt1, Point2D.Float pt2) {
         return Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
     }
 
@@ -221,7 +227,7 @@ public class BMNGViewer extends JXMapKit {
                     g.translate(-rect.x, -rect.y);
 
                     drawRegion(g, map);
-                    //drawZones(g, map);
+                    drawZones(g, map);
 
                     if (getSimulationManager().getSimulation().getPopulation() != null) {
                         Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();
