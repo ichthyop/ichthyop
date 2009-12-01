@@ -45,7 +45,6 @@ public class BMNGViewer extends JXMapKit {
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     List<GeoPosition> region, roughRegion;
     List<List<GeoPosition>> zones;
-    boolean firstCall = true;
 
     public BMNGViewer() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
@@ -77,6 +76,10 @@ public class BMNGViewer extends JXMapKit {
         setZoom(zoom);
 
         zones = new ArrayList(getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size());
+        for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE)) {
+            zone.init();
+            zones.add(getZoneEdge(zone));
+        }
     }
 
     private List<GeoPosition> getRegion() {
@@ -217,16 +220,10 @@ public class BMNGViewer extends JXMapKit {
     }
 
     public void drawZones(Graphics2D g, JXMapViewer map) {
-        if (firstCall) {
-            for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE)) {
-                System.out.println(zone);
-                zone.init();
-                zones.add(getZoneEdge(zone));
+        if (zones != null) {
+            for (List<GeoPosition> zoneEdge : zones) {
+                drawZone(zoneEdge, g, map);
             }
-        }
-        firstCall = false;
-        for (List<GeoPosition> zoneEdge : zones) {
-            drawZone(zoneEdge, g, map);
         }
 
     }
@@ -244,7 +241,6 @@ public class BMNGViewer extends JXMapKit {
 
                     drawRegion(g, map);
                     drawZones(g, map);
-                    //drawGrid(g, map);
 
                     if (getSimulationManager().getSimulation().getPopulation() != null) {
                         Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();
