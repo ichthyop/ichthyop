@@ -37,6 +37,7 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
     }
 
     public void init() {
+        loadZones();
         for (List<Zone> listZone : map.values()) {
             for (Zone zone : listZone) {
                 zone.init();
@@ -44,7 +45,7 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
         }
     }
 
-    private void loadZones() {
+    public void loadZones() {
 
         Iterator<XZone> it = getZones().iterator();
         map = new HashMap();

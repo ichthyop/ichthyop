@@ -567,7 +567,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
     }
 
     public void nextStepTriggered(NextStepEvent e) {
-        try {
+        /*try {
             SwingUtilities.invokeAndWait(new Runnable() {
 
                 public void run() {
@@ -584,7 +584,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
                             if (!ckBoxWorkBackground.isSelected()) {
                                 scrollPaneSimulationUI.repaint();
                             }
-                            screen2File(pnlSimulationUI, getSimulationManager().getTimeManager().getCalendar());
+                            //screen2File(pnlSimulationUI, getSimulationManager().getTimeManager().getCalendar());
                             recordTimer.restart();
                         }
                     }
@@ -594,7 +594,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
             logger.log(Level.SEVERE, null, ex);
         } catch (InvocationTargetException ex) {
             logger.log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
 
     /**
@@ -1041,38 +1041,29 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
         btnOpenCfgFile.setAction(actionMap.get("openConfigurationFile")); // NOI18N
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
-        btnOpenCfgFile.setIcon(resourceMap.getIcon("openConfigurationFile.Action.toolBarIcon")); // NOI18N
-        btnOpenCfgFile.setText(resourceMap.getString("btnOpenCfgFile.text")); // NOI18N
         btnOpenCfgFile.setFocusable(false);
-        btnOpenCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnOpenCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnOpenCfgFile.setName("btnOpenCfgFile"); // NOI18N
         btnOpenCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(btnOpenCfgFile);
 
         btnClose.setAction(actionMap.get("closeConfigurationFile")); // NOI18N
-        btnClose.setIcon(resourceMap.getIcon("closeConfigurationFile.Action.toolBarIcon")); // NOI18N
-        btnClose.setText(resourceMap.getString("btnClose.text")); // NOI18N
         btnClose.setFocusable(false);
-        btnClose.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnClose.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnClose.setName("btnClose"); // NOI18N
         btnClose.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(btnClose);
 
         btnNewCfgFile.setAction(actionMap.get("newConfigurationFile")); // NOI18N
-        btnNewCfgFile.setIcon(resourceMap.getIcon("newConfigurationFile.Action.toolBarIcon")); // NOI18N
-        btnNewCfgFile.setText(resourceMap.getString("btnNewCfgFile.text")); // NOI18N
         btnNewCfgFile.setFocusable(false);
-        btnNewCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnNewCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnNewCfgFile.setName("btnNewCfgFile"); // NOI18N
         btnNewCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(btnNewCfgFile);
 
         btnEditCfgFile.setAction(actionMap.get("editConfigurationFile")); // NOI18N
-        btnEditCfgFile.setIcon(resourceMap.getIcon("editConfigurationFile.Action.toolBarIcon")); // NOI18N
-        btnEditCfgFile.setText(resourceMap.getString("btnEditCfgFile.text")); // NOI18N
         btnEditCfgFile.setFocusable(false);
-        btnEditCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnEditCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnEditCfgFile.setName("btnEditCfgFile"); // NOI18N
         btnEditCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(btnEditCfgFile);
@@ -1125,10 +1116,8 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         toolBar.add(jSeparator13);
 
         btnExit.setAction(actionMap.get("exitApplication")); // NOI18N
-        btnExit.setIcon(resourceMap.getIcon("exitApplication.Action.toolBarIcon")); // NOI18N
-        btnExit.setText(resourceMap.getString("btnExit.text")); // NOI18N
         btnExit.setFocusable(false);
-        btnExit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnExit.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnExit.setName("btnExit"); // NOI18N
         btnExit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(btnExit);
@@ -1136,6 +1125,7 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         pnlProgress.setName("pnlProgress"); // NOI18N
         pnlProgress.setVisible(false);
 
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         lblProgressCurrent.setText(resourceMap.getString("lblProgressCurrent.text")); // NOI18N
         lblProgressCurrent.setName("lblProgressCurrent"); // NOI18N
 
@@ -1246,8 +1236,6 @@ public class IchthyopView extends FrameView implements NextStepListener, TimingT
         simulationRecordToolBar.add(jSeparator7);
 
         ckBoxWorkBackground.setSelected(true);
-        ckBoxWorkBackground.setText(resourceMap.getString("ckBoxWorkBackground.text")); // NOI18N
-        ckBoxWorkBackground.setToolTipText(resourceMap.getString("ckBoxWorkBackground.toolTipText")); // NOI18N
         ckBoxWorkBackground.setFocusable(false);
         ckBoxWorkBackground.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ckBoxWorkBackground.setName("ckBoxWorkBackground"); // NOI18N

@@ -28,7 +28,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="pnlProgress" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="pnlSimulation" pref="547" max="32767" attributes="0"/>
+                  <Component id="pnlSimulation" pref="553" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -50,10 +50,8 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="openConfigurationFile" methodName="openConfigurationFile"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="openConfigurationFile.Action.toolBarIcon"/>
-                <Property name="text" type="java.lang.String" resourceKey="btnOpenCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="horizontalTextPosition" type="int" value="4"/>
                 <Property name="name" type="java.lang.String" value="btnOpenCfgFile" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
@@ -63,10 +61,8 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="closeConfigurationFile" methodName="closeConfigurationFile"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="closeConfigurationFile.Action.toolBarIcon"/>
-                <Property name="text" type="java.lang.String" resourceKey="btnClose.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="horizontalTextPosition" type="int" value="4"/>
                 <Property name="name" type="java.lang.String" value="btnClose" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
@@ -76,10 +72,8 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="newConfigurationFile" methodName="newConfigurationFile"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="newConfigurationFile.Action.toolBarIcon"/>
-                <Property name="text" type="java.lang.String" resourceKey="btnNewCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="horizontalTextPosition" type="int" value="4"/>
                 <Property name="name" type="java.lang.String" value="btnNewCfgFile" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
@@ -89,10 +83,8 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="editConfigurationFile" methodName="editConfigurationFile"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="editConfigurationFile.Action.toolBarIcon"/>
-                <Property name="text" type="java.lang.String" resourceKey="btnEditCfgFile.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="horizontalTextPosition" type="int" value="4"/>
                 <Property name="name" type="java.lang.String" value="btnEditCfgFile" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
@@ -177,10 +169,8 @@
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="exitApplication" methodName="exitApplication"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" resourceKey="exitApplication.Action.toolBarIcon"/>
-                <Property name="text" type="java.lang.String" resourceKey="btnExit.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
-                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="horizontalTextPosition" type="int" value="4"/>
                 <Property name="name" type="java.lang.String" value="btnExit" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
@@ -304,7 +294,7 @@
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="547" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="553" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
           </Layout>
@@ -370,8 +360,6 @@
             <Component class="javax.swing.JCheckBox" name="ckBoxWorkBackground">
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>
-                <Property name="text" type="java.lang.String" resourceKey="ckBoxWorkBackground.text"/>
-                <Property name="toolTipText" type="java.lang.String" resourceKey="ckBoxWorkBackground.toolTipText"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="4"/>
                 <Property name="name" type="java.lang.String" value="ckBoxWorkBackground" noResource="true"/>

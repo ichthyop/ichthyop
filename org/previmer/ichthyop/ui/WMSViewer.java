@@ -26,6 +26,7 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactory;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
+import org.jdesktop.swingx.mapviewer.wms.WMSTileFactory;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.TypeZone;
@@ -39,14 +40,14 @@ import org.previmer.ichthyop.manager.SimulationManager;
  *
  * @author pverley
  */
-public class BMNGViewer extends JXMapKit {
+public class WMSViewer extends JXMapKit {
 
-    private TileFactory tileFactory = new NasaTileFactory();
+    private TileFactory tileFactory = new MGDSTileFactory();
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     List<GeoPosition> region, roughRegion;
     List<List<GeoPosition>> zones;
 
-    public BMNGViewer() {
+    public WMSViewer() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
         setMiniMapVisible(false);
         setTileFactory(tileFactory);
@@ -297,6 +298,40 @@ public class BMNGViewer extends JXMapKit {
                     int z = 4;
                     z = (int) Math.pow(2, (double) zz - 1);
                     return new WMSService().toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
+                }
+            });
+        }
+    }
+
+    class MGDSTileFactory extends DefaultTileFactory {
+
+        /** Creates a new instance of IchthyopTileFactory */
+        public MGDSTileFactory() {
+            super(new TileFactoryInfo(8, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+
+                @Override
+                public String getTileUrl(int x, int y, int zoom) {
+                    int zz = 17 - zoom;
+                    int z = 4;
+                    z = (int) Math.pow(2, (double) zz - 1);
+                    return new WMSService("http://www.marine-geo.org/services/wms?", "GMRT,topo").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
+                }
+            });
+        }
+    }
+
+    class DemisTileFactory extends DefaultTileFactory {
+
+        /** Creates a new instance of IchthyopTileFactory */
+        public DemisTileFactory() {
+            super(new TileFactoryInfo(6, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+
+                @Override
+                public String getTileUrl(int x, int y, int zoom) {
+                    int zz = 17 - zoom;
+                    int z = 4;
+                    z = (int) Math.pow(2, (double) zz - 1);
+                    return new WMSService("http://www2.demis.nl/wms/wms.asp?wms=WorldMap&", "Bathymetry,Topography,Borders,Coastlines").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
                 }
             });
         }

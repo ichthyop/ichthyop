@@ -18,4 +18,6 @@ public interface IZoneManager {
 
     public void init();
 
+    public void loadZones();
+
 }

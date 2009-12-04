@@ -18,7 +18,8 @@ public class IchthyopApp extends SingleFrameApplication {
      * At startup create and show the main frame of the application.
      */
     @Override protected void startup() {
-        show(new IchthyopView(this));
+        //show(new IchthyopView(this));
+        show(new IchthyopBMNGView(this));
     }
 
     /**
@@ -28,14 +29,16 @@ public class IchthyopApp extends SingleFrameApplication {
      */
     @Override protected void configureWindow(java.awt.Window root) {
         if (shouldRestorePreferences) {
-            ((IchthyopView) getMainView()).restorePreferences();
+            //((IchthyopView) getMainView()).restorePreferences();
+            ((IchthyopBMNGView) getMainView()).restorePreferences();
             shouldRestorePreferences = false;
         }
     }
 
     @Override protected void shutdown() {
         super.shutdown();
-        ((IchthyopView) getMainView()).savePreferences();
+        //((IchthyopView) getMainView()).savePreferences();
+        ((IchthyopBMNGView) getMainView()).savePreferences();
     }
 
 
