@@ -946,6 +946,9 @@
                 <StringItem index="3" value="Item 4"/>
               </StringArray>
             </Property>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="selectSimulation" methodName="selectSimulation"/>
+            </Property>
             <Property name="name" type="java.lang.String" value="cbBoxSimulation" noResource="true"/>
           </Properties>
         </Component>
@@ -1003,6 +1006,9 @@
                     <StringItem index="1" value="http://wms.jpl.nasa.gov/wms.cgi?"/>
                     <StringItem index="2" value="http://www2.demis.nl/wms/wms.asp?wms=WorldMap&amp;"/>
                   </StringArray>
+                </Property>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="changeWMS" methodName="changeWMS"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="cbBoxWMS" noResource="true"/>
               </Properties>

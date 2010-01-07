@@ -311,7 +311,7 @@ public class IchthyopMapView extends FrameView implements NextStepListener, Timi
         simulationReplayToolBar.setVisible(true);
         pnlSimulation.removeAll();
         //pnlSimulation.add(new GradientPanel(), StackLayout.TOP);
-        pnlSimulation.add(mapViewer = new SimuMapViewer(), StackLayout.TOP);
+        pnlSimulation.add(mapViewer = new WMSMapper(), StackLayout.TOP);
         if (!((String) cbBoxRunId.getItemAt(0)).startsWith("Please") && getRunId().matches(Snapshots.readableIdToId((String) cbBoxRunId.getItemAt(0)))) {
             cbBoxRunId.setSelectedIndex(0);
         } else {
@@ -1860,7 +1860,7 @@ public class IchthyopMapView extends FrameView implements NextStepListener, Timi
     private float nbfps = 1.f;
     private float time;
     private Timer progressTimer;
-    private SimuMapViewer mapViewer;
+    private WMSMapper mapViewer;
     private NetcdfFileWriteable ncOut;
     private int i_record = 0;
     private ChangeListener animatedChangeListener;

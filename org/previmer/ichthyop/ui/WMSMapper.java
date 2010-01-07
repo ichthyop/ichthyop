@@ -38,9 +38,9 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class SimuMapViewer extends JXMapKit {
+public class WMSMapper extends JXMapKit {
 
-    private TileFactory tileFactory = new NasaTileFactory();
+    private TileFactory tileFactory = new MGDSTileFactory();
     //private TileFactory tileFactory = new LocalTileFactory();
     private List<GeoPosition> region, roughRegion;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
@@ -56,13 +56,29 @@ public class SimuMapViewer extends JXMapKit {
     boolean loadFromHeap = false;
     private List<GeoPosition>[] painterMap;
     private boolean[] loadedIndices;
-    CompoundPainter cp;
+    private CompoundPainter cp;
+    private double defaultLat = 48.38, defaultLon = -4.62;
+    private int defaultZoom = 10;
 
-    public SimuMapViewer() {
+    public WMSMapper() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
         setMiniMapVisible(false);
         setTileFactory(tileFactory);
         //getMainMap().setOverlayPainter(getCompoundPainter());
+    }
+
+    public void setWMS(String wmsURL) {
+        if (wmsURL.contains("marine")) {
+            setTileFactory(new MGDSTileFactory());
+        } else if (wmsURL.contains("demis")) {
+            setTileFactory(new DemisTileFactory());
+        } else if (wmsURL.contains("nasa")) {
+            setTileFactory(new NasaTileFactory());
+        } else {
+            setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
+        }
+        setAddressLocation(new GeoPosition(defaultLat, defaultLon));
+        setZoom(defaultZoom);
     }
 
     public int index() {
@@ -138,15 +154,15 @@ public class SimuMapViewer extends JXMapKit {
         roughRegion.add(new GeoPosition(latmax, lonmax));
         roughRegion.add(new GeoPosition(latmax, lonmin));
 
-        double avgLat = 0.5d * (latmin + latmax);
-        double avgLon = 0.5d * (lonmin + lonmax);
-        setAddressLocation(new GeoPosition(avgLat, avgLon));
+        defaultLat = 0.5d * (latmin + latmax);
+        defaultLon = 0.5d * (lonmin + lonmax);
+        setAddressLocation(new GeoPosition(defaultLat, defaultLon));
 
         //double dlon_meter = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
         double dlat_meter = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
 
-        int zoom = (int) Math.round(1.17 * Math.log(dlat_meter * 1.25) - 4.8);
-        setZoom(zoom);
+        defaultZoom = (int) Math.round(1.17 * Math.log(dlat_meter * 1.25) - 4.8);
+        setZoom(defaultZoom);
 
         vlon = nc.findVariable("lon");
         vlat = nc.findVariable("lat");
@@ -160,10 +176,10 @@ public class SimuMapViewer extends JXMapKit {
             try {
                 StringBuffer filename = new StringBuffer(System.getProperty("user.dir"));
                 filename.append(File.separator);
-                filename.append("img");
+                filename.append("output");
                 filename.append(File.separator);
                 filename.append(id);
-                filename.append("_steps.nc");
+                filename.append(".nc");
                 nc = NetcdfDataset.openFile(filename.toString(), null);
                 index = Integer.MIN_VALUE / 2;
                 init();
@@ -178,11 +194,14 @@ public class SimuMapViewer extends JXMapKit {
                 }
                 show(indexFirst());
             } catch (IOException ex) {
-                Logger.getLogger(SimuMapViewer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            this.setAddressLocation(new GeoPosition(48.5, -2.2));
-            setZoom(13);
+            defaultLat = 48.38;
+            defaultLon = -4.62;
+            defaultZoom = 10;
+            setAddressLocation(new GeoPosition(defaultLat, defaultLon));
+            setZoom(defaultZoom);
             getMainMap().setOverlayPainter(null);
             region = null;
         }
@@ -221,14 +240,10 @@ public class SimuMapViewer extends JXMapKit {
     private List<GeoPosition> readRegion() {
 
         final List<GeoPosition> lregion = new ArrayList<GeoPosition>();
-        try {
-            ArrayFloat.D1 lonEdge = (D1) nc.findVariable("lon-edge").read();
-            ArrayFloat.D1 latEdge = (D1) nc.findVariable("lat-edge").read();
-            for (int i = 0; i < lonEdge.getShape()[0]; i++) {
-                lregion.add(new GeoPosition(latEdge.get(i), lonEdge.get(i)));
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(SimuMapViewer.class.getName()).log(Level.SEVERE, null, ex);
+        ArrayFloat.D1 lonEdge = (D1) nc.findGlobalAttribute("edge_lon").getValues();
+        ArrayFloat.D1 latEdge = (D1) nc.findGlobalAttribute("edge_lat").getValues();
+        for (int i = 0; i < lonEdge.getShape()[0]; i++) {
+            lregion.add(new GeoPosition(latEdge.get(i), lonEdge.get(i)));
         }
         return lregion;
     }
@@ -300,7 +315,6 @@ public class SimuMapViewer extends JXMapKit {
     getMainMap().setOverlayPainter(cp);
     }
     }*/
-
     private void drawParticle(Graphics2D g, JXMapViewer map, GeoPosition gp) {
 
         //create a polygon
@@ -392,9 +406,9 @@ public class SimuMapViewer extends JXMapKit {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(SimuMapViewer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(SimuMapViewer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
         }
         return list;
     }
@@ -410,10 +424,11 @@ public class SimuMapViewer extends JXMapKit {
                     Rectangle rect = map.getViewportBounds();
                     g.translate(-rect.x, -rect.y);
 
-                    //drawRegion(g, map);
-                    if (currentPainter != null)
-                    for (GeoPosition gp : currentPainter) {
-                        drawParticle(g, map, gp);
+                    drawRegion(g, map);
+                    if (currentPainter != null) {
+                        for (GeoPosition gp : currentPainter) {
+                            drawParticle(g, map, gp);
+                        }
                     }
                     g.dispose();
                 }
@@ -580,6 +595,40 @@ public class SimuMapViewer extends JXMapKit {
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
                     return baseURL + x + "x" + y + "x" + "z" + ".jpg";
+                }
+            });
+        }
+    }
+
+    class MGDSTileFactory extends DefaultTileFactory {
+
+        /** Creates a new instance of IchthyopTileFactory */
+        public MGDSTileFactory() {
+            super(new TileFactoryInfo(8, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+
+                @Override
+                public String getTileUrl(int x, int y, int zoom) {
+                    int zz = 17 - zoom;
+                    int z = 4;
+                    z = (int) Math.pow(2, (double) zz - 1);
+                    return new WMSService("http://www.marine-geo.org/services/wms?", "GMRT,topo").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
+                }
+            });
+        }
+    }
+
+    class DemisTileFactory extends DefaultTileFactory {
+
+        /** Creates a new instance of IchthyopTileFactory */
+        public DemisTileFactory() {
+            super(new TileFactoryInfo(6, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+
+                @Override
+                public String getTileUrl(int x, int y, int zoom) {
+                    int zz = 17 - zoom;
+                    int z = 4;
+                    z = (int) Math.pow(2, (double) zz - 1);
+                    return new WMSService("http://www2.demis.nl/wms/wms.asp?wms=WorldMap&", "Bathymetry,Topography,Borders,Coastlines").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
                 }
             });
         }

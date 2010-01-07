@@ -272,16 +272,40 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             logger.log(Level.SEVERE, null, ex);
         }
         List listRunId = new ArrayList();
-            listRunId.add("Please select a run");
-            for (File file : folder.listFiles(new MetaFilenameFilter("*.nc"))) {
-                String strRunId = Snapshots.getReadableIdFromFile(file);
-                if (!listRunId.contains(strRunId)) {
-                    listRunId.add(strRunId);
-                }
+        listRunId.add("Please select a run");
+        for (File file : folder.listFiles(new MetaFilenameFilter("*.nc"))) {
+            String strRunId = Snapshots.getReadableIdFromFile(file);
+            if (!listRunId.contains(strRunId)) {
+                listRunId.add(strRunId);
             }
-            Collections.sort(listRunId);
-            Collections.reverse(listRunId);
-            cbBoxSimulation.setModel(new DefaultComboBoxModel(listRunId.toArray()));
+        }
+        Collections.sort(listRunId);
+        //Collections.reverse(listRunId);
+        cbBoxSimulation.setModel(new DefaultComboBoxModel(listRunId.toArray()));
+        cbBoxSimulation.setSelectedIndex(0);
+    }
+
+    @Action
+    public void selectSimulation() {
+        boolean bln = false;
+        for (Component cp : pnlBackground.getComponents()) {
+            if (cp.equals(wmsMapper)) {
+                bln = true;
+            }
+        }
+        if (!bln) {
+            pnlBackground.add(wmsMapper, StackLayout.TOP);
+        }
+        if (cbBoxSimulation.getSelectedIndex() > 0) {
+            wmsMapper.setId(Snapshots.readableIdToId((String) cbBoxSimulation.getSelectedItem()));
+        } else {
+            wmsMapper.setId(null);
+        }
+    }
+
+    @Action
+    public void changeWMS() {
+        wmsMapper.setWMS((String) cbBoxWMS.getSelectedItem());
     }
 
     @Action
@@ -1756,6 +1780,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         lblSimulation.setName("lblSimulation"); // NOI18N
 
         cbBoxSimulation.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbBoxSimulation.setAction(actionMap.get("selectSimulation")); // NOI18N
         cbBoxSimulation.setName("cbBoxSimulation"); // NOI18N
 
         btnPath.setAction(actionMap.get("changePath")); // NOI18N
@@ -1766,6 +1791,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         pnlWMS.setOpaque(false);
 
         cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "http://www.marine-geo.org/services/wms?", "http://wms.jpl.nasa.gov/wms.cgi?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
+        cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
         cbBoxWMS.setName("cbBoxWMS"); // NOI18N
 
         lblWMS.setText(resourceMap.getString("lblWMS.text")); // NOI18N
@@ -2143,4 +2169,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private float nbfps = 1.f;
     private float time;
     private Timer progressTimer;
+    private WMSMapper wmsMapper = new WMSMapper();
+
+    ;
 }

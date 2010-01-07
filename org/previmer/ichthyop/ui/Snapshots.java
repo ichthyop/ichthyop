@@ -44,7 +44,7 @@ public class Snapshots {
 
     public static String getIdFromFile(File file) {
         String filename = file.getName();
-        return filename.split("_")[0];
+        return filename;
     }
 
     public static String getReadableIdFromFile(File file) {
@@ -53,8 +53,9 @@ public class Snapshots {
 
     public static String idToReadableId(String id) {
         String strId = id.substring(id.indexOf("run") + 3);
+        String prefix = id.substring(0, id.indexOf("_ichthyop")) + " run ";
         try {
-            return "Run " + dtformatterReadableId.format(dtformatterId.parse(strId));
+            return prefix + dtformatterReadableId.format(dtformatterId.parse(strId));
 
         } catch (ParseException ex) {
             Logger.getLogger(IchthyopApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -63,9 +64,10 @@ public class Snapshots {
     }
 
     public static String readableIdToId(String readableId) {
-        String strReadableId = readableId.substring(4);
+        String strReadableId = readableId.substring(readableId.indexOf(" run ") + 5);
+        String prefix = readableId.substring(0, readableId.indexOf(" run "));
         try {
-            return "ichthyop-run" + dtformatterId.format(dtformatterReadableId.parse(strReadableId));
+            return prefix + "_ichthyop-run" + dtformatterId.format(dtformatterReadableId.parse(strReadableId));
 
         } catch (ParseException ex) {
             Logger.getLogger(IchthyopApp.class.getName()).log(Level.SEVERE, null, ex);

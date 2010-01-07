@@ -24,7 +24,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.io.UserDefinedTracker;
+import org.previmer.ichthyop.ui.Snapshots;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -54,7 +59,12 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     private OutputManager() {
         super();
-        isRecord = getSimulationManager().getParameterManager().isBlockEnabled(BlockType.OPTION, block_key);
+        //isRecord = getSimulationManager().getParameterManager().isBlockEnabled(BlockType.OPTION, block_key);
+        /*
+         * phv 07-01-2010
+         * Ichthyop systematically generates output files for postprocessing mapping.
+         */
+        isRecord = true;
         if (isRecord()) {
             getSimulationManager().getTimeManager().addNextStepListener(this);
             getSimulationManager().getTimeManager().addLastStepListener(this);
@@ -77,7 +87,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     private String getPathName() {
-        return getParameter("directory_out") + getParameter("output_filename") + ".nc";
+        return getParameter("directory_out") + getParameter("output_filename") + "_" + Snapshots.newId() + ".nc";
     }
 
     private boolean isRecord() {
@@ -89,19 +99,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     public void setUp() {
-
-        if (isRecord()) {
-            try {
-                ncOut = NetcdfFileWriteable.createNew("");
-                record_frequency = Integer.valueOf(getParameter("record_frequency"));
-                ncOut.setLocation(getPathName());
-                addTrackers();
-                ncOut.create();
-            } catch (IOException ex) {
-                Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
-        }
     }
 
     public void init() {
@@ -121,6 +118,42 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         } catch (NullPointerException ex) {
             Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private void addGlobalAttributes() {
+        /* Add the region edges */
+        List<GeoPosition> region = makeRegion();
+        ArrayFloat.D1 lonEdge = new ArrayFloat.D1(region.size());
+        ArrayFloat.D1 latEdge = new ArrayFloat.D1(region.size());
+        int i = 0;
+        for (GeoPosition gp : region) {
+            lonEdge.set(i, (float) gp.getLongitude());
+            latEdge.set(i, (float) gp.getLatitude());
+            i++;
+        }
+        ncOut.addGlobalAttribute("edge_lat", latEdge);
+        ncOut.addGlobalAttribute("edge_lon", lonEdge);
+
+        /* Add the zones */
+    }
+
+    private List<GeoPosition> makeRegion() {
+
+        final List<GeoPosition> lregion = new ArrayList<GeoPosition>();
+        IDataset dataset = getSimulationManager().getDataset();
+        for (int i = 1; i < dataset.get_nx(); i++) {
+            lregion.add(new GeoPosition(dataset.getLat(i, 0), dataset.getLon(i, 0)));
+        }
+        for (int j = 1; j < dataset.get_ny(); j++) {
+            lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), dataset.getLon(dataset.get_nx() - 1, j)));
+        }
+        for (int i = dataset.get_nx() - 1; i > 0; i--) {
+            lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), dataset.getLon(i, dataset.get_ny() - 1)));
+        }
+        for (int j = dataset.get_ny() - 1; j > 0; j--) {
+            lregion.add(new GeoPosition(dataset.getLat(0, j), dataset.getLon(0, j)));
+        }
+        return lregion;
     }
 
     private void addTrackers() {
@@ -215,17 +248,23 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                 record_frequency = Integer.valueOf(getParameter("record_frequency"));
                 ncOut.setLocation(getPathName());
                 addTrackers();
-                ncOut.create();
+                //ncOut.create();
             } catch (IOException ex) {
                 Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-            Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
         }
     }
 
     public void initializePerformed(InitializeEvent e) {
-        i_record = 0;
-        dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
+        try {
+            i_record = 0;
+            dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
+            addGlobalAttributes();
+            ncOut.create();
+        } catch (IOException ex) {
+            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
     }
 
     public class NCDimFactory {
