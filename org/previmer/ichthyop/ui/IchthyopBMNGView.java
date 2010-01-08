@@ -10,6 +10,9 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
 import java.lang.reflect.InvocationTargetException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
@@ -18,11 +21,14 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -287,15 +293,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
 
     @Action
     public void selectSimulation() {
-        boolean bln = false;
-        for (Component cp : pnlBackground.getComponents()) {
-            if (cp.equals(wmsMapper)) {
-                bln = true;
-            }
-        }
-        if (!bln) {
-            pnlBackground.add(wmsMapper, StackLayout.TOP);
-        }
+        
         if (cbBoxSimulation.getSelectedIndex() > 0) {
             wmsMapper.setId(Snapshots.readableIdToId((String) cbBoxSimulation.getSelectedItem()));
         } else {
@@ -468,6 +466,8 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         }
         setMessage("Closed " + getSimulationManager().getConfigurationFile().toString());
         getSimulationManager().setConfigurationFile(null);
+        lblCfgFile.setText("Configuration file");
+        lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
         if (btnSimulationRecord.isSelected()) {
             btnSimulationRecord.doClick();
         }
@@ -939,7 +939,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             if (file.isFile()) {
                 cfgPath = file.getParentFile();
                 loadConfigurationFile(file);
-                tpConfiguration.setCollapsed(false);
+                //tpConfiguration.setCollapsed(false);
             } else if (file.isDirectory()) {
                 cfgPath = file;
             }
@@ -1098,28 +1098,34 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         tpContainer.setLayout(new GridBagLayout());
 
         tpConfiguration = new JXTaskPane();
-        tpConfiguration.setCollapsed(true);
+        tpConfiguration.setCollapsed(false);
+        tpConfiguration.setAnimated(false);
         tpConfiguration.setTitle(getResourceMap().getString("step.Configuration.text"));
         tpConfiguration.setIcon(getResourceMap().getIcon("step.Configuration.icon"));
         tpConfiguration.add(pnlConfiguration);
 
         tpSimulation = new JXTaskPane();
         tpSimulation.setCollapsed(true);
+        tpSimulation.setAnimated(false);
         tpSimulation.setTitle(getResourceMap().getString("step.Simulation.text"));
         tpSimulation.setIcon(getResourceMap().getIcon("step.Simulation.icon"));
         tpSimulation.add(pnlSimulation);
 
         tpMapping = new JXTaskPane();
         tpMapping.setCollapsed(true);
+        tpMapping.setAnimated(false);
         tpMapping.setTitle(getResourceMap().getString("step.Mapping.text"));
         tpMapping.setIcon(getResourceMap().getIcon("step.Mapping.icon"));
         tpMapping.add(pnlMapping);
 
         tpAnimation = new JXTaskPane();
         tpAnimation.setCollapsed(true);
+        tpAnimation.setAnimated(false);
         tpAnimation.setTitle(getResourceMap().getString("step.Animation.text"));
         tpAnimation.setIcon(getResourceMap().getIcon("step.Animation.icon"));
         tpAnimation.add(pnlAnimation);
+
+        addTaskPaneListeners();
 
         tpContainer.add(tpConfiguration, new GridBagConstraints(0, 0, 1, 1, 100, 0,
                 GridBagConstraints.NORTH,
@@ -1166,6 +1172,68 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
                 GridBagConstraints.BOTH,
                 new Insets(5, 5, 5, 5), 0, 0));
         splitPane.setRightComponent(rightPane);
+    }
+
+    private void addTaskPaneListeners() {
+
+        tpConfiguration.addPropertyChangeListener("collapsed", new PropertyChangeListener() {
+
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (!(Boolean) evt.getNewValue()) {
+                    tpSimulation.setCollapsed(true);
+                    tpAnimation.setCollapsed(true);
+                    tpMapping.setCollapsed(true);
+                }
+            }
+        });
+
+        tpSimulation.addPropertyChangeListener("collapsed", new PropertyChangeListener() {
+
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (!(Boolean) evt.getNewValue()) {
+                    tpConfiguration.setCollapsed(true);
+                    tpAnimation.setCollapsed(true);
+                    tpMapping.setCollapsed(true);
+                }
+            }
+        });
+
+        tpMapping.addPropertyChangeListener("collapsed", new PropertyChangeListener() {
+
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (!(Boolean) evt.getNewValue()) {
+                    tpSimulation.setCollapsed(true);
+                    tpAnimation.setCollapsed(true);
+                    tpConfiguration.setCollapsed(true);
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        public void run() {
+                            pnlBackground.add(wmsMapper, StackLayout.TOP);
+                            pnlBackground.repaint();
+                        }
+                    });
+                } else {
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        public void run() {
+                            pnlBackground.remove(wmsMapper);
+                            pnlBackground.repaint();
+                        }
+                    });
+                }
+            }
+        });
+
+        tpAnimation.addPropertyChangeListener("collapsed", new PropertyChangeListener() {
+
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (!(Boolean) evt.getNewValue()) {
+                    tpSimulation.setCollapsed(true);
+                    tpConfiguration.setCollapsed(true);
+                    tpMapping.setCollapsed(true);
+                }
+            }
+        });
     }
 
     /** This method is called from within the constructor to
