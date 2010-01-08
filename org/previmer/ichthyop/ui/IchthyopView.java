@@ -78,9 +78,9 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 /**
  * The application's main frame.
  */
-public class IchthyopBMNGView extends FrameView implements NextStepListener, TimingTarget {
+public class IchthyopView extends FrameView implements NextStepListener, TimingTarget {
 
-    public IchthyopBMNGView(SingleFrameApplication app) {
+    public IchthyopView(SingleFrameApplication app) {
         super(app);
 
         createLogfile();
@@ -616,7 +616,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
 
     private void animate(boolean animated) {
 
-        ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopBMNGView.class);
+        ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         if (animated) {
             //animator.setStartDelay(1000);
             animator.setAcceleration(0.01f);
@@ -755,7 +755,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             ImageIO.write(bi, "PNG", new File(fileName.toString()));
 
         } catch (IOException ex) {
-            Logger.getLogger(IchthyopBMNGView.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -861,7 +861,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
 
     public class SimulationRunTask extends Task {
 
-        ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopBMNGView.class);
+        ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         JLabel lblProgress;
 
         SimulationRunTask(Application instance) {
@@ -1433,11 +1433,11 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
 
         menuBar.setName("menuBar"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopBMNGView.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
         fileMenu.setName("fileMenu"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopBMNGView.class, this);
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
         newMenuItem.setAction(actionMap.get("newConfigurationFile")); // NOI18N
         newMenuItem.setName("newMenuItem"); // NOI18N
         fileMenu.add(newMenuItem);

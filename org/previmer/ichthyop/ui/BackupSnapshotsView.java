@@ -192,8 +192,8 @@ public class BackupSnapshotsView extends FrameView {
         }
     }
 
-    private IchthyopBMNGView getIchthyopView() {
-        return (IchthyopBMNGView) IchthyopApp.getApplication().getMainView();
+    private IchthyopView getIchthyopView() {
+        return (IchthyopView) IchthyopApp.getApplication().getMainView();
     }
 
     public void setMessage(String text) {
