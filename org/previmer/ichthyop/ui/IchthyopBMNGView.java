@@ -30,6 +30,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -165,7 +166,8 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         btnSimulationRecord.getAction().setEnabled(false);
         simulationReplayToolBar.setVisible(false);
         simulationRecordToolBar.setVisible(false);
-        fillCbBoxSimulation(new File("./output/"));
+        fillCbBoxMapping(new File("./output/"));
+        fillCbBoxAnimation(new File("./output/"));
 
         setMessage("Please, open a configuration file or create a new one");
     }
@@ -220,12 +222,15 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     public void changeSimulationReplay() {
         snapshots = createSnapshots();
         if (snapshots != null) {
-            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (String) cbBoxRunId.getSelectedItem());
+            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (String) cbBoxAnimation.getSelectedItem());
+            if (snapshots.getNumberImages() > 0) {
             setReplayToolbarEnabled(true);
             sliderTime.setValue(0);
             sliderTime.setMaximum(snapshots.getNumberImages() - 1);
-            replayPanel.setSnapshots(snapshots);
-            getFrame().pack();
+            replayPanel.setSnapshots(snapshots);} else {
+                setMessage("No PNG pictures found in folder " + snapshots.getPath());
+            }
+
         } else {
             getFrame().setTitle(getResourceMap().getString("Application.title") + " - Snapshots viewer");
             setReplayToolbarEnabled(false);
@@ -250,52 +255,92 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             }
             setMessage("Run " + getSnapshots().getReadableId() + " deleted.");
             //viewerPanel.setSnapshots(null);
-            Object obj = cbBoxRunId.getSelectedItem();
-            cbBoxRunId.setSelectedIndex(cbBoxRunId.getItemCount() - 1);
-            cbBoxRunId.removeItem(obj);
+            Object obj = cbBoxAnimation.getSelectedItem();
+            cbBoxAnimation.setSelectedIndex(cbBoxAnimation.getItemCount() - 1);
+            cbBoxAnimation.removeItem(obj);
         }
     }
 
     @Action
     public void changePath() {
-        JFileChooser chooser = new JFileChooser(new File(lblFolder.getText()));
+
+        File file = tpMapping.isCollapsed()
+                ? new File(lblFolder2.getText())
+                : new File(lblFolder.getText());
+        JFileChooser chooser = new JFileChooser(file);
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int returnPath = chooser.showDialog(getFrame(), "Select folder");
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            fillCbBoxSimulation(chooser.getSelectedFile());
+            if (!tpMapping.isCollapsed()) {
+                fillCbBoxMapping(chooser.getSelectedFile());
+            } else {
+                fillCbBoxAnimation(chooser.getSelectedFile());
+            }
         }
     }
 
     @Action
     public void createMaps() {
+        setMessage("Not implemented yet");
     }
 
-    private void fillCbBoxSimulation(File folder) {
-        try {
-            lblFolder.setText(folder.getCanonicalPath());
-            lblFolder.setFont(lblFolder.getFont().deriveFont(12));
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
-        List listRunId = new ArrayList();
-        listRunId.add("Please select a run");
+    @Action
+    public void cancelMapping() {
+        setMessage("Not implemented yet");
+    }
+
+    private void fillCbBoxMapping(File folder) {
+
+        lblFolder.setText(folder.getAbsolutePath());
+        lblFolder.setFont(lblFolder.getFont().deriveFont(12));
+        List listRuns = new ArrayList();
+        listRuns.add("Please select a run");
         for (File file : folder.listFiles(new MetaFilenameFilter("*.nc"))) {
             String strRunId = Snapshots.getReadableIdFromFile(file);
-            if (!listRunId.contains(strRunId)) {
-                listRunId.add(strRunId);
+            if (!listRuns.contains(strRunId)) {
+                listRuns.add(strRunId);
             }
         }
-        Collections.sort(listRunId);
+        Collections.sort(listRuns);
         //Collections.reverse(listRunId);
-        cbBoxSimulation.setModel(new DefaultComboBoxModel(listRunId.toArray()));
-        cbBoxSimulation.setSelectedIndex(0);
+        cbBoxMapping.setModel(new DefaultComboBoxModel(listRuns.toArray()));
+        cbBoxMapping.setSelectedIndex(0);
+    }
+
+    private void fillCbBoxAnimation(File folder) {
+
+        lblFolder2.setText(folder.getAbsolutePath());
+        lblFolder2.setFont(lblFolder.getFont().deriveFont(12));
+        List listRuns = new ArrayList();
+        listRuns.add("Please select a run");
+        File[] listFolders = folder.listFiles(new FileFilter() {
+
+            public boolean accept(File pathname) {
+                boolean accepted = false;
+                if (pathname.isDirectory()) {
+                    String name = pathname.getName();
+                    accepted = name.matches(".*ichthyop-run.*");
+                }
+                return accepted;
+            }
+        });
+        for (File file : listFolders) {
+            String strRunId = Snapshots.getReadableIdFromFile(file);
+            if (!listRuns.contains(strRunId)) {
+                listRuns.add(strRunId);
+            }
+        }
+        Collections.sort(listRuns);
+        //Collections.reverse(listRunId);
+        cbBoxAnimation.setModel(new DefaultComboBoxModel(listRuns.toArray()));
+        cbBoxAnimation.setSelectedIndex(0);
     }
 
     @Action
     public void selectSimulation() {
-        
-        if (cbBoxSimulation.getSelectedIndex() > 0) {
-            wmsMapper.setId(Snapshots.readableIdToId((String) cbBoxSimulation.getSelectedItem()));
+
+        if (cbBoxMapping.getSelectedIndex() > 0) {
+            wmsMapper.setId(Snapshots.readableIdToId((String) cbBoxMapping.getSelectedItem()));
         } else {
             wmsMapper.setId(null);
         }
@@ -346,14 +391,14 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         }
         Collections.sort(listRunId);
         Collections.reverse(listRunId);
-        cbBoxRunId.setModel(new DefaultComboBoxModel(listRunId.toArray()));
+        cbBoxAnimation.setModel(new DefaultComboBoxModel(listRunId.toArray()));
         simulationReplayToolBar.setVisible(true);
         pnlSimulation.remove(replayPanel);
         pnlSimulation.add(replayPanel = new ReplayPanel(), StackLayout.TOP);
-        if (!((String) cbBoxRunId.getItemAt(0)).startsWith("Please") && getRunId().matches(Snapshots.readableIdToId((String) cbBoxRunId.getItemAt(0)))) {
-            cbBoxRunId.setSelectedIndex(0);
+        if (!((String) cbBoxAnimation.getItemAt(0)).startsWith("Please") && getRunId().matches(Snapshots.readableIdToId((String) cbBoxAnimation.getItemAt(0)))) {
+            cbBoxAnimation.setSelectedIndex(0);
         } else {
-            cbBoxRunId.setSelectedIndex(cbBoxRunId.getItemCount() - 1);
+            cbBoxAnimation.setSelectedIndex(cbBoxAnimation.getItemCount() - 1);
         }
         pnlSimulation.setVisible(true);
         replayPanel.addKeyListener(new KeyScroller());
@@ -518,11 +563,11 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     }
 
     private Snapshots createSnapshots() {
-        String id = (String) cbBoxRunId.getSelectedItem();
+        String id = (String) cbBoxAnimation.getSelectedItem();
         setMessage(id);
         sliderTime.setValue(0);
         if (!id.startsWith("Please")) {
-            return new Snapshots(Snapshots.readableIdToId(id));
+            return new Snapshots(Snapshots.readableIdToId(id), lblFolder2.getText());
         } else {
             return null;
         }
@@ -577,7 +622,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             animator.setAcceleration(0.01f);
             setReplayToolbarEnabled(false);
             btnAnimaction.setEnabled(true);
-            cbBoxRunId.setEnabled(false);
+            cbBoxAnimation.setEnabled(false);
             replayPanel.initAnim();
             animator.start();
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
@@ -616,7 +661,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
 
     public void end() {
         setReplayToolbarEnabled(true);
-        cbBoxRunId.setEnabled(true);
+        cbBoxAnimation.setEnabled(true);
         replayPanel.endAnim();
         setMessage(getResourceMap().getString("animAction.stopped.message"));
 
@@ -897,7 +942,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             openMenuItem.getAction().setEnabled(true);
             isRunning = false;
             resetProgressBar();
-            fillCbBoxSimulation(new File("./output/"));
+            fillCbBoxMapping(new File("./output/"));
             tpSimulation.setCollapsed(true);
             tpMapping.setCollapsed(false);
 
@@ -1231,6 +1276,21 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
                     tpSimulation.setCollapsed(true);
                     tpConfiguration.setCollapsed(true);
                     tpMapping.setCollapsed(true);
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        public void run() {
+                            pnlBackground.add(replayPanel, StackLayout.TOP);
+                            pnlBackground.repaint();
+                        }
+                    });
+                } else {
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        public void run() {
+                            pnlBackground.remove(replayPanel);
+                            pnlBackground.repaint();
+                        }
+                    });
                 }
             }
         });
@@ -1329,13 +1389,14 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         pnlSimulationUI = new SimulationUI();
         pnlMapping = new javax.swing.JPanel();
         lblSimulation = new javax.swing.JLabel();
-        cbBoxSimulation = new javax.swing.JComboBox();
+        cbBoxMapping = new javax.swing.JComboBox();
         btnPath = new javax.swing.JButton();
         pnlWMS = new javax.swing.JPanel();
         cbBoxWMS = new javax.swing.JComboBox();
         lblWMS = new javax.swing.JLabel();
         btnMapping = new javax.swing.JButton();
         lblFolder = new javax.swing.JLabel();
+        btnCancelMapping = new javax.swing.JButton();
         pnlAnimation = new javax.swing.JPanel();
         btnFirst = new javax.swing.JButton();
         btnPrevious = new javax.swing.JButton();
@@ -1345,9 +1406,13 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         sliderTime = new javax.swing.JSlider();
         lblFramePerSecond = new javax.swing.JLabel();
         animationSpeed = new javax.swing.JSpinner();
-        cbBoxRunId = new javax.swing.JComboBox();
+        cbBoxAnimation = new javax.swing.JComboBox();
         btnDeleteSnapshots = new javax.swing.JButton();
         btnSaveAsSnapshots = new javax.swing.JButton();
+        lblSimulation2 = new javax.swing.JLabel();
+        btnPath2 = new javax.swing.JButton();
+        lblFolder2 = new javax.swing.JLabel();
+        lblAnimationSpeed = new javax.swing.JLabel();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1847,9 +1912,9 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         lblSimulation.setText(resourceMap.getString("lblSimulation.text")); // NOI18N
         lblSimulation.setName("lblSimulation"); // NOI18N
 
-        cbBoxSimulation.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cbBoxSimulation.setAction(actionMap.get("selectSimulation")); // NOI18N
-        cbBoxSimulation.setName("cbBoxSimulation"); // NOI18N
+        cbBoxMapping.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbBoxMapping.setAction(actionMap.get("selectSimulation")); // NOI18N
+        cbBoxMapping.setName("cbBoxMapping"); // NOI18N
 
         btnPath.setAction(actionMap.get("changePath")); // NOI18N
         btnPath.setName("btnPath"); // NOI18N
@@ -1892,6 +1957,9 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         lblFolder.setText(resourceMap.getString("lblFolder.text")); // NOI18N
         lblFolder.setName("lblFolder"); // NOI18N
 
+        btnCancelMapping.setAction(actionMap.get("cancelMapping")); // NOI18N
+        btnCancelMapping.setName("btnCancelMapping"); // NOI18N
+
         javax.swing.GroupLayout pnlMappingLayout = new javax.swing.GroupLayout(pnlMapping);
         pnlMapping.setLayout(pnlMappingLayout);
         pnlMappingLayout.setHorizontalGroup(
@@ -1903,10 +1971,13 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
                     .addGroup(pnlMappingLayout.createSequentialGroup()
                         .addComponent(lblSimulation)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cbBoxSimulation, 0, 265, Short.MAX_VALUE)
+                        .addComponent(cbBoxMapping, 0, 265, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnPath))
-                    .addComponent(btnMapping)
+                    .addGroup(pnlMappingLayout.createSequentialGroup()
+                        .addComponent(btnMapping)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCancelMapping))
                     .addComponent(pnlWMS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1916,12 +1987,14 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
                 .addContainerGap()
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblSimulation)
-                    .addComponent(cbBoxSimulation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbBoxMapping, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnPath))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblFolder)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnMapping)
+                .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnMapping)
+                    .addComponent(btnCancelMapping))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pnlWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(17, Short.MAX_VALUE))
@@ -1960,6 +2033,8 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         btnLast.setName("btnLast"); // NOI18N
         btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
+        sliderTime.setPaintTrack(false);
+        sliderTime.setSnapToTicks(true);
         sliderTime.setValue(0);
         sliderTime.setName("sliderTime"); // NOI18N
         sliderTime.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -1976,6 +2051,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             }
         });
 
+        lblFramePerSecond.setFont(resourceMap.getFont("lblFramePerSecond.font")); // NOI18N
         lblFramePerSecond.setText(resourceMap.getString("lblFramePerSecond.text")); // NOI18N
         lblFramePerSecond.setToolTipText(resourceMap.getString("lblFramePerSecond.toolTipText")); // NOI18N
         lblFramePerSecond.setName("lblFramePerSecond"); // NOI18N
@@ -1996,21 +2072,34 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             }
         });
 
-        cbBoxRunId.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cbBoxRunId.setAction(actionMap.get("changeSimulationReplay")); // NOI18N
-        cbBoxRunId.setName("cbBoxRunId"); // NOI18N
+        cbBoxAnimation.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbBoxAnimation.setAction(actionMap.get("changeSimulationReplay")); // NOI18N
+        cbBoxAnimation.setName("cbBoxAnimation"); // NOI18N
 
         btnDeleteSnapshots.setAction(actionMap.get("deleteSnapshots")); // NOI18N
         btnDeleteSnapshots.setFocusable(false);
-        btnDeleteSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnDeleteSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnDeleteSnapshots.setName("btnDeleteSnapshots"); // NOI18N
         btnDeleteSnapshots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
         btnSaveAsSnapshots.setAction(actionMap.get("saveAsSnapshots")); // NOI18N
         btnSaveAsSnapshots.setFocusable(false);
-        btnSaveAsSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnSaveAsSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnSaveAsSnapshots.setName("btnSaveAsSnapshots"); // NOI18N
         btnSaveAsSnapshots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+
+        lblSimulation2.setText(resourceMap.getString("lblSimulation2.text")); // NOI18N
+        lblSimulation2.setName("lblSimulation2"); // NOI18N
+
+        btnPath2.setAction(actionMap.get("changePath")); // NOI18N
+        btnPath2.setName("btnPath2"); // NOI18N
+
+        lblFolder2.setFont(resourceMap.getFont("lblFolder2.font")); // NOI18N
+        lblFolder2.setText(resourceMap.getString("lblFolder2.text")); // NOI18N
+        lblFolder2.setName("lblFolder2"); // NOI18N
+
+        lblAnimationSpeed.setText(resourceMap.getString("lblAnimationSpeed.text")); // NOI18N
+        lblAnimationSpeed.setName("lblAnimationSpeed"); // NOI18N
 
         javax.swing.GroupLayout pnlAnimationLayout = new javax.swing.GroupLayout(pnlAnimation);
         pnlAnimation.setLayout(pnlAnimationLayout);
@@ -2019,7 +2108,20 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             .addGroup(pnlAnimationLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
+                    .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                .addComponent(lblSimulation2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cbBoxAnimation, 0, 225, Short.MAX_VALUE))
+                            .addComponent(lblFolder2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnPath2))
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addComponent(btnDeleteSnapshots)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSaveAsSnapshots))
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(btnFirst)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2031,21 +2133,28 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnLast))
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(lblFramePerSecond)
+                        .addComponent(lblAnimationSpeed)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(cbBoxRunId, 0, 144, Short.MAX_VALUE)
+                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteSnapshots)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsSnapshots)))
+                        .addComponent(lblFramePerSecond)))
                 .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
             pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAnimationLayout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbBoxAnimation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblSimulation2)
+                    .addComponent(btnPath2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblFolder2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnDeleteSnapshots)
+                    .addComponent(btnSaveAsSnapshots))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnLast)
                     .addComponent(btnNext)
@@ -2056,14 +2165,10 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
                 .addComponent(sliderTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblFramePerSecond)
-                    .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSaveAsSnapshots)
-                    .addComponent(btnDeleteSnapshots)
-                    .addComponent(cbBoxRunId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblAnimationSpeed)
+                    .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblFramePerSecond))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         setComponent(mainPanel);
@@ -2112,6 +2217,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSpinner animationSpeed;
     private javax.swing.JButton btnAnimaction;
+    private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
     private javax.swing.JButton btnDeleteSnapshots;
     private javax.swing.JButton btnExit;
@@ -2123,6 +2229,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private javax.swing.JButton btnNext;
     private javax.swing.JButton btnOpenCfgFile;
     private javax.swing.JButton btnPath;
+    private javax.swing.JButton btnPath2;
     private javax.swing.JToggleButton btnPreview;
     private javax.swing.JButton btnPrevious;
     private javax.swing.JButton btnSaveAsSnapshots;
@@ -2131,8 +2238,8 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private javax.swing.JToggleButton btnSimulationRecord;
     private javax.swing.JToggleButton btnSimulationReplay;
     private javax.swing.JButton btnSimulationRun;
-    private javax.swing.JComboBox cbBoxRunId;
-    private javax.swing.JComboBox cbBoxSimulation;
+    private javax.swing.JComboBox cbBoxAnimation;
+    private javax.swing.JComboBox cbBoxMapping;
     private javax.swing.JComboBox cbBoxWMS;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JRadioButtonMenuItem gtkMenuItem;
@@ -2155,8 +2262,10 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private javax.swing.JSeparator jSeparator8;
     private javax.swing.JToolBar.Separator jSeparator9;
     private javax.swing.JMenu lafMenu;
+    private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblCfgFile;
     private javax.swing.JLabel lblFolder;
+    private javax.swing.JLabel lblFolder2;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
@@ -2164,6 +2273,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private javax.swing.JLabel lblRecordStep;
     private javax.swing.JLabel lblRefreshFrequency;
     private javax.swing.JLabel lblSimulation;
+    private javax.swing.JLabel lblSimulation2;
     private javax.swing.JLabel lblSimulationRecord;
     private javax.swing.JLabel lblSimulationReplay;
     private javax.swing.JLabel lblSteps;
@@ -2238,6 +2348,4 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private float time;
     private Timer progressTimer;
     private WMSMapper wmsMapper = new WMSMapper();
-
-    ;
 }

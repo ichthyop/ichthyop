@@ -24,13 +24,22 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 public class Snapshots {
 
     private String id;
-    private File path = new File(System.getProperty("user.dir") + File.separator + "img");
+    private File path;
     private File[] listFiles;
     private static SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
     private static SimpleDateFormat dtformatterReadableId = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
     public Snapshots(String id) {
         this.id = id;
+    }
+
+    public Snapshots(String id, String folder) {
+        this.id = id;
+        String folderName = folder;
+        if (!folderName.endsWith(File.separator)) {
+            folderName += File.separator;
+        }
+        path = new File(folderName + id);
     }
 
     public static String newId() {
@@ -52,8 +61,11 @@ public class Snapshots {
     }
 
     public static String idToReadableId(String id) {
-        String strId = id.substring(id.indexOf("run") + 3);
-        String prefix = id.substring(0, id.indexOf("_ichthyop")) + " run ";
+        String strId = id.substring(id.indexOf("ichthyop-run") + 12);
+        String prefix = id.substring(0, id.indexOf("ichthyop-run"));
+        prefix += prefix.length() > 0
+                ? " run "
+                : "Run ";
         try {
             return prefix + dtformatterReadableId.format(dtformatterId.parse(strId));
 
@@ -64,10 +76,13 @@ public class Snapshots {
     }
 
     public static String readableIdToId(String readableId) {
-        String strReadableId = readableId.substring(readableId.indexOf(" run ") + 5);
-        String prefix = readableId.substring(0, readableId.indexOf(" run "));
+        String strReadableId = readableId.substring(readableId.toLowerCase().lastIndexOf("run") + 3);
+        String prefix = readableId.substring(0, readableId.toLowerCase().lastIndexOf("run"));
         try {
-            return prefix + "_ichthyop-run" + dtformatterId.format(dtformatterReadableId.parse(strReadableId));
+            String strId = prefix.length() > 0
+                    ? prefix + "_ichthyop-run"
+                    : "ichthyop-run";
+            return strId + dtformatterId.format(dtformatterReadableId.parse(strReadableId));
 
         } catch (ParseException ex) {
             Logger.getLogger(IchthyopApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -85,15 +100,15 @@ public class Snapshots {
 
     public File[] getImages() {
 
-        if (!path.exists()) {
-            IOTools.makeDirectories(path.getPath());
-        }
-
         if (listFiles != null) {
             return listFiles;
         } else {
-            listFiles = path.listFiles(new MetaFilenameFilter(getId() + "*.png"));
-            Arrays.sort(listFiles);
+            try {
+                listFiles = path.listFiles(new MetaFilenameFilter(getId() + "*.png"));
+                Arrays.sort(listFiles);
+            } catch (Exception e) {
+                listFiles = new File[0];
+            }
             return listFiles;
         }
     }
@@ -120,5 +135,9 @@ public class Snapshots {
 
     public int getNumberImages() {
         return getImages().length;
+    }
+
+    public String getPath() {
+        return path.getAbsolutePath();
     }
 }
