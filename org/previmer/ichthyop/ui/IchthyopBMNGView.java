@@ -340,9 +340,9 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     public void selectSimulation() {
 
         if (cbBoxMapping.getSelectedIndex() > 0) {
-            wmsMapper.setId(Snapshots.readableIdToId((String) cbBoxMapping.getSelectedItem()));
+            wmsMapper.setId(Snapshots.readableIdToId((String) cbBoxMapping.getSelectedItem()), lblFolder.getText());
         } else {
-            wmsMapper.setId(null);
+            wmsMapper.setId(null, "");
         }
     }
 
@@ -706,8 +706,8 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
                         if (((getSimulationManager().getTimeManager().getTime() - getSimulationManager().getTimeManager().get_tO()) % dt_refresh) == 0) {
                             lblRecordBulb.setIcon(getResourceMap().getIcon("lblRecordBulb.icon.on"));
                             lblRecordBulb.setText("Snapshot: " + getSimulationManager().getTimeManager().stepToString());
-                            bmngViewer.drawParticles();
-                            screen2File(bmngViewer, getSimulationManager().getTimeManager().getCalendar());
+                            //bmngViewer.drawParticles();
+                            //screen2File(bmngViewer, getSimulationManager().getTimeManager().getCalendar());
                             recordTimer.restart();
                         }
                     }
@@ -881,7 +881,6 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
             }
             btnPreview.getAction().setEnabled(false);
             btnSimulationReplay.getAction().setEnabled(false);
-            bmngViewer.setEnabled(false);
             resetRunId();
             lblProgress = new JLabel("0%");
             lblProgress.setOpaque(false);
@@ -1019,6 +1018,7 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     public void setMessage(String text) {
         statusMessageLabel.setText((text == null) ? "" : text);
         messageTimer.restart();
+        loggerScrollPane.setMessage(text);
     }
 
     private void updateLookAndFeel(String laf) {
@@ -1198,7 +1198,9 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
         pnlSteps.setLayout(new VerticalLayout());
         pnlSteps.add(tpContainer);
         leftSplitPane.setTopComponent(pnlSteps);
-        leftSplitPane.setBottomComponent(new JXTitledPanel("Information"));
+        JXTitledPanel informationPanel = new JXTitledPanel("Information");
+        informationPanel.add(loggerScrollPane);
+        leftSplitPane.setBottomComponent(informationPanel);
         leftPane.add(leftSplitPane, new GridBagConstraints(0, 0, 1, 1, 100, 100,
                 GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH,
@@ -2340,7 +2342,6 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private String runId;
     private boolean isSetup;
     private ReplayPanel replayPanel = new ReplayPanel();
-    private WMSViewer bmngViewer = new WMSViewer();
     private Snapshots snapshots;
     private final float TEN_MINUTES = 10.f * 60.f;
     private Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
@@ -2348,4 +2349,5 @@ public class IchthyopBMNGView extends FrameView implements NextStepListener, Tim
     private float time;
     private Timer progressTimer;
     private WMSMapper wmsMapper = new WMSMapper();
+    private LoggerScrollPane loggerScrollPane = new LoggerScrollPane();
 }

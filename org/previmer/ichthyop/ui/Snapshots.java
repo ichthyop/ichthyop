@@ -62,7 +62,7 @@ public class Snapshots {
 
     public static String idToReadableId(String id) {
         String strId = id.substring(id.indexOf("ichthyop-run") + 12);
-        String prefix = id.substring(0, id.indexOf("ichthyop-run"));
+        String prefix = id.substring(0, Math.max(id.indexOf("ichthyop-run") - 1, 0));
         prefix += prefix.length() > 0
                 ? " run "
                 : "Run ";
@@ -80,7 +80,7 @@ public class Snapshots {
         String prefix = readableId.substring(0, readableId.toLowerCase().lastIndexOf("run"));
         try {
             String strId = prefix.length() > 0
-                    ? prefix + "_ichthyop-run"
+                    ? prefix.trim() + "_ichthyop-run"
                     : "ichthyop-run";
             return strId + dtformatterId.format(dtformatterReadableId.parse(strReadableId));
 

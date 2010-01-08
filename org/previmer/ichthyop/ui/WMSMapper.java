@@ -170,14 +170,15 @@ public class WMSMapper extends JXMapKit {
         bgPainter = getBgPainter();
     }
 
-    public void setId(String id) {
+    public void setId(String id, String folder) {
         this.id = id;
         if (null != id) {
             try {
-                StringBuffer filename = new StringBuffer(System.getProperty("user.dir"));
-                filename.append(File.separator);
-                filename.append("output");
-                filename.append(File.separator);
+                StringBuffer filename = new StringBuffer(folder);
+                if (!folder.endsWith(File.separator)) {
+                    filename.append(File.separator);
+                    
+                }
                 filename.append(id);
                 filename.append(".nc");
                 nc = NetcdfDataset.openFile(filename.toString(), null);
