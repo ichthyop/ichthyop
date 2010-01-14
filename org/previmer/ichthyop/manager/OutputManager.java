@@ -38,7 +38,7 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public class OutputManager extends AbstractManager implements IOutputManager, LastStepListener, SetupListener {
+public class OutputManager extends AbstractManager implements IOutputManager, LastStepListener {
 
     private static final String CLASS_NAME = "class_name";
     final private static OutputManager outputManager = new OutputManager();
@@ -87,7 +87,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     private String getPathName() {
-        return getParameter("directory_out") + getParameter("output_filename") + "_" + Snapshots.newId() + ".nc";
+        return getParameter("directory_out") + getParameter("output_filename") + "_" + getSimulationManager().getId() + ".nc";
     }
 
     private boolean isRecord() {
@@ -96,14 +96,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     public boolean isTrackerEnabled(String trackerKey) {
         return getSimulationManager().getParameterManager().isBlockEnabled(BlockType.TRACKER, trackerKey);
-    }
-
-    public void setUp() {
-    }
-
-    public void init() {
-        i_record = 0;
-        dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
     }
 
     /**
@@ -247,8 +239,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                 ncOut = NetcdfFileWriteable.createNew("");
                 record_frequency = Integer.valueOf(getParameter("record_frequency"));
                 ncOut.setLocation(getPathName());
+                getDimensionFactory().resetDimensions();
                 addTrackers();
-                //ncOut.create();
             } catch (IOException ex) {
                 Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -318,6 +310,12 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                 zoneDimension.put(type, ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size()));
             }
             return zoneDimension.get(type);
+        }
+
+        public void resetDimensions() {
+            time = null;
+            drifter = null;
+            zoneDimension = null;
         }
     }
 }

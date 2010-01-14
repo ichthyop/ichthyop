@@ -383,8 +383,6 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnSimulationRun" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnSimulationProgress" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnPreview" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -394,10 +392,9 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="btnSimulationRun" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnSimulationProgress" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnPreview" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="btnPreview" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnSimulationRun" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -413,17 +410,6 @@
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="4"/>
             <Property name="name" type="java.lang.String" value="btnSimulationRun" noResource="true"/>
-            <Property name="verticalTextPosition" type="int" value="3"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JToggleButton" name="btnSimulationProgress">
-          <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="simulationProgress" methodName="simulationProgress"/>
-            </Property>
-            <Property name="focusable" type="boolean" value="false"/>
-            <Property name="horizontalTextPosition" type="int" value="4"/>
-            <Property name="name" type="java.lang.String" value="btnSimulationProgress" noResource="true"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
@@ -1086,7 +1072,7 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="lblProgressCurrent">
           <Properties>
-            <Property name="foreground" type="java.awt.Color" noResource="true" editor="org.netbeans.beaninfo.editors.ColorEditor">
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
             </Property>
             <Property name="text" type="java.lang.String" resourceKey="lblProgressCurrent.text"/>
@@ -1122,7 +1108,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="lblTimeLeftGlobal">
           <Properties>
-            <Property name="foreground" type="java.awt.Color" noResource="true" editor="org.netbeans.beaninfo.editors.ColorEditor">
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
             </Property>
             <Property name="text" type="java.lang.String" resourceKey="lblTimeLeftGlobal.text"/>

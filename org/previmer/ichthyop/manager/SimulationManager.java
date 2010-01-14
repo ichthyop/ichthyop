@@ -23,6 +23,11 @@ import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.previmer.ichthyop.calendar.Calendar1900;
@@ -53,6 +58,9 @@ public class SimulationManager implements ISimulationManager {
     private long cpu_start_global;
     private boolean flagStop = false;
     private File cfgFile;
+    private String id;
+    private static SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
+    private static SimpleDateFormat dtformatterReadableId = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
     public static SimulationManager getInstance() {
         return simulationManager;
@@ -71,6 +79,74 @@ public class SimulationManager implements ISimulationManager {
 
     public File getConfigurationFile() {
         return cfgFile;
+    }
+
+    public String getId() {
+
+        if (null == id) {
+            id = newId();
+        }
+        if (this.getNumberOfSimulations() > 1) {
+            return id + "_s" + (getIndexSimulation() + 1);
+        } else {
+            return id;
+        }
+    }
+
+    public void resetId() {
+        id = null;
+    }
+
+    private static String newId() {
+        StringBuffer strBfRunId = new StringBuffer("ichthyop-run");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        dtformatterId.setCalendar(calendar);
+        strBfRunId.append(dtformatterId.format(calendar.getTime()));
+        return strBfRunId.toString();
+    }
+
+    public static String getIdFromFile(File file) {
+        String filename = file.getName();
+        return filename;
+    }
+
+    public static String getReadableIdFromFile(File file) {
+        return idToReadableId(getIdFromFile(file));
+    }
+
+    public static String idToReadableId(String id) {
+        String strId = id.substring(id.indexOf("ichthyop-run") + 12);
+        String prefix = id.substring(0, Math.max(id.indexOf("ichthyop-run") - 1, 0));
+        prefix += prefix.length() > 0
+                ? " run "
+                : "Run ";
+        try {
+            return prefix + dtformatterReadableId.format(dtformatterId.parse(strId));
+
+        } catch (ParseException ex) {
+            Logger.getLogger(SimulationManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public static String readableIdToId(String readableId) {
+        String strReadableId = readableId.substring(readableId.toLowerCase().lastIndexOf("run") + 3);
+        String prefix = readableId.substring(0, readableId.toLowerCase().lastIndexOf("run"));
+        try {
+            String strId = prefix.length() > 0
+                    ? prefix.trim() + "_ichthyop-run"
+                    : "ichthyop-run";
+            return strId + dtformatterId.format(dtformatterReadableId.parse(strReadableId));
+
+        } catch (ParseException ex) {
+            Logger.getLogger(SimulationManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public String getReadableId() {
+        return idToReadableId(getId());
     }
 
     /**
@@ -223,7 +299,6 @@ public class SimulationManager implements ISimulationManager {
 
     public void stop() {
         flagStop = true;
-        getSimulation().getPopulation().clear();
     }
 
     public boolean isStopped() {

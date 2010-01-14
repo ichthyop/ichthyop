@@ -16,12 +16,8 @@ public interface IOutputManager extends NextStepListener {
 
     public String getParameter(String key);
 
-    public void setUp();
-
     public NCDimFactory getDimensionFactory();
 
     public boolean isTrackerEnabled(String trackerKey);
-
-    public void init();
 
 }

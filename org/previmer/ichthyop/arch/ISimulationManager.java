@@ -73,4 +73,8 @@ public interface ISimulationManager extends Runnable {
     public float progressGlobal();
 
     public float progressCurrent();
+
+    public String getId();
+
+    public void resetId();
 }

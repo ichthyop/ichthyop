@@ -6,12 +6,13 @@
 package org.previmer.ichthyop.arch;
 
 import java.util.Set;
+import org.previmer.ichthyop.event.SetupListener;
 
 /**
  *
  * @author pverley
  */
-public interface IPopulation extends Set {
+public interface IPopulation extends Set, SetupListener {
 
     public void step();
 

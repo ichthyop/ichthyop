@@ -142,7 +142,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         closeMenuItem.getAction().setEnabled(false);
         saveMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
-        btnSimulationProgress.getAction().setEnabled(false);
         //btnSimulationReplay.getAction().setEnabled(false);
         fillCbBoxMapping(new File("output/"));
         fillCbBoxAnimation(new File("output/"));
@@ -158,7 +157,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         try {
             String logPath = System.getProperty("user.dir") + File.separator + "log" + File.separator;
             StringBuffer logfile = new StringBuffer(logPath);
-            logfile.append(getRunId());
+            logfile.append("ichthyop");
             logfile.append(".log");
             IOTools.makeDirectories(logfile.toString());
             FileHandler fh = new FileHandler(logfile.toString());
@@ -171,19 +170,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         } catch (SecurityException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-    }
-
-    private String getRunId() {
-
-        if (null == runId) {
-            runId = Snapshots.newId();
-        }
-        return runId;
-    }
-
-    private void resetRunId() {
-        runId = null;
-        getRunId();
     }
 
     @Action
@@ -408,7 +394,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblCfgFile.setText("Configuration file");
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
         btnSimulationRun.getAction().setEnabled(false);
-        btnSimulationProgress.getAction().setEnabled(false);
         btnSaveCfgFile.getAction().setEnabled(false);
         closeMenuItem.getAction().setEnabled(false);
     }
@@ -429,17 +414,13 @@ public class IchthyopView extends FrameView implements TimingTarget {
         logger.info("Opened " + file.toString());
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
         lblCfgFile.setText(file.getAbsolutePath());
-        lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, (int) (lblCfgFile.getFont().getSize() * 0.8)));
+        lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
         getSimulationManager().setConfigurationFile(file);
         getSimulationManager().getZoneManager().loadZones();
         isSetup = false;
         //saveMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
-        btnSimulationProgress.getAction().setEnabled(true);
-        if (getSimulationManager().getNumberOfSimulations() > 1) {
-            btnSimulationProgress.doClick();
-        }
         //getApplication().getContext().getTaskService().execute(new CreateBlockTreeTask(getApplication(), ICFile.getInstance()));
     }
 
@@ -589,11 +570,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         fileName.append(File.separator);
         fileName.append("img");
         fileName.append(File.separator);
-        fileName.append(getRunId());
-        if (getSimulationManager().getNumberOfSimulations() > 1) {
-            fileName.append("_s");
-            fileName.append(getSimulationManager().getIndexSimulation() + 1);
-        }
+        fileName.append(getSimulationManager().getId());
         fileName.append('_');
         fileName.append(dtFormat.format(calendar.getTime()));
         fileName.append(".png");
@@ -611,27 +588,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
             Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-    }
-
-    private void setProgress() {
-
-        if (progressBarCurrent.isVisible()) {
-            progressBarCurrent.setValue((int) (getSimulationManager().progressCurrent() * 100));
-            StringBuffer strBf = new StringBuffer();
-            strBf.append(getSimulationManager().getTimeManager().stepToString());
-            strBf.append(" - ");
-            strBf.append(getSimulationManager().timeLeftCurrent());
-            lblTimeLeftCurrent.setText(strBf.toString());
-        }
-
-        if (progressBarGlobal.isVisible()) {
-            progressBarGlobal.setValue((int) (getSimulationManager().progressGlobal() * 100));
-            StringBuffer strBf = new StringBuffer("Simulation ");
-            strBf.append(getSimulationManager().indexSimulationToString());
-            strBf.append(" - ");
-            strBf.append(getSimulationManager().timeLeftGlobal());
-            lblTimeLeftGlobal.setText(strBf.toString());
-        }
     }
 
     private void resetProgressBar() {
@@ -688,18 +644,16 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     @Action
-    public void simulationProgress() {
+    public void setupProgress() {
         if (getSimulationManager().getNumberOfSimulations() > 1) {
-            lblProgressGlobal.setEnabled(true);
-            progressBarGlobal.setEnabled(true);
-            lblTimeLeftGlobal.setEnabled(true);
+            lblProgressGlobal.setVisible(true);
+            progressBarGlobal.setVisible(true);
+            lblTimeLeftGlobal.setVisible(true);
         } else {
-            lblProgressGlobal.setEnabled(false);
-            progressBarGlobal.setEnabled(false);
-            lblTimeLeftGlobal.setEnabled(false);
+            lblProgressGlobal.setVisible(false);
+            progressBarGlobal.setVisible(false);
+            lblTimeLeftGlobal.setVisible(false);
         }
-        //pnlProgress.setVisible(!pnlProgress.isVisible());
-        //pnlProgress.validate();
 
     }
 
@@ -707,28 +661,22 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
         ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         JLabel lblProgress;
+        private boolean bln;
 
         SimulationRunTask(Application instance) {
             super(instance);
             setMessage("Simulation started");
             setMenuEnabled(false);
+            bln = false;
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.stop"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.stop"));
             isRunning = true;
-            //btnSimulationRun.getAction().setEnabled(false);
+            btnSimulationRun.getAction().setEnabled(false);
             if (btnPreview.isSelected()) {
                 btnPreview.doClick();
             }
             btnPreview.getAction().setEnabled(false);
-            resetRunId();
-            /*lblProgress = new JLabel("0%");
-            lblProgress.setOpaque(false);
-            lblProgress.setFont(lblProgress.getFont().deriveFont(Font.BOLD, 40));
-            lblProgress.setHorizontalTextPosition(JLabel.CENTER);
-            lblProgress.setHorizontalAlignment(JLabel.CENTER);
-            lblProgress.setForeground(new Color(200, 200, 100, 100));
-            pnlBackground.add(lblProgress, StackLayout.TOP);*/
-            //pnlProgress.setVisible(true);
+            getSimulationManager().resetId();
         }
 
         @Override
@@ -754,13 +702,32 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
         @Override
         protected void process(List values) {
-            for (Object o : values) {
-                Float f = (Float) o;
-                int percent = (int) (f * 100);
-                //lblProgress.setText(percent + "%");
-                setMessage(percent + "%");
+            if (!bln) {
+                btnSimulationRun.getAction().setEnabled(true);
+                bln = true;
             }
-            IchthyopView.this.setProgress();
+            printProgress();
+        }
+
+        private void printProgress() {
+
+            if (progressBarCurrent.isVisible()) {
+                progressBarCurrent.setValue((int) (getSimulationManager().progressCurrent() * 100));
+                StringBuffer strBf = new StringBuffer();
+                strBf.append(getSimulationManager().getTimeManager().stepToString());
+                strBf.append(" - ");
+                strBf.append(getSimulationManager().timeLeftCurrent());
+                lblTimeLeftCurrent.setText(strBf.toString());
+            }
+
+            if (progressBarGlobal.isVisible()) {
+                progressBarGlobal.setValue((int) (getSimulationManager().progressGlobal() * 100));
+                StringBuffer strBf = new StringBuffer("Simulation ");
+                strBf.append(getSimulationManager().indexSimulationToString());
+                strBf.append(" - ");
+                strBf.append(getSimulationManager().timeLeftGlobal());
+                lblTimeLeftGlobal.setText(strBf.toString());
+            }
         }
 
         @Override
@@ -772,6 +739,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
         @Override
         protected void succeeded(Object obj) {
             setMessage("End of simulation");
+            tpSimulation.setCollapsed(true);
+            tpMapping.setCollapsed(false);
         }
 
         @Override
@@ -783,8 +752,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
             isRunning = false;
             resetProgressBar();
             fillCbBoxMapping(new File("./output/"));
-            tpSimulation.setCollapsed(true);
-            tpMapping.setCollapsed(false);
         }
     }
 
@@ -1013,6 +980,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpSimulation.setCollapsed(true);
                     tpAnimation.setCollapsed(true);
                     tpMapping.setCollapsed(true);
+                    if (!lblCfgFile.getText().isEmpty()) {
+                        //mainTitledPanel.setTitle("Ichthyop - " + tpConfiguration.getTitle() + " - " + lblCfgFile.getText());
+                    }
+                } else {
+                    //mainTitledPanel.setTitle("Ichthyop");
                 }
             }
         });
@@ -1025,6 +997,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpAnimation.setCollapsed(true);
                     tpMapping.setCollapsed(true);
                     pnlProgress.setVisible(true);
+                    setupProgress();
                 } else {
                     pnlProgress.setVisible(false);
                 }
@@ -1114,7 +1087,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         itemStageChart = new javax.swing.JCheckBoxMenuItem();
         pnlSimulation = new javax.swing.JPanel();
         btnSimulationRun = new javax.swing.JButton();
-        btnSimulationProgress = new javax.swing.JToggleButton();
         btnPreview = new javax.swing.JToggleButton();
         pnlFile = new javax.swing.JPanel();
         btnNewCfgFile = new javax.swing.JButton();
@@ -1366,12 +1338,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnSimulationRun.setName("btnSimulationRun"); // NOI18N
         btnSimulationRun.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        btnSimulationProgress.setAction(actionMap.get("simulationProgress")); // NOI18N
-        btnSimulationProgress.setFocusable(false);
-        btnSimulationProgress.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnSimulationProgress.setName("btnSimulationProgress"); // NOI18N
-        btnSimulationProgress.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-
         btnPreview.setAction(actionMap.get("previewSimulation")); // NOI18N
         btnPreview.setFocusable(false);
         btnPreview.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -1386,8 +1352,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 .addContainerGap()
                 .addComponent(btnSimulationRun)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSimulationProgress)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPreview)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -1395,10 +1359,9 @@ public class IchthyopView extends FrameView implements TimingTarget {
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSimulationLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSimulationRun)
-                    .addComponent(btnSimulationProgress)
-                    .addComponent(btnPreview))
+                .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnPreview)
+                    .addComponent(btnSimulationRun))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1881,7 +1844,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JButton btnPrevious;
     private javax.swing.JButton btnSaveAsSnapshots;
     private javax.swing.JButton btnSaveCfgFile;
-    private javax.swing.JToggleButton btnSimulationProgress;
     private javax.swing.JButton btnSimulationRun;
     private javax.swing.JMenuItem cancelMapMenuItem;
     private javax.swing.JComboBox cbBoxAnimation;

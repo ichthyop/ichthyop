@@ -6,6 +6,9 @@ import org.previmer.ichthyop.arch.IPopulation;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.previmer.ichthyop.arch.IMasterParticle;
+import org.previmer.ichthyop.arch.ISimulationManager;
+import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  * <p> The Population is the intermediate level of the hierarchy of the IBM:
@@ -39,6 +42,10 @@ public class Population extends HashSet implements IPopulation {
 // Constructors
 ///////////////
 
+    public Population() {
+        getSimulationManager().addSetupListener(this);
+    }
+
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -57,6 +64,14 @@ public class Population extends HashSet implements IPopulation {
                 particle.step();
             }
         }
+    }
+
+    public void setupPerformed(SetupEvent e) {
+        population.clear();
+    }
+
+    private ISimulationManager getSimulationManager() {
+        return SimulationManager.getInstance();
     }
     //------- End of class
 }
