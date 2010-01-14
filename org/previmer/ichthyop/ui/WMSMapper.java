@@ -13,20 +13,31 @@ import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import javax.imageio.ImageIO;
+import org.jdesktop.application.Application;
+import org.jdesktop.application.Task;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayFloat.D1;
 import ucar.ma2.InvalidRangeException;
@@ -41,30 +52,24 @@ import ucar.nc2.dataset.NetcdfDataset;
 public class WMSMapper extends JXMapKit {
 
     private TileFactory tileFactory = new MGDSTileFactory();
-    //private TileFactory tileFactory = new LocalTileFactory();
-    private List<GeoPosition> region, roughRegion;
+    private List<GeoPosition> region;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    private String id;
     private NetcdfFile nc;
-    private Variable vlon, vlat;
-    private int index, indexMax;
-    private Thread loader;
-    private boolean loadingDone = false;
+    private Variable vlon, vlat, vtime;
+    private int indexMax;
     boolean canRepaint = false;
-    private List<GeoPosition> currentPainter, indexp1Painter, indexm1Painter;
     private Painter bgPainter;
     boolean loadFromHeap = false;
-    private List<GeoPosition>[] painterMap;
-    private boolean[] loadedIndices;
-    private CompoundPainter cp;
     private double defaultLat = 48.38, defaultLon = -4.62;
     private int defaultZoom = 10;
 
     public WMSMapper() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
         setMiniMapVisible(false);
+        setZoomButtonsVisible(true);
+        setZoomSliderVisible(true);
         setTileFactory(tileFactory);
-        //getMainMap().setOverlayPainter(getCompoundPainter());
+
     }
 
     public void setWMS(String wmsURL) {
@@ -81,34 +86,8 @@ public class WMSMapper extends JXMapKit {
         setZoom(defaultZoom);
     }
 
-    public int index() {
-        return index;
-    }
-
     public int getIndexMax() {
         return indexMax;
-    }
-
-    public int indexNext() {
-        /*if (index < indexMax) {
-        index++;
-        }*/
-        return index + 1;
-    }
-
-    public int indexPrevious() {
-        /*if (index > 0) {
-        index--;
-        }*/
-        return index - 1;
-    }
-
-    public int indexLast() {
-        return indexMax;
-    }
-
-    public int indexFirst() {
-        return 0;
     }
 
     public void init() {
@@ -148,12 +127,6 @@ public class WMSMapper extends JXMapKit {
             latmax = double_tmp;
         }
 
-        roughRegion = new ArrayList();
-        roughRegion.add(new GeoPosition(latmin, lonmin));
-        roughRegion.add(new GeoPosition(latmin, lonmax));
-        roughRegion.add(new GeoPosition(latmax, lonmax));
-        roughRegion.add(new GeoPosition(latmax, lonmin));
-
         defaultLat = 0.5d * (latmin + latmax);
         defaultLon = 0.5d * (lonmin + lonmax);
         setAddressLocation(new GeoPosition(defaultLat, defaultLon));
@@ -166,34 +139,25 @@ public class WMSMapper extends JXMapKit {
 
         vlon = nc.findVariable("lon");
         vlat = nc.findVariable("lat");
+        vtime = nc.findVariable("time");
 
         bgPainter = getBgPainter();
     }
 
-    public void setId(String id, String folder) {
-        this.id = id;
-        if (null != id) {
+    public File getFile() {
+        if (null != nc) {
+            return new File(nc.getLocation());
+        } else {
+            return null;
+        }
+    }
+
+    public void setFile(File ncfile) {
+        if (ncfile != null && ncfile.isFile()) {
             try {
-                StringBuffer filename = new StringBuffer(folder);
-                if (!folder.endsWith(File.separator)) {
-                    filename.append(File.separator);
-                    
-                }
-                filename.append(id);
-                filename.append(".nc");
-                nc = NetcdfDataset.openFile(filename.toString(), null);
-                index = Integer.MIN_VALUE / 2;
+                nc = NetcdfDataset.openFile(ncfile.getAbsolutePath(), null);
                 init();
-                //loadFromHeap = true;
-                if (loadFromHeap) {
-                    loadedIndices = new boolean[indexMax + 1];
-                    painterMap = new ArrayList[indexMax + 1];
-                    new Thread(new LoaderThread(0)).start();
-                } else {
-                    loadedIndices = null;
-                    painterMap = null;
-                }
-                show(indexFirst());
+                getMainMap().setOverlayPainter(getBgPainter());
             } catch (IOException ex) {
                 Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -206,6 +170,52 @@ public class WMSMapper extends JXMapKit {
             getMainMap().setOverlayPainter(null);
             region = null;
         }
+
+    }
+
+    public void map(final int index) {
+
+        Painter<JXMapViewer> particleLayer = new Painter<JXMapViewer>() {
+
+            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
+                g = (Graphics2D) g.create();
+                //convert from viewport to world bitmap
+                Rectangle rect = map.getViewportBounds();
+                g.translate(-rect.x, -rect.y);
+
+                drawRegion(g, map);
+                for (GeoPosition gp : getListGeoPosition(index)) {
+                    drawParticle(g, map, gp);
+                }
+                g.dispose();
+            }
+        };
+        CompoundPainter cp = new CompoundPainter();
+        cp.setPainters(bgPainter, particleLayer);
+        cp.setCacheable(false);
+        getMainMap().setOverlayPainter(cp);
+    }
+
+    void map(final MapStep mapStep) {
+        Painter<JXMapViewer> particleLayer = new Painter<JXMapViewer>() {
+
+            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
+                g = (Graphics2D) g.create();
+                //convert from viewport to world bitmap
+                Rectangle rect = map.getViewportBounds();
+                g.translate(-rect.x, -rect.y);
+
+                //drawRegion(g, map);
+                for (GeoPosition gp : mapStep.getParticlesGP()) {
+                    drawParticle(g, map, gp);
+                }
+                g.dispose();
+            }
+        };
+        CompoundPainter cp = new CompoundPainter();
+        cp.setPainters(bgPainter, particleLayer);
+        cp.setCacheable(false);
+        getMainMap().setOverlayPainter(cp);
     }
 
     public List<GeoPosition> getRegion() {
@@ -232,10 +242,6 @@ public class WMSMapper extends JXMapKit {
 
 
         return bgOverlay;
-    }
-
-    private List<GeoPosition> getRoughRegion() {
-        return roughRegion;
     }
 
     private List<GeoPosition> readRegion() {
@@ -273,7 +279,7 @@ public class WMSMapper extends JXMapKit {
 
     private void drawRegion(Graphics2D g, JXMapViewer map) {
         Polygon poly = new Polygon();
-        for (GeoPosition gp : getRoughRegion()) {
+        for (GeoPosition gp : getRegion()) {
             //convert geo to world bitmap pixel
             Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
             poly.addPoint((int) pt.getX(), (int) pt.getY());
@@ -331,65 +337,17 @@ public class WMSMapper extends JXMapKit {
         return SimulationManager.getInstance();
     }
 
-    public boolean showFast(int index) {
-        return loadFromHeap
-                ? showFastHeap(index)
-                : showFastRead(index);
-    }
-
-    private boolean showFastRead(int index) {
-        if (loader == null || loadingDone) {
-            loadingDone = false;
-            canRepaint = false;
-            loader = new Thread(new FastLoaderThread(index));
-            loader.start();
-            return true;
-        } else {
-            return false;
+    private double getTime(int index) {
+        double time = 0.d;
+        try {
+            ArrayDouble.D0 arrTime = (D0) vtime.read(new int[]{index}, new int[]{1}).reduce();
+            time = arrTime.get();
+        } catch (IOException ex) {
+            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    private boolean showFastHeap(int index) {
-        if (index > indexMax) {
-            index = 0;
-        } else if (index < 0) {
-            index = indexMax;
-        }
-        if (loadedIndices[index]) {
-            this.index = index;
-            //setTime();
-            canRepaint = true;
-            currentPainter = painterMap[index];
-            setPainter();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean show(int index) {
-
-        if (loader == null || loadingDone) {
-            loadingDone = false;
-            canRepaint = false;
-            loader = new Thread(new LinkedLoaderThread(index));
-            loader.start();
-            return true;
-        }
-        if (!loadingDone && !loader.isAlive()) {
-            loader.interrupt();
-            loadingDone = true;
-        }
-        return false;
-    }
-
-    private List<GeoPosition> load(int index) {
-        if (index > indexMax) {
-            index = 0;
-        } else if (index < 0) {
-            index = indexMax;
-        }
-        return getListGeoPosition(index);
+        return time;
     }
 
     private List<GeoPosition> getListGeoPosition(int index) {
@@ -414,149 +372,102 @@ public class WMSMapper extends JXMapKit {
         return list;
     }
 
-    private CompoundPainter getCompoundPainter() {
+    /**
+     * Saves the snapshot of the specified component as a PNG picture.
+     * The name of the picture includes the current time of the simulation.
+     * @param cpnt the Component to save as a PNG picture.
+     * @param cld the Calendar of the current {@code Step} object.
+     * @throws an IOException if an ouput exception occurs when saving the
+     * picture.
+     */
+    private void screen2File(Component component, Calendar calendar) {
 
-        if (null == cp) {
-            Painter<JXMapViewer> particleLayer = new Painter<JXMapViewer>() {
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+        dtFormat.setCalendar(calendar);
+        StringBuffer fileName = new StringBuffer(System.getProperty("user.dir"));
+        fileName.append(File.separator);
+        fileName.append("img");
+        fileName.append(File.separator);
+        fileName.append(getSimulationManager().getId());
+        fileName.append('_');
+        fileName.append(dtFormat.format(calendar.getTime()));
+        fileName.append(".png");
 
-                public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-                    g = (Graphics2D) g.create();
-                    //convert from viewport to world bitmap
-                    Rectangle rect = map.getViewportBounds();
-                    g.translate(-rect.x, -rect.y);
+        BufferedImage bi = new BufferedImage(component.getWidth(),
+                component.getHeight(),
+                BufferedImage.TYPE_INT_RGB);
+        Graphics g = bi.getGraphics();
+        component.paintAll(g);
+        try {
+            ImageIO.write(bi, "PNG", new File(fileName.toString()));
 
-                    drawRegion(g, map);
-                    if (currentPainter != null) {
-                        for (GeoPosition gp : currentPainter) {
-                            drawParticle(g, map, gp);
-                        }
-                    }
-                    g.dispose();
-                }
-            };
-            cp = new CompoundPainter();
-            cp.setPainters(bgPainter, particleLayer);
-            cp.setCacheable(false);
+        } catch (IOException ex) {
+            Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return cp;
 
     }
 
-    private void setPainter() {
-        getMainMap().setOverlayPainter(getCompoundPainter());
+    public Task getMapTask(Application instance) {
+        return new MapTask(instance);
     }
 
-    private class LoaderThread implements Runnable {
+    private class MapTask extends Task<Object, MapStep> {
 
-        int indexStart;
-
-        LoaderThread(int indexStart) {
-            this.indexStart = indexStart;
+        MapTask(Application instance) {
+            super(instance);
+            setZoomButtonsVisible(false);
+            setZoomSliderVisible(false);
         }
 
-        private void load(int index) {
-            painterMap[index] = getListGeoPosition(index);
-            loadedIndices[index] = true;
-        }
-
-        public void run() {
-            int nbStep = indexMax + 1;
-            for (int i = indexStart; i < nbStep; i++) {
-                load(i);
+        @Override
+        protected Object doInBackground() throws Exception {
+            for (int i = 0; i < indexMax - 1; i++) {
+                setProgress((float) i / indexMax);
+                MapStep mapStep = new MapStep(i);
+                mapStep.process();
+                publish(mapStep);
+                Thread.sleep(500);
             }
-            for (int i = 0; i < indexStart; i++) {
-                load(i);
+            return null;
+        }
+
+        @Override
+        protected void process(List<MapStep> mapSteps) {
+            for (MapStep mapStep : mapSteps) {
+                map(mapStep);
+                screen2File(WMSMapper.this, mapStep.getCalendar());
             }
         }
-    }
 
-    private class FastLoaderThread implements Runnable {
-
-        int newIndex;
-
-        FastLoaderThread(int newIndex) {
-            this.newIndex = newIndex;
-        }
-
-        public void run() {
-            currentPainter = indexp1Painter;
-            index = newIndex;
-            //setTime();
-            canRepaint = true;
-            setPainter();
-            indexp1Painter = load(newIndex + 1);
-            loadingDone = true;
+        @Override
+        protected void finished() {
+            setZoomButtonsVisible(true);
+            setZoomSliderVisible(true);
         }
     }
 
-    private class LinkedLoaderThread implements Runnable {
+    private class MapStep {
 
-        int newIndex;
-        int fadingDuration = 500;
+        private int index;
+        private List<GeoPosition> gp;
+        private Calendar calendar;
 
-        LinkedLoaderThread(int newIndex) {
-            this.newIndex = newIndex;
+        MapStep(int index) {
+            this.index = index;
         }
 
-        public void run() {
+        void process() {
+            gp = getListGeoPosition(index);
+            calendar = new ClimatoCalendar();
+            calendar.setTimeInMillis((long) (getTime(index) * 1000L));
+        }
 
-            int step = newIndex - index;
-            if (step == indexMax) {
-                step = -1;
-            } else if (step == -indexMax) {
-                step = 1;
-            }
-            switch (step) {
-                case 1:
-                    indexm1Painter = currentPainter;
-                    currentPainter = indexp1Painter;
-                    index = newIndex;
-                    //setTime();
-                    canRepaint = true;
-                    setPainter();
-                    indexp1Painter = load(newIndex + 1);
-                    break;
-                case -1:
-                    indexp1Painter = currentPainter;
-                    currentPainter = indexm1Painter;
-                    index = newIndex;
-                    //setTime();
-                    canRepaint = true;
-                    setPainter();
-                    indexm1Painter = load(newIndex - 1);
-                    break;
-                case 2:
-                    indexm1Painter = indexp1Painter;
-                    currentPainter = load(newIndex);
-                    index = newIndex;
-                    //setTime();
-                    canRepaint = true;
-                    setPainter();
-                    indexp1Painter = load(newIndex + 1);
-                    break;
-                case -2:
-                    indexp1Painter = indexm1Painter;
-                    currentPainter = load(newIndex);
-                    index = newIndex;
-                    //setTime();
-                    canRepaint = true;
-                    setPainter();
-                    indexp1Painter = load(newIndex + 1);
-                    break;
-                case 0:
-                    canRepaint = true;
-                    return;
-                default:
-                    currentPainter = load(newIndex);
-                    index = newIndex;
-                    //setTime();
-                    canRepaint = true;
-                    setPainter();
-                    indexm1Painter = load(newIndex - 1);
-                    indexp1Painter = load(newIndex + 1);
-                    break;
-            }
-            loadingDone = true;
+        Calendar getCalendar() {
+            return calendar;
+        }
+
+        List<GeoPosition> getParticlesGP() {
+            return gp;
         }
     }
 

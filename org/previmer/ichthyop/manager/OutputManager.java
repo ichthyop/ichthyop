@@ -86,7 +86,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         return getSimulationManager().getParameterManager().getParameter(block_key, key);
     }
 
-    private String getPathName() {
+    public String getFileLocation() {
         return getParameter("directory_out") + getParameter("output_filename") + "_" + getSimulationManager().getId() + ".nc";
     }
 
@@ -238,7 +238,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             try {
                 ncOut = NetcdfFileWriteable.createNew("");
                 record_frequency = Integer.valueOf(getParameter("record_frequency"));
-                ncOut.setLocation(getPathName());
+                ncOut.setLocation(getFileLocation());
                 getDimensionFactory().resetDimensions();
                 addTrackers();
             } catch (IOException ex) {

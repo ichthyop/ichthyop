@@ -20,4 +20,6 @@ public interface IOutputManager extends NextStepListener {
 
     public boolean isTrackerEnabled(String trackerKey);
 
+    public String getFileLocation();
+
 }
