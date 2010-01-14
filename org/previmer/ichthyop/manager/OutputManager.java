@@ -240,7 +240,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                 record_frequency = Integer.valueOf(getParameter("record_frequency"));
                 ncOut.setLocation(getFileLocation());
                 getDimensionFactory().resetDimensions();
-                addTrackers();
             } catch (IOException ex) {
                 Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -251,6 +250,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         try {
             i_record = 0;
             dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
+            addTrackers();
             addGlobalAttributes();
             ncOut.create();
         } catch (IOException ex) {
