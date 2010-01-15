@@ -113,7 +113,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         dateFormat.setCalendar(calendar);
     }
 
-    private int getTimeOrigin(String time_origin, int field) {
+    public int getTimeOrigin(String time_origin, int field) {
         SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         Calendar1900 cld = new Calendar1900();
         dtFormat.setCalendar(cld);

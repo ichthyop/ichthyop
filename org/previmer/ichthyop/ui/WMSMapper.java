@@ -35,7 +35,9 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import org.previmer.ichthyop.io.IOTools;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
@@ -62,6 +64,7 @@ public class WMSMapper extends JXMapKit {
     boolean loadFromHeap = false;
     private double defaultLat = 48.38, defaultLon = -4.62;
     private int defaultZoom = 10;
+    private Calendar calendar;
 
     public WMSMapper() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
@@ -140,6 +143,14 @@ public class WMSMapper extends JXMapKit {
         vlon = nc.findVariable("lon");
         vlat = nc.findVariable("lat");
         vtime = nc.findVariable("time");
+        if (vtime.findAttribute("calendar").getStringValue().matches("climato")) {
+            calendar = new ClimatoCalendar();
+        } else {
+            String time_origin = vtime.findAttribute("origin").getStringValue();
+            calendar = new Calendar1900(getSimulationManager().getTimeManager().getTimeOrigin(time_origin, Calendar.YEAR),
+                    getSimulationManager().getTimeManager().getTimeOrigin(time_origin, Calendar.MONTH),
+                    getSimulationManager().getTimeManager().getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+        }
 
         bgPainter = getBgPainter();
     }
@@ -171,29 +182,6 @@ public class WMSMapper extends JXMapKit {
             region = null;
         }
 
-    }
-
-    public void map(final int index) {
-
-        Painter<JXMapViewer> particleLayer = new Painter<JXMapViewer>() {
-
-            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-                g = (Graphics2D) g.create();
-                //convert from viewport to world bitmap
-                Rectangle rect = map.getViewportBounds();
-                g.translate(-rect.x, -rect.y);
-
-                drawRegion(g, map);
-                for (GeoPosition gp : getListGeoPosition(index)) {
-                    drawParticle(g, map, gp);
-                }
-                g.dispose();
-            }
-        };
-        CompoundPainter cp = new CompoundPainter();
-        cp.setPainters(bgPainter, particleLayer);
-        cp.setCacheable(false);
-        getMainMap().setOverlayPainter(cp);
     }
 
     void map(final MapStep mapStep) {
@@ -337,7 +325,7 @@ public class WMSMapper extends JXMapKit {
         return SimulationManager.getInstance();
     }
 
-    private double getTime(int index) {
+    private double readTime(int index) {
         double time = 0.d;
         try {
             ArrayDouble.D0 arrTime = (D0) vtime.read(new int[]{index}, new int[]{1}).reduce();
@@ -380,16 +368,17 @@ public class WMSMapper extends JXMapKit {
      * @throws an IOException if an ouput exception occurs when saving the
      * picture.
      */
-    private void screen2File(Component component, Calendar calendar) {
+    public void screen2File(Component component, Calendar calendar) {
 
         SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
         dtFormat.setCalendar(calendar);
-        StringBuffer fileName = new StringBuffer(System.getProperty("user.dir"));
+        StringBuffer fileName = new StringBuffer(getFile().getParent());
         fileName.append(File.separator);
-        fileName.append("img");
+        String id = getFile().getName().substring(0, getFile().getName().indexOf(".nc"));
+        fileName.append(id);
         fileName.append(File.separator);
-        fileName.append(getSimulationManager().getId());
-        fileName.append('_');
+        fileName.append(id);
+        fileName.append("_img");
         fileName.append(dtFormat.format(calendar.getTime()));
         fileName.append(".png");
 
@@ -399,6 +388,7 @@ public class WMSMapper extends JXMapKit {
         Graphics g = bi.getGraphics();
         component.paintAll(g);
         try {
+            IOTools.makeDirectories(fileName.toString());
             ImageIO.write(bi, "PNG", new File(fileName.toString()));
 
         } catch (IOException ex) {
@@ -407,50 +397,17 @@ public class WMSMapper extends JXMapKit {
 
     }
 
-    public Task getMapTask(Application instance) {
-        return new MapTask(instance);
+    public MapStep getMapStep(int index) {
+        MapStep mapStep = new MapStep(index);
+        mapStep.process();
+        return mapStep;
     }
 
-    private class MapTask extends Task<Object, MapStep> {
-
-        MapTask(Application instance) {
-            super(instance);
-            setZoomButtonsVisible(false);
-            setZoomSliderVisible(false);
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-            for (int i = 0; i < indexMax - 1; i++) {
-                setProgress((float) i / indexMax);
-                MapStep mapStep = new MapStep(i);
-                mapStep.process();
-                publish(mapStep);
-                Thread.sleep(500);
-            }
-            return null;
-        }
-
-        @Override
-        protected void process(List<MapStep> mapSteps) {
-            for (MapStep mapStep : mapSteps) {
-                map(mapStep);
-                screen2File(WMSMapper.this, mapStep.getCalendar());
-            }
-        }
-
-        @Override
-        protected void finished() {
-            setZoomButtonsVisible(true);
-            setZoomSliderVisible(true);
-        }
-    }
-
-    private class MapStep {
+    public class MapStep {
 
         private int index;
         private List<GeoPosition> gp;
-        private Calendar calendar;
+        private Long time;
 
         MapStep(int index) {
             this.index = index;
@@ -458,11 +415,11 @@ public class WMSMapper extends JXMapKit {
 
         void process() {
             gp = getListGeoPosition(index);
-            calendar = new ClimatoCalendar();
-            calendar.setTimeInMillis((long) (getTime(index) * 1000L));
+            time = (long) (readTime(index) * 1000L);
         }
 
         Calendar getCalendar() {
+            calendar.setTimeInMillis(time);
             return calendar;
         }
 

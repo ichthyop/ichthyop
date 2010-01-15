@@ -65,6 +65,7 @@ import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.jdesktop.swingx.JXTitledPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.previmer.ichthyop.io.ICFile;
+import org.previmer.ichthyop.ui.WMSMapper.MapStep;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -225,12 +226,49 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
     @Action
     public Task createMaps() {
-        return wmsMapper.getMapTask(getApplication());
+        return createMapTask = new CreateMapTask(getApplication());
+    }
+
+    private class CreateMapTask extends Task<Object, MapStep> {
+
+        CreateMapTask(Application instance) {
+            super(instance);
+            wmsMapper.setZoomButtonsVisible(false);
+            wmsMapper.setZoomSliderVisible(false);
+            btnMapping.getAction().setEnabled(false);
+            btnCancelMapping.getAction().setEnabled(true);
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            for (int i = 0; i < wmsMapper.getIndexMax() - 1; i++) {
+                setProgress((float) i / wmsMapper.getIndexMax());
+                publish(wmsMapper.getMapStep(i));
+                Thread.sleep(500);
+            }
+            return null;
+        }
+
+        @Override
+        protected void process(List<MapStep> mapSteps) {
+            for (MapStep mapStep : mapSteps) {
+                wmsMapper.map(mapStep);
+                wmsMapper.screen2File(wmsMapper, mapStep.getCalendar());
+            }
+        }
+
+        @Override
+        protected void finished() {
+            wmsMapper.setZoomButtonsVisible(true);
+            wmsMapper.setZoomSliderVisible(true);
+            btnMapping.getAction().setEnabled(true);
+            btnCancelMapping.getAction().setEnabled(false);
+        }
     }
 
     @Action
     public void cancelMapping() {
-        setMessage("Not implemented yet");
+        createMapTask.cancel(true);
     }
 
     private void fillCbBoxAnimation(File folder) {
@@ -274,9 +312,10 @@ public class IchthyopView extends FrameView implements TimingTarget {
         chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop output file (*.nc)", "nc"));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            lblNC.setText(chooser.getSelectedFile().getName());
+            outputFile = chooser.getSelectedFile();
+            lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
-            wmsMapper.setFile(chooser.getSelectedFile());
+            wmsMapper.setFile(outputFile);
             btnMapping.getAction().setEnabled(true);
         }
     }
@@ -514,12 +553,13 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
         SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
         dtFormat.setCalendar(calendar);
-        StringBuffer fileName = new StringBuffer(System.getProperty("user.dir"));
+        StringBuffer fileName = new StringBuffer(outputFile.getParent());
         fileName.append(File.separator);
-        fileName.append("img");
+        String id = outputFile.getName().substring(0, outputFile.getName().indexOf(".nc"));
+        fileName.append(id);
         fileName.append(File.separator);
-        fileName.append(getSimulationManager().getId());
-        fileName.append('_');
+        fileName.append(id);
+        fileName.append("_img");
         fileName.append(dtFormat.format(calendar.getTime()));
         fileName.append(".png");
 
@@ -699,8 +739,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
             openMenuItem.getAction().setEnabled(true);
             isRunning = false;
             resetProgressBar();
-            File file = new File(getSimulationManager().getOutputManager().getFileLocation());
-            lblNC.setText(file.getName());
+            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
+            lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
         }
     }
@@ -963,8 +1003,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpConfiguration.setCollapsed(true);
                     wmsMapper.setVisible(true);
                     if (!lblNC.getText().isEmpty()) {
-                        File file = new File(lblNC.getText());
-                        wmsMapper.setFile(file);
+                        wmsMapper.setFile(outputFile);
                         btnMapping.getAction().setEnabled(true);
                     } else {
                         wmsMapper.setFile(null);
@@ -1866,6 +1905,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
     private Task simulActionTask;
+    private Task createMapTask;
     private String runId;
     private boolean isSetup;
     private ReplayPanel replayPanel = new ReplayPanel();
@@ -1877,4 +1917,5 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private Timer progressTimer;
     private WMSMapper wmsMapper = new WMSMapper();
     private LoggerScrollPane loggerScrollPane = new LoggerScrollPane();
+    private File outputFile;
 }

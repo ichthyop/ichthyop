@@ -21,6 +21,8 @@ public interface ITimeManager {
 
     public int get_dt();
 
+    public int getTimeOrigin(String time_origin, int field);
+
     public long getTransportDuration();
 
     public Calendar getCalendar();
