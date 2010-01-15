@@ -145,6 +145,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnSimulationRun.getAction().setEnabled(false);
         btnCancelMapping.getAction().setEnabled(false);
         btnMapping.getAction().setEnabled(false);
+        setAnimationToolsEnabled(false);
 
         setMessage("Please, open a configuration file or create a new one");
     }
@@ -182,45 +183,38 @@ public class IchthyopView extends FrameView implements TimingTarget {
         IchthyopApp.getApplication().show(aboutBox);
     }
 
-    @Action
-    public void changeSimulationReplay() {
-        snapshots = createSnapshots();
-        if (snapshots != null) {
-            getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (String) cbBoxAnimation.getSelectedItem());
-            if (snapshots.getNumberImages() > 0) {
-                sliderTime.setValue(0);
-                sliderTime.setMaximum(snapshots.getNumberImages() - 1);
-                replayPanel.setSnapshots(snapshots);
-            } else {
-                setMessage("No PNG pictures found in folder " + snapshots.getPath());
-            }
-
-        } else {
-            getFrame().setTitle(getResourceMap().getString("Application.title") + " - Snapshots viewer");
-            replayPanel.setSnapshots(null);
-        }
+    private void setAnimationToolsEnabled(boolean enabled) {
+        btnSaveAsSnapshots.getAction().setEnabled(enabled);
+        btnDeleteSnapshots.getAction().setEnabled(enabled);
+        btnFirst.getAction().setEnabled(enabled);
+        btnPrevious.getAction().setEnabled(enabled);
+        btnAnimaction.getAction().setEnabled(enabled);
+        btnNext.getAction().setEnabled(enabled);
+        btnLast.getAction().setEnabled(enabled);
+        sliderTime.setEnabled(enabled);
     }
 
     @Action
     public void deleteSnapshots() {
-        StringBuffer message = new StringBuffer("Delete run ");
-        message.append(getSnapshots().getReadableId());
+        File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
+        StringBuffer message = new StringBuffer("Delete maps from ");
+        message.append(outputFolder.getName());
         message.append(" ?");
-        /*message.append('\n');
-        message.append(getSnapshots().getNumberImages());
-        message.append(" snapshots will be deleted from your computer.");*/
+        message.append('\n');
+        message.append(files2Delete.length);
+        message.append(" PNG pictures will be deleted from your computer.");
         int dialog = JOptionPane.showConfirmDialog(getFrame(), message.toString(), "Ichthytop - Delete snapshots", JOptionPane.OK_CANCEL_OPTION);
         if (dialog == JOptionPane.OK_OPTION) {
-            for (File file : getSnapshots().getImages()) {
+            for (File file : outputFolder.listFiles(new MetaFilenameFilter("*.png"))) {
                 if (file.delete()) {
                     setMessage("Deleted " + file.toString());
                 }
             }
-            setMessage("Run " + getSnapshots().getReadableId() + " deleted.");
-            //viewerPanel.setSnapshots(null);
-            Object obj = cbBoxAnimation.getSelectedItem();
-            cbBoxAnimation.setSelectedIndex(cbBoxAnimation.getItemCount() - 1);
-            cbBoxAnimation.removeItem(obj);
+            outputFolder.delete();
+            lblFolder.setText(getResourceMap().getString("lblFolder.text"));
+            outputFolder = null;
+            replayPanel.setFolder(null);
+            setAnimationToolsEnabled(false);
         }
     }
 
@@ -271,42 +265,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
         createMapTask.cancel(true);
     }
 
-    private void fillCbBoxAnimation(File folder) {
-
-        lblFolder2.setText(folder.getAbsolutePath());
-        //lblFolder2.setFont(lblFolder.getFont().deriveFont(12));
-        List listRuns = new ArrayList();
-        listRuns.add("Please select a run");
-        File[] listFolders = folder.listFiles(new FileFilter() {
-
-            public boolean accept(File pathname) {
-                boolean accepted = false;
-                if (pathname.isDirectory()) {
-                    String name = pathname.getName();
-                    accepted = name.matches(".*ichthyop-run.*");
-                }
-                return accepted;
-            }
-        });
-        for (File file : listFolders) {
-            String strRunId = Snapshots.getReadableIdFromFile(file);
-            if (!listRuns.contains(strRunId)) {
-                listRuns.add(strRunId);
-            }
-        }
-        Collections.sort(listRuns);
-        //Collections.reverse(listRunId);
-        cbBoxAnimation.setModel(new DefaultComboBoxModel(listRuns.toArray()));
-        listRuns.remove(0);
-        cbBoxAnimation.setSelectedIndex(0);
-    }
-
     @Action
     public void openNcMapping() {
-
-        File file = (null == wmsMapper.getFile())
+        File file = (null == outputFile)
                 ? new File(System.getProperty("user.dir"))
-                : wmsMapper.getFile();
+                : outputFile.getParentFile();
         JFileChooser chooser = new JFileChooser(file);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop output file (*.nc)", "nc"));
@@ -321,13 +284,31 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     @Action
+    public void openFolderAnimation() {
+
+        File file = (null == outputFolder)
+                ? new File(System.getProperty("user.dir"))
+                : outputFolder;
+        JFileChooser chooser = new JFileChooser(file);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int returnPath = chooser.showDialog(getFrame(), "Select folder");
+        if (returnPath == JFileChooser.APPROVE_OPTION) {
+            outputFolder = chooser.getSelectedFile();
+            lblFolder.setText(outputFolder.getName());
+            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
+            replayPanel.setFolder(outputFolder);
+            setAnimationToolsEnabled(true);
+        }
+    }
+
+    @Action
     public void changeWMS() {
         wmsMapper.setWMS((String) cbBoxWMS.getSelectedItem());
     }
 
     @Action
     public void saveAsSnapshots() {
-        getApplication().show(new BackupSnapshotsView(IchthyopApp.getApplication(), getSnapshots()));
+        //getApplication().show(new BackupSnapshotsView(IchthyopApp.getApplication(), folder));
     }
 
     private void showSimulationPreview() {
@@ -411,21 +392,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         //getApplication().getContext().getTaskService().execute(new CreateBlockTreeTask(getApplication(), ICFile.getInstance()));
     }
 
-    private Snapshots getSnapshots() {
-        return snapshots;
-    }
-
-    private Snapshots createSnapshots() {
-        String id = (String) cbBoxAnimation.getSelectedItem();
-        setMessage(id);
-        sliderTime.setValue(0);
-        if (!id.startsWith("Please")) {
-            return new Snapshots(Snapshots.readableIdToId(id), lblFolder2.getText());
-        } else {
-            return null;
-        }
-    }
-
     @Action
     public void showChartsPopup() {
         //popupCharts.show(btnCharts, 0, btnCharts.getHeight());
@@ -473,7 +439,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
             //animator.setStartDelay(1000);
             animator.setAcceleration(0.01f);
             btnAnimaction.setEnabled(true);
-            cbBoxAnimation.setEnabled(false);
+            btnOpenAnimation.getAction().setEnabled(false);
             replayPanel.initAnim();
             animator.start();
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
@@ -511,7 +477,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     public void end() {
-        cbBoxAnimation.setEnabled(true);
+        btnOpenAnimation.getAction().setEnabled(true);
         replayPanel.endAnim();
         setMessage(getResourceMap().getString("animAction.stopped.message"));
 
@@ -1002,7 +968,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpAnimation.setCollapsed(true);
                     tpConfiguration.setCollapsed(true);
                     wmsMapper.setVisible(true);
-                    if (!lblNC.getText().isEmpty()) {
+                    if (null != outputFile && outputFile.isFile()) {
                         wmsMapper.setFile(outputFile);
                         btnMapping.getAction().setEnabled(true);
                     } else {
@@ -1023,6 +989,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpConfiguration.setCollapsed(true);
                     tpMapping.setCollapsed(true);
                     replayPanel.setVisible(true);
+                    replayPanel.setFolder(outputFolder);
                 } else {
                     replayPanel.setVisible(false);
                 }
@@ -1109,13 +1076,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
         sliderTime = new javax.swing.JSlider();
         lblFramePerSecond = new javax.swing.JLabel();
         animationSpeed = new javax.swing.JSpinner();
-        cbBoxAnimation = new javax.swing.JComboBox();
         btnDeleteSnapshots = new javax.swing.JButton();
         btnSaveAsSnapshots = new javax.swing.JButton();
-        lblSimulation2 = new javax.swing.JLabel();
-        btnPath2 = new javax.swing.JButton();
-        lblFolder2 = new javax.swing.JLabel();
         lblAnimationSpeed = new javax.swing.JLabel();
+        btnOpenAnimation = new javax.swing.JButton();
+        lblFolder = new javax.swing.JLabel();
         pnlConfiguration = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         blockTree = new org.previmer.ichthyop.ui.BlockTree();
@@ -1126,6 +1091,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblProgressGlobal = new javax.swing.JLabel();
         progressBarGlobal = new javax.swing.JProgressBar();
         lblTimeLeftGlobal = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1588,10 +1554,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
             }
         });
 
-        cbBoxAnimation.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cbBoxAnimation.setAction(actionMap.get("changeSimulationReplay")); // NOI18N
-        cbBoxAnimation.setName("cbBoxAnimation"); // NOI18N
-
         btnDeleteSnapshots.setAction(actionMap.get("deleteSnapshots")); // NOI18N
         btnDeleteSnapshots.setFocusable(false);
         btnDeleteSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -1604,14 +1566,15 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnSaveAsSnapshots.setName("btnSaveAsSnapshots"); // NOI18N
         btnSaveAsSnapshots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        lblSimulation2.setName("lblSimulation2"); // NOI18N
-
-        btnPath2.setAction(actionMap.get("changePath")); // NOI18N
-        btnPath2.setName("btnPath2"); // NOI18N
-
-        lblFolder2.setName("lblFolder2"); // NOI18N
-
+        lblAnimationSpeed.setText(resourceMap.getString("lblAnimationSpeed.text")); // NOI18N
         lblAnimationSpeed.setName("lblAnimationSpeed"); // NOI18N
+
+        btnOpenAnimation.setAction(actionMap.get("openFolderAnimation")); // NOI18N
+        btnOpenAnimation.setName("btnOpenAnimation"); // NOI18N
+
+        lblFolder.setFont(resourceMap.getFont("lblFolder.font")); // NOI18N
+        lblFolder.setText(resourceMap.getString("lblFolder.text")); // NOI18N
+        lblFolder.setName("lblFolder"); // NOI18N
 
         javax.swing.GroupLayout pnlAnimationLayout = new javax.swing.GroupLayout(pnlAnimation);
         pnlAnimation.setLayout(pnlAnimationLayout);
@@ -1620,20 +1583,19 @@ public class IchthyopView extends FrameView implements TimingTarget {
             .addGroup(pnlAnimationLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
+                    .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlAnimationLayout.createSequentialGroup()
-                                .addComponent(lblSimulation2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cbBoxAnimation, 0, 323, Short.MAX_VALUE))
-                            .addComponent(lblFolder2))
+                        .addComponent(btnOpenAnimation)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnPath2))
+                        .addComponent(btnSaveAsSnapshots)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnDeleteSnapshots))
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(btnDeleteSnapshots)
+                        .addComponent(lblAnimationSpeed)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsSnapshots))
+                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblFramePerSecond))
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(btnFirst)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1644,35 +1606,28 @@ public class IchthyopView extends FrameView implements TimingTarget {
                         .addComponent(btnNext)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnLast))
-                    .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(lblAnimationSpeed)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFramePerSecond)))
+                    .addComponent(lblFolder))
                 .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
             pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAnimationLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cbBoxAnimation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblSimulation2)
-                    .addComponent(btnPath2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblFolder2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(24, 24, 24)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnDeleteSnapshots)
-                    .addComponent(btnSaveAsSnapshots))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnLast)
-                    .addComponent(btnNext)
-                    .addComponent(btnAnimaction)
-                    .addComponent(btnPrevious)
-                    .addComponent(btnFirst))
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnSaveAsSnapshots)
+                            .addComponent(btnOpenAnimation))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblFolder)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnLast)
+                            .addComponent(btnNext)
+                            .addComponent(btnAnimaction)
+                            .addComponent(btnPrevious)
+                            .addComponent(btnFirst)))
+                    .addComponent(btnDeleteSnapshots))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sliderTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1680,7 +1635,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     .addComponent(lblAnimationSpeed)
                     .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblFramePerSecond))
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pnlConfiguration.setName("pnlConfiguration"); // NOI18N
@@ -1730,6 +1685,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblTimeLeftGlobal.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         lblTimeLeftGlobal.setName("lblTimeLeftGlobal"); // NOI18N
 
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setIcon(resourceMap.getIcon("jLabel1.icon")); // NOI18N
+        jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
+        jLabel1.setName("jLabel1"); // NOI18N
+
         javax.swing.GroupLayout pnlProgressLayout = new javax.swing.GroupLayout(pnlProgress);
         pnlProgress.setLayout(pnlProgressLayout);
         pnlProgressLayout.setHorizontalGroup(
@@ -1737,22 +1697,27 @@ public class IchthyopView extends FrameView implements TimingTarget {
             .addGroup(pnlProgressLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblProgressCurrent)
-                    .addComponent(lblProgressGlobal))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressBarGlobal, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
-                    .addComponent(progressBarCurrent, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lblTimeLeftCurrent)
-                    .addComponent(lblTimeLeftGlobal))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE)
+                    .addGroup(pnlProgressLayout.createSequentialGroup()
+                        .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblProgressCurrent)
+                            .addComponent(lblProgressGlobal))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(progressBarGlobal, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
+                            .addComponent(progressBarCurrent, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lblTimeLeftCurrent)
+                            .addComponent(lblTimeLeftGlobal))))
                 .addContainerGap())
         );
         pnlProgressLayout.setVerticalGroup(
             pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlProgressLayout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlProgressLayout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblProgressCurrent)
                     .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1763,7 +1728,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     .addComponent(lblProgressGlobal)
                     .addComponent(lblTimeLeftGlobal)
                     .addComponent(progressBarGlobal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addGap(44, 44, 44))
         );
 
         setComponent(mainPanel);
@@ -1774,7 +1739,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
         // TODO add your handling code here:
         replayPanel.setAvatarIndex(sliderTime.getValue());
-        setMessage(getSnapshots().getTime(sliderTime.getValue()));
+        //setMessage(getSnapshots().getTime(sliderTime.getValue()));
     }//GEN-LAST:event_sliderTimeStateChanged
 
     private void sliderTimeMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sliderTimeMousePressed
@@ -1819,16 +1784,15 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JButton btnMapping;
     private javax.swing.JButton btnNewCfgFile;
     private javax.swing.JButton btnNext;
+    private javax.swing.JButton btnOpenAnimation;
     private javax.swing.JButton btnOpenCfgFile;
     private javax.swing.JButton btnOpenNC;
-    private javax.swing.JButton btnPath2;
     private javax.swing.JToggleButton btnPreview;
     private javax.swing.JButton btnPrevious;
     private javax.swing.JButton btnSaveAsSnapshots;
     private javax.swing.JButton btnSaveCfgFile;
     private javax.swing.JButton btnSimulationRun;
     private javax.swing.JMenuItem cancelMapMenuItem;
-    private javax.swing.JComboBox cbBoxAnimation;
     private javax.swing.JComboBox cbBoxWMS;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
@@ -1839,6 +1803,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JCheckBoxMenuItem itemLengthChart;
     private javax.swing.JCheckBoxMenuItem itemRecruitChart;
     private javax.swing.JCheckBoxMenuItem itemStageChart;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator13;
@@ -1847,12 +1812,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblCfgFile;
-    private javax.swing.JLabel lblFolder2;
+    private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblNC;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
-    private javax.swing.JLabel lblSimulation2;
     private javax.swing.JLabel lblTimeLeftCurrent;
     private javax.swing.JLabel lblTimeLeftGlobal;
     private javax.swing.JLabel lblWMS;
@@ -1906,10 +1870,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private boolean isRunning = false;
     private Task simulActionTask;
     private Task createMapTask;
-    private String runId;
     private boolean isSetup;
     private ReplayPanel replayPanel = new ReplayPanel();
-    private Snapshots snapshots;
     private final float TEN_MINUTES = 10.f * 60.f;
     private Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
     private float nbfps = 1.f;
@@ -1917,5 +1879,5 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private Timer progressTimer;
     private WMSMapper wmsMapper = new WMSMapper();
     private LoggerScrollPane loggerScrollPane = new LoggerScrollPane();
-    private File outputFile;
+    private File outputFile, outputFolder;
 }

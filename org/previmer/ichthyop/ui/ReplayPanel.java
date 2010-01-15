@@ -6,25 +6,18 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 
 import java.io.File;
@@ -35,9 +28,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
@@ -55,9 +47,10 @@ public class ReplayPanel extends JPanel {
     private float veilAlphaLevel = 0.0f;
     private float alphaLevel = 0.0f;
     private int avatarIndex;
-    private boolean damaged = true;
     private FocusGrabber focusGrabber;
-    private Snapshots snapshots;
+    private File folder;
+    private Icon bgIcon;
+    private boolean damaged = true;
 
     public ReplayPanel() {
         GridBagLayout layout = new GridBagLayout();
@@ -68,39 +61,7 @@ public class ReplayPanel extends JPanel {
         initInputListeners();
         addInputListeners();
     }
-
-    /*@Override
-    public Dimension getPreferredSize() {
-        try {
-            int width = avatars.get(0).getWidth() + getInsets().left + getInsets().right;
-            int height = avatars.get(0).getHeight() + getInsets().bottom + getInsets().top;
-            new Dimension(width, height);
-        } catch (Exception ex) {
-            Logger.getLogger(ReplayPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return super.getPreferredSize();
-    }
-
-    @Override
-    public int getWidth() {
-        try {
-            return avatars.get(0).getWidth() + getInsets().left + getInsets().right;
-        } catch (Exception ex) {
-            Logger.getLogger(ReplayPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return super.getWidth();
-    }
-
-    @Override
-    public int getHeight() {
-        try {
-            return avatars.get(0).getHeight() +getInsets().bottom + getInsets().top + 20;
-        } catch (Exception ex) {
-            Logger.getLogger(ReplayPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return super.getHeight();
-    }*/
-
+    
     @Override
     public Dimension getMaximumSize() {
         return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -131,6 +92,11 @@ public class ReplayPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        if (avatars == null || avatars.isEmpty()) {
+            if (bgIcon != null)
+            bgIcon.paintIcon(this, g, (getWidth() - bgIcon.getIconWidth()) / 2, (getHeight() - bgIcon.getIconHeight()) / 2);
+        }
+
         if (!loadingDone && faderTimer == null) {
             return;
         }
@@ -147,11 +113,13 @@ public class ReplayPanel extends JPanel {
                 RenderingHints.VALUE_ANTIALIAS_ON);
         Composite oldComposite = g2.getComposite();
 
-        try {
-            BufferedImage img = avatars.get(getAvatarIndex());
-            setSize(img.getWidth(), img.getHeight());
-            g2.drawImage(img, x, y, img.getWidth(), img.getHeight(), null);
-        } catch (Exception ex) {
+        if (avatars != null && !avatars.isEmpty()) {
+            try {
+                BufferedImage img = avatars.get(getAvatarIndex());
+                setSize(img.getWidth(), img.getHeight());
+                g2.drawImage(img, x, y, img.getWidth(), img.getHeight(), null);
+            } catch (Exception ex) {
+            }
         }
 
         g2.setComposite(oldComposite);
@@ -176,26 +144,8 @@ public class ReplayPanel extends JPanel {
         removeMouseListener(focusGrabber);
     }
 
-    private void findAvatars(String runId) {
-        avatars = new ArrayList<BufferedImage>();
-        picturesFinder = new Thread(new PicturesFinderThread(runId.concat("*.png")));
-        picturesFinder.start();
-    }
-
-    public void setSnapshots(Snapshots snapshots) {
-        this.snapshots = snapshots;
-        if (snapshots != null) {
-            findAvatars(snapshots.getId());
-        } else {
-            avatars = new ArrayList<BufferedImage>();
-            damaged = true;
-            repaint();
-        }
-        //damaged = true;
-    }
-
     public int getIndexMax() {
-        return snapshots.getNumberImages() - 1;
+        return avatars.size() - 1;
     }
 
     public int getAvatarIndex() {
@@ -207,12 +157,32 @@ public class ReplayPanel extends JPanel {
         repaint();
     }
 
+    void setFolder(File folder) {
+        this.folder = folder;
+        avatars = new ArrayList<BufferedImage>();
+        if (null != folder && folder.isDirectory()) {
+            System.out.println(folder.toString());
+            picturesFinder = new Thread(new PicturesFinderThread(folder, "*.png"));
+            picturesFinder.start();
+        } else {
+            bgIcon = IchthyopApp.getApplication().getMainView().getResourceMap().getIcon("step.Animation.bgicon");
+            damaged = true;
+            repaint();
+        }
+    }
+
+    public File getFolder() {
+        return folder;
+    }
+
     private class PicturesFinderThread implements Runnable {
 
         String strFilter;
+        File folder;
 
-        PicturesFinderThread(String strFilter) {
+        PicturesFinderThread(File folder, String strFilter) {
             this.strFilter = strFilter;
+            this.folder = folder;
         }
 
         public void run() {
@@ -220,7 +190,7 @@ public class ReplayPanel extends JPanel {
             try {
                 MetaFilenameFilter filter = new MetaFilenameFilter(strFilter);
 
-                List<File> files = Arrays.asList(new File("./img").listFiles(filter));
+                List<File> files = Arrays.asList(folder.listFiles(filter));
                 Collections.sort(files);
                 for (int i = 0; i < files.size(); i++) {
                     File file = files.get(i);

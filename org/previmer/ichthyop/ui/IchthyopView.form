@@ -708,26 +708,23 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="sliderTime" alignment="0" pref="368" max="32767" attributes="1"/>
+                      <Component id="sliderTime" alignment="0" pref="405" max="32767" attributes="1"/>
                       <Group type="102" alignment="0" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="lblSimulation2" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="cbBoxAnimation" pref="323" max="32767" attributes="0"/>
-                              </Group>
-                              <Component id="lblFolder2" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" max="-2" attributes="0"/>
-                          <Component id="btnPath2" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="btnDeleteSnapshots" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnOpenAnimation" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnSaveAsSnapshots" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="btnDeleteSnapshots" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="lblAnimationSpeed" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="animationSpeed" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="lblFramePerSecond" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="btnFirst" min="-2" max="-2" attributes="0"/>
@@ -740,41 +737,34 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnLast" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="lblAnimationSpeed" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="animationSpeed" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="lblFramePerSecond" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="lblFolder" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="cbBoxAnimation" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblSimulation2" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnPath2" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="lblFolder2" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="btnSaveAsSnapshots" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnOpenAnimation" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="lblFolder" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace pref="12" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="btnLast" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnNext" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnAnimaction" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnPrevious" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnFirst" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
                       <Component id="btnDeleteSnapshots" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnSaveAsSnapshots" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="btnLast" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnNext" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnAnimaction" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnPrevious" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnFirst" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="sliderTime" min="-2" max="-2" attributes="0"/>
@@ -784,7 +774,7 @@
                       <Component id="animationSpeed" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lblFramePerSecond" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="44" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -885,26 +875,10 @@
             <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="animationSpeedStateChanged"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cbBoxAnimation">
-          <Properties>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="4">
-                <StringItem index="0" value="Item 1"/>
-                <StringItem index="1" value="Item 2"/>
-                <StringItem index="2" value="Item 3"/>
-                <StringItem index="3" value="Item 4"/>
-              </StringArray>
-            </Property>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopView" id="changeSimulationReplay" methodName="changeSimulationReplay"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="cbBoxAnimation" noResource="true"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JButton" name="btnDeleteSnapshots">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="deleteSnapshots" methodName="deleteSnapshots"/>
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteSnapshots" methodName="deleteSnapshots"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="4"/>
@@ -915,7 +889,7 @@
         <Component class="javax.swing.JButton" name="btnSaveAsSnapshots">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="saveAsSnapshots" methodName="saveAsSnapshots"/>
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsSnapshots" methodName="saveAsSnapshots"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="4"/>
@@ -923,27 +897,25 @@
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="lblSimulation2">
-          <Properties>
-            <Property name="name" type="java.lang.String" value="lblSimulation2" noResource="true"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnPath2">
-          <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="changePath" methodName="changePath"/>
-            </Property>
-            <Property name="name" type="java.lang.String" value="btnPath2" noResource="true"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblFolder2">
-          <Properties>
-            <Property name="name" type="java.lang.String" value="lblFolder2" noResource="true"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JLabel" name="lblAnimationSpeed">
           <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="lblAnimationSpeed.text"/>
             <Property name="name" type="java.lang.String" value="lblAnimationSpeed" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnOpenAnimation">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="openFolderAnimation" methodName="openFolderAnimation"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="btnOpenAnimation" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblFolder">
+          <Properties>
+            <Property name="font" type="java.awt.Font" resourceKey="lblFolder.font"/>
+            <Property name="text" type="java.lang.String" resourceKey="lblFolder.text"/>
+            <Property name="name" type="java.lang.String" value="lblFolder" noResource="true"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -1003,18 +975,23 @@
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="lblProgressCurrent" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblProgressGlobal" alignment="0" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="progressBarGlobal" pref="321" max="32767" attributes="1"/>
-                      <Component id="progressBarCurrent" alignment="0" pref="321" max="32767" attributes="1"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="lblTimeLeftCurrent" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblTimeLeftGlobal" alignment="1" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel1" alignment="0" pref="576" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="lblProgressCurrent" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="lblProgressGlobal" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="progressBarGlobal" pref="321" max="32767" attributes="1"/>
+                              <Component id="progressBarCurrent" alignment="0" pref="321" max="32767" attributes="1"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="lblTimeLeftCurrent" min="-2" max="-2" attributes="0"/>
+                              <Component id="lblTimeLeftGlobal" alignment="1" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -1022,8 +999,10 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
+                  <Component id="jLabel1" max="32767" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="lblProgressCurrent" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
@@ -1037,7 +1016,7 @@
                       <Component id="lblTimeLeftGlobal" min="-2" max="-2" attributes="0"/>
                       <Component id="progressBarGlobal" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="14" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" pref="44" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -1087,6 +1066,14 @@
             <Property name="text" type="java.lang.String" resourceKey="lblTimeLeftGlobal.text"/>
             <Property name="horizontalTextPosition" type="int" value="2"/>
             <Property name="name" type="java.lang.String" value="lblTimeLeftGlobal" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel1">
+          <Properties>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="icon" type="javax.swing.Icon" resourceKey="jLabel1.icon"/>
+            <Property name="text" type="java.lang.String" resourceKey="jLabel1.text"/>
+            <Property name="name" type="java.lang.String" value="jLabel1" noResource="true"/>
           </Properties>
         </Component>
       </SubComponents>
