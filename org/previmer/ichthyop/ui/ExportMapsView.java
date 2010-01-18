@@ -11,6 +11,7 @@ import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.Timer;
@@ -24,22 +25,23 @@ import org.jdesktop.application.Task;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
+import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
  * The application's main frame.
  */
-public class BackupSnapshotsView extends FrameView {
+public class ExportMapsView extends FrameView {
 
-    public BackupSnapshotsView(SingleFrameApplication app, Snapshots snapshots) {
+    public ExportMapsView(SingleFrameApplication app, File folder) {
         super(app);
         JFrame frame = new JFrame();
         frame.setName("backupView");
         //frame.setResizable(false);
         setFrame(frame);
 
-        this.snapshots = snapshots;
+        this.folder = folder;
 
-        getFrame().setTitle(getResourceMap().getString("Application.title") + " - Backup run " + snapshots.getReadableId());
+        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + folder.getName());
 
         initComponents();
         getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
@@ -121,7 +123,7 @@ public class BackupSnapshotsView extends FrameView {
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int returnPath = chooser.showDialog(getFrame(), "Select folder");
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            if (!chooser.getSelectedFile().equals(imgPath)) {
+            if (!chooser.getSelectedFile().equals(folder)) {
                 btnSave.getAction().setEnabled(true);
                 backupPath = chooser.getSelectedFile();
                 textFieldPath.setEnabled(true);
@@ -130,7 +132,7 @@ public class BackupSnapshotsView extends FrameView {
                 setMessage("Set path " + backupPath.toString());
             } else {
                 statusAnimationLabel.setIcon(getResourceMap().getIcon("StatusBar.failedIcon"));
-                setMessage("img/ folder is a working folder of this program. Please select an other one.");
+                setMessage("Please select a destination folder distinct from the source folder.");
             }
         }
     }
@@ -148,9 +150,10 @@ public class BackupSnapshotsView extends FrameView {
 
         @Override
         protected Object doInBackground() throws Exception {
-            int nbFiles = snapshots.getNumberImages();
+            File[] pictures = folder.listFiles(new MetaFilenameFilter("*.png"));
+            int nbFiles = pictures.length;
             for (int i = 0; i < nbFiles; i++) {
-                File sfile = snapshots.getImages()[i];
+                File sfile = pictures[i];
                 File dfile = rename(sfile);
                 setProgress(i / (float) nbFiles);
                 IOTools.copyFile(sfile, dfile);
@@ -179,7 +182,7 @@ public class BackupSnapshotsView extends FrameView {
             destDirectory += File.separator;
         }
         String filename = file.getName();
-        filename = filename.replaceFirst(snapshots.getId(), textFieldName.getText().trim());
+        filename = filename.replaceFirst(folder.getName(), textFieldName.getText().trim());
         return new File(destDirectory + filename);
     }
 
@@ -215,7 +218,7 @@ public class BackupSnapshotsView extends FrameView {
         textFieldPath = new javax.swing.JTextField();
         btnChoosePath = new javax.swing.JButton();
         textFieldName = new javax.swing.JTextField();
-        textFieldName.setText(snapshots.getId());
+        textFieldName.setText(folder.getName());
         lblName = new javax.swing.JLabel();
         btnCancel = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
@@ -227,7 +230,7 @@ public class BackupSnapshotsView extends FrameView {
 
         mainPanel.setName("mainPanel"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(BackupSnapshotsView.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(ExportMapsView.class);
         lblPath.setText(resourceMap.getString("lblPath.text")); // NOI18N
         lblPath.setName("lblPath"); // NOI18N
 
@@ -236,7 +239,7 @@ public class BackupSnapshotsView extends FrameView {
         textFieldPath.setText("Path not set yet");
         textFieldPath.setEnabled(false);
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(BackupSnapshotsView.class, this);
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(ExportMapsView.class, this);
         btnChoosePath.setAction(actionMap.get("changePath")); // NOI18N
         btnChoosePath.setName("btnChoosePath"); // NOI18N
 
@@ -255,7 +258,6 @@ public class BackupSnapshotsView extends FrameView {
 
         btnSave.setAction(actionMap.get("save")); // NOI18N
         btnSave.setName("btnSave"); // NOI18N
-        btnSave.getAction().setEnabled(false);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -264,20 +266,20 @@ public class BackupSnapshotsView extends FrameView {
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                    .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblPath)
                             .addComponent(lblName))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addComponent(textFieldPath, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
+                                .addComponent(textFieldPath, javax.swing.GroupLayout.DEFAULT_SIZE, 410, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnChoosePath))
-                            .addComponent(textFieldName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(textFieldName, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                        .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addComponent(btnSave)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnCancel)))
                 .addContainerGap())
         );
@@ -294,10 +296,10 @@ public class BackupSnapshotsView extends FrameView {
                     .addComponent(lblName)
                     .addComponent(textFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCancel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(283, 283, 283))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE, false)
+                    .addComponent(btnCancel)
+                    .addComponent(btnSave))
+                .addGap(25, 25, 25))
         );
 
         statusPanel.setName("statusPanel"); // NOI18N
@@ -315,11 +317,11 @@ public class BackupSnapshotsView extends FrameView {
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 332, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 345, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -367,7 +369,6 @@ public class BackupSnapshotsView extends FrameView {
     private final Icon[] busyIcons = new Icon[15];
     private int busyIconIndex = 0;
     private static final Logger logger = Logger.getLogger(ISimulationManager.class.getName());
-    private Snapshots snapshots;
-    private File imgPath = new File(System.getProperty("user.dir") + File.separator + "img");
+    private File folder;
     private File backupPath = new File(System.getProperty("user.dir"));
 }

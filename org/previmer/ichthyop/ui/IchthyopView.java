@@ -353,8 +353,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     @Action
-    public void saveAsSnapshots() {
-        //getApplication().show(new BackupSnapshotsView(IchthyopApp.getApplication(), folder));
+    public void saveAsMaps() {
+        getApplication().show(new ExportMapsView(IchthyopApp.getApplication(), replayPanel.getFolder()));
     }
 
     private void showSimulationPreview() {
