@@ -182,7 +182,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="exportMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsSnapshots" methodName="saveAsSnapshots"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exportMaps" methodName="exportMaps"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="exportMenuItem" noResource="true"/>
               </Properties>
@@ -190,7 +190,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="deleteMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteSnapshots" methodName="deleteSnapshots"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteMaps" methodName="deleteMaps"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="deleteMenuItem" noResource="true"/>
               </Properties>
@@ -697,9 +697,9 @@
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="btnOpenAnimation" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="btnSaveAsSnapshots" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnExportMaps" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="btnDeleteSnapshots" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnDeleteMaps" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Component id="lblFolder" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="sliderTime" alignment="0" pref="405" max="32767" attributes="0"/>
@@ -734,13 +734,13 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="btnSaveAsSnapshots" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnExportMaps" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="btnOpenAnimation" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="lblFolder" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="btnDeleteSnapshots" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnDeleteMaps" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -848,25 +848,25 @@
             <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="animationSpeedStateChanged"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="btnDeleteSnapshots">
+        <Component class="javax.swing.JButton" name="btnDeleteMaps">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteSnapshots" methodName="deleteSnapshots"/>
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteMaps" methodName="deleteMaps"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="4"/>
-            <Property name="name" type="java.lang.String" value="btnDeleteSnapshots" noResource="true"/>
+            <Property name="name" type="java.lang.String" value="btnDeleteMaps" noResource="true"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnSaveAsSnapshots">
+        <Component class="javax.swing.JButton" name="btnExportMaps">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsSnapshots" methodName="saveAsSnapshots"/>
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="exportMaps" methodName="exportMaps"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="4"/>
-            <Property name="name" type="java.lang.String" value="btnSaveAsSnapshots" noResource="true"/>
+            <Property name="name" type="java.lang.String" value="btnExportMaps" noResource="true"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>

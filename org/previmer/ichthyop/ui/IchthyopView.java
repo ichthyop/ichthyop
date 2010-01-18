@@ -184,8 +184,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     private void setAnimationToolsEnabled(boolean enabled) {
-        btnSaveAsSnapshots.getAction().setEnabled(enabled);
-        btnDeleteSnapshots.getAction().setEnabled(enabled);
+        btnExportMaps.getAction().setEnabled(enabled);
+        btnDeleteMaps.getAction().setEnabled(enabled);
         btnFirst.getAction().setEnabled(enabled);
         btnPrevious.getAction().setEnabled(enabled);
         btnAnimaction.getAction().setEnabled(enabled);
@@ -195,7 +195,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     @Action
-    public void deleteSnapshots() {
+    public void deleteMaps() {
         File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
         StringBuffer message = new StringBuffer("Delete maps from ");
         message.append(outputFolder.getName());
@@ -353,7 +353,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     @Action
-    public void saveAsMaps() {
+    public void exportMaps() {
         getApplication().show(new ExportMapsView(IchthyopApp.getApplication(), replayPanel.getFolder()));
     }
 
@@ -1117,8 +1117,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnLast = new javax.swing.JButton();
         lblFramePerSecond = new javax.swing.JLabel();
         animationSpeed = new javax.swing.JSpinner();
-        btnDeleteSnapshots = new javax.swing.JButton();
-        btnSaveAsSnapshots = new javax.swing.JButton();
+        btnDeleteMaps = new javax.swing.JButton();
+        btnExportMaps = new javax.swing.JButton();
         lblAnimationSpeed = new javax.swing.JLabel();
         btnOpenAnimation = new javax.swing.JButton();
         lblFolder = new javax.swing.JLabel();
@@ -1227,11 +1227,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
         jSeparator14.setName("jSeparator14"); // NOI18N
         animationMenu.add(jSeparator14);
 
-        exportMenuItem.setAction(actionMap.get("saveAsSnapshots")); // NOI18N
+        exportMenuItem.setAction(actionMap.get("exportMaps")); // NOI18N
         exportMenuItem.setName("exportMenuItem"); // NOI18N
         animationMenu.add(exportMenuItem);
 
-        deleteMenuItem.setAction(actionMap.get("deleteSnapshots")); // NOI18N
+        deleteMenuItem.setAction(actionMap.get("deleteMaps")); // NOI18N
         deleteMenuItem.setName("deleteMenuItem"); // NOI18N
         animationMenu.add(deleteMenuItem);
 
@@ -1569,17 +1569,17 @@ public class IchthyopView extends FrameView implements TimingTarget {
             }
         });
 
-        btnDeleteSnapshots.setAction(actionMap.get("deleteSnapshots")); // NOI18N
-        btnDeleteSnapshots.setFocusable(false);
-        btnDeleteSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnDeleteSnapshots.setName("btnDeleteSnapshots"); // NOI18N
-        btnDeleteSnapshots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnDeleteMaps.setAction(actionMap.get("deleteMaps")); // NOI18N
+        btnDeleteMaps.setFocusable(false);
+        btnDeleteMaps.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        btnDeleteMaps.setName("btnDeleteMaps"); // NOI18N
+        btnDeleteMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        btnSaveAsSnapshots.setAction(actionMap.get("saveAsSnapshots")); // NOI18N
-        btnSaveAsSnapshots.setFocusable(false);
-        btnSaveAsSnapshots.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnSaveAsSnapshots.setName("btnSaveAsSnapshots"); // NOI18N
-        btnSaveAsSnapshots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnExportMaps.setAction(actionMap.get("exportMaps")); // NOI18N
+        btnExportMaps.setFocusable(false);
+        btnExportMaps.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        btnExportMaps.setName("btnExportMaps"); // NOI18N
+        btnExportMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
         lblAnimationSpeed.setText(resourceMap.getString("lblAnimationSpeed.text")); // NOI18N
         lblAnimationSpeed.setName("lblAnimationSpeed"); // NOI18N
@@ -1613,9 +1613,9 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(btnOpenAnimation)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsSnapshots)
+                        .addComponent(btnExportMaps)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteSnapshots))
+                        .addComponent(btnDeleteMaps))
                     .addComponent(lblFolder)
                     .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
                     .addComponent(lblTime)
@@ -1644,11 +1644,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnSaveAsSnapshots)
+                            .addComponent(btnExportMaps)
                             .addComponent(btnOpenAnimation))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblFolder))
-                    .addComponent(btnDeleteSnapshots))
+                    .addComponent(btnDeleteMaps))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnLast)
@@ -1801,8 +1801,9 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
-    private javax.swing.JButton btnDeleteSnapshots;
+    private javax.swing.JButton btnDeleteMaps;
     private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnExportMaps;
     private javax.swing.JButton btnFirst;
     private javax.swing.JButton btnLast;
     private javax.swing.JButton btnMapping;
@@ -1813,7 +1814,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JButton btnOpenNC;
     private javax.swing.JToggleButton btnPreview;
     private javax.swing.JButton btnPrevious;
-    private javax.swing.JButton btnSaveAsSnapshots;
     private javax.swing.JButton btnSaveCfgFile;
     private javax.swing.JButton btnSimulationRun;
     private javax.swing.JMenuItem cancelMapMenuItem;
