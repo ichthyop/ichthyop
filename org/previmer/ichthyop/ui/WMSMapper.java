@@ -155,6 +155,10 @@ public class WMSMapper extends JXMapKit {
         bgPainter = getBgPainter();
     }
 
+    public File getFolder() {
+        return new File(getFile().getAbsolutePath().substring(0, getFile().getAbsolutePath().lastIndexOf(".nc")));
+    }
+
     public File getFile() {
         if (null != nc) {
             return new File(nc.getLocation());

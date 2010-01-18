@@ -40,13 +40,14 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
  */
 public class ReplayPanel extends JPanel {
 
-    private List<BufferedImage> avatars = null;
+    private List<BufferedImage> pictures = null;
+    private List<String> pictureNames = null;
     private boolean loadingDone = false;
     private Thread picturesFinder = null;
     private Timer faderTimer = null;
     private float veilAlphaLevel = 0.0f;
     private float alphaLevel = 0.0f;
-    private int avatarIndex;
+    private int index;
     private FocusGrabber focusGrabber;
     private File folder;
     private Icon bgIcon;
@@ -61,7 +62,7 @@ public class ReplayPanel extends JPanel {
         initInputListeners();
         addInputListeners();
     }
-    
+
     @Override
     public Dimension getMaximumSize() {
         return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -92,9 +93,10 @@ public class ReplayPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (avatars == null || avatars.isEmpty()) {
-            if (bgIcon != null)
-            bgIcon.paintIcon(this, g, (getWidth() - bgIcon.getIconWidth()) / 2, (getHeight() - bgIcon.getIconHeight()) / 2);
+        if (pictures == null || pictures.isEmpty()) {
+            if (bgIcon != null) {
+                bgIcon.paintIcon(this, g, (getWidth() - bgIcon.getIconWidth()) / 2, (getHeight() - bgIcon.getIconHeight()) / 2);
+            }
         }
 
         if (!loadingDone && faderTimer == null) {
@@ -113,11 +115,13 @@ public class ReplayPanel extends JPanel {
                 RenderingHints.VALUE_ANTIALIAS_ON);
         Composite oldComposite = g2.getComposite();
 
-        if (avatars != null && !avatars.isEmpty()) {
+        if (pictures != null && !pictures.isEmpty()) {
             try {
-                BufferedImage img = avatars.get(getAvatarIndex());
-                setSize(img.getWidth(), img.getHeight());
-                g2.drawImage(img, x, y, img.getWidth(), img.getHeight(), null);
+                BufferedImage img = pictures.get(getIndex());
+                //setSize(img.getWidth(), img.getHeight());
+                //x = x + (getWidth() - img.getWidth()) / 2;
+                //y = y + (getHeight() - img.getHeight()) / 2;
+                g2.drawImage(img, x, y, getWidth(), getHeight(), null);
             } catch (Exception ex) {
             }
         }
@@ -145,29 +149,51 @@ public class ReplayPanel extends JPanel {
     }
 
     public int getIndexMax() {
-        return avatars.size() - 1;
+        return pictures.size() - 1;
     }
 
-    public int getAvatarIndex() {
-        return avatarIndex;
+    public int getIndex() {
+        return index;
     }
 
-    public void setAvatarIndex(int index) {
-        avatarIndex = index;
+    public void setIndex(int index) {
+        this.index = index;
         repaint();
     }
 
     void setFolder(File folder) {
         this.folder = folder;
-        avatars = new ArrayList<BufferedImage>();
+        pictures = new ArrayList();
+        pictureNames = new ArrayList();
         if (null != folder && folder.isDirectory()) {
-            System.out.println(folder.toString());
             picturesFinder = new Thread(new PicturesFinderThread(folder, "*.png"));
             picturesFinder.start();
         } else {
             bgIcon = IchthyopApp.getApplication().getMainView().getResourceMap().getIcon("step.Animation.bgicon");
             damaged = true;
             repaint();
+        }
+    }
+
+    public String getTime() {
+        try {
+            String[] tokens = pictureNames.get(index).split("_");
+            String date = tokens[tokens.length - 1];
+            date = date.substring(0, date.indexOf(".png"));
+            String[] dateToken = date.split("-");
+            StringBuffer time = new StringBuffer("Year ");
+            time.append(dateToken[0].substring(3));
+            time.append(" Month ");
+            time.append(dateToken[1]);
+            time.append(" Day ");
+            time.append(dateToken[2]);
+            time.append(" - ");
+            time.append(dateToken[3]);
+            time.append(":");
+            time.append(dateToken[4]);
+            return time.toString();
+        } catch (Exception e) {
+            return "Time";
         }
     }
 
@@ -195,10 +221,11 @@ public class ReplayPanel extends JPanel {
                 for (int i = 0; i < files.size(); i++) {
                     File file = files.get(i);
                     BufferedImage image = ImageIO.read(file);
-                    avatars.add(image);
+                    pictures.add(image);
+                    pictureNames.add(file.getName());
                     if (i > 2) {
                         damaged = true;
-                        setAvatarIndex(0);
+                        setIndex(0);
                         startFader();
                     }
 

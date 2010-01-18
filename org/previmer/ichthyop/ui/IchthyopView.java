@@ -258,6 +258,13 @@ public class IchthyopView extends FrameView implements TimingTarget {
             btnMapping.getAction().setEnabled(true);
             btnCancelMapping.getAction().setEnabled(false);
         }
+
+        @Override
+        protected void succeeded(Object o) {
+            tpMapping.setCollapsed(true);
+            tpAnimation.setCollapsed(false);
+            getApplication().getContext().getTaskService().execute(new OpenFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
+        }
     }
 
     @Action
@@ -284,7 +291,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     @Action
-    public void openFolderAnimation() {
+    public Task openFolderAnimation() {
 
         File file = (null == outputFolder)
                 ? new File(System.getProperty("user.dir"))
@@ -293,11 +300,50 @@ public class IchthyopView extends FrameView implements TimingTarget {
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int returnPath = chooser.showDialog(getFrame(), "Select folder");
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            outputFolder = chooser.getSelectedFile();
+            return new OpenFolderAnimationTask(getApplication(), chooser.getSelectedFile());
+        }
+        return null;
+    }
+
+    private class OpenFolderAnimationTask extends Task {
+
+        private File folder;
+        int nbPNG = 0;
+
+        OpenFolderAnimationTask(Application instance, File folder) {
+            super(instance);
+            this.folder = folder;
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            nbPNG = folder.listFiles(new MetaFilenameFilter("*.png")).length;
+            if (nbPNG > 0) {
+                return null;
+            } else {
+                cancel(true);
+            }
+            return null;
+        }
+
+        @Override
+        protected void succeeded(Object o) {
+            outputFolder = folder;
             lblFolder.setText(outputFolder.getName());
             lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
             replayPanel.setFolder(outputFolder);
+            sliderTime.setMaximum(nbPNG - 1);
             setAnimationToolsEnabled(true);
+        }
+
+        @Override
+        protected void cancelled() {
+            lblFolder.setText(IchthyopView.this.getResourceMap().getString("lblFolder.text"));
+            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
+            sliderTime.setMaximum(0);
+            setAnimationToolsEnabled(false);
+            setMessage("No PNG pictures found in folder " + folder.getAbsolutePath());
+            outputFolder = null;
         }
     }
 
@@ -551,13 +597,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblTimeLeftGlobal.setText(getResourceMap().getString("lblTimeLeftGlobal.text"));
     }
 
-    /*@Action
+    @Action
     public void exitApplication() {
-    if (pnlProgress.isVisible()) {
-    btnSimulationProgress.doClick();
+        getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(btnExit, 0, null));
     }
-    getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(btnExit, 0, null));
-    }*/
+
     @Action
     public void newConfigurationFile() {
         setMessage("New configuration file - not supported yet.");
@@ -841,6 +885,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
         JXTaskPaneContainer tpContainer = new JXTaskPaneContainer();
         tpContainer.setLayout(new GridBagLayout());
+        tpContainer.setOpaque(false);
 
         tpConfiguration = new JXTaskPane();
         tpConfiguration.setCollapsed(false);
@@ -1018,20 +1063,17 @@ public class IchthyopView extends FrameView implements TimingTarget {
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         simulationMenu = new javax.swing.JMenu();
         simulactionMenuItem = new javax.swing.JMenuItem();
-        progressMenuItem = new javax.swing.JMenuItem();
         previewMenuItem = new javax.swing.JMenuItem();
         mappingMenu = new javax.swing.JMenu();
         openNCMenuItem = new javax.swing.JMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         mapMenuItem = new javax.swing.JMenuItem();
         cancelMapMenuItem = new javax.swing.JMenuItem();
-        jSeparator8 = new javax.swing.JPopupMenu.Separator();
-        wmsMenu = new javax.swing.JMenu();
         animationMenu = new javax.swing.JMenu();
-        animSimuMenu = new javax.swing.JMenu();
+        openAnimationMenuItem = new javax.swing.JMenuItem();
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
-        deleteMenuItem = new javax.swing.JMenuItem();
         exportMenuItem = new javax.swing.JMenuItem();
+        deleteMenuItem = new javax.swing.JMenuItem();
         jSeparator15 = new javax.swing.JPopupMenu.Separator();
         animactionMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
@@ -1073,7 +1115,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnAnimaction = new javax.swing.JButton();
         btnNext = new javax.swing.JButton();
         btnLast = new javax.swing.JButton();
-        sliderTime = new javax.swing.JSlider();
         lblFramePerSecond = new javax.swing.JLabel();
         animationSpeed = new javax.swing.JSpinner();
         btnDeleteSnapshots = new javax.swing.JButton();
@@ -1081,6 +1122,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblAnimationSpeed = new javax.swing.JLabel();
         btnOpenAnimation = new javax.swing.JButton();
         lblFolder = new javax.swing.JLabel();
+        sliderTime = new javax.swing.JSlider();
+        lblTime = new javax.swing.JLabel();
         pnlConfiguration = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         blockTree = new org.previmer.ichthyop.ui.BlockTree();
@@ -1092,6 +1135,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         progressBarGlobal = new javax.swing.JProgressBar();
         lblTimeLeftGlobal = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        btnExit = new javax.swing.JButton();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1147,10 +1191,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         simulactionMenuItem.setName("simulactionMenuItem"); // NOI18N
         simulationMenu.add(simulactionMenuItem);
 
-        progressMenuItem.setAction(actionMap.get("simulationProgress")); // NOI18N
-        progressMenuItem.setName("progressMenuItem"); // NOI18N
-        simulationMenu.add(progressMenuItem);
-
         previewMenuItem.setAction(actionMap.get("previewSimulation")); // NOI18N
         previewMenuItem.setName("previewMenuItem"); // NOI18N
         simulationMenu.add(previewMenuItem);
@@ -1175,32 +1215,25 @@ public class IchthyopView extends FrameView implements TimingTarget {
         cancelMapMenuItem.setName("cancelMapMenuItem"); // NOI18N
         mappingMenu.add(cancelMapMenuItem);
 
-        jSeparator8.setName("jSeparator8"); // NOI18N
-        mappingMenu.add(jSeparator8);
-
-        wmsMenu.setText(resourceMap.getString("wmsMenu.text")); // NOI18N
-        wmsMenu.setName("wmsMenu"); // NOI18N
-        mappingMenu.add(wmsMenu);
-
         menuBar.add(mappingMenu);
 
         animationMenu.setText(resourceMap.getString("animationMenu.text")); // NOI18N
         animationMenu.setName("animationMenu"); // NOI18N
 
-        animSimuMenu.setText(resourceMap.getString("animSimuMenu.text")); // NOI18N
-        animSimuMenu.setName("animSimuMenu"); // NOI18N
-        animationMenu.add(animSimuMenu);
+        openAnimationMenuItem.setAction(actionMap.get("openFolderAnimation")); // NOI18N
+        openAnimationMenuItem.setName("openAnimationMenuItem"); // NOI18N
+        animationMenu.add(openAnimationMenuItem);
 
         jSeparator14.setName("jSeparator14"); // NOI18N
         animationMenu.add(jSeparator14);
 
-        deleteMenuItem.setAction(actionMap.get("deleteSnapshots")); // NOI18N
-        deleteMenuItem.setName("deleteMenuItem"); // NOI18N
-        animationMenu.add(deleteMenuItem);
-
         exportMenuItem.setAction(actionMap.get("saveAsSnapshots")); // NOI18N
         exportMenuItem.setName("exportMenuItem"); // NOI18N
         animationMenu.add(exportMenuItem);
+
+        deleteMenuItem.setAction(actionMap.get("deleteSnapshots")); // NOI18N
+        deleteMenuItem.setName("deleteMenuItem"); // NOI18N
+        animationMenu.add(deleteMenuItem);
 
         jSeparator15.setName("jSeparator15"); // NOI18N
         animationMenu.add(jSeparator15);
@@ -1516,24 +1549,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnLast.setName("btnLast"); // NOI18N
         btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        sliderTime.setPaintTrack(false);
-        sliderTime.setSnapToTicks(true);
-        sliderTime.setValue(0);
-        sliderTime.setName("sliderTime"); // NOI18N
-        sliderTime.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                sliderTimeMousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                sliderTimeMouseReleased(evt);
-            }
-        });
-        sliderTime.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                sliderTimeStateChanged(evt);
-            }
-        });
-
         lblFramePerSecond.setText(resourceMap.getString("lblFramePerSecond.text")); // NOI18N
         lblFramePerSecond.setToolTipText(resourceMap.getString("lblFramePerSecond.toolTipText")); // NOI18N
         lblFramePerSecond.setName("lblFramePerSecond"); // NOI18N
@@ -1576,6 +1591,18 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblFolder.setText(resourceMap.getString("lblFolder.text")); // NOI18N
         lblFolder.setName("lblFolder"); // NOI18N
 
+        sliderTime.setValue(0);
+        sliderTime.setName("sliderTime"); // NOI18N
+        sliderTime.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sliderTimeStateChanged(evt);
+            }
+        });
+
+        lblTime.setFont(resourceMap.getFont("lblTime.font")); // NOI18N
+        lblTime.setText(resourceMap.getString("lblTime.text")); // NOI18N
+        lblTime.setName("lblTime"); // NOI18N
+
         javax.swing.GroupLayout pnlAnimationLayout = new javax.swing.GroupLayout(pnlAnimation);
         pnlAnimation.setLayout(pnlAnimationLayout);
         pnlAnimationLayout.setHorizontalGroup(
@@ -1583,19 +1610,15 @@ public class IchthyopView extends FrameView implements TimingTarget {
             .addGroup(pnlAnimationLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(btnOpenAnimation)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSaveAsSnapshots)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDeleteSnapshots))
-                    .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(lblAnimationSpeed)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFramePerSecond))
+                    .addComponent(lblFolder)
+                    .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
+                    .addComponent(lblTime)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(btnFirst)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1606,28 +1629,35 @@ public class IchthyopView extends FrameView implements TimingTarget {
                         .addComponent(btnNext)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnLast))
-                    .addComponent(lblFolder))
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addComponent(lblAnimationSpeed)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblFramePerSecond)))
                 .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
             pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAnimationLayout.createSequentialGroup()
-                .addGap(24, 24, 24)
+                .addContainerGap()
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnSaveAsSnapshots)
                             .addComponent(btnOpenAnimation))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFolder)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
-                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnLast)
-                            .addComponent(btnNext)
-                            .addComponent(btnAnimaction)
-                            .addComponent(btnPrevious)
-                            .addComponent(btnFirst)))
+                        .addComponent(lblFolder))
                     .addComponent(btnDeleteSnapshots))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnLast)
+                    .addComponent(btnNext)
+                    .addComponent(btnAnimaction)
+                    .addComponent(btnPrevious)
+                    .addComponent(btnFirst))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblTime)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sliderTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1635,7 +1665,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     .addComponent(lblAnimationSpeed)
                     .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblFramePerSecond))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pnlConfiguration.setName("pnlConfiguration"); // NOI18N
@@ -1731,26 +1761,13 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 .addGap(44, 44, 44))
         );
 
+        btnExit.setAction(actionMap.get("exitApplication")); // NOI18N
+        btnExit.setName("btnExit"); // NOI18N
+
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
-        // TODO add your handling code here:
-        replayPanel.setAvatarIndex(sliderTime.getValue());
-        //setMessage(getSnapshots().getTime(sliderTime.getValue()));
-    }//GEN-LAST:event_sliderTimeStateChanged
-
-    private void sliderTimeMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sliderTimeMousePressed
-        // TODO add your handling code here:
-        replayPanel.initAnim();
-    }//GEN-LAST:event_sliderTimeMousePressed
-
-    private void sliderTimeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sliderTimeMouseReleased
-        // TODO add your handling code here:
-        replayPanel.endAnim();
-    }//GEN-LAST:event_sliderTimeMouseReleased
 
     private void lblFramePerSecondMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblFramePerSecondMouseClicked
         // TODO add your handling code here:
@@ -1769,8 +1786,14 @@ public class IchthyopView extends FrameView implements TimingTarget {
         // TODO add your handling code here:
         //popupProgress.show(progressBar, 0, 0);
     }//GEN-LAST:event_progressBarMouseEntered
+
+    private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
+        // TODO add your handling code here:
+        replayPanel.setIndex(sliderTime.getValue());
+        lblTime.setText(replayPanel.getTime());
+    }//GEN-LAST:event_sliderTimeStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu animSimuMenu;
     private javax.swing.JMenuItem animactionMenuItem;
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
@@ -1779,6 +1802,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
     private javax.swing.JButton btnDeleteSnapshots;
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton btnFirst;
     private javax.swing.JButton btnLast;
     private javax.swing.JButton btnMapping;
@@ -1809,7 +1833,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator15;
-    private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblCfgFile;
     private javax.swing.JLabel lblFolder;
@@ -1817,6 +1840,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JLabel lblNC;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
+    private javax.swing.JLabel lblTime;
     private javax.swing.JLabel lblTimeLeftCurrent;
     private javax.swing.JLabel lblTimeLeftGlobal;
     private javax.swing.JLabel lblWMS;
@@ -1825,6 +1849,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JMenu mappingMenu;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem newMenuItem;
+    private javax.swing.JMenuItem openAnimationMenuItem;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem openNCMenuItem;
     private javax.swing.JPanel pnlAnimation;
@@ -1840,7 +1865,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JProgressBar progressBarCurrent;
     private javax.swing.JProgressBar progressBarGlobal;
-    private javax.swing.JMenuItem progressMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JScrollPane scrollPaneSimulationUI;
     private javax.swing.JMenuItem simulactionMenuItem;
@@ -1850,7 +1874,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
-    private javax.swing.JMenu wmsMenu;
     // End of variables declaration//GEN-END:variables
     private JPanel pnlBackground;
     private JXTitledPanel mainTitledPanel;

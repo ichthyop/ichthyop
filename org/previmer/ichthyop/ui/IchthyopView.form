@@ -113,14 +113,6 @@
                 <Property name="name" type="java.lang.String" value="simulactionMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="progressMenuItem">
-              <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="simulationProgress" methodName="simulationProgress"/>
-                </Property>
-                <Property name="name" type="java.lang.String" value="progressMenuItem" noResource="true"/>
-              </Properties>
-            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="previewMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -166,17 +158,6 @@
                 <Property name="name" type="java.lang.String" value="cancelMapMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator8">
-              <Properties>
-                <Property name="name" type="java.lang.String" value="jSeparator8" noResource="true"/>
-              </Properties>
-            </MenuItem>
-            <Menu class="javax.swing.JMenu" name="wmsMenu">
-              <Properties>
-                <Property name="text" type="java.lang.String" resourceKey="wmsMenu.text"/>
-                <Property name="name" type="java.lang.String" value="wmsMenu" noResource="true"/>
-              </Properties>
-            </Menu>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="animationMenu">
@@ -185,23 +166,17 @@
             <Property name="name" type="java.lang.String" value="animationMenu" noResource="true"/>
           </Properties>
           <SubComponents>
-            <Menu class="javax.swing.JMenu" name="animSimuMenu">
+            <MenuItem class="javax.swing.JMenuItem" name="openAnimationMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" resourceKey="animSimuMenu.text"/>
-                <Property name="name" type="java.lang.String" value="animSimuMenu" noResource="true"/>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openFolderAnimation" methodName="openFolderAnimation"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="openAnimationMenuItem" noResource="true"/>
               </Properties>
-            </Menu>
+            </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator14">
               <Properties>
                 <Property name="name" type="java.lang.String" value="jSeparator14" noResource="true"/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="deleteMenuItem">
-              <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteSnapshots" methodName="deleteSnapshots"/>
-                </Property>
-                <Property name="name" type="java.lang.String" value="deleteMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="exportMenuItem">
@@ -210,6 +185,14 @@
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsSnapshots" methodName="saveAsSnapshots"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="exportMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="deleteMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteSnapshots" methodName="deleteSnapshots"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="deleteMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator15">
@@ -711,7 +694,6 @@
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="sliderTime" alignment="0" pref="405" max="32767" attributes="1"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="btnOpenAnimation" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -719,13 +701,9 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnDeleteSnapshots" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="lblAnimationSpeed" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="animationSpeed" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="lblFramePerSecond" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="lblFolder" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="sliderTime" alignment="0" pref="405" max="32767" attributes="0"/>
+                      <Component id="lblTime" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="btnFirst" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -737,7 +715,13 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnLast" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="lblFolder" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="lblAnimationSpeed" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="animationSpeed" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="lblFramePerSecond" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -746,7 +730,7 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -755,17 +739,19 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="lblFolder" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="12" max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="btnLast" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="btnNext" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="btnAnimaction" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="btnPrevious" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="btnFirst" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
                       </Group>
                       <Component id="btnDeleteSnapshots" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="btnLast" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnNext" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnAnimaction" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnPrevious" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnFirst" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="lblTime" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="sliderTime" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -774,7 +760,7 @@
                       <Component id="animationSpeed" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lblFramePerSecond" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -835,19 +821,6 @@
             <Property name="name" type="java.lang.String" value="btnLast" noResource="true"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JSlider" name="sliderTime">
-          <Properties>
-            <Property name="paintTrack" type="boolean" value="false"/>
-            <Property name="snapToTicks" type="boolean" value="true"/>
-            <Property name="value" type="int" value="0"/>
-            <Property name="name" type="java.lang.String" value="sliderTime" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="sliderTimeMousePressed"/>
-            <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="sliderTimeMouseReleased"/>
-            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="sliderTimeStateChanged"/>
-          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="lblFramePerSecond">
           <Properties>
@@ -916,6 +889,22 @@
             <Property name="font" type="java.awt.Font" resourceKey="lblFolder.font"/>
             <Property name="text" type="java.lang.String" resourceKey="lblFolder.text"/>
             <Property name="name" type="java.lang.String" value="lblFolder" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JSlider" name="sliderTime">
+          <Properties>
+            <Property name="value" type="int" value="0"/>
+            <Property name="name" type="java.lang.String" value="sliderTime" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="sliderTimeStateChanged"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblTime">
+          <Properties>
+            <Property name="font" type="java.awt.Font" resourceKey="lblTime.font"/>
+            <Property name="text" type="java.lang.String" resourceKey="lblTime.text"/>
+            <Property name="name" type="java.lang.String" value="lblTime" noResource="true"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -1078,6 +1067,14 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JButton" name="btnExit">
+      <Properties>
+        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+          <action class="org.previmer.ichthyop.ui.IchthyopView" id="exitApplication" methodName="exitApplication"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="btnExit" noResource="true"/>
+      </Properties>
+    </Component>
   </NonVisualComponents>
   <Properties>
     <Property name="component" type="javax.swing.JComponent" editor="org.netbeans.modules.form.ComponentChooserEditor">
