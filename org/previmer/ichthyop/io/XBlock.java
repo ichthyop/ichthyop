@@ -17,7 +17,7 @@ import org.jdom.filter.Filter;
  *
  * @author pverley
  */
-public class XBlock extends org.jdom.Element {
+public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
 
     private final static String BLOCK = "block";
     final public static String KEY = "key";
@@ -80,6 +80,10 @@ public class XBlock extends org.jdom.Element {
 
     public Iterable<XParameter> getXParameters() {
         return map.values();
+    }
+
+    public int compareTo(XBlock block) {
+        return getKey().compareTo(block.getKey());
     }
 
     /*public List<XParameter> getParameters(final ParamType type) {

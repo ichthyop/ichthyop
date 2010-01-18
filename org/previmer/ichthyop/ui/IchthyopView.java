@@ -6,7 +6,6 @@ package org.previmer.ichthyop.ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -22,23 +21,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-import javax.imageio.ImageIO;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -47,8 +37,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
@@ -64,7 +52,6 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.jdesktop.swingx.JXTitledPanel;
 import org.jdesktop.swingx.VerticalLayout;
-import org.previmer.ichthyop.io.ICFile;
 import org.previmer.ichthyop.ui.WMSMapper.MapStep;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
@@ -286,6 +273,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
             lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
             wmsMapper.setFile(outputFile);
+            wmsMapper.setVisible(true);
+            lblMapping.setVisible(false);
             btnMapping.getAction().setEnabled(true);
             setMainTitle();
         }
@@ -416,6 +405,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnSimulationRun.getAction().setEnabled(false);
         btnSaveCfgFile.getAction().setEnabled(false);
         closeMenuItem.getAction().setEnabled(false);
+        editionSplitPane.setVisible(false);
+        lblConfiguration.setVisible(true);
         setMainTitle();
     }
 
@@ -443,7 +434,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
         setMainTitle();
-        //getApplication().getContext().getTaskService().execute(new CreateBlockTreeTask(getApplication(), ICFile.getInstance()));
+        getApplication().getContext().getTaskService().execute(new CreateBlockTreeTask(getApplication()));
     }
 
     @Action
@@ -727,22 +718,20 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
     private class CreateBlockTreeTask extends Task {
 
-        ICFile icfile;
-
-        CreateBlockTreeTask(Application instance, ICFile xam) {
+        CreateBlockTreeTask(Application instance) {
             super(instance);
-            this.icfile = xam;
         }
 
         @Override
         protected Object doInBackground() throws Exception {
 
-            blockTree.createModel(icfile);
+            blockTree.createModel();
             return null;
         }
 
         @Override
         protected void succeeded(Object o) {
+            editionSplitPane.setVisible(true);
             blockTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
             //blockTree.addTreeSelectionListener(IchthyopView.this);
             blockTree.setNodeVisible(blockTree.getRoot().getFirstLeaf());
@@ -922,14 +911,31 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 new Insets(5, 5, 5, 5), 0, 0));
         splitPane.setLeftComponent(leftPane);
 
+        lblConfiguration = new JLabel(getResourceMap().getIcon("lblConfiguration.icon"));
+        lblConfiguration.setHorizontalAlignment(JLabel.CENTER);
+        lblConfiguration.setVerticalAlignment(JLabel.CENTER);
+        editionSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        editionSplitPane.setLeftComponent(blockTree);
+        editionSplitPane.setRightComponent(new GradientPanel());
+
+        lblMapping = new JLabel(getResourceMap().getIcon("lblMapping.icon"));
+        lblMapping.setHorizontalAlignment(JLabel.CENTER);
+        lblMapping.setVerticalAlignment(JLabel.CENTER);
+
         JPanel rightPane = new JPanel();
         rightPane.setLayout(new GridBagLayout());
         mainTitledPanel = new JXTitledPanel("Ichthyop");
         pnlBackground = new JPanel();
         pnlBackground.setLayout(new StackLayout());
         pnlBackground.add(new GradientPanel(), StackLayout.BOTTOM);
+        pnlBackground.add(lblConfiguration, StackLayout.TOP);
+        lblConfiguration.setVisible(true);
+        pnlBackground.add(editionSplitPane);
+        editionSplitPane.setVisible(false);
         pnlBackground.add(pnlProgress, StackLayout.TOP);
         pnlProgress.setVisible(false);
+        pnlBackground.add(lblMapping, StackLayout.TOP);
+        lblMapping.setVisible(false);
         pnlBackground.add(wmsMapper, StackLayout.TOP);
         wmsMapper.setVisible(false);
         pnlBackground.add(replayPanel, StackLayout.TOP);
@@ -951,6 +957,15 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpSimulation.setCollapsed(true);
                     tpAnimation.setCollapsed(true);
                     tpMapping.setCollapsed(true);
+                    if (null != getSimulationManager().getConfigurationFile()) {
+                        editionSplitPane.setVisible(true);
+                        lblConfiguration.setVisible(false);
+                    } else {
+                        lblConfiguration.setVisible(true);
+                    }
+                } else {
+                    editionSplitPane.setVisible(false);
+                    lblConfiguration.setVisible(false);
                 }
                 setMainTitle();
             }
@@ -979,16 +994,20 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpSimulation.setCollapsed(true);
                     tpAnimation.setCollapsed(true);
                     tpConfiguration.setCollapsed(true);
-                    wmsMapper.setVisible(true);
                     if (null != outputFile && outputFile.isFile()) {
                         wmsMapper.setFile(outputFile);
+                        wmsMapper.setVisible(true);
+                        lblMapping.setVisible(false);
                         btnMapping.getAction().setEnabled(true);
                     } else {
                         wmsMapper.setFile(null);
+                        wmsMapper.setVisible(false);
+                        lblMapping.setVisible(true);
                         btnMapping.getAction().setEnabled(false);
                     }
                 } else {
                     wmsMapper.setVisible(false);
+                    lblMapping.setVisible(false);
                 }
                 setMainTitle();
             }
@@ -1673,6 +1692,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
         blockTree.setName("blockTree"); // NOI18N
+        blockTree.setRootVisible(true);
         jScrollPane1.setViewportView(blockTree);
 
         javax.swing.GroupLayout pnlConfigurationLayout = new javax.swing.GroupLayout(pnlConfiguration);
@@ -1902,4 +1922,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private WMSMapper wmsMapper = new WMSMapper();
     private LoggerScrollPane loggerScrollPane = new LoggerScrollPane();
     private File outputFile, outputFolder;
+    private JSplitPane editionSplitPane;
+    private JLabel lblConfiguration;
+    private JLabel lblMapping;
 }

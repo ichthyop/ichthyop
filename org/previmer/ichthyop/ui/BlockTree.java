@@ -6,6 +6,7 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,10 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import org.jdesktop.application.ResourceMap;
+import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.io.ICFile;
 import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -107,15 +109,19 @@ public class BlockTree extends JTree {
     }
     }
     }*/
-    public void createModel(ICFile xa) {
+    public void createModel() {
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Blocks");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(getSimulationManager().getConfigurationFile().getName());
         setModel(new DefaultTreeModel(root));
         List<XBlock> listb = new ArrayList();
         for (BlockType type : BlockType.values()) {
-            listb.addAll(xa.getBlocks(type));
+            if (!type.equals(BlockType.ZONE)) {
+                for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type))
+                listb.add(block);
+            }
         }
-        //Collections.reverse(listv);
+        Collections.sort(listb);
+        Collections.reverse(listb);
         blockMap = new HashMap(listb.size());
         for (XBlock block : listb) {
             insertIntoTree(block);
@@ -193,7 +199,7 @@ public class BlockTree extends JTree {
     public void insertIntoTree(XBlock block, int leafIndex, boolean isVisible) {
 
         blockMap.put(block.getKey(), block);
-        String[] keys = block.getKey().split(".");
+        String[] keys = block.getKey().split("/");
         DefaultMutableTreeNode node = insertNodeInParent(getRoot(), keys[0]);
         if (keys.length > 1) {
             for (int i = 1; i < keys.length - 1; i++) {
@@ -227,7 +233,7 @@ public class BlockTree extends JTree {
         }
         for (int i = 1; i < path.length; i++) {
             key.append(path[i].toString());
-            key.append(".");
+            key.append("/");
         }
         key.deleteCharAt(key.length() - 1);
         return key.toString();
@@ -243,7 +249,7 @@ public class BlockTree extends JTree {
 
     public TreePath keyToTreePath(String key) {
         //String fullKey = getRoot().toString() + "/" + key;
-        return find(new TreePath(getRoot()), key.split("."), 0, true);
+        return find(new TreePath(getRoot()), key.split("/"), 0, true);
     }
 
     private TreePath find(TreePath parent, Object[] nodes, int depth, boolean byName) {
@@ -275,6 +281,10 @@ public class BlockTree extends JTree {
         }
         // No match at this branch
         return null;
+    }
+
+    private ISimulationManager getSimulationManager() {
+        return SimulationManager.getInstance();
     }
 
     class TreeRenderer extends DefaultTreeCellRenderer {
