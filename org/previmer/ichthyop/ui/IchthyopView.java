@@ -287,6 +287,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
             wmsMapper.setFile(outputFile);
             btnMapping.getAction().setEnabled(true);
+            setMainTitle();
         }
     }
 
@@ -344,6 +345,11 @@ public class IchthyopView extends FrameView implements TimingTarget {
             setAnimationToolsEnabled(false);
             setMessage("No PNG pictures found in folder " + folder.getAbsolutePath());
             outputFolder = null;
+        }
+
+        @Override
+        protected void finished() {
+            setMainTitle();
         }
     }
 
@@ -410,6 +416,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnSimulationRun.getAction().setEnabled(false);
         btnSaveCfgFile.getAction().setEnabled(false);
         closeMenuItem.getAction().setEnabled(false);
+        setMainTitle();
     }
 
     @Action
@@ -430,11 +437,12 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
         getSimulationManager().setConfigurationFile(file);
-        getSimulationManager().getZoneManager().loadZones();
+        //getSimulationManager().getZoneManager().loadZones();
         isSetup = false;
         //saveMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
+        setMainTitle();
         //getApplication().getContext().getTaskService().execute(new CreateBlockTreeTask(getApplication(), ICFile.getInstance()));
     }
 
@@ -553,43 +561,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         }
     }
 
-    /**
-     * Saves the snapshot of the specified component as a PNG picture.
-     * The name of the picture includes the current time of the simulation.
-     * @param cpnt the Component to save as a PNG picture.
-     * @param cld the Calendar of the current {@code Step} object.
-     * @throws an IOException if an ouput exception occurs when saving the
-     * picture.
-     */
-    private void screen2File(Component component, Calendar calendar) {
-
-        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
-        dtFormat.setCalendar(calendar);
-        StringBuffer fileName = new StringBuffer(outputFile.getParent());
-        fileName.append(File.separator);
-        String id = outputFile.getName().substring(0, outputFile.getName().indexOf(".nc"));
-        fileName.append(id);
-        fileName.append(File.separator);
-        fileName.append(id);
-        fileName.append("_img");
-        fileName.append(dtFormat.format(calendar.getTime()));
-        fileName.append(".png");
-
-        BufferedImage bi = new BufferedImage(component.getWidth(),
-                component.getHeight(),
-                BufferedImage.TYPE_INT_RGB);
-        Graphics g = bi.getGraphics();
-        component.paintAll(g);
-        try {
-            setMessage("Saving image " + fileName.toString());
-            ImageIO.write(bi, "PNG", new File(fileName.toString()));
-
-        } catch (IOException ex) {
-            Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
     private void resetProgressBar() {
         progressBarCurrent.setValue(0);
         lblTimeLeftCurrent.setText(getResourceMap().getString("lblTimeLeftCurrent.text"));
@@ -692,7 +663,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     getSimulationManager().getSimulation().step();
                     setProgress(getSimulationManager().progressCurrent());
                     publish(getSimulationManager().progressCurrent());
-                    setMessage(getSimulationManager().getTimeManager().stepToString() + " - Time " + getSimulationManager().getTimeManager().timeToString());
                 } while (!getSimulationManager().isStopped() && getSimulationManager().getTimeManager().hasNextStep());
             } while (!getSimulationManager().isStopped() && getSimulationManager().hasNextSimulation());
             return null;
@@ -705,6 +675,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 bln = true;
             }
             printProgress();
+            //setMessage(getSimulationManager().getTimeManager().stepToString() + " - Time " + getSimulationManager().getTimeManager().timeToString());
         }
 
         private void printProgress() {
@@ -737,21 +708,20 @@ public class IchthyopView extends FrameView implements TimingTarget {
         @Override
         protected void succeeded(Object obj) {
             setMessage("End of simulation");
+            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
+            lblNC.setText(outputFile.getName());
+            lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
             tpSimulation.setCollapsed(true);
             tpMapping.setCollapsed(false);
         }
 
         @Override
         protected void finished() {
-            //setMenuEnabled(true);
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
             openMenuItem.getAction().setEnabled(true);
             isRunning = false;
             resetProgressBar();
-            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
-            lblNC.setText(outputFile.getName());
-            lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
         }
     }
 
@@ -981,12 +951,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpSimulation.setCollapsed(true);
                     tpAnimation.setCollapsed(true);
                     tpMapping.setCollapsed(true);
-                    if (!lblCfgFile.getText().isEmpty()) {
-                        //mainTitledPanel.setTitle("Ichthyop - " + tpConfiguration.getTitle() + " - " + lblCfgFile.getText());
-                    }
-                } else {
-                    //mainTitledPanel.setTitle("Ichthyop");
                 }
+                setMainTitle();
             }
         });
 
@@ -1002,6 +968,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 } else {
                     pnlProgress.setVisible(false);
                 }
+                setMainTitle();
             }
         });
 
@@ -1023,6 +990,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 } else {
                     wmsMapper.setVisible(false);
                 }
+                setMainTitle();
             }
         });
 
@@ -1038,8 +1006,40 @@ public class IchthyopView extends FrameView implements TimingTarget {
                 } else {
                     replayPanel.setVisible(false);
                 }
+                setMainTitle();
             }
         });
+    }
+
+    private void setMainTitle() {
+
+        if (!tpConfiguration.isCollapsed()) {
+            if (null != getSimulationManager().getConfigurationFile()) {
+                mainTitledPanel.setTitle("Ichthyop - " + tpConfiguration.getTitle() + " - " + lblCfgFile.getText());
+            } else {
+                mainTitledPanel.setTitle("Ichthyop - " + tpConfiguration.getTitle());
+            }
+        } else if (!tpSimulation.isCollapsed()) {
+            if (null != getSimulationManager().getConfigurationFile()) {
+                mainTitledPanel.setTitle("Ichthyop - " + tpSimulation.getTitle() + " - " + lblCfgFile.getText());
+            } else {
+                mainTitledPanel.setTitle("Ichthyop - " + tpSimulation.getTitle());
+            }
+        } else if (!tpMapping.isCollapsed()) {
+            if (null != outputFile) {
+                mainTitledPanel.setTitle("Ichthyop - " + tpMapping.getTitle() + " - " + outputFile.getName());
+            } else {
+                mainTitledPanel.setTitle("Ichthyop - " + tpMapping.getTitle());
+            }
+        } else if (!tpAnimation.isCollapsed()) {
+            if (null != outputFolder) {
+                mainTitledPanel.setTitle("Ichthyop - " + tpAnimation.getTitle() + " - " + outputFolder.getName());
+            } else {
+                mainTitledPanel.setTitle("Ichthyop - " + tpAnimation.getTitle());
+            }
+        } else {
+            mainTitledPanel.setTitle("Ichthyop");
+        }
     }
 
     /** This method is called from within the constructor to
@@ -1792,7 +1792,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         replayPanel.setIndex(sliderTime.getValue());
         lblTime.setText(replayPanel.getTime());
     }//GEN-LAST:event_sliderTimeStateChanged
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem animactionMenuItem;
     private javax.swing.JMenu animationMenu;
