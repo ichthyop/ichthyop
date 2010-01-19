@@ -24,6 +24,7 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     final public static String ENABLED = "enabled";
     final public static String TYPE = "type";
     public final static String PARAMETERS = "parameters";
+    public final static String DESCRIPTION = "description";
     private final BlockType block_type;
     private HashMap<String, XParameter> map;
 
@@ -46,11 +47,19 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     public boolean isEnabled() {
-        
+
         if (null != getChild(ENABLED)) {
             return Boolean.valueOf(getChildTextNormalize(ENABLED));
         } else {
             return true;
+        }
+    }
+
+    public String getDescription() {
+        if (null != getChild(DESCRIPTION)) {
+            return getChildTextNormalize(DESCRIPTION);
+        } else {
+            return "No description available";
         }
     }
 
@@ -78,8 +87,18 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
         return map.get(key);
     }
 
-    public Iterable<XParameter> getXParameters() {
-        return map.values();
+    public Collection<XParameter> getXParameters() {
+       return getXParameters(false);
+    }
+
+    public Collection<XParameter> getXParameters(Boolean hidden) {
+        List<XParameter> list = new ArrayList();
+        for (XParameter xparam : map.values()) {
+            if (hidden.equals(xparam.isHidden())) {
+                list.add(xparam);
+            }
+        }
+        return list;
     }
 
     public int compareTo(XBlock block) {
@@ -87,48 +106,48 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     /*public List<XParameter> getParameters(final ParamType type) {
-        Filter filtre = new Filter() {
+    Filter filtre = new Filter() {
 
-            public boolean matches(Object obj) {
-                if (!(obj instanceof Element)) {
-                    return false;
-                }
-                Element element = (Element) obj;
-                if (element.getAttribute(XParameter.TYPE) != null && element.getAttributeValue(XParameter.TYPE).matches(type.toString())) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        };
-        List<XParameter> list = new ArrayList();
-        for (Object elt : getChild(PARAMETERS).getContent(filtre)) {
-            list.add(new XParameter((Element) elt));
-        }
-        return list;
+    public boolean matches(Object obj) {
+    if (!(obj instanceof Element)) {
+    return false;
+    }
+    Element element = (Element) obj;
+    if (element.getAttribute(XParameter.TYPE) != null && element.getAttributeValue(XParameter.TYPE).matches(type.toString())) {
+    return true;
+    } else {
+    return false;
+    }
+    }
+    };
+    List<XParameter> list = new ArrayList();
+    for (Object elt : getChild(PARAMETERS).getContent(filtre)) {
+    list.add(new XParameter((Element) elt));
+    }
+    return list;
     }
 
     public XParameter getParameter(final String key) {
-        Filter filtre = new Filter() {
+    Filter filtre = new Filter() {
 
-            public boolean matches(Object obj) {
-                if (!(obj instanceof Element)) {
-                    return false;
-                }
-                Element element = (Element) obj;
-                if (element.getChildTextNormalize(XParameter.KEY).matches(key)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        };
-        List searchResult = getChild(PARAMETERS).getContent(filtre);
-        if (searchResult != null && searchResult.size() > 0 && searchResult.size() < 2) {
-            return new XParameter((Element) searchResult.get(0));
-        } else {
-            return null;
-        }
+    public boolean matches(Object obj) {
+    if (!(obj instanceof Element)) {
+    return false;
+    }
+    Element element = (Element) obj;
+    if (element.getChildTextNormalize(XParameter.KEY).matches(key)) {
+    return true;
+    } else {
+    return false;
+    }
+    }
+    };
+    List searchResult = getChild(PARAMETERS).getContent(filtre);
+    if (searchResult != null && searchResult.size() > 0 && searchResult.size() < 2) {
+    return new XParameter((Element) searchResult.get(0));
+    } else {
+    return null;
+    }
 
     }*/
 }

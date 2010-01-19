@@ -10,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
+import javax.swing.event.TreeSelectionEvent;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -24,11 +25,14 @@ import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -45,6 +49,14 @@ import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
@@ -52,13 +64,16 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.jdesktop.swingx.JXTitledPanel;
 import org.jdesktop.swingx.VerticalLayout;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.ui.WMSMapper.MapStep;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
  * The application's main frame.
  */
-public class IchthyopView extends FrameView implements TimingTarget {
+public class IchthyopView extends FrameView implements TimingTarget, TreeSelectionListener {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -67,6 +82,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
         initComponents();
         createTaskPaneContainer();
+        createPanelTree();
         getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
 
         // status bar initialization - message timeout, idle icon and busy animation, etc
@@ -182,6 +198,30 @@ public class IchthyopView extends FrameView implements TimingTarget {
     }
 
     @Action
+    public void upper() {
+        blockTree.removeTreeSelectionListener(IchthyopView.this);
+        hasStructureChanged = blockTree.upper();
+        blockTree.addTreeSelectionListener(IchthyopView.this);
+    }
+
+    @Action
+    public void lower() {
+        blockTree.removeTreeSelectionListener(IchthyopView.this);
+        hasStructureChanged = blockTree.lower();
+        blockTree.addTreeSelectionListener(IchthyopView.this);
+    }
+
+    @Action
+    public void expand() {
+        blockTree.expandAll();
+    }
+
+    @Action
+    public void collapse() {
+        blockTree.collapseAll();
+    }
+
+    @Action
     public void deleteMaps() {
         File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
         StringBuffer message = new StringBuffer("Delete maps from ");
@@ -208,6 +248,67 @@ public class IchthyopView extends FrameView implements TimingTarget {
     @Action
     public Task createMaps() {
         return createMapTask = new CreateMapTask(getApplication());
+    }
+
+    /*
+     * This method picks good column sizes.
+     * If all column heads are wider than the column's cells'
+     * contents, then you can just use column.sizeWidthToFit().
+     */
+    private void initColumnSizes(JTable table) {
+
+        ParameterTableModel model = (ParameterTableModel) table.getModel();
+        TableColumn column = null;
+        Component comp = null;
+        int headerWidth = 0;
+        int cellWidth = 0;
+        Object[] longValues = model.longValues;
+        TableCellRenderer headerRenderer =
+                table.getTableHeader().getDefaultRenderer();
+
+        for (int i = 0; i < table.getModel().getColumnCount(); i++) {
+            column = table.getColumnModel().getColumn(i);
+
+            comp = headerRenderer.getTableCellRendererComponent(
+                    null, column.getHeaderValue(),
+                    false, false, 0, 0);
+            headerWidth = comp.getPreferredSize().width;
+
+            comp = table.getDefaultRenderer(model.getColumnClass(i)).
+                    getTableCellRendererComponent(
+                    table, longValues[i],
+                    false, false, 0, i);
+            cellWidth = comp.getPreferredSize().width;
+
+            column.setPreferredWidth(Math.max(headerWidth, cellWidth));
+        }
+    }
+
+    public void valueChanged(TreeSelectionEvent e) {
+        final DefaultMutableTreeNode node = blockTree.getSelectedNode();
+        if (node != null && node.isLeaf()) {
+            splitPaneCfg.setRightComponent(pnlBlock);
+            pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(blockTree.getSelectedKey()));
+            XBlock block = blockTree.getSelectedBlock();
+            if (block.getType().equals(BlockType.OPTION)) {
+                ckBoxBlock.setVisible(false);
+            } else {
+                ckBoxBlock.setVisible(true);
+                ckBoxBlock.setSelected(block.isEnabled());
+            }
+            StringBuffer info = new StringBuffer("<html><i>");
+            info.append(block.getDescription());
+            info.append("</i></html>");
+            lblBlockInfo.setText(info.toString());
+            if (!showHiddenParameters) {
+                btnHiddenParameter.doClick();
+            } else {
+                tableParameter.setModel(new ParameterTableModel(false));
+                initColumnSizes(tableParameter);
+            }
+        } else {
+            splitPaneCfg.setRightComponent(pnlTree);
+        }
     }
 
     private class CreateMapTask extends Task<Object, MapStep> {
@@ -405,7 +506,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnSimulationRun.getAction().setEnabled(false);
         btnSaveCfgFile.getAction().setEnabled(false);
         closeMenuItem.getAction().setEnabled(false);
-        editionSplitPane.setVisible(false);
+        pnlConfiguration.setVisible(false);
         lblConfiguration.setVisible(true);
         setMainTitle();
     }
@@ -731,9 +832,9 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
         @Override
         protected void succeeded(Object o) {
-            editionSplitPane.setVisible(true);
+            pnlConfiguration.setVisible(true);
             blockTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-            //blockTree.addTreeSelectionListener(IchthyopView.this);
+            blockTree.addTreeSelectionListener(IchthyopView.this);
             blockTree.setNodeVisible(blockTree.getRoot().getFirstLeaf());
         }
 
@@ -914,9 +1015,6 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblConfiguration = new JLabel(getResourceMap().getIcon("lblConfiguration.icon"));
         lblConfiguration.setHorizontalAlignment(JLabel.CENTER);
         lblConfiguration.setVerticalAlignment(JLabel.CENTER);
-        editionSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        editionSplitPane.setLeftComponent(blockTree);
-        editionSplitPane.setRightComponent(new GradientPanel());
 
         lblMapping = new JLabel(getResourceMap().getIcon("lblMapping.icon"));
         lblMapping.setHorizontalAlignment(JLabel.CENTER);
@@ -930,8 +1028,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
         pnlBackground.add(new GradientPanel(), StackLayout.BOTTOM);
         pnlBackground.add(lblConfiguration, StackLayout.TOP);
         lblConfiguration.setVisible(true);
-        pnlBackground.add(editionSplitPane);
-        editionSplitPane.setVisible(false);
+        pnlBackground.add(pnlConfiguration);
+        pnlConfiguration.setVisible(false);
         pnlBackground.add(pnlProgress, StackLayout.TOP);
         pnlProgress.setVisible(false);
         pnlBackground.add(lblMapping, StackLayout.TOP);
@@ -958,13 +1056,13 @@ public class IchthyopView extends FrameView implements TimingTarget {
                     tpAnimation.setCollapsed(true);
                     tpMapping.setCollapsed(true);
                     if (null != getSimulationManager().getConfigurationFile()) {
-                        editionSplitPane.setVisible(true);
+                        pnlConfiguration.setVisible(true);
                         lblConfiguration.setVisible(false);
                     } else {
                         lblConfiguration.setVisible(true);
                     }
                 } else {
-                    editionSplitPane.setVisible(false);
+                    pnlConfiguration.setVisible(false);
                     lblConfiguration.setVisible(false);
                 }
                 setMainTitle();
@@ -1061,6 +1159,177 @@ public class IchthyopView extends FrameView implements TimingTarget {
         }
     }
 
+    private void createPanelTree() {
+
+        pnlTree.setLayout(new GridBagLayout());
+        JLabel lblTitle = new JLabel(getResourceMap().getString("lblSelectBlock.text"));
+        lblTitle.setVerticalAlignment(JLabel.CENTER);
+        lblTitle.setHorizontalAlignment(JLabel.CENTER);
+        lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 16));
+        pnlTree.add(lblTitle,
+                new GridBagConstraints(0, 0, 2, 1, 100, 0,
+                GridBagConstraints.CENTER,
+                GridBagConstraints.BOTH,
+                new Insets(5, 5, 5, 5), 0, 0));
+        int i = 1;
+        for (BlockType block : BlockType.values()) {
+            pnlTree.add(new JLabel(getResourceMap().getIcon("Tree.icon." + block.getColor())),
+                    new GridBagConstraints(0, i, 1, 1, 50, 0,
+                    GridBagConstraints.CENTER,
+                    GridBagConstraints.BOTH,
+                    new Insets(5, 5, 5, 5), 0, 0));
+            pnlTree.add(new JLabel(block.toString()),
+                    new GridBagConstraints(1, i, 1, 1, 50, 0,
+                    GridBagConstraints.CENTER,
+                    GridBagConstraints.BOTH,
+                    new Insets(5, 5, 5, 5), 0, 0));
+            i++;
+        }
+    }
+
+    @Action
+    public void showHiddenParameters() {
+        if (showHiddenParameters) {
+            btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.hide"));
+            btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.unlock"));
+            tableParameter.setModel(new ParameterTableModel(true));
+            initColumnSizes(tableParameter);
+            showHiddenParameters = false;
+
+        } else {
+            btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.show"));
+            btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.lock"));
+            tableParameter.setModel(new ParameterTableModel(false));
+            initColumnSizes(tableParameter);
+            showHiddenParameters = true;
+        }
+    }
+
+    class ParameterTableModel extends AbstractTableModel {
+
+        private String[] columnNames = {"Name", "Value"};
+        private Object[][] data;
+        Object[] longValues;
+
+        ParameterTableModel(boolean showHidden) {
+            data = createData(showHidden);
+            longValues = getLongValues(data);
+        }
+
+        /**
+         *
+         * @param model int
+         * @return Object[][]
+         */
+        private Object[][] createData(boolean showHidden) {
+
+            XBlock block = blockTree.getSelectedBlock();
+            Collection<XParameter> list = block.getXParameters();
+            if (showHidden) {
+                list.addAll(block.getXParameters(true));
+            }
+            String[][] data = new String[list.size()][3];
+            int i = 0;
+            for (XParameter xparam : list) {
+                data[i++] = new String[]{xparam.getKey(), xparam.getValues(), String.valueOf(xparam.isHidden())};
+            }
+            return data;
+        }
+
+        /**
+         *
+         * @param data Object[][]
+         * @return Object[]
+         */
+        private Object[] getLongValues(Object[][] data) {
+
+            String[] longuest = new String[2];
+            for (int j = 0; j < 2; j++) {
+                longuest[j] = "";
+                for (int i = 0; i < data.length; i++) {
+                    String value = (String) data[i][j];
+                    if (value != null && (value.length() > longuest[j].length())) {
+                        longuest[j] = value;
+                    }
+                }
+            }
+            return longuest;
+        }
+
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        public int getRowCount() {
+            return data.length;
+        }
+
+        @Override
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+
+        public Object getValueAt(int row, int col) {
+            return data[row][col];
+        }
+
+        /*
+         * JTable uses this method to determine the default renderer/
+         * editor for each cell.  If we didn't implement this method,
+         * then the last column would contain text ("true"/"false"),
+         * rather than a check box.
+         */
+        @Override
+        public Class getColumnClass(int c) {
+            return getValueAt(0, c).getClass();
+        }
+
+        /*
+         * Don't need to implement this method unless your table's
+         * editable.
+         */
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            //Note that the data/cell address is constant,
+            //no matter where the cell appears onscreen.
+            return false;
+        }
+
+        /*
+         * Don't need to implement this method unless your table's
+         * data can change.
+         */
+        @Override
+        public void setValueAt(Object value, int row, int col) {
+
+            data[row][col] = value;
+            fireTableCellUpdated(row, col);
+        }
+    }
+
+    class ParameterCellRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table,
+                Object value, boolean isSelected, boolean hasFocus,
+                int row,
+                int column) {
+
+            Component comp = super.getTableCellRendererComponent(table,
+                    value, isSelected, hasFocus, row, column);
+
+            //System.out.println(row + " " + column + " " + NCField.values()[row].isRequired(0));
+            Boolean hidden = Boolean.valueOf(((ParameterTableModel)table.getModel()).getValueAt(row, 2).toString());
+            if (hidden) {
+                comp.setBackground(new Color(255, 0, 0, 20));
+            } else {
+                comp.setBackground(Color.WHITE);
+            }
+
+            return comp;
+        }
+    }
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -1144,8 +1413,27 @@ public class IchthyopView extends FrameView implements TimingTarget {
         sliderTime = new javax.swing.JSlider();
         lblTime = new javax.swing.JLabel();
         pnlConfiguration = new javax.swing.JPanel();
+        splitPaneCfg = new javax.swing.JSplitPane();
+        jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         blockTree = new org.previmer.ichthyop.ui.BlockTree();
+        jToolBar1 = new javax.swing.JToolBar();
+        btnExpand = new javax.swing.JButton();
+        btnCollapse = new javax.swing.JButton();
+        btnUpper = new javax.swing.JButton();
+        btnLower = new javax.swing.JButton();
+        pnlBlock = new javax.swing.JPanel();
+        pnlBlockInfo = new javax.swing.JPanel();
+        lblBlockInfo = new javax.swing.JLabel();
+        ckBoxBlock = new javax.swing.JCheckBox();
+        pnlParameters = new javax.swing.JPanel();
+        pnlParamDescription = new javax.swing.JPanel();
+        lblParameter = new javax.swing.JLabel();
+        txtFieldValue = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tableParameter = new javax.swing.JTable();
+        btnHiddenParameter = new org.jdesktop.swingx.JXHyperlink();
         pnlProgress = new javax.swing.JPanel();
         lblProgressCurrent = new javax.swing.JLabel();
         progressBarCurrent = new javax.swing.JProgressBar();
@@ -1155,6 +1443,7 @@ public class IchthyopView extends FrameView implements TimingTarget {
         lblTimeLeftGlobal = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         btnExit = new javax.swing.JButton();
+        pnlTree = new javax.swing.JPanel();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1689,21 +1978,270 @@ public class IchthyopView extends FrameView implements TimingTarget {
 
         pnlConfiguration.setName("pnlConfiguration"); // NOI18N
 
+        splitPaneCfg.setDividerLocation(250);
+        splitPaneCfg.setName("splitPaneCfg"); // NOI18N
+
+        jPanel1.setName("jPanel1"); // NOI18N
+
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
         blockTree.setName("blockTree"); // NOI18N
         blockTree.setRootVisible(true);
         jScrollPane1.setViewportView(blockTree);
 
+        jToolBar1.setFloatable(false);
+        jToolBar1.setRollover(true);
+        jToolBar1.setName("jToolBar1"); // NOI18N
+
+        btnExpand.setAction(actionMap.get("expand")); // NOI18N
+        btnExpand.setFocusable(false);
+        btnExpand.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnExpand.setName("btnExpand"); // NOI18N
+        btnExpand.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnExpand);
+
+        btnCollapse.setAction(actionMap.get("collapse")); // NOI18N
+        btnCollapse.setFocusable(false);
+        btnCollapse.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnCollapse.setName("btnCollapse"); // NOI18N
+        btnCollapse.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnCollapse);
+
+        btnUpper.setAction(actionMap.get("upper")); // NOI18N
+        btnUpper.setFocusable(false);
+        btnUpper.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnUpper.setName("btnUpper"); // NOI18N
+        btnUpper.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnUpper);
+
+        btnLower.setAction(actionMap.get("lower")); // NOI18N
+        btnLower.setFocusable(false);
+        btnLower.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnLower.setName("btnLower"); // NOI18N
+        btnLower.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnLower);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        splitPaneCfg.setLeftComponent(jPanel1);
+
+        pnlBlock.setName("pnlBlock"); // NOI18N
+
+        pnlBlockInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlBlockInfo.border.title"))); // NOI18N
+        pnlBlockInfo.setName("pnlBlockInfo"); // NOI18N
+
+        lblBlockInfo.setText(resourceMap.getString("lblBlockInfo.text")); // NOI18N
+        lblBlockInfo.setName("lblBlockInfo"); // NOI18N
+
+        ckBoxBlock.setText(resourceMap.getString("ckBoxBlock.text")); // NOI18N
+        ckBoxBlock.setName("ckBoxBlock"); // NOI18N
+
+        javax.swing.GroupLayout pnlBlockInfoLayout = new javax.swing.GroupLayout(pnlBlockInfo);
+        pnlBlockInfo.setLayout(pnlBlockInfoLayout);
+        pnlBlockInfoLayout.setHorizontalGroup(
+            pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlBlockInfoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE)
+                    .addComponent(ckBoxBlock))
+                .addContainerGap())
+        );
+        pnlBlockInfoLayout.setVerticalGroup(
+            pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockInfoLayout.createSequentialGroup()
+                .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ckBoxBlock)
+                .addContainerGap())
+        );
+
+        pnlParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlParameters.border.title"))); // NOI18N
+        pnlParameters.setName("pnlParameters"); // NOI18N
+
+        pnlParamDescription.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlParamDescription.border.title"))); // NOI18N
+        pnlParamDescription.setName("pnlParamDescription"); // NOI18N
+
+        lblParameter.setText(resourceMap.getString("lblParameter.text")); // NOI18N
+        lblParameter.setName("lblParameter"); // NOI18N
+
+        javax.swing.GroupLayout pnlParamDescriptionLayout = new javax.swing.GroupLayout(pnlParamDescription);
+        pnlParamDescription.setLayout(pnlParamDescriptionLayout);
+        pnlParamDescriptionLayout.setHorizontalGroup(
+            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 458, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        pnlParamDescriptionLayout.setVerticalGroup(
+            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        txtFieldValue.setText(resourceMap.getString("txtFieldValue.text")); // NOI18N
+        txtFieldValue.setName("txtFieldValue"); // NOI18N
+
+        jLabel2.setText(resourceMap.getString("jLabel2.text")); // NOI18N
+        jLabel2.setName("jLabel2"); // NOI18N
+
+        jScrollPane2.setName("jScrollPane2"); // NOI18N
+
+        tableParameter.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Parameter", "Value(s)"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tableParameter.setName("tableParameter"); // NOI18N
+        tableParameter.setDefaultRenderer(Object.class, new ParameterCellRenderer());
+        jScrollPane2.setViewportView(tableParameter);
+
+        btnHiddenParameter.setAction(actionMap.get("showHiddenParameters")); // NOI18N
+        btnHiddenParameter.setClickedColor(resourceMap.getColor("btnHiddenParameter.clickedColor")); // NOI18N
+        btnHiddenParameter.setUnclickedColor(resourceMap.getColor("btnHiddenParameter.unclickedColor")); // NOI18N
+        btnHiddenParameter.setFont(resourceMap.getFont("btnHiddenParameter.font")); // NOI18N
+        btnHiddenParameter.setName("btnHiddenParameter"); // NOI18N
+
+        javax.swing.GroupLayout pnlParametersLayout = new javax.swing.GroupLayout(pnlParameters);
+        pnlParameters.setLayout(pnlParametersLayout);
+        pnlParametersLayout.setHorizontalGroup(
+            pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParametersLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE)
+                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtFieldValue, javax.swing.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE)
+                    .addComponent(jLabel2)
+                    .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+        pnlParametersLayout.setVerticalGroup(
+            pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParametersLayout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
+                .addComponent(pnlParamDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtFieldValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(34, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout pnlBlockLayout = new javax.swing.GroupLayout(pnlBlock);
+        pnlBlock.setLayout(pnlBlockLayout);
+        pnlBlockLayout.setHorizontalGroup(
+            pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlBlockLayout.setVerticalGroup(
+            pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlBlockLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(pnlBlockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        splitPaneCfg.setRightComponent(pnlBlock);
+
         javax.swing.GroupLayout pnlConfigurationLayout = new javax.swing.GroupLayout(pnlConfiguration);
         pnlConfiguration.setLayout(pnlConfigurationLayout);
         pnlConfigurationLayout.setHorizontalGroup(
             pnlConfigurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+            .addComponent(splitPaneCfg, javax.swing.GroupLayout.DEFAULT_SIZE, 810, Short.MAX_VALUE)
         );
         pnlConfigurationLayout.setVerticalGroup(
             pnlConfigurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+            .addComponent(splitPaneCfg, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         pnlProgress.setBackground(new Color(0,0,0,0));
@@ -1784,6 +2322,19 @@ public class IchthyopView extends FrameView implements TimingTarget {
         btnExit.setAction(actionMap.get("exitApplication")); // NOI18N
         btnExit.setName("btnExit"); // NOI18N
 
+        pnlTree.setName("pnlTree"); // NOI18N
+
+        javax.swing.GroupLayout pnlTreeLayout = new javax.swing.GroupLayout(pnlTree);
+        pnlTree.setLayout(pnlTreeLayout);
+        pnlTreeLayout.setHorizontalGroup(
+            pnlTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 146, Short.MAX_VALUE)
+        );
+        pnlTreeLayout.setVerticalGroup(
+            pnlTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 79, Short.MAX_VALUE)
+        );
+
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
@@ -1820,11 +2371,15 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
+    private javax.swing.JButton btnCollapse;
     private javax.swing.JButton btnDeleteMaps;
     private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnExpand;
     private javax.swing.JButton btnExportMaps;
     private javax.swing.JButton btnFirst;
+    private org.jdesktop.swingx.JXHyperlink btnHiddenParameter;
     private javax.swing.JButton btnLast;
+    private javax.swing.JButton btnLower;
     private javax.swing.JButton btnMapping;
     private javax.swing.JButton btnNewCfgFile;
     private javax.swing.JButton btnNext;
@@ -1835,8 +2390,10 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JButton btnPrevious;
     private javax.swing.JButton btnSaveCfgFile;
     private javax.swing.JButton btnSimulationRun;
+    private javax.swing.JButton btnUpper;
     private javax.swing.JMenuItem cancelMapMenuItem;
     private javax.swing.JComboBox cbBoxWMS;
+    private javax.swing.JCheckBox ckBoxBlock;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem exportMenuItem;
@@ -1847,16 +2404,22 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JCheckBoxMenuItem itemRecruitChart;
     private javax.swing.JCheckBoxMenuItem itemStageChart;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator15;
+    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblAnimationSpeed;
+    private javax.swing.JLabel lblBlockInfo;
     private javax.swing.JLabel lblCfgFile;
     private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblNC;
+    private javax.swing.JLabel lblParameter;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
     private javax.swing.JLabel lblTime;
@@ -1872,12 +2435,17 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem openNCMenuItem;
     private javax.swing.JPanel pnlAnimation;
+    private javax.swing.JPanel pnlBlock;
+    private javax.swing.JPanel pnlBlockInfo;
     private javax.swing.JPanel pnlConfiguration;
     private javax.swing.JPanel pnlFile;
     private javax.swing.JPanel pnlMapping;
+    private javax.swing.JPanel pnlParamDescription;
+    private javax.swing.JPanel pnlParameters;
     private javax.swing.JPanel pnlProgress;
     private javax.swing.JPanel pnlSimulation;
     private javax.swing.JPanel pnlSimulationUI;
+    private javax.swing.JPanel pnlTree;
     private javax.swing.JPanel pnlWMS;
     private javax.swing.JPopupMenu popupCharts;
     private javax.swing.JMenuItem previewMenuItem;
@@ -1890,9 +2458,12 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private javax.swing.JMenu simulationMenu;
     private javax.swing.JSlider sliderTime;
     private javax.swing.JSplitPane splitPane;
+    private javax.swing.JSplitPane splitPaneCfg;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
+    private javax.swing.JTable tableParameter;
+    private javax.swing.JTextField txtFieldValue;
     // End of variables declaration//GEN-END:variables
     private JPanel pnlBackground;
     private JXTitledPanel mainTitledPanel;
@@ -1922,7 +2493,8 @@ public class IchthyopView extends FrameView implements TimingTarget {
     private WMSMapper wmsMapper = new WMSMapper();
     private LoggerScrollPane loggerScrollPane = new LoggerScrollPane();
     private File outputFile, outputFolder;
-    private JSplitPane editionSplitPane;
     private JLabel lblConfiguration;
     private JLabel lblMapping;
+    private boolean hasStructureChanged;
+    private boolean showHiddenParameters = true;
 }

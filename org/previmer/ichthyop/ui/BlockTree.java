@@ -109,6 +109,20 @@ public class BlockTree extends JTree {
     }
     }
     }*/
+    public void expandAll() {
+        for (int i = 0; i < getRowCount(); i++) {
+            expandRow(i);
+        }
+
+    }
+
+    public void collapseAll() {
+        for (int i = 0; i < getRowCount(); i++) {
+            collapseRow(i);
+        }
+
+    }
+
     public void createModel() {
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(getSimulationManager().getConfigurationFile().getName());
@@ -116,8 +130,9 @@ public class BlockTree extends JTree {
         List<XBlock> listb = new ArrayList();
         for (BlockType type : BlockType.values()) {
             if (!type.equals(BlockType.ZONE)) {
-                for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type))
-                listb.add(block);
+                for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
+                    listb.add(block);
+                }
             }
         }
         Collections.sort(listb);
