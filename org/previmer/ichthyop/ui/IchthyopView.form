@@ -422,16 +422,19 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="lblCfgFile" alignment="0" pref="431" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="lblCfgFile" alignment="0" pref="313" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="btnNewCfgFile" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnOpenCfgFile" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnCloseCfgFile" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -440,15 +443,17 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="btnOpenCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnNewCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnCloseCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="btnSaveAsCfgFile" alignment="0" max="32767" attributes="1"/>
-                      <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="btnNewCfgFile" alignment="0" max="32767" attributes="1"/>
-                          <Component id="btnOpenCfgFile" alignment="0" max="32767" attributes="1"/>
-                      </Group>
-                      <Component id="btnCloseCfgFile" max="32767" attributes="1"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblCfgFile" min="-2" max="-2" attributes="0"/>
@@ -458,6 +463,11 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
+        <Component class="javax.swing.JLabel" name="lblCfgFile">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="lblCfgFile" noResource="true"/>
+          </Properties>
+        </Component>
         <Component class="javax.swing.JButton" name="btnNewCfgFile">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -480,6 +490,32 @@
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
+        <Component class="javax.swing.JButton" name="btnSaveCfgFile">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveConfigurationFile" methodName="saveConfigurationFile"/>
+            </Property>
+            <Property name="focusable" type="boolean" value="false"/>
+            <Property name="horizontalTextPosition" type="int" value="4"/>
+            <Property name="name" type="java.lang.String" value="btnSaveCfgFile" noResource="true"/>
+            <Property name="verticalTextPosition" type="int" value="3"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnSaveCfgFile.getAction().setEnabled(false);"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnSaveAsCfgFile">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsConfigurationFile" methodName="saveAsConfigurationFile"/>
+            </Property>
+            <Property name="focusable" type="boolean" value="false"/>
+            <Property name="horizontalAlignment" type="int" value="4"/>
+            <Property name="horizontalTextPosition" type="int" value="4"/>
+            <Property name="name" type="java.lang.String" value="btnSaveAsCfgFile" noResource="true"/>
+            <Property name="verticalTextPosition" type="int" value="3"/>
+          </Properties>
+        </Component>
         <Component class="javax.swing.JButton" name="btnCloseCfgFile">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -489,21 +525,6 @@
             <Property name="horizontalTextPosition" type="int" value="4"/>
             <Property name="name" type="java.lang.String" value="btnCloseCfgFile" noResource="true"/>
             <Property name="verticalTextPosition" type="int" value="3"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnSaveAsCfgFile">
-          <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsConfigurationFile" methodName="saveAsConfigurationFile"/>
-            </Property>
-            <Property name="horizontalAlignment" type="int" value="4"/>
-            <Property name="name" type="java.lang.String" value="btnSaveAsCfgFile" noResource="true"/>
-            <Property name="verticalTextPosition" type="int" value="3"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JLabel" name="lblCfgFile">
-          <Properties>
-            <Property name="name" type="java.lang.String" value="lblCfgFile" noResource="true"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -926,7 +947,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="splitPaneCfg" alignment="1" pref="539" max="32767" attributes="0"/>
+              <Component id="splitPaneCfg" alignment="1" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -968,7 +989,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jScrollPane1" pref="463" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" pref="516" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jToolBar1" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -1070,7 +1091,6 @@
                           <Group type="103" groupAlignment="1" attributes="0">
                               <Component id="pnlParameters" alignment="0" max="32767" attributes="0"/>
                               <Component id="pnlBlockInfo" alignment="0" max="32767" attributes="0"/>
-                              <Component id="btnSaveCfgFile" alignment="1" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -1082,9 +1102,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="pnlBlockInfo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="pnlParameters" max="32767" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
+                          <Component id="pnlParameters" pref="435" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -1157,16 +1175,17 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jScrollPane2" alignment="0" pref="494" max="32767" attributes="0"/>
-                                  <Component id="btnHiddenParameter" alignment="1" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="jScrollPane2" alignment="1" pref="494" max="32767" attributes="0"/>
                                   <Component id="pnlParamDescription" alignment="1" max="32767" attributes="0"/>
-                                  <Group type="102" alignment="1" attributes="0">
-                                      <Component id="btnApply" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="btnUndo" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="btnReset" min="-2" max="-2" attributes="0"/>
+                                      <Component id="btnRedo" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace pref="104" max="32767" attributes="0"/>
+                                      <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -1176,17 +1195,18 @@
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="jScrollPane2" min="-2" pref="119" max="-2" attributes="0"/>
+                              <Component id="jScrollPane2" min="-2" pref="128" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="btnUndo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="btnRedo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
+                              </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="pnlParamDescription" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="btnReset" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="btnApply" alignment="3" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace min="-2" pref="134" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1232,29 +1252,6 @@
                         </Component>
                       </SubComponents>
                     </Container>
-                    <Container class="javax.swing.JScrollPane" name="jScrollPane2">
-                      <Properties>
-                        <Property name="name" type="java.lang.String" value="jScrollPane2" noResource="true"/>
-                      </Properties>
-                      <AuxValues>
-                        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-                      </AuxValues>
-
-                      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-                      <SubComponents>
-                        <Component class="javax.swing.JTable" name="tableParameter">
-                          <Properties>
-                            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                              <Table columnCount="0" rowCount="0"/>
-                            </Property>
-                            <Property name="name" type="java.lang.String" value="tableParameter" noResource="true"/>
-                          </Properties>
-                          <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="tableParameter.setDefaultRenderer(Object.class, new ParameterCellRenderer());&#xa;tableParameter.getSelectionModel().addListSelectionListener(new ListSelectionListener() {&#xa;&#xa;            public void valueChanged(ListSelectionEvent e) {&#xa;                tableValueChanged(e);&#xa;            }&#xa;        });"/>
-                          </AuxValues>
-                        </Component>
-                      </SubComponents>
-                    </Container>
                     <Component class="org.jdesktop.swingx.JXHyperlink" name="btnHiddenParameter">
                       <Properties>
                         <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -1266,35 +1263,52 @@
                         <Property name="name" type="java.lang.String" value="btnHiddenParameter" noResource="true"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JButton" name="btnReset">
+                    <Component class="javax.swing.JButton" name="btnUndo">
                       <Properties>
                         <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="resetChanges" methodName="resetChanges"/>
+                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="undo" methodName="undo"/>
                         </Property>
-                        <Property name="name" type="java.lang.String" value="btnReset" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="btnUndo" noResource="true"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JButton" name="btnApply">
+                    <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+                      <Properties>
+                        <Property name="name" type="java.lang.String" value="jScrollPane2" noResource="true"/>
+                      </Properties>
+                      <AuxValues>
+                        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+                      </AuxValues>
+
+                      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+                      <SubComponents>
+                        <Component class="javax.swing.JTable" name="table">
+                          <Properties>
+                            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
+                              <Table columnCount="4" rowCount="4">
+                                <Column editable="true" title="Title 1" type="java.lang.Object"/>
+                                <Column editable="true" title="Title 2" type="java.lang.Object"/>
+                                <Column editable="true" title="Title 3" type="java.lang.Object"/>
+                                <Column editable="true" title="Title 4" type="java.lang.Object"/>
+                              </Table>
+                            </Property>
+                            <Property name="name" type="java.lang.String" value="table" noResource="true"/>
+                          </Properties>
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ParameterTable();"/>
+                          </AuxValues>
+                        </Component>
+                      </SubComponents>
+                    </Container>
+                    <Component class="javax.swing.JButton" name="btnRedo">
                       <Properties>
                         <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="applyChanges" methodName="applyChanges"/>
+                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="redo" methodName="redo"/>
                         </Property>
-                        <Property name="name" type="java.lang.String" value="btnApply" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="btnRedo" noResource="true"/>
                       </Properties>
                     </Component>
                   </SubComponents>
                 </Container>
-                <Component class="javax.swing.JButton" name="btnSaveCfgFile">
-                  <Properties>
-                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                      <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveConfigurationFile" methodName="saveConfigurationFile"/>
-                    </Property>
-                    <Property name="name" type="java.lang.String" value="btnSaveCfgFile" noResource="true"/>
-                  </Properties>
-                  <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnSaveCfgFile.getAction().setEnabled(false);"/>
-                  </AuxValues>
-                </Component>
               </SubComponents>
             </Container>
           </SubComponents>
