@@ -64,12 +64,12 @@
                 <Property name="name" type="java.lang.String" value="openMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="saveMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="saveAsMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="saveConfigurationFile" methodName="saveConfigurationFile"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsConfigurationFile" methodName="saveAsConfigurationFile"/>
                 </Property>
-                <Property name="name" type="java.lang.String" value="saveMenuItem" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="saveAsMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="closeMenuItem">
@@ -423,13 +423,13 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="lblCfgFile" alignment="0" pref="415" max="32767" attributes="0"/>
+                      <Component id="lblCfgFile" alignment="0" pref="431" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="btnNewCfgFile" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnOpenCfgFile" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="btnSaveCfgFile" min="-2" pref="96" max="-2" attributes="0"/>
+                          <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnCloseCfgFile" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -442,11 +442,13 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="btnSaveCfgFile" max="32767" attributes="1"/>
-                      <Component id="btnNewCfgFile" alignment="0" max="32767" attributes="1"/>
-                      <Component id="btnOpenCfgFile" alignment="0" max="32767" attributes="1"/>
-                      <Component id="btnCloseCfgFile" alignment="0" max="32767" attributes="1"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="btnSaveAsCfgFile" alignment="0" max="32767" attributes="1"/>
+                      <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="btnNewCfgFile" alignment="0" max="32767" attributes="1"/>
+                          <Component id="btnOpenCfgFile" alignment="0" max="32767" attributes="1"/>
+                      </Group>
+                      <Component id="btnCloseCfgFile" max="32767" attributes="1"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblCfgFile" min="-2" max="-2" attributes="0"/>
@@ -489,12 +491,14 @@
             <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnSaveCfgFile">
+        <Component class="javax.swing.JButton" name="btnSaveAsCfgFile">
           <Properties>
             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-              <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="saveConfigurationFile" methodName="saveConfigurationFile"/>
+              <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsConfigurationFile" methodName="saveAsConfigurationFile"/>
             </Property>
-            <Property name="name" type="java.lang.String" value="btnSaveCfgFile" noResource="true"/>
+            <Property name="horizontalAlignment" type="int" value="4"/>
+            <Property name="name" type="java.lang.String" value="btnSaveAsCfgFile" noResource="true"/>
+            <Property name="verticalTextPosition" type="int" value="3"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblCfgFile">
@@ -922,7 +926,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="splitPaneCfg" alignment="1" pref="521" max="32767" attributes="0"/>
+              <Component id="splitPaneCfg" alignment="1" pref="539" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -964,7 +968,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jScrollPane1" pref="445" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" pref="463" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jToolBar1" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -1066,6 +1070,7 @@
                           <Group type="103" groupAlignment="1" attributes="0">
                               <Component id="pnlParameters" alignment="0" max="32767" attributes="0"/>
                               <Component id="pnlBlockInfo" alignment="0" max="32767" attributes="0"/>
+                              <Component id="btnSaveCfgFile" alignment="1" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -1078,6 +1083,8 @@
                           <Component id="pnlBlockInfo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="pnlParameters" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -1156,6 +1163,11 @@
                                   <Component id="jScrollPane2" alignment="0" pref="494" max="32767" attributes="0"/>
                                   <Component id="btnHiddenParameter" alignment="1" min="-2" max="-2" attributes="0"/>
                                   <Component id="pnlParamDescription" alignment="1" max="32767" attributes="0"/>
+                                  <Group type="102" alignment="1" attributes="0">
+                                      <Component id="btnApply" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnReset" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -1169,7 +1181,12 @@
                               <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="pnlParamDescription" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace pref="94" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="btnReset" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnApply" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1249,8 +1266,32 @@
                         <Property name="name" type="java.lang.String" value="btnHiddenParameter" noResource="true"/>
                       </Properties>
                     </Component>
+                    <Component class="javax.swing.JButton" name="btnReset">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="resetChanges" methodName="resetChanges"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="btnReset" noResource="true"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnApply">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="applyChanges" methodName="applyChanges"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="btnApply" noResource="true"/>
+                      </Properties>
+                    </Component>
                   </SubComponents>
                 </Container>
+                <Component class="javax.swing.JButton" name="btnSaveCfgFile">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveConfigurationFile" methodName="saveConfigurationFile"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="btnSaveCfgFile" noResource="true"/>
+                  </Properties>
+                </Component>
               </SubComponents>
             </Container>
           </SubComponents>
