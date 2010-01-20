@@ -304,14 +304,14 @@ public class BlockTree extends JTree {
 
     class TreeRenderer extends DefaultTreeCellRenderer {
 
-        HashMap<BlockType, Icon> iconMap;
+        Icon iconLeaf, iconRoot, iconNode, iconNodeExpanded;
 
         TreeRenderer() {
             ResourceMap resourceMap = ((IchthyopView) IchthyopApp.getApplication().getMainView()).getResourceMap();
-            iconMap = new HashMap(BlockType.values().length);
-            for (BlockType type : BlockType.values()) {
-                iconMap.put(type, resourceMap.getIcon("Tree.icon." + type.getColor()));
-            }
+            iconLeaf = resourceMap.getIcon("Tree.icon.leaf");
+            iconRoot = resourceMap.getIcon("Tree.icon.root");
+            iconNode = resourceMap.getIcon("Tree.icon.node");
+            iconNodeExpanded = resourceMap.getIcon("Tree.icon.nodexp");
         }
 
         @Override
@@ -329,24 +329,21 @@ public class BlockTree extends JTree {
                     expanded, leaf, row,
                     hasFocus);
 
-            if (leaf) {
-                BlockType type = getType(value);
-                if (type != null) {
-                    setIcon(iconMap.get(type));
+            if (row == 0) {
+                setIcon(iconRoot);
+                return this;
+            }
+            
+            if (!leaf) {
+                if (expanded) {
+                    setIcon(iconNodeExpanded);
+                } else {
+                    setIcon(iconNode);
                 }
+            } else {
+                setIcon(iconLeaf);
             }
             return this;
-        }
-
-        protected BlockType getType(Object value) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-            if (node != null) {
-                XBlock block = blockMap.get(BlockTree.this.nodeToKey(node));
-                if (block != null) {
-                    return block.getType();
-                }
-            }
-            return null;
         }
     }
 }

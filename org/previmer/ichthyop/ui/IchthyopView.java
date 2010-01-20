@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -52,7 +51,6 @@ import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionListener;
@@ -205,15 +203,18 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     @Action
     public void upper() {
         blockTree.removeTreeSelectionListener(IchthyopView.this);
-        hasStructureChanged = blockTree.upper();
+        hasStructureChanged |= blockTree.upper();
         blockTree.addTreeSelectionListener(IchthyopView.this);
+        btnSaveCfgFile.getAction().setEnabled(btnSaveCfgFile.getAction().isEnabled() | hasStructureChanged);
     }
 
     @Action
     public void lower() {
         blockTree.removeTreeSelectionListener(IchthyopView.this);
-        hasStructureChanged = blockTree.lower();
+        hasStructureChanged |= blockTree.lower();
         blockTree.addTreeSelectionListener(IchthyopView.this);
+        btnSaveCfgFile.getAction().setEnabled(false);
+        btnSaveCfgFile.getAction().setEnabled(btnSaveCfgFile.getAction().isEnabled() | hasStructureChanged);
     }
 
     @Action
@@ -534,6 +535,8 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
 
     @Action
     public void saveConfigurationFile() {
+        btnSaveCfgFile.getAction().setEnabled(false);
+        hasStructureChanged = false;
     }
 
     @Action
@@ -1100,6 +1103,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
                     if (null != getSimulationManager().getConfigurationFile()) {
                         pnlConfiguration.setVisible(true);
                         lblConfiguration.setVisible(false);
+                        btnSaveCfgFile.getAction().setEnabled(false);
                     } else {
                         lblConfiguration.setVisible(true);
                     }
@@ -1209,24 +1213,11 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         lblTitle.setHorizontalAlignment(JLabel.CENTER);
         lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 16));
         pnlTree.add(lblTitle,
-                new GridBagConstraints(0, 0, 2, 1, 100, 0,
+                new GridBagConstraints(0, 0, 1, 1, 100, 100,
                 GridBagConstraints.CENTER,
                 GridBagConstraints.BOTH,
                 new Insets(5, 5, 5, 5), 0, 0));
-        int i = 1;
-        for (BlockType block : BlockType.values()) {
-            pnlTree.add(new JLabel(getResourceMap().getIcon("Tree.icon." + block.getColor())),
-                    new GridBagConstraints(0, i, 1, 1, 50, 0,
-                    GridBagConstraints.CENTER,
-                    GridBagConstraints.BOTH,
-                    new Insets(5, 5, 5, 5), 0, 0));
-            pnlTree.add(new JLabel(block.toString()),
-                    new GridBagConstraints(1, i, 1, 1, 50, 0,
-                    GridBagConstraints.CENTER,
-                    GridBagConstraints.BOTH,
-                    new Insets(5, 5, 5, 5), 0, 0));
-            i++;
-        }
+
     }
 
     @Action
@@ -1257,6 +1248,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
 
         btnReset.getAction().setEnabled(false);
         btnApply.getAction().setEnabled(false);
+        btnSaveCfgFile.getAction().setEnabled(true);
     }
 
     @Action
@@ -1317,12 +1309,12 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             if (showHidden) {
                 list.addAll(block.getXParameters(true));
             }
-            String[][] data = new String[list.size()][4];
+            String[][] tableData = new String[list.size()][4];
             int i = 0;
             for (XParameter xparam : list) {
-                data[i++] = new String[]{xparam.getKey(), xparam.getValues(), String.valueOf(xparam.isHidden()), String.valueOf(xparam.isSerial())};
+                tableData[i++] = new String[]{xparam.getKey(), xparam.getValues(), String.valueOf(xparam.isHidden()), String.valueOf(xparam.isSerial())};
             }
-            return data;
+            return tableData;
         }
 
         /**
@@ -2266,6 +2258,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
 
         btnSaveCfgFile.setAction(actionMap.get("saveConfigurationFile")); // NOI18N
         btnSaveCfgFile.setName("btnSaveCfgFile"); // NOI18N
+        btnSaveCfgFile.getAction().setEnabled(false);
 
         javax.swing.GroupLayout pnlBlockLayout = new javax.swing.GroupLayout(pnlBlock);
         pnlBlock.setLayout(pnlBlockLayout);
