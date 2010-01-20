@@ -285,7 +285,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             if (!showHiddenParameters) {
                 btnHiddenParameter.doClick();
             } else {
-                getTable().setModel(block, false, this);
+                getTable().setModel(block, this);
             }
             if (block.getXParameters(true).size() > 0) {
                 btnHiddenParameter.getAction().setEnabled(true);
@@ -298,8 +298,10 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     }
 
     public void tableChanged(TableModelEvent e) {
-        btnRedo.getAction().setEnabled(false);
-        btnUndo.getAction().setEnabled(true);
+        if (e != null) {
+            btnRedo.getAction().setEnabled(false);
+            btnUndo.getAction().setEnabled(true);
+        }
     }
 
     private class CreateMapTask extends Task<Object, MapStep> {
@@ -1204,13 +1206,13 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         if (showHiddenParameters) {
             btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.hide"));
             btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.unlock"));
-            getTable().setModel(selectedBlock, true, this);
+            getTable().getModel().setAllRowsVisible(true);
             showHiddenParameters = false;
 
         } else {
             btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.show"));
             btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.lock"));
-            getTable().setModel(selectedBlock, false, this);
+            getTable().getModel().setAllRowsVisible(false);
             showHiddenParameters = true;
         }
     }

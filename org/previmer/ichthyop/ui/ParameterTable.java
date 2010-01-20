@@ -33,10 +33,11 @@ import org.previmer.ichthyop.io.XParameter;
  */
 public class ParameterTable extends JTable {
 
-    ParameterTableModel model = new ParameterTableModel();
+    private ParameterTableModel model = new ParameterTableModel();
 
     public ParameterTable() {
         super(new DefaultTableModel());
+        setDefaultRenderer(Object.class, new ParameterCellRenderer());
     }
 
     @Override
@@ -48,8 +49,8 @@ public class ParameterTable extends JTable {
         return getModel().getUndoManager();
     }
 
-    public void setModel(XBlock block, boolean includeHiddenParameters, TableModelListener l) {
-        setModel(model = new ParameterTableModel(block, includeHiddenParameters));
+    public void setModel(XBlock block, TableModelListener l) {
+        setModel(model = new ParameterTableModel(block));
         model.addTableModelListener(l);
         adjustColumnSizes();
     }
@@ -93,14 +94,18 @@ public class ParameterTable extends JTable {
         private Object[][] data;
         private JvUndoManager undoManager;
         private Object[] longValues;
+        private int visibleRows = 1, allRows = 1;
+        private boolean isAllRowsVisible;
 
         ParameterTableModel() {
             data = new Object[1][1];
             longValues = new String[] {"", ""};
+            isAllRowsVisible = false;
         }
 
-        ParameterTableModel(XBlock block, boolean showHidden) {
-            data = createData(block, showHidden);
+        ParameterTableModel(XBlock block) {
+            isAllRowsVisible = false;
+            data = createData(block);
             longValues = getLongValues(data);
             addUndoableEditListener(undoManager = new JvUndoManager());
         }
@@ -109,17 +114,22 @@ public class ParameterTable extends JTable {
             return undoManager;
         }
 
+        public void setAllRowsVisible(boolean visible) {
+            isAllRowsVisible = visible;
+            fireTableChanged(null);
+        }
+
         /**
          *
          * @param model int
          * @return Object[][]
          */
-        private Object[][] createData(XBlock block, boolean includeHiddenParameters) {
+        private Object[][] createData(XBlock block) {
 
             Collection<XParameter> list = block.getXParameters();
-            if (includeHiddenParameters) {
-                list.addAll(block.getXParameters(true));
-            }
+            visibleRows = list.size();
+            list.addAll(block.getXParameters(true));
+            allRows = list.size();
             String[][] tableData = new String[list.size()][4];
             int i = 0;
             for (XParameter xparam : list) {
@@ -157,7 +167,7 @@ public class ParameterTable extends JTable {
         }
 
         public int getRowCount() {
-            return data.length;
+            return isAllRowsVisible ? allRows : visibleRows;
         }
 
         @Override
