@@ -1102,7 +1102,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="pnlBlockInfo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="pnlParameters" pref="435" max="32767" attributes="0"/>
+                          <Component id="pnlParameters" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -1295,6 +1295,7 @@
                           </Properties>
                           <AuxValues>
                             <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ParameterTable();"/>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="table.getSelectionModel().addListSelectionListener(this);"/>
                           </AuxValues>
                         </Component>
                       </SubComponents>

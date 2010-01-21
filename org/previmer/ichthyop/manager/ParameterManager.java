@@ -6,16 +6,23 @@ import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.filter.Filter;
 import org.jdom.input.SAXBuilder;
+import org.jdom.output.XMLOutputter;
 
 /**
  *
@@ -62,6 +69,22 @@ public class ParameterManager implements IParameterManager {
         return cfgFile.getBlocks(type);
     }
 
+    public Collection<XBlock> readBlocks() {
+        return cfgFile.readBlocks();
+    }
+
+    public void cleanup() {
+        cfgFile.removeAllBlocks();
+    }
+
+    public void save() throws IOException, FileNotFoundException {
+        cfgFile.write(new FileOutputStream(cfgFile.file));
+    }
+
+    public void addBlock(XBlock block) {
+        cfgFile.addBlock(block);
+    }
+
     private class ConfigurationFile {
 
         private File file;
@@ -86,6 +109,13 @@ public class ParameterManager implements IParameterManager {
             }
         }
 
+        private void write(OutputStream out) throws IOException {
+            org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
+            format.setEncoding(System.getProperty("file.encoding"));
+            XMLOutputter xmlOut = new XMLOutputter(format);
+            xmlOut.output(structure, out);
+        }
+
         public List<XParameter> getParameters(ParamType paramType) {
             List<XParameter> list = new ArrayList();
             for (XBlock xblock : map.values()) {
@@ -104,6 +134,10 @@ public class ParameterManager implements IParameterManager {
             return map.get(new BlockId(type, blockKey).toString()).getXParameter(key);
         }
 
+        private void removeAllBlocks() {
+            structure.getRootElement().removeChildren(XBlock.BLOCK);
+        }
+
         private Iterable getBlocks(BlockType type) {
             ArrayList<XBlock> list = new ArrayList();
             for (XBlock xblock : map.values()) {
@@ -116,6 +150,15 @@ public class ParameterManager implements IParameterManager {
 
         private XBlock getBlock(final BlockType type, final String key) {
             return map.get(new BlockId(type, key).toString());
+        }
+
+        private List<XBlock> readBlocks() {
+            List<Element> list = structure.getRootElement().getChildren(XBlock.BLOCK);
+            List<XBlock> listBlock = new ArrayList(list.size());
+            for (Element elt : list) {
+                listBlock.add(new XBlock(elt));
+            }
+            return listBlock;
         }
 
         private List<XBlock> readBlocks(final BlockType type) {
@@ -143,12 +186,16 @@ public class ParameterManager implements IParameterManager {
 
         private HashMap<String, XBlock> createMap() {
             HashMap<String, XBlock> lmap = new HashMap();
-            for (BlockType type : BlockType.values()) {
-                for (XBlock xblock : readBlocks(type)) {
-                    lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
-                }
+            for (XBlock xblock : readBlocks()) {
+                lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
             }
             return lmap;
+        }
+
+        private void addBlock(Content child) {
+            XBlock block = (XBlock) child.detach();
+            block.prepairForWriting();
+            structure.getRootElement().addContent(block);
         }
     }
 

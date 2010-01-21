@@ -27,7 +27,6 @@ import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -50,21 +49,11 @@ import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
-import javax.swing.JTable;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
-import javax.swing.undo.AbstractUndoableEdit;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.JXTaskPane;
@@ -80,7 +69,7 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 /**
  * The application's main frame.
  */
-public class IchthyopView extends FrameView implements TimingTarget, TreeSelectionListener, TableModelListener {
+public class IchthyopView extends FrameView implements TimingTarget, TreeSelectionListener, TableModelListener, ListSelectionListener {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -262,11 +251,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
 
     public void valueChanged(TreeSelectionEvent e) {
         final DefaultMutableTreeNode node = blockTree.getSelectedNode();
-        if (e != null && selectedBlock != null && btnUndo.getAction().isEnabled()) {
-            applyChanges(selectedBlock);
-        }
         if (node != null && node.isLeaf()) {
-            selectedBlock = blockTree.getSelectedBlock();
             splitPaneCfg.setRightComponent(pnlBlock);
             pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(blockTree.getSelectedKey()));
             XBlock block = blockTree.getSelectedBlock();
@@ -287,7 +272,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             } else {
                 getTable().setModel(block, this);
             }
-            if (block.getXParameters(true).size() > 0) {
+            if (block.getNbHiddenParameters() > 0) {
                 btnHiddenParameter.getAction().setEnabled(true);
             } else {
                 btnHiddenParameter.getAction().setEnabled(false);
@@ -299,8 +284,28 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
 
     public void tableChanged(TableModelEvent e) {
         if (e != null) {
+            int row = table.getSelectedRow();
+            XParameter xparam = blockTree.getSelectedBlock().getXParameter(table.getValueAt(row, 0).toString());
+            xparam.setValues(table.getValueAt(row, 1).toString());
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
+            btnSaveCfgFile.getAction().setEnabled(true);
+        }
+    }
+
+    public void valueChanged(ListSelectionEvent e) {
+        if (!e.getValueIsAdjusting()) {
+            try {
+                XParameter xparam = blockTree.getSelectedBlock().getXParameter(table.getValueAt(table.getSelectedRow(), 0).toString());
+                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
+                StringBuffer info = new StringBuffer("<html><i>");
+                info.append(xparam.getDescription());
+                info.append("</i></html>");
+                lblParameter.setText(info.toString());
+            } catch (Exception ex) {
+                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParamDescription.border.title")));
+                lblParameter.setText(getResourceMap().getString("lblParameter.text"));
+            }
         }
     }
 
@@ -511,9 +516,31 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     }
 
     @Action
-    public void saveConfigurationFile() {
-        btnSaveCfgFile.getAction().setEnabled(false);
-        hasStructureChanged = false;
+    public Task saveConfigurationFile() {
+        return new SaveCfgFileTask(getApplication());
+    }
+
+    private class SaveCfgFileTask extends Task {
+
+        SaveCfgFileTask(Application instance) {
+            super(instance);
+            setMessage("Saving " + getSimulationManager().getConfigurationFile().getName() + "...");
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            getSimulationManager().getParameterManager().cleanup();
+            blockTree.writeStructure(getSimulationManager().getParameterManager());
+            getSimulationManager().getParameterManager().save();
+            return null;
+        }
+
+        @Override
+        protected void succeeded(Object o) {
+            btnSaveCfgFile.getAction().setEnabled(false);
+            hasStructureChanged = false;
+            setMessage(getSimulationManager().getConfigurationFile().getName() + " saved.");
+        }
     }
 
     @Action
@@ -1247,28 +1274,6 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             btnUndo.getAction().setEnabled(getTable().getUndoManager().canUndo());
         } else {
             btnRedo.getAction().setEnabled(false);
-        }
-    }
-
-    private void tableParameterChanged(TableModelEvent e) {
-        btnUndo.getAction().setEnabled(true);
-        btnSaveCfgFile.getAction().setEnabled(true);
-    }
-
-    private void tableValueChanged(ListSelectionEvent e) {
-
-        if (!e.getValueIsAdjusting()) {
-            try {
-                XParameter xparam = blockTree.getSelectedBlock().getXParameter(table.getValueAt(table.getSelectedRow(), 0).toString());
-                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
-                StringBuffer info = new StringBuffer("<html><i>");
-                info.append(xparam.getDescription());
-                info.append("</i></html>");
-                lblParameter.setText(info.toString());
-            } catch (Exception ex) {
-                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParamDescription.border.title")));
-                lblParameter.setText(getResourceMap().getString("lblParameter.text"));
-            }
         }
     }
 
@@ -2083,6 +2088,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             }
         ));
         table.setName("table"); // NOI18N
+        table.getSelectionModel().addListSelectionListener(this);
         jScrollPane2.setViewportView(table);
 
         btnRedo.setAction(actionMap.get("redo")); // NOI18N
@@ -2137,7 +2143,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
                 .addContainerGap()
                 .addComponent(pnlBlockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE)
+                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -2408,5 +2414,4 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     private JLabel lblMapping;
     private boolean hasStructureChanged;
     private boolean showHiddenParameters = true;
-    private XBlock selectedBlock;
 }

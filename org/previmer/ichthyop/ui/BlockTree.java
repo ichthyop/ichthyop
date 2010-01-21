@@ -19,6 +19,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import org.jdesktop.application.ResourceMap;
+import org.previmer.ichthyop.arch.IParameterManager;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
@@ -99,16 +100,16 @@ public class BlockTree extends JTree {
         return null;
     }
 
-    /*public void writeStructure(XAFile xafile) {
-    for (Enumeration e1 = getRoot().postorderEnumeration(); e1.hasMoreElements();) {
-    DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
-    if (node.isLeaf()) {
-    XBlock var = blockMap.get(nodeToKey(node));
-    //var.timestamp();
-    xafile.addVariable(var);
+    public void writeStructure(IParameterManager manager) {
+        for (Enumeration e1 = getRoot().postorderEnumeration(); e1.hasMoreElements();) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
+            if (node.isLeaf()) {
+                XBlock block = blockMap.get(nodeToKey(node));
+                manager.addBlock(block);
+            }
+        }
     }
-    }
-    }*/
+
     public void expandAll() {
         for (int i = 0; i < getRowCount(); i++) {
             expandRow(i);
@@ -128,14 +129,12 @@ public class BlockTree extends JTree {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(getSimulationManager().getConfigurationFile().getName());
         setModel(new DefaultTreeModel(root));
         List<XBlock> listb = new ArrayList();
-        for (BlockType type : BlockType.values()) {
-            if (!type.equals(BlockType.ZONE)) {
-                for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
-                    listb.add(block);
-                }
+        for (XBlock block : getSimulationManager().getParameterManager().readBlocks()) {
+            if (!block.getType().equals(BlockType.ZONE)) {
+                listb.add(block);
             }
         }
-        Collections.sort(listb);
+        //Collections.sort(listb);
         Collections.reverse(listb);
         blockMap = new HashMap(listb.size());
         for (XBlock block : listb) {
@@ -333,7 +332,7 @@ public class BlockTree extends JTree {
                 setIcon(iconRoot);
                 return this;
             }
-            
+
             if (!leaf) {
                 if (expanded) {
                     setIcon(iconNodeExpanded);

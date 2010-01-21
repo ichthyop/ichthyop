@@ -17,6 +17,14 @@ public enum BlockType {
     RELEASE("violet"),
     DATASET("orange"),
     TRACKER("red");
+
+    static BlockType getType(String value) {
+        for (BlockType type : values()) {
+            if (type.toString().matches(value))
+                return type;
+        }
+        return null;
+    }
     
     String color;
 

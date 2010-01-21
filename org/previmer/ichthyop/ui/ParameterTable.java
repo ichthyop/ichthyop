@@ -8,9 +8,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
@@ -127,9 +130,8 @@ public class ParameterTable extends JTable {
         private Object[][] createData(XBlock block) {
 
             Collection<XParameter> list = block.getXParameters();
-            visibleRows = list.size();
-            list.addAll(block.getXParameters(true));
             allRows = list.size();
+            visibleRows = allRows - block.getNbHiddenParameters();
             String[][] tableData = new String[list.size()][4];
             int i = 0;
             for (XParameter xparam : list) {

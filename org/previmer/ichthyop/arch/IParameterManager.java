@@ -10,6 +10,9 @@ import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,5 +33,13 @@ public interface IParameterManager {
     public List<XParameter> getParameters(ParamType paramType);
 
     public String getParameter(BlockType blockType, String blockKey, String key);
+
+    public void addBlock(XBlock block);
+
+    public void cleanup();
+
+    public void save() throws IOException, FileNotFoundException;
+
+    public Collection<XBlock> readBlocks();
 
 }

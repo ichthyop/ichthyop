@@ -30,6 +30,12 @@ public class XParameter extends org.jdom.Element {
         param_type = getType(xparameter);
         hidden = isHidden(xparameter);
         if (xparameter != null) {
+            if (getType().equals(ParamType.SERIAL)) {
+                this.setAttribute(TYPE, getType().toString());
+            }
+            if (isHidden()) {
+                this.setAttribute(HIDDEN, String.valueOf(true));
+            }
             addContent(xparameter.cloneContent());
             values = getChildren(VALUE);
         }
@@ -99,12 +105,12 @@ public class XParameter extends org.jdom.Element {
         if (getType().equals(ParamType.SERIAL)) {
             String[] tokens = vals.split("\"");
             values = new ArrayList();
-                for (String val : tokens) {
-                    val = val.trim();
-                    if (!val.contains("\"") && !val.isEmpty()) {
-                        values.add(new Element(VALUE).setText(val));
-                    }
+            for (String val : tokens) {
+                val = val.trim();
+                if (!val.contains("\"") && !val.isEmpty()) {
+                    values.add(new Element(VALUE).setText(val));
                 }
+            }
         } else {
             setValue(vals);
         }

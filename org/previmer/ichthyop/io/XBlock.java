@@ -6,6 +6,8 @@ package org.previmer.ichthyop.io;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,7 +21,7 @@ import org.jdom.filter.Filter;
  */
 public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
 
-    private final static String BLOCK = "block";
+    public final static String BLOCK = "block";
     final public static String KEY = "key";
     final public static String ENABLED = "enabled";
     final public static String TYPE = "type";
@@ -27,11 +29,24 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     public final static String DESCRIPTION = "description";
     private final BlockType block_type;
     private HashMap<String, XParameter> map;
+    private int nbHiddenParameters;
+
+    public XBlock(Element element) {
+        super(BLOCK);
+        this.block_type = getType(element);
+        this.setAttribute(TYPE, block_type.toString());
+        nbHiddenParameters = 0;
+        if (element != null) {
+            addContent(element.cloneContent());
+            map = createMap();
+        }
+    }
 
     public XBlock(BlockType block_type, Element element) {
         super(BLOCK);
         this.block_type = block_type;
         this.setAttribute(TYPE, block_type.toString());
+        nbHiddenParameters = 0;
         if (element != null) {
             addContent(element.cloneContent());
             map = createMap();
@@ -40,6 +55,14 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
 
     public BlockType getType() {
         return block_type;
+    }
+
+    private BlockType getType(Element element) {
+        if (null != element && null != element.getAttribute(TYPE)) {
+            return BlockType.getType(element.getAttribute(TYPE).getValue());
+        } else {
+            return BlockType.OPTION;
+        }
     }
 
     public String getKey() {
@@ -63,10 +86,17 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
         }
     }
 
+    public int getNbHiddenParameters() {
+        return nbHiddenParameters;
+    }
+
     private HashMap<String, XParameter> createMap() {
         HashMap<String, XParameter> lmap = new HashMap();
         for (XParameter xparam : readParameters()) {
             lmap.put(xparam.getKey(), xparam);
+            if (xparam.isHidden()) {
+                nbHiddenParameters++;
+            }
         }
         return lmap;
     }
@@ -88,21 +118,45 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     public Collection<XParameter> getXParameters() {
-       return getXParameters(false);
-    }
-
-    public Collection<XParameter> getXParameters(Boolean hidden) {
-        List<XParameter> list = new ArrayList();
-        for (XParameter xparam : map.values()) {
-            if (hidden.equals(xparam.isHidden())) {
-                list.add(xparam);
-            }
-        }
+        List<XParameter> list = new ArrayList(map.values());
+        Collections.sort(list, new XParameterComparator());
         return list;
     }
 
     public int compareTo(XBlock block) {
         return getKey().compareTo(block.getKey());
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer str = new StringBuffer("Block: ");
+        str.append(getKey());
+        str.append(" (");
+        str.append(getType());
+        str.append(")\n");
+        for (XParameter param : getXParameters()) {
+            str.append("  ");
+            str.append(param.getKey());
+            str.append("::");
+            str.append(param.getValues());
+            str.append("\n");
+        }
+        for (XParameter param : getXParameters()) {
+            str.append("  ~");
+            str.append(param.getKey());
+            str.append("::");
+            str.append(param.getValues());
+            str.append("\n");
+        }
+        str.append("\n");
+        return str.toString();
+    }
+
+    public void prepairForWriting() {
+        getChild(PARAMETERS).removeContent();
+        for (XParameter param : getXParameters()) {
+            getChild(PARAMETERS).addContent(param);
+        }
     }
 
     /*public List<XParameter> getParameters(final ParamType type) {
@@ -150,4 +204,23 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     }*/
+
+    private class XParameterComparator implements Comparator<XParameter> {
+
+        public int compare(XParameter o1, XParameter o2) {
+            if (o1.isHidden()) {
+                if (o2.isHidden()) {
+                    return o1.getKey().compareToIgnoreCase(o2.getKey());
+                } else {
+                    return 1;
+                }
+            } else {
+                if (o2.isHidden()) {
+                    return -1;
+                } else {
+                    return o1.getKey().compareToIgnoreCase(o2.getKey());
+                }
+            }
+        }
+    }
 }
