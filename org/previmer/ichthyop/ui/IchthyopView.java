@@ -5,6 +5,7 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -27,6 +28,7 @@ import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -56,6 +58,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
+import org.jdesktop.swingx.JXLabel;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 import org.jdesktop.swingx.JXTitledPanel;
@@ -897,6 +901,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
 
         if (null != getSimulationManager().getConfigurationFile()) {
             savePreference(openMenuItem, getSimulationManager().getConfigurationFile().getPath());
+            savePreference(blockTree, blockTree.getSelectedKey());
         } else {
             savePreference(openMenuItem, cfgPath.getPath());
         }
@@ -927,7 +932,6 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             if (file.isFile()) {
                 cfgPath = file.getParentFile();
                 loadConfigurationFile(file);
-                //tpConfiguration.setCollapsed(false);
             } else if (file.isDirectory()) {
                 cfgPath = file;
             }
@@ -1065,6 +1069,16 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         lblConfiguration.setHorizontalAlignment(JLabel.CENTER);
         lblConfiguration.setVerticalAlignment(JLabel.CENTER);
 
+        pnlLogo = new JXPanel();
+        pnlLogo.setLayout(new GridBagLayout());
+        pnlLogo.setOpaque(false);
+        pnlLogo.setAlpha(0.4f);
+        pnlLogo.add(hyperLinkLogo, new GridBagConstraints(0, 0, 1, 1, 100, 100,
+                GridBagConstraints.CENTER,
+                GridBagConstraints.BOTH,
+                new Insets(0, 0, 0, 0), 0, 0));
+
+
         lblMapping = new JLabel(getResourceMap().getIcon("lblMapping.icon"));
         lblMapping.setHorizontalAlignment(JLabel.CENTER);
         lblMapping.setVerticalAlignment(JLabel.CENTER);
@@ -1075,6 +1089,8 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         pnlBackground = new JPanel();
         pnlBackground.setLayout(new StackLayout());
         pnlBackground.add(new GradientPanel(), StackLayout.BOTTOM);
+        pnlBackground.add(pnlLogo, StackLayout.TOP);
+        pnlLogo.setVisible(false);
         pnlBackground.add(lblConfiguration, StackLayout.TOP);
         lblConfiguration.setVisible(true);
         pnlBackground.add(pnlConfiguration);
@@ -1178,8 +1194,19 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         });
     }
 
+    @Action
+    public void browse() {
+        try {
+            IOTools.browse(URI.create(getResourceMap().getString("Application.homepage")));
+            setMessage(getResourceMap().getString("browse.Action.openurl") + " " + getResourceMap().getString("Application.homepage"));
+        } catch (IOException ex) {
+            setMessage(getResourceMap().getString("browse.Action.no-browser") + " " + getResourceMap().getString("Application.homepage"));
+        }
+    }
+
     private void setMainTitle() {
 
+        pnlLogo.setVisible(false);
         if (!tpConfiguration.isCollapsed()) {
             if (null != getSimulationManager().getConfigurationFile()) {
                 mainTitledPanel.setTitle("Ichthyop - " + tpConfiguration.getTitle() + " - " + lblCfgFile.getText());
@@ -1206,6 +1233,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             }
         } else {
             mainTitledPanel.setTitle("Ichthyop");
+            pnlLogo.setVisible(true);
         }
     }
 
@@ -1392,6 +1420,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         jLabel1 = new javax.swing.JLabel();
         btnExit = new javax.swing.JButton();
         pnlTree = new javax.swing.JPanel();
+        hyperLinkLogo = new org.jdesktop.swingx.JXHyperlink();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1401,11 +1430,11 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 645, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 709, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 449, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -1529,11 +1558,11 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         statusPanel.setLayout(statusPanelLayout);
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 645, Short.MAX_VALUE)
+            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 709, Short.MAX_VALUE)
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 459, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 523, Short.MAX_VALUE)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusAnimationLabel)
@@ -2251,6 +2280,12 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             .addGap(0, 79, Short.MAX_VALUE)
         );
 
+        hyperLinkLogo.setAction(actionMap.get("browse")); // NOI18N
+        hyperLinkLogo.setText(resourceMap.getString("hyperLinkLogo.text")); // NOI18N
+        hyperLinkLogo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        hyperLinkLogo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        hyperLinkLogo.setName("hyperLinkLogo"); // NOI18N
+
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
@@ -2316,6 +2351,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem exportMenuItem;
+    private org.jdesktop.swingx.JXHyperlink hyperLinkLogo;
     private javax.swing.JCheckBoxMenuItem itemDeadChart;
     private javax.swing.JCheckBoxMenuItem itemDepthChart;
     private javax.swing.JCheckBoxMenuItem itemEdgeChart;
@@ -2414,4 +2450,5 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     private JLabel lblMapping;
     private boolean hasStructureChanged;
     private boolean showHiddenParameters = true;
+    private JXPanel pnlLogo;
 }
