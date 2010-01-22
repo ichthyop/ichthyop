@@ -208,7 +208,7 @@ public class ParameterTable extends JTable {
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
 
-        for (int row = 0; row < model.getRowCount(); row++) {
+        for (int row = 0; row < model.getRowCount(true); row++) {
             XParameter param = block.getXParameter(model.getParameterKey(row));
             switch (param.getFormat()) {
                 case LIST:
@@ -217,8 +217,11 @@ public class ParameterTable extends JTable {
                 case INTEGER:
                     editorModel.addEditorForRow(row, new IntegerEditor());
                     break;
+                case FLOAT:
+                    editorModel.addEditorForRow(row, new FloatEditor());
+                    break;
                 case BOOLEAN:
-                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JCheckBox()));
+                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(new String[]{"true", "false"})));
                     break;
 
             }
@@ -350,11 +353,17 @@ public class ParameterTable extends JTable {
             return longuest;
         }
 
+        @Override
         public int getColumnCount() {
             return columnNames.length;
         }
 
+        @Override
         public int getRowCount() {
+            return getRowCount(this.isAllRowsVisible);
+        }
+
+        public int getRowCount(boolean isAllRowsVisible) {
             return isAllRowsVisible ? allRows : visibleRows;
         }
 
@@ -363,6 +372,7 @@ public class ParameterTable extends JTable {
             return columnNames[col];
         }
 
+        @Override
         public Object getValueAt(int row, int col) {
             return data[row][col];
         }
@@ -422,13 +432,13 @@ public class ParameterTable extends JTable {
         public void setValueAt(Object value, int row, int column, boolean undoable) {
             UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
             if (undoable == false || listeners == null) {
-                data[row][column] = value;
+                data[row][column] = value.toString();
                 fireTableCellUpdated(row, column);
                 return;
             }
 
             Object oldValue = getValueAt(row, column);
-            data[row][column] = value;
+            data[row][column] = value.toString();
             fireTableCellUpdated(row, column);
             JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
             UndoableEditEvent editEvent = new UndoableEditEvent(this, cellEdit);

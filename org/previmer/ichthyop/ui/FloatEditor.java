@@ -30,9 +30,6 @@
  */
 package org.previmer.ichthyop.ui;
 
-/*
- * IntegerEditor is used by TableFTFEditDemo.java.
- */
 import javax.swing.AbstractAction;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JFormattedTextField;
@@ -52,36 +49,37 @@ import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 
 /**
- * Implements a cell editor that uses a formatted text field
- * to edit Integer values.
+ *
+ * @author pverley
  */
-public class IntegerEditor extends DefaultCellEditor {
+public class FloatEditor extends DefaultCellEditor {
 
     JFormattedTextField ftf;
-    NumberFormat integerFormat;
-    private Integer minimum, maximum;
+    NumberFormat floatFormat;
+    private Float minimum, maximum;
     private boolean DEBUG = false;
 
-    public IntegerEditor() {
-        this(0, Integer.MAX_VALUE);
+    public FloatEditor() {
+        this(Float.MIN_VALUE, Float.MAX_VALUE);
     }
 
-    public IntegerEditor(int min, int max) {
+    public FloatEditor(float min, float max) {
         super(new JFormattedTextField());
         ftf = (JFormattedTextField) getComponent();
-        minimum = new Integer(min);
-        maximum = new Integer(max);
+        minimum = new Float(min);
+        maximum = new Float(max);
 
         //Set up the editor for the integer cells.
-        integerFormat = NumberFormat.getIntegerInstance(Locale.US);
-        integerFormat.setGroupingUsed(false);
-        NumberFormatter intFormatter = new NumberFormatter(integerFormat);
-        intFormatter.setFormat(integerFormat);
-        intFormatter.setMinimum(minimum);
-        intFormatter.setMaximum(maximum);
+        floatFormat = NumberFormat.getNumberInstance(Locale.US);
+        floatFormat.setGroupingUsed(false);
+        NumberFormatter floatFormatter = new NumberFormatter(floatFormat);
+        floatFormatter.setFormat(floatFormat);
+        floatFormatter.setMinimum(minimum);
+        floatFormatter.setMaximum(maximum);
+
 
         ftf.setFormatterFactory(
-                new DefaultFormatterFactory(intFormatter));
+                new DefaultFormatterFactory(floatFormatter));
         ftf.setValue(minimum);
         ftf.setHorizontalAlignment(JTextField.TRAILING);
         ftf.setFocusLostBehavior(JFormattedTextField.PERSIST);
@@ -117,7 +115,7 @@ public class IntegerEditor extends DefaultCellEditor {
         JFormattedTextField txtField =
                 (JFormattedTextField) super.getTableCellEditorComponent(
                 table, value, isSelected, row, column);
-        txtField.setValue(Integer.valueOf(value.toString()));
+        txtField.setValue(Float.valueOf(value.toString()));
         return txtField;
     }
 
@@ -126,16 +124,16 @@ public class IntegerEditor extends DefaultCellEditor {
     public Object getCellEditorValue() {
         JFormattedTextField txtField = (JFormattedTextField) getComponent();
         Object o = txtField.getValue();
-        if (o instanceof Integer) {
+        if (o instanceof Float) {
             return o;
         } else if (o instanceof Number) {
-            return new Integer(((Number) o).intValue());
+            return new Float(((Number) o).floatValue());
         } else {
             if (DEBUG) {
                 System.out.println("getCellEditorValue: o isn't a Number");
             }
             try {
-                return integerFormat.parseObject(o.toString());
+                return floatFormat.parseObject(o.toString());
             } catch (ParseException exc) {
                 System.err.println("getCellEditorValue: can't parse o: " + o);
                 return null;
@@ -178,9 +176,7 @@ public class IntegerEditor extends DefaultCellEditor {
             "Revert"};
         int answer = JOptionPane.showOptionDialog(
                 SwingUtilities.getWindowAncestor(ftf),
-                "The value must be an integer between "
-                + minimum + " and "
-                + maximum + ".\n"
+                "The value must be a float.\n"
                 + "You can either continue editing "
                 + "or revert to the last valid value.",
                 "Invalid Text Entered",
