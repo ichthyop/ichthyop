@@ -7,12 +7,19 @@ package org.previmer.ichthyop.ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Vector;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.UndoableEditEvent;
@@ -20,13 +27,17 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import org.previmer.ichthyop.io.ParameterFormat;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 
@@ -36,11 +47,143 @@ import org.previmer.ichthyop.io.XParameter;
  */
 public class ParameterTable extends JTable {
 
+    ///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
+    /**
+     * TableCellEditor customized to accept one JComboBox per cell (and not
+     * just one per column as for the basic JTable).
+     * @see ichthyop.ui.RowEditorModel
+     */
+    protected RowEditorModel rm;
+    /**
+     *
+     */
     private ParameterTableModel model = new ParameterTableModel();
+    /**
+     *
+     */
+    private ParameterCellRenderer renderer = new ParameterCellRenderer();
 
+///////////////
+// Constructors
+///////////////
+    /**
+     * See constructor JTable()
+     */
     public ParameterTable() {
-        super(new DefaultTableModel());
-        setDefaultRenderer(Object.class, new ParameterCellRenderer());
+        super();
+        rm = null;
+    }
+
+    /**
+     * See constructor JTable(TableModel tm)
+     */
+    public ParameterTable(TableModel tm) {
+        super(tm);
+        rm = null;
+    }
+
+    /**
+     * See constructor JTable(TableModel tm, TableColumnModel cm)
+     */
+    public ParameterTable(TableModel tm, TableColumnModel cm) {
+        super(tm, cm);
+        rm = null;
+    }
+
+    /**
+     * See constructor JTable(TableModel tm, TableColumnModel cm,
+    ListSelectionModel sm)
+     */
+    public ParameterTable(TableModel tm, TableColumnModel cm,
+            ListSelectionModel sm) {
+        super(tm, cm, sm);
+        rm = null;
+    }
+
+    /**
+     * See constructor JTable(int rows, int cols)
+     */
+    public ParameterTable(int rows, int cols) {
+        super(rows, cols);
+        rm = null;
+    }
+
+    /**
+     * See constructor JTable(final Vector rowData, final Vector columnNames)
+     */
+    public ParameterTable(final Vector rowData, final Vector columnNames) {
+        super(rowData, columnNames);
+        rm = null;
+    }
+
+    /**
+     * See constructor JTable(final Object[][] rowData, final Object[] colNames)
+     */
+    public ParameterTable(final Object[][] rowData, final Object[] colNames) {
+        super(rowData, colNames);
+        rm = null;
+    }
+
+    /**
+     * This is the only new constructor compared to extended class
+     * <code>JTable</code>.
+     * Constructs a <code>JTableCbBox</code> with <code>numRows</code>
+     * and <code>numColumns</code> of empty cells, with the specified
+     * <code>RowEditorModel</code>.
+     *
+     * @param numRows the number of rows the table holds
+     * @param numColumns the number of columns the table holds
+     */
+    public ParameterTable(TableModel tm, RowEditorModel rm) {
+        super(tm, null, null);
+        this.rm = rm;
+    }
+
+////////////////////////////
+// Definition of the methods
+////////////////////////////
+    /**
+     * Sets the <code>RowEditorModel</code>.
+     * @param rm the <code>RowEditorModel</code> for the table.
+     */
+    public void setRowEditorModel(RowEditorModel rm) {
+        this.rm = rm;
+    }
+
+    /**
+     * Gets the <code>RowEditorModel</code>.
+     * @return the <code>RowEditorModel</code> of the table.
+     */
+    public RowEditorModel getRowEditorModel() {
+        return rm;
+    }
+
+    /**
+     * Returns an appropriate editor for the cell specified by
+     * <code>row</code> and <code>column</code>. If the
+     * <code>RowEditorModel</code> is non-null and the cell editor at specified
+     * row is non-null either, returns that. Otherwise calls the parent
+     * <code>getCellEditor</code> method.
+     *
+     * @param row an int, the row of the cell to edit
+     * @param column an int, the column of the cell to edit
+     * @return TableCellEditor, the editor for this cell;
+
+     * @see javax.swing.JTable#getCellEditor
+     */
+    @Override
+    public TableCellEditor getCellEditor(int row, int col) {
+
+        TableCellEditor tmpEditor = null;
+        if (rm != null) {
+            tmpEditor = rm.getEditor(row);
+        }
+        if (tmpEditor != null) {
+            return tmpEditor;
+        }
+        return super.getCellEditor(row, col);
     }
 
     @Override
@@ -54,8 +197,32 @@ public class ParameterTable extends JTable {
 
     public void setModel(XBlock block, TableModelListener l) {
         setModel(model = new ParameterTableModel(block));
+        setEditors(block);
+        setDefaultRenderer(Object.class, renderer);
         model.addTableModelListener(l);
         adjustColumnSizes();
+    }
+
+    private void setEditors(XBlock block) {
+
+        RowEditorModel editorModel = new RowEditorModel();
+        setRowEditorModel(editorModel);
+
+        for (int row = 0; row < model.getRowCount(); row++) {
+            XParameter param = block.getXParameter(model.getParameterKey(row));
+            switch (param.getFormat()) {
+                case LIST:
+                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(param.getAcceptedValues())));
+                    break;
+                case INTEGER:
+                    editorModel.addEditorForRow(row, new IntegerEditor());
+                    break;
+                case BOOLEAN:
+                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JCheckBox()));
+                    break;
+
+            }
+        }
     }
 
     /*
@@ -99,15 +266,17 @@ public class ParameterTable extends JTable {
         private Object[] longValues;
         private int visibleRows = 1, allRows = 1;
         private boolean isAllRowsVisible;
+        private XBlock block;
 
         ParameterTableModel() {
             data = new Object[1][1];
-            longValues = new String[] {"", ""};
+            longValues = new String[]{"", ""};
             isAllRowsVisible = false;
         }
 
         ParameterTableModel(XBlock block) {
             isAllRowsVisible = false;
+            this.block = block;
             data = createData(block);
             longValues = getLongValues(data);
             addUndoableEditListener(undoManager = new JvUndoManager());
@@ -130,14 +299,31 @@ public class ParameterTable extends JTable {
         private Object[][] createData(XBlock block) {
 
             Collection<XParameter> list = block.getXParameters();
+            List<String[]> listData = new ArrayList();
             allRows = list.size();
             visibleRows = allRows - block.getNbHiddenParameters();
-            String[][] tableData = new String[list.size()][4];
+            String[][] tableData = new String[list.size()][2];
             int i = 0;
             for (XParameter xparam : list) {
-                tableData[i++] = new String[]{xparam.getKey(), xparam.getValues(), String.valueOf(xparam.isHidden()), String.valueOf(xparam.isSerial())};
+                xparam.reset();
+                if (xparam.hasNext()) {
+                    listData.add(new String[]{xparam.getKey() + " [1]", xparam.getValue()});
+                    while (xparam.hasNext()) {
+                        xparam.increment();
+                        listData.add(new String[]{xparam.getKey() + " [" + (xparam.index() + 1) + "]", xparam.getValue()});
+                    }
+                } else {
+                    listData.add(new String[]{xparam.getKey(), xparam.getValue()});
+                }
+            }
+            allRows = listData.size();
+            visibleRows = allRows - block.getNbHiddenParameters();
+            tableData = new String[listData.size()][2];
+            for (String[] arr : listData) {
+                tableData[i++] = arr;
             }
             return tableData;
+
         }
 
         public Object[] getLongValues() {
@@ -179,6 +365,27 @@ public class ParameterTable extends JTable {
 
         public Object getValueAt(int row, int col) {
             return data[row][col];
+        }
+
+        public String getParameterKey(int row) {
+            String key = "";
+            if (row >= 0) {
+                key = getValueAt(row, 0).toString();
+                if (key.trim().endsWith("]")) {
+                    key = key.substring(0, key.lastIndexOf("[")).trim();
+                }
+            }
+            return key;
+        }
+
+        public int getParameterIndex(int row) {
+            if (row >= 0) {
+                String key = getValueAt(row, 0).toString();
+                if (key.trim().endsWith("]")) {
+                    return Integer.valueOf(key.substring(key.lastIndexOf("[") + 1, key.lastIndexOf("]")).trim()) - 1;
+                }
+            }
+            return 0;
         }
 
         /*
@@ -283,14 +490,15 @@ public class ParameterTable extends JTable {
                     value, isSelected, hasFocus, row, column);
 
             ParameterTableModel model = (ParameterTableModel) table.getModel();
-            Boolean hidden = Boolean.valueOf(model.getValueAt(row, 2).toString());
-            Boolean serial = Boolean.valueOf(model.getValueAt(row, 3).toString());
-            if (hidden) {
-                comp.setBackground(new Color(255, 0, 0, 20));
-            } else if (serial) {
-                comp.setBackground(new Color(0, 255, 0, 20));
-            } else {
-                comp.setBackground(Color.WHITE);
+            XParameter param = model.block.getXParameter(model.getParameterKey(row));
+            if (null != param) {
+                if (param.isHidden()) {
+                    comp.setBackground(new Color(255, 0, 0, 20));
+                } else if (param.isSerial()) {
+                    comp.setBackground(new Color(0, 255, 0, 20));
+                } else {
+                    comp.setBackground(Color.WHITE);
+                }
             }
 
             return comp;

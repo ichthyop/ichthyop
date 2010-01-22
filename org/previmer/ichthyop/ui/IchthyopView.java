@@ -289,8 +289,8 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     public void tableChanged(TableModelEvent e) {
         if (e != null) {
             int row = table.getSelectedRow();
-            XParameter xparam = blockTree.getSelectedBlock().getXParameter(table.getValueAt(row, 0).toString());
-            xparam.setValues(table.getValueAt(row, 1).toString());
+            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(row).toString());
+            xparam.setValue(table.getValueAt(row, 1).toString(), getTable().getModel().getParameterIndex(row));
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
             btnSaveCfgFile.getAction().setEnabled(true);
@@ -1270,17 +1270,6 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             getTable().getModel().setAllRowsVisible(false);
             showHiddenParameters = true;
         }
-    }
-
-    private void applyChanges(XBlock block) {
-
-        for (int i = 0; i < table.getRowCount(); i++) {
-            XParameter xparam = block.getXParameter(table.getValueAt(i, 0).toString());
-            xparam.setValues(table.getValueAt(i, 1).toString());
-        }
-
-        btnUndo.getAction().setEnabled(false);
-        btnRedo.getAction().setEnabled(false);
     }
 
     @Action

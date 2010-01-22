@@ -20,15 +20,19 @@ public class XParameter extends org.jdom.Element {
     final public static String TYPE = "type";
     final public static String HIDDEN = "hidden";
     final public static String DESCRIPTION = "description";
+    final public static String FORMAT = "format";
+    final public static String ACCEPTED = "accepted";
     private int index;
     private final ParamType param_type;
     private List<Element> values;
     private boolean hidden;
+    private ParameterFormat param_format;
 
     XParameter(Element xparameter) {
         super(PARAMETER);
         param_type = getType(xparameter);
         hidden = isHidden(xparameter);
+        param_format = getFormat(xparameter);
         if (xparameter != null) {
             if (getType().equals(ParamType.SERIAL)) {
                 this.setAttribute(TYPE, getType().toString());
@@ -78,6 +82,31 @@ public class XParameter extends org.jdom.Element {
         }
     }
 
+    public ParameterFormat getFormat() {
+        return param_format;
+    }
+
+    public String[] getAcceptedValues() {
+        List<String> list = new ArrayList();
+        if (getFormat().equals(ParameterFormat.LIST)) {
+            try {
+                for (Object elt : getChildren(ACCEPTED)) {
+                    list.add(((Element) elt).getTextNormalize());
+                }
+            } catch (NullPointerException e) {
+            }
+        }
+        return list.toArray(new String[list.size()]);
+    }
+
+    private ParameterFormat getFormat(Element element) {
+        if (null != element && null != element.getChild(FORMAT)) {
+            return ParameterFormat.getFormat(element.getChild(FORMAT).getValue());
+        } else {
+            return ParameterFormat.TEXT;
+        }
+    }
+
     @Override
     public String getValue() {
         return values.get(index).getTextNormalize();
@@ -98,22 +127,11 @@ public class XParameter extends org.jdom.Element {
     }
 
     public void setValue(String value) {
-        values.get(0).setText(value);
+        setValue(value, 0);
     }
 
-    public void setValues(String vals) {
-        if (getType().equals(ParamType.SERIAL)) {
-            String[] tokens = vals.split("\"");
-            values = new ArrayList();
-            for (String val : tokens) {
-                val = val.trim();
-                if (!val.contains("\"") && !val.isEmpty()) {
-                    values.add(new Element(VALUE).setText(val));
-                }
-            }
-        } else {
-            setValue(vals);
-        }
+    public void setValue(String value, int index) {
+        values.get(index).setText(value);
     }
 
     public boolean isSerial() {
