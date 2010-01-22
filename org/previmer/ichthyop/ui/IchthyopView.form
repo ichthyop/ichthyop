@@ -989,7 +989,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jScrollPane1" pref="516" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" pref="546" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jToolBar1" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -1102,7 +1102,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="pnlBlockInfo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="pnlParameters" max="32767" attributes="0"/>
+                          <Component id="pnlParameters" pref="465" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -1175,18 +1175,21 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="1" attributes="0">
+                          <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="1" attributes="0">
-                                  <Component id="jScrollPane2" alignment="1" pref="494" max="32767" attributes="0"/>
-                                  <Component id="pnlParamDescription" alignment="1" max="32767" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="jScrollPane2" alignment="0" pref="494" max="32767" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="btnUndo" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="btnRedo" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace pref="104" max="32767" attributes="0"/>
-                                      <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnAddValue" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnRemoveValue" min="-2" max="-2" attributes="0"/>
                                   </Group>
+                                  <Component id="pnlParamDescription" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="btnHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -1195,18 +1198,19 @@
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
+                              <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="jScrollPane2" min="-2" pref="128" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="btnUndo" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="btnRedo" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="btnUndo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnRedo" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnAddValue" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnRemoveValue" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="pnlParamDescription" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace min="-2" pref="134" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="152" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1268,6 +1272,7 @@
                         <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                           <action class="org.previmer.ichthyop.ui.IchthyopView" id="undo" methodName="undo"/>
                         </Property>
+                        <Property name="font" type="java.awt.Font" resourceKey="btnUndo.font"/>
                         <Property name="name" type="java.lang.String" value="btnUndo" noResource="true"/>
                       </Properties>
                     </Component>
@@ -1305,7 +1310,26 @@
                         <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                           <action class="org.previmer.ichthyop.ui.IchthyopView" id="redo" methodName="redo"/>
                         </Property>
+                        <Property name="font" type="java.awt.Font" resourceKey="btnRedo.font"/>
                         <Property name="name" type="java.lang.String" value="btnRedo" noResource="true"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnAddValue">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="addSerialValue" methodName="addSerialValue"/>
+                        </Property>
+                        <Property name="font" type="java.awt.Font" resourceKey="btnAddValue.font"/>
+                        <Property name="name" type="java.lang.String" value="btnAddValue" noResource="true"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="btnRemoveValue">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="removeSerialValue" methodName="removeSerialValue"/>
+                        </Property>
+                        <Property name="font" type="java.awt.Font" resourceKey="btnRemoveValue.font"/>
+                        <Property name="name" type="java.lang.String" value="btnRemoveValue" noResource="true"/>
                       </Properties>
                     </Component>
                   </SubComponents>
@@ -1468,7 +1492,6 @@
         <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
           <action class="org.previmer.ichthyop.ui.IchthyopView" id="browse" methodName="browse"/>
         </Property>
-        <Property name="text" type="java.lang.String" resourceKey="hyperLinkLogo.text"/>
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="horizontalTextPosition" type="int" value="0"/>
         <Property name="name" type="java.lang.String" value="hyperLinkLogo" noResource="true"/>

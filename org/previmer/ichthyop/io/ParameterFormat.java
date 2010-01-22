@@ -11,15 +11,21 @@ package org.previmer.ichthyop.io;
  */
 public enum ParameterFormat {
     
-    TEXT,
-    DATE,
-    DURATION,
-    FLOAT,
-    INTEGER,
-    LIST,
-    BOOLEAN,
-    FILE,
-    PATH;
+    TEXT("value not set yet"),
+    DATE("1900/01/01 00:00"),
+    DURATION("0/01:00"),
+    FLOAT("0.0"),
+    INTEGER("0"),
+    LIST("value not set yet"),
+    BOOLEAN("true"),
+    FILE("file not set yet"),
+    PATH(System.getProperty("user.dir"));
+    
+    private String defaultValue;
+
+    ParameterFormat(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
 
     @Override
     public String toString() {
@@ -32,6 +38,10 @@ public enum ParameterFormat {
                 return type;
         }
         return null;
+    }
+
+    public String getDefault() {
+        return defaultValue;
     }
 
 }

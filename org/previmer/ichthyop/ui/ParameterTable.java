@@ -258,7 +258,7 @@ public class ParameterTable extends JTable {
         }
     }
 
-    public class ParameterTableModel extends AbstractTableModel {
+    public class ParameterTableModel extends DefaultTableModel {
 
         private String[] columnNames = {"Name", "Value"};
         private Object[][] data;

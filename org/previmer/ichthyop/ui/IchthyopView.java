@@ -73,7 +73,9 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 /**
  * The application's main frame.
  */
-public class IchthyopView extends FrameView implements TimingTarget, TreeSelectionListener, TableModelListener, ListSelectionListener {
+public class IchthyopView extends FrameView
+        implements TimingTarget, TreeSelectionListener, TableModelListener,
+        ListSelectionListener, PropertyChangeListener {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -149,6 +151,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         btnCancelMapping.getAction().setEnabled(false);
         btnMapping.getAction().setEnabled(false);
         setAnimationToolsEnabled(false);
+        addPropertyChangeListener("xicfile", this);
 
         setMessage("Please, open a configuration file or create a new one");
     }
@@ -202,7 +205,9 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         blockTree.removeTreeSelectionListener(IchthyopView.this);
         hasStructureChanged |= blockTree.upper();
         blockTree.addTreeSelectionListener(IchthyopView.this);
-        btnSaveCfgFile.getAction().setEnabled(btnSaveCfgFile.getAction().isEnabled() | hasStructureChanged);
+        if (hasStructureChanged) {
+            firePropertyChange("xicfile", null, null);
+        }
     }
 
     @Action
@@ -210,8 +215,9 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         blockTree.removeTreeSelectionListener(IchthyopView.this);
         hasStructureChanged |= blockTree.lower();
         blockTree.addTreeSelectionListener(IchthyopView.this);
-        btnSaveCfgFile.getAction().setEnabled(false);
-        btnSaveCfgFile.getAction().setEnabled(btnSaveCfgFile.getAction().isEnabled() | hasStructureChanged);
+        if (hasStructureChanged) {
+            firePropertyChange("xicfile", null, null);
+        }
     }
 
     @Action
@@ -271,6 +277,8 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             lblBlockInfo.setText(info.toString());
             btnUndo.getAction().setEnabled(false);
             btnRedo.getAction().setEnabled(false);
+            btnAddValue.getAction().setEnabled(false);
+            btnRemoveValue.getAction().setEnabled(false);
             if (!showHiddenParameters) {
                 btnHiddenParameter.doClick();
             } else {
@@ -293,24 +301,32 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             xparam.setValue(table.getValueAt(row, 1).toString(), getTable().getModel().getParameterIndex(row));
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
-            btnSaveCfgFile.getAction().setEnabled(true);
+            firePropertyChange("xicfile", null, null);
         }
+        btnAddValue.getAction().setEnabled(false);
+        btnRemoveValue.getAction().setEnabled(false);
     }
 
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             try {
-                XParameter xparam = blockTree.getSelectedBlock().getXParameter(table.getValueAt(table.getSelectedRow(), 0).toString());
+                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(table.getSelectedRow()));
                 pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
                 StringBuffer info = new StringBuffer("<html><i>");
                 info.append(xparam.getDescription());
                 info.append("</i></html>");
                 lblParameter.setText(info.toString());
+                btnAddValue.getAction().setEnabled(xparam.isSerial());
+                btnRemoveValue.getAction().setEnabled(xparam.isSerial() && (xparam.getLength() > 1));
             } catch (Exception ex) {
                 pnlParamDescription.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParamDescription.border.title")));
                 lblParameter.setText(getResourceMap().getString("lblParameter.text"));
             }
         }
+    }
+
+    public void propertyChange(PropertyChangeEvent evt) {
+        btnSaveCfgFile.getAction().setEnabled(true);
     }
 
     private class CreateMapTask extends Task<Object, MapStep> {
@@ -1294,6 +1310,29 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         }
     }
 
+    @Action
+    public void addSerialValue() {
+        int row = table.getSelectedRow();
+        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(row).toString());
+        xparam.addValue();
+        getTable().setModel(blockTree.getSelectedBlock(), this);
+        btnRemoveValue.getAction().setEnabled(false);
+        btnAddValue.getAction().setEnabled(false);
+        firePropertyChange("xicfile", null, null);
+    }
+
+    @Action
+    public void removeSerialValue() {
+        int row = table.getSelectedRow();
+        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(row).toString());
+        int index = getTable().getModel().getParameterIndex(row);
+        xparam.removeValue(index);
+        getTable().setModel(blockTree.getSelectedBlock(), this);
+        btnRemoveValue.getAction().setEnabled(false);
+        btnAddValue.getAction().setEnabled(false);
+        firePropertyChange("xicfile", null, null);
+    }
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -1399,6 +1438,8 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         jScrollPane2 = new javax.swing.JScrollPane();
         table = new ParameterTable();
         btnRedo = new javax.swing.JButton();
+        btnAddValue = new javax.swing.JButton();
+        btnRemoveValue = new javax.swing.JButton();
         pnlProgress = new javax.swing.JPanel();
         lblProgressCurrent = new javax.swing.JLabel();
         progressBarCurrent = new javax.swing.JProgressBar();
@@ -2019,7 +2060,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -2090,6 +2131,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         btnHiddenParameter.setName("btnHiddenParameter"); // NOI18N
 
         btnUndo.setAction(actionMap.get("undo")); // NOI18N
+        btnUndo.setFont(resourceMap.getFont("btnUndo.font")); // NOI18N
         btnUndo.setName("btnUndo"); // NOI18N
 
         jScrollPane2.setName("jScrollPane2"); // NOI18N
@@ -2110,38 +2152,52 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         jScrollPane2.setViewportView(table);
 
         btnRedo.setAction(actionMap.get("redo")); // NOI18N
+        btnRedo.setFont(resourceMap.getFont("btnRedo.font")); // NOI18N
         btnRedo.setName("btnRedo"); // NOI18N
+
+        btnAddValue.setAction(actionMap.get("addSerialValue")); // NOI18N
+        btnAddValue.setFont(resourceMap.getFont("btnAddValue.font")); // NOI18N
+        btnAddValue.setName("btnAddValue"); // NOI18N
+
+        btnRemoveValue.setAction(actionMap.get("removeSerialValue")); // NOI18N
+        btnRemoveValue.setFont(resourceMap.getFont("btnRemoveValue.font")); // NOI18N
+        btnRemoveValue.setName("btnRemoveValue"); // NOI18N
 
         javax.swing.GroupLayout pnlParametersLayout = new javax.swing.GroupLayout(pnlParameters);
         pnlParameters.setLayout(pnlParametersLayout);
         pnlParametersLayout.setHorizontalGroup(
             pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlParametersLayout.createSequentialGroup()
+            .addGroup(pnlParametersLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE)
-                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlParametersLayout.createSequentialGroup()
+                    .addGroup(pnlParametersLayout.createSequentialGroup()
                         .addComponent(btnUndo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnRedo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 104, Short.MAX_VALUE)
-                        .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAddValue)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnRemoveValue))
+                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         pnlParametersLayout.setVerticalGroup(
             pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlParametersLayout.createSequentialGroup()
+                .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnUndo)
-                        .addComponent(btnRedo))
-                    .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnUndo)
+                    .addComponent(btnRedo)
+                    .addComponent(btnAddValue)
+                    .addComponent(btnRemoveValue))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlParamDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(134, 134, 134))
+                .addGap(152, 152, 152))
         );
 
         javax.swing.GroupLayout pnlBlockLayout = new javax.swing.GroupLayout(pnlBlock);
@@ -2161,7 +2217,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
                 .addContainerGap()
                 .addComponent(pnlBlockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -2270,7 +2326,6 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
         );
 
         hyperLinkLogo.setAction(actionMap.get("browse")); // NOI18N
-        hyperLinkLogo.setText(resourceMap.getString("hyperLinkLogo.text")); // NOI18N
         hyperLinkLogo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hyperLinkLogo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         hyperLinkLogo.setName("hyperLinkLogo"); // NOI18N
@@ -2308,6 +2363,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
     private org.previmer.ichthyop.ui.BlockTree blockTree;
+    private javax.swing.JButton btnAddValue;
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
@@ -2329,6 +2385,7 @@ public class IchthyopView extends FrameView implements TimingTarget, TreeSelecti
     private javax.swing.JToggleButton btnPreview;
     private javax.swing.JButton btnPrevious;
     private javax.swing.JButton btnRedo;
+    private javax.swing.JButton btnRemoveValue;
     private javax.swing.JButton btnSaveAsCfgFile;
     private javax.swing.JButton btnSaveCfgFile;
     private javax.swing.JButton btnSimulationRun;

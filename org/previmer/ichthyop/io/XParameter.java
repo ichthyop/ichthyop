@@ -22,6 +22,7 @@ public class XParameter extends org.jdom.Element {
     final public static String DESCRIPTION = "description";
     final public static String FORMAT = "format";
     final public static String ACCEPTED = "accepted";
+    final public static String DEFAULT = "default";
     private int index;
     private final ParamType param_type;
     private List<Element> values;
@@ -130,8 +131,30 @@ public class XParameter extends org.jdom.Element {
         setValue(value, 0);
     }
 
+    public void addValue() {
+        indexOf(values.get(getLength() - 1));
+        addContent(indexOf(values.get(getLength() - 1)) + 1, new Element(VALUE).setText(getDefault()));
+        values = getChildren(VALUE);
+    }
+
+    public String getDefault() {
+        if (null != getChildTextNormalize(DEFAULT)) {
+            return getChildTextNormalize(DEFAULT);
+        } else {
+            return getFormat().getDefault();
+        }
+    }
+
     public void setValue(String value, int index) {
+        if (index >= values.size()) {
+            addContent(new Element(VALUE));
+            values = getChildren(VALUE);
+        }
         values.get(index).setText(value);
+    }
+
+    public void removeValue(int index) {
+        values.remove(index);
     }
 
     public boolean isSerial() {
