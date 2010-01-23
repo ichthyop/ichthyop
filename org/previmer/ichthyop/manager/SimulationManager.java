@@ -68,6 +68,7 @@ public class SimulationManager implements ISimulationManager {
 
     public void setConfigurationFile(File file) {
         cfgFile = file;
+        nb_simulations = 1;
         if (file != null) {
             getParameterManager().setConfigurationFile(file);
             for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
