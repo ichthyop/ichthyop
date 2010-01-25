@@ -220,6 +220,9 @@ public class ParameterTable extends JTable {
                 case DURATION:
                     editorModel.addEditorForRow(row, new DurationEditor());
                     break;
+                case DATE:
+                    editorModel.addEditorForRow(row, new DateEditor());
+                    break;
             }
         }
     }

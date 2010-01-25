@@ -12,7 +12,7 @@ package org.previmer.ichthyop.io;
 public enum ParameterFormat {
     
     TEXT("value not set yet"),
-    DATE("1900/01/01 00:00"),
+    DATE("0"),
     DURATION("3600"),
     FLOAT("0.0"),
     INTEGER("0"),
