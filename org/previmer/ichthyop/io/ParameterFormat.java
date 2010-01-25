@@ -13,7 +13,7 @@ public enum ParameterFormat {
     
     TEXT("value not set yet"),
     DATE("1900/01/01 00:00"),
-    DURATION("0/01:00"),
+    DURATION("3600"),
     FLOAT("0.0"),
     INTEGER("0"),
     LIST("value not set yet"),

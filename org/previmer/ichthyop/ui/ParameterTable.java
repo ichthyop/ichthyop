@@ -217,7 +217,9 @@ public class ParameterTable extends JTable {
                 case BOOLEAN:
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(new String[]{"true", "false"})));
                     break;
-
+                case DURATION:
+                    editorModel.addEditorForRow(row, new DurationEditor());
+                    break;
             }
         }
     }
