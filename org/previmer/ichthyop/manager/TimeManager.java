@@ -100,7 +100,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         if (getParameter("Time/General", "Type of calendar").matches("climato")) {
             calendar = new ClimatoCalendar();
         } else {
-            String time_origin = getParameter("Time/General", "Calendar time origin");
+            String time_origin = getParameter("Time/General", "Time origin");
             calendar = new Calendar1900(getTimeOrigin(time_origin, Calendar.YEAR),
                     getTimeOrigin(time_origin, Calendar.MONTH),
                     getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));

@@ -32,7 +32,7 @@ public class TimeTracker extends AbstractTracker {
         String calendarName = getSimulationManager().getTimeManager().getCalendar().getClass().getSimpleName();
         if (calendarName.toLowerCase().contains("calendar1900")) {
             listAttributes.add(new Attribute("calendar", "gregorian"));
-            listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getParameter("app.time", "calendar_time_origin")));
+            listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getParameter("Time/General", "Time origin")));
         } else {
             listAttributes.add(new Attribute("calendar", "climato"));
         }

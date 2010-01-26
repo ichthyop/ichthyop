@@ -108,7 +108,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
 
         timeEvent = new long[findNumberReleaseEvents()];
         for (int i = 0; i < timeEvent.length; i++) {
-            timeEvent[i] = Integer.valueOf(getSimulationManager().getParameterManager().getParameter("Release/Schedule", "Release event " + i));
+            timeEvent[i] = Long.valueOf(getSimulationManager().getParameterManager().getParameter("Release/Schedule", "Release event " + i));
         }
     }
 
