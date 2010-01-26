@@ -34,7 +34,7 @@ public abstract class AbstractTracker extends SimulationManagerAccessor implemen
     abstract Array createArray();
 
     public AbstractTracker(DataType type) {
-        trackerKey = getSimulationManager().getPropertyManager(getClass()).getProperty("tracker.key");
+        trackerKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
         this.type = type;
         setDimensions();
         array = createArray();

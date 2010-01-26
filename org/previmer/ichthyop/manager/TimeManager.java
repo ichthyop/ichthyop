@@ -94,7 +94,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         if (!isForward) {
             dt *= -1;
         }
-        t0 = Long.valueOf(getParameter("Time/General", "Initial time"));
+        t0 = Long.valueOf(getParameter("Time/General", "Beginning of simulation"));
         //Logger.getAnonymousLogger().info("time-step: " + dt + " - t0: " + t0);
         transportDuration = Long.valueOf(getParameter("Time/General", "Transport duration"));
         if (getParameter("Time/General", "Type of calendar").matches("climato")) {

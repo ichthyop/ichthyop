@@ -18,7 +18,7 @@ public class AdvectionAction extends AbstractAction {
 
     public void loadParameters() {
 
-        isEuler = getParameter("numerical_scheme").matches("euler");
+        isEuler = getParameter("Numerical scheme").matches("euler");
         isForward = getSimulationManager().getTimeManager().get_dt() >= 0;
     }
 

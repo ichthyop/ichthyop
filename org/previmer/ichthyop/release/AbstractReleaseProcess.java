@@ -5,9 +5,7 @@
 package org.previmer.ichthyop.release;
 
 import org.previmer.ichthyop.event.ReleaseEvent;
-import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IReleaseProcess;
-import org.previmer.ichthyop.arch.ISimulation;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -23,7 +21,7 @@ public abstract class AbstractReleaseProcess extends SimulationManagerAccessor i
     private boolean paramLoaded = false;
 
     public AbstractReleaseProcess() {
-        releaseKey = getSimulationManager().getPropertyManager(getClass()).getProperty("release.key");
+        releaseKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
         loadParameters();
     }
 

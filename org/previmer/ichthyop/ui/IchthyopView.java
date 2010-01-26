@@ -251,6 +251,10 @@ public class IchthyopView extends FrameView
             splitPaneCfg.setRightComponent(pnlBlock);
             pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(blockTree.getSelectedKey()));
             XBlock block = blockTree.getSelectedBlock();
+            if (block.getType().equals(BlockType.ZONE)) {
+                splitPaneCfg.setRightComponent(pnlTree);
+                return;
+            }
             if (block.getType().equals(BlockType.OPTION)) {
                 ckBoxBlock.setVisible(false);
             } else {

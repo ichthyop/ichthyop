@@ -200,27 +200,27 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
     void loadParameters() {
 
-        strXiDim = getParameter("field_dim_xi");
-        strEtaDim = getParameter("field_dim_eta");
-        strZDim = getParameter("field_dim_z");
-        strTimeDim = getParameter("field_dim_time");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strBathy = getParameter("field_var_bathy");
-        strMask = getParameter("field_var_mask");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
-        strZeta = getParameter("field_var_zeta");
-        strTp = getParameter("field_var_tp");
-        strSal = getParameter("field_var_sal");
-        strTime = getParameter("field_var_time");
-        strKv = getParameter("field_var_kv");
-        strPn = getParameter("field_var_pn");
-        strPm = getParameter("field_var_pm");
-        strCs_r = getParameter("field_attrib_csr");
-        strCs_w = getParameter("field_attrib_csw");
-        strSc_r = getParameter("field_attrib_scr");
-        strSc_w = getParameter("field_attrib_scw");
+        strXiDim = getParameter("Dimension in the XI-direction");
+        strEtaDim = getParameter("Dimension in the ETA-direction");
+        strZDim = getParameter("Dimension in the Z-direction");
+        strTimeDim = getParameter("Dimension in time");
+        strLon = getParameter("Longitude of RHO-points");
+        strLat = getParameter("Latitude of RHO-points");
+        strBathy = getParameter("Bathymetry at RHO-points");
+        strMask = getParameter("Mask on RHO-points");
+        strU = getParameter("U-momentum component");
+        strV = getParameter("V-momentum component");
+        strZeta = getParameter("Free-surface elevation");
+        strTp = getParameter("Averaged potential temperature");
+        strSal = getParameter("Averaged salinity");
+        strTime = getParameter("Averaged time since initialization");
+        strKv = getParameter("Vertical turbulent diffusion");
+        strPn = getParameter("Curvilinear coordinate metric in ETA");
+        strPm = getParameter("Curvilinear coordinate metric in XI");
+        strCs_r = getParameter("S-coordinate stretching curves at RHO-points");
+        strCs_w = getParameter("S-coordinate stretching curves at W-points");
+        strSc_r = getParameter("S-coordinate at RHO-points");
+        strSc_w = getParameter("S-coordinate at W-points");
     }
 
     private void openLocation(String rawPath) throws IOException {
@@ -230,8 +230,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
         if (isDirectory(path)) {
             listInputFiles = getInputList(path);
-            if (!getParameter("grid_file").isEmpty()) {
-                gridFile = getGridFile(getParameter("grid_file"));
+            if (!getParameter("Grid file").isEmpty()) {
+                gridFile = getGridFile(getParameter("Grid file"));
             } else {
                 gridFile = listInputFiles.get(0);
             }
@@ -254,7 +254,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         ArrayList<String> list = null;
 
         File inputPath = new File(path);
-        String fileMask = getParameter("file_filter");
+        String fileMask = getParameter("File filter");
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
         if (listFile.length == 0) {
             throw new IOException(path + " contains no file matching mask " + fileMask);
@@ -283,9 +283,9 @@ public abstract class Roms3dDataset extends AbstractDataset {
         loadParameters();
 
         try {
-            openLocation(getParameter("input_path"));
+            openLocation(getParameter("Input path"));
             getDimNC();
-            if (Boolean.valueOf(getParameter("is_ranged"))) {
+            if (Boolean.valueOf(getParameter("Is ranged"))) {
                 float[] p1 = new float[]{Float.valueOf(getParameter("range_P1_lon")), Float.valueOf(getParameter("range_P1_lat"))};
                 float[] p2 = new float[]{Float.valueOf(getParameter("range_P2_lon")), Float.valueOf(getParameter("range_P2_lat"))};
                 range(p1, p2);
@@ -364,7 +364,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             return listInputFiles.get(indexLast);
         }
 
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
+        throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("File filter") + " of folder " + getParameter("Input path"));
     }
 
     private boolean isTimeIntoFile(long time, int index) throws IOException {

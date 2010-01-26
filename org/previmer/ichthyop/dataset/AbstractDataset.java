@@ -20,7 +20,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     abstract void loadParameters();
 
     public AbstractDataset() {
-        datasetKey = getSimulationManager().getPropertyManager(getClass()).getProperty("dataset.key");
+        datasetKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
         getSimulationManager().getTimeManager().addNextStepListener(this);
     }
 

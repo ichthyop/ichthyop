@@ -32,7 +32,6 @@ public class ParameterManager implements IParameterManager {
 
     private static ParameterManager parameterManager = new ParameterManager();
     private ConfigurationFile cfgFile;
-    private Hashtable<ParamType, List<XParameter>> parameters;
 
     public static ParameterManager getInstance() {
         return parameterManager;
@@ -40,7 +39,6 @@ public class ParameterManager implements IParameterManager {
 
     public void setConfigurationFile(File file) {
         cfgFile = new ConfigurationFile(file);
-        parameters = new Hashtable();
     }
 
     public List<XParameter> getParameters(ParamType paramType) {

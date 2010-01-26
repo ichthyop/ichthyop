@@ -18,7 +18,7 @@ public class Roms3dRutgersDataset extends Roms3dDataset {
     @Override
     float getHc() {
         try {
-            return ncIn.findVariable(getParameter("field_attrib_hc")).readScalarFloat();
+            return ncIn.findVariable(getParameter("S-coordinate critical depth")).readScalarFloat();
         } catch (IOException ex) {
             Logger.getLogger(Roms3dRutgersDataset.class.getName()).log(Level.SEVERE, null, ex);
         }

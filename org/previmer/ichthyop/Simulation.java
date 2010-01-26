@@ -4,24 +4,8 @@
  */
 package org.previmer.ichthyop;
 
-import org.previmer.ichthyop.arch.IOutputManager;
-import org.previmer.ichthyop.manager.ReleaseManager;
-import org.previmer.ichthyop.arch.IReleaseManager;
-import org.previmer.ichthyop.manager.ZoneManager;
-import org.previmer.ichthyop.manager.ParameterManager;
-import org.previmer.ichthyop.manager.ActionManager;
 import org.previmer.ichthyop.arch.ISimulation;
-import org.previmer.ichthyop.arch.IDataset;
-import org.previmer.ichthyop.arch.IZoneManager;
-import org.previmer.ichthyop.arch.IActionManager;
-import org.previmer.ichthyop.arch.IDatasetManager;
-import org.previmer.ichthyop.arch.IParameterManager;
 import org.previmer.ichthyop.arch.IPopulation;
-import org.previmer.ichthyop.arch.IPropertyManager;
-import org.previmer.ichthyop.arch.IStep;
-import org.previmer.ichthyop.manager.DatasetManager;
-import org.previmer.ichthyop.manager.OutputManager;
-import org.previmer.ichthyop.manager.PropertyManager;
 
 /**
  *
@@ -42,19 +26,4 @@ public class Simulation implements ISimulation {
     public void step() {
         getPopulation().step();
     }
-
-    /*public void setUp() {
-        getReleaseManager().setUp();
-        getOutputManager().setUp();
-        getDataset().setUp();
-        getActionManager().setUp();
-        getStep().setUp();
-    }
-
-    public void init() {
-        getStep().init();
-        getOutputManager().init();
-        getDataset().init();
-        getZoneManager().init();
-    }*/
 }

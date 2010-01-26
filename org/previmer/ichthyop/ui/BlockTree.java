@@ -130,9 +130,7 @@ public class BlockTree extends JTree {
         setModel(new DefaultTreeModel(root));
         List<XBlock> listb = new ArrayList();
         for (XBlock block : getSimulationManager().getParameterManager().readBlocks()) {
-            if (!block.getType().equals(BlockType.ZONE)) {
-                listb.add(block);
-            }
+            listb.add(block);
         }
         //Collections.sort(listb);
         Collections.reverse(listb);

@@ -56,15 +56,15 @@ public class UserDefinedTracker extends SimulationManagerAccessor implements ITr
     }
 
     public String short_name() {
-        return getParameter("short_name");
+        return getParameter("Short name");
     }
 
     public String long_name() {
-        return getParameter("long_name");
+        return getParameter("Long name");
     }
 
     public String unit() {
-        return getParameter("unit");
+        return getParameter("Unit");
     }
 
     public Attribute[] attributes() {
