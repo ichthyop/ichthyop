@@ -567,6 +567,7 @@ public class IchthyopView extends FrameView
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
         btnSimulationRun.getAction().setEnabled(false);
         btnSaveAsCfgFile.getAction().setEnabled(false);
+        btnSaveCfgFile.getAction().setEnabled(false);
         closeMenuItem.getAction().setEnabled(false);
         pnlConfiguration.setVisible(false);
         lblConfiguration.setVisible(true);
