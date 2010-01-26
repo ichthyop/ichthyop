@@ -1458,7 +1458,7 @@ public class IchthyopView extends FrameView
                 .addComponent(btnSimulationRun)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPreview)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(135, Short.MAX_VALUE))
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1545,11 +1545,11 @@ public class IchthyopView extends FrameView
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlWMS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlMappingLayout.createSequentialGroup()
-                        .addComponent(btnOpenNC)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnMapping)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCancelMapping))
+                        .addComponent(btnCancelMapping)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnOpenNC))
                     .addComponent(lblNC))
                 .addContainerGap())
         );
@@ -1683,13 +1683,6 @@ public class IchthyopView extends FrameView
             .addGroup(pnlAnimationLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(btnOpenAnimation)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnExportMaps)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteMaps))
-                    .addComponent(lblFolder)
                     .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                     .addComponent(lblTime)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
@@ -1702,27 +1695,25 @@ public class IchthyopView extends FrameView
                         .addComponent(btnNext)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnLast))
+                    .addComponent(lblFolder)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(lblAnimationSpeed)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFramePerSecond)))
+                        .addComponent(lblFramePerSecond))
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addComponent(btnOpenAnimation)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnExportMaps)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnDeleteMaps)))
                 .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
             pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAnimationLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnExportMaps)
-                            .addComponent(btnOpenAnimation))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFolder))
-                    .addComponent(btnDeleteMaps))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnLast)
                     .addComponent(btnNext)
@@ -1733,7 +1724,14 @@ public class IchthyopView extends FrameView
                 .addComponent(lblTime)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sliderTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnExportMaps)
+                    .addComponent(btnOpenAnimation)
+                    .addComponent(btnDeleteMaps))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblFolder)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblAnimationSpeed)
                     .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1768,7 +1766,7 @@ public class IchthyopView extends FrameView
         );
         titledPanelLoggerLayout.setVerticalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
+            .addComponent(loggerScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 23, Short.MAX_VALUE)
         );
 
         leftSplitPane.setRightComponent(titledPanelLogger);
@@ -1784,7 +1782,7 @@ public class IchthyopView extends FrameView
         gradientPanel.setLayout(gradientPanelLayout);
         gradientPanelLayout.setHorizontalGroup(
             gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 236, Short.MAX_VALUE)
+            .addGap(0, 348, Short.MAX_VALUE)
         );
         gradientPanelLayout.setVerticalGroup(
             gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1810,11 +1808,11 @@ public class IchthyopView extends FrameView
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.PREFERRED_SIZE, 848, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 848, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.PREFERRED_SIZE, 504, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
