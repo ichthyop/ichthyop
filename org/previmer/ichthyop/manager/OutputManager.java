@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.manager;
 
+import java.awt.geom.Point2D;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.NextStepEvent;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.io.UserDefinedTracker;
 import ucar.ma2.ArrayFloat;
@@ -123,6 +125,90 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         ncOut.addGlobalAttribute("edge_lon", lonEdge);
 
         /* Add the zones */
+        int iZone = 0;
+        getSimulationManager().getZoneManager().init();
+        for (TypeZone type : TypeZone.values()) {
+            if (null != getSimulationManager().getZoneManager().getZones(type)) {
+                for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
+                    List<GeoPosition> zoneEdge = makeZoneEdge(zone);
+                    lonEdge = new ArrayFloat.D1(zoneEdge.size());
+                    latEdge = new ArrayFloat.D1(zoneEdge.size());
+                    i = 0;
+                    for (GeoPosition gp : zoneEdge) {
+                        lonEdge.set(i, (float) gp.getLongitude());
+                        latEdge.set(i, (float) gp.getLatitude());
+                        i++;
+                    }
+                    ncOut.addGlobalAttribute("zone" + iZone + "_lat", latEdge);
+                    ncOut.addGlobalAttribute("zone" + iZone + "_lon", lonEdge);
+                    ncOut.addGlobalAttribute("zone" + iZone + "_type", zone.getType().toString());
+                    iZone++;
+                }
+            }
+        }
+        ncOut.addGlobalAttribute("nb_zones", iZone);
+    }
+
+    private List<GeoPosition> makeZoneEdge(Zone zone) {
+        List<GeoPosition> list = new ArrayList();
+        int xmin = (int) Math.floor(zone.getXmin());
+        int xmax = (int) Math.ceil(zone.getXmax());
+        int ymin = (int) Math.floor(zone.getYmin());
+        int ymax = (int) Math.ceil(zone.getYmax());
+        IDataset dataset = getSimulationManager().getDataset();
+        int refinement = 5;
+        float incr = 1 / (float) refinement;
+        int nx = (xmax - xmin + 1) * refinement;
+        int ny = (ymax - ymin + 1) * refinement;
+        boolean[][] bzone = new boolean[nx][ny];
+        boolean[][] ezone = new boolean[nx][ny];
+        for (float i = xmin; i < xmax; i += incr) {
+            for (float j = ymin; j < ymax; j += incr) {
+                int ii = (int) Math.round((i - xmin) * refinement);
+                int jj = (int) Math.round((j - ymin) * refinement);
+                bzone[ii][jj] = zone.isGridPointInZone(i, j);
+            }
+        }
+        List<Point2D.Float> listPt = new ArrayList();
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                int im1 = Math.max(i - 1, 0);
+                int ip1 = Math.min(i + 1, nx - 1);
+                int jm1 = Math.max(j - 1, 0);
+                int jp1 = Math.min(j + 1, ny - 1);
+                ezone[i][j] = bzone[i][j] && !(bzone[im1][j] && bzone[ip1][j] && bzone[i][jm1] && bzone[i][jp1]);
+                if (ezone[i][j]) {
+                    listPt.add(new Point2D.Float(xmin + i * incr, ymin + j * incr));
+                }
+            }
+        }
+
+        Point2D.Float pt1 = listPt.get(0);
+        double[] lonlat = dataset.xy2lonlat(pt1.x, pt1.y);
+        GeoPosition gp = new GeoPosition(lonlat[0], lonlat[1]);
+        list.add(gp);
+        listPt.remove(pt1);
+        while (!listPt.isEmpty()) {
+            Point2D.Float closestToP1 = new Point2D.Float(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            double distMin = getDistance(pt1, closestToP1);
+            for (Point2D.Float pt2 : listPt) {
+                double dist = Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
+                if (dist < distMin) {
+                    closestToP1 = pt2;
+                    distMin = dist;
+                }
+            }
+            lonlat = dataset.xy2lonlat(closestToP1.x, closestToP1.y);
+            gp = new GeoPosition(lonlat[0], lonlat[1]);
+            list.add(gp);
+            listPt.remove(closestToP1);
+            pt1 = closestToP1;
+        }
+        return list;
+    }
+
+    private double getDistance(Point2D.Float pt1, Point2D.Float pt2) {
+        return Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
     }
 
     private List<GeoPosition> makeRegion() {

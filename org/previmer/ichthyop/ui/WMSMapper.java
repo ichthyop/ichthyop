@@ -25,6 +25,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import javax.imageio.ImageIO;
 import org.jdesktop.application.Application;
@@ -55,6 +56,7 @@ public class WMSMapper extends JXMapKit {
 
     private TileFactory tileFactory = new MGDSTileFactory();
     private List<GeoPosition> region;
+    private HashMap<String, List<GeoPosition>> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private NetcdfFile nc;
     private Variable vlon, vlat, vtime;
@@ -217,6 +219,13 @@ public class WMSMapper extends JXMapKit {
         return region;
     }
 
+    public HashMap<String, List<GeoPosition>> getZones() {
+        if (null == zones) {
+            zones = readZones();
+        }
+        return zones;
+    }
+
     private Painter<JXMapViewer> getBgPainter() {
         Painter<JXMapViewer> bgOverlay = new Painter<JXMapViewer>() {
 
@@ -227,6 +236,7 @@ public class WMSMapper extends JXMapKit {
                 g.translate(-rect.x, -rect.y);
 
                 drawRegion(g, map);
+                drawZones(g, map);
 
                 g.dispose();
             }
@@ -247,26 +257,43 @@ public class WMSMapper extends JXMapKit {
         return lregion;
     }
 
-    public void drawRegion() {
-
-        Painter<JXMapViewer> polygonOverlay = new Painter<JXMapViewer>() {
-
-            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-                g = (Graphics2D) g.create();
-                //convert from viewport to world bitmap
-                Rectangle rect = map.getViewportBounds();
-                g.translate(-rect.x, -rect.y);
-
-                drawRegion(g, map);
-
-                g.dispose();
+    private HashMap<String, List<GeoPosition>> readZones() {
+        HashMap<String, List<GeoPosition>> lzones = new HashMap();
+        if (null != nc.findGlobalAttribute("nb_zones")) {
+            int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
+            for (int iZone = 0; iZone < nbZones; iZone++) {
+                List<GeoPosition> zone = new ArrayList<GeoPosition>();
+                ArrayFloat.D1 lonEdge = (D1) nc.findGlobalAttribute("zone" + iZone + "_lon").getValues();
+                ArrayFloat.D1 latEdge = (D1) nc.findGlobalAttribute("zone" + iZone + "_lat").getValues();
+                String type = nc.findGlobalAttribute("zone" + iZone + "_type").getStringValue();
+                for (int i = 0; i < lonEdge.getShape()[0]; i++) {
+                    zone.add(new GeoPosition(latEdge.get(i), lonEdge.get(i)));
+                }
+                lzones.put(type + "_zone" + iZone, zone);
             }
-        };
+        }
+        return lzones;
+    }
 
-        CompoundPainter cp = new CompoundPainter();
-        cp.setPainters(polygonOverlay);
-        cp.setCacheable(false);
-        getMainMap().setOverlayPainter(cp);
+    private void drawZone(List<GeoPosition> zoneEdge, Graphics2D g, JXMapViewer map) {
+
+        Polygon polygon = new Polygon();
+        for (GeoPosition gp : zoneEdge) {
+            //convert geo to world bitmap pixel
+            Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
+            polygon.addPoint((int) pt.getX(), (int) pt.getY());
+        }
+        //do the drawing
+        g.setColor(new Color(255, 0, 0, 50));
+        g.fill(polygon);
+        g.setColor(Color.RED);
+        g.draw(polygon);
+    }
+
+    private void drawZones(Graphics2D g, JXMapViewer map) {
+        for (List<GeoPosition> zone : getZones().values()) {
+            drawZone(zone, g, map);
+        }
     }
 
     private void drawRegion(Graphics2D g, JXMapViewer map) {
