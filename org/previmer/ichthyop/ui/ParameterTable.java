@@ -225,6 +225,10 @@ public class ParameterTable extends JTable {
                     break;
                 case FILE:
                     editorModel.addEditorForRow(row, new FileEditor());
+                    break;
+                case PATH:
+                    editorModel.addEditorForRow(row, new PathEditor());
+                    break;
             }
         }
     }

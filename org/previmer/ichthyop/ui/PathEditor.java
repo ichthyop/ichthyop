@@ -21,23 +21,23 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class FileEditor extends AbstractCellEditor
+public class PathEditor extends AbstractCellEditor
         implements TableCellEditor, ActionListener {
-    File currentFile = new File(System.getProperty("user.dir"));
-    JFileChooser fileChooser;
+    File currentPath = new File(System.getProperty("user.dir"));
+    JFileChooser chooser;
     JTextField textField = new JTextField();
     protected static final String EDIT = "edit";
     JPanel panel;
 
-    public FileEditor() {
+    public PathEditor() {
         //Set up the editor (from the table's point of view),
         //which is a button.
         //This button brings up the color chooser dialog,
         //which is the editor from the user's point of view.
         panel = createEditorUI();
         //Set up the dialog that the button brings up.
-        fileChooser = new JFileChooser();
-        fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     }
 
     private JPanel createEditorUI() {
@@ -62,17 +62,17 @@ public class FileEditor extends AbstractCellEditor
     public void actionPerformed(ActionEvent e) {
             //The user has clicked the cell, so
             //bring up the dialog.
-            fileChooser.setSelectedFile(currentFile);
-            int answer = fileChooser.showOpenDialog(panel);
+            chooser.setSelectedFile(currentPath);
+            int answer = chooser.showDialog(panel, "Select a folder");
             if (answer == JFileChooser.APPROVE_OPTION) {
-                currentFile = fileChooser.getSelectedFile();
+                currentPath = chooser.getSelectedFile();
                 fireEditingStopped();
             }
     }
 
     //Implement the one CellEditor method that AbstractCellEditor doesn't.
     public Object getCellEditorValue() {
-        return currentFile.toString();
+        return currentPath.toString();
     }
 
     //Implement the one method defined by TableCellEditor.
@@ -81,8 +81,8 @@ public class FileEditor extends AbstractCellEditor
                                                  boolean isSelected,
                                                  int row,
                                                  int column) {
-        currentFile = new File(value.toString());
-        textField.setText(currentFile.toString());
+        currentPath = new File(value.toString());
+        textField.setText(currentPath.toString());
         return panel;
     }
 }
