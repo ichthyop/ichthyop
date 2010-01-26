@@ -223,6 +223,8 @@ public class ParameterTable extends JTable {
                 case DATE:
                     editorModel.addEditorForRow(row, new DateEditor());
                     break;
+                case FILE:
+                    editorModel.addEditorForRow(row, new FileEditor());
             }
         }
     }
