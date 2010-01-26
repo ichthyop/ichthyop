@@ -256,6 +256,10 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         }
     }
 
+    public void lastStepTriggered() {
+        fireLastStepTriggered();
+    }
+
     private void fireLastStepTriggered() {
 
         LastStepListener[] listenerList = (LastStepListener[]) listeners.getListeners(LastStepListener.class);

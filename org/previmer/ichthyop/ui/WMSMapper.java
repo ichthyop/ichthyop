@@ -284,9 +284,9 @@ public class WMSMapper extends JXMapKit {
             polygon.addPoint((int) pt.getX(), (int) pt.getY());
         }
         //do the drawing
-        g.setColor(new Color(255, 0, 0, 50));
+        g.setColor(new Color(255, 0, 0, 30));
         g.fill(polygon);
-        g.setColor(Color.RED);
+        g.setColor(new Color(255, 0, 0, 70));
         g.draw(polygon);
     }
 

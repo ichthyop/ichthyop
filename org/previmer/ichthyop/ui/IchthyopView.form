@@ -342,7 +342,7 @@
                                 <Component class="javax.swing.JButton" name="btnMapping">
                                   <Properties>
                                     <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                      <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="createMaps" methodName="createMaps"/>
+                                      <action class="org.previmer.ichthyop.ui.IchthyopView" id="createMaps" methodName="createMaps"/>
                                     </Property>
                                     <Property name="name" type="java.lang.String" value="btnMapping" noResource="true"/>
                                   </Properties>

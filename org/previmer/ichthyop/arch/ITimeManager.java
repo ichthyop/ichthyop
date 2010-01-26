@@ -43,5 +43,6 @@ public interface ITimeManager {
 
     public String stepToString();
 
+    public void lastStepTriggered();
 
 }

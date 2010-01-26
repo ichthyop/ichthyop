@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.previmer.ichthyop.dataset;
 
 import org.previmer.ichthyop.util.MetaFilenameFilter;
@@ -10,7 +9,9 @@ import org.previmer.ichthyop.util.NCComparator;
 import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -28,7 +29,7 @@ import ucar.nc2.Variable;
  * @author pverley
  */
 public class Mars3dDataset extends AbstractDataset {
-    
+
     /**
      * Grid dimension
      */
@@ -189,11 +190,9 @@ public class Mars3dDataset extends AbstractDataset {
      * Geographical boundary of the domain
      */
     private double latMin, lonMin, latMax, lonMax, depthMax;
-
     double[] dxu;
     double dyv;
     float[] s_rho;
-
 
     void loadParameters() {
 
@@ -218,7 +217,10 @@ public class Mars3dDataset extends AbstractDataset {
         URI uriCurrent = new File("").toURI();
         String path = uriCurrent.resolve(URI.create(rawPath)).getPath();
 
-        if (isDirectory(path)) {
+        if (isDODS(rawPath)) {
+            listInputFiles = new ArrayList<String>(1);
+            listInputFiles.add(rawPath);
+        } else if (isDirectory(path)) {
             listInputFiles = getInputList(path);
             if (!getParameter("Grid file").isEmpty()) {
                 gridFile = getGridFile(getParameter("Grid file"));
@@ -227,6 +229,34 @@ public class Mars3dDataset extends AbstractDataset {
             }
         }
         open(listInputFiles.get(0));
+    }
+
+    /**
+     *  Checks for existence of the specidied OPeNDAP location.
+     *
+     * @param location a String, the OPeNDAP location
+     * @return <code>true</code> if the OPeNDAP location exists,
+     *         <code>false</code> otherwise.
+     * @throws an IOException is the specified location is not a valid
+     * OPeNDAP URL
+     */
+    private boolean isDODS(String location) throws IOException {
+
+        if (location.startsWith("dods:") | location.startsWith("http:")) {
+            try {
+                URL u = new URL(location + ".dds");
+                HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+                conn.setRequestMethod("HEAD");
+                int code = conn.getResponseCode();
+
+                return (code == 200);
+
+            } catch (Exception e) {
+                throw new IOException(location + " is not a valid OPeNDAP URL."
+                        + e.getMessage());
+            }
+        }
+        return false;
     }
 
     private String getGridFile(String rawFile) throws IOException {
@@ -320,12 +350,12 @@ public class Mars3dDataset extends AbstractDataset {
                         timeArr.getLong(timeArr.getIndex().set(lrank)));
             }
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + ncIn.getLocation().toString() + " : " +
-                    e.getCause());
+            throw new IOException("Problem reading file " + ncIn.getLocation().toString() + " : "
+                    + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                    " variable in file " + ncIn.getLocation().toString() + " : " +
-                    e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + ncIn.getLocation().toString() + " : "
+                    + e.getCause());
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
         }
@@ -383,8 +413,8 @@ public class Mars3dDataset extends AbstractDataset {
         } catch (IOException e) {
             throw new IOException("Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                    " variable in file " + filename + " : " + e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + filename + " : " + e.getCause());
         }
         //return false;
 
@@ -412,8 +442,8 @@ public class Mars3dDataset extends AbstractDataset {
         } catch (IOException e) {
             throw new IOException("Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                    " variable in file " + filename + " : " + e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + filename + " : " + e.getCause());
         }
         return false;
     }
@@ -435,10 +465,10 @@ public class Mars3dDataset extends AbstractDataset {
             s_w[k] = .5d * (s_rho[k - 1] + s_rho[k]);
         }
 
-        for (int i = nx; i-- > 0; ) {
-            for (int j = ny; j-- > 0; ) {
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
                 z_w_tmp[0][j][i] = -hRho[j][i];
-                for (int k = nz; k-- > 0; ) {
+                for (int k = nz; k-- > 0;) {
                     z_r_tmp[k][j][i] = ((double) s_rho[k] - 1.d) * hRho[j][i];
                     z_w_tmp[k + 1][j][i] = (s_w[k + 1] - 1.d) * hRho[j][i];
                 }
@@ -465,14 +495,14 @@ public class Mars3dDataset extends AbstractDataset {
         dxu = new double[ny];
 
         try {
-            arrLon = ncIn.findVariable(strLon).read(new int[] {ipo},
-                    new int[] {nx});
-            arrLat = ncIn.findVariable(strLat).read(new int[] {jpo},
-                    new int[] {ny});
-            arrH = ncIn.findVariable(strBathy).read(new int[] {jpo, ipo},
-                    new int[] {ny, nx});
-            arrZeta = ncIn.findVariable(strZeta).read(new int[] {0, jpo, ipo},
-                    new int[] {1, ny, nx}).reduce();
+            arrLon = ncIn.findVariable(strLon).read(new int[]{ipo},
+                    new int[]{nx});
+            arrLat = ncIn.findVariable(strLat).read(new int[]{jpo},
+                    new int[]{ny});
+            arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo},
+                    new int[]{ny, nx});
+            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo},
+                    new int[]{1, ny, nx}).reduce();
 
             if (arrH.getElementType() == double.class) {
                 hRho = (double[][]) arrH.copyToNDJavaArray();
@@ -494,8 +524,8 @@ public class Mars3dDataset extends AbstractDataset {
                     indexLon.set(i);
                     lonRho[j][i] = arrLon.getDouble(indexLon);
                     latRho[j][i] = arrLat.getDouble(indexLat);
-                    maskRho[j][i] = (hRho[j][i] == -999.0) ? (byte) 0 :
-                                    (byte) 1;
+                    maskRho[j][i] = (hRho[j][i] == -999.0) ? (byte) 0
+                            : (byte) 1;
                 }
             }
 
@@ -517,7 +547,8 @@ public class Mars3dDataset extends AbstractDataset {
 
         } catch (IOException ex) {
             ex.printStackTrace();
-        } catch (InvalidRangeException ex) {}
+        } catch (InvalidRangeException ex) {
+        }
 
         double[] ptGeo1, ptGeo2;
         for (int j = 0; j < ny; j++) {
@@ -540,21 +571,20 @@ public class Mars3dDataset extends AbstractDataset {
      * @return a double, the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
      */
     static double geodesicDistance(double lat1, double lon1, double lat2,
-                                   double lon2) {
+            double lon2) {
         //--------------------------------------------------------------
         // Return the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
         double d = 6367000.d * Math.sqrt(2.d
-                                         - 2.d *
-                                         Math.cos(Math.PI * lat1 / 180.d) *
-                                         Math.cos(Math.PI * lat2 / 180.d) *
-                                         Math.cos(Math.PI * (lon1 - lon2) /
-                                                  180.d)
-                                         - 2.d *
-                                         Math.sin(Math.PI * lat1 / 180.d) *
-                                         Math.sin(Math.PI * lat2 / 180.d));
+                - 2.d
+                * Math.cos(Math.PI * lat1 / 180.d)
+                * Math.cos(Math.PI * lat2 / 180.d)
+                * Math.cos(Math.PI * (lon1 - lon2)
+                / 180.d)
+                - 2.d
+                * Math.sin(Math.PI * lat1 / 180.d)
+                * Math.sin(Math.PI * lat2 / 180.d));
         return (d);
     }
-
 
     /**
      * Reads the dimensions of the NetCDF dataset
@@ -676,8 +706,8 @@ public class Mars3dDataset extends AbstractDataset {
         } else {
             double pr = getDepth(x, y, lk);
             z = Math.max(0.d,
-                    (double) lk +
-                    (depth - pr) / (getDepth(x, y, lk + 1) - pr));
+                    (double) lk
+                    + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
         }
         return (z);
     }
@@ -697,13 +727,13 @@ public class Mars3dDataset extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx) *
-                            (1.d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     if (isInWater(i + ii, j + jj)) {
-                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii] *
-                                (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j +
-                                jj][i + ii]);
+                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
+                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
+                                + jj][i + ii]);
                         depth += co * z_r;
                     }
                 }
@@ -768,9 +798,9 @@ public class Mars3dDataset extends AbstractDataset {
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
-                    co = Math.abs((1.d - (double) ii - dx) *
-                            (.5d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (.5d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
                     dv += x * co / dyv;
@@ -805,9 +835,9 @@ public class Mars3dDataset extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((.5d - (double) ii - dx) *
-                            (1.d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
+                    co = Math.abs((.5d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                     du += x * co / dxu[j + jj];
@@ -836,10 +866,10 @@ public class Mars3dDataset extends AbstractDataset {
     }
 
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[0] > (nx - 2.0f)) ||
-                (pGrid[0] < 1.0f) ||
-                (pGrid[1] > (ny - 2.0f)) ||
-                (pGrid[1] < 1.0f));
+        return ((pGrid[0] > (nx - 2.0f))
+                || (pGrid[0] < 1.0f)
+                || (pGrid[1] > (ny - 2.0f))
+                || (pGrid[1] < 1.0f));
     }
 
     public double getBathy(int i, int j) {
@@ -862,10 +892,10 @@ public class Mars3dDataset extends AbstractDataset {
                 if (isInWater(i + ii, j + jj)) {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                     double z_r = 0.d;
-                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j +
-                            jj][i + ii] *
-                            (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i +
-                            ii]);
+                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j
+                            + jj][i + ii]
+                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i
+                            + ii]);
                     hh += co * z_r;
                 }
             }
@@ -896,19 +926,19 @@ public class Mars3dDataset extends AbstractDataset {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
                     {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
                         try {
-                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii] +
-                                    frac * temp_tp1[k + kk][j + jj][i + ii];
+                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii]
+                                    + frac * temp_tp1[k + kk][j + jj][i + ii];
                             tp += x * co;
                         } catch (ArrayIndexOutOfBoundsException e) {
                             throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating temperature field : " +
-                                    e.getMessage());
+                                    "Problem interpolating temperature field : "
+                                    + e.getMessage());
                         }
                     }
                 }
@@ -944,19 +974,19 @@ public class Mars3dDataset extends AbstractDataset {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
                     {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
                         try {
-                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii] +
-                                    frac * salt_tp1[k + kk][j + jj][i + ii];
+                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii]
+                                    + frac * salt_tp1[k + kk][j + jj][i + ii];
                             sal += x * co;
                         } catch (ArrayIndexOutOfBoundsException e) {
                             throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating salinity field : " +
-                                    e.getMessage());
+                                    "Problem interpolating salinity field : "
+                                    + e.getMessage());
                         }
                     }
                 }
@@ -982,7 +1012,7 @@ public class Mars3dDataset extends AbstractDataset {
     }
 
     public double getdxi(int j, int i) {
-         return dxu[j];
+        return dxu[j];
     }
 
     public double getdeta(int j, int i) {
@@ -1080,8 +1110,8 @@ public class Mars3dDataset extends AbstractDataset {
                 inc = 0;
                 if ((xb[k] == lon) & (yb[k] == lat)) {
                     crossings = 1;
-                } else if (((dx1 == 0.) & (lat >= yb[k])) |
-                        ((dx2 == 0.) & (lat >= yb[k + 1]))) {
+                } else if (((dx1 == 0.) & (lat >= yb[k]))
+                        | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
                     inc = 1;
                 } else if ((dx1 * dx2 > 0.) & ((xb[k + 1] - xb[k]) * dxy >= 0.)) {
                     inc = 2;
@@ -1152,8 +1182,8 @@ public class Mars3dDataset extends AbstractDataset {
             k = (int) zz;
             a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
             b = diff2(Kv, k) / 2.d;
-            c = (Kv[k + 1] - Kv[k]) -
-                    (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
+            c = (Kv[k + 1] - Kv[k])
+                    - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
             d = Kv[k];
         }
         ddepth = depth + 0.5d * diffzKv * dt - z_rho_cst[k][j][i];
@@ -1235,8 +1265,8 @@ public class Mars3dDataset extends AbstractDataset {
         } catch (IOException e) {
             throw new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem reading " + strTimeDim + " dimension at location " + filename +
-                    " : " + e.getMessage());
+            throw new IOException("Problem reading " + strTimeDim + " dimension at location " + filename
+                    + " : " + e.getMessage());
         }
     }
 
@@ -1272,14 +1302,14 @@ public class Mars3dDataset extends AbstractDataset {
 
 
         } catch (IOException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (InvalidRangeException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
@@ -1295,26 +1325,25 @@ public class Mars3dDataset extends AbstractDataset {
 
         //---------------------------------------------------
         // Calculation Coeff Huon & Hvom
-        for (int k = nz; k-- > 0; ) {
-            for (int i = 0; i++ < nx - 1; ) {
-                for (int j = ny; j-- > 0; ) {
-                    Huon[k][j][i] = .5d * ((z_w_tmp[k + 1][j][i] -
-                                            z_w_tmp[k][j][i]) +
-                                           (z_w_tmp[k + 1][j][i - 1] -
-                                            z_w_tmp[k][j][i - 1])) * dyv *
-                                    u_tp1[k][j][i - 1];
+        for (int k = nz; k-- > 0;) {
+            for (int i = 0; i++ < nx - 1;) {
+                for (int j = ny; j-- > 0;) {
+                    Huon[k][j][i] = .5d * ((z_w_tmp[k + 1][j][i]
+                            - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j][i - 1]
+                            - z_w_tmp[k][j][i - 1])) * dyv
+                            * u_tp1[k][j][i - 1];
                 }
             }
-            for (int i = nx; i-- > 0; ) {
-                for (int j = 0; j++ < ny - 1; ) {
-                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i] -
-                                              z_w_tmp[k][j][i]) +
-                                             (z_w_tmp[k + 1][j - 1][i] -
-                                              z_w_tmp[k][j - 1][i])) *
-                                            (dxu[j] +
-                                             dxu[j - 1]))
-                                    *
-                                    v_tp1[k][j - 1][i];
+            for (int i = nx; i-- > 0;) {
+                for (int j = 0; j++ < ny - 1;) {
+                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i]
+                            - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j - 1][i]
+                            - z_w_tmp[k][j - 1][i]))
+                            * (dxu[j]
+                            + dxu[j - 1]))
+                            * v_tp1[k][j - 1][i];
                 }
             }
         }
@@ -1324,45 +1353,45 @@ public class Mars3dDataset extends AbstractDataset {
         double[] wrk = new double[nx];
         double[][][] w_double = new double[nz + 1][ny][nx];
 
-        for (int j = ny - 1; j-- > 0; ) {
-            for (int i = nx; i-- > 0; ) {
+        for (int j = ny - 1; j-- > 0;) {
+            for (int i = nx; i-- > 0;) {
                 w_double[0][j][i] = 0.f;
             }
-            for (int k = 0; k++ < nz; ) {
-                for (int i = nx - 1; i-- > 0; ) {
-                    w_double[k][j][i] = w_double[k - 1][j][i] +
-                                        (float) (Huon[k - 1][j][i]
-                                                 - Huon[k
-                                                 - 1][j][i + 1] + Hvom[k -
-                                                 1][j][i] - Hvom[k - 1][j +
-                                                 1][i]);
+            for (int k = 0; k++ < nz;) {
+                for (int i = nx - 1; i-- > 0;) {
+                    w_double[k][j][i] = w_double[k - 1][j][i]
+                            + (float) (Huon[k - 1][j][i]
+                            - Huon[k
+                            - 1][j][i + 1] + Hvom[k
+                            - 1][j][i] - Hvom[k - 1][j
+                            + 1][i]);
                 }
             }
-            for (int i = nx; i-- > 0; ) {
-                wrk[i] = w_double[nz][j][i] /
-                         (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
+            for (int i = nx; i-- > 0;) {
+                wrk[i] = w_double[nz][j][i]
+                        / (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
             }
-            for (int k = nz; k-- >= 2; ) {
-                for (int i = nx; i-- > 0; ) {
-                    w_double[k][j][i] += -wrk[i] *
-                            (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
+            for (int k = nz; k-- >= 2;) {
+                for (int i = nx; i-- > 0;) {
+                    w_double[k][j][i] += -wrk[i]
+                            * (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
                 }
             }
-            for (int i = nx; i-- > 0; ) {
+            for (int i = nx; i-- > 0;) {
                 w_double[nz][j][i] = 0.f;
             }
         }
 
         //---------------------------------------------------
         // Boundary Conditions
-        for (int k = nz + 1; k-- > 0; ) {
-            for (int j = ny; j-- > 0; ) {
+        for (int k = nz + 1; k-- > 0;) {
+            for (int j = ny; j-- > 0;) {
                 w_double[k][j][0] = w_double[k][j][1];
                 w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
             }
         }
-        for (int k = nz + 1; k-- > 0; ) {
-            for (int i = nx; i-- > 0; ) {
+        for (int k = nz + 1; k-- > 0;) {
+            for (int i = nx; i-- > 0;) {
                 w_double[k][0][i] = w_double[k][1][i];
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
@@ -1371,9 +1400,9 @@ public class Mars3dDataset extends AbstractDataset {
         //---------------------------------------------------
         // w * dxu * dyv
         float[][][] w = new float[nz + 1][ny][nx];
-        for (int i = nx; i-- > 0; ) {
-            for (int j = ny; j-- > 0; ) {
-                for (int k = nz + 1; k-- > 0; ) {
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
+                for (int k = nz + 1; k-- > 0;) {
                     w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j] * dyv));
                 }
             }
@@ -1401,8 +1430,8 @@ public class Mars3dDataset extends AbstractDataset {
                     zeta_tp1[j][i] = 0.f;
                 }
                 for (int k = 0; k < nz + 1; k++) {
-                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i] *
-                            (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
+                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
+                            * (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
                 }
             }
         }
@@ -1569,8 +1598,8 @@ public class Mars3dDataset extends AbstractDataset {
 
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
-                double co = Math.abs((1.d - (double) ii - dx) *
-                        (1.d - (double) jj - dy));
+                double co = Math.abs((1.d - (double) ii - dx)
+                        * (1.d - (double) jj - dy));
                 CO += co;
                 value += array.get(jj, ii) * co;
             }
@@ -1588,9 +1617,9 @@ public class Mars3dDataset extends AbstractDataset {
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
-                    double co = Math.abs((1.d - (double) ii - dx) *
-                            (1.d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
+                    double co = Math.abs((1.d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     CO += co;
                     value += array.get(kk, jj, ii) * co;
                 }

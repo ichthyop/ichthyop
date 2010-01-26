@@ -299,6 +299,7 @@ public class SimulationManager implements ISimulationManager {
     }
 
     public void stop() {
+        getTimeManager().lastStepTriggered();
         flagStop = true;
     }
 
