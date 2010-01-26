@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.previmer.ichthyop.ui;
 
 import javax.swing.AbstractCellEditor;
@@ -23,13 +22,14 @@ import javax.swing.JTextField;
 
 public class FileEditor extends AbstractCellEditor
         implements TableCellEditor, ActionListener {
+
     File currentFile = new File(System.getProperty("user.dir"));
     JFileChooser fileChooser;
     JTextField textField = new JTextField();
     protected static final String EDIT = "edit";
     JPanel panel;
 
-    public FileEditor() {
+    public FileEditor(int dialogType) {
         //Set up the editor (from the table's point of view),
         //which is a button.
         //This button brings up the color chooser dialog,
@@ -37,7 +37,7 @@ public class FileEditor extends AbstractCellEditor
         panel = createEditorUI();
         //Set up the dialog that the button brings up.
         fileChooser = new JFileChooser();
-        fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        fileChooser.setDialogType(dialogType);
     }
 
     private JPanel createEditorUI() {
@@ -60,14 +60,19 @@ public class FileEditor extends AbstractCellEditor
      * the dialog's OK button.
      */
     public void actionPerformed(ActionEvent e) {
-            //The user has clicked the cell, so
-            //bring up the dialog.
-            fileChooser.setSelectedFile(currentFile);
-            int answer = fileChooser.showOpenDialog(panel);
-            if (answer == JFileChooser.APPROVE_OPTION) {
-                currentFile = fileChooser.getSelectedFile();
-                fireEditingStopped();
-            }
+        //The user has clicked the cell, so
+        //bring up the dialog.
+        fileChooser.setSelectedFile(currentFile);
+        int answer = JFileChooser.CANCEL_OPTION;
+        if (fileChooser.getDialogType() == JFileChooser.FILES_ONLY) {
+            answer = fileChooser.showOpenDialog(panel);
+        } else if (fileChooser.getDialogType() == JFileChooser.DIRECTORIES_ONLY) {
+            answer = fileChooser.showDialog(panel, "Select a folder");
+        }
+        if (answer == JFileChooser.APPROVE_OPTION) {
+            currentFile = fileChooser.getSelectedFile();
+            fireEditingStopped();
+        }
     }
 
     //Implement the one CellEditor method that AbstractCellEditor doesn't.
@@ -77,10 +82,10 @@ public class FileEditor extends AbstractCellEditor
 
     //Implement the one method defined by TableCellEditor.
     public Component getTableCellEditorComponent(JTable table,
-                                                 Object value,
-                                                 boolean isSelected,
-                                                 int row,
-                                                 int column) {
+            Object value,
+            boolean isSelected,
+            int row,
+            int column) {
         currentFile = new File(value.toString());
         textField.setText(currentFile.toString());
         return panel;

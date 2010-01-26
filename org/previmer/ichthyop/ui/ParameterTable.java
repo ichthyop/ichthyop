@@ -15,6 +15,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelListener;
@@ -224,10 +225,10 @@ public class ParameterTable extends JTable {
                     editorModel.addEditorForRow(row, new DateEditor());
                     break;
                 case FILE:
-                    editorModel.addEditorForRow(row, new FileEditor());
+                    editorModel.addEditorForRow(row, new FileEditor(JFileChooser.FILES_ONLY));
                     break;
                 case PATH:
-                    editorModel.addEditorForRow(row, new PathEditor());
+                    editorModel.addEditorForRow(row, new FileEditor(JFileChooser.DIRECTORIES_ONLY));
                     break;
             }
         }
