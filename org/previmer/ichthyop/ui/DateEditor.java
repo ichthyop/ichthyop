@@ -77,6 +77,11 @@ public class DateEditor extends DefaultCellEditor {
     private Calendar getCalendar() {
         return calendar;
     }
+    
+    public void setCalendar(Calendar calendar) {
+        this.calendar = calendar;
+        dtFormat.setCalendar(calendar);
+    }
 
     //Override to invoke setValue on the formatted text field.
     @Override

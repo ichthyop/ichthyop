@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
@@ -18,6 +19,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
@@ -33,8 +35,11 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import org.previmer.ichthyop.calendar.Calendar1900;
+import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -59,6 +64,10 @@ public class ParameterTable extends JTable {
      *
      */
     private ParameterCellRenderer renderer = new ParameterCellRenderer();
+    /**
+     *
+     */
+    private DateEditor dateEditor = new DateEditor();
 
 ///////////////
 // Constructors
@@ -203,6 +212,10 @@ public class ParameterTable extends JTable {
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
 
+        if (block.getKey().matches("Time/General")) {
+            setupDateEditor(block);
+        }
+
         for (int row = 0; row < model.getRowCount(true); row++) {
             XParameter param = block.getXParameter(model.getParameterKey(row));
             switch (param.getFormat()) {
@@ -222,7 +235,7 @@ public class ParameterTable extends JTable {
                     editorModel.addEditorForRow(row, new DurationEditor());
                     break;
                 case DATE:
-                    editorModel.addEditorForRow(row, new DateEditor());
+                    editorModel.addEditorForRow(row, dateEditor);
                     break;
                 case FILE:
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.FILES_ONLY));
@@ -265,6 +278,40 @@ public class ParameterTable extends JTable {
 
             column.setPreferredWidth(Math.max(headerWidth, cellWidth));
         }
+    }
+
+    private void setupDateEditor(XBlock block) {
+        if (block.getXParameter("Type of calendar").getValue().matches("climato")) {
+            dateEditor.setCalendar(new ClimatoCalendar());
+        } else {
+            Calendar1900 calendar = new Calendar1900();
+            if (null != model.block) {
+                if (null != block.getXParameter("Time origin")) {
+                    String time_origin = block.getXParameter("Time origin").getValue();
+                    calendar = new Calendar1900(getTimeOrigin(time_origin, Calendar.YEAR),
+                            getTimeOrigin(time_origin, Calendar.MONTH),
+                            getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+                }
+            }
+            dateEditor.setCalendar(calendar);
+        }
+    }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        super.tableChanged(e);
+        if (null != model) {
+            if (model.getParameterKey(e.getLastRow()).matches("Type of calendar")
+                    || model.getParameterKey(e.getLastRow()).matches("Time origin")) {
+                if (null != model.block) {
+                    setupDateEditor(model.block);
+                }
+            }
+        }
+    }
+
+    private int getTimeOrigin(String time_origin, int field) {
+        return SimulationManager.getInstance().getTimeManager().getTimeOrigin(time_origin, field);
     }
 
     public class ParameterTableModel extends DefaultTableModel {
@@ -392,6 +439,14 @@ public class ParameterTable extends JTable {
                 }
             }
             return key;
+        }
+
+        public String getParameterValue(int row) {
+            String value = "";
+            if (row >= 0) {
+                value = getValueAt(row, 1).toString();
+            }
+            return value;
         }
 
         public int getParameterIndex(int row) {

@@ -305,9 +305,9 @@ public class Mars3dDataset extends AbstractDataset {
         try {
             openLocation(getParameter("Input path"));
             getDimNC();
-            if (Boolean.valueOf(getParameter("Is ranged"))) {
-                float[] p1 = new float[]{Float.valueOf(getParameter("range_P1_lon")), Float.valueOf(getParameter("range_P1_lat"))};
-                float[] p2 = new float[]{Float.valueOf(getParameter("range_P2_lon")), Float.valueOf(getParameter("range_P2_lat"))};
+            if (Boolean.valueOf(getParameter("Shrink domain"))) {
+                float[] p1 = new float[]{Float.valueOf(getParameter("north-west-corner.lon")), Float.valueOf(getParameter("north-west-corner.lat"))};
+                float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
                 range(p1, p2);
             }
             readConstantField(gridFile);
