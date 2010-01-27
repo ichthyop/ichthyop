@@ -2461,6 +2461,9 @@ public class IchthyopView extends FrameView
                 setupProgress();
             } else {
                 pnlProgress.setVisible(false);
+                if (btnPreview.isSelected()) {
+                    btnPreview.doClick();
+                }
             }
             setMainTitle();
         }
