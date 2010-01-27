@@ -19,7 +19,8 @@ public enum ParameterFormat {
     LIST("value not set yet"),
     BOOLEAN("true"),
     FILE("file not set yet"),
-    PATH(System.getProperty("user.dir"));
+    PATH(System.getProperty("user.dir")),
+    CLASS("class not set yet");
     
     private String defaultValue;
 

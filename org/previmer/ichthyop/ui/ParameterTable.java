@@ -243,6 +243,9 @@ public class ParameterTable extends JTable {
                 case PATH:
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.DIRECTORIES_ONLY));
                     break;
+                case CLASS:
+                    editorModel.addEditorForRow(row, new ClassEditor());
+                    break;
             }
         }
     }
@@ -301,11 +304,14 @@ public class ParameterTable extends JTable {
     public void tableChanged(TableModelEvent e) {
         super.tableChanged(e);
         if (null != model) {
-            if (model.getParameterKey(e.getLastRow()).matches("Type of calendar")
-                    || model.getParameterKey(e.getLastRow()).matches("Time origin")) {
-                if (null != model.block) {
-                    setupDateEditor(model.block);
+            try {
+                if (model.getParameterKey(e.getLastRow()).matches("Type of calendar")
+                        || model.getParameterKey(e.getLastRow()).matches("Time origin")) {
+                    if (null != model.block) {
+                        setupDateEditor(model.block);
+                    }
                 }
+            } catch (Exception ex) {
             }
         }
     }
