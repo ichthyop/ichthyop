@@ -36,8 +36,12 @@ public class ClassEditor extends DefaultCellEditor {
             String packageName = Simulation.class.getPackage().getName();
             DefaultComboBoxModel model = new DefaultComboBoxModel();
             for (Class aClass : getClasses(packageName)) {
-                if (null != aClass && null != aClass.getCanonicalName())
-                model.addElement(aClass.getCanonicalName());
+                try {
+                    if (null != aClass && null != aClass.getCanonicalName()) {
+                        model.addElement(aClass.getCanonicalName());
+                    }
+                } catch (Exception ex) {
+                }
             }
             cbBox.setModel(model);
         } catch (ClassNotFoundException ex) {
@@ -115,6 +119,7 @@ public class ClassEditor extends DefaultCellEditor {
         }
         return classes;
     }
+
     /**
      * Cette méthode retourne la liste des classes présentes dans un jar du classpath et dans un package donné
      *
