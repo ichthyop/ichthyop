@@ -245,6 +245,22 @@ public class IchthyopView extends FrameView
         return createMapTask = new CreateMapTask(getApplication());
     }
 
+    @Action
+    public void setBlockEnabled() {
+        blockTree.getSelectedBlock().setEnabled(ckBoxBlock.isSelected());
+        setParameterEditorEnabled(ckBoxBlock.isSelected());
+        firePropertyChange("xicfile", null, null);
+    }
+
+    private void setParameterEditorEnabled(boolean enabled) {
+        table.setEnabled(enabled);
+        btnUndo.getAction().setEnabled(enabled && getTable().getUndoManager().canUndo());
+        btnRedo.getAction().setEnabled(enabled && getTable().getUndoManager().canRedo());
+        btnHiddenParameter.getAction().setEnabled(enabled && (blockTree.getSelectedBlock().getNbHiddenParameters() > 0));
+        btnAddValue.getAction().setEnabled(false);
+        btnRemoveValue.getAction().setEnabled(false);
+    }
+
     public void valueChanged(TreeSelectionEvent e) {
         final DefaultMutableTreeNode node = blockTree.getSelectedNode();
         if (node != null && node.isLeaf()) {
@@ -279,6 +295,7 @@ public class IchthyopView extends FrameView
             } else {
                 btnHiddenParameter.getAction().setEnabled(false);
             }
+            setParameterEditorEnabled(block.isEnabled());
         } else {
             splitPaneCfg.setRightComponent(pnlTree);
         }
@@ -2080,6 +2097,7 @@ public class IchthyopView extends FrameView
         lblBlockInfo.setText(resourceMap.getString("lblBlockInfo.text")); // NOI18N
         lblBlockInfo.setName("lblBlockInfo"); // NOI18N
 
+        ckBoxBlock.setAction(actionMap.get("setBlockEnabled")); // NOI18N
         ckBoxBlock.setText(resourceMap.getString("ckBoxBlock.text")); // NOI18N
         ckBoxBlock.setName("ckBoxBlock"); // NOI18N
 

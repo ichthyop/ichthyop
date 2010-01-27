@@ -1343,6 +1343,9 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="ckBoxBlock">
                       <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="setBlockEnabled" methodName="setBlockEnabled"/>
+                        </Property>
                         <Property name="text" type="java.lang.String" resourceKey="ckBoxBlock.text"/>
                         <Property name="name" type="java.lang.String" value="ckBoxBlock" noResource="true"/>
                       </Properties>

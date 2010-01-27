@@ -571,6 +571,9 @@ public class ParameterTable extends JTable {
                     comp.setBackground(Color.WHITE);
                 }
             }
+            if (!table.isEnabled()) {
+                comp.setBackground(new Color(192, 192, 192, 50));
+            }
 
             return comp;
         }

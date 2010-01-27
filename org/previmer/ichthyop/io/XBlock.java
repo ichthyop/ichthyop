@@ -78,6 +78,13 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
         }
     }
 
+    public void setEnabled(boolean enabled) {
+        if (null == getChild(ENABLED)) {
+            addContent(new Element(ENABLED));
+        }
+        this.getChild(ENABLED).setText(String.valueOf(enabled));
+    }
+
     public String getDescription() {
         if (null != getChild(DESCRIPTION)) {
             return getChildTextNormalize(DESCRIPTION);
