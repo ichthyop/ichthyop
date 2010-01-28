@@ -1291,7 +1291,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="pnlBlockInfo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="pnlParameters" pref="465" max="32767" attributes="0"/>
+                          <Component id="pnlParameters" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -1367,10 +1367,11 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" groupAlignment="1" attributes="0">
                                   <Component id="jScrollPane2" alignment="0" pref="494" max="32767" attributes="0"/>
+                                  <Component id="btnHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="btnUndo" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
@@ -1381,7 +1382,6 @@
                                       <Component id="btnRemoveValue" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Component id="pnlParamDescription" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="btnHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -1392,7 +1392,7 @@
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jScrollPane2" min="-2" pref="128" max="-2" attributes="0"/>
+                              <Component id="jScrollPane2" min="-2" pref="268" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="btnUndo" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1402,7 +1402,7 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="pnlParamDescription" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace min="-2" pref="152" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1488,6 +1488,7 @@
                                 <Column editable="true" title="Title 4" type="java.lang.Object"/>
                               </Table>
                             </Property>
+                            <Property name="fillsViewportHeight" type="boolean" value="true"/>
                             <Property name="name" type="java.lang.String" value="table" noResource="true"/>
                           </Properties>
                           <AuxValues>
