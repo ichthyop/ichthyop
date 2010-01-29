@@ -60,7 +60,7 @@ public class FloatEditor extends DefaultCellEditor {
     private boolean DEBUG = false;
 
     public FloatEditor() {
-        this(Float.MIN_VALUE, Float.MAX_VALUE);
+        this(-1 * Float.MAX_VALUE, Float.MAX_VALUE);
     }
 
     public FloatEditor(float min, float max) {

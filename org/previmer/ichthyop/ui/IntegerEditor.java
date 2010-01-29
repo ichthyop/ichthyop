@@ -63,7 +63,7 @@ public class IntegerEditor extends DefaultCellEditor {
     private boolean DEBUG = false;
 
     public IntegerEditor() {
-        this(0, Integer.MAX_VALUE);
+        this(-1 * Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     public IntegerEditor(int min, int max) {
