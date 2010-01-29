@@ -4,29 +4,19 @@
  */
 package org.previmer.ichthyop.ui;
 
-import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.util.Vector;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
-import javax.swing.undo.UndoableEdit;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
  * @author pverley
  */
-public class JMultiCellEditorsTable extends JTable {
+public class JMultiCellEditorsTable extends JXTable {
 
 ///////////////////////////////
 // Declaration of the variables

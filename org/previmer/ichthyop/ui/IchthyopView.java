@@ -56,6 +56,7 @@ import org.jdesktop.animation.timing.TimingTarget;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
+import org.previmer.ichthyop.ui.ParameterTable.ParameterTableModel;
 import org.previmer.ichthyop.ui.WMSMapper.MapStep;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
@@ -301,11 +302,15 @@ public class IchthyopView extends FrameView
         }
     }
 
+    private ParameterTableModel getTableModel() {
+        return (ParameterTableModel) getTable().getModel();
+    }
+
     public void tableChanged(TableModelEvent e) {
         if (e != null) {
             int row = table.getSelectedRow();
-            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(row).toString());
-            xparam.setValue(table.getValueAt(row, 1).toString(), getTable().getModel().getParameterIndex(row));
+            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(row).toString());
+            xparam.setValue(table.getValueAt(row, 1).toString(), getTableModel().getParameterIndex(row));
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
             firePropertyChange("xicfile", null, null);
@@ -317,7 +322,7 @@ public class IchthyopView extends FrameView
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             try {
-                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(table.getSelectedRow()));
+                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(table.getSelectedRow()));
                 pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
                 StringBuffer info = new StringBuffer("<html><i>");
                 info.append(xparam.getDescription());
@@ -567,6 +572,7 @@ public class IchthyopView extends FrameView
         protected void succeeded(Object o) {
             btnSaveCfgFile.getAction().setEnabled(false);
             hasStructureChanged = false;
+            isSetup = false;
             setMessage(getSimulationManager().getConfigurationFile().getName() + " saved.");
         }
     }
@@ -1129,13 +1135,13 @@ public class IchthyopView extends FrameView
         if (showHiddenParameters) {
             btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.hide"));
             btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.unlock"));
-            getTable().getModel().setAllRowsVisible(true);
+            getTable().setAllRowsVisible(true);
             showHiddenParameters = false;
 
         } else {
             btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.show"));
             btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.lock"));
-            getTable().getModel().setAllRowsVisible(false);
+            getTable().setAllRowsVisible(false);
             showHiddenParameters = true;
         }
     }
@@ -1165,7 +1171,7 @@ public class IchthyopView extends FrameView
     @Action
     public void addSerialValue() {
         int row = table.getSelectedRow();
-        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(row).toString());
+        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(row).toString());
         xparam.addValue();
         getTable().setModel(blockTree.getSelectedBlock(), this);
         btnRemoveValue.getAction().setEnabled(false);
@@ -1176,8 +1182,8 @@ public class IchthyopView extends FrameView
     @Action
     public void removeSerialValue() {
         int row = table.getSelectedRow();
-        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getModel().getParameterKey(row).toString());
-        int index = getTable().getModel().getParameterIndex(row);
+        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(row).toString());
+        int index = getTableModel().getParameterIndex(row);
         xparam.removeValue(index);
         getTable().setModel(blockTree.getSelectedBlock(), this);
         btnRemoveValue.getAction().setEnabled(false);
@@ -1313,11 +1319,11 @@ public class IchthyopView extends FrameView
         lblParameter = new javax.swing.JLabel();
         btnHiddenParameter = new org.jdesktop.swingx.JXHyperlink();
         btnUndo = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        table = new ParameterTable();
         btnRedo = new javax.swing.JButton();
         btnAddValue = new javax.swing.JButton();
         btnRemoveValue = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        table = new ParameterTable();
         pnlProgress = new javax.swing.JPanel();
         lblProgressCurrent = new javax.swing.JLabel();
         progressBarCurrent = new javax.swing.JProgressBar();
@@ -2071,17 +2077,17 @@ public class IchthyopView extends FrameView
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)))
+                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -2108,7 +2114,7 @@ public class IchthyopView extends FrameView
             .addGroup(pnlBlockInfoLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE)
+                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE)
                     .addComponent(ckBoxBlock))
                 .addContainerGap())
         );
@@ -2136,7 +2142,7 @@ public class IchthyopView extends FrameView
             pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 458, Short.MAX_VALUE)
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 566, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlParamDescriptionLayout.setVerticalGroup(
@@ -2156,6 +2162,18 @@ public class IchthyopView extends FrameView
         btnUndo.setFont(resourceMap.getFont("btnUndo.font")); // NOI18N
         btnUndo.setName("btnUndo"); // NOI18N
 
+        btnRedo.setAction(actionMap.get("redo")); // NOI18N
+        btnRedo.setFont(resourceMap.getFont("btnRedo.font")); // NOI18N
+        btnRedo.setName("btnRedo"); // NOI18N
+
+        btnAddValue.setAction(actionMap.get("addSerialValue")); // NOI18N
+        btnAddValue.setFont(resourceMap.getFont("btnAddValue.font")); // NOI18N
+        btnAddValue.setName("btnAddValue"); // NOI18N
+
+        btnRemoveValue.setAction(actionMap.get("removeSerialValue")); // NOI18N
+        btnRemoveValue.setFont(resourceMap.getFont("btnRemoveValue.font")); // NOI18N
+        btnRemoveValue.setName("btnRemoveValue"); // NOI18N
+
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
         table.setModel(new javax.swing.table.DefaultTableModel(
@@ -2169,33 +2187,18 @@ public class IchthyopView extends FrameView
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        table.setFillsViewportHeight(true);
         table.setName("table"); // NOI18N
-        table.getSelectionModel().addListSelectionListener(this);
         jScrollPane2.setViewportView(table);
-
-        btnRedo.setAction(actionMap.get("redo")); // NOI18N
-        btnRedo.setFont(resourceMap.getFont("btnRedo.font")); // NOI18N
-        btnRedo.setName("btnRedo"); // NOI18N
-
-        btnAddValue.setAction(actionMap.get("addSerialValue")); // NOI18N
-        btnAddValue.setFont(resourceMap.getFont("btnAddValue.font")); // NOI18N
-        btnAddValue.setName("btnAddValue"); // NOI18N
-
-        btnRemoveValue.setAction(actionMap.get("removeSerialValue")); // NOI18N
-        btnRemoveValue.setFont(resourceMap.getFont("btnRemoveValue.font")); // NOI18N
-        btnRemoveValue.setName("btnRemoveValue"); // NOI18N
 
         javax.swing.GroupLayout pnlParametersLayout = new javax.swing.GroupLayout(pnlParameters);
         pnlParameters.setLayout(pnlParametersLayout);
         pnlParametersLayout.setHorizontalGroup(
             pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlParametersLayout.createSequentialGroup()
+            .addGroup(pnlParametersLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE)
-                    .addComponent(btnHiddenParameter, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlParametersLayout.createSequentialGroup()
+                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(pnlParametersLayout.createSequentialGroup()
                         .addComponent(btnUndo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnRedo)
@@ -2203,7 +2206,8 @@ public class IchthyopView extends FrameView
                         .addComponent(btnAddValue)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnRemoveValue))
-                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlParametersLayout.setVerticalGroup(
@@ -2211,7 +2215,7 @@ public class IchthyopView extends FrameView
             .addGroup(pnlParametersLayout.createSequentialGroup()
                 .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 312, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUndo)
@@ -2227,12 +2231,12 @@ public class IchthyopView extends FrameView
         pnlBlock.setLayout(pnlBlockLayout);
         pnlBlockLayout.setHorizontalGroup(
             pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockLayout.createSequentialGroup()
+            .addGroup(pnlBlockLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addGroup(pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
         pnlBlockLayout.setVerticalGroup(
             pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2250,7 +2254,7 @@ public class IchthyopView extends FrameView
         pnlConfiguration.setLayout(pnlConfigurationLayout);
         pnlConfigurationLayout.setHorizontalGroup(
             pnlConfigurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPaneCfg, javax.swing.GroupLayout.DEFAULT_SIZE, 810, Short.MAX_VALUE)
+            .addComponent(splitPaneCfg, javax.swing.GroupLayout.DEFAULT_SIZE, 905, Short.MAX_VALUE)
         );
         pnlConfigurationLayout.setVerticalGroup(
             pnlConfigurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2439,7 +2443,7 @@ public class IchthyopView extends FrameView
                 if (null != getSimulationManager().getConfigurationFile()) {
                     pnlConfiguration.setVisible(true);
                     lblConfiguration.setVisible(false);
-                    btnSaveCfgFile.getAction().setEnabled(false);
+                    //btnSaveCfgFile.getAction().setEnabled(false);
                 } else {
                     lblConfiguration.setVisible(true);
                 }
@@ -2620,7 +2624,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;
-    private javax.swing.JTable table;
+    private org.jdesktop.swingx.JXTable table;
     private org.jdesktop.swingx.JXTaskPane taskPaneAnimation;
     private org.jdesktop.swingx.JXTaskPane taskPaneConfiguration;
     private org.jdesktop.swingx.JXTaskPaneContainer taskPaneContainerSteps;
@@ -2654,4 +2658,5 @@ public class IchthyopView extends FrameView
     private JLabel lblMapping;
     private boolean hasStructureChanged;
     private boolean showHiddenParameters = true;
+    private boolean hasCfgFileChanged = false;
 }

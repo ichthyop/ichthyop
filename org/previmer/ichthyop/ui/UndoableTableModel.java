@@ -22,91 +22,15 @@ import javax.swing.undo.UndoableEdit;
  */
 public class UndoableTableModel extends DefaultTableModel {
 
-    private String[] columnNames = {"Name", "Value"};
     private JUndoManager undoManager;
-    private Object[][] data = new String[][] {{""}, {""}};
-    private Object[] longValues;
 
     public UndoableTableModel() {
+        super();
         addUndoableEditListener(undoManager = new JUndoManager());
-    }
-
-    public void setData(Object[][] data) {
-        this.data = data;
-        longValues = getLongValues(data);
-    }
-    public Object[][] createData() {
-        return new Object[][] {{""}, {""}};
-    }
-
-    public Object[] getLongValues() {
-        return longValues;
-    }
-
-    /**
-     *
-     * @param data Object[][]
-     * @return Object[]
-     */
-    private Object[] getLongValues(Object[][] data) {
-
-        String[] longuest = new String[2];
-        for (int j = 0; j < 2; j++) {
-            longuest[j] = "";
-            for (int i = 0; i < data.length; i++) {
-                String value = (String) data[i][j];
-                if (value != null && (value.length() > longuest[j].length())) {
-                    longuest[j] = value;
-                }
-            }
-        }
-        return longuest;
     }
 
     public JUndoManager getUndoManager() {
         return undoManager;
-    }
-
-    @Override
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    @Override
-    public int getRowCount() {
-        return data.length;
-    }
-
-    @Override
-    public String getColumnName(int col) {
-        return columnNames[col];
-    }
-
-    @Override
-    public Object getValueAt(int row, int col) {
-        return data[row][col];
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int col) {
-        //Note that the data/cell address is constant,
-        //no matter where the cell appears onscreen.
-        if (col == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /*
-     * JTable uses this method to determine the default renderer/
-     * editor for each cell.  If we didn't implement this method,
-     * then the last column would contain text ("true"/"false"),
-     * rather than a check box.
-     */
-    @Override
-    public Class getColumnClass(int c) {
-        return getValueAt(0, c).getClass();
     }
 
     @Override
@@ -117,14 +41,12 @@ public class UndoableTableModel extends DefaultTableModel {
     public void setValueAt(Object value, int row, int column, boolean undoable) {
         UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
         if (undoable == false || listeners == null) {
-            data[row][column] = String.valueOf(value);
-            fireTableCellUpdated(row, column);
+            super.setValueAt(value, row, column);
             return;
         }
 
         Object oldValue = getValueAt(row, column);
-        data[row][column] = String.valueOf(value);
-        fireTableCellUpdated(row, column);
+        super.setValueAt(value, row, column);
         JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
         UndoableEditEvent editEvent = new UndoableEditEvent(this, cellEdit);
         for (UndoableEditListener listener : listeners) {
