@@ -23,6 +23,7 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
 
     public final static String BLOCK = "block";
     final public static String KEY = "key";
+    final public static String TREEPATH = "tree_path";
     final public static String ENABLED = "enabled";
     final public static String TYPE = "type";
     public final static String PARAMETERS = "parameters";
@@ -67,6 +68,10 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
 
     public String getKey() {
         return getChildTextNormalize(KEY);
+    }
+
+    public String getTreePath() {
+        return getChildTextNormalize(TREEPATH);
     }
 
     public boolean isEnabled() {

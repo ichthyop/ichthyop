@@ -266,7 +266,7 @@ public class IchthyopView extends FrameView
         final DefaultMutableTreeNode node = blockTree.getSelectedNode();
         if (node != null && node.isLeaf()) {
             splitPaneCfg.setRightComponent(pnlBlock);
-            pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(blockTree.getSelectedKey()));
+            pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(blockTree.getSelectedBlock().getTreePath()));
             XBlock block = blockTree.getSelectedBlock();
             if (block.getType().equals(BlockType.ZONE)) {
                 splitPaneCfg.setRightComponent(pnlTree);
@@ -302,15 +302,11 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private ParameterTableModel getTableModel() {
-        return (ParameterTableModel) getTable().getModel();
-    }
-
     public void tableChanged(TableModelEvent e) {
         if (e != null) {
             int row = table.getSelectedRow();
-            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(row).toString());
-            xparam.setValue(table.getValueAt(row, 1).toString(), getTableModel().getParameterIndex(row));
+            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
+            xparam.setValue(table.getValueAt(row, 1).toString(), getTable().getParameterIndex(row));
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
             firePropertyChange("xicfile", null, null);
@@ -322,7 +318,7 @@ public class IchthyopView extends FrameView
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             try {
-                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(table.getSelectedRow()));
+                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(table.getSelectedRow()));
                 pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
                 StringBuffer info = new StringBuffer("<html><i>");
                 info.append(xparam.getDescription());
@@ -955,7 +951,7 @@ public class IchthyopView extends FrameView
 
         if (null != getSimulationManager().getConfigurationFile()) {
             savePreference(openMenuItem, getSimulationManager().getConfigurationFile().getPath());
-            savePreference(blockTree, blockTree.getSelectedKey());
+            //savePreference(blockTree, blockTree.getSelectedKey());
         } else {
             savePreference(openMenuItem, cfgPath.getPath());
         }
@@ -1171,7 +1167,7 @@ public class IchthyopView extends FrameView
     @Action
     public void addSerialValue() {
         int row = table.getSelectedRow();
-        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(row).toString());
+        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
         xparam.addValue();
         getTable().setModel(blockTree.getSelectedBlock(), this);
         btnRemoveValue.getAction().setEnabled(false);
@@ -1182,8 +1178,8 @@ public class IchthyopView extends FrameView
     @Action
     public void removeSerialValue() {
         int row = table.getSelectedRow();
-        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTableModel().getParameterKey(row).toString());
-        int index = getTableModel().getParameterIndex(row);
+        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
+        int index = getTable().getParameterIndex(row);
         xparam.removeValue(index);
         getTable().setModel(blockTree.getSelectedBlock(), this);
         btnRemoveValue.getAction().setEnabled(false);

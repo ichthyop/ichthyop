@@ -6,7 +6,6 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -14,12 +13,9 @@ import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JTable;
 import javax.swing.RowFilter;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -30,6 +26,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.manager.SimulationManager;
@@ -76,37 +73,32 @@ public class ParameterTable extends JMultiCellEditorsTable {
     public void setModel(XBlock block, TableModelListener l) {
         setModel(model = new ParameterTableModel(block));
         setEditors(block);
-        //setDefaultRenderer(Object.class, renderer);
         getModel().addTableModelListener(l);
-        getColumnExt("Serial").setVisible(false);
-        getColumnExt("Hidden").setVisible(false);
+        getColumnExt(XParameter.TYPE_HEADER).setVisible(false);
+        getColumnExt(XParameter.HIDDEN_HEADER).setVisible(false);
+        getColumnExt(XParameter.KEY_HEADER).setVisible(false);
+        getColumnExt(XParameter.INDEX_HEADER).setVisible(false);
         addHighlighter(new ColorHighlighter(new HighlightPredicate() {
 
             public boolean isHighlighted(Component cmpnt, ComponentAdapter ca) {
                 try {
-                    return Boolean.valueOf(ca.getValueAt(ca.row, 2).toString());
-                } catch (Exception ex) {
-                    return false;
-                }
-            }
-        }, new Color(0, 255, 0, 20), Color.BLACK));
-        addHighlighter(new ColorHighlighter(new HighlightPredicate() {
-
-            public boolean isHighlighted(Component cmpnt, ComponentAdapter ca) {
-                try {
-                    return Boolean.valueOf(ca.getValueAt(ca.row, 3).toString());
+                    return Boolean.valueOf(model.getValueAt(ca.row, getColumnExt(XParameter.HIDDEN_HEADER).getModelIndex()).toString());
                 } catch (Exception ex) {
                     return false;
                 }
             }
         }, new Color(255, 0, 0, 20), Color.BLACK));
-        setRowFilter(new RowFilter<Object, Object>() {
+        addHighlighter(new ColorHighlighter(new HighlightPredicate() {
 
-            public boolean include(Entry<? extends Object, ? extends Object> entry) {
-                return !Boolean.valueOf(entry.getStringValue(3));
+            public boolean isHighlighted(Component cmpnt, ComponentAdapter ca) {
+                try {
+                    return model.getValueAt(ca.row, getColumnExt(XParameter.TYPE_HEADER).getModelIndex()).toString().matches(ParamType.SERIAL.toString());
+                } catch (Exception ex) {
+                    return false;
+                }
             }
-        });
-        //adjustColumnSizes();
+        }, new Color(0, 255, 0, 20), Color.BLACK));
+        setAllRowsVisible(false);
     }
 
     private void setEditors(XBlock block) {
@@ -114,12 +106,12 @@ public class ParameterTable extends JMultiCellEditorsTable {
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
 
-        if (block.getKey().matches("Time/General")) {
+        if (block.getKey().matches("app.time")) {
             setupDateEditor(block);
         }
 
         for (int row = 0; row < model.getRowCount(); row++) {
-            XParameter param = block.getXParameter(model.getParameterKey(row));
+            XParameter param = block.getXParameter(getParameterKey(row));
             switch (param.getFormat()) {
                 case LIST:
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(param.getAcceptedValues())));
@@ -159,7 +151,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
             setRowFilter(new RowFilter<Object, Object>() {
 
                 public boolean include(Entry<? extends Object, ? extends Object> entry) {
-                    return !Boolean.valueOf(entry.getStringValue(3));
+                    return !Boolean.valueOf(entry.getStringValue(getColumnExt(XParameter.HIDDEN_HEADER).getModelIndex()));
                 }
             });
         }
@@ -199,13 +191,13 @@ public class ParameterTable extends JMultiCellEditorsTable {
     }
 
     private void setupDateEditor(XBlock block) {
-        if (block.getXParameter("Type of calendar").getValue().matches("climato")) {
+        if (block.getXParameter("calendar_type").getValue().matches("climato")) {
             dateEditor.setCalendar(new ClimatoCalendar());
         } else {
             Calendar1900 calendar = new Calendar1900();
             if (null != model.block) {
-                if (null != block.getXParameter("Time origin")) {
-                    String time_origin = block.getXParameter("Time origin").getValue();
+                if (null != block.getXParameter("time_origin")) {
+                    String time_origin = block.getXParameter("time_origin").getValue();
                     calendar = new Calendar1900(getTimeOrigin(time_origin, Calendar.YEAR),
                             getTimeOrigin(time_origin, Calendar.MONTH),
                             getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
@@ -220,8 +212,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
         super.tableChanged(e);
         if (null != model) {
             try {
-                if (model.getParameterKey(e.getLastRow()).matches("Type of calendar")
-                        || model.getParameterKey(e.getLastRow()).matches("Time origin")) {
+                if (getParameterKey(e.getLastRow()).matches("calendar_type")
+                        || getParameterKey(e.getLastRow()).matches("time_origin")) {
                     if (null != model.block) {
                         setupDateEditor(model.block);
                     }
@@ -235,34 +227,51 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return SimulationManager.getInstance().getTimeManager().getTimeOrigin(time_origin, field);
     }
 
+    public String getParameterKey(int row) {
+        String key = "";
+        if (row >= 0) {
+            key = model.getValueAt(row, getColumnExt(XParameter.KEY_HEADER).getModelIndex()).toString();
+        }
+        return key;
+    }
+
+    public String getParameterValue(int row) {
+        String value = "";
+        if (row >= 0) {
+            value = model.getValueAt(row, getColumnExt(XParameter.VALUE_HEADER).getModelIndex()).toString();
+        }
+        return value;
+    }
+
+    public int getParameterIndex(int row) {
+        if (row >= 0) {
+            return Integer.valueOf(model.getValueAt(row, getColumnExt(XParameter.INDEX_HEADER).getModelIndex()).toString());
+        }
+        return 0;
+    }
+
     public class ParameterTableModel extends UndoableTableModel {
 
         private XBlock block;
 
         ParameterTableModel(XBlock block) {
             this.block = block;
-            setDataVector(createData(), new String[]{"Name", "Value", "Serial", "Hidden"});
+            setDataVector(createData(), XParameter.getHeaders());
         }
 
         public Object[][] createData() {
 
             Collection<XParameter> list = block.getXParameters();
             List<String[]> listData = new ArrayList();
-            String[][] tableData = new String[list.size()][4];
+            String[][] tableData;
             int i = 0;
             for (XParameter xparam : list) {
                 xparam.reset();
-                if (xparam.hasNext()) {
-                    listData.add(new String[]{xparam.getKey() + " [1]", xparam.getValue(), String.valueOf(xparam.isSerial()), String.valueOf(xparam.isHidden())});
-                    while (xparam.hasNext()) {
-                        xparam.increment();
-                        listData.add(new String[]{xparam.getKey() + " [" + (xparam.index() + 1) + "]", xparam.getValue(), String.valueOf(xparam.isSerial()), String.valueOf(xparam.isHidden())});
-                    }
-                } else {
-                    listData.add(new String[]{xparam.getKey(), xparam.getValue(), String.valueOf(xparam.isSerial()), String.valueOf(xparam.isHidden())});
-                }
+                do {
+                    listData.add(xparam.toTableRow());
+                } while (xparam.hasNext());
             }
-            tableData = new String[listData.size()][2];
+            tableData = new String[list.size()][XParameter.getHeaders().length];
             for (String[] arr : listData) {
                 tableData[i++] = arr;
             }
@@ -288,42 +297,12 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
         @Override
         public boolean isCellEditable(int row, int col) {
-            //Note that the data/cell address is constant,
-            //no matter where the cell appears onscreen.
-            if (col == 1) {
+
+            if (getColumnName(col).matches(XParameter.VALUE_HEADER)) {
                 return true;
             } else {
                 return false;
             }
-        }
-
-        public String getParameterKey(int row) {
-            String key = "";
-            if (row >= 0) {
-                key = getValueAt(row, 0).toString();
-                if (key.trim().endsWith("]")) {
-                    key = key.substring(0, key.lastIndexOf("[")).trim();
-                }
-            }
-            return key;
-        }
-
-        public String getParameterValue(int row) {
-            String value = "";
-            if (row >= 0) {
-                value = getValueAt(row, 1).toString();
-            }
-            return value;
-        }
-
-        public int getParameterIndex(int row) {
-            if (row >= 0) {
-                String key = getValueAt(row, 0).toString();
-                if (key.trim().endsWith("]")) {
-                    return Integer.valueOf(key.substring(key.lastIndexOf("[") + 1, key.lastIndexOf("]")).trim()) - 1;
-                }
-            }
-            return 0;
         }
     }
 }

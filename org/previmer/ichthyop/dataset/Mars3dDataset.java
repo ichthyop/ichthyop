@@ -21,7 +21,6 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
 /**
@@ -45,11 +44,11 @@ public class Mars3dDataset extends AbstractDataset {
     /**
      * Longitude at rho point.
      */
-    static double[][] lonRho;
+    static double[] lonRho;
     /**
      * Latitude at rho point.
      */
-    static double[][] latRho;
+    static double[] latRho;
     /**
      * Bathymetry
      */
@@ -489,8 +488,8 @@ public class Mars3dDataset extends AbstractDataset {
 
         Array arrLon, arrLat, arrH, arrZeta;
         Index index;
-        lonRho = new double[ny][nx];
-        latRho = new double[ny][nx];
+        lonRho = new double[nx];
+        latRho = new double[ny];
         maskRho = new byte[ny][nx];
         dxu = new double[ny];
 
@@ -520,11 +519,18 @@ public class Mars3dDataset extends AbstractDataset {
             Index indexLat = arrLat.getIndex();
             for (int j = 0; j < ny; j++) {
                 indexLat.set(j);
+                latRho[j] = arrLat.getDouble(indexLat);
+            }
+            for (int i = 0; i < nx; i++) {
+                indexLon.set(i);
+                lonRho[i] = arrLon.getDouble(indexLon);
+            }
+            for (int j = 0; j < ny; j++) {
+                indexLat.set(j);
                 for (int i = 0; i < nx; i++) {
                     indexLon.set(i);
-                    lonRho[j][i] = arrLon.getDouble(indexLon);
-                    latRho[j][i] = arrLat.getDouble(indexLat);
-                    maskRho[j][i] = (hRho[j][i] == -999.0) ? (byte) 0
+                    maskRho[j][i] = (hRho[j][i] == -999.0)
+                            ? (byte) 0
                             : (byte) 1;
                 }
             }
@@ -542,8 +548,7 @@ public class Mars3dDataset extends AbstractDataset {
             }
             zeta_tp1 = zeta_tp0;
 
-            s_rho = (float[]) ncIn.findVariable(strSigma).read().
-                    copyToNDJavaArray();
+            s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -611,7 +616,7 @@ public class Mars3dDataset extends AbstractDataset {
 
         boolean found;
         int imin, imax, jmin, jmax, i0, j0;
-        double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
+        double  dy1, dx2, c1, c2, deltax, deltay, xgrid, ygrid;
 
         xgrid = -1.;
         ygrid = -1.;
@@ -647,21 +652,19 @@ public class Mars3dDataset extends AbstractDataset {
 
             //--------------------------------------------
             // Trilinear interpolation
-            dy1 = latRho[jmin + 1][imin] - latRho[jmin][imin];
-            dx1 = lonRho[jmin + 1][imin] - lonRho[jmin][imin];
-            dy2 = latRho[jmin][imin + 1] - latRho[jmin][imin];
-            dx2 = lonRho[jmin][imin + 1] - lonRho[jmin][imin];
+            dy1 = latRho[jmin + 1] - latRho[jmin];
+            dx2 = lonRho[imin + 1] - lonRho[imin];
 
-            c1 = lon * dy1 - lat * dx1;
-            c2 = lonRho[jmin][imin] * dy2 - latRho[jmin][imin] * dx2;
-            deltax = (c1 * dx2 - c2 * dx1) / (dx2 * dy1 - dy2 * dx1);
-            deltax = (deltax - lonRho[jmin][imin]) / dx2;
+            c1 = lon * dy1;
+            c2 = -latRho[jmin] * dx2;
+            deltax = c1 / dy1;
+            deltax = (deltax - lonRho[imin]) / dx2;
             xgrid = (double) imin + Math.min(Math.max(0.d, deltax), 1.d);
 
-            c1 = lonRho[jmin][imin] * dy1 - latRho[jmin][imin] * dx1;
-            c2 = lon * dy2 - lat * dx2;
-            deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1 - dy2 * dx1);
-            deltay = (deltay - latRho[jmin][imin]) / dy1;
+            c1 = lonRho[imin] * dy1;
+            c2 = -lat * dx2;
+            deltay = -c2 / dx2;
+            deltay = (deltay - latRho[jmin]) / dy1;
             ygrid = (double) jmin + Math.min(Math.max(0.d, deltay), 1.d);
         }
         return (new double[]{xgrid, ygrid});
@@ -685,8 +688,8 @@ public class Mars3dDataset extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                latitude += co * latRho[j + jj][i + ii];
-                longitude += co * lonRho[j + jj][i + ii];
+                latitude += co * latRho[j + jj];
+                longitude += co * lonRho[i + ii];
             }
         }
         return (new double[]{latitude, longitude});
@@ -1075,23 +1078,23 @@ public class Mars3dDataset extends AbstractDataset {
         yb = new double[nb + 1];
         shft = 0 - imin;
         for (int i = imin; i <= (imax - 1); i++) {
-            xb[i + shft] = lonRho[jmin][i];
-            yb[i + shft] = latRho[jmin][i];
+            xb[i + shft] = lonRho[i];
+            yb[i + shft] = latRho[jmin];
         }
         shft = 0 - jmin + imax - imin;
         for (int j = jmin; j <= (jmax - 1); j++) {
-            xb[j + shft] = lonRho[j][imax];
-            yb[j + shft] = latRho[j][imax];
+            xb[j + shft] = lonRho[imax];
+            yb[j + shft] = latRho[j];
         }
         shft = jmax - jmin + 2 * imax - imin;
         for (int i = imax; i >= (imin + 1); i--) {
-            xb[shft - i] = lonRho[jmax][i];
-            yb[shft - i] = latRho[jmax][i];
+            xb[shft - i] = lonRho[i];
+            yb[shft - i] = latRho[jmax];
         }
         shft = 2 * jmax - jmin + 2 * (imax - imin);
         for (int j = jmax; j >= (jmin + 1); j--) {
-            xb[shft - j] = lonRho[j][imin];
-            yb[shft - j] = latRho[j][imin];
+            xb[shft - j] = lonRho[imin];
+            yb[shft - j] = latRho[j];
         }
         xb[nb] = xb[0];
         yb[nb] = yb[0];
@@ -1444,8 +1447,8 @@ public class Mars3dDataset extends AbstractDataset {
      */
     void readLonLat(String gridFile) throws IOException {
         Array arrLon, arrLat;
-        lonRho = new double[ny][nx];
-        latRho = new double[ny][nx];
+        lonRho = new double[nx];
+        latRho = new double[ny];
         try {
             arrLon = ncIn.findVariable(strLon).read();
             arrLat = ncIn.findVariable(strLat).read();
@@ -1453,11 +1456,11 @@ public class Mars3dDataset extends AbstractDataset {
             Index indexLat = arrLat.getIndex();
             for (int j = 0; j < ny; j++) {
                 indexLat.set(j);
-                for (int i = 0; i < nx; i++) {
-                    indexLon.set(i);
-                    lonRho[j][i] = arrLon.getDouble(indexLon);
-                    latRho[j][i] = arrLat.getDouble(indexLat);
-                }
+                latRho[j] = arrLat.getDouble(indexLat);
+            }
+            for (int i = 0; i < nx; i++) {
+                indexLon.set(i);
+                lonRho[i] = arrLon.getDouble(indexLon);
             }
             arrLon = null;
             arrLat = null;
@@ -1651,17 +1654,17 @@ public class Mars3dDataset extends AbstractDataset {
         while (i-- > 0) {
             j = ny;
             while (j-- > 0) {
-                if (lonRho[j][i] >= lonMax) {
-                    lonMax = lonRho[j][i];
+                if (lonRho[i] >= lonMax) {
+                    lonMax = lonRho[i];
                 }
-                if (lonRho[j][i] <= lonMin) {
-                    lonMin = lonRho[j][i];
+                if (lonRho[i] <= lonMin) {
+                    lonMin = lonRho[i];
                 }
-                if (latRho[j][i] >= latMax) {
-                    latMax = latRho[j][i];
+                if (latRho[j] >= latMax) {
+                    latMax = latRho[j];
                 }
-                if (latRho[j][i] <= latMin) {
-                    latMin = latRho[j][i];
+                if (latRho[j] <= latMin) {
+                    latMin = latRho[j];
                 }
                 if (hRho[j][i] >= depthMax) {
                     depthMax = hRho[j][i];
@@ -1732,7 +1735,7 @@ public class Mars3dDataset extends AbstractDataset {
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
     public double getLat(int i, int j) {
-        return latRho[j][i];
+        return latRho[j];
     }
 
     /**
@@ -1742,6 +1745,6 @@ public class Mars3dDataset extends AbstractDataset {
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
     public double getLon(int i, int j) {
-        return lonRho[j][i];
+        return lonRho[i];
     }
 }

@@ -104,7 +104,7 @@ public class BlockTree extends JTree {
         for (Enumeration e1 = getRoot().postorderEnumeration(); e1.hasMoreElements();) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
             if (node.isLeaf()) {
-                XBlock block = blockMap.get(nodeToKey(node));
+                XBlock block = blockMap.get(nodeToTreePath(node));
                 manager.addBlock(block);
             }
         }
@@ -196,7 +196,7 @@ public class BlockTree extends JTree {
     public void remove(DefaultMutableTreeNode node) {
         if (node != null && !node.isRoot()) {
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-            blockMap.remove(nodeToKey(node));
+            blockMap.remove(nodeToTreePath(node));
             getDModel().removeNodeFromParent(node);
             if (parent != null && parent.isLeaf()) {
                 remove(parent);
@@ -210,14 +210,14 @@ public class BlockTree extends JTree {
 
     public void insertIntoTree(XBlock block, int leafIndex, boolean isVisible) {
 
-        blockMap.put(block.getKey(), block);
-        String[] keys = block.getKey().split("/");
-        DefaultMutableTreeNode node = insertNodeInParent(getRoot(), keys[0]);
-        if (keys.length > 1) {
-            for (int i = 1; i < keys.length - 1; i++) {
-                node = insertNodeInParent(node, keys[i]);
+        blockMap.put(block.getTreePath(), block);
+        String[] treePath = block.getTreePath().split("/");
+        DefaultMutableTreeNode node = insertNodeInParent(getRoot(), treePath[0]);
+        if (treePath.length > 1) {
+            for (int i = 1; i < treePath.length - 1; i++) {
+                node = insertNodeInParent(node, treePath[i]);
             }
-            node = insertNodeInParent(node, keys[keys.length - 1], leafIndex);
+            node = insertNodeInParent(node, treePath[treePath.length - 1], leafIndex);
         }
         if (isVisible) {
             setNodeVisible(node);
@@ -237,7 +237,7 @@ public class BlockTree extends JTree {
         setTreePathVisible(treePath);
     }
 
-    public String nodeToKey(DefaultMutableTreeNode node) {
+    public String nodeToTreePath(DefaultMutableTreeNode node) {
         TreeNode[] path = node.getPath();
         StringBuffer key = new StringBuffer();
         if (path.length < 2) {
@@ -252,17 +252,17 @@ public class BlockTree extends JTree {
     }
 
     public XBlock getSelectedBlock() {
-        return blockMap.get(getSelectedKey());
+        return blockMap.get(getTreePath());
     }
 
-    public String getSelectedKey() {
-        return nodeToKey(getSelectedNode());
+    public String getTreePath() {
+        return nodeToTreePath(getSelectedNode());
     }
 
-    public TreePath keyToTreePath(String key) {
+    /*public TreePath keyToTreePath(String key) {
         //String fullKey = getRoot().toString() + "/" + key;
         return find(new TreePath(getRoot()), key.split("/"), 0, true);
-    }
+    }*/
 
     private TreePath find(TreePath parent, Object[] nodes, int depth, boolean byName) {
 
