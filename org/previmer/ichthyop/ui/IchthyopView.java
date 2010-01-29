@@ -139,6 +139,7 @@ public class IchthyopView extends FrameView
         btnPreview.getAction().setEnabled(false);
         btnCancelMapping.getAction().setEnabled(false);
         btnMapping.getAction().setEnabled(false);
+        btnCloseNC.getAction().setEnabled(false);
         setAnimationToolsEnabled(false);
         addPropertyChangeListener("xicfile", this);
     }
@@ -403,8 +404,19 @@ public class IchthyopView extends FrameView
             wmsMapper.setVisible(true);
             lblMapping.setVisible(false);
             btnMapping.getAction().setEnabled(true);
+            btnCloseNC.getAction().setEnabled(true);
             setMainTitle();
         }
+    }
+
+    @Action
+    public void closeNetCDF() {
+        outputFile = null;
+        lblNC.setText(getResourceMap().getString("lblNC.text"));
+        lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
+        wmsMapper.setFile(outputFile);
+        btnMapping.getAction().setEnabled(false);
+        btnCloseNC.getAction().setEnabled(false);
     }
 
     @Action
@@ -1242,6 +1254,7 @@ public class IchthyopView extends FrameView
         cbBoxWMS = new javax.swing.JComboBox();
         lblWMS = new javax.swing.JLabel();
         lblNC = new javax.swing.JLabel();
+        btnCloseNC = new javax.swing.JButton();
         taskPaneAnimation = new org.jdesktop.swingx.JXTaskPane();
         pnlAnimation = new javax.swing.JPanel();
         btnFirst = new javax.swing.JButton();
@@ -1546,7 +1559,7 @@ public class IchthyopView extends FrameView
                 .addContainerGap()
                 .addComponent(lblWMS)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbBoxWMS, 0, 372, Short.MAX_VALUE)
+                .addComponent(cbBoxWMS, 0, 283, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlWMSLayout.setVerticalGroup(
@@ -1562,6 +1575,9 @@ public class IchthyopView extends FrameView
         lblNC.setText(resourceMap.getString("lblNC.text")); // NOI18N
         lblNC.setName("lblNC"); // NOI18N
 
+        btnCloseNC.setAction(actionMap.get("closeNetCDF")); // NOI18N
+        btnCloseNC.setName("btnCloseNC"); // NOI18N
+
         javax.swing.GroupLayout pnlMappingLayout = new javax.swing.GroupLayout(pnlMapping);
         pnlMapping.setLayout(pnlMappingLayout);
         pnlMappingLayout.setHorizontalGroup(
@@ -1569,13 +1585,15 @@ public class IchthyopView extends FrameView
             .addGroup(pnlMappingLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlWMS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlMappingLayout.createSequentialGroup()
                         .addComponent(btnMapping)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCancelMapping)
+                        .addComponent(btnCancelMapping))
+                    .addComponent(pnlWMS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(pnlMappingLayout.createSequentialGroup()
+                        .addComponent(btnOpenNC)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnOpenNC))
+                        .addComponent(btnCloseNC))
                     .addComponent(lblNC))
                 .addContainerGap())
         );
@@ -1585,13 +1603,16 @@ public class IchthyopView extends FrameView
                 .addContainerGap()
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnMapping)
-                    .addComponent(btnCancelMapping)
-                    .addComponent(btnOpenNC))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblNC)
+                    .addComponent(btnCancelMapping))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pnlWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnOpenNC)
+                    .addComponent(btnCloseNC))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblNC)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneMapping.getContentPane().add(pnlMapping);
@@ -2537,6 +2558,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
+    private javax.swing.JButton btnCloseNC;
     private javax.swing.JButton btnCollapse;
     private javax.swing.JButton btnDeleteMaps;
     private javax.swing.JButton btnExit;

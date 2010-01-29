@@ -303,16 +303,19 @@
                               <Layout>
                                 <DimensionLayout dim="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="102" alignment="0" attributes="0">
+                                      <Group type="102" attributes="0">
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="pnlWMS" alignment="0" max="32767" attributes="1"/>
                                               <Group type="102" alignment="0" attributes="0">
                                                   <Component id="btnMapping" min="-2" max="-2" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
                                                   <Component id="btnCancelMapping" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
+                                              </Group>
+                                              <Component id="pnlWMS" alignment="0" max="32767" attributes="1"/>
+                                              <Group type="102" alignment="0" attributes="0">
                                                   <Component id="btnOpenNC" min="-2" max="-2" attributes="0"/>
+                                                  <EmptySpace max="-2" attributes="0"/>
+                                                  <Component id="btnCloseNC" min="-2" max="-2" attributes="0"/>
                                               </Group>
                                               <Component id="lblNC" alignment="0" min="-2" max="-2" attributes="0"/>
                                           </Group>
@@ -327,13 +330,17 @@
                                           <Group type="103" groupAlignment="3" attributes="0">
                                               <Component id="btnMapping" alignment="3" min="-2" max="-2" attributes="0"/>
                                               <Component id="btnCancelMapping" alignment="3" min="-2" max="-2" attributes="0"/>
-                                              <Component id="btnOpenNC" alignment="3" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                          <Component id="lblNC" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                           <Component id="pnlWMS" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace pref="17" max="32767" attributes="0"/>
+                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                          <Group type="103" groupAlignment="3" attributes="0">
+                                              <Component id="btnOpenNC" alignment="3" min="-2" max="-2" attributes="0"/>
+                                              <Component id="btnCloseNC" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="lblNC" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                                 </DimensionLayout>
@@ -381,7 +388,7 @@
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="lblWMS" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="cbBoxWMS" pref="372" max="32767" attributes="0"/>
+                                              <Component id="cbBoxWMS" pref="283" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
@@ -426,6 +433,14 @@
                                     <Property name="font" type="java.awt.Font" resourceKey="lblNC.font"/>
                                     <Property name="text" type="java.lang.String" resourceKey="lblNC.text"/>
                                     <Property name="name" type="java.lang.String" value="lblNC" noResource="true"/>
+                                  </Properties>
+                                </Component>
+                                <Component class="javax.swing.JButton" name="btnCloseNC">
+                                  <Properties>
+                                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                      <action class="org.previmer.ichthyop.ui.IchthyopView" id="closeNetCDF" methodName="closeNetCDF"/>
+                                    </Property>
+                                    <Property name="name" type="java.lang.String" value="btnCloseNC" noResource="true"/>
                                   </Properties>
                                 </Component>
                               </SubComponents>
