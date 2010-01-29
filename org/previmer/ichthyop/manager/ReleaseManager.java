@@ -106,16 +106,22 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
 
     private void schedule() {
 
-        timeEvent = new long[findNumberReleaseEvents()];
-        for (int i = 0; i < timeEvent.length; i++) {
-            timeEvent[i] = Long.valueOf(getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i));
+        boolean isEnabled = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled"));
+        if (isEnabled) {
+            timeEvent = new long[findNumberReleaseEvents()];
+            for (int i = 0; i < timeEvent.length; i++) {
+                timeEvent[i] = Long.valueOf(getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i));
+            }
+        } else {
+            timeEvent = new long[]{Long.valueOf(getSimulationManager().getParameterManager().getParameter("app.time", "initial_time"))};
         }
     }
 
     private int findNumberReleaseEvents() {
         int i = 0;
-        while (!getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i).isEmpty())
+        while (!getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i).isEmpty()) {
             i++;
+        }
         //Logger.getLogger(ReleaseSchedule.class.getName()).log(Level.CONFIG, "Number release events: " + i);
         return i;
     }
