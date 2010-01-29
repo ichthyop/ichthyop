@@ -864,6 +864,11 @@ public class IchthyopView extends FrameView
         }
 
         @Override
+        protected void failed(Throwable t) {
+            logger.log(Level.SEVERE, null, t);
+        }
+
+        @Override
         protected void process(List values) {
             if (!bln) {
                 btnSimulationRun.getAction().setEnabled(true);
@@ -914,7 +919,7 @@ public class IchthyopView extends FrameView
         protected void finished() {
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
-            openMenuItem.getAction().setEnabled(true);
+            setMenuEnabled(true);
             isRunning = false;
             resetProgressBar();
         }
@@ -1261,25 +1266,27 @@ public class IchthyopView extends FrameView
         javax.swing.JMenu configurationMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
         openMenuItem = new javax.swing.JMenuItem();
-        saveAsMenuItem = new javax.swing.JMenuItem();
         closeMenuItem = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        saveMenuItem = new javax.swing.JMenuItem();
+        saveAsMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         simulationMenu = new javax.swing.JMenu();
         simulactionMenuItem = new javax.swing.JMenuItem();
         previewMenuItem = new javax.swing.JMenuItem();
         mappingMenu = new javax.swing.JMenu();
-        openNCMenuItem = new javax.swing.JMenuItem();
-        jSeparator13 = new javax.swing.JPopupMenu.Separator();
         mapMenuItem = new javax.swing.JMenuItem();
         cancelMapMenuItem = new javax.swing.JMenuItem();
+        jSeparator13 = new javax.swing.JPopupMenu.Separator();
+        openNCMenuItem = new javax.swing.JMenuItem();
         animationMenu = new javax.swing.JMenu();
+        animactionMenuItem = new javax.swing.JMenuItem();
+        jSeparator15 = new javax.swing.JPopupMenu.Separator();
         openAnimationMenuItem = new javax.swing.JMenuItem();
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
         exportMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
-        jSeparator15 = new javax.swing.JPopupMenu.Separator();
-        animactionMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
         statusPanel = new javax.swing.JPanel();
@@ -1847,13 +1854,20 @@ public class IchthyopView extends FrameView
         openMenuItem.setName("openMenuItem"); // NOI18N
         configurationMenu.add(openMenuItem);
 
-        saveAsMenuItem.setAction(actionMap.get("saveAsConfigurationFile")); // NOI18N
-        saveAsMenuItem.setName("saveAsMenuItem"); // NOI18N
-        configurationMenu.add(saveAsMenuItem);
-
         closeMenuItem.setAction(actionMap.get("closeConfigurationFile")); // NOI18N
         closeMenuItem.setName("closeMenuItem"); // NOI18N
         configurationMenu.add(closeMenuItem);
+
+        jSeparator2.setName("jSeparator2"); // NOI18N
+        configurationMenu.add(jSeparator2);
+
+        saveMenuItem.setAction(actionMap.get("saveConfigurationFile")); // NOI18N
+        saveMenuItem.setName("saveMenuItem"); // NOI18N
+        configurationMenu.add(saveMenuItem);
+
+        saveAsMenuItem.setAction(actionMap.get("saveAsConfigurationFile")); // NOI18N
+        saveAsMenuItem.setName("saveAsMenuItem"); // NOI18N
+        configurationMenu.add(saveAsMenuItem);
 
         jSeparator1.setName("jSeparator1"); // NOI18N
         configurationMenu.add(jSeparator1);
@@ -1880,13 +1894,6 @@ public class IchthyopView extends FrameView
         mappingMenu.setText(resourceMap.getString("mappingMenu.text")); // NOI18N
         mappingMenu.setName("mappingMenu"); // NOI18N
 
-        openNCMenuItem.setAction(actionMap.get("openNcMapping")); // NOI18N
-        openNCMenuItem.setName("openNCMenuItem"); // NOI18N
-        mappingMenu.add(openNCMenuItem);
-
-        jSeparator13.setName("jSeparator13"); // NOI18N
-        mappingMenu.add(jSeparator13);
-
         mapMenuItem.setAction(actionMap.get("createMaps")); // NOI18N
         mapMenuItem.setName("mapMenuItem"); // NOI18N
         mappingMenu.add(mapMenuItem);
@@ -1895,10 +1902,24 @@ public class IchthyopView extends FrameView
         cancelMapMenuItem.setName("cancelMapMenuItem"); // NOI18N
         mappingMenu.add(cancelMapMenuItem);
 
+        jSeparator13.setName("jSeparator13"); // NOI18N
+        mappingMenu.add(jSeparator13);
+
+        openNCMenuItem.setAction(actionMap.get("openNcMapping")); // NOI18N
+        openNCMenuItem.setName("openNCMenuItem"); // NOI18N
+        mappingMenu.add(openNCMenuItem);
+
         menuBar.add(mappingMenu);
 
         animationMenu.setText(resourceMap.getString("animationMenu.text")); // NOI18N
         animationMenu.setName("animationMenu"); // NOI18N
+
+        animactionMenuItem.setAction(actionMap.get("animAction")); // NOI18N
+        animactionMenuItem.setName("animactionMenuItem"); // NOI18N
+        animationMenu.add(animactionMenuItem);
+
+        jSeparator15.setName("jSeparator15"); // NOI18N
+        animationMenu.add(jSeparator15);
 
         openAnimationMenuItem.setAction(actionMap.get("openFolderAnimation")); // NOI18N
         openAnimationMenuItem.setName("openAnimationMenuItem"); // NOI18N
@@ -1914,13 +1935,6 @@ public class IchthyopView extends FrameView
         deleteMenuItem.setAction(actionMap.get("deleteMaps")); // NOI18N
         deleteMenuItem.setName("deleteMenuItem"); // NOI18N
         animationMenu.add(deleteMenuItem);
-
-        jSeparator15.setName("jSeparator15"); // NOI18N
-        animationMenu.add(jSeparator15);
-
-        animactionMenuItem.setAction(actionMap.get("animAction")); // NOI18N
-        animactionMenuItem.setName("animactionMenuItem"); // NOI18N
-        animationMenu.add(animactionMenuItem);
 
         menuBar.add(animationMenu);
 
@@ -2506,6 +2520,9 @@ public class IchthyopView extends FrameView
                 replayPanel.setVisible(true);
                 replayPanel.setFolder(outputFolder);
             } else {
+                if (animator.isRunning()) {
+                    animate(false);
+                }
                 replayPanel.setVisible(false);
             }
             setMainTitle();
@@ -2566,6 +2583,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator15;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblBlockInfo;
@@ -2611,6 +2629,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JProgressBar progressBarCurrent;
     private javax.swing.JProgressBar progressBarGlobal;
     private javax.swing.JMenuItem saveAsMenuItem;
+    private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JScrollPane scrollPaneSimulationUI;
     private javax.swing.JMenuItem simulactionMenuItem;
     private javax.swing.JMenu simulationMenu;
@@ -2654,5 +2673,4 @@ public class IchthyopView extends FrameView
     private JLabel lblMapping;
     private boolean hasStructureChanged;
     private boolean showHiddenParameters = true;
-    private boolean hasCfgFileChanged = false;
 }

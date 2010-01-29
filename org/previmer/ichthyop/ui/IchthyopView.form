@@ -796,20 +796,33 @@
                 <Property name="name" type="java.lang.String" value="openMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="saveAsMenuItem">
-              <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsConfigurationFile" methodName="saveAsConfigurationFile"/>
-                </Property>
-                <Property name="name" type="java.lang.String" value="saveAsMenuItem" noResource="true"/>
-              </Properties>
-            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="closeMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="closeConfigurationFile" methodName="closeConfigurationFile"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="closeMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator2" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="saveMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveConfigurationFile" methodName="saveConfigurationFile"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="saveMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="saveAsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsConfigurationFile" methodName="saveAsConfigurationFile"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="saveAsMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JSeparator" name="jSeparator1">
@@ -861,19 +874,6 @@
             <Property name="name" type="java.lang.String" value="mappingMenu" noResource="true"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="openNCMenuItem">
-              <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openNcMapping" methodName="openNcMapping"/>
-                </Property>
-                <Property name="name" type="java.lang.String" value="openNCMenuItem" noResource="true"/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator13">
-              <Properties>
-                <Property name="name" type="java.lang.String" value="jSeparator13" noResource="true"/>
-              </Properties>
-            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mapMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -890,6 +890,19 @@
                 <Property name="name" type="java.lang.String" value="cancelMapMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator13">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator13" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="openNCMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="openNcMapping" methodName="openNcMapping"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="openNCMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="animationMenu">
@@ -898,6 +911,19 @@
             <Property name="name" type="java.lang.String" value="animationMenu" noResource="true"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="animactionMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="animAction" methodName="animAction"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="animactionMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator15">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator15" noResource="true"/>
+              </Properties>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="openAnimationMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -925,19 +951,6 @@
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="deleteMaps" methodName="deleteMaps"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="deleteMenuItem" noResource="true"/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator15">
-              <Properties>
-                <Property name="name" type="java.lang.String" value="jSeparator15" noResource="true"/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="animactionMenuItem">
-              <Properties>
-                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="animAction" methodName="animAction"/>
-                </Property>
-                <Property name="name" type="java.lang.String" value="animactionMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
           </SubComponents>
