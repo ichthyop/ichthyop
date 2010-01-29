@@ -89,18 +89,18 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     }
 
     private void loadParameters() {
-        dt = Integer.valueOf(getParameter("Time/General", "Time step"));
-        boolean isForward = getParameter("Time/General", "Time arrow").matches("forward");
+        dt = Integer.valueOf(getParameter("app.time", "time_step"));
+        boolean isForward = getParameter("app.time", "time_arrow").matches("forward");
         if (!isForward) {
             dt *= -1;
         }
-        t0 = Long.valueOf(getParameter("Time/General", "Beginning of simulation"));
+        t0 = Long.valueOf(getParameter("app.time", "initial_time"));
         //Logger.getAnonymousLogger().info("time-step: " + dt + " - t0: " + t0);
-        transportDuration = Long.valueOf(getParameter("Time/General", "Transport duration"));
-        if (getParameter("Time/General", "Type of calendar").matches("climato")) {
+        transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
+        if (getParameter("app.time", "calendar_type").matches("climato")) {
             calendar = new ClimatoCalendar();
         } else {
-            String time_origin = getParameter("Time/General", "Time origin");
+            String time_origin = getParameter("app.time", "time_origin");
             calendar = new Calendar1900(getTimeOrigin(time_origin, Calendar.YEAR),
                     getTimeOrigin(time_origin, Calendar.MONTH),
                     getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));

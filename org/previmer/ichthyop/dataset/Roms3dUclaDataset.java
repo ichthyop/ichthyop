@@ -12,6 +12,6 @@ public class Roms3dUclaDataset extends Roms3dDataset {
 
     @Override
     float getHc() {
-        return ncIn.findGlobalAttribute(getParameter("S-coordinate critical depth")).getNumericValue().floatValue();
+        return ncIn.findGlobalAttribute(getParameter("field_attrib_hc")).getNumericValue().floatValue();
     }
 }

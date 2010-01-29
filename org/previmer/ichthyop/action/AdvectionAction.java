@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.arch.IBasicParticle;
-import java.util.logging.Logger;
 
 /**
  *
@@ -18,7 +17,7 @@ public class AdvectionAction extends AbstractAction {
 
     public void loadParameters() {
 
-        isEuler = getParameter("Numerical scheme").matches("euler");
+        isEuler = getParameter("scheme").matches("euler");
         isForward = getSimulationManager().getTimeManager().get_dt() >= 0;
     }
 

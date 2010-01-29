@@ -40,7 +40,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     private static final String CLASS_NAME = "class_name";
     final private static OutputManager outputManager = new OutputManager();
-    private final static String block_key = "IO/Output/General";
+    private final static String block_key = "app.output";
     private int dt_record;
     private NCDimFactory dimensionFactory;
     private int i_record;
@@ -85,7 +85,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     public String getFileLocation() {
-        return getParameter("Output path") + getParameter("Output filename") + "_" + getSimulationManager().getId() + ".nc";
+        return getParameter("output_path") + getParameter("file_prefix") + "_" + getSimulationManager().getId() + ".nc";
     }
 
     private boolean isRecord() {
@@ -319,7 +319,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         if (isRecord()) {
             try {
                 ncOut = NetcdfFileWriteable.createNew("");
-                record_frequency = Integer.valueOf(getParameter("Record frequency"));
+                record_frequency = Integer.valueOf(getParameter("record_frequency"));
                 ncOut.setLocation(getFileLocation());
                 getDimensionFactory().resetDimensions();
             } catch (IOException ex) {

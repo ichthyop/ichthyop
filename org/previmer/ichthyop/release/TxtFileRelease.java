@@ -27,7 +27,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
 
     @Override
     void loadParameters() {
-        pathname = getParameter("Drifter file");
+        pathname = getParameter("txtfile");
     }
 
     private File getFile(String pathname) throws IOException {

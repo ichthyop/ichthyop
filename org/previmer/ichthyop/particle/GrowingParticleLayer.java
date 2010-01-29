@@ -61,9 +61,9 @@ public class GrowingParticleLayer extends ParticleLayer implements IGrowingParti
         FEEDING_LARVA = Integer.valueOf(propertyManager.getProperty("stage.feeding-larva.code"));
 
         IParameterManager parameterManager = getSimulationManager().getParameterManager();
-        length_init = Float.valueOf(parameterManager.getParameter("Biology/Threshold length", "Initial length"));
-        hatch_length = Float.valueOf(parameterManager.getParameter("Biology/Threshold length", "Hatch length"));
-        yolk_to_feeding_length = Float.valueOf(parameterManager.getParameter("Biology/Threshold length", "Yolk to feeding length"));
+        length_init = Float.valueOf(parameterManager.getParameter("app.particle_length", "initial_length"));
+        hatch_length = Float.valueOf(parameterManager.getParameter("app.particle_length", "hatch_length"));
+        yolk_to_feeding_length = Float.valueOf(parameterManager.getParameter("app.particle_length", "yolk2feeding_length"));
     }
 
     public double getLength() {

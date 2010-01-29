@@ -21,10 +21,10 @@ public class ZoneRelease extends AbstractReleaseProcess {
     private boolean is3D;
 
     public void loadParameters() {
-        nbTotalToRelease = Integer.valueOf(getParameter("Number of particles"));
+        nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
         nbReleaseZones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size();
         nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
-        is3D = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("Transport/General", "Dimension").matches("three dimensions"));
+        is3D = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("app.transport", "dimension").matches("three dimensions"));
     }
 
     public void proceedToRelease(ReleaseEvent event) throws IOException {
@@ -66,6 +66,6 @@ public class ZoneRelease extends AbstractReleaseProcess {
     }
 
     public int getNbParticles() {
-        return Integer.valueOf(getParameter("Number of particles"));
+        return Integer.valueOf(getParameter("number_particles"));
     }
 }
