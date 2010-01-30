@@ -5,7 +5,9 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelEvent;
@@ -21,6 +23,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.RoundRectangle2D;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +37,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.swing.BorderFactory;
 import javax.swing.Timer;
-import javax.swing.Icon;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -53,10 +56,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
+import org.jdesktop.swingx.JXStatusBar;
+import org.jdesktop.swingx.icon.EmptyIcon;
+import org.jdesktop.swingx.painter.BusyPainter;
+import org.jdesktop.swingx.plaf.basic.BasicStatusBarUI;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
-import org.previmer.ichthyop.ui.ParameterTable.ParameterTableModel;
 import org.previmer.ichthyop.ui.WMSMapper.MapStep;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
@@ -83,22 +89,10 @@ public class IchthyopView extends FrameView
 
             public void actionPerformed(ActionEvent e) {
                 statusMessageLabel.setText("");
+                lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.grey"));
             }
         });
         messageTimer.setRepeats(false);
-        int busyAnimationRate = resourceMap.getInteger("StatusBar.busyAnimationRate");
-        for (int i = 0; i < busyIcons.length; i++) {
-            busyIcons[i] = resourceMap.getIcon("StatusBar.busyIcons[" + i + "]");
-        }
-        busyIconTimer = new Timer(busyAnimationRate, new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
-                statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
-            }
-        });
-        idleIcon = resourceMap.getIcon("StatusBar.idleIcon");
-        statusAnimationLabel.setIcon(idleIcon);
         progressBar.setVisible(false);
 
         // connecting action tasks to status bar via TaskMonitor
@@ -108,16 +102,22 @@ public class IchthyopView extends FrameView
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 String propertyName = evt.getPropertyName();
                 if ("started".equals(propertyName)) {
-                    if (!busyIconTimer.isRunning()) {
-                        statusAnimationLabel.setIcon(busyIcons[0]);
-                        busyIconIndex = 0;
-                        busyIconTimer.start();
-                    }
+                    statusAnimationLabel.setBusy(true);
                     progressBar.setVisible(true);
                     progressBar.setIndeterminate(true);
+                } else if ("failed".equals(propertyName)) {
+                    statusAnimationLabel.setBusy(false);
+                    progressBar.setVisible(false);
+                    progressBar.setValue(0);
+                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.red"));
+                } else if ("succeeded".equals(propertyName)) {
+                    statusAnimationLabel.setBusy(false);
+                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.green"));
+                    progressBar.setVisible(false);
+                    progressBar.setValue(0);
                 } else if ("done".equals(propertyName)) {
-                    busyIconTimer.stop();
-                    statusAnimationLabel.setIcon(idleIcon);
+                    statusAnimationLabel.setBusy(false);
+                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.green"));
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
                 } else if ("message".equals(propertyName)) {
@@ -701,7 +701,6 @@ public class IchthyopView extends FrameView
             animator.setAcceleration(0.01f);
             btnAnimaction.setEnabled(true);
             btnOpenAnimation.getAction().setEnabled(false);
-            replayPanel.initAnim();
             animator.start();
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
         } else {
@@ -739,9 +738,7 @@ public class IchthyopView extends FrameView
 
     public void end() {
         btnOpenAnimation.getAction().setEnabled(true);
-        replayPanel.endAnim();
         setMessage(getResourceMap().getString("animAction.stopped.message"));
-
     }
 
     public void repeat() {
@@ -1302,11 +1299,6 @@ public class IchthyopView extends FrameView
         deleteMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
-        statusPanel = new javax.swing.JPanel();
-        javax.swing.JSeparator statusPanelSeparator = new javax.swing.JSeparator();
-        statusMessageLabel = new javax.swing.JLabel();
-        statusAnimationLabel = new javax.swing.JLabel();
-        progressBar = new javax.swing.JProgressBar();
         popupCharts = new javax.swing.JPopupMenu();
         itemDepthChart = new javax.swing.JCheckBoxMenuItem();
         itemEdgeChart = new javax.swing.JCheckBoxMenuItem();
@@ -1353,6 +1345,12 @@ public class IchthyopView extends FrameView
         lblSelectBlock = new javax.swing.JLabel();
         pnlLogo = new org.jdesktop.swingx.JXPanel();
         hyperLinkLogo = new org.jdesktop.swingx.JXHyperlink();
+        statusBar = new org.jdesktop.swingx.JXStatusBar();
+        statusMessageLabel = new javax.swing.JLabel();
+        statusAnimationLabel = new org.jdesktop.swingx.JXBusyLabel();
+        pnlProgressBar = new javax.swing.JPanel();
+        progressBar = new javax.swing.JProgressBar();
+        lblFlag = new javax.swing.JLabel();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1559,7 +1557,7 @@ public class IchthyopView extends FrameView
                 .addContainerGap()
                 .addComponent(lblWMS)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbBoxWMS, 0, 283, Short.MAX_VALUE)
+                .addComponent(cbBoxWMS, 0, 372, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlWMSLayout.setVerticalGroup(
@@ -1833,7 +1831,7 @@ public class IchthyopView extends FrameView
         );
         gradientPanelLayout.setVerticalGroup(
             gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 472, Short.MAX_VALUE)
+            .addGap(0, 503, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout titledPanelMainLayout = new javax.swing.GroupLayout(titledPanelMain.getContentContainer());
@@ -1859,7 +1857,7 @@ public class IchthyopView extends FrameView
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.PREFERRED_SIZE, 504, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.PREFERRED_SIZE, 535, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -1967,48 +1965,6 @@ public class IchthyopView extends FrameView
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
-
-        statusPanel.setName("statusPanel"); // NOI18N
-
-        statusPanelSeparator.setName("statusPanelSeparator"); // NOI18N
-
-        statusMessageLabel.setName("statusMessageLabel"); // NOI18N
-
-        statusAnimationLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
-
-        progressBar.setName("progressBar"); // NOI18N
-        progressBar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                progressBarMouseEntered(evt);
-            }
-        });
-
-        javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
-        statusPanel.setLayout(statusPanelLayout);
-        statusPanelLayout.setHorizontalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 848, Short.MAX_VALUE)
-            .addGroup(statusPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 662, Short.MAX_VALUE)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(statusAnimationLabel)
-                .addContainerGap())
-        );
-        statusPanelLayout.setVerticalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(statusPanelLayout.createSequentialGroup()
-                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(statusMessageLabel)
-                    .addComponent(statusAnimationLabel)
-                    .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3))
-        );
 
         popupCharts.setName("popupCharts"); // NOI18N
 
@@ -2322,8 +2278,6 @@ public class IchthyopView extends FrameView
         lblTimeLeftGlobal.setName("lblTimeLeftGlobal"); // NOI18N
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(resourceMap.getIcon("jLabel1.icon")); // NOI18N
-        jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
 
         javax.swing.GroupLayout pnlProgressLayout = new javax.swing.GroupLayout(pnlProgress);
@@ -2425,9 +2379,64 @@ public class IchthyopView extends FrameView
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
+        statusBar.setName("statusBar"); // NOI18N
+        statusBar.putClientProperty(BasicStatusBarUI.AUTO_ADD_SEPARATOR, false);
+        JXStatusBar.Constraint c0 = new JXStatusBar.Constraint();
+        c0.setFixedWidth(20);
+        statusBar.add(lblFlag, c0);
+        //statusBar.add(new JSeparator(JSeparator.VERTICAL));
+        JXStatusBar.Constraint c1 = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
+        statusBar.add(statusMessageLabel, c1);
+        JXStatusBar.Constraint c2 = new JXStatusBar.Constraint(JXStatusBar.Constraint.ResizeBehavior.FILL);
+        statusBar.add(pnlProgressBar, c2);
+        JXStatusBar.Constraint c3 = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
+        c3.setFixedWidth(20);
+        statusBar.add(statusAnimationLabel, c3);
+
+        statusMessageLabel.setText(resourceMap.getString("statusMessageLabel.text")); // NOI18N
+        statusMessageLabel.setName("statusMessageLabel"); // NOI18N
+
+        statusAnimationLabel.setText(resourceMap.getString("statusAnimationLabel.text")); // NOI18N
+        statusAnimationLabel.setMaximumSize(new java.awt.Dimension(20, 20));
+        statusAnimationLabel.setMinimumSize(new java.awt.Dimension(20, 20));
+        statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
+        statusAnimationLabel.setPreferredSize(new java.awt.Dimension(20, 20));
+        BusyPainter painter = new BusyPainter(
+            new RoundRectangle2D.Float(0, 0,4.0f,1.8f,10.0f,10.0f),
+            new Ellipse2D.Float(3.0f,3.0f,14.0f,14.0f));
+        painter.setTrailLength(4);
+        painter.setPoints(8);
+        painter.setFrame(-1);
+        statusAnimationLabel.setPreferredSize(new Dimension(20,20));
+        statusAnimationLabel.setIcon(new EmptyIcon(20,20));
+        statusAnimationLabel.setBusyPainter(painter);
+
+        pnlProgressBar.setName("pnlProgressBar"); // NOI18N
+        pnlProgressBar.setOpaque(false);
+
+        progressBar.setName("progressBar"); // NOI18N
+
+        javax.swing.GroupLayout pnlProgressBarLayout = new javax.swing.GroupLayout(pnlProgressBar);
+        pnlProgressBar.setLayout(pnlProgressBarLayout);
+        pnlProgressBarLayout.setHorizontalGroup(
+            pnlProgressBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlProgressBarLayout.createSequentialGroup()
+                .addContainerGap(421, Short.MAX_VALUE)
+                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        pnlProgressBarLayout.setVerticalGroup(
+            pnlProgressBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        lblFlag.setIcon(resourceMap.getIcon("lblFlag.icon")); // NOI18N
+        lblFlag.setText(resourceMap.getString("lblFlag.text")); // NOI18N
+        lblFlag.setName("lblFlag"); // NOI18N
+
         setComponent(mainPanel);
         setMenuBar(menuBar);
-        setStatusBar(statusPanel);
+        setStatusBar(statusBar);
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblFramePerSecondMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblFramePerSecondMouseClicked
@@ -2442,11 +2451,6 @@ public class IchthyopView extends FrameView
         JSpinner source = (JSpinner) evt.getSource();
         nbfps = (Float) source.getValue();
 }//GEN-LAST:event_animationSpeedStateChanged
-
-    private void progressBarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_progressBarMouseEntered
-        // TODO add your handling code here:
-        //popupProgress.show(progressBar, 0, 0);
-    }//GEN-LAST:event_progressBarMouseEntered
 
     private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
         // TODO add your handling code here:
@@ -2610,6 +2614,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblBlockInfo;
     private javax.swing.JLabel lblCfgFile;
+    private javax.swing.JLabel lblFlag;
     private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblNC;
@@ -2641,6 +2646,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JPanel pnlParamDescription;
     private javax.swing.JPanel pnlParameters;
     private javax.swing.JPanel pnlProgress;
+    private javax.swing.JPanel pnlProgressBar;
     private javax.swing.JPanel pnlSimulation;
     private javax.swing.JPanel pnlSimulationUI;
     private javax.swing.JPanel pnlTree;
@@ -2658,9 +2664,9 @@ public class IchthyopView extends FrameView
     private javax.swing.JSlider sliderTime;
     private javax.swing.JSplitPane splitPane;
     private javax.swing.JSplitPane splitPaneCfg;
-    private javax.swing.JLabel statusAnimationLabel;
+    private org.jdesktop.swingx.JXBusyLabel statusAnimationLabel;
+    private org.jdesktop.swingx.JXStatusBar statusBar;
     private javax.swing.JLabel statusMessageLabel;
-    private javax.swing.JPanel statusPanel;
     private org.jdesktop.swingx.JXTable table;
     private org.jdesktop.swingx.JXTaskPane taskPaneAnimation;
     private org.jdesktop.swingx.JXTaskPane taskPaneConfiguration;
@@ -2672,10 +2678,6 @@ public class IchthyopView extends FrameView
     private org.jdesktop.swingx.JXTitledPanel titledPanelSteps;
     // End of variables declaration//GEN-END:variables
     private final Timer messageTimer;
-    private final Timer busyIconTimer;
-    private final Icon idleIcon;
-    private final Icon[] busyIcons = new Icon[15];
-    private int busyIconIndex = 0;
     private JDialog aboutBox;
     private static final Logger logger = Logger.getLogger(ISimulationManager.class.getName());
     private File cfgPath = new File(System.getProperty("user.dir"));
