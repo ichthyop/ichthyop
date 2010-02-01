@@ -195,20 +195,20 @@ public class Mars3dDataset extends AbstractDataset {
 
     void loadParameters() {
 
-        strLonDim = getParameter("Dimension in the longitude direction");
-        strLatDim = getParameter("Dimension in the latitude direction");
-        strZDim = getParameter("Dimension in the Z-direction");
-        strTimeDim = getParameter("Dimension in time");
-        strLon = getParameter("Longitude of RHO-points");
-        strLat = getParameter("Latitude of RHO-points");
-        strBathy = getParameter("Bathymetry at RHO-points");
-        strU = getParameter("U-momentum component");
-        strV = getParameter("V-momentum component");
-        strZeta = getParameter("Free-surface elevation");
-        strTp = getParameter("Averaged potential temperature");
+        strLonDim = getParameter("field_dim_lon");
+        strLatDim = getParameter("field_dim_lat");
+        strZDim = getParameter("field_dim_z");
+        strTimeDim = getParameter("field_dim_time");
+        strLon = getParameter("field_var_lon");
+        strLat = getParameter("field_var_lat");
+        strBathy = getParameter("field_var_bathy");
+        strU = getParameter("field_var_u");
+        strV = getParameter("field_var_v");
+        strZeta = getParameter("field_var_zeta");
+        strTp = getParameter("field_var_temp");
         //strSal = getParameter("Averaged salinity");
-        strTime = getParameter("Averaged time since initialization");
-        strSigma = getParameter("Ocean sigma coordinate");
+        strTime = getParameter("field_var_time");
+        strSigma = getParameter("field_var_sigma");
     }
 
     private void openLocation(String rawPath) throws IOException {
@@ -221,8 +221,8 @@ public class Mars3dDataset extends AbstractDataset {
             listInputFiles.add(rawPath);
         } else if (isDirectory(path)) {
             listInputFiles = getInputList(path);
-            if (!getParameter("Grid file").isEmpty()) {
-                gridFile = getGridFile(getParameter("Grid file"));
+            if (!getParameter("grid_file").isEmpty()) {
+                gridFile = getGridFile(getParameter("grid_file"));
             } else {
                 gridFile = listInputFiles.get(0);
             }
@@ -273,7 +273,7 @@ public class Mars3dDataset extends AbstractDataset {
         ArrayList<String> list = null;
 
         File inputPath = new File(path);
-        String fileMask = getParameter("File filter");
+        String fileMask = getParameter("file_filter");
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
         if (listFile.length == 0) {
             throw new IOException(path + " contains no file matching mask " + fileMask);
@@ -302,9 +302,9 @@ public class Mars3dDataset extends AbstractDataset {
         loadParameters();
 
         try {
-            openLocation(getParameter("Input path"));
+            openLocation(getParameter("input_path"));
             getDimNC();
-            if (Boolean.valueOf(getParameter("Shrink domain"))) {
+            if (Boolean.valueOf(getParameter("shrink_domain"))) {
                 float[] p1 = new float[]{Float.valueOf(getParameter("north-west-corner.lon")), Float.valueOf(getParameter("north-west-corner.lat"))};
                 float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
                 range(p1, p2);
@@ -383,7 +383,7 @@ public class Mars3dDataset extends AbstractDataset {
             return listInputFiles.get(indexLast);
         }
 
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("File filter") + " of folder " + getParameter("Input path"));
+        throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
     }
 
     private boolean isTimeIntoFile(long time, int index) throws IOException {

@@ -94,13 +94,17 @@ public class GridPoint extends SimulationManagerAccessor {
     }
 
     public void applyMove() {
+        
         setX(x + dx);
+        dx = 0.d;
         setY(y + dy);
+        dy = 0.d;
         if (is3D) {
             setZ(z + dz);
+            dz = 0.d;
         }
-        this.exclusivityH = false;
-        this.exclusivityV = false;
+        exclusivityH = false;
+        exclusivityV = false;
     }
 
     /**
