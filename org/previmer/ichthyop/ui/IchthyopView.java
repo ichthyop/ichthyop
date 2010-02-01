@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelEvent;
@@ -106,16 +107,12 @@ public class IchthyopView extends FrameView
                     progressBar.setVisible(true);
                     progressBar.setIndeterminate(true);
                 } else if ("failed".equals(propertyName)) {
+                    Toolkit.getDefaultToolkit().beep();
                     statusAnimationLabel.setBusy(false);
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
                     lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.red"));
                 } else if ("succeeded".equals(propertyName)) {
-                    statusAnimationLabel.setBusy(false);
-                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.green"));
-                    progressBar.setVisible(false);
-                    progressBar.setValue(0);
-                } else if ("done".equals(propertyName)) {
                     statusAnimationLabel.setBusy(false);
                     lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.green"));
                     progressBar.setVisible(false);
@@ -376,6 +373,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void succeeded(Object o) {
+            firePropertyChange("succeeded", null, null);
             taskPaneMapping.setCollapsed(true);
             taskPaneAnimation.setCollapsed(false);
             getApplication().getContext().getTaskService().execute(new OpenFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
@@ -450,28 +448,32 @@ public class IchthyopView extends FrameView
             if (nbPNG > 0) {
                 return null;
             } else {
-                cancel(true);
+                throw new NullPointerException("No PNG pictures found in folder " + folder.getAbsolutePath());
             }
-            return null;
         }
 
         @Override
         protected void succeeded(Object o) {
+            firePropertyChange("succeeded", null, null);
             outputFolder = folder;
             lblFolder.setText(outputFolder.getName());
             lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
             replayPanel.setFolder(outputFolder);
             sliderTime.setMaximum(nbPNG - 1);
             setAnimationToolsEnabled(true);
+            sliderTime.setValue(0);
+            animate(true);
         }
 
         @Override
-        protected void cancelled() {
+        protected void failed(Throwable t) {
+            firePropertyChange("failed", null, null);
             lblFolder.setText(IchthyopView.this.getResourceMap().getString("lblFolder.text"));
             lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
             sliderTime.setMaximum(0);
+            sliderTime.setValue(0);
             setAnimationToolsEnabled(false);
-            setMessage("No PNG pictures found in folder " + folder.getAbsolutePath());
+            setMessage(t.getLocalizedMessage());
             outputFolder = null;
         }
 
@@ -516,14 +518,15 @@ public class IchthyopView extends FrameView
             if (!isSetup) {
                 setMessage("Setting up...");
                 getSimulationManager().setup();
-                isSetup = true;
-                setMessage("Setup [OK]");
             }
             return null;
         }
 
         @Override
         protected void succeeded(Object obj) {
+            firePropertyChange("succeeded", null, null);
+            isSetup = true;
+            setMessage("Setup [OK]");
             showSimulationPreview();
         }
     }
@@ -578,6 +581,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void succeeded(Object o) {
+            firePropertyChange("succeeded", null, null);
             btnSaveCfgFile.getAction().setEnabled(false);
             hasStructureChanged = false;
             isSetup = false;
@@ -874,6 +878,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void failed(Throwable t) {
+            firePropertyChange("failed", null, null);
             logger.log(Level.SEVERE, null, t);
         }
 
@@ -916,6 +921,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void succeeded(Object obj) {
+            firePropertyChange("succeeded", null, null);
             setMessage("End of simulation");
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
             lblNC.setText(outputFile.getName());
@@ -949,6 +955,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void succeeded(Object o) {
+            firePropertyChange("succeeded", null, null);
             pnlConfiguration.setVisible(true);
             blockTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
             blockTree.addTreeSelectionListener(IchthyopView.this);
@@ -957,6 +964,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void failed(Throwable t) {
+            firePropertyChange("failed", null, null);
             logger.log(Level.SEVERE, null, t);
         }
     }
@@ -2521,11 +2529,13 @@ public class IchthyopView extends FrameView
                     wmsMapper.setVisible(true);
                     lblMapping.setVisible(false);
                     btnMapping.getAction().setEnabled(true);
+                    btnCloseNC.getAction().setEnabled(true);
                 } else {
                     wmsMapper.setFile(null);
                     wmsMapper.setVisible(false);
                     lblMapping.setVisible(true);
                     btnMapping.getAction().setEnabled(false);
+                    btnCloseNC.getAction().setEnabled(false);
                 }
             } else {
                 wmsMapper.setVisible(false);
