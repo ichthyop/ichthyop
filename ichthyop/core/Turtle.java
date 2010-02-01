@@ -1,5 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
+ * February the 1st, 16:15. Nathan can you see that change ?
+ * 
+ To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package ichthyop.core;
