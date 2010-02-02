@@ -149,9 +149,9 @@ public class WMSMapper extends JXMapKit {
             calendar = new ClimatoCalendar();
         } else {
             String time_origin = vtime.findAttribute("origin").getStringValue();
-            calendar = new Calendar1900(getSimulationManager().getTimeManager().getTimeOrigin(time_origin, Calendar.YEAR),
-                    getSimulationManager().getTimeManager().getTimeOrigin(time_origin, Calendar.MONTH),
-                    getSimulationManager().getTimeManager().getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+            calendar = new Calendar1900(Calendar1900.getTimeOrigin(time_origin, Calendar.YEAR),
+                    Calendar1900.getTimeOrigin(time_origin, Calendar.MONTH),
+                    Calendar1900.getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
         }
 
         bgPainter = getBgPainter();

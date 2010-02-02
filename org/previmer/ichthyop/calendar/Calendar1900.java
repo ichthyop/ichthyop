@@ -1,6 +1,7 @@
 package org.previmer.ichthyop.calendar;
 
 /** Import the abstract class Calendar */
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -24,35 +25,26 @@ public class Calendar1900 extends Calendar {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
     /**
      * Origin of time
      */
     int[] epoch_fields;
-
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
-
     public static final int ONE_SECOND = 1000;
     public static final int ONE_MINUTE = 60 * ONE_SECOND;
     public static final int ONE_HOUR = 60 * ONE_MINUTE;
     public static final long ONE_DAY = 24 * ONE_HOUR;
     public static final long ONE_WEEK = 7 * ONE_DAY;
-
-    private static final int NUM_DAYS[]
-            = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334}; // 0-based, for day-in-year
-    private static final int LEAP_NUM_DAYS[]
-            = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}; // 0-based, for day-in-year
-    private static final int MONTH_LENGTH[]
-            = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0-based
-    private static final int LEAP_MONTH_LENGTH[]
-            = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0-based
+    private static final int NUM_DAYS[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334}; // 0-based, for day-in-year
+    private static final int LEAP_NUM_DAYS[] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}; // 0-based, for day-in-year
+    private static final int MONTH_LENGTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0-based
+    private static final int LEAP_MONTH_LENGTH[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0-based
 
 ///////////////
 // Constructors
 ///////////////
-
     /**
      * Constructs a Gregorian Calendar with origin of time
      * January 1, 1900 00:00:00.000 GMT.
@@ -78,11 +70,29 @@ public class Calendar1900 extends Calendar {
         setEpoch(HOUR_OF_DAY, 0);
         setEpoch(MINUTE, 0);
         setEpoch(SECOND, 0);
+        setTimeInMillis(0);
+    }
+
+    public Calendar1900(String time_origin) {
+        this(getTimeOrigin(time_origin, Calendar.YEAR),
+                getTimeOrigin(time_origin, Calendar.MONTH),
+                getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    public static int getTimeOrigin(String time_origin, int field) {
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        Calendar1900 cld = new Calendar1900();
+        dtFormat.setCalendar(cld);
+        cld.setTimeInMillis(0);
+        try {
+            cld.setTime(dtFormat.parse(time_origin));
+        } catch (Exception ex) {
+        }
+        return cld.get(field);
+    }
 
     /**
      * Sets the given epoch field (origin of time) to the given value.
@@ -115,7 +125,6 @@ public class Calendar1900 extends Calendar {
         return day * ONE_DAY;
     }
 
-
     /**
      * Converts time as milliseconds to time field values.
      */
@@ -126,12 +135,10 @@ public class Calendar1900 extends Calendar {
         int n400, n4, n1;
 
         long timeInDay_o = timeInDay + (isLeap(epoch_fields[YEAR])
-                                        ?
-                                        LEAP_NUM_DAYS[epoch_fields[MONTH]] +
-                                        epoch_fields[DAY_OF_MONTH] - 1
-                                        :
-                                        NUM_DAYS[epoch_fields[MONTH]] +
-                                        epoch_fields[DAY_OF_MONTH] - 1);
+                ? LEAP_NUM_DAYS[epoch_fields[MONTH]]
+                + epoch_fields[DAY_OF_MONTH] - 1
+                : NUM_DAYS[epoch_fields[MONTH]]
+                + epoch_fields[DAY_OF_MONTH] - 1);
 
         n400 = (int) (timeInDay_o / 146097);
         dayOfYear = (int) (timeInDay_o % 146097);
@@ -156,8 +163,8 @@ public class Calendar1900 extends Calendar {
         }
 
         month = (12 * (dayOfYear + correction) + 6) / 367; // zero-based month
-        dayOfMonth = dayOfYear -
-                     (isLeap ? LEAP_NUM_DAYS[month] : NUM_DAYS[month]) + 1; // one-based DOM
+        dayOfMonth = dayOfYear
+                - (isLeap ? LEAP_NUM_DAYS[month] : NUM_DAYS[month]) + 1; // one-based DOM
 
         year = rawYear;
         set(YEAR, year);
@@ -207,7 +214,8 @@ public class Calendar1900 extends Calendar {
             time2Day += isLeap
                     ? (long) (LEAP_NUM_DAYS[monthOn])
                     : (long) (NUM_DAYS[monthOn]);
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+        }
 
         int deltaYear = yearOn - epoch_fields[YEAR];
 
@@ -224,18 +232,16 @@ public class Calendar1900 extends Calendar {
                 : NUM_DAYS[epoch_fields[MONTH]];
 
         long millis = dayToMillis(time2Day);
-        int millisInDay = fields[MILLISECOND] +
-                          1000 *
-                          (fields[SECOND] +
-                           60 * (fields[MINUTE] + 60 * fields[HOUR_OF_DAY]));
+        int millisInDay = fields[MILLISECOND]
+                + 1000
+                * (fields[SECOND]
+                + 60 * (fields[MINUTE] + 60 * fields[HOUR_OF_DAY]));
         time = millis + millisInDay;
     }
-
 
 //////////////////////////////////
 // Inherited methods not redefined
 //////////////////////////////////
-
     public int getGreatestMinimum(int field) {
         return 0;
     }
@@ -257,7 +263,5 @@ public class Calendar1900 extends Calendar {
 
     public void roll(int field, boolean up) {
     }
-
     //---------- End of class
-
 }

@@ -93,9 +93,9 @@
                               <Layout>
                                 <DimensionLayout dim="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="102" alignment="0" attributes="0">
+                                      <Group type="102" attributes="0">
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="1" attributes="0">
+                                          <Group type="103" groupAlignment="0" attributes="0">
                                               <Component id="lblCfgFile" alignment="0" pref="420" max="32767" attributes="0"/>
                                               <Group type="102" alignment="0" attributes="0">
                                                   <Component id="btnNewCfgFile" min="-2" max="-2" attributes="0"/>
@@ -109,6 +109,7 @@
                                                   <EmptySpace max="-2" attributes="0"/>
                                                   <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
                                               </Group>
+                                              <Component id="ckBoxAdvancedEditor" alignment="0" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <EmptySpace max="-2" attributes="0"/>
                                       </Group>
@@ -130,6 +131,8 @@
                                           </Group>
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Component id="lblCfgFile" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                          <Component id="ckBoxAdvancedEditor" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
@@ -198,6 +201,15 @@
                                     <Property name="horizontalTextPosition" type="int" value="4"/>
                                     <Property name="name" type="java.lang.String" value="btnCloseCfgFile" noResource="true"/>
                                     <Property name="verticalTextPosition" type="int" value="3"/>
+                                  </Properties>
+                                </Component>
+                                <Component class="javax.swing.JCheckBox" name="ckBoxAdvancedEditor">
+                                  <Properties>
+                                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                      <action class="org.previmer.ichthyop.ui.IchthyopView" id="reloadEditor" methodName="reloadEditor"/>
+                                    </Property>
+                                    <Property name="text" type="java.lang.String" resourceKey="ckBoxAdvancedEditor.text"/>
+                                    <Property name="name" type="java.lang.String" value="ckBoxAdvancedEditor" noResource="true"/>
                                   </Properties>
                                 </Component>
                               </SubComponents>
@@ -1705,13 +1717,11 @@
     </Container>
     <Component class="javax.swing.JLabel" name="statusMessageLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" resourceKey="statusMessageLabel.text"/>
         <Property name="name" type="java.lang.String" value="statusMessageLabel" noResource="true"/>
       </Properties>
     </Component>
     <Component class="org.jdesktop.swingx.JXBusyLabel" name="statusAnimationLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" resourceKey="statusAnimationLabel.text"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[20, 20]"/>
         </Property>
@@ -1760,7 +1770,6 @@
     <Component class="javax.swing.JLabel" name="lblFlag">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" resourceKey="lblFlag.icon"/>
-        <Property name="text" type="java.lang.String" resourceKey="lblFlag.text"/>
         <Property name="name" type="java.lang.String" value="lblFlag" noResource="true"/>
       </Properties>
     </Component>

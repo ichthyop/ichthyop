@@ -10,6 +10,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
+import java.lang.reflect.InvocationTargetException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -29,6 +30,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.EventObject;
 import java.util.List;
@@ -43,6 +45,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
@@ -50,6 +53,7 @@ import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionListener;
@@ -260,41 +264,90 @@ public class IchthyopView extends FrameView
         btnRemoveValue.getAction().setEnabled(false);
     }
 
+    @Action
+    public void reloadEditor() {
+        valueChanged(new TreeSelectionEvent(ckBoxAdvancedEditor, null, true, null, null));
+    }
+
+    private void setupAdvancedEditor(XBlock block) {
+
+        pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(block.getTreePath()));
+        if (block.getType().equals(BlockType.OPTION)) {
+            ckBoxBlock.setVisible(false);
+        } else {
+            ckBoxBlock.setVisible(true);
+            ckBoxBlock.setSelected(block.isEnabled());
+        }
+        StringBuffer info = new StringBuffer("<html><i>");
+        info.append(block.getDescription());
+        info.append("</i></html>");
+        lblBlockInfo.setText(info.toString());
+        btnUndo.getAction().setEnabled(false);
+        btnRedo.getAction().setEnabled(false);
+        btnAddValue.getAction().setEnabled(false);
+        btnRemoveValue.getAction().setEnabled(false);
+        if (!showHiddenParameters) {
+            btnHiddenParameter.doClick();
+        } else {
+            getTable().setModel(block, this);
+        }
+        if (block.getNbHiddenParameters() > 0) {
+            btnHiddenParameter.getAction().setEnabled(true);
+        } else {
+            btnHiddenParameter.getAction().setEnabled(false);
+        }
+        setParameterEditorEnabled(block.isEnabled());
+    }
+
+    private JBlockPanel getBlockEditor(XBlock block) {
+
+        if (null != block.getXParameter("editor")) {
+            String editorClass = block.getXParameter("editor").getValue();
+            try {
+                Constructor constructor = Class.forName(editorClass).getConstructor(XBlock.class);
+                return (JBlockPanel) constructor.newInstance(block);
+            } catch (InstantiationException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return null;
+        } else {
+            return null;
+        }
+    }
+
     public void valueChanged(TreeSelectionEvent e) {
         final DefaultMutableTreeNode node = blockTree.getSelectedNode();
+        blockEditor = null;
         if (node != null && node.isLeaf()) {
-            splitPaneCfg.setRightComponent(pnlBlock);
-            pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(blockTree.getSelectedBlock().getTreePath()));
             XBlock block = blockTree.getSelectedBlock();
             if (block.getType().equals(BlockType.ZONE)) {
                 splitPaneCfg.setRightComponent(pnlTree);
                 return;
             }
-            if (block.getType().equals(BlockType.OPTION)) {
-                ckBoxBlock.setVisible(false);
-            } else {
-                ckBoxBlock.setVisible(true);
-                ckBoxBlock.setSelected(block.isEnabled());
+            setupAdvancedEditor(block);
+            if (!ckBoxAdvancedEditor.isSelected()) {
+                blockEditor = getBlockEditor(block);
             }
-            StringBuffer info = new StringBuffer("<html><i>");
-            info.append(block.getDescription());
-            info.append("</i></html>");
-            lblBlockInfo.setText(info.toString());
-            btnUndo.getAction().setEnabled(false);
-            btnRedo.getAction().setEnabled(false);
-            btnAddValue.getAction().setEnabled(false);
-            btnRemoveValue.getAction().setEnabled(false);
-            if (!showHiddenParameters) {
-                btnHiddenParameter.doClick();
+            if (null != blockEditor) {
+                JTabbedPane tabbedPane = new JTabbedPane();
+                tabbedPane.add(blockEditor, "User-friendly editor");
+                tabbedPane.add(pnlBlock, "Advanced editor");
+                splitPaneCfg.setRightComponent(tabbedPane);
             } else {
-                getTable().setModel(block, this);
+                splitPaneCfg.setRightComponent(pnlBlock);
             }
-            if (block.getNbHiddenParameters() > 0) {
-                btnHiddenParameter.getAction().setEnabled(true);
-            } else {
-                btnHiddenParameter.getAction().setEnabled(false);
-            }
-            setParameterEditorEnabled(block.isEnabled());
         } else {
             splitPaneCfg.setRightComponent(pnlTree);
         }
@@ -1246,6 +1299,7 @@ public class IchthyopView extends FrameView
         btnSaveCfgFile = new javax.swing.JButton();
         btnSaveAsCfgFile = new javax.swing.JButton();
         btnCloseCfgFile = new javax.swing.JButton();
+        ckBoxAdvancedEditor = new javax.swing.JCheckBox();
         taskPaneSimulation = new org.jdesktop.swingx.JXTaskPane();
         pnlSimulation = new javax.swing.JPanel();
         btnPreview = new javax.swing.JToggleButton();
@@ -1424,24 +1478,29 @@ public class IchthyopView extends FrameView
         btnCloseCfgFile.setName("btnCloseCfgFile"); // NOI18N
         btnCloseCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
+        ckBoxAdvancedEditor.setAction(actionMap.get("reloadEditor")); // NOI18N
+        ckBoxAdvancedEditor.setText(resourceMap.getString("ckBoxAdvancedEditor.text")); // NOI18N
+        ckBoxAdvancedEditor.setName("ckBoxAdvancedEditor"); // NOI18N
+
         javax.swing.GroupLayout pnlFileLayout = new javax.swing.GroupLayout(pnlFile);
         pnlFile.setLayout(pnlFileLayout);
         pnlFileLayout.setHorizontalGroup(
             pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlFileLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lblCfgFile, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlFileLayout.createSequentialGroup()
+                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                    .addGroup(pnlFileLayout.createSequentialGroup()
                         .addComponent(btnNewCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnOpenCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCloseCfgFile))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlFileLayout.createSequentialGroup()
+                    .addGroup(pnlFileLayout.createSequentialGroup()
                         .addComponent(btnSaveCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsCfgFile)))
+                        .addComponent(btnSaveAsCfgFile))
+                    .addComponent(ckBoxAdvancedEditor))
                 .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
@@ -1458,6 +1517,8 @@ public class IchthyopView extends FrameView
                     .addComponent(btnSaveCfgFile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCfgFile)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(ckBoxAdvancedEditor)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2401,10 +2462,8 @@ public class IchthyopView extends FrameView
         c3.setFixedWidth(20);
         statusBar.add(statusAnimationLabel, c3);
 
-        statusMessageLabel.setText(resourceMap.getString("statusMessageLabel.text")); // NOI18N
         statusMessageLabel.setName("statusMessageLabel"); // NOI18N
 
-        statusAnimationLabel.setText(resourceMap.getString("statusAnimationLabel.text")); // NOI18N
         statusAnimationLabel.setMaximumSize(new java.awt.Dimension(20, 20));
         statusAnimationLabel.setMinimumSize(new java.awt.Dimension(20, 20));
         statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
@@ -2439,7 +2498,6 @@ public class IchthyopView extends FrameView
         );
 
         lblFlag.setIcon(resourceMap.getIcon("lblFlag.icon")); // NOI18N
-        lblFlag.setText(resourceMap.getString("lblFlag.text")); // NOI18N
         lblFlag.setName("lblFlag"); // NOI18N
 
         setComponent(mainPanel);
@@ -2599,6 +2657,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnUpper;
     private javax.swing.JMenuItem cancelMapMenuItem;
     private javax.swing.JComboBox cbBoxWMS;
+    private javax.swing.JCheckBox ckBoxAdvancedEditor;
     private javax.swing.JCheckBox ckBoxBlock;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
@@ -2707,4 +2766,5 @@ public class IchthyopView extends FrameView
     private JLabel lblMapping;
     private boolean hasStructureChanged;
     private boolean showHiddenParameters = true;
+    private JBlockPanel blockEditor;
 }

@@ -224,7 +224,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
     }
 
     private int getTimeOrigin(String time_origin, int field) {
-        return SimulationManager.getInstance().getTimeManager().getTimeOrigin(time_origin, field);
+        return Calendar1900.getTimeOrigin(time_origin, field);
     }
 
     public String getParameterKey(int row) {
