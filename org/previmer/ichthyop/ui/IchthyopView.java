@@ -1032,6 +1032,8 @@ public class IchthyopView extends FrameView
         }
 
         savePreference(animationSpeed, animationSpeed.getValue());
+        
+        savePreference(ckBoxAdvancedEditor, ckBoxAdvancedEditor.isSelected());
     }
 
     private void savePreference(Component bean, Object property) {
@@ -1051,7 +1053,14 @@ public class IchthyopView extends FrameView
     }
 
     public void restorePreferences() {
-        Object property = restorePreference(openMenuItem);
+        Object property;
+
+        property = restorePreference(ckBoxAdvancedEditor);
+        if (property != null) {
+            ckBoxAdvancedEditor.setSelected((Boolean) property);
+        }
+
+        property = restorePreference(openMenuItem);
         if (property != null) {
             File file = new File((String) property);
             if (file.isFile()) {
