@@ -39,7 +39,6 @@ public class JDurationTextField extends JFormattedTextField {
     
     public JDurationTextField() {
         setFocusLostBehavior(JFormattedTextField.COMMIT_OR_REVERT);
-        setHorizontalAlignment(JTextField.TRAILING);
         try {
             maskFormatter = new MaskFormatter("#### day(s) ## hour(s) ## minute(s)");
         } catch (ParseException ex) {

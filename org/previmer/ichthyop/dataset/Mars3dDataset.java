@@ -4,6 +4,8 @@
  */
 package org.previmer.ichthyop.dataset;
 
+import java.net.MalformedURLException;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import org.previmer.ichthyop.event.NextStepEvent;
@@ -12,9 +14,17 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScheme;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.auth.CredentialsNotAvailableException;
+import org.apache.commons.httpclient.auth.CredentialsProvider;
+import org.previmer.ichthyop.ui.IchthyopApp;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.Index;
@@ -22,6 +32,8 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.Variable;
+import ucar.nc2.dods.DODSNetcdfFile;
+import ucar.nc2.util.net.HttpClientManager;
 
 /**
  *
@@ -217,17 +229,38 @@ public class Mars3dDataset extends AbstractDataset {
         String path = uriCurrent.resolve(URI.create(rawPath)).getPath();
 
         if (isDODS(rawPath)) {
-            listInputFiles = new ArrayList<String>(1);
-            listInputFiles.add(rawPath);
+        listInputFiles = new ArrayList<String>(1);
+        listInputFiles.add(rawPath);
         } else if (isDirectory(path)) {
-            listInputFiles = getInputList(path);
-            if (!getParameter("grid_file").isEmpty()) {
-                gridFile = getGridFile(getParameter("grid_file"));
-            } else {
-                gridFile = listInputFiles.get(0);
-            }
+        listInputFiles = getInputList(path);
+        if (!getParameter("grid_file").isEmpty()) {
+        gridFile = getGridFile(getParameter("grid_file"));
+        } else {
+        gridFile = listInputFiles.get(0);
+        }
         }
         open(listInputFiles.get(0));
+        /*listInputFiles = new ArrayList<String>(1);
+        listInputFiles.add(rawPath);
+        openDods(rawPath);*/
+    }
+
+    private void openDods(String strUrl) {
+
+        try {
+            CredentialsProvider provider = new CredentialsProvider() {
+
+                public Credentials getCredentials(AuthScheme as, String string, int i, boolean bln) throws CredentialsNotAvailableException {
+                    return new UsernamePasswordCredentials("opendapibi", "65bwt1s");
+                }
+            };
+            //CredentialsProvider provider = new thredds.ui.UrlAuthenticatorDialog(IchthyopApp.getApplication().getMainFrame());
+            HttpClientManager.init(provider, IchthyopApp.getApplication().getMainFrame().getTitle());
+            ncIn = NetcdfDataset.openFile(strUrl, null);
+            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+        } catch (Exception ex) {
+            Logger.getLogger(Mars3dDataset.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

@@ -8,19 +8,26 @@
  *
  * Created on Feb 2, 2010, 10:02:01 AM
  */
-
 package org.previmer.ichthyop.ui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
+import javax.swing.BorderFactory;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.io.XParameter;
 
 /**
  *
  * @author pverley
  */
-public class TimeOptionPanel extends JBlockPanel {
+public class TimeOptionPanel extends JBlockPanel implements PropertyChangeListener, ActionListener {
 
     /** Creates new form TimeOptionPanel */
     public TimeOptionPanel() {
@@ -33,16 +40,30 @@ public class TimeOptionPanel extends JBlockPanel {
         if (null != block) {
             putValues();
         }
+        addListeners();
+    }
+
+    private void addListeners() {
+        txtFieldTimeOrigin.addPropertyChangeListener("value", this);
+        txtFieldInitialTime.addPropertyChangeListener("value", this);
+        txtFieldTimeStep.addPropertyChangeListener("value", this);
+        rdBtnForward.addActionListener(this);
+        rdBtnBackward.addActionListener(this);
+        rdBtnClimato.addActionListener(this);
+        rdBtnGregorian.addActionListener(this);
     }
 
     private void putValues() {
 
         // Block info
+        pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(getBlock().getTreePath()));
         StringBuffer info = new StringBuffer("<html><i>");
         info.append(getBlock().getDescription());
         info.append("</i></html>");
         lblBlockInfo.setText(info.toString());
-        
+
+        lblRetrieveInfo.setText("");
+
         // Direction in time
         if (getBlock().getXParameter("time_arrow").getValue().matches("forward")) {
             rdBtnForward.doClick();
@@ -64,7 +85,7 @@ public class TimeOptionPanel extends JBlockPanel {
         }
 
         // Initial time
-        txtFieldInitialTime.setValue(Long.valueOf(getBlock().getXParameter("initial_time").getValue()));
+        txtFieldInitialTime.setValue(Long.valueOf(getBlock().getXParameter("initial_time").getValue()).longValue());
 
         // Transport duration
         txtFieldDuration.setValue(Long.valueOf(getBlock().getXParameter("transport_duration").getValue()).longValue());
@@ -75,6 +96,81 @@ public class TimeOptionPanel extends JBlockPanel {
 
     public Task retrieveNCInfo() {
         return null;
+    }
+
+    public void propertyChange(PropertyChangeEvent evt) {
+
+        if (evt.getPropertyName().matches("value")) {
+            firePropertyChange("xicfile", null, null);
+        }
+
+        Object source = evt.getSource();
+
+        if (source == txtFieldTimeOrigin) {
+            if (txtFieldTimeOrigin.isEditValid()) {
+                txtFieldInitialTime.setCalendar(new Calendar1900(txtFieldTimeOrigin.getText()));
+                txtFieldFirstTime.setCalendar(new Calendar1900(txtFieldTimeOrigin.getText()));
+                getBlock().getXParameter("time_origin").setValue(txtFieldFirstTime.getText());
+            }
+        }
+
+        if (source == txtFieldInitialTime) {
+            if (txtFieldInitialTime.isEditValid()) {
+                getBlock().getXParameter("initial_time").setValue(String.valueOf(txtFieldInitialTime.getTimeInSeconds()));
+            }
+        }
+
+        if (source == txtFieldDuration) {
+            if (txtFieldDuration.isEditValid()) {
+                getBlock().getXParameter("transport_duration").setValue(String.valueOf(txtFieldDuration.getDurationInSeconds()));
+            }
+        }
+
+        if (source == txtFieldTimeStep) {
+            if (txtFieldTimeStep.isEditValid()) {
+                getBlock().getXParameter("time_step").setValue(((Long) txtFieldTimeStep.getValue()).toString());
+            }
+        }
+    }
+
+    private void setParamInfo(XParameter xparam) {
+        if (null != xparam) {
+            try {
+                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getLongName()));
+                StringBuffer info = new StringBuffer("<html><i>");
+                info.append(xparam.getDescription());
+                info.append("</i></html>");
+                lblParameter.setText(info.toString());
+            } catch (Exception ex) {
+                pnlParamDescription.setBorder(BorderFactory.createTitledBorder("Parameter description"));
+                lblParameter.setText("No description available");
+            }
+        } else {
+            pnlParamDescription.setBorder(BorderFactory.createTitledBorder("Parameter description"));
+            lblParameter.setText("No description available");
+        }
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        firePropertyChange("xicfile", null, null);
+
+        Object source = e.getSource();
+
+        if (source == rdBtnForward) {
+            getBlock().getXParameter("time_arrow").setValue("forward");
+        }
+
+        if (source == rdBtnBackward) {
+            getBlock().getXParameter("time_arrow").setValue("backward");
+        }
+
+        if (source == rdBtnClimato) {
+            getBlock().getXParameter("calendar_type").setValue("climato");
+        }
+
+        if (source == rdBtnGregorian) {
+            getBlock().getXParameter("calendar_type").setValue("gregorian");
+        }
     }
 
     /** This method is called from within the constructor to
@@ -119,6 +215,8 @@ public class TimeOptionPanel extends JBlockPanel {
         txtFieldTimeStep = new javax.swing.JFormattedTextField();
         jLabel14 = new javax.swing.JLabel();
         txtFieldTimeOrigin = new javax.swing.JFormattedTextField();
+        pnlParamDescription = new javax.swing.JPanel();
+        lblParameter = new javax.swing.JLabel();
 
         setName("Form"); // NOI18N
 
@@ -135,18 +233,19 @@ public class TimeOptionPanel extends JBlockPanel {
             pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlBlockInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
+                .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 695, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlBlockInfoLayout.setVerticalGroup(
             pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockInfoLayout.createSequentialGroup()
-                .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
+                .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("jPanel1.border.title"))); // NOI18N
         jPanel1.setName("jPanel1"); // NOI18N
+        jPanel1.setVisible(false);
 
         jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
@@ -215,7 +314,7 @@ public class TimeOptionPanel extends JBlockPanel {
                                 .addComponent(txtFieldBestTimeStep, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel7)))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -269,15 +368,39 @@ public class TimeOptionPanel extends JBlockPanel {
         rdBtnForward.setSelected(true);
         rdBtnForward.setText(resourceMap.getString("rdBtnForward.text")); // NOI18N
         rdBtnForward.setName("rdBtnForward"); // NOI18N
+        rdBtnForward.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                rdBtnForwardMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
 
         buttonGroup1.add(rdBtnBackward);
         rdBtnBackward.setText(resourceMap.getString("rdBtnBackward.text")); // NOI18N
         rdBtnBackward.setName("rdBtnBackward"); // NOI18N
+        rdBtnBackward.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                rdBtnForwardMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
 
         buttonGroup2.add(rdBtnClimato);
         rdBtnClimato.setSelected(true);
         rdBtnClimato.setText(resourceMap.getString("rdBtnClimato.text")); // NOI18N
         rdBtnClimato.setName("rdBtnClimato"); // NOI18N
+        rdBtnClimato.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                rdBtnGregorianMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
         rdBtnClimato.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rdBtnClimatoActionPerformed(evt);
@@ -287,6 +410,14 @@ public class TimeOptionPanel extends JBlockPanel {
         buttonGroup2.add(rdBtnGregorian);
         rdBtnGregorian.setText(resourceMap.getString("rdBtnGregorian.text")); // NOI18N
         rdBtnGregorian.setName("rdBtnGregorian"); // NOI18N
+        rdBtnGregorian.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                rdBtnGregorianMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
         rdBtnGregorian.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rdBtnGregorianActionPerformed(evt);
@@ -294,11 +425,35 @@ public class TimeOptionPanel extends JBlockPanel {
         });
 
         txtFieldDuration.setName("txtFieldDuration"); // NOI18N
+        txtFieldDuration.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                txtFieldDurationMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
 
         txtFieldInitialTime.setName("txtFieldInitialTime"); // NOI18N
+        txtFieldInitialTime.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                txtFieldInitialTimeMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
 
         txtFieldTimeStep.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         txtFieldTimeStep.setName("txtFieldTimeStep"); // NOI18N
+        txtFieldTimeStep.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
 
         jLabel14.setText(resourceMap.getString("jLabel14.text")); // NOI18N
         jLabel14.setName("jLabel14"); // NOI18N
@@ -312,6 +467,36 @@ public class TimeOptionPanel extends JBlockPanel {
         txtFieldTimeOrigin.setEnabled(false);
         txtFieldTimeOrigin.setName("txtFieldTimeOrigin"); // NOI18N
         txtFieldTimeOrigin.setValue("1900/01/01 00:00");
+        txtFieldTimeOrigin.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                txtFieldTimeOriginMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtFieldTimeStepMouseExited(evt);
+            }
+        });
+
+        pnlParamDescription.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlParamDescription.border.title"))); // NOI18N
+        pnlParamDescription.setName("pnlParamDescription"); // NOI18N
+
+        lblParameter.setText(resourceMap.getString("lblParameter.text")); // NOI18N
+        lblParameter.setName("lblParameter"); // NOI18N
+
+        javax.swing.GroupLayout pnlParamDescriptionLayout = new javax.swing.GroupLayout(pnlParamDescription);
+        pnlParamDescription.setLayout(pnlParamDescriptionLayout);
+        pnlParamDescriptionLayout.setHorizontalGroup(
+            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        pnlParamDescriptionLayout.setVerticalGroup(
+            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -320,30 +505,33 @@ public class TimeOptionPanel extends JBlockPanel {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel13)
-                    .addComponent(jLabel11)
-                    .addComponent(jLabel10)
-                    .addComponent(jLabel12)
-                    .addComponent(jLabel8)
-                    .addComponent(jLabel9))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(rdBtnClimato)
-                        .addGap(18, 18, 18)
-                        .addComponent(rdBtnGregorian))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(rdBtnForward)
-                        .addGap(18, 18, 18)
-                        .addComponent(rdBtnBackward))
-                    .addComponent(txtFieldTimeOrigin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFieldInitialTime, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFieldDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(txtFieldTimeStep, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel13)
+                            .addComponent(jLabel11)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel12)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel14)))
-                .addContainerGap(146, Short.MAX_VALUE))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(rdBtnClimato)
+                                .addGap(18, 18, 18)
+                                .addComponent(rdBtnGregorian))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(rdBtnForward)
+                                .addGap(18, 18, 18)
+                                .addComponent(rdBtnBackward))
+                            .addComponent(txtFieldTimeOrigin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtFieldInitialTime, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtFieldDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(txtFieldTimeStep, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel14)))))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -375,6 +563,8 @@ public class TimeOptionPanel extends JBlockPanel {
                     .addComponent(jLabel13)
                     .addComponent(txtFieldTimeStep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel14))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlParamDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -382,12 +572,12 @@ public class TimeOptionPanel extends JBlockPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -397,7 +587,7 @@ public class TimeOptionPanel extends JBlockPanel {
                 .addComponent(pnlBlockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -417,7 +607,41 @@ public class TimeOptionPanel extends JBlockPanel {
         txtFieldFirstTime.setCalendar(new Calendar1900(txtFieldTimeOrigin.getText()));
     }//GEN-LAST:event_rdBtnGregorianActionPerformed
 
+    private void rdBtnForwardMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_rdBtnForwardMouseEntered
+        // TODO add your handling code here:
+        setParamInfo(getBlock().getXParameter("time_arrow"));
+    }//GEN-LAST:event_rdBtnForwardMouseEntered
 
+    private void txtFieldTimeOriginMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtFieldTimeOriginMouseEntered
+        // TODO add your handling code here:
+        setParamInfo(getBlock().getXParameter("time_origin"));
+
+    }//GEN-LAST:event_txtFieldTimeOriginMouseEntered
+
+    private void txtFieldInitialTimeMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtFieldInitialTimeMouseEntered
+        // TODO add your handling code here:
+        setParamInfo(getBlock().getXParameter("initial_time"));
+    }//GEN-LAST:event_txtFieldInitialTimeMouseEntered
+
+    private void txtFieldDurationMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtFieldDurationMouseEntered
+        // TODO add your handling code here:
+        setParamInfo(getBlock().getXParameter("transport_duration"));
+    }//GEN-LAST:event_txtFieldDurationMouseEntered
+
+    private void txtFieldTimeStepMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtFieldTimeStepMouseEntered
+        // TODO add your handling code here:
+        setParamInfo(getBlock().getXParameter("time_step"));
+    }//GEN-LAST:event_txtFieldTimeStepMouseEntered
+
+    private void txtFieldTimeStepMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtFieldTimeStepMouseExited
+        // TODO add your handling code here:
+        setParamInfo(null);
+    }//GEN-LAST:event_txtFieldTimeStepMouseExited
+
+    private void rdBtnGregorianMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_rdBtnGregorianMouseEntered
+        // TODO add your handling code here:
+        setParamInfo(getBlock().getXParameter("calendar_type"));
+    }//GEN-LAST:event_rdBtnGregorianMouseEntered
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRetrieveInfo;
     private javax.swing.ButtonGroup buttonGroup1;
@@ -438,8 +662,10 @@ public class TimeOptionPanel extends JBlockPanel {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblBlockInfo;
+    private javax.swing.JLabel lblParameter;
     private javax.swing.JLabel lblRetrieveInfo;
     private javax.swing.JPanel pnlBlockInfo;
+    private javax.swing.JPanel pnlParamDescription;
     private javax.swing.JRadioButton rdBtnBackward;
     private javax.swing.JRadioButton rdBtnClimato;
     private javax.swing.JRadioButton rdBtnForward;
@@ -454,5 +680,5 @@ public class TimeOptionPanel extends JBlockPanel {
     private javax.swing.JFormattedTextField txtFieldTimeStep;
     // End of variables declaration//GEN-END:variables
 
-
+    
 }

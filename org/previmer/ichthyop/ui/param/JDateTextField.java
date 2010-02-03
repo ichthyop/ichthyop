@@ -54,7 +54,9 @@ public class JDateTextField extends JFormattedTextField {
     }
 
     public void setCalendar(Calendar calendar) {
-        long time = calendar.getTimeInMillis();
+        long time = (null != this.calendar)
+                ? getTimeInSeconds()
+                : 0L;
         this.calendar = calendar;
         dtFormat.setCalendar(calendar);
         setValue(time);

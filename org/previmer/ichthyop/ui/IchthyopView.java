@@ -45,7 +45,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
@@ -345,6 +344,7 @@ public class IchthyopView extends FrameView
                 tabbedPane.add(blockEditor, "User-friendly editor");
                 tabbedPane.add(pnlBlock, "Advanced editor");
                 splitPaneCfg.setRightComponent(tabbedPane);
+                blockEditor.addPropertyChangeListener("xicfile", this);
             } else {
                 splitPaneCfg.setRightComponent(pnlBlock);
             }
