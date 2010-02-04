@@ -15,6 +15,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.net.URI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -23,11 +24,10 @@ import javax.swing.JTextField;
 public class FileEditor extends AbstractCellEditor
         implements TableCellEditor, ActionListener {
 
-    File currentFile = new File(System.getProperty("user.dir"));
-    JFileChooser fileChooser;
-    JTextField textField = new JTextField();
+    private JFileChooser fileChooser;
+    private JTextField textField = new JTextField();
     protected static final String EDIT = "edit";
-    JPanel panel;
+    private JPanel panel;
 
     public FileEditor(int dialogType) {
         //Set up the editor (from the table's point of view),
@@ -37,14 +37,14 @@ public class FileEditor extends AbstractCellEditor
         panel = createEditorUI();
         //Set up the dialog that the button brings up.
         fileChooser = new JFileChooser();
-        fileChooser.setDialogType(dialogType);
+        fileChooser.setFileSelectionMode(dialogType);
     }
 
     private JPanel createEditorUI() {
         JPanel pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
         textField = new JTextField();
-        textField.setEditable(false);
+        textField.setEditable(true);
         JButton btn = new JButton("...");
         btn.setBorderPainted(false);
         btn.setFont(btn.getFont().deriveFont(Font.PLAIN, 10));
@@ -62,22 +62,20 @@ public class FileEditor extends AbstractCellEditor
     public void actionPerformed(ActionEvent e) {
         //The user has clicked the cell, so
         //bring up the dialog.
-        fileChooser.setSelectedFile(currentFile);
-        int answer = JFileChooser.CANCEL_OPTION;
-        if (fileChooser.getDialogType() == JFileChooser.FILES_ONLY) {
-            answer = fileChooser.showOpenDialog(panel);
-        } else if (fileChooser.getDialogType() == JFileChooser.DIRECTORIES_ONLY) {
-            answer = fileChooser.showDialog(panel, "Select a folder");
-        }
+        String path = textField.getText().isEmpty()
+                ? URI.create(System.getProperty("user.dir")).getPath()
+                : URI.create(textField.getText()).getPath();
+        fileChooser.setSelectedFile(new File(path));
+        int answer = fileChooser.showOpenDialog(panel);
         if (answer == JFileChooser.APPROVE_OPTION) {
-            currentFile = fileChooser.getSelectedFile();
+            textField.setText(fileChooser.getSelectedFile().toURI().toString());
             fireEditingStopped();
         }
     }
 
     //Implement the one CellEditor method that AbstractCellEditor doesn't.
     public Object getCellEditorValue() {
-        return currentFile.toString();
+        return textField.getText();
     }
 
     //Implement the one method defined by TableCellEditor.
@@ -86,8 +84,7 @@ public class FileEditor extends AbstractCellEditor
             boolean isSelected,
             int row,
             int column) {
-        currentFile = new File(value.toString());
-        textField.setText(currentFile.toString());
+        textField.setText(value.toString());
         return panel;
     }
 }
