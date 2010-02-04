@@ -13,9 +13,9 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class RunBatch extends SimulationManagerAccessor {
+public class IchthyopBatch extends SimulationManagerAccessor {
 
-    public RunBatch(String path) {
+    public IchthyopBatch(String path) {
 
         try {
             File file = new File(path);
@@ -26,12 +26,7 @@ public class RunBatch extends SimulationManagerAccessor {
                 throw new IOException("Configuration file not found");
             }
         } catch (Exception ex) {
-            Logger.getLogger(RunBatch.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(IchthyopBatch.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public static void main(String... args) {
-        String filename = System.getProperty("user.dir") + File.separator + "cfg.xic";
-        new RunBatch(filename);
     }
 }
