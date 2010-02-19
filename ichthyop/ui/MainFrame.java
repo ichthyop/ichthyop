@@ -1140,8 +1140,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
      * @return an int, the time [second] between two steps
      */
     public static int getDtDisplay() {
-        return
-                (prmRefresh == null)
+        return (prmRefresh == null)
                 ? Configuration.get_dt()
                 : prmRefresh.getValue().intValue() * Configuration.get_dt();
     }
