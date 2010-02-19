@@ -54,7 +54,12 @@ public class BuoyancyScheme {
     final private static double C12 = 8.24493f * Math.pow(10, -1);
     final private static double C13 = 1.6546f * Math.pow(10, -6);
     final private static double C14 = 1.0227f * Math.pow(10, -4);
-    final private static double C15 = 5.72466f * Math.pow(10, -3);///////////////////////////////
+    final private static double C15 = 5.72466f * Math.pow(10, -3);
+    //Include for A. Ospina
+    final private static double alfaK = 42922.0767d;
+    final private static double betaK = 2.290236d;
+
+///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
@@ -69,15 +74,46 @@ public class BuoyancyScheme {
     /**
      * Egg density [g/cm3], a key parameter to calculate the egg buoyancy.
      */
-    private static float eggDensity;
+    private static double eggDensity;
     /**
      * Sea water density at particle location.
      */
     private static double waterDensity;
-    /*
-     *
+    ////////////////////////////
+// for Andres Ospina-Alvarez
+////////////////////////////
+    /**
+     * Age limit for Buoyancy scheme (A. Ospina)
      */
-    public final static double HATCHING_DEPTH = 20; // aqui pones tu valor de profundidad de eclosion
+    public static double age_lim_buoy_mov;
+    /**
+     * Egg stage at particle location not corrected.
+     */
+    private static double stage;
+    /**
+     * Egg stage at particle location corrected.
+     */
+    private static double stageC;
+    /**
+     * DevK constant.
+     */
+    private static double DevK;
+    /**
+     * Time of egg hatch
+     */
+    private static double timeHatch;
+    /**
+     * Day of egg hatch
+     */
+    private static double dayHatch;
+    /**
+     * Hatching density minus spwaning density
+     */
+    private static double rangeDens;
+    /**
+     * Hatching depth for egg, value choiced for users
+     */
+    public final static double HATCHING_DEPTH = -25;
     
 ////////////////////////////
 // Definition of the methods
@@ -152,10 +188,21 @@ public class BuoyancyScheme {
                 (waterDensity - getEggDensity(age))) / 100.0f) * dt);
     }
 
-    /**
-     * For Andres OSPINA
-     * Compute Egg denstity as function of its age
-     */
+    public static double move(double sal, double spawning_density, double hatching_density, double age, double tp) {
+
+        waterDensity = waterDensity(sal, tp);
+        age_lim_buoy_mov = 3600 * alfaK * Math.pow(tp, -betaK);
+        if (age <= age_lim_buoy_mov) {
+            return (g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f
+                    * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
+                    * (waterDensity - getEggDensity(spawning_density,
+                    hatching_density, age, tp) / 100.0f) * dt);
+        } else {
+            return 0;
+        }
+
+    }
+
     private static double getEggDensity(double age) {
 
         double spec_gravity = 0.d;
@@ -169,6 +216,39 @@ public class BuoyancyScheme {
         //System.out.println(spec_gravity);
 
         return spec_gravity;
+    }
+
+    private static double getEggDensity(double spawning_density, double hatching_density, double age, double tp) {
+
+        double age_in_hour = age / 3600;
+
+        DevK = age_in_hour * Math.pow(tp, betaK);
+
+        timeHatch = alfaK * Math.pow(tp, -betaK);
+        dayHatch = timeHatch / 24;
+
+        rangeDens = hatching_density - spawning_density;
+
+        stage = 0.000000000000235 * Math.pow(DevK, 3) - 0.0000000132 * Math.pow(DevK, 2)
+                + 0.0003605 * DevK + 0.6278;
+        stageC = stage + 1.4;
+
+        eggDensity = (1.3977 * Math.pow(10, -25) * (2.3738 * Math.pow(10, 20)
+                * Math.pow(stageC, 6) - 9.3745 * Math.pow(10, 21) * Math.pow(stageC, 5)
+                + 1.3323 * Math.pow(10, 23) * Math.pow(stageC, 4) - 7.9280
+                * Math.pow(10, 23) * Math.pow(stageC, 3) + 1.5734 * Math.pow(10, 24)
+                * Math.pow(stageC, 2) + 9.8733 * Math.pow(10, 23) * stageC - 5.6919
+                * Math.pow(10, 22))) * (rangeDens) + spawning_density;
+
+        System.out.println("spawning density     " + (float) spawning_density);
+        System.out.println("hatching density     " + (float) hatching_density);
+        System.out.println("egg density:         " + (float) eggDensity);
+        System.out.println("days for Hatch:      " + (float) dayHatch * 24.0f);
+        //System.out.println("Stage: " + (float) stage);
+        System.out.println("Age in hours:        " + (float) age_in_hour);
+        //System.out.println("Temperature: " + (float) tp);
+        System.out.println("-------------------------------------------");
+        return (eggDensity);
     }
     
     /**

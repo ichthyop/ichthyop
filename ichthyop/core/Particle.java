@@ -335,6 +335,7 @@ public class Particle extends RhoPoint implements IParticle {
         
         if (FLAG_BUOYANCY) {
             spawning_density = BuoyancyScheme.waterDensity(salinity, temperature);
+            // phv - aqui seria una manera de calcular du hatching density
             double[] hatching_position = getPGrid(); // aqui leo la posicion de la particula
             hatching_position[2] = BuoyancyScheme.HATCHING_DEPTH; // la pongo virtualmente a la profundidad de eclosion
             double tp_hatching_depth = data.getTemperature(hatching_position, Simulation.get_t0());
@@ -710,20 +711,16 @@ public class Particle extends RhoPoint implements IParticle {
             grid2Geog();
             salinity = data.getSalinity(getPGrid(), time);
             temperature = data.getTemperature(getPGrid(), time);
-            /*setZ(Dataset.depth2z(getX(), getY(),
-                    getDepth() +
-                    BuoyancyScheme.move(salinity, temperature)));*/
-            setZ(Dataset.depth2z(getX(), getY(),
+            /*
+             setZ(Dataset.depth2z(getX(), getY(),
                     getDepth() +
                     BuoyancyScheme.move(salinity, temperature, age)));
-            
-            /*setZ(Dataset.depth2z(getX(), getY(),
-                    getDepth() +
-                    BuoyancyScheme.move(salinity, temperature, spawning_density)));*/
-            
-            /*setZ(Dataset.depth2z(getX(), getY(),
-                    getDepth() +
-                    BuoyancyScheme.move(salinity, temperature, spawning_density, hatching_density)));*/
+             */
+
+            // phv - aqui llamaras tu nueva rutina que depende tambien de hatching_density
+            setZ(Dataset.depth2z(getX(), getY(),
+                    getDepth()
+                    + BuoyancyScheme.move(salinity, spawning_density, hatching_density, age, temperature)));
             
             
         }
