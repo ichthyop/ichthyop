@@ -1,7 +1,7 @@
 /*
  * February the 1st, 16:15. Nathan can you see that change ?
  * 
- To change this template, choose Tools | Templates
+To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package ichthyop.core;
@@ -9,8 +9,7 @@ package ichthyop.core;
 import ichthyop.io.Configuration;
 import ichthyop.io.Dataset;
 import ichthyop.util.Constant;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.HashMap;
 
 /**
  *
@@ -18,14 +17,8 @@ import java.util.GregorianCalendar;
  */
 public class Turtle extends Particle {
 
-    private static int startHour, startMinute, endHour, endMinute;
-    private static Calendar now, startTime, endTime;
     private static boolean FLAG_ACTIVE_ORIENTATION, FLAG_ADVECTION;
-    private int durationActivePeriod;
-    private int[] durationSwimmingSpeed, durationSwimmingOrientation;
-    private int[] currentSpeedActivity, currentOrientationActivity;
-    private int[] speedActivity, orientationActivity;
-    private float[] swimmingSpeed, swimmingOrientation;
+    private HashMap<Integer, Integer[]> currentSpeedActivity, currentOrientationActivity;
     private boolean isActive;
 
     public Turtle(int index, boolean is3D, double xmin, double xmax, double ymin, double ymax, double depthMin, double depthMax) {
@@ -47,49 +40,23 @@ public class Turtle extends Particle {
         FLAG_ADVECTION = Configuration.isAdvection();
         FLAG_ACTIVE_ORIENTATION = Configuration.isActiveOrientation();
         if (FLAG_ACTIVE_ORIENTATION) {
-            String activePeriod[] = Configuration.getActivePeriod().split(" ");
-            startHour = Integer.valueOf(activePeriod[0].split(":")[0]);
-            startMinute = Integer.valueOf(activePeriod[0].split(":")[1]);
-            endHour = Integer.valueOf(activePeriod[1].split(":")[0]);
-            endMinute = Integer.valueOf(activePeriod[1].split(":")[1]);
-            durationActivePeriod = computeActivePeriodDuration();
-            speedActivity = Configuration.getSwimmingSpeedActivity();
-            orientationActivity = Configuration.getSwimmingOrientationActivity();
-            swimmingSpeed = Configuration.getSwimmingSpeed();
-            swimmingOrientation = Configuration.getSwimmingOrientation();
-
-            durationSwimmingSpeed = new int[speedActivity.length];
-            for (int i = 0; i < speedActivity.length; i++) {
-                durationSwimmingSpeed[i] = (int) ((speedActivity[i] / 100.f) * durationActivePeriod);
+            currentSpeedActivity = new HashMap(Configuration.getOrientationZones().size());
+            currentOrientationActivity = new HashMap(Configuration.getOrientationZones().size());
+            for (OrientationZone zone : Configuration.getOrientationZones()) {
+                resetActivity(zone);
             }
-
-            durationSwimmingOrientation = new int[orientationActivity.length + 1];
-            int durationTotalOrientation = 0;
-            for (int i = 0; i < orientationActivity.length; i++) {
-                durationSwimmingOrientation[i] = (int) ((orientationActivity[i] / 100.f) * durationActivePeriod);
-                durationTotalOrientation += durationSwimmingOrientation[i];
-            }
-            durationSwimmingOrientation[orientationActivity.length] = Math.max(0, durationActivePeriod - durationTotalOrientation);
-            /*for (int i : durationSwimmingOrientation) {
-            System.out.println(i + " / " + durationActivePeriod);
-            }*/
-
-            resetActivity();
 
         }
     }
 
-    private void resetActivity() {
+    private void resetActivity(OrientationZone zone) {
         isActive = false;
-        currentSpeedActivity = new int[durationSwimmingSpeed.length];
-        currentOrientationActivity = new int[durationSwimmingOrientation.length];
-    }
-
-    private int computeActivePeriodDuration() {
-        GregorianCalendar start, end;
-        start = new GregorianCalendar(1982, 05, 13, startHour, startMinute);
-        end = new GregorianCalendar(1982, 05, 13, endHour, endMinute);
-        return (int) (end.getTimeInMillis() - start.getTimeInMillis());
+        Integer[] zeros = new Integer[zone.getSpeedActivity().length];
+        for (int i = 0; i < zeros.length; i++) {
+            zeros[i] = 0;
+        }
+        currentSpeedActivity.put(zone.getIndex(), zeros);
+        currentOrientationActivity.put(zone.getIndex(), zeros);
     }
 
     @Override
@@ -114,55 +81,66 @@ public class Turtle extends Particle {
 
     private void swimTurtle(double time) {
 
-        // check wether it is active period
-        if (isActivePeriod(time)) {
-            if (!isActive) {
-                isActive = true;
-            }
-            // check wether the turtle is located in an orientation zone
-            //System.out.println(getNumZone(Constant.ORIENTATION));
-            if (getNumZone(Constant.ORIENTATION) != -1) {
+        int numZone = getNumZone(Constant.ORIENTATION);
+        if (numZone != -1) {
+            // retrieve the orientation zone
+            OrientationZone zone = getOrientationZone(numZone);
+            // check wether it is active period for the corresponding zone
+            if (isActivePeriod(time, zone)) {
+                if (!isActive) {
+                    isActive = true;
+                }
                 // go swim !!
-                double speed = getSpeed();
-                double orientation = getOrientation();
+                double speed = getSpeed(time, zone);
+                double orientation = getOrientation(time, zone);
                 //System.out.println(speed + " " + orientation);
                 double newLon = getLon() + getdlon(speed, orientation);
                 double newLat = getLat() + getdlat(speed, orientation);
                 //System.out.println(getLon() + " " + newLon + " - " + getLat() + " " + newLat);
                 this.setLLD(newLon, newLat, getDepth());
                 geog2Grid();
-            }
-        } else {
-            if (isActive) {
-                resetActivity();
+            } else {
+                if (isActive) {
+                    resetActivity(zone);
+                }
             }
         }
     }
 
-    private double getSpeed() {
+    private OrientationZone getOrientationZone(int index) {
+        for (OrientationZone zone : Configuration.getOrientationZones()) {
+            if (index == zone.getIndex()) {
+                return zone;
+            }
+        }
+        return null;
+    }
 
-        int rank = (int) (Math.random() * durationSwimmingSpeed.length);
-        //System.out.println("particle " + index() + " " + rank);
-        if (currentSpeedActivity[rank] < durationSwimmingSpeed[rank]) {
-            currentSpeedActivity[rank] += dt;
-            return swimmingSpeed[rank];
+    private double getSpeed(double time, OrientationZone zone) {
+
+        int rank = (int) (Math.random() * zone.getSwimmingSpeed().length);
+        //System.out.println("particle " + index() + " " + rank + " - zone " + zone.getIndex() + " " + currentSpeedActivity.get(zone.getIndex())[rank]);
+
+        if (currentSpeedActivity.get(zone.getIndex())[rank] < zone.getDurationSwimmingSpeed(time, rank)) {
+            currentSpeedActivity.get(zone.getIndex())[rank] += (int) dt;
+            return zone.getSwimmingSpeed()[rank];
         } else {
-            return getSpeed();
+            return getSpeed(time, zone);
         }
     }
 
-    private double getOrientation() {
+    private double getOrientation(double time, OrientationZone zone) {
 
-        int rank = (int) (Math.random() * durationSwimmingOrientation.length);
+        int rank = (int) (Math.random() * zone.getOrientationActivity().length);
 
-        if (currentOrientationActivity[rank] < durationSwimmingOrientation[rank]) {
-            if (rank < swimmingOrientation.length) {
-                return swimmingOrientation[rank];
+        if (currentOrientationActivity.get(zone.getIndex())[rank] < zone.getDurationSwimmingOrientation(time, rank)) {
+            if (rank < zone.getSwimmingOrientation().length) {
+                return zone.getSwimmingOrientation()[rank];
             } else {
                 return Math.random() * 360.d;
             }
         } else {
-            return getOrientation();
+            return getOrientation(time, zone);
         }
     }
 
@@ -199,30 +177,7 @@ public class Turtle extends Particle {
         return dlon;
     }
 
-    public boolean isActivePeriod(double time) {
-
-        if (now == null) {
-            return false;
-        }
-        now.setTimeInMillis((long) (time * 1e3));
-        syncCalendars();
-        //SimpleDateFormat dtf = new SimpleDateFormat("HH:mm");
-        //System.out.println(dtf.format(startTime.getTime()) + " " + dtf.format(now.getTime()) + " " + dtf.format(endTime.getTime()) + " " + (now.after(startTime) && now.before(endTime)));
-        return (now.equals(startTime) || now.after(startTime)) && now.before(endTime);
-    }
-
-    private void syncCalendars() {
-        startTime = (Calendar) now.clone();
-        endTime = (Calendar) now.clone();
-
-        startTime.set(Calendar.HOUR_OF_DAY, startHour);
-        startTime.set(Calendar.MINUTE, startMinute);
-        endTime.set(Calendar.HOUR_OF_DAY, endHour);
-        endTime.set(Calendar.MINUTE, endMinute);
-
-    }
-
-    public static void setCalendar(Calendar cld) {
-        now = cld;
+    public boolean isActivePeriod(double time, OrientationZone zone) {
+        return zone.isActivePeriod(time);
     }
 }

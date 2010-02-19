@@ -39,7 +39,6 @@ public class Simulation {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
     /**
      * Duration of simulation [second].
      * <code>duration of simulation = duration of transport + duration
@@ -131,7 +130,6 @@ public class Simulation {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
     /**
      * Sets up the simulation once a file of configuration has been loaded.
      * It constructs the <code>Dataset</code> object, according to the model
@@ -145,18 +143,18 @@ public class Simulation {
         System.out.println("Preliminary computation");
 
         switch (Configuration.getTypeModel() + Configuration.getDimSimu()) {
-        case (Constant.ROMS + Constant.SIMU_2D):
-            Particle.data = new DatasetR2D();
-            break;
-        case (Constant.ROMS + Constant.SIMU_3D):
-            Particle.data = new DatasetR3D();
-            break;
-        case (Constant.MARS + Constant.SIMU_2D):
-            Particle.data = new DatasetM2D();
-            break;
-        case (Constant.MARS + Constant.SIMU_3D):
-            Particle.data = new DatasetM3D();
-            break;
+            case (Constant.ROMS + Constant.SIMU_2D):
+                Particle.data = new DatasetR2D();
+                break;
+            case (Constant.ROMS + Constant.SIMU_3D):
+                Particle.data = new DatasetR3D();
+                break;
+            case (Constant.MARS + Constant.SIMU_2D):
+                Particle.data = new DatasetM2D();
+                break;
+            case (Constant.MARS + Constant.SIMU_3D):
+                Particle.data = new DatasetM3D();
+                break;
         }
 
         Particle.data.setUp();
@@ -178,36 +176,25 @@ public class Simulation {
         t0 = Configuration.get_t0(SerialParameter.TO.index());
 
         replica = SerialParameter.REPLICA.index();
-        dtRelease = Configuration.getReleaseDt(SerialParameter.PULSATION.
-                                               index());
-        nbReleaseEvents = Configuration.getNbReleaseEvents(SerialParameter.
-                PULSATION.index());
+        dtRelease = Configuration.getReleaseDt(SerialParameter.PULSATION.index());
+        nbReleaseEvents = Configuration.getNbReleaseEvents(SerialParameter.PULSATION.index());
 
         if (Configuration.getTypeRelease() == Constant.RELEASE_ZONE) {
             depthReleaseMin = -1.f * Configuration.getDepthReleaseMin(
-                    SerialParameter.
-                    RELASE_DEPTH.index());
+                    SerialParameter.RELASE_DEPTH.index());
             depthReleaseMax = -1.f * Configuration.getDepthReleaseMax(
-                    SerialParameter.
-                    RELASE_DEPTH.index());
+                    SerialParameter.RELASE_DEPTH.index());
             if (Configuration.isPatchiness()) {
-                patchRadius = Configuration.getRadiusPatchi(SerialParameter.
-                        PATCHINESS.
-                        index());
+                patchRadius = Configuration.getRadiusPatchi(SerialParameter.PATCHINESS.index());
                 patchThickness = Configuration.getThickPatchi(
-                        SerialParameter.
-                        PATCHINESS.
-                        index());
+                        SerialParameter.PATCHINESS.index());
             }
         }
 
         if (Configuration.isLethalTp()) {
-            lethalTpEgg = Configuration.getLethalTpEgg(SerialParameter.
-                    LETHAL_TP_EGG.
-                    index());
+            lethalTpEgg = Configuration.getLethalTpEgg(SerialParameter.LETHAL_TP_EGG.index());
             lethalTpLarvae = Configuration.getLethalTpLarvae(
-                    SerialParameter.
-                    LETHAL_TP_LARVAE.index());
+                    SerialParameter.LETHAL_TP_LARVAE.index());
         }
 
         if (Configuration.isGrowth()) {
@@ -215,20 +202,19 @@ public class Simulation {
         }
 
         if (Configuration.isBuoyancy()) {
-            eggDensity = Configuration.getEggDensity(SerialParameter.
-                    BUOYANCY.index());
+            eggDensity = Configuration.getEggDensity(SerialParameter.BUOYANCY.index());
             BuoyancyScheme.init();
         }
 
         if (Configuration.getTypeRecruitment() == Constant.RECRUIT_LENGTH) {
             lengthMinAtRecruitment = Configuration.getLengthRecruitment(
                     SerialParameter.RECRUIT_LENGTH.index());
-        } else if (Configuration.getTypeRecruitment() ==
-                   Constant.RECRUIT_AGE) {
+        } else if (Configuration.getTypeRecruitment()
+                == Constant.RECRUIT_AGE) {
             ageMinAtRecruitment = Configuration.getAgeRecruitment(
                     SerialParameter.RECRUIT_AGE.index());
         }
-        
+
         if (Configuration.isDepthRecruitment()) {
             topDepthRecruitment = Configuration.getMinDepthRecruitment(
                     SerialParameter.RECRUIT_DEPTH.index());
@@ -237,11 +223,10 @@ public class Simulation {
         }
 
         if (Configuration.isMigration()) {
-            depthDay = -1.f *
-                       Configuration.getDepthDay(SerialParameter.DVM.
-                                                 index());
-            depthNight = -1.f *
-                         Configuration.getDepthNight(SerialParameter.DVM.index());
+            depthDay = -1.f
+                    * Configuration.getDepthDay(SerialParameter.DVM.index());
+            depthNight = -1.f
+                    * Configuration.getDepthNight(SerialParameter.DVM.index());
             DVMPattern.init();
         }
 
@@ -297,7 +282,7 @@ public class Simulation {
         console.append('\n');
 
         if (Configuration.getTypeRelease()
-            == Constant.RELEASE_ZONE) {
+                == Constant.RELEASE_ZONE) {
             console.append("Release: ZONE\n");
             console.append("Release depth [meter]: [");
             console.append(depthReleaseMin);
@@ -359,19 +344,19 @@ public class Simulation {
             console.append("Buoyancy: UNDEF\n");
         }
         if (Configuration.getTypeRecruitment()
-            != Constant.NONE) {
+                != Constant.NONE) {
             console.append("Recruitment: DEFINED\n");
             switch (Configuration.getTypeRecruitment()) {
-            case Constant.RECRUIT_AGE:
-                console.append(
-                        "Age min at recruitment [day]: ");
-                console.append(ageMinAtRecruitment);
-                break;
-            case Constant.RECRUIT_LENGTH:
-                console.append(
-                        "Length min at recruitment [millimeter]: ");
-                console.append(lengthMinAtRecruitment);
-                break;
+                case Constant.RECRUIT_AGE:
+                    console.append(
+                            "Age min at recruitment [day]: ");
+                    console.append(ageMinAtRecruitment);
+                    break;
+                case Constant.RECRUIT_LENGTH:
+                    console.append(
+                            "Length min at recruitment [millimeter]: ");
+                    console.append(lengthMinAtRecruitment);
+                    break;
             }
             console.append('\n');
             if (Configuration.isDepthRecruitment()) {
@@ -418,12 +403,17 @@ public class Simulation {
         Iterator iter = Configuration.getReleaseZones().iterator();
         while (iter.hasNext()) {
             znTmp = (Zone) iter.next();
-            znTmp.geo2Grid();
+            znTmp.init();
         }
         iter = Configuration.getRecruitmentZones().iterator();
         while (iter.hasNext()) {
             znTmp = (Zone) iter.next();
-            znTmp.geo2Grid();
+            znTmp.init();
+        }
+        iter = Configuration.getOrientationZones().iterator();
+        while (iter.hasNext()) {
+            znTmp = (Zone) iter.next();
+            znTmp.init();
         }
 
     }
@@ -431,7 +421,6 @@ public class Simulation {
 //////////
 // Getters
 //////////
-
     /**
      * Gets the duration of transport
      *
@@ -460,7 +449,7 @@ public class Simulation {
     public static float getAgeMinAtRecruitment() {
         return ageMinAtRecruitment;
     }
-    
+
     /**
      * Gets the recruitment minimum depth. 
      * 
@@ -470,7 +459,7 @@ public class Simulation {
     public static float getMinDepthRecruitment() {
         return topDepthRecruitment;
     }
-    
+
     /**
      * Gets the recruitment maximum depth.
      *
@@ -587,7 +576,6 @@ public class Simulation {
      *
      * @return a float, the radius [meter] of the patch.
      */
-
     public static float getRadiusPatchi() {
         return patchRadius;
     }
@@ -617,6 +605,5 @@ public class Simulation {
     public Population getPopulation() {
         return population;
     }
-
     //---------- End of class
 }

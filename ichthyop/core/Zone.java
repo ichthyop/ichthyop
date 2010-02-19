@@ -150,6 +150,10 @@ public class Zone {
 // Definition of the methods
 ////////////////////////////
 
+    public void init() {
+        geo2Grid();
+    }
+
     /**
      * Transforms longitude and latitude of the demarcation points into
      * grid coordinates

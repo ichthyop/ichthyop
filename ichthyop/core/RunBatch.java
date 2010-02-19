@@ -64,29 +64,28 @@ public class RunBatch {
      */
     /*public static void main(String[] args) throws Exception {
 
-        System.out.println();
-        for (int i = 0; i < Resources.TITLE_LARGE.length(); i++) {
-            System.out.print('%');
-        }
-        System.out.println();
-        System.out.println(Resources.TITLE_LARGE);
-        for (int i = 0; i < Resources.TITLE_LARGE.length(); i++) {
-            System.out.print('%');
-        }
-        System.out.println();
+    System.out.println();
+    for (int i = 0; i < Resources.TITLE_LARGE.length(); i++) {
+    System.out.print('%');
+    }
+    System.out.println();
+    System.out.println(Resources.TITLE_LARGE);
+    for (int i = 0; i < Resources.TITLE_LARGE.length(); i++) {
+    System.out.print('%');
+    }
+    System.out.println();
 
-        if (args == null || args.length == 0) {
-            throw new IOException("Not enough input argument");
-        }
+    if (args == null || args.length == 0) {
+    throw new IOException("Not enough input argument");
+    }
 
 
-        if (args.length < 2) {
-            new RunBatch(args[0]);
-        } else {
-            new RunBatch(args[0], args[1]);
-        }
+    if (args.length < 2) {
+    new RunBatch(args[0]);
+    } else {
+    new RunBatch(args[0], args[1]);
+    }
     }*/
-
     /**
      * Sets up the main frame. It loads a configuration file and calls for the
      * setup SwingWorker.
@@ -273,7 +272,9 @@ public class RunBatch {
             }
 
             if (Configuration.isActiveOrientation()) {
-                Turtle.setCalendar((Calendar) step.getCalendar().clone());
+                for (OrientationZone zone : Configuration.getOrientationZones()) {
+                    zone.setCalendar((Calendar) step.getCalendar().clone());
+                }
             }
         }
         //----------- End of inner class SerialSwingWorker

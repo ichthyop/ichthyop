@@ -75,6 +75,7 @@ import ichthyop.util.Resources;
 import ichthyop.util.SafeSwingWorker;
 import ichthyop.util.Constant;
 import ichthyop.bio.DVMPattern;
+import ichthyop.core.OrientationZone;
 import ichthyop.core.Turtle;
 import ichthyop.util.FileNameExtensionFilter;
 import java.awt.event.WindowEvent;
@@ -441,8 +442,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
 
         new ChartManager();
 
-        colorbarBathy = new ColorBar(Resources.LBL_BATHY + " " +
-                Resources.UNIT_METER, Constant.HORIZONTAL,
+        colorbarBathy = new ColorBar(Resources.LBL_BATHY + " "
+                + Resources.UNIT_METER, Constant.HORIZONTAL,
                 0, Dataset.getDepthMax(), Color.CYAN,
                 new Color(0, 0, 150));
 
@@ -800,9 +801,9 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         System.err.println(message.toString());
 
         JOptionPane.showMessageDialog(null,
-                errTitle + "\n" +
-                t.getClass().getSimpleName() + " : " +
-                t.getMessage(),
+                errTitle + "\n"
+                + t.getClass().getSimpleName() + " : "
+                + t.getMessage(),
                 "Error " + t.getClass().getSimpleName(),
                 JOptionPane.ERROR_MESSAGE);
     }
@@ -823,10 +824,10 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
                 viewer.setImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
             }
             if (timeSnapShot != null) {
-                lblDate.setText(Resources.LBL_STEP + (sldTime.getMaximum() + 1) +
-                        " / " + (sldTime.getMaximum() + 1) + " - " +
-                        Resources.LBL_TIME +
-                        timeSnapShot[sldTime.getMaximum()]);
+                lblDate.setText(Resources.LBL_STEP + (sldTime.getMaximum() + 1)
+                        + " / " + (sldTime.getMaximum() + 1) + " - "
+                        + Resources.LBL_TIME
+                        + timeSnapShot[sldTime.getMaximum()]);
                 sldTime.setEnabled(true);
             } else {
                 lblDate.setText(Resources.LBL_TIME);
@@ -921,8 +922,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
                     return;
                 }
             }
-            Throwable t = new IOException("Ouput path incorrect " +
-                    Configuration.getDirectorOut());
+            Throwable t = new IOException("Ouput path incorrect "
+                    + Configuration.getDirectorOut());
             printErr(t, "Output error");
             ckBoxCapture.setSelected(false);
         }
@@ -1068,9 +1069,9 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         if (flagStop && viewer != null) {
             int i_step = sldTime.getMaximum() * (1 - timeArrow) / 2 + timeArrow * sldTime.getValue();
             viewer.setImage(imgSnapShot[i_step]);
-            lblDate.setText(Resources.LBL_STEP + (i_step + 1) + " / " +
-                    (sldTime.getMaximum() + 1) + " - " +
-                    Resources.LBL_TIME + timeSnapShot[i_step]);
+            lblDate.setText(Resources.LBL_STEP + (i_step + 1) + " / "
+                    + (sldTime.getMaximum() + 1) + " - "
+                    + Resources.LBL_TIME + timeSnapShot[i_step]);
             viewer.repaint();
         }
     }
@@ -1325,8 +1326,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
                     OutputNC.write(step.getTime());
                 }
                 if (step.hasToRefresh()) {
-                    System.out.println("-----< " + step.timeToString() +
-                            " >-----");
+                    System.out.println("-----< " + step.timeToString()
+                            + " >-----");
                     step.setData(simulation.getPopulation());
                     ChartManager.counting();
                 }
@@ -1407,8 +1408,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
                         timeSnapShot[i_step] = strTime;
                     }
                     i_step++;
-                    lblDate.setText(Resources.LBL_STEP + i_step + " / " +
-                            nb_steps + " - " + Resources.LBL_TIME + strTime);
+                    lblDate.setText(Resources.LBL_STEP + i_step + " / "
+                            + nb_steps + " - " + Resources.LBL_TIME + strTime);
                     simulationUI.repaint();
                     ChartManager.refresh(strTime);
                     if (ckBoxCapture.isSelected()) {
@@ -1460,7 +1461,9 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             }
 
             if (Configuration.isActiveOrientation()) {
-                Turtle.setCalendar((Calendar) step.getCalendar().clone());
+                for (OrientationZone zone : Configuration.getOrientationZones()) {
+                    zone.setCalendar((Calendar) step.getCalendar().clone());
+                }
             }
         }
 
@@ -1477,8 +1480,8 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
 
             SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd_HHmm");
             dtFormat.setCalendar(calendar);
-            String fileName = Configuration.getDirectorOut() +
-                    "img_" + dtFormat.format(calendar.getTime()) + ".png";
+            String fileName = Configuration.getDirectorOut()
+                    + "img_" + dtFormat.format(calendar.getTime()) + ".png";
             System.out.println(fileName);
 
             try {
@@ -1680,7 +1683,9 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             }
 
             if (Configuration.isActiveOrientation()) {
-                Turtle.setCalendar((Calendar) step.getCalendar().clone());
+                for (OrientationZone zone : Configuration.getOrientationZones()) {
+                    zone.setCalendar((Calendar) step.getCalendar().clone());
+                }
             }
         }
         //----------- End of inner class SerialSwingWorker

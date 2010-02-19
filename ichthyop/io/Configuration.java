@@ -1,5 +1,6 @@
 package ichthyop.io;
 
+import ichthyop.core.OrientationZone;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -119,12 +120,7 @@ public class Configuration {
     // Section TURTLE
     /////////////////
     private static boolean BLN_ACTIVE_ORIENTATION;
-    private static String[] ACTIVE_PERIOD;
-    private static float[] SPEED_INTENSITY;
-    private static int[] SPEED_ACTIVITY;
-    private static float[] ORIENTATION;
-    private static int[] ORIENTATION_ACTIVITY;
-    private static ArrayList<Zone> listOrientationZone;
+    private static ArrayList<OrientationZone> listOrientationZone;
 
 //////////////
 // Constructor
@@ -768,15 +764,7 @@ public class Configuration {
     private void readTurtle(INIFile file, String section, boolean isSerial) {
 
         BLN_ACTIVE_ORIENTATION = file.getBooleanProperty(section, Structure.ACTIVE_ORIENTATTION);
-        if (BLN_ACTIVE_ORIENTATION) {
-            ACTIVE_PERIOD = readString(file, section, Structure.ACTIVE_PERIOD, false);
-            SPEED_INTENSITY = readFloat(file, section, Structure.SPEED_INTENSITY, true);
-            SPEED_ACTIVITY = readInteger(file, section, Structure.SPEED_ACTIVITY, true);
-            ORIENTATION = readFloat(file, section, Structure.ORIENTATION, true);
-            ORIENTATION_ACTIVITY = readInteger(file, section, Structure.ORIENTATION_ACTIVITY, true);
-        }
-        listOrientationZone = readZone(file, Constant.ORIENTATION);
-
+        listOrientationZone = readOrientationZone(file);
     }
 
     /**
@@ -1042,6 +1030,60 @@ public class Configuration {
         return array;
     }
 
+    private ArrayList<OrientationZone> readOrientationZone(INIFile file) {
+        ArrayList<OrientationZone> list;
+        double[] lon = new double[4];
+        double[] lat = new double[4];
+        int bathyMin, bathyMax;
+        Color color;
+        int colorR, colorG, colorB;
+        int numberZones = 0;
+
+        String prefix = Structure.SECTION_ORIENTATION_ZONE;
+
+        String[] sections = file.getAllSectionNames();
+        for (String section : sections) {
+            if (section.toLowerCase().startsWith(prefix.toLowerCase())) {
+                numberZones++;
+            }
+        }
+
+        list = new ArrayList(numberZones);
+
+        for (int i = 0; i < numberZones; i++) {
+            String section = prefix + String.valueOf(i + 1);
+            for (int j = 0; j < 4; j++) {
+                lon[j] = readFloat(file,
+                        section,
+                        Structure.LON_ZONE + String.valueOf(j + 1));
+                lat[j] = readFloat(file,
+                        section,
+                        Structure.LAT_ZONE + String.valueOf(j + 1));
+            }
+            bathyMin = readInteger(file, section, Structure.BATHY_MIN);
+            bathyMax = readInteger(file, section, Structure.BATHY_MAX);
+            colorR = readInteger(file, section, Structure.RED);
+            colorG = readInteger(file, section, Structure.GREEN);
+            colorB = readInteger(file, section, Structure.BLUE);
+            color = new Color(colorR, colorG, colorB);
+
+            OrientationZone zone = new OrientationZone(i,
+                    lon[0], lat[0],
+                    lon[1], lat[1],
+                    lon[2], lat[2],
+                    lon[3], lat[3],
+                    bathyMin, bathyMax,
+                    color);
+            zone.setSwimmingSpeed(readFloat(file, section, Structure.SPEED_INTENSITY, true));
+            zone.setSpeedActivity(readInteger(file, section, Structure.SPEED_ACTIVITY, true));
+            zone.setSwimmingOrientation(readFloat(file, section, Structure.ORIENTATION, true));
+            zone.setOrientationActivity(readInteger(file, section, Structure.ORIENTATION_ACTIVITY, true));
+            zone.setActivePeriod(readString(file, section, Structure.ACTIVE_PERIOD, true));
+            list.add(zone);
+        }
+        return list;
+    }
+
     /**
      * Reads the zone definitions of the specified type (release or recruitment).
      *
@@ -1068,8 +1110,6 @@ public class Configuration {
             case Constant.RECRUITMENT:
                 prefix = Structure.SECTION_RECRUITMENT_ZONE;
                 break;
-            case Constant.ORIENTATION:
-                prefix = Structure.SECTION_ORIENTATION_ZONE;
         }
 
         String[] sections = file.getAllSectionNames();
@@ -1505,7 +1545,7 @@ public class Configuration {
     }
 
     //---------------------------------------------------------
-    public static ArrayList<Zone> getOrientationZones() {
+    public static ArrayList<OrientationZone> getOrientationZones() {
         return listOrientationZone;
     }
 
@@ -1526,31 +1566,6 @@ public class Configuration {
 
     public static String getDrifterFile() {
         return PATH_FILE_DRIFTERS;
-    }
-
-    //----------------------------------------------------------
-    public static String getActivePeriod() {
-        return ACTIVE_PERIOD[0];
-    }
-
-    //----------------------------------------------------------
-    public static float[] getSwimmingSpeed() {
-        return SPEED_INTENSITY;
-    }
-
-    //----------------------------------------------------------
-    public static int[] getSwimmingSpeedActivity() {
-        return SPEED_ACTIVITY;
-    }
-
-    //----------------------------------------------------------
-    public static float[] getSwimmingOrientation() {
-        return ORIENTATION;
-    }
-
-    //----------------------------------------------------------
-    public static int[] getSwimmingOrientationActivity() {
-        return ORIENTATION_ACTIVITY;
     }
 
     //--------------------------------------------------------------------------
