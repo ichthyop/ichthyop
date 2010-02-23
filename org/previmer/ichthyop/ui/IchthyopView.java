@@ -1293,13 +1293,13 @@ public class IchthyopView extends FrameView
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         mainPanel = new javax.swing.JPanel();
         splitPane = new javax.swing.JSplitPane();
         leftSplitPane = new javax.swing.JSplitPane();
         titledPanelSteps = new org.jdesktop.swingx.JXTitledPanel();
-        taskPaneContainerSteps = new org.jdesktop.swingx.JXTaskPaneContainer();
+        stepsScrollPane = new javax.swing.JScrollPane();
+        stepsPanel = new javax.swing.JPanel();
         taskPaneConfiguration = new org.jdesktop.swingx.JXTaskPane();
         pnlFile = new javax.swing.JPanel();
         lblCfgFile = new javax.swing.JLabel();
@@ -1430,14 +1430,15 @@ public class IchthyopView extends FrameView
         leftSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         leftSplitPane.setName("leftSplitPane"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopView.class);
         titledPanelSteps.setTitle(resourceMap.getString("titledPanelSteps.title")); // NOI18N
+        titledPanelSteps.setMinimumSize(new java.awt.Dimension(200, 200));
         titledPanelSteps.setName("titledPanelSteps"); // NOI18N
-        titledPanelSteps.getContentContainer().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        taskPaneContainerSteps.setOpaque(false);
-        taskPaneContainerSteps.setName("taskPaneContainerSteps"); // NOI18N
-        taskPaneContainerSteps.setLayout(new java.awt.GridBagLayout());
+        stepsScrollPane.setName("stepsScrollPane"); // NOI18N
+        stepsScrollPane.setPreferredSize(new java.awt.Dimension(300, 400));
+
+        stepsPanel.setName("stepsPanel"); // NOI18N
 
         taskPaneConfiguration.setAnimated(false);
         taskPaneConfiguration.setIcon(resourceMap.getIcon("step.Configuration.icon")); // NOI18N
@@ -1454,7 +1455,7 @@ public class IchthyopView extends FrameView
 
         lblCfgFile.setName("lblCfgFile"); // NOI18N
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(IchthyopView.class, this);
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(IchthyopView.class, this);
         btnNewCfgFile.setAction(actionMap.get("newConfigurationFile")); // NOI18N
         btnNewCfgFile.setFocusable(false);
         btnNewCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -1533,12 +1534,6 @@ public class IchthyopView extends FrameView
 
         taskPaneConfiguration.getContentPane().add(pnlFile);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 100.0;
-        taskPaneContainerSteps.add(taskPaneConfiguration, gridBagConstraints);
-
         taskPaneSimulation.setAnimated(false);
         taskPaneSimulation.setIcon(resourceMap.getIcon("step.Simulation.icon")); // NOI18N
         taskPaneSimulation.setTitle(resourceMap.getString("step.Simulation.text")); // NOI18N
@@ -1586,14 +1581,6 @@ public class IchthyopView extends FrameView
         );
 
         taskPaneSimulation.getContentPane().add(pnlSimulation);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 100.0;
-        taskPaneContainerSteps.add(taskPaneSimulation, gridBagConstraints);
 
         taskPaneMapping.setAnimated(false);
         taskPaneMapping.setIcon(resourceMap.getIcon("step.Mapping.icon")); // NOI18N
@@ -1692,14 +1679,6 @@ public class IchthyopView extends FrameView
         );
 
         taskPaneMapping.getContentPane().add(pnlMapping);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 100.0;
-        taskPaneContainerSteps.add(taskPaneMapping, gridBagConstraints);
 
         taskPaneAnimation.setAnimated(false);
         taskPaneAnimation.setIcon(resourceMap.getIcon("step.Animation.icon")); // NOI18N
@@ -1864,15 +1843,40 @@ public class IchthyopView extends FrameView
 
         taskPaneAnimation.getContentPane().add(pnlAnimation);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 100.0;
-        taskPaneContainerSteps.add(taskPaneAnimation, gridBagConstraints);
+        javax.swing.GroupLayout stepsPanelLayout = new javax.swing.GroupLayout(stepsPanel);
+        stepsPanel.setLayout(stepsPanelLayout);
+        stepsPanelLayout.setHorizontalGroup(
+            stepsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(taskPaneConfiguration, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(taskPaneSimulation, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(taskPaneMapping, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(taskPaneAnimation, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        stepsPanelLayout.setVerticalGroup(
+            stepsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(stepsPanelLayout.createSequentialGroup()
+                .addComponent(taskPaneConfiguration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(taskPaneSimulation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(taskPaneMapping, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(taskPaneAnimation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
-        titledPanelSteps.getContentContainer().add(taskPaneContainerSteps, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        stepsScrollPane.setViewportView(stepsPanel);
+
+        javax.swing.GroupLayout titledPanelStepsLayout = new javax.swing.GroupLayout(titledPanelSteps.getContentContainer());
+        titledPanelSteps.getContentContainer().setLayout(titledPanelStepsLayout);
+        titledPanelStepsLayout.setHorizontalGroup(
+            titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+        );
+        titledPanelStepsLayout.setVerticalGroup(
+            titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+        );
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
 
@@ -1885,11 +1889,11 @@ public class IchthyopView extends FrameView
         titledPanelLogger.getContentContainer().setLayout(titledPanelLoggerLayout);
         titledPanelLoggerLayout.setHorizontalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
         );
         titledPanelLoggerLayout.setVerticalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(loggerScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 23, Short.MAX_VALUE)
+            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE)
         );
 
         leftSplitPane.setRightComponent(titledPanelLogger);
@@ -1905,11 +1909,11 @@ public class IchthyopView extends FrameView
         gradientPanel.setLayout(gradientPanelLayout);
         gradientPanelLayout.setHorizontalGroup(
             gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 348, Short.MAX_VALUE)
+            .addGap(0, 344, Short.MAX_VALUE)
         );
         gradientPanelLayout.setVerticalGroup(
             gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 503, Short.MAX_VALUE)
+            .addGap(0, 1013, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout titledPanelMainLayout = new javax.swing.GroupLayout(titledPanelMain.getContentContainer());
@@ -1935,7 +1939,7 @@ public class IchthyopView extends FrameView
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.PREFERRED_SIZE, 535, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 1045, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -2745,10 +2749,11 @@ public class IchthyopView extends FrameView
     private org.jdesktop.swingx.JXBusyLabel statusAnimationLabel;
     private org.jdesktop.swingx.JXStatusBar statusBar;
     private javax.swing.JLabel statusMessageLabel;
+    private javax.swing.JPanel stepsPanel;
+    private javax.swing.JScrollPane stepsScrollPane;
     private org.jdesktop.swingx.JXTable table;
     private org.jdesktop.swingx.JXTaskPane taskPaneAnimation;
     private org.jdesktop.swingx.JXTaskPane taskPaneConfiguration;
-    private org.jdesktop.swingx.JXTaskPaneContainer taskPaneContainerSteps;
     private org.jdesktop.swingx.JXTaskPane taskPaneMapping;
     private org.jdesktop.swingx.JXTaskPane taskPaneSimulation;
     private org.jdesktop.swingx.JXTitledPanel titledPanelLogger;
