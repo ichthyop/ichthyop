@@ -15,7 +15,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.net.URI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -63,12 +62,12 @@ public class FileEditor extends AbstractCellEditor
         //The user has clicked the cell, so
         //bring up the dialog.
         String path = textField.getText().isEmpty()
-                ? URI.create(System.getProperty("user.dir")).getPath()
-                : URI.create(textField.getText()).getPath();
+                ? System.getProperty("user.dir")
+                : textField.getText();
         fileChooser.setSelectedFile(new File(path));
         int answer = fileChooser.showOpenDialog(panel);
         if (answer == JFileChooser.APPROVE_OPTION) {
-            textField.setText(fileChooser.getSelectedFile().toURI().toString());
+            textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
             fireEditingStopped();
         }
     }
