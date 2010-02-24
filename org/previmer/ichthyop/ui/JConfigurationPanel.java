@@ -163,7 +163,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             if (!ckBoxAdvancedEditorOnly.isSelected()) {
                 blockEditor = getBlockEditor(block);
             }
-            splitPaneCfg.setRightComponent(pnlEditors);
+            splitPaneCfg.setRightComponent(scrollPaneEditors);
             if (null != blockEditor) {
                 tabbedPane.add(blockEditor, "User-friendly editor", 0);
                 blockEditor.addPropertyChangeListener("xicfile", (IchthyopView) IchthyopApp.getApplication().getMainView());
@@ -335,6 +335,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnCollapse = new javax.swing.JButton();
         btnUpper = new javax.swing.JButton();
         btnLower = new javax.swing.JButton();
+        scrollPaneEditors = new javax.swing.JScrollPane();
         pnlEditors = new javax.swing.JPanel();
         tabbedPane = new javax.swing.JTabbedPane();
         pnlBlock = new javax.swing.JPanel();
@@ -436,21 +437,23 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             .addGroup(pnlBlockTreeLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlBlockTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE))
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlBlockTreeLayout.setVerticalGroup(
             pnlBlockTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockTreeLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 433, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
         splitPaneCfg.setLeftComponent(pnlBlockTree);
+
+        scrollPaneEditors.setName("scrollPaneEditors"); // NOI18N
 
         pnlEditors.setName("pnlEditors"); // NOI18N
 
@@ -634,17 +637,19 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap())
         );
 
-        splitPaneCfg.setRightComponent(pnlEditors);
+        scrollPaneEditors.setViewportView(pnlEditors);
+
+        splitPaneCfg.setRightComponent(scrollPaneEditors);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPaneCfg, javax.swing.GroupLayout.DEFAULT_SIZE, 890, Short.MAX_VALUE)
+            .addComponent(splitPaneCfg, javax.swing.GroupLayout.DEFAULT_SIZE, 879, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPaneCfg, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 674, Short.MAX_VALUE)
+            .addComponent(splitPaneCfg, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 509, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -674,6 +679,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JPanel pnlNoBlockSelected;
     private javax.swing.JPanel pnlParamDescription;
     private javax.swing.JPanel pnlParameters;
+    private javax.swing.JScrollPane scrollPaneEditors;
     private javax.swing.JSplitPane splitPaneCfg;
     private javax.swing.JTabbedPane tabbedPane;
     private org.jdesktop.swingx.JXTable table;
