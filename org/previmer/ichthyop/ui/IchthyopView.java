@@ -5,32 +5,21 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Insets;
-import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
-import java.lang.reflect.InvocationTargetException;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TreeSelectionEvent;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
-import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.RoundRectangle2D;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.EventObject;
 import java.util.List;
@@ -38,7 +27,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-import javax.swing.BorderFactory;
 import javax.swing.Timer;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -52,21 +40,8 @@ import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
-import org.jdesktop.swingx.JXStatusBar;
-import org.jdesktop.swingx.icon.EmptyIcon;
-import org.jdesktop.swingx.painter.BusyPainter;
-import org.jdesktop.swingx.plaf.basic.BasicStatusBarUI;
-import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.io.XBlock;
-import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.ui.WMSMapper.MapStep;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
@@ -74,8 +49,7 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
  * The application's main frame.
  */
 public class IchthyopView extends FrameView
-        implements TimingTarget, TreeSelectionListener, TableModelListener,
-        ListSelectionListener, PropertyChangeListener {
+        implements TimingTarget,  PropertyChangeListener {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -83,55 +57,9 @@ public class IchthyopView extends FrameView
         createLogfile();
 
         initComponents();
+        setStatusBar(statusBar);
         getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
         getApplication().addExitListener(new ConfirmExit());
-
-        // status bar initialization - message timeout, idle icon and busy animation, etc
-        ResourceMap resourceMap = getResourceMap();
-        int messageTimeout = resourceMap.getInteger("StatusBar.messageTimeout");
-        messageTimer = new Timer(messageTimeout, new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                statusMessageLabel.setText("");
-                lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.grey"));
-            }
-        });
-        messageTimer.setRepeats(false);
-        progressBar.setVisible(false);
-
-        // connecting action tasks to status bar via TaskMonitor
-        TaskMonitor taskMonitor = new TaskMonitor(getApplication().getContext());
-        taskMonitor.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                String propertyName = evt.getPropertyName();
-                if ("started".equals(propertyName)) {
-                    statusAnimationLabel.setBusy(true);
-                    progressBar.setVisible(true);
-                    progressBar.setIndeterminate(true);
-                } else if ("failed".equals(propertyName)) {
-                    Toolkit.getDefaultToolkit().beep();
-                    statusAnimationLabel.setBusy(false);
-                    progressBar.setVisible(false);
-                    progressBar.setValue(0);
-                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.red"));
-                } else if ("succeeded".equals(propertyName)) {
-                    statusAnimationLabel.setBusy(false);
-                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.green"));
-                    progressBar.setVisible(false);
-                    progressBar.setValue(0);
-                } else if ("message".equals(propertyName)) {
-                    String text = (String) (evt.getNewValue());
-                    statusMessageLabel.setText((text == null) ? "" : text);
-                    messageTimer.restart();
-                } else if ("progress".equals(propertyName)) {
-                    int value = (Integer) (evt.getNewValue());
-                    progressBar.setVisible(true);
-                    progressBar.setIndeterminate(false);
-                    progressBar.setValue(value);
-                }
-            }
-        });
 
         closeMenuItem.getAction().setEnabled(false);
         saveAsMenuItem.getAction().setEnabled(false);
@@ -189,36 +117,6 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void upper() {
-        blockTree.removeTreeSelectionListener(IchthyopView.this);
-        hasStructureChanged |= blockTree.upper();
-        blockTree.addTreeSelectionListener(IchthyopView.this);
-        if (hasStructureChanged) {
-            firePropertyChange("xicfile", null, null);
-        }
-    }
-
-    @Action
-    public void lower() {
-        blockTree.removeTreeSelectionListener(IchthyopView.this);
-        hasStructureChanged |= blockTree.lower();
-        blockTree.addTreeSelectionListener(IchthyopView.this);
-        if (hasStructureChanged) {
-            firePropertyChange("xicfile", null, null);
-        }
-    }
-
-    @Action
-    public void expand() {
-        blockTree.expandAll();
-    }
-
-    @Action
-    public void collapse() {
-        blockTree.collapseAll();
-    }
-
-    @Action
     public void deleteMaps() {
         File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
         StringBuffer message = new StringBuffer("Delete maps from ");
@@ -245,143 +143,6 @@ public class IchthyopView extends FrameView
     @Action
     public Task createMaps() {
         return createMapTask = new CreateMapTask(getApplication());
-    }
-
-    @Action
-    public void setBlockEnabled() {
-        blockTree.getSelectedBlock().setEnabled(ckBoxBlock.isSelected());
-        setParameterEditorEnabled(ckBoxBlock.isSelected());
-        firePropertyChange("xicfile", null, null);
-    }
-
-    private void setParameterEditorEnabled(boolean enabled) {
-        table.setEnabled(enabled);
-        btnUndo.getAction().setEnabled(enabled && getTable().getUndoManager().canUndo());
-        btnRedo.getAction().setEnabled(enabled && getTable().getUndoManager().canRedo());
-        btnHiddenParameter.getAction().setEnabled(enabled && (blockTree.getSelectedBlock().getNbHiddenParameters() > 0));
-        btnAddValue.getAction().setEnabled(false);
-        btnRemoveValue.getAction().setEnabled(false);
-    }
-
-    @Action
-    public void reloadEditor() {
-        valueChanged(new TreeSelectionEvent(ckBoxAdvancedEditor, null, true, null, null));
-    }
-
-    private void setupAdvancedEditor(XBlock block) {
-
-        pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(block.getTreePath()));
-        if (block.getType().equals(BlockType.OPTION)) {
-            ckBoxBlock.setVisible(false);
-        } else {
-            ckBoxBlock.setVisible(true);
-            ckBoxBlock.setSelected(block.isEnabled());
-        }
-        StringBuffer info = new StringBuffer("<html><i>");
-        info.append(block.getDescription());
-        info.append("</i></html>");
-        lblBlockInfo.setText(info.toString());
-        btnUndo.getAction().setEnabled(false);
-        btnRedo.getAction().setEnabled(false);
-        btnAddValue.getAction().setEnabled(false);
-        btnRemoveValue.getAction().setEnabled(false);
-        if (!showHiddenParameters) {
-            btnHiddenParameter.doClick();
-        } else {
-            getTable().setModel(block, this);
-        }
-        if (block.getNbHiddenParameters() > 0) {
-            btnHiddenParameter.getAction().setEnabled(true);
-        } else {
-            btnHiddenParameter.getAction().setEnabled(false);
-        }
-        setParameterEditorEnabled(block.isEnabled());
-    }
-
-    private JBlockPanel getBlockEditor(XBlock block) {
-
-        if (null != block.getXParameter("editor")) {
-            String editorClass = block.getXParameter("editor").getValue();
-            try {
-                Constructor constructor = Class.forName(editorClass).getConstructor(XBlock.class);
-                return (JBlockPanel) constructor.newInstance(block);
-            } catch (InstantiationException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvocationTargetException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchMethodException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SecurityException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return null;
-        } else {
-            return null;
-        }
-    }
-
-    public void valueChanged(TreeSelectionEvent e) {
-        final DefaultMutableTreeNode node = blockTree.getSelectedNode();
-        blockEditor = null;
-        if (node != null && node.isLeaf()) {
-            XBlock block = blockTree.getSelectedBlock();
-            if (block.getType().equals(BlockType.ZONE)) {
-                splitPaneCfg.setRightComponent(pnlTree);
-                return;
-            }
-            setupAdvancedEditor(block);
-            if (!ckBoxAdvancedEditor.isSelected()) {
-                blockEditor = getBlockEditor(block);
-            }
-            if (null != blockEditor) {
-                JTabbedPane tabbedPane = new JTabbedPane();
-                tabbedPane.add(blockEditor, "User-friendly editor");
-                tabbedPane.add(pnlBlock, "Advanced editor");
-                splitPaneCfg.setRightComponent(tabbedPane);
-                blockEditor.addPropertyChangeListener("xicfile", this);
-            } else {
-                splitPaneCfg.setRightComponent(pnlBlock);
-            }
-        } else {
-            splitPaneCfg.setRightComponent(pnlTree);
-        }
-    }
-
-    public void tableChanged(TableModelEvent e) {
-        if (e != null) {
-            int row = table.getSelectedRow();
-            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
-            xparam.setValue(table.getValueAt(row, 1).toString(), getTable().getParameterIndex(row));
-            btnRedo.getAction().setEnabled(false);
-            btnUndo.getAction().setEnabled(true);
-            firePropertyChange("xicfile", null, null);
-        }
-        btnAddValue.getAction().setEnabled(false);
-        btnRemoveValue.getAction().setEnabled(false);
-    }
-
-    public void valueChanged(ListSelectionEvent e) {
-        if (!e.getValueIsAdjusting()) {
-            try {
-                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(table.getSelectedRow()));
-                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
-                StringBuffer info = new StringBuffer("<html><i>");
-                info.append(xparam.getDescription());
-                info.append("</i></html>");
-                lblParameter.setText(info.toString());
-                btnAddValue.getAction().setEnabled(xparam.isSerial());
-                btnRemoveValue.getAction().setEnabled(xparam.isSerial() && (xparam.getLength() > 1));
-            } catch (Exception ex) {
-                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParamDescription.border.title")));
-                lblParameter.setText(getResourceMap().getString("lblParameter.text"));
-            }
-        }
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
@@ -626,7 +387,7 @@ public class IchthyopView extends FrameView
         @Override
         protected Object doInBackground() throws Exception {
             getSimulationManager().getParameterManager().cleanup();
-            blockTree.writeStructure(getSimulationManager().getParameterManager());
+            pnlConfiguration.updateXMLStructure();
             getSimulationManager().getParameterManager().save();
             getSimulationManager().setConfigurationFile(getSimulationManager().getConfigurationFile());
             return null;
@@ -636,7 +397,6 @@ public class IchthyopView extends FrameView
         protected void succeeded(Object o) {
             firePropertyChange("succeeded", null, null);
             btnSaveCfgFile.getAction().setEnabled(false);
-            hasStructureChanged = false;
             isSetup = false;
             setMessage(getSimulationManager().getConfigurationFile().getName() + " saved.");
         }
@@ -707,7 +467,7 @@ public class IchthyopView extends FrameView
         btnSimulationRun.getAction().setEnabled(true);
         btnPreview.getAction().setEnabled(true);
         setMainTitle();
-        getApplication().getContext().getTaskService().execute(new CreateBlockTreeTask(getApplication()));
+        pnlConfiguration.loadBlockTree();
     }
 
     @Action
@@ -764,8 +524,8 @@ public class IchthyopView extends FrameView
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.play"));
             if (progressTimer != null && progressTimer.isRunning()) {
                 progressTimer.stop();
-                progressBar.setValue(0);
-                progressBar.setVisible(false);
+                statusBar.getProgressBar().setValue(0);
+                statusBar.getProgressBar().setVisible(false);
             }
             if (animator.isRunning()) {
                 animator.stop();
@@ -808,25 +568,18 @@ public class IchthyopView extends FrameView
 
         ProgressAction() {
             duration = animator.getAcceleration() / 2;
-            progressBar.setVisible(true);
-            progressBar.setIndeterminate(false);
+            statusBar.getProgressBar().setVisible(true);
+            statusBar.getProgressBar().setIndeterminate(false);
         }
 
         public void actionPerformed(ActionEvent e) {
             progress = (int) (100.f * animator.getTimingFraction() / duration);
-            progressBar.setValue(progress);
+            statusBar.getProgressBar().setValue(progress);
             if (progress >= 100) {
                 progressTimer.stop();
-                progressBar.setVisible(false);
+                statusBar.getProgressBar().setVisible(false);
             }
         }
-    }
-
-    private void resetProgressBar() {
-        progressBarCurrent.setValue(0);
-        lblTimeLeftCurrent.setText(getResourceMap().getString("lblTimeLeftCurrent.text"));
-        progressBarGlobal.setValue(0);
-        lblTimeLeftGlobal.setText(getResourceMap().getString("lblTimeLeftGlobal.text"));
     }
 
     @Action
@@ -871,20 +624,6 @@ public class IchthyopView extends FrameView
         newMenuItem.getAction().setEnabled(enabled);
         saveAsMenuItem.getAction().setEnabled(enabled);
         closeMenuItem.getAction().setEnabled(enabled);
-    }
-
-    @Action
-    public void setupProgress() {
-        if (getSimulationManager().getNumberOfSimulations() > 1) {
-            lblProgressGlobal.setVisible(true);
-            progressBarGlobal.setVisible(true);
-            lblTimeLeftGlobal.setVisible(true);
-        } else {
-            lblProgressGlobal.setVisible(false);
-            progressBarGlobal.setVisible(false);
-            lblTimeLeftGlobal.setVisible(false);
-        }
-
     }
 
     public class SimulationRunTask extends Task {
@@ -941,29 +680,8 @@ public class IchthyopView extends FrameView
                 btnSimulationRun.getAction().setEnabled(true);
                 bln = true;
             }
-            printProgress();
+            pnlProgress.printProgress();
             //setMessage(getSimulationManager().getTimeManager().stepToString() + " - Time " + getSimulationManager().getTimeManager().timeToString());
-        }
-
-        private void printProgress() {
-
-            if (progressBarCurrent.isVisible()) {
-                progressBarCurrent.setValue((int) (getSimulationManager().progressCurrent() * 100));
-                StringBuffer strBf = new StringBuffer();
-                strBf.append(getSimulationManager().getTimeManager().stepToString());
-                strBf.append(" - ");
-                strBf.append(getSimulationManager().timeLeftCurrent());
-                lblTimeLeftCurrent.setText(strBf.toString());
-            }
-
-            if (progressBarGlobal.isVisible()) {
-                progressBarGlobal.setValue((int) (getSimulationManager().progressGlobal() * 100));
-                StringBuffer strBf = new StringBuffer("Simulation ");
-                strBf.append(getSimulationManager().indexSimulationToString());
-                strBf.append(" - ");
-                strBf.append(getSimulationManager().timeLeftGlobal());
-                lblTimeLeftGlobal.setText(strBf.toString());
-            }
         }
 
         @Override
@@ -989,36 +707,7 @@ public class IchthyopView extends FrameView
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
             setMenuEnabled(true);
             isRunning = false;
-            resetProgressBar();
-        }
-    }
-
-    private class CreateBlockTreeTask extends Task {
-
-        CreateBlockTreeTask(Application instance) {
-            super(instance);
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-
-            blockTree.createModel();
-            return null;
-        }
-
-        @Override
-        protected void succeeded(Object o) {
-            firePropertyChange("succeeded", null, null);
-            pnlConfiguration.setVisible(true);
-            blockTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-            blockTree.addTreeSelectionListener(IchthyopView.this);
-            blockTree.setNodeVisible(blockTree.getRoot().getFirstLeaf());
-        }
-
-        @Override
-        protected void failed(Throwable t) {
-            firePropertyChange("failed", null, null);
-            logger.log(Level.SEVERE, null, t);
+            pnlProgress.resetProgressBar();
         }
     }
 
@@ -1032,8 +721,6 @@ public class IchthyopView extends FrameView
         }
 
         savePreference(animationSpeed, animationSpeed.getValue());
-        
-        savePreference(ckBoxAdvancedEditor, ckBoxAdvancedEditor.isSelected());
     }
 
     private void savePreference(Component bean, Object property) {
@@ -1054,11 +741,6 @@ public class IchthyopView extends FrameView
 
     public void restorePreferences() {
         Object property;
-
-        property = restorePreference(ckBoxAdvancedEditor);
-        if (property != null) {
-            ckBoxAdvancedEditor.setSelected((Boolean) property);
-        }
 
         property = restorePreference(openMenuItem);
         if (property != null) {
@@ -1091,8 +773,7 @@ public class IchthyopView extends FrameView
     }
 
     public void setMessage(String text) {
-        statusMessageLabel.setText((text == null) ? "" : text);
-        messageTimer.restart();
+        statusBar.setMessage(text);
         loggerScrollPane.setMessage(text);
     }
 
@@ -1206,71 +887,6 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private ParameterTable getTable() {
-        return (ParameterTable) table;
-    }
-
-    @Action
-    public void showHiddenParameters() {
-        if (showHiddenParameters) {
-            btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.hide"));
-            btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.unlock"));
-            getTable().setAllRowsVisible(true);
-            showHiddenParameters = false;
-
-        } else {
-            btnHiddenParameter.setText(getResourceMap().getString("showHiddenParameters.Action.text.show"));
-            btnHiddenParameter.setIcon(getResourceMap().getIcon("showHiddenParameters.Action.icon.lock"));
-            getTable().setAllRowsVisible(false);
-            showHiddenParameters = true;
-        }
-    }
-
-    @Action
-    public void undo() {
-        if (getTable().getUndoManager().canUndo()) {
-            getTable().getUndoManager().undo();
-            btnRedo.getAction().setEnabled(getTable().getUndoManager().canRedo());
-            btnUndo.getAction().setEnabled(getTable().getUndoManager().canUndo());
-        } else {
-            btnUndo.getAction().setEnabled(false);
-        }
-    }
-
-    @Action
-    public void redo() {
-        if (getTable().getUndoManager().canRedo()) {
-            getTable().getUndoManager().redo();
-            btnRedo.getAction().setEnabled(getTable().getUndoManager().canRedo());
-            btnUndo.getAction().setEnabled(getTable().getUndoManager().canUndo());
-        } else {
-            btnRedo.getAction().setEnabled(false);
-        }
-    }
-
-    @Action
-    public void addSerialValue() {
-        int row = table.getSelectedRow();
-        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
-        xparam.addValue();
-        getTable().setModel(blockTree.getSelectedBlock(), this);
-        btnRemoveValue.getAction().setEnabled(false);
-        btnAddValue.getAction().setEnabled(false);
-        firePropertyChange("xicfile", null, null);
-    }
-
-    @Action
-    public void removeSerialValue() {
-        int row = table.getSelectedRow();
-        XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
-        int index = getTable().getParameterIndex(row);
-        xparam.removeValue(index);
-        getTable().setModel(blockTree.getSelectedBlock(), this);
-        btnRemoveValue.getAction().setEnabled(false);
-        btnAddValue.getAction().setEnabled(false);
-        firePropertyChange("xicfile", null, null);
-    }
-
     class ConfirmExit implements Application.ExitListener {
 
         public boolean canExit(EventObject e) {
@@ -1308,7 +924,6 @@ public class IchthyopView extends FrameView
         btnSaveCfgFile = new javax.swing.JButton();
         btnSaveAsCfgFile = new javax.swing.JButton();
         btnCloseCfgFile = new javax.swing.JButton();
-        ckBoxAdvancedEditor = new javax.swing.JCheckBox();
         taskPaneSimulation = new org.jdesktop.swingx.JXTaskPane();
         pnlSimulation = new javax.swing.JPanel();
         btnPreview = new javax.swing.JToggleButton();
@@ -1342,6 +957,7 @@ public class IchthyopView extends FrameView
         titledPanelLogger = new org.jdesktop.swingx.JXTitledPanel();
         loggerScrollPane = new org.previmer.ichthyop.ui.LoggerScrollPane();
         titledPanelMain = new org.jdesktop.swingx.JXTitledPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
         gradientPanel = new org.previmer.ichthyop.ui.GradientPanel();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu configurationMenu = new javax.swing.JMenu();
@@ -1370,58 +986,11 @@ public class IchthyopView extends FrameView
         deleteMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
-        popupCharts = new javax.swing.JPopupMenu();
-        itemDepthChart = new javax.swing.JCheckBoxMenuItem();
-        itemEdgeChart = new javax.swing.JCheckBoxMenuItem();
-        itemRecruitChart = new javax.swing.JCheckBoxMenuItem();
-        itemLengthChart = new javax.swing.JCheckBoxMenuItem();
-        itemDeadChart = new javax.swing.JCheckBoxMenuItem();
-        itemStageChart = new javax.swing.JCheckBoxMenuItem();
         scrollPaneSimulationUI = new javax.swing.JScrollPane();
         pnlSimulationUI = new SimulationUI();
-        pnlConfiguration = new javax.swing.JPanel();
-        splitPaneCfg = new javax.swing.JSplitPane();
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        blockTree = new org.previmer.ichthyop.ui.BlockTree();
-        jToolBar1 = new javax.swing.JToolBar();
-        btnExpand = new javax.swing.JButton();
-        btnCollapse = new javax.swing.JButton();
-        btnUpper = new javax.swing.JButton();
-        btnLower = new javax.swing.JButton();
-        pnlBlock = new javax.swing.JPanel();
-        pnlBlockInfo = new javax.swing.JPanel();
-        lblBlockInfo = new javax.swing.JLabel();
-        ckBoxBlock = new javax.swing.JCheckBox();
-        pnlParameters = new javax.swing.JPanel();
-        pnlParamDescription = new javax.swing.JPanel();
-        lblParameter = new javax.swing.JLabel();
-        btnHiddenParameter = new org.jdesktop.swingx.JXHyperlink();
-        btnUndo = new javax.swing.JButton();
-        btnRedo = new javax.swing.JButton();
-        btnAddValue = new javax.swing.JButton();
-        btnRemoveValue = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        table = new ParameterTable();
-        pnlProgress = new javax.swing.JPanel();
-        lblProgressCurrent = new javax.swing.JLabel();
-        progressBarCurrent = new javax.swing.JProgressBar();
-        lblTimeLeftCurrent = new javax.swing.JLabel();
-        lblProgressGlobal = new javax.swing.JLabel();
-        progressBarGlobal = new javax.swing.JProgressBar();
-        lblTimeLeftGlobal = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
         btnExit = new javax.swing.JButton();
-        pnlTree = new javax.swing.JPanel();
-        lblSelectBlock = new javax.swing.JLabel();
         pnlLogo = new org.jdesktop.swingx.JXPanel();
         hyperLinkLogo = new org.jdesktop.swingx.JXHyperlink();
-        statusBar = new org.jdesktop.swingx.JXStatusBar();
-        statusMessageLabel = new javax.swing.JLabel();
-        statusAnimationLabel = new org.jdesktop.swingx.JXBusyLabel();
-        pnlProgressBar = new javax.swing.JPanel();
-        progressBar = new javax.swing.JProgressBar();
-        lblFlag = new javax.swing.JLabel();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
@@ -1488,10 +1057,6 @@ public class IchthyopView extends FrameView
         btnCloseCfgFile.setName("btnCloseCfgFile"); // NOI18N
         btnCloseCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        ckBoxAdvancedEditor.setAction(actionMap.get("reloadEditor")); // NOI18N
-        ckBoxAdvancedEditor.setText(resourceMap.getString("ckBoxAdvancedEditor.text")); // NOI18N
-        ckBoxAdvancedEditor.setName("ckBoxAdvancedEditor"); // NOI18N
-
         javax.swing.GroupLayout pnlFileLayout = new javax.swing.GroupLayout(pnlFile);
         pnlFile.setLayout(pnlFileLayout);
         pnlFileLayout.setHorizontalGroup(
@@ -1509,8 +1074,7 @@ public class IchthyopView extends FrameView
                     .addGroup(pnlFileLayout.createSequentialGroup()
                         .addComponent(btnSaveCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsCfgFile))
-                    .addComponent(ckBoxAdvancedEditor))
+                        .addComponent(btnSaveAsCfgFile)))
                 .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
@@ -1527,8 +1091,6 @@ public class IchthyopView extends FrameView
                     .addComponent(btnSaveCfgFile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCfgFile)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ckBoxAdvancedEditor)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1871,11 +1433,11 @@ public class IchthyopView extends FrameView
         titledPanelSteps.getContentContainer().setLayout(titledPanelStepsLayout);
         titledPanelStepsLayout.setHorizontalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(stepsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
         );
         titledPanelStepsLayout.setVerticalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
         );
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
@@ -1889,11 +1451,11 @@ public class IchthyopView extends FrameView
         titledPanelLogger.getContentContainer().setLayout(titledPanelLoggerLayout);
         titledPanelLoggerLayout.setHorizontalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
         );
         titledPanelLoggerLayout.setVerticalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE)
+            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
         );
 
         leftSplitPane.setRightComponent(titledPanelLogger);
@@ -1901,7 +1463,10 @@ public class IchthyopView extends FrameView
         splitPane.setLeftComponent(leftSplitPane);
 
         titledPanelMain.setTitle(resourceMap.getString("titledPanelMain.title")); // NOI18N
+        titledPanelMain.setMinimumSize(new java.awt.Dimension(32, 32));
         titledPanelMain.setName("titledPanelMain"); // NOI18N
+
+        jScrollPane3.setName("jScrollPane3"); // NOI18N
 
         gradientPanel.setName("gradientPanel"); // NOI18N
 
@@ -1909,25 +1474,26 @@ public class IchthyopView extends FrameView
         gradientPanel.setLayout(gradientPanelLayout);
         gradientPanelLayout.setHorizontalGroup(
             gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 344, Short.MAX_VALUE)
+            .addGap(0, 683, Short.MAX_VALUE)
         );
         gradientPanelLayout.setVerticalGroup(
             gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1013, Short.MAX_VALUE)
+            .addGap(0, 489, Short.MAX_VALUE)
         );
+
+        jScrollPane3.setViewportView(gradientPanel);
+        createMainPanel();
 
         javax.swing.GroupLayout titledPanelMainLayout = new javax.swing.GroupLayout(titledPanelMain.getContentContainer());
         titledPanelMain.getContentContainer().setLayout(titledPanelMainLayout);
         titledPanelMainLayout.setHorizontalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(gradientPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE)
         );
         titledPanelMainLayout.setVerticalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(gradientPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
         );
-
-        createMainPanel();
 
         splitPane.setRightComponent(titledPanelMain);
 
@@ -1935,11 +1501,11 @@ public class IchthyopView extends FrameView
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 848, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 869, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 1045, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -2048,32 +1614,6 @@ public class IchthyopView extends FrameView
 
         menuBar.add(helpMenu);
 
-        popupCharts.setName("popupCharts"); // NOI18N
-
-        itemDepthChart.setText(resourceMap.getString("itemDepthChart.text")); // NOI18N
-        itemDepthChart.setName("itemDepthChart"); // NOI18N
-        popupCharts.add(itemDepthChart);
-
-        itemEdgeChart.setText(resourceMap.getString("itemEdgeChart.text")); // NOI18N
-        itemEdgeChart.setName("itemEdgeChart"); // NOI18N
-        popupCharts.add(itemEdgeChart);
-
-        itemRecruitChart.setText(resourceMap.getString("itemRecruitChart.text")); // NOI18N
-        itemRecruitChart.setName("itemRecruitChart"); // NOI18N
-        popupCharts.add(itemRecruitChart);
-
-        itemLengthChart.setText(resourceMap.getString("itemLengthChart.text")); // NOI18N
-        itemLengthChart.setName("itemLengthChart"); // NOI18N
-        popupCharts.add(itemLengthChart);
-
-        itemDeadChart.setText(resourceMap.getString("itemDeadChart.text")); // NOI18N
-        itemDeadChart.setName("itemDeadChart"); // NOI18N
-        popupCharts.add(itemDeadChart);
-
-        itemStageChart.setText(resourceMap.getString("itemStageChart.text")); // NOI18N
-        itemStageChart.setName("itemStageChart"); // NOI18N
-        popupCharts.add(itemStageChart);
-
         scrollPaneSimulationUI.setBorder(null);
         scrollPaneSimulationUI.setName("scrollPaneSimulationUI"); // NOI18N
         scrollPaneSimulationUI.setPreferredSize(new java.awt.Dimension(500, 500));
@@ -2095,335 +1635,8 @@ public class IchthyopView extends FrameView
 
         scrollPaneSimulationUI.setViewportView(pnlSimulationUI);
 
-        pnlConfiguration.setName("pnlConfiguration"); // NOI18N
-
-        splitPaneCfg.setDividerLocation(250);
-        splitPaneCfg.setName("splitPaneCfg"); // NOI18N
-
-        jPanel1.setName("jPanel1"); // NOI18N
-
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        blockTree.setName("blockTree"); // NOI18N
-        blockTree.setRootVisible(true);
-        jScrollPane1.setViewportView(blockTree);
-
-        jToolBar1.setFloatable(false);
-        jToolBar1.setRollover(true);
-        jToolBar1.setName("jToolBar1"); // NOI18N
-
-        btnExpand.setAction(actionMap.get("expand")); // NOI18N
-        btnExpand.setFocusable(false);
-        btnExpand.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnExpand.setName("btnExpand"); // NOI18N
-        btnExpand.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(btnExpand);
-
-        btnCollapse.setAction(actionMap.get("collapse")); // NOI18N
-        btnCollapse.setFocusable(false);
-        btnCollapse.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnCollapse.setName("btnCollapse"); // NOI18N
-        btnCollapse.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(btnCollapse);
-
-        btnUpper.setAction(actionMap.get("upper")); // NOI18N
-        btnUpper.setFocusable(false);
-        btnUpper.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnUpper.setName("btnUpper"); // NOI18N
-        btnUpper.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(btnUpper);
-
-        btnLower.setAction(actionMap.get("lower")); // NOI18N
-        btnLower.setFocusable(false);
-        btnLower.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnLower.setName("btnLower"); // NOI18N
-        btnLower.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(btnLower);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        splitPaneCfg.setLeftComponent(jPanel1);
-
-        pnlBlock.setName("pnlBlock"); // NOI18N
-
-        pnlBlockInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlBlockInfo.border.title"))); // NOI18N
-        pnlBlockInfo.setName("pnlBlockInfo"); // NOI18N
-
-        lblBlockInfo.setText(resourceMap.getString("lblBlockInfo.text")); // NOI18N
-        lblBlockInfo.setName("lblBlockInfo"); // NOI18N
-
-        ckBoxBlock.setAction(actionMap.get("setBlockEnabled")); // NOI18N
-        ckBoxBlock.setText(resourceMap.getString("ckBoxBlock.text")); // NOI18N
-        ckBoxBlock.setName("ckBoxBlock"); // NOI18N
-
-        javax.swing.GroupLayout pnlBlockInfoLayout = new javax.swing.GroupLayout(pnlBlockInfo);
-        pnlBlockInfo.setLayout(pnlBlockInfoLayout);
-        pnlBlockInfoLayout.setHorizontalGroup(
-            pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlBlockInfoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE)
-                    .addComponent(ckBoxBlock))
-                .addContainerGap())
-        );
-        pnlBlockInfoLayout.setVerticalGroup(
-            pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockInfoLayout.createSequentialGroup()
-                .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ckBoxBlock)
-                .addContainerGap())
-        );
-
-        pnlParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlParameters.border.title"))); // NOI18N
-        pnlParameters.setName("pnlParameters"); // NOI18N
-
-        pnlParamDescription.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlParamDescription.border.title"))); // NOI18N
-        pnlParamDescription.setName("pnlParamDescription"); // NOI18N
-
-        lblParameter.setText(resourceMap.getString("lblParameter.text")); // NOI18N
-        lblParameter.setName("lblParameter"); // NOI18N
-
-        javax.swing.GroupLayout pnlParamDescriptionLayout = new javax.swing.GroupLayout(pnlParamDescription);
-        pnlParamDescription.setLayout(pnlParamDescriptionLayout);
-        pnlParamDescriptionLayout.setHorizontalGroup(
-            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 566, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        pnlParamDescriptionLayout.setVerticalGroup(
-            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
-                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        btnHiddenParameter.setAction(actionMap.get("showHiddenParameters")); // NOI18N
-        btnHiddenParameter.setClickedColor(resourceMap.getColor("btnHiddenParameter.clickedColor")); // NOI18N
-        btnHiddenParameter.setUnclickedColor(resourceMap.getColor("btnHiddenParameter.unclickedColor")); // NOI18N
-        btnHiddenParameter.setFont(resourceMap.getFont("btnHiddenParameter.font")); // NOI18N
-        btnHiddenParameter.setName("btnHiddenParameter"); // NOI18N
-
-        btnUndo.setAction(actionMap.get("undo")); // NOI18N
-        btnUndo.setFont(resourceMap.getFont("btnUndo.font")); // NOI18N
-        btnUndo.setName("btnUndo"); // NOI18N
-
-        btnRedo.setAction(actionMap.get("redo")); // NOI18N
-        btnRedo.setFont(resourceMap.getFont("btnRedo.font")); // NOI18N
-        btnRedo.setName("btnRedo"); // NOI18N
-
-        btnAddValue.setAction(actionMap.get("addSerialValue")); // NOI18N
-        btnAddValue.setFont(resourceMap.getFont("btnAddValue.font")); // NOI18N
-        btnAddValue.setName("btnAddValue"); // NOI18N
-
-        btnRemoveValue.setAction(actionMap.get("removeSerialValue")); // NOI18N
-        btnRemoveValue.setFont(resourceMap.getFont("btnRemoveValue.font")); // NOI18N
-        btnRemoveValue.setName("btnRemoveValue"); // NOI18N
-
-        jScrollPane2.setName("jScrollPane2"); // NOI18N
-
-        table.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        table.setName("table"); // NOI18N
-        jScrollPane2.setViewportView(table);
-
-        javax.swing.GroupLayout pnlParametersLayout = new javax.swing.GroupLayout(pnlParameters);
-        pnlParameters.setLayout(pnlParametersLayout);
-        pnlParametersLayout.setHorizontalGroup(
-            pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlParametersLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(pnlParametersLayout.createSequentialGroup()
-                        .addComponent(btnUndo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRedo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAddValue)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemoveValue))
-                    .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        pnlParametersLayout.setVerticalGroup(
-            pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlParametersLayout.createSequentialGroup()
-                .addComponent(btnHiddenParameter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 312, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnUndo)
-                    .addComponent(btnRedo)
-                    .addComponent(btnAddValue)
-                    .addComponent(btnRemoveValue))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlParamDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout pnlBlockLayout = new javax.swing.GroupLayout(pnlBlock);
-        pnlBlock.setLayout(pnlBlockLayout);
-        pnlBlockLayout.setHorizontalGroup(
-            pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlBlockLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(47, Short.MAX_VALUE))
-        );
-        pnlBlockLayout.setVerticalGroup(
-            pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlBlockLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlBlockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        splitPaneCfg.setRightComponent(pnlBlock);
-
-        javax.swing.GroupLayout pnlConfigurationLayout = new javax.swing.GroupLayout(pnlConfiguration);
-        pnlConfiguration.setLayout(pnlConfigurationLayout);
-        pnlConfigurationLayout.setHorizontalGroup(
-            pnlConfigurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPaneCfg, javax.swing.GroupLayout.DEFAULT_SIZE, 905, Short.MAX_VALUE)
-        );
-        pnlConfigurationLayout.setVerticalGroup(
-            pnlConfigurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPaneCfg, javax.swing.GroupLayout.Alignment.TRAILING)
-        );
-
-        pnlProgress.setBackground(new Color(0,0,0,0));
-        pnlProgress.setName("pnlProgress"); // NOI18N
-        pnlProgress.setOpaque(false);
-        pnlProgress.setPreferredSize(new java.awt.Dimension(600, 100));
-
-        lblProgressCurrent.setForeground(java.awt.Color.white);
-        lblProgressCurrent.setText(resourceMap.getString("lblProgressCurrent.text")); // NOI18N
-        lblProgressCurrent.setName("lblProgressCurrent"); // NOI18N
-
-        progressBarCurrent.setName("progressBarCurrent"); // NOI18N
-        progressBarCurrent.setStringPainted(true);
-
-        lblTimeLeftCurrent.setForeground(resourceMap.getColor("lblTimeLeftCurrent.foreground")); // NOI18N
-        lblTimeLeftCurrent.setText(resourceMap.getString("lblTimeLeftCurrent.text")); // NOI18N
-        lblTimeLeftCurrent.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        lblTimeLeftCurrent.setName("lblTimeLeftCurrent"); // NOI18N
-
-        lblProgressGlobal.setForeground(resourceMap.getColor("lblProgressGlobal.foreground")); // NOI18N
-        lblProgressGlobal.setText(resourceMap.getString("lblProgressGlobal.text")); // NOI18N
-        lblProgressGlobal.setName("lblProgressGlobal"); // NOI18N
-
-        progressBarGlobal.setName("progressBarGlobal"); // NOI18N
-        progressBarGlobal.setStringPainted(true);
-
-        lblTimeLeftGlobal.setForeground(java.awt.Color.white);
-        lblTimeLeftGlobal.setText(resourceMap.getString("lblTimeLeftGlobal.text")); // NOI18N
-        lblTimeLeftGlobal.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        lblTimeLeftGlobal.setName("lblTimeLeftGlobal"); // NOI18N
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setName("jLabel1"); // NOI18N
-
-        javax.swing.GroupLayout pnlProgressLayout = new javax.swing.GroupLayout(pnlProgress);
-        pnlProgress.setLayout(pnlProgressLayout);
-        pnlProgressLayout.setHorizontalGroup(
-            pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlProgressLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE)
-                    .addGroup(pnlProgressLayout.createSequentialGroup()
-                        .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblProgressCurrent)
-                            .addComponent(lblProgressGlobal))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(progressBarGlobal, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
-                            .addComponent(progressBarCurrent, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(lblTimeLeftCurrent)
-                            .addComponent(lblTimeLeftGlobal))))
-                .addContainerGap())
-        );
-        pnlProgressLayout.setVerticalGroup(
-            pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlProgressLayout.createSequentialGroup()
-                .addGap(48, 48, 48)
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblProgressCurrent)
-                    .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(progressBarCurrent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblTimeLeftCurrent)))
-                .addGap(18, 18, 18)
-                .addGroup(pnlProgressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblProgressGlobal)
-                    .addComponent(lblTimeLeftGlobal)
-                    .addComponent(progressBarGlobal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(44, 44, 44))
-        );
-
         btnExit.setAction(actionMap.get("exitApplication")); // NOI18N
         btnExit.setName("btnExit"); // NOI18N
-
-        pnlTree.setName("pnlTree"); // NOI18N
-
-        lblSelectBlock.setFont(resourceMap.getFont("lblSelectBlock.font")); // NOI18N
-        lblSelectBlock.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblSelectBlock.setText(resourceMap.getString("lblSelectBlock.text")); // NOI18N
-        lblSelectBlock.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        lblSelectBlock.setName("lblSelectBlock"); // NOI18N
-
-        javax.swing.GroupLayout pnlTreeLayout = new javax.swing.GroupLayout(pnlTree);
-        pnlTree.setLayout(pnlTreeLayout);
-        pnlTreeLayout.setHorizontalGroup(
-            pnlTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblSelectBlock, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
-        );
-        pnlTreeLayout.setVerticalGroup(
-            pnlTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblSelectBlock, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
-        );
 
         pnlLogo.setAlpha(0.4F);
         pnlLogo.setInheritAlpha(false);
@@ -2461,61 +1674,8 @@ public class IchthyopView extends FrameView
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        statusBar.setName("statusBar"); // NOI18N
-        statusBar.putClientProperty(BasicStatusBarUI.AUTO_ADD_SEPARATOR, false);
-        JXStatusBar.Constraint c0 = new JXStatusBar.Constraint();
-        c0.setFixedWidth(20);
-        statusBar.add(lblFlag, c0);
-        //statusBar.add(new JSeparator(JSeparator.VERTICAL));
-        JXStatusBar.Constraint c1 = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
-        statusBar.add(statusMessageLabel, c1);
-        JXStatusBar.Constraint c2 = new JXStatusBar.Constraint(JXStatusBar.Constraint.ResizeBehavior.FILL);
-        statusBar.add(pnlProgressBar, c2);
-        JXStatusBar.Constraint c3 = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
-        c3.setFixedWidth(20);
-        statusBar.add(statusAnimationLabel, c3);
-
-        statusMessageLabel.setName("statusMessageLabel"); // NOI18N
-
-        statusAnimationLabel.setMaximumSize(new java.awt.Dimension(20, 20));
-        statusAnimationLabel.setMinimumSize(new java.awt.Dimension(20, 20));
-        statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
-        statusAnimationLabel.setPreferredSize(new java.awt.Dimension(20, 20));
-        BusyPainter painter = new BusyPainter(
-            new RoundRectangle2D.Float(0, 0,4.0f,1.8f,10.0f,10.0f),
-            new Ellipse2D.Float(3.0f,3.0f,14.0f,14.0f));
-        painter.setTrailLength(4);
-        painter.setPoints(8);
-        painter.setFrame(-1);
-        statusAnimationLabel.setPreferredSize(new Dimension(20,20));
-        statusAnimationLabel.setIcon(new EmptyIcon(20,20));
-        statusAnimationLabel.setBusyPainter(painter);
-
-        pnlProgressBar.setName("pnlProgressBar"); // NOI18N
-        pnlProgressBar.setOpaque(false);
-
-        progressBar.setName("progressBar"); // NOI18N
-
-        javax.swing.GroupLayout pnlProgressBarLayout = new javax.swing.GroupLayout(pnlProgressBar);
-        pnlProgressBar.setLayout(pnlProgressBarLayout);
-        pnlProgressBarLayout.setHorizontalGroup(
-            pnlProgressBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlProgressBarLayout.createSequentialGroup()
-                .addContainerGap(421, Short.MAX_VALUE)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        pnlProgressBarLayout.setVerticalGroup(
-            pnlProgressBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        lblFlag.setIcon(resourceMap.getIcon("lblFlag.icon")); // NOI18N
-        lblFlag.setName("lblFlag"); // NOI18N
-
         setComponent(mainPanel);
         setMenuBar(menuBar);
-        setStatusBar(statusBar);
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblFramePerSecondMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblFramePerSecondMouseClicked
@@ -2577,7 +1737,7 @@ public class IchthyopView extends FrameView
                 taskPaneAnimation.setCollapsed(true);
                 taskPaneMapping.setCollapsed(true);
                 pnlProgress.setVisible(true);
-                setupProgress();
+                pnlProgress.setupProgress();
             } else {
                 pnlProgress.setVisible(false);
                 if (btnPreview.isSelected()) {
@@ -2638,21 +1798,15 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenuItem animactionMenuItem;
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
-    private org.previmer.ichthyop.ui.BlockTree blockTree;
-    private javax.swing.JButton btnAddValue;
     private javax.swing.JButton btnAnimaction;
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
     private javax.swing.JButton btnCloseNC;
-    private javax.swing.JButton btnCollapse;
     private javax.swing.JButton btnDeleteMaps;
     private javax.swing.JButton btnExit;
-    private javax.swing.JButton btnExpand;
     private javax.swing.JButton btnExportMaps;
     private javax.swing.JButton btnFirst;
-    private org.jdesktop.swingx.JXHyperlink btnHiddenParameter;
     private javax.swing.JButton btnLast;
-    private javax.swing.JButton btnLower;
     private javax.swing.JButton btnMapping;
     private javax.swing.JButton btnNewCfgFile;
     private javax.swing.JButton btnNext;
@@ -2661,52 +1815,28 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnOpenNC;
     private javax.swing.JToggleButton btnPreview;
     private javax.swing.JButton btnPrevious;
-    private javax.swing.JButton btnRedo;
-    private javax.swing.JButton btnRemoveValue;
     private javax.swing.JButton btnSaveAsCfgFile;
     private javax.swing.JButton btnSaveCfgFile;
     private javax.swing.JButton btnSimulationRun;
-    private javax.swing.JButton btnUndo;
-    private javax.swing.JButton btnUpper;
     private javax.swing.JMenuItem cancelMapMenuItem;
     private javax.swing.JComboBox cbBoxWMS;
-    private javax.swing.JCheckBox ckBoxAdvancedEditor;
-    private javax.swing.JCheckBox ckBoxBlock;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem exportMenuItem;
     private org.previmer.ichthyop.ui.GradientPanel gradientPanel;
     private org.jdesktop.swingx.JXHyperlink hyperLinkLogo;
-    private javax.swing.JCheckBoxMenuItem itemDeadChart;
-    private javax.swing.JCheckBoxMenuItem itemDepthChart;
-    private javax.swing.JCheckBoxMenuItem itemEdgeChart;
-    private javax.swing.JCheckBoxMenuItem itemLengthChart;
-    private javax.swing.JCheckBoxMenuItem itemRecruitChart;
-    private javax.swing.JCheckBoxMenuItem itemStageChart;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblAnimationSpeed;
-    private javax.swing.JLabel lblBlockInfo;
     private javax.swing.JLabel lblCfgFile;
-    private javax.swing.JLabel lblFlag;
     private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblNC;
-    private javax.swing.JLabel lblParameter;
-    private javax.swing.JLabel lblProgressCurrent;
-    private javax.swing.JLabel lblProgressGlobal;
-    private javax.swing.JLabel lblSelectBlock;
     private javax.swing.JLabel lblTime;
-    private javax.swing.JLabel lblTimeLeftCurrent;
-    private javax.swing.JLabel lblTimeLeftGlobal;
     private javax.swing.JLabel lblWMS;
     private javax.swing.JSplitPane leftSplitPane;
     private org.previmer.ichthyop.ui.LoggerScrollPane loggerScrollPane;
@@ -2719,25 +1849,13 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem openNCMenuItem;
     private javax.swing.JPanel pnlAnimation;
-    private javax.swing.JPanel pnlBlock;
-    private javax.swing.JPanel pnlBlockInfo;
-    private javax.swing.JPanel pnlConfiguration;
     private javax.swing.JPanel pnlFile;
     private org.jdesktop.swingx.JXPanel pnlLogo;
     private javax.swing.JPanel pnlMapping;
-    private javax.swing.JPanel pnlParamDescription;
-    private javax.swing.JPanel pnlParameters;
-    private javax.swing.JPanel pnlProgress;
-    private javax.swing.JPanel pnlProgressBar;
     private javax.swing.JPanel pnlSimulation;
     private javax.swing.JPanel pnlSimulationUI;
-    private javax.swing.JPanel pnlTree;
     private javax.swing.JPanel pnlWMS;
-    private javax.swing.JPopupMenu popupCharts;
     private javax.swing.JMenuItem previewMenuItem;
-    private javax.swing.JProgressBar progressBar;
-    private javax.swing.JProgressBar progressBarCurrent;
-    private javax.swing.JProgressBar progressBarGlobal;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JScrollPane scrollPaneSimulationUI;
@@ -2745,13 +1863,8 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenu simulationMenu;
     private javax.swing.JSlider sliderTime;
     private javax.swing.JSplitPane splitPane;
-    private javax.swing.JSplitPane splitPaneCfg;
-    private org.jdesktop.swingx.JXBusyLabel statusAnimationLabel;
-    private org.jdesktop.swingx.JXStatusBar statusBar;
-    private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel stepsPanel;
     private javax.swing.JScrollPane stepsScrollPane;
-    private org.jdesktop.swingx.JXTable table;
     private org.jdesktop.swingx.JXTaskPane taskPaneAnimation;
     private org.jdesktop.swingx.JXTaskPane taskPaneConfiguration;
     private org.jdesktop.swingx.JXTaskPane taskPaneMapping;
@@ -2760,7 +1873,6 @@ public class IchthyopView extends FrameView
     private org.jdesktop.swingx.JXTitledPanel titledPanelMain;
     private org.jdesktop.swingx.JXTitledPanel titledPanelSteps;
     // End of variables declaration//GEN-END:variables
-    private final Timer messageTimer;
     private JDialog aboutBox;
     private static final Logger logger = Logger.getLogger(ISimulationManager.class.getName());
     private File cfgPath = new File(System.getProperty("user.dir"));
@@ -2778,7 +1890,7 @@ public class IchthyopView extends FrameView
     private File outputFile, outputFolder;
     private JLabel lblConfiguration;
     private JLabel lblMapping;
-    private boolean hasStructureChanged;
-    private boolean showHiddenParameters = true;
-    private JBlockPanel blockEditor;
+    private JConfigurationPanel pnlConfiguration = new JConfigurationPanel();
+    private JStatusBar statusBar = new JStatusBar();
+    private JRunProgressPanel pnlProgress = new JRunProgressPanel();
 }

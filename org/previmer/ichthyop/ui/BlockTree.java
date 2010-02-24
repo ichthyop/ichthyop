@@ -18,6 +18,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.arch.IParameterManager;
 import org.previmer.ichthyop.arch.ISimulationManager;
@@ -304,7 +305,7 @@ public class BlockTree extends JTree {
         Icon iconLeaf, iconRoot, iconNode, iconNodeExpanded;
 
         TreeRenderer() {
-            ResourceMap resourceMap = ((IchthyopView) IchthyopApp.getApplication().getMainView()).getResourceMap();
+            ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(BlockTree.class);
             iconLeaf = resourceMap.getIcon("Tree.icon.leaf");
             iconRoot = resourceMap.getIcon("Tree.icon.root");
             iconNode = resourceMap.getIcon("Tree.icon.node");
