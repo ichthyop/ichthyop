@@ -101,8 +101,8 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jToolBar1" alignment="0" max="32767" attributes="0"/>
-                          <Component id="jScrollPane1" alignment="0" pref="178" max="32767" attributes="0"/>
+                          <Component id="jToolBar1" alignment="0" pref="226" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" alignment="0" pref="226" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -512,6 +512,7 @@
                                   </Properties>
                                   <AuxValues>
                                     <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ParameterTable();"/>
+                                    <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="table.getSelectionModel().addListSelectionListener(this);"/>
                                   </AuxValues>
                                 </Component>
                               </SubComponents>

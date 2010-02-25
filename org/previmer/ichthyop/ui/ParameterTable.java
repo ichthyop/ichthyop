@@ -267,11 +267,16 @@ public class ParameterTable extends JMultiCellEditorsTable {
             int i = 0;
             for (XParameter xparam : list) {
                 xparam.reset();
-                do {
-                    listData.add(xparam.toTableRow());
-                } while (xparam.hasNext());
+                listData.add(xparam.toTableRow());
+                if (xparam.hasNext()) {
+                    do {
+                        xparam.increment();
+                        listData.add(xparam.toTableRow());
+                    } while (xparam.hasNext());
+                }
+                xparam.reset();
             }
-            tableData = new String[list.size()][XParameter.getHeaders().length];
+            tableData = new String[listData.size()][XParameter.getHeaders().length];
             for (String[] arr : listData) {
                 tableData[i++] = arr;
             }

@@ -66,6 +66,7 @@ public class XParameter extends org.jdom.Element {
             longName += " [" + String.valueOf(index + 1) + "]";
         }
         row = new String[] {getKey(), String.valueOf(index), longName, getValue(), param_type.toString(), Boolean.toString(hidden)};
+        //System.out.println(getKey() + " - " +  String.valueOf(index) + " - " + longName + " - " + getValue() + " - " + param_type.toString() + " - " + Boolean.toString(hidden));
         return row;
     }
 

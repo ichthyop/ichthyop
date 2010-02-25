@@ -10,12 +10,19 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.RoundRectangle2D;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -26,6 +33,9 @@ import org.jdesktop.application.Action;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
+import org.jdesktop.swingx.JXBusyLabel;
+import org.jdesktop.swingx.icon.EmptyIcon;
+import org.jdesktop.swingx.painter.BusyPainter;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
@@ -36,14 +46,15 @@ import org.previmer.ichthyop.manager.SimulationManager;
  *
  * @author pverley
  */
-public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelectionListener, TableModelListener {
+public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelectionListener, TableModelListener, ListSelectionListener {
 
     /** Creates new form JConfigurationPanel */
     public JConfigurationPanel() {
         initComponents();
     }
 
-    @Action public void upper() {
+    @Action
+    public void upper() {
         blockTree.removeTreeSelectionListener(this);
         hasStructureChanged |= blockTree.upper();
         blockTree.addTreeSelectionListener(this);
@@ -52,7 +63,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
     }
 
-    @Action public void lower() {
+    @Action
+    public void lower() {
         blockTree.removeTreeSelectionListener(this);
         hasStructureChanged |= blockTree.lower();
         blockTree.addTreeSelectionListener(this);
@@ -61,11 +73,13 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
     }
 
-    @Action public void expand() {
+    @Action
+    public void expand() {
         blockTree.expandAll();
     }
 
-    @Action public void collapse() {
+    @Action
+    public void collapse() {
         blockTree.collapseAll();
     }
 
@@ -102,8 +116,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
         setParameterEditorEnabled(block.isEnabled());
     }
-    
-    @Action public void setBlockEnabled() {
+
+    @Action
+    public void setBlockEnabled() {
         blockTree.getSelectedBlock().setEnabled(ckBoxBlock.isSelected());
         setParameterEditorEnabled(ckBoxBlock.isSelected());
         firePropertyChange("xicfile", null, null);
@@ -118,7 +133,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRemoveValue.getAction().setEnabled(false);
     }
 
-    @Action public void reloadEditor() {
+    @Action
+    public void reloadEditor() {
         valueChanged(new TreeSelectionEvent(ckBoxAdvancedEditorOnly, null, true, null, null));
     }
 
@@ -151,27 +167,75 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     }
 
     public void valueChanged(TreeSelectionEvent e) {
-        final DefaultMutableTreeNode node = blockTree.getSelectedNode();
-        blockEditor = null;
-        if (node != null && node.isLeaf()) {
-            XBlock block = blockTree.getSelectedBlock();
-            if (block.getType().equals(BlockType.ZONE)) {
-                splitPaneCfg.setRightComponent(pnlNoBlockSelected);
-                return;
+        Application.getInstance().getContext().getTaskService().execute(new ShowConfigEditorsTask());
+    }
+
+    private class ShowConfigEditorsTask extends Task<JBlockPanel, Object> {
+
+        private JXBusyLabel busyLabel;
+
+        ShowConfigEditorsTask() {
+            super(Application.getInstance());
+            busyLabel = new JXBusyLabel(new Dimension(100, 100));
+            BusyPainter painter = new BusyPainter(
+                    new RoundRectangle2D.Float(0, 0, 8.5f, 5.6f, 10.0f, 10.0f),
+                    new Ellipse2D.Float(15.0f, 15.0f, 70.0f, 70.0f));
+            painter.setTrailLength(4);
+            painter.setPoints(8);
+            painter.setFrame(-1);
+            busyLabel.setPreferredSize(new Dimension(100, 100));
+            busyLabel.setIcon(new EmptyIcon(100, 100));
+            busyLabel.setBusyPainter(painter);
+            busyLabel.setHorizontalAlignment(JLabel.CENTER);
+            busyLabel.setVerticalTextPosition(JLabel.BOTTOM);
+            busyLabel.setHorizontalTextPosition(JLabel.CENTER);
+            busyLabel.setText("Loading parameter editor...");
+            busyLabel.setBusy(true);
+            tabbedPane.setVisible(false);
+            pnlEditors.setLayout(new StackLayout());
+            pnlEditors.add(busyLabel, StackLayout.TOP);
+        }
+
+        @Override
+        protected JBlockPanel doInBackground() throws Exception {
+
+            DefaultMutableTreeNode node = blockTree.getSelectedNode();
+            if (node != null && node.isLeaf()) {
+                XBlock block = blockTree.getSelectedBlock();
+                if (block.getType().equals(BlockType.ZONE)) {
+                    cancel(true);
+                }
+                setupAdvancedEditor(block);
+                if (!ckBoxAdvancedEditorOnly.isSelected()) {
+                    return getBlockEditor(block);
+                }
+            } else {
+                cancel(true);
             }
-            setupAdvancedEditor(block);
-            if (!ckBoxAdvancedEditorOnly.isSelected()) {
-                blockEditor = getBlockEditor(block);
+            return null;
+        }
+
+        @Override
+        protected void succeeded(JBlockPanel blockEditor) {
+            if (tabbedPane.getTabCount() > 1) {
+                tabbedPane.remove(0);
             }
-            splitPaneCfg.setRightComponent(scrollPaneEditors);
-            if (null != blockEditor) {
+            if (blockEditor != null) {
                 tabbedPane.add(blockEditor, "User-friendly editor", 0);
                 blockEditor.addPropertyChangeListener("xicfile", (IchthyopView) IchthyopApp.getApplication().getMainView());
-            } else {
-                tabbedPane.remove(0);
-                //splitPaneCfg.setRightComponent(pnlBlock);
             }
-        } else {
+            tabbedPane.setVisible(true);
+            splitPaneCfg.setRightComponent(scrollPaneEditors);
+        }
+
+        @Override
+        protected void finished() {
+            busyLabel.setBusy(false);
+            pnlEditors.remove(busyLabel);
+        }
+
+        @Override
+        protected void cancelled() {
             splitPaneCfg.setRightComponent(pnlNoBlockSelected);
         }
     }
@@ -437,8 +501,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             .addGroup(pnlBlockTreeLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlBlockTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE))
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlBlockTreeLayout.setVerticalGroup(
@@ -551,6 +615,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             }
         ));
         table.setName("table"); // NOI18N
+        table.getSelectionModel().addListSelectionListener(this);
         jScrollPane2.setViewportView(table);
 
         javax.swing.GroupLayout pnlParametersLayout = new javax.swing.GroupLayout(pnlParameters);

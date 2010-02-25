@@ -122,6 +122,10 @@ public class JStatusBar extends JXStatusBar {
                     lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.green"));
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
+                } else if ("done".equals(propertyName)) {
+                    statusAnimationLabel.setBusy(false);
+                    progressBar.setVisible(false);
+                    progressBar.setValue(0);
                 } else if ("message".equals(propertyName)) {
                     String text = (String) (evt.getNewValue());
                     statusMessageLabel.setText((text == null) ? "" : text);

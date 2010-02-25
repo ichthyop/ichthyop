@@ -69,7 +69,7 @@ public class IchthyopView extends FrameView
         btnMapping.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
         setAnimationToolsEnabled(false);
-        addPropertyChangeListener("xicfile", this);
+        pnlConfiguration.addPropertyChangeListener("xicfile", this);
     }
 
     public ISimulationManager getSimulationManager() {
