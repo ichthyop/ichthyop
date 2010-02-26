@@ -142,6 +142,9 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                     ncOut.addGlobalAttribute("zone" + iZone + "_lat", latEdge);
                     ncOut.addGlobalAttribute("zone" + iZone + "_lon", lonEdge);
                     ncOut.addGlobalAttribute("zone" + iZone + "_type", zone.getType().toString());
+                    String color = zone.getColor().toString();
+                    color = color.substring(color.lastIndexOf("["));
+                    ncOut.addGlobalAttribute("zone" + iZone + "_color", color);
                     iZone++;
                 }
             }

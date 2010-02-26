@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.io;
 
+import java.awt.Color;
 import org.previmer.ichthyop.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ public class XZone extends XBlock {
     final public static String TYPE_ZONE = "type";
     final public static String INDEX = "index";
     final public static String POLYGON = "polygon";
+    final public static String COLOR = "color";
     private XBathyMask bathyMask;
 
     public XZone(Element xzone) {
@@ -40,6 +42,23 @@ public class XZone extends XBlock {
 
     public XBathyMask getBathyMask() {
         return bathyMask;
+    }
+
+    public Color getColor() {
+        if (null == getChild(COLOR)) {
+            return Color.WHITE;
+        }
+        String strColor = this.getChildTextNormalize(COLOR);
+        strColor = strColor.substring(1, strColor.length() - 1);
+        String[] rgb = strColor.split(",");
+        if (rgb.length != 3) {
+            return Color.WHITE;
+        }
+        int red = Integer.valueOf(rgb[0].substring(rgb[0].indexOf("=") + 1));
+        int green = Integer.valueOf(rgb[1].substring(rgb[1].indexOf("=") + 1));
+        int blue = Integer.valueOf(rgb[2].substring(rgb[2].indexOf("=") + 1));
+        return new Color(red, green, blue);
+
     }
 
     public ArrayList<XPoint> getPolygon() {

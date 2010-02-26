@@ -1,5 +1,6 @@
 package org.previmer.ichthyop;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import org.previmer.ichthyop.arch.IBasicParticle;
 
@@ -52,11 +53,26 @@ public class Zone extends SimulationManagerAccessor {
      *  [meter]
      */
     private int upperDepth;
+    /**
+     * Zone index
+     */
     int index;
+    /**
+     * Zone color (RGB)
+     */
+    private Color color;
 
     public Zone(TypeZone type, int index) {
         this.type = type;
         this.index = index;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public Color getColor() {
+        return color;
     }
 
     public void setInshoreLine(int inshoreLine) {
@@ -116,10 +132,10 @@ public class Zone extends SimulationManagerAccessor {
     }
 
     private boolean isXYBetweenBathyLines(double x, double y) {
-        return (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
-                inshoreLine &
-                getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
-                offshoreLine);
+        return (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
+                > inshoreLine
+                & getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
+                < offshoreLine);
     }
 
     private boolean isXYInPolygon(double x, double y) {
@@ -139,11 +155,11 @@ public class Zone extends SimulationManagerAccessor {
                 inc = 0;
                 if ((polygon.get(k).getX() == x) & (polygon.get(k).getY() == y)) {
                     crossings = 1;
-                } else if (((dx1 == 0.) & (y >= polygon.get(k).getY())) |
-                        ((dx2 == 0.) & (y >= polygon.get(k + 1).getY()))) {
+                } else if (((dx1 == 0.) & (y >= polygon.get(k).getY()))
+                        | ((dx2 == 0.) & (y >= polygon.get(k + 1).getY()))) {
                     inc = 1;
-                } else if ((dx1 * dx2 > 0.) &
-                        ((polygon.get(k + 1).getX() - polygon.get(k).getX()) * dxy >= 0.)) {
+                } else if ((dx1 * dx2 > 0.)
+                        & ((polygon.get(k + 1).getX() - polygon.get(k).getX()) * dxy >= 0.)) {
                     inc = 2;
                 }
                 if (polygon.get(k + 1).getX() > polygon.get(k).getX()) {
@@ -158,10 +174,10 @@ public class Zone extends SimulationManagerAccessor {
         }
 
         if (isInBox) {
-            isInBox = (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) >
-                    inshoreLine &
-                    getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y)) <
-                    offshoreLine);
+            isInBox = (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
+                    > inshoreLine
+                    & getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
+                    < offshoreLine);
         }
 
         return (isInBox);

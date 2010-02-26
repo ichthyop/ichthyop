@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.manager;
 
+import java.awt.Color;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
@@ -63,6 +64,7 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
             zone.setInshoreLine(xzone.getBathyMask().getInshoreLine());
             zone.setLowerDepth(xzone.getBathyMask().getLowerDepth());
             zone.setUpperDepth(xzone.getBathyMask().getUpperDepth());
+            zone.setColor(xzone.getColor());
             for (XPoint point : xzone.getPolygon()) {
                 zone.addPoint(point.createRhoPoint());
             }

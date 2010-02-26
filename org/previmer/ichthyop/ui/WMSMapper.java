@@ -36,6 +36,7 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
@@ -56,7 +57,7 @@ public class WMSMapper extends JXMapKit {
 
     private TileFactory tileFactory = new MGDSTileFactory();
     private List<GeoPosition> region;
-    private HashMap<String, List<GeoPosition>> zones;
+    private HashMap<String, DrawableZone> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private NetcdfFile nc;
     private Variable vlon, vlat, vtime;
@@ -219,7 +220,7 @@ public class WMSMapper extends JXMapKit {
         return region;
     }
 
-    public HashMap<String, List<GeoPosition>> getZones() {
+    public HashMap<String, DrawableZone> getZones() {
         if (null == zones) {
             zones = readZones();
         }
@@ -257,41 +258,46 @@ public class WMSMapper extends JXMapKit {
         return lregion;
     }
 
-    private HashMap<String, List<GeoPosition>> readZones() {
-        HashMap<String, List<GeoPosition>> lzones = new HashMap();
+    private HashMap<String, DrawableZone> readZones() {
+        HashMap<String, DrawableZone> lzones = new HashMap();
         if (null != nc.findGlobalAttribute("nb_zones")) {
             int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
             for (int iZone = 0; iZone < nbZones; iZone++) {
-                List<GeoPosition> zone = new ArrayList<GeoPosition>();
+                List<GeoPosition> edge = new ArrayList<GeoPosition>();
                 ArrayFloat.D1 lonEdge = (D1) nc.findGlobalAttribute("zone" + iZone + "_lon").getValues();
                 ArrayFloat.D1 latEdge = (D1) nc.findGlobalAttribute("zone" + iZone + "_lat").getValues();
                 String type = nc.findGlobalAttribute("zone" + iZone + "_type").getStringValue();
+                String color = nc.findGlobalAttribute("zone" + iZone + "_color").getStringValue();
                 for (int i = 0; i < lonEdge.getShape()[0]; i++) {
-                    zone.add(new GeoPosition(latEdge.get(i), lonEdge.get(i)));
+                    edge.add(new GeoPosition(latEdge.get(i), lonEdge.get(i)));
                 }
+                DrawableZone zone = new DrawableZone(edge, color);
                 lzones.put(type + "_zone" + iZone, zone);
             }
         }
         return lzones;
     }
 
-    private void drawZone(List<GeoPosition> zoneEdge, Graphics2D g, JXMapViewer map) {
+    private void drawZone(DrawableZone zone, Graphics2D g, JXMapViewer map) {
 
         Polygon polygon = new Polygon();
-        for (GeoPosition gp : zoneEdge) {
+        for (GeoPosition gp : zone.getEdge()) {
             //convert geo to world bitmap pixel
             Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
             polygon.addPoint((int) pt.getX(), (int) pt.getY());
         }
         //do the drawing
-        g.setColor(new Color(255, 0, 0, 30));
+        Color color = zone.getColor();
+        Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 30);
+        g.setColor(fillColor);
         g.fill(polygon);
-        g.setColor(new Color(255, 0, 0, 70));
+        Color edgeColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 70);
+        g.setColor(edgeColor);
         g.draw(polygon);
     }
 
     private void drawZones(Graphics2D g, JXMapViewer map) {
-        for (List<GeoPosition> zone : getZones().values()) {
+        for (DrawableZone zone : getZones().values()) {
             drawZone(zone, g, map);
         }
     }
@@ -531,6 +537,42 @@ public class WMSMapper extends JXMapKit {
                     return new WMSService("http://www2.demis.nl/wms/wms.asp?wms=WorldMap&", "Bathymetry,Topography,Borders,Coastlines").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
                 }
             });
+        }
+    }
+
+    class DrawableZone {
+
+        private List<GeoPosition> edge;
+        private Color color;
+
+        DrawableZone(List<GeoPosition> edge, String color) {
+            this.edge = edge;
+            this.color = getColor(color);
+        }
+
+        public Color getColor() {
+            return color;
+        }
+
+        public List<GeoPosition> getEdge() {
+            return edge;
+        }
+
+        private Color getColor(String strColor) {
+            if (null == strColor) {
+                return Color.WHITE;
+            }
+            strColor = strColor.substring(1, strColor.length() - 1);
+            System.out.println(strColor);
+            String[] rgb = strColor.split(",");
+            if (rgb.length != 3) {
+                return Color.WHITE;
+            }
+            int red = Integer.valueOf(rgb[0].substring(rgb[0].indexOf("=") + 1));
+            int green = Integer.valueOf(rgb[1].substring(rgb[1].indexOf("=") + 1));
+            int blue = Integer.valueOf(rgb[2].substring(rgb[2].indexOf("=") + 1));
+            return new Color(red, green, blue);
+
         }
     }
 }
