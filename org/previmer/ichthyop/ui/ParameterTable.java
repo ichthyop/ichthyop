@@ -189,7 +189,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     private void setupDateEditor(XBlock block) {
         Calendar calendar;
-        System.out.println("setupDateEditor");
         if (block.getXParameter("calendar_type").getValue().matches("climato")) {
             calendar = new ClimatoCalendar();
         } else {
