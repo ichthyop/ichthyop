@@ -110,10 +110,11 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         if (isEnabled) {
             timeEvent = new long[findNumberReleaseEvents()];
             for (int i = 0; i < timeEvent.length; i++) {
-                timeEvent[i] = Long.valueOf(getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i));
+                
+                timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i));
             }
         } else {
-            timeEvent = new long[]{Long.valueOf(getSimulationManager().getParameterManager().getParameter("app.time", "initial_time"))};
+            timeEvent = new long[]{getSimulationManager().getTimeManager().date2seconds(getSimulationManager().getParameterManager().getParameter("app.time", "initial_time"))};
         }
     }
 
@@ -171,10 +172,10 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     public void setupPerformed(SetupEvent e) {
         indexEvent = 0;
         isAllReleased = false;
-        schedule();
     }
 
     public void initializePerformed(InitializeEvent e) {
         // do nothing
+        schedule();
     }
 }

@@ -17,6 +17,7 @@ import javax.swing.RowFilter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -44,10 +45,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
      *
      */
     private ParameterTableModel model;
-    /**
-     *
-     */
-    private DateEditor dateEditor = new DateEditor();
 
 ///////////////
 // Constructors
@@ -126,10 +123,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(new String[]{"true", "false"})));
                     break;
                 case DURATION:
-                    editorModel.addEditorForRow(row, new DurationEditor());
+                    editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION));
                     break;
                 case DATE:
-                    editorModel.addEditorForRow(row, dateEditor);
+                    editorModel.addEditorForRow(row, new DateEditor(DateEditor.DATE));
                     break;
                 case FILE:
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.FILES_ONLY));
@@ -191,10 +188,12 @@ public class ParameterTable extends JMultiCellEditorsTable {
     }
 
     private void setupDateEditor(XBlock block) {
+        Calendar calendar;
+        System.out.println("setupDateEditor");
         if (block.getXParameter("calendar_type").getValue().matches("climato")) {
-            dateEditor.setCalendar(new ClimatoCalendar());
+            calendar = new ClimatoCalendar();
         } else {
-            Calendar1900 calendar = new Calendar1900();
+            calendar = new Calendar1900();
             if (null != model.block) {
                 if (null != block.getXParameter("time_origin")) {
                     String time_origin = block.getXParameter("time_origin").getValue();
@@ -203,7 +202,13 @@ public class ParameterTable extends JMultiCellEditorsTable {
                             getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
                 }
             }
-            dateEditor.setCalendar(calendar);
+        }
+        for (int i = 0; i < getRowCount() - 1; i++) {
+            TableCellEditor editor =  getRowEditorModel().getEditor(i);
+            if (null != editor)
+            if (editor instanceof DateEditor) {
+                ((DateEditor) editor).setCalendar(calendar);
+            }
         }
     }
 

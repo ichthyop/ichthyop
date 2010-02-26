@@ -38,7 +38,7 @@ public class TimeOptionPanel extends JBlockPanel implements PropertyChangeListen
         initComponents();
         setBlock(block);
         if (null != block) {
-            putValues();
+            //putValues();
         }
         addListeners();
     }

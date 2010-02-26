@@ -4,6 +4,10 @@
  */
 package org.previmer.ichthyop.manager;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
@@ -15,13 +19,28 @@ import org.previmer.ichthyop.event.LastStepListener;
 import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import javax.swing.event.EventListenerList;
+import javax.xml.datatype.Duration;
 
 /**
  *
  * @author pverley
  */
 public class TimeManager extends AbstractManager implements ITimeManager {
+
+///////////////////////////////
+// Declaration of the constants
+///////////////////////////////
+
+    private static final int ONE_SECOND = 1;
+    private static final int ONE_MINUTE = 60 * ONE_SECOND;
+    private static final int ONE_HOUR = 60 * ONE_MINUTE;
+    private static final long ONE_DAY = 24 * ONE_HOUR;
+    
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
 
     private final static TimeManager timeManager = new TimeManager();
     /**
@@ -59,7 +78,9 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     /**
      * The simple date format parses and formats dates in human readable format.
      */
-    private SimpleDateFormat dateFormat;
+    private SimpleDateFormat outputDateFormat;
+    private SimpleDateFormat inputDateFormat = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+    private SimpleDateFormat inputDurationFormat = new SimpleDateFormat("DDDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     private EventListenerList listeners = new EventListenerList();
 
 ///////////////
@@ -94,9 +115,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         if (!isForward) {
             dt *= -1;
         }
-        t0 = Long.valueOf(getParameter("app.time", "initial_time"));
-        //Logger.getAnonymousLogger().info("time-step: " + dt + " - t0: " + t0);
-        transportDuration = Long.valueOf(getParameter("app.time", "transport_duration"));
+        transportDuration = duration2seconds(getParameter("app.time", "transport_duration"));
         if (getParameter("app.time", "calendar_type").matches("climato")) {
             calendar = new ClimatoCalendar();
         } else {
@@ -105,12 +124,46 @@ public class TimeManager extends AbstractManager implements ITimeManager {
                     Calendar1900.getTimeOrigin(time_origin, Calendar.MONTH),
                     Calendar1900.getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
         }
+        t0 = date2seconds(getParameter("app.time", "initial_time"));
         calendar.setTimeInMillis(t0 * 1000L);
-        dateFormat = new SimpleDateFormat(
+        outputDateFormat = new SimpleDateFormat(
                 (calendar.getClass() == Calendar1900.class)
                 ? "yyyy/MM/dd HH:mm:ss"
                 : "yy/MM/dd HH:mm:ss");
-        dateFormat.setCalendar(calendar);
+        outputDateFormat.setCalendar(calendar);
+    }
+
+    /**
+     * 
+     * @param duration format: getInputDurationFormat()
+     * @return
+     */
+    public long duration2seconds(String duration) {
+        Calendar lcalendar = new ClimatoCalendar();
+        inputDurationFormat.setCalendar(lcalendar);
+        try {
+            lcalendar.setTime(inputDurationFormat.parse(duration));
+            long seconds = 0L;
+            seconds = lcalendar.get(Calendar.DAY_OF_YEAR) * ONE_DAY
+                    + lcalendar.get(Calendar.HOUR_OF_DAY) * ONE_HOUR
+                    + lcalendar.get(Calendar.MINUTE) * ONE_MINUTE;
+            return seconds;
+        } catch (ParseException ex) {
+            Logger.getLogger(TimeManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+
+    public long date2seconds(String date) {
+        Calendar lcalendar = (Calendar) calendar.clone();
+        inputDateFormat.setCalendar(lcalendar);
+        try {
+            lcalendar.setTime(inputDateFormat.parse(date));
+            return lcalendar.getTimeInMillis() / 1000L;
+        } catch (ParseException ex) {
+            Logger.getLogger(TimeManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
     }
 
     private String getParameter(String blockName, String key) {
@@ -142,7 +195,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
      * @return the current time of the simulation, formatted in a String
      */
     public String timeToString() {
-        return dateFormat.format(calendar.getTime());
+        return outputDateFormat.format(calendar.getTime());
     }
 
     /**
@@ -266,6 +319,14 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         i_step = 0;
         time = t0;
         nb_steps = (int) (simuDuration / dt);
+    }
+
+    public SimpleDateFormat getInputDurationFormat() {
+        return inputDurationFormat;
+    }
+
+    public SimpleDateFormat getInputDateFormat() {
+        return inputDateFormat;
     }
     //---------- End of class
 }

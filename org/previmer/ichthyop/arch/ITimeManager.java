@@ -5,6 +5,7 @@
 
 package org.previmer.ichthyop.arch;
 
+import java.text.SimpleDateFormat;
 import org.previmer.ichthyop.event.LastStepListener;
 import org.previmer.ichthyop.event.NextStepListener;
 import java.util.Calendar;
@@ -42,5 +43,13 @@ public interface ITimeManager {
     public String stepToString();
 
     public void lastStepTriggered();
+
+    public long duration2seconds(String duration);
+
+    public long date2seconds(String date);
+
+    public SimpleDateFormat getInputDurationFormat();
+
+    public SimpleDateFormat getInputDateFormat();
 
 }
