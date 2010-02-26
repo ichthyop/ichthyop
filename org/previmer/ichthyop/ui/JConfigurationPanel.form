@@ -51,6 +51,16 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="org.jdesktop.swingx.JXBusyLabel" name="busyLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jXBusyLabel1"/>
+        <Property name="name" type="java.lang.String" value="busyLabel" noResource="true"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JXBusyLabel(new Dimension(100, 100));"/>
+        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="            BusyPainter painter = new BusyPainter(&#xa;                    new RoundRectangle2D.Float(0, 0, 8.5f, 5.6f, 10.0f, 10.0f),&#xa;                    new Ellipse2D.Float(15.0f, 15.0f, 70.0f, 70.0f));&#xa;            painter.setTrailLength(4);&#xa;            painter.setPoints(8);&#xa;            painter.setFrame(-1);&#xa;            busyLabel.setPreferredSize(new Dimension(100, 100));&#xa;            busyLabel.setIcon(new EmptyIcon(100, 100));&#xa;            busyLabel.setBusyPainter(painter);&#xa;            busyLabel.setHorizontalAlignment(JLabel.CENTER);&#xa;            busyLabel.setVerticalTextPosition(JLabel.BOTTOM);&#xa;            busyLabel.setHorizontalTextPosition(JLabel.CENTER);"/>
+      </AuxValues>
+    </Component>
   </NonVisualComponents>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -67,12 +77,12 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="splitPaneCfg" alignment="0" pref="879" max="32767" attributes="0"/>
+          <Component id="splitPaneCfg" alignment="0" pref="944" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="splitPaneCfg" alignment="1" pref="509" max="32767" attributes="0"/>
+          <Component id="splitPaneCfg" alignment="1" pref="569" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -112,7 +122,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" pref="433" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" pref="600" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jToolBar1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -219,7 +229,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="tabbedPane" alignment="0" pref="658" max="32767" attributes="0"/>
+                              <Component id="tabbedPane" alignment="0" pref="560" max="32767" attributes="0"/>
                               <Component id="ckBoxAdvancedEditorOnly" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -261,13 +271,13 @@
                       <Layout>
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
+                              <Group type="102" alignment="1" attributes="0">
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                  <Group type="103" groupAlignment="1" attributes="0">
                                       <Component id="pnlBlockInfo" alignment="0" max="32767" attributes="1"/>
                                       <Component id="pnlParameters" alignment="0" max="32767" attributes="1"/>
                                   </Group>
-                                  <EmptySpace max="32767" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -297,13 +307,18 @@
                           <Layout>
                             <DimensionLayout dim="0">
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="lblBlockInfo" alignment="0" pref="602" max="32767" attributes="0"/>
-                                          <Component id="ckBoxBlock" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="ckBoxBlock" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace pref="414" max="32767" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="lblBlockInfo" pref="492" max="32767" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                                          </Group>
                                       </Group>
-                                      <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                             </DimensionLayout>
@@ -351,9 +366,9 @@
                                   <Group type="102" alignment="1" attributes="0">
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="1" attributes="0">
-                                          <Component id="jScrollPane2" alignment="0" pref="602" max="32767" attributes="0"/>
+                                          <Component id="pnlParamDescription" alignment="0" max="32767" attributes="1"/>
+                                          <Component id="srollPaneTable" alignment="0" pref="492" max="32767" attributes="1"/>
                                           <Component id="btnHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="pnlParamDescription" alignment="0" max="32767" attributes="0"/>
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="btnUndo" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
@@ -373,7 +388,7 @@
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jScrollPane2" min="-2" pref="226" max="-2" attributes="0"/>
+                                      <Component id="srollPaneTable" min="-2" pref="226" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
                                           <Component id="btnUndo" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -404,7 +419,7 @@
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" alignment="0" attributes="0">
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="lblParameter" pref="566" max="32767" attributes="0"/>
+                                          <Component id="lblParameter" pref="456" max="32767" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
@@ -488,9 +503,9 @@
                                 <Property name="name" type="java.lang.String" value="btnRemoveValue" noResource="true"/>
                               </Properties>
                             </Component>
-                            <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+                            <Container class="javax.swing.JScrollPane" name="srollPaneTable">
                               <Properties>
-                                <Property name="name" type="java.lang.String" value="jScrollPane2" noResource="true"/>
+                                <Property name="name" type="java.lang.String" value="srollPaneTable" noResource="true"/>
                               </Properties>
                               <AuxValues>
                                 <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>

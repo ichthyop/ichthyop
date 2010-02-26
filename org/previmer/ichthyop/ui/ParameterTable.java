@@ -30,7 +30,6 @@ import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
-import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -289,16 +288,15 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
 
         private Object[] getLongValues() {
-
-            Object[][] data = createData();
-            String[] longuest = new String[2];
-            for (int j = 0; j < 2; j++) {
-                longuest[j] = "";
-                for (int i = 0; i < data.length; i++) {
-                    String value = (String) data[i][j];
-                    if (value != null && (value.length() > longuest[j].length())) {
-                        longuest[j] = value;
-                    }
+            
+            String[] longuest = new String[] {"", ""};
+            Collection<XParameter> list = block.getXParameters();
+            for (XParameter xparam : list) {
+                if (xparam.getLongName().length() > longuest[0].length()) {
+                    longuest[0] = xparam.getLongName();
+                }
+                if (xparam.getValue().length() > longuest[1].length()) {
+                    longuest[1] = xparam.getValue();
                 }
             }
             return longuest;
