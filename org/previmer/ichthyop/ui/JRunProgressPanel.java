@@ -24,6 +24,7 @@ public class JRunProgressPanel extends javax.swing.JPanel {
     /** Creates new form JRunProgressPanel */
     public JRunProgressPanel() {
         initComponents();
+        hideBars();
     }
 
     public void resetProgressBar() {
@@ -37,7 +38,22 @@ public class JRunProgressPanel extends javax.swing.JPanel {
         return Application.getInstance().getContext().getResourceMap(JRunProgressPanel.class);
     }
 
+    public void hideBars() {
+        lblProgressCurrent.setVisible(false);
+        progressBarCurrent.setVisible(false);
+        lblTimeLeftCurrent.setVisible(false);
+        lblProgressGlobal.setVisible(false);
+        progressBarGlobal.setVisible(false);
+        lblTimeLeftGlobal.setVisible(false);
+    }
+
     public void setupProgress() {
+        // show progress bar for current simulation
+        lblProgressCurrent.setVisible(true);
+        progressBarCurrent.setVisible(true);
+        lblTimeLeftCurrent.setVisible(true);
+
+        // show global progress bar for SERIAL runs only
         if (getSimulationManager().getNumberOfSimulations() > 1) {
             lblProgressGlobal.setVisible(true);
             progressBarGlobal.setVisible(true);
@@ -89,37 +105,37 @@ public class JRunProgressPanel extends javax.swing.JPanel {
         lblProgressGlobal = new javax.swing.JLabel();
         progressBarGlobal = new javax.swing.JProgressBar();
         lblTimeLeftGlobal = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        lblIcon = new javax.swing.JLabel();
 
         setOpaque(false);
 
-        lblProgressCurrent.setForeground(java.awt.Color.white);
         lblProgressCurrent.setText("Current simulation");
+        lblProgressCurrent.setForeground(java.awt.Color.white);
         lblProgressCurrent.setName("lblProgressCurrent"); // NOI18N
 
         progressBarCurrent.setName("progressBarCurrent"); // NOI18N
         progressBarCurrent.setStringPainted(true);
 
-        lblTimeLeftCurrent.setForeground(new java.awt.Color(255, 255, 255));
         lblTimeLeftCurrent.setText("time left");
+        lblTimeLeftCurrent.setForeground(new java.awt.Color(255, 255, 255));
         lblTimeLeftCurrent.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         lblTimeLeftCurrent.setName("lblTimeLeftCurrent"); // NOI18N
 
-        lblProgressGlobal.setForeground(new java.awt.Color(255, 255, 255));
         lblProgressGlobal.setText("Global run");
+        lblProgressGlobal.setForeground(new java.awt.Color(255, 255, 255));
         lblProgressGlobal.setName("lblProgressGlobal"); // NOI18N
 
         progressBarGlobal.setName("progressBarGlobal"); // NOI18N
         progressBarGlobal.setStringPainted(true);
 
-        lblTimeLeftGlobal.setForeground(java.awt.Color.white);
         lblTimeLeftGlobal.setText("time left");
+        lblTimeLeftGlobal.setForeground(java.awt.Color.white);
         lblTimeLeftGlobal.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         lblTimeLeftGlobal.setName("lblTimeLeftGlobal"); // NOI18N
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(null);
-        jLabel1.setName("jLabel1"); // NOI18N
+        lblIcon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico256/run-simulation.png"))); // NOI18N
+        lblIcon.setName("lblIcon"); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -140,14 +156,14 @@ public class JRunProgressPanel extends javax.swing.JPanel {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(lblTimeLeftCurrent)
                             .addComponent(lblTimeLeftGlobal)))
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 596, Short.MAX_VALUE))
+                    .addComponent(lblIcon, javax.swing.GroupLayout.DEFAULT_SIZE, 596, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblIcon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblProgressCurrent)
@@ -163,7 +179,7 @@ public class JRunProgressPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel lblIcon;
     private javax.swing.JLabel lblProgressCurrent;
     private javax.swing.JLabel lblProgressGlobal;
     private javax.swing.JLabel lblTimeLeftCurrent;

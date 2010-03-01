@@ -38,7 +38,7 @@
                           <Component id="lblTimeLeftGlobal" alignment="1" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <Component id="jLabel1" alignment="0" pref="596" max="32767" attributes="0"/>
+                  <Component id="lblIcon" alignment="0" pref="596" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -48,7 +48,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jLabel1" max="32767" attributes="0"/>
+              <Component id="lblIcon" max="32767" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="lblProgressCurrent" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -71,10 +71,10 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="lblProgressCurrent">
       <Properties>
+        <Property name="text" type="java.lang.String" value="Current simulation"/>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Current simulation"/>
         <Property name="name" type="java.lang.String" value="lblProgressCurrent" noResource="true"/>
       </Properties>
     </Component>
@@ -86,20 +86,20 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblTimeLeftCurrent">
       <Properties>
+        <Property name="text" type="java.lang.String" value="time left"/>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="time left"/>
         <Property name="horizontalTextPosition" type="int" value="2"/>
         <Property name="name" type="java.lang.String" value="lblTimeLeftCurrent" noResource="true"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="lblProgressGlobal">
       <Properties>
+        <Property name="text" type="java.lang.String" value="Global run"/>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Global run"/>
         <Property name="name" type="java.lang.String" value="lblProgressGlobal" noResource="true"/>
       </Properties>
     </Component>
@@ -111,21 +111,21 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblTimeLeftGlobal">
       <Properties>
+        <Property name="text" type="java.lang.String" value="time left"/>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="time left"/>
         <Property name="horizontalTextPosition" type="int" value="2"/>
         <Property name="name" type="java.lang.String" value="lblTimeLeftGlobal" noResource="true"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel1">
+    <Component class="javax.swing.JLabel" name="lblIcon">
       <Properties>
         <Property name="horizontalAlignment" type="int" value="0"/>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="0" name="null"/>
+        <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico256/run-simulation.png"/>
         </Property>
-        <Property name="name" type="java.lang.String" value="jLabel1" noResource="true"/>
+        <Property name="name" type="java.lang.String" value="lblIcon" noResource="true"/>
       </Properties>
     </Component>
   </SubComponents>

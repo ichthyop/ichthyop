@@ -5,6 +5,9 @@
 package org.previmer.ichthyop.ui;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -58,6 +61,21 @@ public class JStatusBar extends JXStatusBar {
         pnlProgressBar.setOpaque(false);
         statusAnimationLabel.setOpaque(false);
         lblFlag.setOpaque(false);
+
+        pnlProgressBar.setLayout(new GridBagLayout());
+        progressBar.setPreferredSize(new Dimension(150, 20));
+        JLabel emptyLabel = new JLabel();
+        emptyLabel.setOpaque(false);
+        pnlProgressBar.add(emptyLabel, new GridBagConstraints(0, 0,
+                              1, 1,
+                              90.d, 0.d,
+                              GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+                              new Insets(0, 0, 0, 0), 0, 0));
+        pnlProgressBar.add(progressBar, new GridBagConstraints(1, 0,
+                              1, 1,
+                              10.d, 0.d,
+                              GridBagConstraints.EAST, GridBagConstraints.NONE,
+                              new Insets(0, 0, 0, 0), 0, 0));
 
         // Designed of the statusAnimationLabel (the JXBusyLabel)
         statusAnimationLabel.setMaximumSize(new java.awt.Dimension(20, 20));
@@ -142,6 +160,10 @@ public class JStatusBar extends JXStatusBar {
 
     public JProgressBar getProgressBar() {
         return progressBar;
+    }
+
+    public void setBusy(boolean busy) {
+        statusAnimationLabel.setBusy(busy);
     }
 
     public void setMessage(String text) {

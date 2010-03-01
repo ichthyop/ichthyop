@@ -154,7 +154,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
                     * ONE_HOUR
                     + nbFormat.parse(duration.substring(0, duration.indexOf("day")).trim()).longValue()
                     * ONE_DAY;
-            System.out.println("seconds " + seconds);
+            //System.out.println("seconds " + seconds);
             return seconds;
         } catch (ParseException ex) {
             // Voluntarily ignore the exception

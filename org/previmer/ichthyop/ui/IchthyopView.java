@@ -637,6 +637,7 @@ public class IchthyopView extends FrameView
             setMessage("Simulation started");
             setMenuEnabled(false);
             bln = false;
+            pnlProgress.setupProgress();
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.stop"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.stop"));
             isRunning = true;
@@ -707,6 +708,7 @@ public class IchthyopView extends FrameView
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
             setMenuEnabled(true);
             isRunning = false;
+            pnlProgress.hideBars();
             pnlProgress.resetProgressBar();
         }
     }
@@ -1737,7 +1739,6 @@ public class IchthyopView extends FrameView
                 taskPaneAnimation.setCollapsed(true);
                 taskPaneMapping.setCollapsed(true);
                 pnlProgress.setVisible(true);
-                pnlProgress.setupProgress();
             } else {
                 pnlProgress.setVisible(false);
                 if (btnPreview.isSelected()) {

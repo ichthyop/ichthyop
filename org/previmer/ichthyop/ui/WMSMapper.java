@@ -563,7 +563,6 @@ public class WMSMapper extends JXMapKit {
                 return Color.WHITE;
             }
             strColor = strColor.substring(1, strColor.length() - 1);
-            System.out.println(strColor);
             String[] rgb = strColor.split(",");
             if (rgb.length != 3) {
                 return Color.WHITE;
