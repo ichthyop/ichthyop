@@ -20,6 +20,8 @@ import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import javax.swing.JFormattedTextField;
 import javax.swing.event.EventListenerList;
 import javax.xml.datatype.Duration;
 
@@ -37,6 +39,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     private static final int ONE_MINUTE = 60 * ONE_SECOND;
     private static final int ONE_HOUR = 60 * ONE_MINUTE;
     private static final long ONE_DAY = 24 * ONE_HOUR;
+    private static final long ONE_YEAR = 365 * ONE_DAY;
     
 ///////////////////////////////
 // Declaration of the variables
@@ -139,17 +142,22 @@ public class TimeManager extends AbstractManager implements ITimeManager {
      * @return
      */
     public long duration2seconds(String duration) {
-        Calendar lcalendar = new ClimatoCalendar();
-        inputDurationFormat.setCalendar(lcalendar);
+        long seconds = 0L;
+        NumberFormat nbFormat = NumberFormat.getInstance();
+        nbFormat.setParseIntegerOnly(true);
+        nbFormat.setGroupingUsed(false);
         try {
-            lcalendar.setTime(inputDurationFormat.parse(duration));
-            long seconds = 0L;
-            seconds = lcalendar.get(Calendar.DAY_OF_YEAR) * ONE_DAY
-                    + lcalendar.get(Calendar.HOUR_OF_DAY) * ONE_HOUR
-                    + lcalendar.get(Calendar.MINUTE) * ONE_MINUTE;
+            seconds = nbFormat.parse(duration.substring(duration.indexOf("hour") + 8, duration.indexOf("minute"))).longValue()
+                    * ONE_MINUTE
+                    + nbFormat.parse(duration.substring(duration.indexOf("day") + 7,
+                    duration.indexOf("hour")).trim()).longValue()
+                    * ONE_HOUR
+                    + nbFormat.parse(duration.substring(0, duration.indexOf("day")).trim()).longValue()
+                    * ONE_DAY;
+            System.out.println("seconds " + seconds);
             return seconds;
         } catch (ParseException ex) {
-            Logger.getLogger(TimeManager.class.getName()).log(Level.SEVERE, null, ex);
+            // Voluntarily ignore the exception
         }
         return 0;
     }
