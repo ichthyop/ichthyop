@@ -49,7 +49,7 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
  * The application's main frame.
  */
 public class IchthyopView extends FrameView
-        implements TimingTarget,  PropertyChangeListener {
+        implements TimingTarget, PropertyChangeListener {
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -68,6 +68,7 @@ public class IchthyopView extends FrameView
         btnCancelMapping.getAction().setEnabled(false);
         btnMapping.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
+        btnExportToKMZ.getAction().setEnabled(false);
         setAnimationToolsEnabled(false);
         pnlConfiguration.addPropertyChangeListener("xicfile", this);
     }
@@ -140,22 +141,73 @@ public class IchthyopView extends FrameView
         }
     }
 
+    public void propertyChange(PropertyChangeEvent evt) {
+        btnSaveCfgFile.getAction().setEnabled(true);
+    }
+
+    @Action
+    public Task exportToKMZ() {
+        return new ExportToKMZTask(getApplication());
+    }
+
+    private class ExportToKMZTask extends SFTask {
+
+        ExportToKMZTask(Application instance) {
+            super(instance);
+            setMessage("Export NetCDF output files to KMZ format for visualizing results with GoogleEarth.");
+            wmsMapper.setAlpha(0.2f);
+            wmsMapper.setEnabled(false);
+            btnMapping.getAction().setEnabled(false);
+            btnExportToKMZ.getAction().setEnabled(false);
+            btnCloseNC.getAction().setEnabled(false);
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            wmsMapper.createKML();
+            for (int i = 0; i < wmsMapper.getIndexMax() + 1; i++) {
+                setProgress((float) i / wmsMapper.getIndexMax());
+                setMessage("NetCDF to KMZ: exporting step " + (i + 1) + "/" + (wmsMapper.getIndexMax() + 1), true);
+                wmsMapper.writeKMLStep(i);
+            }
+            setMessage("Compressing KML file into KMZ. It might take some time...", true);
+            wmsMapper.marshalAndKMZ();
+            return null;
+        }
+
+        @Override
+        protected void finished() {
+            wmsMapper.setAlpha(1.f);
+            wmsMapper.setEnabled(true);
+            btnMapping.getAction().setEnabled(true);
+            btnExportToKMZ.getAction().setEnabled(true);
+            btnCloseNC.getAction().setEnabled(true);
+        }
+
+        @Override
+        void onSuccess(Object o) {
+            setMessage("Exported KMZ file: " + wmsMapper.getKMZPath());
+        }
+
+        @Override
+        void onFailure(Throwable t) {
+            setMessage("NetCDF export to KMZ failed: " + t.getLocalizedMessage());
+        }
+    }
+
     @Action
     public Task createMaps() {
         return createMapTask = new CreateMapTask(getApplication());
     }
 
-    public void propertyChange(PropertyChangeEvent evt) {
-        btnSaveCfgFile.getAction().setEnabled(true);
-    }
-
-    private class CreateMapTask extends Task<Object, MapStep> {
+    private class CreateMapTask extends SFTask<Object, MapStep> {
 
         CreateMapTask(Application instance) {
             super(instance);
             wmsMapper.setZoomButtonsVisible(false);
             wmsMapper.setZoomSliderVisible(false);
             btnMapping.getAction().setEnabled(false);
+            btnExportToKMZ.getAction().setEnabled(false);
             btnCancelMapping.getAction().setEnabled(true);
         }
 
@@ -182,15 +234,20 @@ public class IchthyopView extends FrameView
             wmsMapper.setZoomButtonsVisible(true);
             wmsMapper.setZoomSliderVisible(true);
             btnMapping.getAction().setEnabled(true);
+            btnExportToKMZ.getAction().setEnabled(true);
             btnCancelMapping.getAction().setEnabled(false);
         }
 
         @Override
-        protected void succeeded(Object o) {
-            firePropertyChange("succeeded", null, null);
+        void onSuccess(Object result) {
             taskPaneMapping.setCollapsed(true);
             taskPaneAnimation.setCollapsed(false);
             getApplication().getContext().getTaskService().execute(new OpenFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+            // do nothing
         }
     }
 
@@ -217,6 +274,7 @@ public class IchthyopView extends FrameView
             lblMapping.setVisible(false);
             btnMapping.getAction().setEnabled(true);
             btnCloseNC.getAction().setEnabled(true);
+            btnExportToKMZ.getAction().setEnabled(true);
             setMainTitle();
         }
     }
@@ -228,6 +286,7 @@ public class IchthyopView extends FrameView
         lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
         wmsMapper.setFile(outputFile);
         btnMapping.getAction().setEnabled(false);
+        btnExportToKMZ.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
     }
 
@@ -246,7 +305,7 @@ public class IchthyopView extends FrameView
         return null;
     }
 
-    private class OpenFolderAnimationTask extends Task {
+    private class OpenFolderAnimationTask extends SFTask {
 
         private File folder;
         int nbPNG = 0;
@@ -266,9 +325,7 @@ public class IchthyopView extends FrameView
             }
         }
 
-        @Override
-        protected void succeeded(Object o) {
-            firePropertyChange("succeeded", null, null);
+        public void onSuccess(Object o) {
             outputFolder = folder;
             lblFolder.setText(outputFolder.getName());
             lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
@@ -279,8 +336,7 @@ public class IchthyopView extends FrameView
             animate(true);
         }
 
-        @Override
-        protected void failed(Throwable t) {
+        public void onFailure(Throwable t) {
             firePropertyChange("failed", null, null);
             lblFolder.setText(IchthyopView.this.getResourceMap().getString("lblFolder.text"));
             lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
@@ -321,7 +377,7 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private class SimulationPreviewTask extends Task {
+    private class SimulationPreviewTask extends SFTask {
 
         SimulationPreviewTask(Application instance, boolean isEnabled) {
             super(instance);
@@ -336,12 +392,16 @@ public class IchthyopView extends FrameView
             return null;
         }
 
-        @Override
-        protected void succeeded(Object obj) {
+        protected void onSuccess(Object obj) {
             firePropertyChange("succeeded", null, null);
             isSetup = true;
             setMessage("Setup [OK]");
             showSimulationPreview();
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+            // do nothing
         }
     }
 
@@ -377,7 +437,7 @@ public class IchthyopView extends FrameView
         return new SaveCfgFileTask(getApplication());
     }
 
-    private class SaveCfgFileTask extends Task {
+    private class SaveCfgFileTask extends SFTask {
 
         SaveCfgFileTask(Application instance) {
             super(instance);
@@ -394,11 +454,15 @@ public class IchthyopView extends FrameView
         }
 
         @Override
-        protected void succeeded(Object o) {
-            firePropertyChange("succeeded", null, null);
+        protected void onSuccess(Object o) {
             btnSaveCfgFile.getAction().setEnabled(false);
             isSetup = false;
             setMessage(getSimulationManager().getConfigurationFile().getName() + " saved.");
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+            // do nothing
         }
     }
 
@@ -626,7 +690,7 @@ public class IchthyopView extends FrameView
         closeMenuItem.getAction().setEnabled(enabled);
     }
 
-    public class SimulationRunTask extends Task {
+    public class SimulationRunTask extends SFTask {
 
         ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         JLabel lblProgress;
@@ -654,7 +718,7 @@ public class IchthyopView extends FrameView
             getSimulationManager().resetTimerGlobal();
             do {
                 setMessage("Simulation " + getSimulationManager().indexSimulationToString());
-                setMessage("Initializing...");
+                setMessage("Initializing...", true);
                 getSimulationManager().setup();
                 isSetup = true;
                 getSimulationManager().init();
@@ -669,9 +733,7 @@ public class IchthyopView extends FrameView
             return null;
         }
 
-        @Override
-        protected void failed(Throwable t) {
-            firePropertyChange("failed", null, null);
+        protected void onFailure(Throwable t) {
             logger.log(Level.SEVERE, null, t);
         }
 
@@ -691,9 +753,7 @@ public class IchthyopView extends FrameView
             setMessage("Simulation interrupted");
         }
 
-        @Override
-        protected void succeeded(Object obj) {
-            firePropertyChange("succeeded", null, null);
+        public void onSuccess(Object obj) {
             setMessage("End of simulation");
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
             lblNC.setText(outputFile.getName());
@@ -775,8 +835,8 @@ public class IchthyopView extends FrameView
     }
 
     public void setMessage(String text) {
-        statusBar.setMessage(text);
-        loggerScrollPane.setMessage(text);
+        //statusBar.setMessage(text);
+        //loggerScrollPane.setMessage(text);
     }
 
     private class MouseWheelScroller implements MouseWheelListener {
@@ -940,6 +1000,7 @@ public class IchthyopView extends FrameView
         lblWMS = new javax.swing.JLabel();
         lblNC = new javax.swing.JLabel();
         btnCloseNC = new javax.swing.JButton();
+        btnExportToKMZ = new javax.swing.JButton();
         taskPaneAnimation = new org.jdesktop.swingx.JXTaskPane();
         pnlAnimation = new javax.swing.JPanel();
         btnFirst = new javax.swing.JButton();
@@ -976,6 +1037,7 @@ public class IchthyopView extends FrameView
         previewMenuItem = new javax.swing.JMenuItem();
         mappingMenu = new javax.swing.JMenu();
         mapMenuItem = new javax.swing.JMenuItem();
+        exportToKMZMenuItem = new javax.swing.JMenuItem();
         cancelMapMenuItem = new javax.swing.JMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         openNCMenuItem = new javax.swing.JMenuItem();
@@ -1205,6 +1267,9 @@ public class IchthyopView extends FrameView
         btnCloseNC.setAction(actionMap.get("closeNetCDF")); // NOI18N
         btnCloseNC.setName("btnCloseNC"); // NOI18N
 
+        btnExportToKMZ.setAction(actionMap.get("exportToKMZ")); // NOI18N
+        btnExportToKMZ.setName("btnExportToKMZ"); // NOI18N
+
         javax.swing.GroupLayout pnlMappingLayout = new javax.swing.GroupLayout(pnlMapping);
         pnlMapping.setLayout(pnlMappingLayout);
         pnlMappingLayout.setHorizontalGroup(
@@ -1212,16 +1277,17 @@ public class IchthyopView extends FrameView
             .addGroup(pnlMappingLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlMappingLayout.createSequentialGroup()
-                        .addComponent(btnMapping)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCancelMapping))
                     .addComponent(pnlWMS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlMappingLayout.createSequentialGroup()
                         .addComponent(btnOpenNC)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCloseNC))
-                    .addComponent(lblNC))
+                    .addComponent(lblNC)
+                    .addGroup(pnlMappingLayout.createSequentialGroup()
+                        .addComponent(btnMapping)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCancelMapping))
+                    .addComponent(btnExportToKMZ))
                 .addContainerGap())
         );
         pnlMappingLayout.setVerticalGroup(
@@ -1231,7 +1297,9 @@ public class IchthyopView extends FrameView
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnMapping)
                     .addComponent(btnCancelMapping))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnExportToKMZ)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1567,6 +1635,10 @@ public class IchthyopView extends FrameView
         mapMenuItem.setName("mapMenuItem"); // NOI18N
         mappingMenu.add(mapMenuItem);
 
+        exportToKMZMenuItem.setAction(actionMap.get("exportToKMZ")); // NOI18N
+        exportToKMZMenuItem.setName("exportToKMZMenuItem"); // NOI18N
+        mappingMenu.add(exportToKMZMenuItem);
+
         cancelMapMenuItem.setAction(actionMap.get("cancelMapping")); // NOI18N
         cancelMapMenuItem.setName("cancelMapMenuItem"); // NOI18N
         mappingMenu.add(cancelMapMenuItem);
@@ -1761,12 +1833,14 @@ public class IchthyopView extends FrameView
                     wmsMapper.setVisible(true);
                     lblMapping.setVisible(false);
                     btnMapping.getAction().setEnabled(true);
+                    btnExportToKMZ.getAction().setEnabled(true);
                     btnCloseNC.getAction().setEnabled(true);
                 } else {
                     wmsMapper.setFile(null);
                     wmsMapper.setVisible(false);
                     lblMapping.setVisible(true);
                     btnMapping.getAction().setEnabled(false);
+                    btnExportToKMZ.getAction().setEnabled(false);
                     btnCloseNC.getAction().setEnabled(false);
                 }
             } else {
@@ -1806,6 +1880,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnDeleteMaps;
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnExportMaps;
+    private javax.swing.JButton btnExportToKMZ;
     private javax.swing.JButton btnFirst;
     private javax.swing.JButton btnLast;
     private javax.swing.JButton btnMapping;
@@ -1824,6 +1899,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem exportMenuItem;
+    private javax.swing.JMenuItem exportToKMZMenuItem;
     private org.previmer.ichthyop.ui.GradientPanel gradientPanel;
     private org.jdesktop.swingx.JXHyperlink hyperLinkLogo;
     private javax.swing.JScrollPane jScrollPane3;

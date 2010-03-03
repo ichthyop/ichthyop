@@ -4,6 +4,15 @@
  */
 package org.previmer.ichthyop.ui;
 
+import de.micromata.opengis.kml.v_2_2_0.ColorMode;
+import de.micromata.opengis.kml.v_2_2_0.Document;
+import de.micromata.opengis.kml.v_2_2_0.Folder;
+import de.micromata.opengis.kml.v_2_2_0.IconStyle;
+import de.micromata.opengis.kml.v_2_2_0.Kml;
+import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
+import de.micromata.opengis.kml.v_2_2_0.Placemark;
+import de.micromata.opengis.kml.v_2_2_0.Style;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +34,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -68,6 +78,9 @@ public class WMSMapper extends JXMapKit {
     private double defaultLat = 48.38, defaultLon = -4.62;
     private int defaultZoom = 10;
     private Calendar calendar;
+    private Kml kml;
+    private Document kmlDocument;
+    private Folder kmlMainFolder;
 
     public WMSMapper() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
@@ -397,6 +410,45 @@ public class WMSMapper extends JXMapKit {
         return list;
     }
 
+    public void createKML() {
+        kml = KmlFactory.createKml();
+        kmlDocument = kml.createAndSetDocument().withName(getFile().getName()).withOpen(true);
+        final Style style = kmlDocument.createAndAddStyle().withId("randomColorIcon");
+        final IconStyle iconstyle = style.createAndSetIconStyle().withColor("ffff3df0").withScale(0.3d);
+        iconstyle.createAndSetIcon().withHref("http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
+        kmlMainFolder = kmlDocument.createAndAddFolder();
+    }
+
+    public boolean marshalAndKMZ() throws IOException {
+        kmlDocument.getFeature().add(kmlMainFolder);
+        File kmzFile = new File(getKMZPath());
+        if (kmzFile.exists()) {
+            kmzFile.delete();
+        }
+        return kml.marshalAsKmz(getKMZPath(), kml);
+    }
+
+    public String getKMZPath() {
+        return getFile().getPath().replace(".nc", ".kmz");
+    }
+
+    public void writeKMLStep(int i) {
+
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat dtFormat2 = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        MapStep step = getMapStep(i);
+        Folder stepFolder = new Folder();
+        dtFormat.setCalendar(step.getCalendar());
+        stepFolder.withName(dtFormat2.format(step.getTime()));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
+        stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(step.getTime())).withEnd(dtFormat.format(step.getNextTime()));
+        for (GeoPosition gp : step.getParticlesGP()) {
+            String coord = Double.toString(gp.getLongitude()) + "," + Double.toString(gp.getLatitude());
+            Placemark placeMark = stepFolder.createAndAddPlacemark();
+            placeMark.withStyleUrl("#randomColorIcon").createAndSetPoint().addToCoordinates(coord);
+        }
+        kmlMainFolder.addToFeature(stepFolder);
+    }
+
     /**
      * Saves the snapshot of the specified component as a PNG picture.
      * The name of the picture includes the current time of the simulation.
@@ -458,6 +510,16 @@ public class WMSMapper extends JXMapKit {
         Calendar getCalendar() {
             calendar.setTimeInMillis(time);
             return calendar;
+        }
+
+        Date getTime() {
+            calendar.setTimeInMillis(time);
+            return calendar.getTime();
+        }
+
+        Date getNextTime() {
+            calendar.setTimeInMillis((long) (readTime(Math.min(index + 1, getIndexMax())) * 1000L));
+            return calendar.getTime();
         }
 
         List<GeoPosition> getParticlesGP() {

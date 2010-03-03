@@ -327,14 +327,9 @@
                                   <Layout>
                                     <DimensionLayout dim="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="102" attributes="0">
+                                          <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="btnMapping" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnCancelMapping" min="-2" max="-2" attributes="0"/>
-                                                  </Group>
                                                   <Component id="pnlWMS" alignment="0" max="32767" attributes="1"/>
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Component id="btnOpenNC" min="-2" max="-2" attributes="0"/>
@@ -342,6 +337,12 @@
                                                       <Component id="btnCloseNC" min="-2" max="-2" attributes="0"/>
                                                   </Group>
                                                   <Component id="lblNC" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                  <Group type="102" alignment="0" attributes="0">
+                                                      <Component id="btnMapping" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Component id="btnCancelMapping" min="-2" max="-2" attributes="0"/>
+                                                  </Group>
+                                                  <Component id="btnExportToKMZ" alignment="0" min="-2" max="-2" attributes="1"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                           </Group>
@@ -355,7 +356,9 @@
                                                   <Component id="btnMapping" alignment="3" min="-2" max="-2" attributes="0"/>
                                                   <Component id="btnCancelMapping" alignment="3" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="btnExportToKMZ" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
                                               <Component id="pnlWMS" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="3" attributes="0">
@@ -465,6 +468,14 @@
                                           <action class="org.previmer.ichthyop.ui.IchthyopView" id="closeNetCDF" methodName="closeNetCDF"/>
                                         </Property>
                                         <Property name="name" type="java.lang.String" value="btnCloseNC" noResource="true"/>
+                                      </Properties>
+                                    </Component>
+                                    <Component class="javax.swing.JButton" name="btnExportToKMZ">
+                                      <Properties>
+                                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="exportToKMZ" methodName="exportToKMZ"/>
+                                        </Property>
+                                        <Property name="name" type="java.lang.String" value="btnExportToKMZ" noResource="true"/>
                                       </Properties>
                                     </Component>
                                   </SubComponents>
@@ -928,6 +939,14 @@
                   <action class="org.previmer.ichthyop.ui.IchthyopView" id="createMaps" methodName="createMaps"/>
                 </Property>
                 <Property name="name" type="java.lang.String" value="mapMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="exportToKMZMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exportToKMZ" methodName="exportToKMZ"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="exportToKMZMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="cancelMapMenuItem">

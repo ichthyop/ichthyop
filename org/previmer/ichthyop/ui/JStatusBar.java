@@ -147,6 +147,7 @@ public class JStatusBar extends JXStatusBar {
                 } else if ("message".equals(propertyName)) {
                     String text = (String) (evt.getNewValue());
                     statusMessageLabel.setText((text == null) ? "" : text);
+                } else if ("reset".equals(propertyName)) {
                     messageTimer.restart();
                 } else if ("progress".equals(propertyName)) {
                     int value = (Integer) (evt.getNewValue());
