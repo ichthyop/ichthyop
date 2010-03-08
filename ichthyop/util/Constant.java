@@ -36,6 +36,8 @@ public interface Constant {
     final public static int ROMS = 0;
     /** Label for MARS simulation */
     final public static int MARS = 1;
+    /** Label for GHER simulation */
+    final public static int GHER = 4;
 
     /** Label for Gregorian calendar */
     final public static int GREGORIAN = 0;
