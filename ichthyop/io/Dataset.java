@@ -30,7 +30,6 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
-
 /**
  * The class manages the NetCDF dataset from input files or OPeNDAP location
  * and provides methods that constitute the numerical core of the lagrangian
@@ -66,7 +65,6 @@ public abstract class Dataset {
 ////////////////
 // Debug purpose
 ////////////////
-
     /**
      * Constant for debugging vertical dispersion
      */
@@ -75,11 +73,9 @@ public abstract class Dataset {
      * Constant for debugginf horizontal dispersion
      */
     public final static boolean DEBUG_HDISP = false;
-
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
     /**
      * Grid dimension
      */
@@ -118,9 +114,9 @@ public abstract class Dataset {
     static float[][] zeta_tp0;
     /**
      * /**
-      * Ocean free surface elevetation at time t + dt
-      */
-     static float[][] zeta_tp1;
+     * Ocean free surface elevetation at time t + dt
+     */
+    static float[][] zeta_tp1;
     /**
      * Zonal component of the velocity field at current time
      */
@@ -148,43 +144,43 @@ public abstract class Dataset {
     /**
      * Water salinity at time t + dt
      */
-    private static float[][][] salt_tp1;
+    static float[][][] salt_tp1;
     /**
      * Water salinity at current time
      */
-    private static float[][][] salt_tp0;
+    static float[][][] salt_tp0;
     /**
      * Water temperature at current time
      */
-    private static float[][][] temp_tp0;
+    static float[][][] temp_tp0;
     /**
      * Water temperature at time t + dt
      */
-    private static float[][][] temp_tp1;
+    static float[][][] temp_tp1;
     /**
      * Large zooplankton concentration at current time
      */
-    private float[][][] largeZoo_tp0;
+    float[][][] largeZoo_tp0;
     /**
      * Large zooplankton concentration at time t + dt
      */
-    private float[][][] largeZoo_tp1;
+    float[][][] largeZoo_tp1;
     /**
      * Small zooplankton concentration at current time
      */
-    private float[][][] smallZoo_tp0;
+    float[][][] smallZoo_tp0;
     /**
      * Small zooplankton concentration at time t + dt
      */
-    private float[][][] smallZoo_tp1;
+    float[][][] smallZoo_tp1;
     /**
      * Large phytoplankton concentration at current time
      */
-    private float[][][] largePhyto_tp0;
+    float[][][] largePhyto_tp0;
     /**
      * Large phytoplankton concentration at time t + dt
      */
-    private float[][][] largePhyto_tp1;
+    float[][][] largePhyto_tp1;
     /**
      * Vertical diffusion coefficient at time t + dt
      */
@@ -211,7 +207,6 @@ public abstract class Dataset {
      * Depth at w point. The free surface elevation is disregarded.
      */
     static double[][][] z_w_cst;
-
     /**
      * Geographical boundary of the domain
      */
@@ -273,27 +268,25 @@ public abstract class Dataset {
      * Determines whether or not the temperature field should be read in the
      * NetCDF file, function of the user's options.
      */
-    private static boolean FLAG_TP;
+    static boolean FLAG_TP;
     /**
      * Determines whether or not the salinity field should be read in the
      * NetCDF file, function of the user's options.
      */
-    private static boolean FLAG_SAL;
+    static boolean FLAG_SAL;
     /**
      * Determines whether or not the turbulent diffusivity should be read in the
      * NetCDF file, function of the user's options.
      */
-    private static boolean FLAG_VDISP;
+    static boolean FLAG_VDISP;
     /**
      * Determines whether or not the plankton concentration fields should be
      * read in the NetCDF file, function of the user's options.
      */
-    private static boolean FLAG_PLANKTON;
-
+    static boolean FLAG_PLANKTON;
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
-
     /**
      * Turbulent dissipation rate used in the parametrization of Lagrangian
      * horizontal diffusion.
@@ -305,7 +298,6 @@ public abstract class Dataset {
 //////////////////////////////////////
 // Declaration of the abstract methods
 //////////////////////////////////////
-
     /**
      * Reads time non-dependant fields in NetCDF dataset
      */
@@ -371,7 +363,7 @@ public abstract class Dataset {
      * </pre>
      */
     abstract public double[] advectEuler(double[] pGrid, double time,
-                                         double dt) throws
+            double dt) throws
             ArrayIndexOutOfBoundsException;
 
     /**
@@ -419,7 +411,7 @@ public abstract class Dataset {
      * Adimensionalizes the given magnitude at the specified grid location.
      */
     abstract public double adimensionalize(double number, double xRho,
-                                           double yRho);
+            double yRho);
 
     /**
      * Reads longitude and latitude fields in NetCDF dataset
@@ -439,7 +431,6 @@ public abstract class Dataset {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
     /**
      * Sets up the {@code Dataset}. The method first sets the appropriate
      * variable names, loads the first NetCDF dataset and extract the time
@@ -500,11 +491,10 @@ public abstract class Dataset {
             nx = ncIn.findDimension(strXiDim).getLength();
             ny = ncIn.findDimension(strEtaDim).getLength();
             nz = (Configuration.is3D())
-                 ? ncIn.findDimension(strZDim).getLength()
-                 : 1;
+                    ? ncIn.findDimension(strZDim).getLength()
+                    : 1;
         } catch (NullPointerException e) {
-            throw new IOException("Problem reading dimensions from dataset "
-                                  + ncIn.getLocation() + " : " + e.getMessage());
+            throw new IOException("Problem reading dimensions from dataset " + ncIn.getLocation() + " : " + e.getMessage());
         }
 
         ipo = jpo = 0;
@@ -563,14 +553,14 @@ public abstract class Dataset {
 
         //System.out.print("Calculation of the s-levels\n");
 
-        for (int i = nx; i-- > 0; ) {
-            for (int j = ny; j-- > 0; ) {
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
                 if (zeta_tp1[j][i] == 999.f) {
                     zeta_tp1[j][i] = 0.f;
                 }
                 for (int k = 0; k < nz + 1; k++) {
-                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i] *
-                                       (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
+                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
+                            * (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
                 }
             }
         }
@@ -652,14 +642,12 @@ public abstract class Dataset {
         if (ncIn.findVariable(strSal) == null) {
             if (Configuration.isBuoyancy()) {
                 throw new IOException(
-                        "Cannot implement buoyancy scheme. Salinity field " +
-                        strSal + " not found in file " + ncIn.getLocation());
+                        "Cannot implement buoyancy scheme. Salinity field "
+                        + strSal + " not found in file " + ncIn.getLocation());
             }
 
         } else {
-            FLAG_SAL = Configuration.is3D()
-                       && (Configuration.isBuoyancy()
-                           || Configuration.isRecord());
+            FLAG_SAL = Configuration.is3D() && (Configuration.isBuoyancy() || Configuration.isRecord());
         }
 
         /** temperature */
@@ -667,31 +655,26 @@ public abstract class Dataset {
         if (ncIn.findVariable(strTp) == null) {
             if (Configuration.isGrowth()) {
                 throw new IOException(
-                        "Cannot implement growth model. Temperature field " +
-                        strTp + " not found in file " + ncIn.getLocation());
+                        "Cannot implement growth model. Temperature field "
+                        + strTp + " not found in file " + ncIn.getLocation());
             }
             if (Configuration.isBuoyancy()) {
                 throw new IOException(
-                        "Cannot implement buoyancy scheme. Temperature field " +
-                        strTp + " not found in file " + ncIn.getLocation());
+                        "Cannot implement buoyancy scheme. Temperature field "
+                        + strTp + " not found in file " + ncIn.getLocation());
             }
             if (Configuration.isLethalTp()) {
                 throw new IOException(
-                        "Cannot check for lethal temperature. Temperature field " +
-                        strTp + " not found in file " + ncIn.getLocation());
+                        "Cannot check for lethal temperature. Temperature field "
+                        + strTp + " not found in file " + ncIn.getLocation());
             }
             if (MainFrame.getDisplayColor() == Constant.DISPLAY_TP) {
                 throw new IOException(
-                        "Cannot display temperature. Temperature field " +
-                        strTp + " not found in file " + ncIn.getLocation());
+                        "Cannot display temperature. Temperature field "
+                        + strTp + " not found in file " + ncIn.getLocation());
             }
         } else {
-            FLAG_TP = Configuration.is3D()
-                      && (Configuration.isGrowth()
-                          || Configuration.isBuoyancy()
-                          || MainFrame.getDisplayColor() == Constant.DISPLAY_TP
-                          || Configuration.isLethalTp()
-                          || Configuration.isRecord());
+            FLAG_TP = Configuration.is3D() && (Configuration.isGrowth() || Configuration.isBuoyancy() || MainFrame.getDisplayColor() == Constant.DISPLAY_TP || Configuration.isLethalTp() || Configuration.isRecord());
         }
 
         /** vertical diffusivity */
@@ -699,8 +682,7 @@ public abstract class Dataset {
         if (Configuration.isVDisp()) {
             if (ncIn.findVariable(strKv) == null) {
                 throw new IOException(
-                        "Cannot simulate vertical dispersion. Diffusion field "
-                        + strKv + " not found in file " + ncIn.getLocation());
+                        "Cannot simulate vertical dispersion. Diffusion field " + strKv + " not found in file " + ncIn.getLocation());
             } else {
                 FLAG_VDISP = true;
             }
@@ -709,12 +691,9 @@ public abstract class Dataset {
         /** plankton concentration */
         FLAG_PLANKTON = false;
         if (Configuration.isPlankton()) {
-            if (ncIn.findTopVariable(strSmallZoo) == null
-                || ncIn.findTopVariable(strLargeZoo) == null
-                || ncIn.findTopVariable(strLargePhyto) == null) {
+            if (ncIn.findTopVariable(strSmallZoo) == null || ncIn.findTopVariable(strLargeZoo) == null || ncIn.findTopVariable(strLargePhyto) == null) {
                 throw new IOException(
-                        "Cannot implement growth limitation. Plankton fields"
-                        + " not found in file " + ncIn.getLocation());
+                        "Cannot implement growth limitation. Plankton fields" + " not found in file " + ncIn.getLocation());
             } else {
                 FLAG_PLANKTON = true;
             }
@@ -767,15 +746,15 @@ public abstract class Dataset {
      */
     void setAllFieldsTp1AtTime(int rank) throws IOException {
 
-        int[] origin = new int[] {rank, 0, jpo, ipo};
+        int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin,
-                    new int[] {1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
+                    new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
 
             v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
-                    new int[] {1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
+                    new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
 
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
@@ -783,47 +762,44 @@ public abstract class Dataset {
             xTimeTp1 = null;
 
             zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
-                    new int[] {rank, 0, 0},
-                    new int[] {1, ny, nx}).reduce().copyToNDJavaArray();
+                    new int[]{rank, 0, 0},
+                    new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
 
             if (FLAG_TP) {
                 temp_tp1 = (float[][][]) ncIn.findVariable(strTp).read(origin,
-                        new int[] {1, nz, ny, nx}).reduce().copyToNDJavaArray();
+                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
             }
 
             if (FLAG_SAL) {
                 salt_tp1 = (float[][][]) ncIn.findVariable(strSal).read(origin,
-                        new int[] {1, nz, ny, nx}).reduce().copyToNDJavaArray();
+                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
             }
 
             if (FLAG_VDISP) {
                 kv_tp1 = (float[][][]) ncIn.findVariable(strKv).read(origin,
-                        new int[] {1, nz, ny, nx}).reduce().copyToNDJavaArray();
+                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
             }
 
             if (FLAG_PLANKTON) {
                 largePhyto_tp1 = (float[][][]) ncIn.findVariable(strLargePhyto).
-                                 read(origin, new int[] {1, nz, ny, nx}).reduce().
-                                 copyToNDJavaArray();
+                        read(origin, new int[]{1, nz, ny, nx}).reduce().
+                        copyToNDJavaArray();
                 largeZoo_tp1 = (float[][][]) ncIn.findVariable(strLargeZoo).
-                               read(origin, new int[] {1, nz, ny, nx}).reduce().
-                               copyToNDJavaArray();
+                        read(origin, new int[]{1, nz, ny, nx}).reduce().
+                        copyToNDJavaArray();
                 smallZoo_tp1 = (float[][][]) ncIn.findVariable(strSmallZoo).
-                               read(origin, new int[] {1, nz, ny, nx}).reduce().
-                               copyToNDJavaArray();
+                        read(origin, new int[]{1, nz, ny, nx}).reduce().
+                        copyToNDJavaArray();
             }
         } catch (IOException e) {
-            throw new IOException("Problem extracting fields at location "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (InvalidRangeException e) {
-            throw new IOException("Problem extracting fields at location "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem extracting fields at location "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
@@ -843,12 +819,12 @@ public abstract class Dataset {
      * domain.
      */
     public double[] advectRk4(double[] p0, double time,
-                              double dt) throws ArrayIndexOutOfBoundsException {
+            double dt) throws ArrayIndexOutOfBoundsException {
 
         if (DEBUG_HDISP || DEBUG_VDISP) {
             return (p0.length > 2)
-                    ? new double[] {0.d, 0.d, 0.d}
-                    : new double[] {0.d, 0.d};
+                    ? new double[]{0.d, 0.d, 0.d}
+                    : new double[]{0.d, 0.d};
         }
 
         int dim = p0.length;
@@ -861,7 +837,7 @@ public abstract class Dataset {
             pk[i] = p0[i] + .5d * k1[i];
         }
         if (isOnEdge(pk[0], pk[1])) {
-            return new double[] {.5d * k1[0], .5d * k1[1], 0};
+            return new double[]{.5d * k1[0], .5d * k1[1], 0};
         }
 
         double[] k2 = advectEuler(pk, time + dt / 2, dt);
@@ -870,7 +846,7 @@ public abstract class Dataset {
             pk[i] = p0[i] + .5d * k2[i];
         }
         if (isOnEdge(pk[0], pk[1])) {
-            return new double[] {.5d * k2[0], .5d * k2[1], 0};
+            return new double[]{.5d * k2[0], .5d * k2[1], 0};
         }
 
         double[] k3 = advectEuler(pk, time + dt / 2, dt);
@@ -879,7 +855,7 @@ public abstract class Dataset {
             pk[i] = p0[i] + k3[i];
         }
         if (isOnEdge(pk[0], pk[1])) {
-            return new double[] {k3[0], k3[1], 0};
+            return new double[]{k3[0], k3[1], 0};
         }
 
         double[] k4 = advectEuler(pk, time + dt, dt);
@@ -921,18 +897,18 @@ public abstract class Dataset {
 
         if (DEBUG_HDISP) {
             double epsilon16 = Math.pow(1e-6, 1.d / 6.d);
-            return new double[] {
-                    R * Math.sqrt(2.d * dt) * epsilon16 *
-                    Math.pow(getdxi(j, i), -1.d / 3.d),
-                    R * Math.sqrt(2.d * dt) * epsilon16 *
-                    Math.pow(getdeta(j, i), -1.d / 3.d)};
+            return new double[]{
+                        R * Math.sqrt(2.d * dt) * epsilon16
+                        * Math.pow(getdxi(j, i), -1.d / 3.d),
+                        R * Math.sqrt(2.d * dt) * epsilon16
+                        * Math.pow(getdeta(j, i), -1.d / 3.d)};
         }
 
-        return new double[] {
-                R * Math.sqrt(2.d * dt) * EPSILON16 *
-                Math.pow(getdxi(j, i), -1.d / 3.d),
-                R * Math.sqrt(2.d * dt) * EPSILON16 *
-                Math.pow(getdeta(j, i), -1.d / 3.d)};
+        return new double[]{
+                    R * Math.sqrt(2.d * dt) * EPSILON16
+                    * Math.pow(getdxi(j, i), -1.d / 3.d),
+                    R * Math.sqrt(2.d * dt) * EPSILON16
+                    * Math.pow(getdeta(j, i), -1.d / 3.d)};
     }
 
     /**
@@ -997,7 +973,7 @@ public abstract class Dataset {
         if (newz >= nz - 1) {
             dz = 2.d * (nz - 1 - pGrid[2]) - dz;
         }
-        return new double[] {0.d, 0.d, dz};
+        return new double[]{0.d, 0.d, dz};
     }
 
     /**
@@ -1021,11 +997,10 @@ public abstract class Dataset {
                 if (isInWater(i + ii, j + jj)) {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                     double z_r = 0.d;
-                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j +
-                          jj][i + ii]
-                          *
-                          (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i +
-                           ii]);
+                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j
+                            + jj][i + ii]
+                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i
+                            + ii]);
                     hh += co * z_r;
                 }
             }
@@ -1077,8 +1052,8 @@ public abstract class Dataset {
         j = (int) (Math.round(pGrid[1]));
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        return!(isInWater(i + ii, j) && isInWater(i + ii, j + jj) &&
-                isInWater(i, j + jj));
+        return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj)
+                && isInWater(i, j + jj));
     }
 
     /**
@@ -1103,8 +1078,8 @@ public abstract class Dataset {
         } else {
             double pr = getDepth(xRho, yRho, lk);
             z = Math.max(0.d,
-                         (double) lk +
-                         (depth - pr) / (getDepth(xRho, yRho, lk + 1) - pr));
+                    (double) lk
+                    + (depth - pr) / (getDepth(xRho, yRho, lk + 1) - pr));
         }
         return (z);
     }
@@ -1117,7 +1092,6 @@ public abstract class Dataset {
      * @param depth a double, the depth of the particle
      * @return a double, the z-coordinate corresponding to the depth
      */
-
     public static double depth2z(int i, int j, double depth) {
 
         //-----------------------------------------------
@@ -1131,8 +1105,8 @@ public abstract class Dataset {
             z = (double) lk;
         } else {
             z = Math.max(0.d,
-                         lk + (depth - z_rho_cst[lk][j][i]) /
-                         (z_rho_cst[lk + 1][j][i] - z_rho_cst[lk][j][i]));
+                    lk + (depth - z_rho_cst[lk][j][i])
+                    / (z_rho_cst[lk + 1][j][i] - z_rho_cst[lk][j][i]));
         }
         return (z);
     }
@@ -1159,15 +1133,13 @@ public abstract class Dataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx) *
-                                  (1.d - (double) jj - dy) *
-                                  (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     if (isInWater(i + ii, j + jj)) {
-                        z_r = z_rho_cst[k + kk][j + jj][i + ii]
-                              + (double) zeta_tp0[j + jj][i + ii]
-                              *
-                              (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j +
-                               jj][i + ii]);
+                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
+                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
+                                + jj][i + ii]);
                         depth += co * z_r;
                     }
                 }
@@ -1207,24 +1179,22 @@ public abstract class Dataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx) *
-                                  (1.d - (double) jj - dy) *
-                                  (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     latitude += co * latRho[j + jj][i + ii];
                     longitude += co * lonRho[j + jj][i + ii];
                     if (isInWater(i + ii, j + jj)) {
-                        z_r = z_rho_cst[k + kk][j + jj][i + ii]
-                              + (double) zeta_tp0[j + jj][i + ii]
-                              *
-                              (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j +
-                               jj][i + ii]);
+                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
+                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
+                                + jj][i + ii]);
 
                         depth += co * z_r;
                     }
                 }
             }
         }
-        return (new double[] {latitude, longitude, depth});
+        return (new double[]{latitude, longitude, depth});
     }
 
     /**
@@ -1247,9 +1217,9 @@ public abstract class Dataset {
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
 
         final double ix = Math.max(0.00001f,
-                                   Math.min(xRho, (double) nx - 1.00001f));
+                Math.min(xRho, (double) nx - 1.00001f));
         final double jy = Math.max(0.00001f,
-                                   Math.min(yRho, (double) ny - 1.00001f));
+                Math.min(yRho, (double) ny - 1.00001f));
 
         final int i = (int) Math.floor(ix);
         final int j = (int) Math.floor(jy);
@@ -1265,7 +1235,7 @@ public abstract class Dataset {
                 longitude += co * lonRho[j + jj][i + ii];
             }
         }
-        return (new double[] {latitude, longitude});
+        return (new double[]{latitude, longitude});
     }
 
     /**
@@ -1348,7 +1318,7 @@ public abstract class Dataset {
             deltay = (deltay - latRho[jmin][imin]) / dy1;
             ygrid = (double) jmin + Math.min(Math.max(0.d, deltay), 1.d);
         }
-        return (new double[] {xgrid, ygrid});
+        return (new double[]{xgrid, ygrid});
     }
 
     /**
@@ -1356,7 +1326,7 @@ public abstract class Dataset {
      * to the is inside the polygon defined by (imin, jmin) & (imin, jmax) &
      * (imax, jmax) & (imax, jmin).
      *
-     <p>
+    <p>
      * The algorithm has been adapted from a function in ROMS/UCLA code,
      * originally written by Alexander F. Shchepetkin and Hernan G. Arango.
      * Please find below an extract of the ROMS/UCLA documention.
@@ -1440,7 +1410,7 @@ public abstract class Dataset {
      *         <code>false</code>otherwise.
      */
     public static boolean isInsidePolygone(int imin, int imax, int jmin,
-                                           int jmax, double lon, double lat) {
+            int jmax, double lon, double lat) {
 
         //--------------------------------------------------------------
         // Return true if (lon, lat) is insidide the polygon defined by
@@ -1467,7 +1437,8 @@ public abstract class Dataset {
         }
         shft = jmax - jmin + 2 * imax - imin;
         for (int i = imax; i >= (imin + 1); i--) {
-            xb[shft - i] = lonRho[jmax][i]; ;
+            xb[shft - i] = lonRho[jmax][i];
+            ;
             yb[shft - i] = latRho[jmax][i];
         }
         shft = 2 * jmax - jmin + 2 * (imax - imin);
@@ -1492,8 +1463,8 @@ public abstract class Dataset {
                 inc = 0;
                 if ((xb[k] == lon) & (yb[k] == lat)) {
                     crossings = 1;
-                } else if (((dx1 == 0.) & (lat >= yb[k])) |
-                           ((dx2 == 0.) & (lat >= yb[k + 1]))) {
+                } else if (((dx1 == 0.) & (lat >= yb[k]))
+                        | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
                     inc = 1;
                 } else if ((dx1 * dx2 > 0.) & ((xb[k + 1] - xb[k]) * dxy >= 0.)) {
                     inc = 2;
@@ -1551,19 +1522,19 @@ public abstract class Dataset {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
                     {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                      (1.d - (double) jj - dy) *
-                                      (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
                         try {
-                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii] +
-                                frac * temp_tp1[k + kk][j + jj][i + ii];
+                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii]
+                                    + frac * temp_tp1[k + kk][j + jj][i + ii];
                             tp += x * co;
                         } catch (ArrayIndexOutOfBoundsException e) {
                             throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating temperature field : " +
-                                    e.getMessage());
+                                    "Problem interpolating temperature field : "
+                                    + e.getMessage());
                         }
                     }
                 }
@@ -1589,7 +1560,6 @@ public abstract class Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
-
     public static double getSalinity(double[] pGrid, double time) throws
             ArrayIndexOutOfBoundsException {
 
@@ -1618,19 +1588,19 @@ public abstract class Dataset {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
                     {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                      (1.d - (double) jj - dy) *
-                                      (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
                         try {
-                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii] +
-                                frac * salt_tp1[k + kk][j + jj][i + ii];
+                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii]
+                                    + frac * salt_tp1[k + kk][j + jj][i + ii];
                             sal += x * co;
                         } catch (ArrayIndexOutOfBoundsException e) {
                             throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating salinity field : " +
-                                    e.getMessage());
+                                    "Problem interpolating salinity field : "
+                                    + e.getMessage());
                         }
                     }
                 }
@@ -1657,16 +1627,16 @@ public abstract class Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
-
     public double[] getPlankton(double[] pGrid, double time) {
 
         if (!FLAG_PLANKTON) {
-            return new double[] {Double.NaN, Double.NaN, Double.NaN};
+            return new double[]{Double.NaN, Double.NaN, Double.NaN};
         }
 
         double co, CO, x, frac, largePhyto, smallZoo, largeZoo;
 
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo; ;
+        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        ;
 
         //-----------------------------------------------------------
         // Interpolate the plankton concentration fields
@@ -1674,8 +1644,8 @@ public abstract class Dataset {
         int i = (int) pGrid[0];
         int j = (int) pGrid[1];
         final double kz = Math.max(0.d,
-                                   Math.min(pGrid[2],
-                                            (double) nz - 1.00001f));
+                Math.min(pGrid[2],
+                (double) nz - 1.00001f));
         int k = (int) kz;
         //System.out.println("i " + i + " j " + j + " k " + k);
         double dx = pGrid[0] - (double) i;
@@ -1689,20 +1659,17 @@ public abstract class Dataset {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < 2; ii++) {
                     if (isInWater(i + ii, j + jj)) {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                      (1.d - (double) jj - dy) *
-                                      (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
-                        x = (1.d - frac) * largePhyto_tp0[k + kk][j + jj][i +
-                            ii]
-                            + frac * largePhyto_tp1[k + kk][j + jj][i + ii];
+                        x = (1.d - frac) * largePhyto_tp0[k + kk][j + jj][i
+                                + ii] + frac * largePhyto_tp1[k + kk][j + jj][i + ii];
                         largePhyto += x * co;
-                        x = (1.d - frac) * smallZoo_tp0[k + kk][j + jj][i + ii]
-                            + frac * smallZoo_tp1[k + kk][j + jj][i + ii];
+                        x = (1.d - frac) * smallZoo_tp0[k + kk][j + jj][i + ii] + frac * smallZoo_tp1[k + kk][j + jj][i + ii];
                         smallZoo += x * co;
-                        x = (1.d - frac) * largeZoo_tp0[k + kk][j + jj][i + ii]
-                            + frac * largeZoo_tp1[k + kk][j + jj][i + ii];
+                        x = (1.d - frac) * largeZoo_tp0[k + kk][j + jj][i + ii] + frac * largeZoo_tp1[k + kk][j + jj][i + ii];
                         largeZoo += x * co;
                     }
                 }
@@ -1714,9 +1681,8 @@ public abstract class Dataset {
             largeZoo /= CO;
         }
 
-        return new double[] {largePhyto, smallZoo, largeZoo};
+        return new double[]{largePhyto, smallZoo, largeZoo};
     }
-
 
     /**
      * Gets the list of NetCDF input files that satisfy the file filter and
@@ -1737,8 +1703,7 @@ public abstract class Dataset {
         String fileMask = Configuration.getFileMask();
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
         if (listFile.length == 0) {
-            throw new IOException(path + " contains no file matching mask "
-                                  + fileMask);
+            throw new IOException(path + " contains no file matching mask " + fileMask);
         }
         list = new ArrayList<String>(listFile.length);
         for (File file : listFile) {
@@ -1785,22 +1750,20 @@ public abstract class Dataset {
     private void open(String filename) throws IOException {
 
         try {
-            if (ncIn == null ||
-                (new File(ncIn.getLocation()).compareTo(new File(filename)) !=
-                 0)) {
-                MainFrame.getStatusBar().setMessage(Resources.MSG_OPEN +
-                        filename);
+            if (ncIn == null
+                    || (new File(ncIn.getLocation()).compareTo(new File(filename))
+                    != 0)) {
+                MainFrame.getStatusBar().setMessage(Resources.MSG_OPEN
+                        + filename);
                 ncIn = NetcdfDataset.openFile(filename, null);
                 nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             }
             System.out.print("Open dataset " + filename + "\n");
         } catch (IOException e) {
-            throw new IOException("Problem opening dataset "
-                                  + filename + " - " + e.getMessage());
+            throw new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem reading " + strTimeDim
-                                  + " dimension at location " + filename +
-                                  " : " + e.getMessage());
+            throw new IOException("Problem reading " + strTimeDim + " dimension at location " + filename
+                    + " : " + e.getMessage());
         }
     }
 
@@ -1818,21 +1781,16 @@ public abstract class Dataset {
     private String getNextFile(long time) throws IOException {
 
         int index = indexFile - (1 - time_arrow) / 2;
-        boolean noNext
-                = (listInputFiles.size() == 1)
-                  || (index < 0)
-                  || (index >= listInputFiles.size() - 1);
+        boolean noNext = (listInputFiles.size() == 1) || (index < 0) || (index >= listInputFiles.size() - 1);
         if (noNext) {
-            throw new IOException("Unable to find any file following "
-                                  + listInputFiles.get(indexFile));
+            throw new IOException("Unable to find any file following " + listInputFiles.get(indexFile));
         }
         if (true) {
-        //if (isTimeBetweenFile(time, index)) {
+            //if (isTimeBetweenFile(time, index)) {
             indexFile += time_arrow;
             return listInputFiles.get(indexFile);
         }
-        throw new IOException("Unable to find any file following "
-                              + listInputFiles.get(indexFile));
+        throw new IOException("Unable to find any file following " + listInputFiles.get(indexFile));
     }
 
     /**
@@ -1862,10 +1820,8 @@ public abstract class Dataset {
             return listInputFiles.get(indexLast);
         }
 
-        throw new IOException("Time value " + (long) time
-                              + " not contained among NetCDF files " +
-                              Configuration.getFileMask()
-                              + " of folder " + Configuration.getDirectorIn());
+        throw new IOException("Time value " + (long) time + " not contained among NetCDF files "
+                + Configuration.getFileMask() + " of folder " + Configuration.getDirectorIn());
     }
 
     /**
@@ -1896,17 +1852,15 @@ public abstract class Dataset {
             return (time >= time_r0 && time < time_rf);
             /*switch (time_arrow) {
             case 1:
-                return (time >= time_r0 && time < time_rf);
+            return (time >= time_r0 && time < time_rf);
             case -1:
-                return (time > time_r0 && time <= time_rf);
+            return (time > time_r0 && time <= time_rf);
             }*/
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                                  + e.getCause());
+            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                                  " variable in file "
-                                  + filename + " : " + e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + filename + " : " + e.getCause());
         }
         //return false;
 
@@ -1941,13 +1895,10 @@ public abstract class Dataset {
                 return true;
             }
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                                  + e.getCause());
+            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                                  " variable in file "
-                                  + filename
-                                  + " : " + e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + filename + " : " + e.getCause());
         }
         return false;
     }
@@ -1970,20 +1921,20 @@ public abstract class Dataset {
             time_rank = skipSeconds(
                     timeArr.getLong(timeArr.getIndex().set(rank)));
             while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) break;
+                if (time_arrow < 0 && time == time_rank) {
+                    break;
+                }
                 rank++;
                 time_rank = skipSeconds(
                         timeArr.getLong(timeArr.getIndex().set(rank)));
             }
         } catch (IOException e) {
-            throw new IOException("Problem reading file "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getCause());
+            throw new IOException("Problem reading file " + ncIn.getLocation().toString() + " : "
+                    + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                                  " variable in file "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + ncIn.getLocation().toString() + " : "
+                    + e.getCause());
         } catch (ArrayIndexOutOfBoundsException e) {
             rank = nbTimeRecords;
         }
@@ -2001,10 +1952,10 @@ public abstract class Dataset {
      *         <code>false</code> otherwise.
      */
     boolean isOnEdge(double x, double y) {
-        return ((x > (nx - 2.0f)) ||
-                (x < 1.0f) ||
-                (y > (ny - 2.0f)) ||
-                (y < 1.0f));
+        return ((x > (nx - 2.0f))
+                || (x < 1.0f)
+                || (y > (ny - 2.0f))
+                || (y < 1.0f));
     }
 
     /**
@@ -2017,21 +1968,18 @@ public abstract class Dataset {
      * @return a double, the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
      */
     static double geodesicDistance(double lat1, double lon1, double lat2,
-                                   double lon2) {
+            double lon2) {
         //--------------------------------------------------------------
         // Return the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
-        double d = 6367000.d * Math.sqrt(2.d
-                                         - 2.d *
-                                         Math.cos(Math.PI * lat1 / 180.d) *
-                                         Math.cos(Math.PI * lat2 / 180.d) *
-                                         Math.cos(Math.PI * (lon1 - lon2) /
-                                                  180.d)
-                                         - 2.d *
-                                         Math.sin(Math.PI * lat1 / 180.d) *
-                                         Math.sin(Math.PI * lat2 / 180.d));
+        double d = 6367000.d * Math.sqrt(2.d - 2.d
+                * Math.cos(Math.PI * lat1 / 180.d)
+                * Math.cos(Math.PI * lat2 / 180.d)
+                * Math.cos(Math.PI * (lon1 - lon2)
+                / 180.d) - 2.d
+                * Math.sin(Math.PI * lat1 / 180.d)
+                * Math.sin(Math.PI * lat2 / 180.d));
         return (d);
     }
-
 
     /**
      *  Checks for existence of the specidied OPeNDAP location.
@@ -2054,8 +2002,7 @@ public abstract class Dataset {
                 return (code == 200);
 
             } catch (Exception e) {
-                throw new IOException(location + " is not a valid OPeNDAP URL."
-                                      + e.getMessage());
+                throw new IOException(location + " is not a valid OPeNDAP URL." + e.getMessage());
             }
         }
         return false;
@@ -2154,9 +2101,8 @@ public abstract class Dataset {
         int k;
         double z;
         xTime = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        for (k = nz; k-- > 0; ) {
-            Kv[k] = (1.d - xTime) * kv_tp0[k][j][i]
-                    + xTime * kv_tp1[k][j][i];
+        for (k = nz; k-- > 0;) {
+            Kv[k] = (1.d - xTime) * kv_tp0[k][j][i] + xTime * kv_tp1[k][j][i];
         }
 
         z = Math.min(depth2z(i, j, depth), nz - 1.00001f);
@@ -2179,23 +2125,23 @@ public abstract class Dataset {
          * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c; */
         diffzKv = c + ddepth * (2.d * b + 3.d * a * ddepth);
 
-        zz = Math.min(depth2z(i, j, depth + 0.5d * diffzKv * dt), nz - 1.00001f) ;
+        zz = Math.min(depth2z(i, j, depth + 0.5d * diffzKv * dt), nz - 1.00001f);
         dz = zz - Math.floor(z);
         if (dz >= 1.f || dz < 0) {
             k = (int) zz;
             a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
             b = diff2(Kv, k) / 2.d;
-            c = (Kv[k + 1] - Kv[k]) -
-                (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
+            c = (Kv[k + 1] - Kv[k])
+                    - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
             d = Kv[k];
         }
-        ddepth = depth + 0.5d * diffzKv * dt - z_rho_cst[k][j][i];        
+        ddepth = depth + 0.5d * diffzKv * dt - z_rho_cst[k][j][i];
         /** Compute Kv(z)
          * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
         Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
         Kvzz = Math.max(0.d, Kvzz);
 
-        return new double[] {diffzKv, Kvzz};
+        return new double[]{diffzKv, Kvzz};
     }
 
     /**
@@ -2241,29 +2187,25 @@ public abstract class Dataset {
         if (DEBUG_VDISP) {
             for (int ii = 0; ii < n; ii++) {
                 for (int jj = 0; jj < n; jj++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                                  * (1.d - (double) jj - dy));
+                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                     CO += co;
-                    Hz += co * (z_w_tp0[k + 1][j + jj][i + ii]
-                                - z_w_tp0[k][j + jj][i + ii]);
+                    Hz += co * (z_w_tp0[k + 1][j + jj][i + ii] - z_w_tp0[k][j + jj][i + ii]);
                 }
             }
             if (CO != 0) {
                 Hz /= CO;
             }
-            return new double[] {0, 1e-2, Hz};
+            return new double[]{0, 1e-2, Hz};
         }
 
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
-                co = Math.abs((1.d - (double) ii - dx)
-                              * (1.d - (double) jj - dy));
+                co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
                 kvSpline = getKv(i + ii, j + jj, depth, time, dt);
                 diffKv += kvSpline[0] * co;
                 Kv += kvSpline[1] * co;
-                Hz += co * (z_w_tp0[k + 1][j + jj][i + ii]
-                            - z_w_tp0[Math.max(k - 1, 0)][j + jj][i + ii]);
+                Hz += co * (z_w_tp0[k + 1][j + jj][i + ii] - z_w_tp0[Math.max(k - 1, 0)][j + jj][i + ii]);
             }
         }
         if (CO != 0) {
@@ -2272,7 +2214,7 @@ public abstract class Dataset {
             Hz /= CO;
         }
 
-        return new double[] {diffKv, Kv, Hz};
+        return new double[]{diffKv, Kv, Hz};
     }
 
     /**
@@ -2287,7 +2229,6 @@ public abstract class Dataset {
 //////////
 // Getters
 //////////
-
     /**
      * Gets the value of the NetCDF time variable just superior (or inferior for
      * backward simulation) to the current time of the simulation.
@@ -2379,7 +2320,6 @@ public abstract class Dataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-
     public static double getLon(int i, int j) {
         return lonRho[j][i];
     }
@@ -2398,6 +2338,5 @@ public abstract class Dataset {
         }
         return Double.NaN;
     }
-
     //---------- End of class
 }
