@@ -140,13 +140,9 @@ public class OutputNC {
      */
     private static ArrayDouble.D1 arrTime;
     /**
-     * Array of rank 1, specialized for doubles. Stores release zone number.
+     * Array of rank 1, specialized for doubles. Stores zone number.
      */
-    private static ArrayInt.D1 arrReleaseZone;
-    /**
-     * Array of rank 1, specialized for doubles. Stores recruitment zone number.
-     */
-    private static ArrayInt.D2 arrRecruitZone;
+    private static ArrayInt.D2 arrZone;
     /**
      * Array of rank 2, specialized for integers. Stores death status.
      */
@@ -239,11 +235,10 @@ public class OutputNC {
             }
         }
         if (Configuration.getTypeRelease() == Constant.RELEASE_ZONE) {
-            addVar2NcOut(Field.RELEASE_ZONE);
+            addVar2NcOut(Field.ZONE);
         }
         if (Configuration.getTypeRecruitment() != Constant.NONE) {
             addVar2NcOut(Field.RECRUITED);
-            addVar2NcOut(Field.RECRUITMENT_ZONE);
         }
 
         // Add global attributes
@@ -407,25 +402,6 @@ public class OutputNC {
     }
 
     /**
-     * Writes data to the specified variable.
-     *
-     * @param field a Field, the variable to be written
-     * @param origin an int[], the offset within the variable to start writing.
-     * @param array the Array that will be written; must be same type and
-     * rank as Field
-     */
-    public static void write2NcOut(Field field, Array array) {
-
-        try {
-            ncOut.write(field.short_name(), array);
-        } catch (InvalidRangeException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
      * Closes the NetCDF file.
      */
     public static void close() {
@@ -464,12 +440,11 @@ public class OutputNC {
             arrSal = new ArrayFloat.D2(1, Configuration.getNbParticles());
         }
         if (FLAG_RELEASED_ZONE) {
-            arrReleaseZone = new ArrayInt.D1(Configuration.getNbParticles());
+            arrZone = new ArrayInt.D2(1, Configuration.getNbParticles());
         }
         if (FLAG_RECRUITMENT) {
             arrRecruit = new ArrayInt.D3(1, Configuration.getNbParticles(),
-                    nbRecruitmentZones);
-            arrRecruitZone = new ArrayInt.D2(1, Configuration.getNbParticles());
+                                         nbRecruitmentZones);
         }
         if (FLAG_GROWTH) {
             arrLength = new ArrayFloat.D2(1, Configuration.getNbParticles());
@@ -521,12 +496,11 @@ public class OutputNC {
                 //particle.checkRecruitment(Configuration.getTypeRecruitment());
                 for (int i_zone = 0; i_zone < nbRecruitmentZones; i_zone++) {
                     arrRecruit.set(0, i, i_zone,
-                            particle.isRecruited(i_zone) ? 1 : 0);
-                    arrRecruitZone.set(0, i, particle.getNumRecruitZone() + 1);
+                                   particle.isRecruited(i_zone) ? 1 : 0);
                 }
             }
-            if (FLAG_RELEASED_ZONE && !(time > Simulation.get_t0())) {
-                arrReleaseZone.set(i, particle.getNumZoneInit() + 1);
+            if (FLAG_RELEASED_ZONE) {
+                arrZone.set(0, i, particle.getNumZoneNC());
             }
         }
         arrTime.set(0, time);
@@ -545,10 +519,9 @@ public class OutputNC {
         }
         if (FLAG_RECRUITMENT) {
             write2NcOut(Field.RECRUITED, origin_recruited, arrRecruit);
-            write2NcOut(Field.RECRUITMENT_ZONE, origin, arrRecruitZone);
         }
         if (FLAG_RELEASED_ZONE) {
-            write2NcOut(Field.RELEASE_ZONE, arrReleaseZone);
+            write2NcOut(Field.ZONE, origin, arrZone);
         }
 
         i_record++;
@@ -590,10 +563,8 @@ public class OutputNC {
         DataType.FLOAT),
         LENGTH("length", "particle length", "millimeter",
         DataType.FLOAT),
-        RELEASE_ZONE("release_zone", "release zone number at particle location",
-        "release zone > 0, out zone = 0", null, null, DataType.INT, new Dimension[] {drifter}),
-        RECRUITMENT_ZONE("recruitment_zone", "recruitment zone number at particle location",
-        "recruitment zone > 0, out zone = 0",
+                ZONE("zone", "zone number at particle location",
+                     "releasing zone > 0, recruitment zone < 0, out zone = 0",
         DataType.INT),
         RECRUITED("recruited", "status of recruitment", "boolean",
         DataType.INT, 3),
@@ -640,10 +611,6 @@ public class OutputNC {
          * Number of dimensions of the variable
          */
         private final int nb_dimensions;
-        /**
-         * List of dimensions
-         */
-        private final List<Dimension> dimensions;
 
         ///////////////
         // Constructors
@@ -697,29 +664,12 @@ public class OutputNC {
             this.attribute1 = attribute1;
             this.attribute2 = attribute2;
             this.nb_dimensions = nb_dimensions;
-            dimensions = createDimensions();
-        }
-
-        Field(String name, String description, String unit, String attribute1,
-                String attribute2, DataType type, Dimension[] dimensions) {
-
-            this.short_name = name;
-            this.long_name = description;
-            this.unit = unit;
-            this.type = type;
-            this.attribute1 = attribute1;
-            this.attribute2 = attribute2;
-            this.nb_dimensions = dimensions.length;
-            this.dimensions = new ArrayList(nb_dimensions);
-            for (Dimension dimension : dimensions) {
-                this.dimensions.add(dimension);
-
-            }
         }
 
         ////////////////////////////
         // Definition of the methods
         ////////////////////////////
+
         /**
          * Gets the name of the variable.
          * @return a String, the variable name
@@ -773,25 +723,19 @@ public class OutputNC {
          * @return the List of the variable {@code Dimension}s
          */
         public List<Dimension> dimensions() {
+
+            ArrayList<Dimension>
+                    dimensions = new ArrayList<Dimension>(nb_dimensions);
+            dimensions.add(time);
+            if (nb_dimensions >= 2) {
+                dimensions.add(drifter);
+            }
+            if (nb_dimensions >= 3) {
+                dimensions.add(zone);
+            }
             return dimensions;
         }
 
-        /**
-         * Create the list of the variable dimensions.
-         * @return the List of the variable {@code Dimension}s
-         */
-        private List<Dimension> createDimensions() {
-
-            ArrayList<Dimension> arrDimensions = new ArrayList<Dimension>(nb_dimensions);
-            arrDimensions.add(time);
-            if (nb_dimensions >= 2) {
-                arrDimensions.add(drifter);
-            }
-            if (nb_dimensions >= 3) {
-                arrDimensions.add(zone);
-            }
-            return arrDimensions;
-        }
         //----------- End of enum
     }
     //---------- End of class

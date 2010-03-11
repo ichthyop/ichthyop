@@ -144,20 +144,18 @@ public class Simulation {
         System.out.println("Preliminary computation");
 
         switch (Configuration.getTypeModel() + Configuration.getDimSimu()) {
-            case (Constant.ROMS + Constant.SIMU_2D):
-                Particle.data = new DatasetR2D();
-                break;
-            case (Constant.ROMS + Constant.SIMU_3D):
-                Particle.data = new DatasetR3D();
-                break;
-            case (Constant.MARS + Constant.SIMU_2D):
-                Particle.data = new DatasetM2D();
-                break;
-            case (Constant.MARS + Constant.SIMU_3D):
-                Particle.data = new DatasetM3D();
-                break;
-            case (Constant.GHER + Constant.SIMU_3D):
-                Particle.data = new DatasetGHER3D();
+        case (Constant.ROMS + Constant.SIMU_2D):
+            Particle.data = new DatasetR2D();
+            break;
+        case (Constant.ROMS + Constant.SIMU_3D):
+            Particle.data = new DatasetR3D();
+            break;
+        case (Constant.MARS + Constant.SIMU_2D):
+            Particle.data = new DatasetM2D();
+            break;
+        case (Constant.MARS + Constant.SIMU_3D):
+            Particle.data = new DatasetGHER3D();
+            break;
         }
 
         Particle.data.setUp();
