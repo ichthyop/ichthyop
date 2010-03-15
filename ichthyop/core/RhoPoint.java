@@ -55,15 +55,15 @@ public class RhoPoint {
      * Transforms geographical coordinates into grid coordinates.
      * (lon, lat, depth) ==> (x, y, z)
      *
-     * @see ichthyop.io.Dataset#geo2Grid()
+     * @see ichthyop.io.Dataset.getInstance()#geo2Grid()
      */
     public void geog2Grid() {
 
-        double[] pGrid = Dataset.geo2Grid(lon, lat);
+        double[] pGrid = Dataset.getInstance().geo2Grid(lon, lat);
         x = pGrid[0];
         y = pGrid[1];
         if (bln3D) {
-            z = Dataset.depth2z(x, y, depth);
+            z = Dataset.getInstance().depth2z(x, y, depth);
         }
     }
 
@@ -71,11 +71,11 @@ public class RhoPoint {
      * Transforms grid coordinates into geographical coordinates.
      * (x, y, z) ==> (lon, lat, depth)
      *
-     * @see ichthyop.io.Dataset#grid2Geo()
+     * @see ichthyop.io.Dataset.getInstance()#grid2Geo()
      */
     public void grid2Geog() {
-        double[] pGeog = bln3D ? Dataset.grid2Geo(x, y, z) :
-                         Dataset.grid2Geo(x, y);
+        double[] pGeog = bln3D ? Dataset.getInstance().grid2Geo(x, y, z) :
+                         Dataset.getInstance().grid2Geo(x, y);
         lon = pGeog[1];
         lat = pGeog[0];
         if (bln3D) {
@@ -109,7 +109,7 @@ public class RhoPoint {
         y += move[1];
         if (move.length > 2) {
             z += move[2];
-            z = Math.max(0.d, Math.min(z, (double) Dataset.get_nz() - 1.00001f));
+            z = Math.max(0.d, Math.min(z, (double) Dataset.getInstance().get_nz() - 1.00001f));
         }
     }
 
@@ -157,7 +157,7 @@ public class RhoPoint {
         this.x = x;
         this.y = y;
         this.z = bln3D
-                 ? Math.min(Dataset.depth2z(x, y, depth), Dataset.get_nz() - 1)
+                 ? Math.min(Dataset.getInstance().depth2z(x, y, depth), Dataset.getInstance().get_nz() - 1)
                  : 0;
     }
 

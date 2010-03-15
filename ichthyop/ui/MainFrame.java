@@ -5,9 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.AWTEvent;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.event.WindowListener;
 import java.awt.GridLayout;
 import java.awt.GraphicsEnvironment;
@@ -55,7 +52,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.BorderFactory;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -73,7 +69,6 @@ import ichthyop.core.Step;
 import ichthyop.io.Configuration;
 import ichthyop.io.OutputNC;
 import ichthyop.io.Dataset;
-import ichthyop.ui.ConfigurationUI;
 import ichthyop.ui.chart.ChartManager;
 import ichthyop.ui.param.FloatParameter;
 import ichthyop.ui.param.IntegerParameter;
@@ -463,7 +458,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
 
         colorbarBathy = new ColorBar(Resources.LBL_BATHY + " " +
                 Resources.UNIT_METER, Constant.HORIZONTAL,
-                0, Dataset.getDepthMax(), Color.CYAN,
+                0, Dataset.getInstance().getDepthMax(), Color.CYAN,
                 new Color(0, 0, 150));
 
         // Listeners
@@ -1381,7 +1376,6 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
             simulationUI = null;
             createViewver();
             updateSingleUI();
-            ;
         }
 
         /**
@@ -1398,11 +1392,11 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         protected void process(java.util.List<Step> steps) {
 
             //Updates the UI
-            for (Step step : steps) {
-                strTime = step.timeToString();
+            for (Step lstep : steps) {
+                strTime = lstep.timeToString();
                 statusbar.setMessage(Resources.MSG_COMPUTE + strTime);
-                if (!flagStop && step.hasToRefresh()) {
-                    simulationUI.setStep(step);
+                if (!flagStop && lstep.hasToRefresh()) {
+                    simulationUI.setStep(lstep);
                     statusbar.setMessage(Resources.MSG_REFRESH);
                     sldTime.setValue((nb_steps - 1) * (1 - timeArrow) / 2 + timeArrow * i_step);
                     if (isReplayEnabled) {
@@ -1416,13 +1410,13 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
                     ChartManager.refresh(strTime);
                     if (ckBoxCapture.isSelected()) {
                         try {
-                            screen2File(simulationUI, step.getCalendar());
+                            screen2File(simulationUI, lstep.getCalendar());
                         } catch (IOException e) {
                             printErr(e, "Capture error");
                         }
                     }
                 }
-                if (timeArrow * (step.getTime() + step.get_dt()) >= timeArrow * Dataset.getTimeTp1()) {
+                if (timeArrow * (lstep.getTime() + lstep.get_dt()) >= timeArrow * Dataset.getInstance().getTimeTp1()) {
                     statusbar.setMessage(Resources.MSG_GET_FIELD);
                 }
             }
@@ -1601,32 +1595,32 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
          */
         @Override
         protected void process(java.util.List<Step> steps) {
-            for (Step step : steps) {
+            for (Step lstep : steps) {
                 strBfSimu.delete(0, strBfSimu.length());
                 strBfRun.delete(0, strBfRun.length());
-                barSimulation.setValue(step.progressCurrent());
+                barSimulation.setValue(lstep.progressCurrent());
                 strBfSimu.append("Current simulation - ");
                 strBfSimu.append(Resources.LBL_STEP);
-                strBfSimu.append(step.index() + 1);
+                strBfSimu.append(lstep.index() + 1);
                 strBfSimu.append(" / ");
-                strBfSimu.append(step.getNumberOfSteps());
+                strBfSimu.append(lstep.getNumberOfSteps());
                 strBfSimu.append(" - ");
                 strBfSimu.append(Resources.LBL_TIME);
-                strBfSimu.append(step.timeToString());
+                strBfSimu.append(lstep.timeToString());
                 lblDate.setText(strBfSimu.toString());
-                barRun.setValue(step.progressGlobal());
+                barRun.setValue(lstep.progressGlobal());
                 strBfRun.append("Simulation ");
-                strBfRun.append(step.indexSimulation() + 1);
+                strBfRun.append(lstep.indexSimulation() + 1);
                 strBfRun.append(" / ");
-                strBfRun.append(step.getNumberOfSimulations());
+                strBfRun.append(lstep.getNumberOfSimulations());
                 strBfRun.append(" - ");
-                strBfRun.append(step.timeLeft());
+                strBfRun.append(lstep.timeLeft());
                 lblSimulation.setText(strBfRun.toString());
                 statusbar.setMessage("running...");
-                if (step.hasToRecord()) {
+                if (lstep.hasToRecord()) {
                     statusbar.setMessage("records on file...");
                 }
-                if (timeArrow * (step.getTime() + step.get_dt()) >= timeArrow * Dataset.getTimeTp1()) {
+                if (timeArrow * (lstep.getTime() + lstep.get_dt()) >= timeArrow * Dataset.getInstance().getTimeTp1()) {
                     statusbar.setMessage(Resources.MSG_GET_FIELD);
                 }
             }

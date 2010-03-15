@@ -43,7 +43,7 @@ public class SimulationUI extends JPanel {
     /**
      * The step to display on screen
      */
-    private static Step step;
+    private Step step;
     /**
      * Dimension of the component.
      */
@@ -84,10 +84,10 @@ public class SimulationUI extends JPanel {
      */
     public SimulationUI() {
 
-        latmin = Dataset.getLatMin();
-        latmax = Dataset.getLatMax();
-        lonmin = Dataset.getLonMin();
-        lonmax = Dataset.getLonMax();
+        latmin = Dataset.getInstance().getLatMin();
+        latmax = Dataset.getInstance().getLatMax();
+        lonmin = Dataset.getInstance().getLonMin();
+        lonmax = Dataset.getInstance().getLonMax();
 
         hi = -1;
         wi = -1;
@@ -159,8 +159,8 @@ public class SimulationUI extends JPanel {
         graphic.setColor(new Color(223, 212, 200));
         graphic.fillRect(0, 0, w, h);
         CellUI cell = new CellUI();
-        for (int i = Dataset.get_nx() - 1; i-- > 0; ) {
-            for (int j = Dataset.get_ny() - 1; j-- > 0; ) {
+        for (int i = Dataset.getInstance().get_nx() - 1; i-- > 0; ) {
+            for (int j = Dataset.getInstance().get_ny() - 1; j-- > 0; ) {
                 cell.draw(i, j, w, h);
                 graphic.setColor(cell.getColor(i, j));
                 graphic.fillPolygon(cell);
@@ -226,9 +226,9 @@ public class SimulationUI extends JPanel {
 
         double[] point = new double[2];
 
-        point[0] = w * ((Dataset.getLon(igrid, jgrid) - lonmin) /
+        point[0] = w * ((Dataset.getInstance().getLon(igrid, jgrid) - lonmin) /
                         Math.abs(lonmax - lonmin));
-        point[1] = h * (1.d - ((Dataset.getLat(igrid, jgrid) - latmin) /
+        point[1] = h * (1.d - ((Dataset.getInstance().getLat(igrid, jgrid) - latmin) /
                                Math.abs(latmax - latmin)));
 
         return (point);
@@ -343,8 +343,8 @@ public class SimulationUI extends JPanel {
          */
         private Color getColor(int i, int j) {
 
-            if (Dataset.isInWater(i, j)) {
-                Color color = getColor(Dataset.getBathy(i, j));
+            if (Dataset.getInstance().isInWater(i, j)) {
+                Color color = getColor(Dataset.getInstance().getBathy(i, j));
                 boolean found = false;
                 Iterator<Zone> iter = listZones.iterator();
                 Zone zone;
@@ -372,8 +372,8 @@ public class SimulationUI extends JPanel {
             if (Double.isNaN(depth)) {
                 return (Color.darkGray);
             } else {
-                xdepth = (float) Math.abs((Dataset.getDepthMax() - depth) /
-                                          Dataset.getDepthMax());
+                xdepth = (float) Math.abs((Dataset.getInstance().getDepthMax() - depth) /
+                                          Dataset.getInstance().getDepthMax());
                 xdepth = Math.max(0, Math.min(xdepth, 1));
 
             }

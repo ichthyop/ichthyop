@@ -68,95 +68,95 @@ public abstract class Dataset {
     /**
      * Constant for debugging vertical dispersion
      */
-    public final static boolean DEBUG_VDISP = false;
+    public static final boolean DEBUG_VDISP = false;
     /**
      * Constant for debugginf horizontal dispersion
      */
-    public final static boolean DEBUG_HDISP = false;
+    public static final boolean DEBUG_HDISP = false;
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
      * Grid dimension
      */
-    static int nx, ny, nz;
+    int nx, ny, nz;
     /**
      * Origin for grid index
      */
-    static int ipo, jpo;
+    int ipo, jpo;
     /**
      * Number of time records in current NetCDF file
      */
-    private static int nbTimeRecords;
+    private int nbTimeRecords;
     /**
      * The NetCDF dataset
      */
-    static NetcdfFile ncIn;
+    NetcdfFile ncIn;
     /**
      * Longitude at rho point.
      */
-    static double[][] lonRho;
+    double[][] lonRho;
     /**
      * Latitude at rho point.
      */
-    static double[][] latRho;
+    double[][] latRho;
     /**
      * Bathymetry
      */
-    static double[][] hRho;
+    double[][] hRho;
     /**
      * Mask: water = 1, cost = 0
      */
-    static byte[][] maskRho;
+    byte[][] maskRho;
     /**
      * Ocean free surface elevetation at current time
      */
-    static float[][] zeta_tp0;
+    float[][] zeta_tp0;
     /**
      * /**
      * Ocean free surface elevetation at time t + dt
      */
-    static float[][] zeta_tp1;
+    float[][] zeta_tp1;
     /**
      * Zonal component of the velocity field at current time
      */
-    static float[][][] u_tp0;
+    float[][][] u_tp0;
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    static float[][][] u_tp1;
+    float[][][] u_tp1;
     /**
      * Meridional component of the velocity field at current time
      */
-    static float[][][] v_tp0;
+    float[][][] v_tp0;
     /**
      *  Meridional component of the velocity field at time t + dt
      */
-    static float[][][] v_tp1;
+    float[][][] v_tp1;
     /**
      * Vertical component of the velocity field at current time
      */
-    static float[][][] w_tp0;
+    float[][][] w_tp0;
     /**
      * Vertical component of the velocity field at time t + dt
      */
-    static float[][][] w_tp1;
+    float[][][] w_tp1;
     /**
      * Water salinity at time t + dt
      */
-    static float[][][] salt_tp1;
+    float[][][] salt_tp1;
     /**
      * Water salinity at current time
      */
-    static float[][][] salt_tp0;
+    float[][][] salt_tp0;
     /**
      * Water temperature at current time
      */
-    static float[][][] temp_tp0;
+    float[][][] temp_tp0;
     /**
      * Water temperature at time t + dt
      */
-    static float[][][] temp_tp1;
+    float[][][] temp_tp1;
     /**
      * Large zooplankton concentration at current time
      */
@@ -192,33 +192,33 @@ public abstract class Dataset {
     /**
      * Depth at rho point
      */
-    static double[][][] z_rho_cst;
+    double[][][] z_rho_cst;
     /**
      * Depth at w point at current time.
      * Takes account of free surface elevation.
      */
-    static double[][][] z_w_tp0;
+    double[][][] z_w_tp0;
     /**
      * Depth at w point at time t + dt
      * Takes account of free surface elevation.
      */
-    static double[][][] z_w_tp1;
+    double[][][] z_w_tp1;
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    static double[][][] z_w_cst;
+    double[][][] z_w_cst;
     /**
      * Geographical boundary of the domain
      */
-    private static double latMin, lonMin, latMax, lonMax;
+    private double latMin, lonMin, latMax, lonMax;
     /**
      * Maximum depth [meter] of the domain
      */
-    private static double depthMax;
+    private double depthMax;
     /**
      * Time step [second] between two records in NetCDF dataset
      */
-    static double dt_HyMo;
+    double dt_HyMo;
     /**
      * List on NetCDF input files in which dataset is read.
      */
@@ -230,15 +230,15 @@ public abstract class Dataset {
     /**
      * Time t + dt expressed in seconds
      */
-    static double time_tp1;
+    double time_tp1;
     /**
      * Current rank in NetCDF dataset
      */
-    private static int rank;
+    private int rank;
     /**
      * Time arrow: forward = +1, backward = -1
      */
-    private static int time_arrow;
+    private int time_arrow;
     /**
      * Mersenne Twister pseudo random number generator
      * @see ichthyop.util.MTRandom
@@ -247,43 +247,48 @@ public abstract class Dataset {
     /**
      * Name of the Dimension in NetCDF file
      */
-    static String strXiDim, strEtaDim, strZDim, strTimeDim;
+    String strXiDim, strEtaDim, strZDim, strTimeDim;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strU, strV, strTp, strSal, strTime, strZeta;
+    String strU, strV, strTp, strSal, strTime, strZeta;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strLon, strLat, strMask, strBathy;
+    String strLon, strLat, strMask, strBathy;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strKv;
+    String strKv;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strLargePhyto, strLargeZoo, strSmallZoo;
+    String strLargePhyto, strLargeZoo, strSmallZoo;
     /**
      * Determines whether or not the temperature field should be read in the
      * NetCDF file, function of the user's options.
      */
-    static boolean FLAG_TP;
+    boolean FLAG_TP;
     /**
      * Determines whether or not the salinity field should be read in the
      * NetCDF file, function of the user's options.
      */
-    static boolean FLAG_SAL;
+    boolean FLAG_SAL;
     /**
      * Determines whether or not the turbulent diffusivity should be read in the
      * NetCDF file, function of the user's options.
      */
-    static boolean FLAG_VDISP;
+    boolean FLAG_VDISP;
     /**
      * Determines whether or not the plankton concentration fields should be
      * read in the NetCDF file, function of the user's options.
      */
-    static boolean FLAG_PLANKTON;
+    boolean FLAG_PLANKTON;
+    /**
+     * A dataset instance to get round the methods
+     */
+    static Dataset dataset;
+    
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
@@ -292,8 +297,8 @@ public abstract class Dataset {
      * horizontal diffusion.
      * @see Monin and Ozmidov, 1981
      */
-    private final static double EPSILON = 1e-9;
-    private final static double EPSILON16 = Math.pow(EPSILON, 1.d / 6.d);
+    private final double EPSILON = 1e-9;
+    private final double EPSILON16 = Math.pow(EPSILON, 1.d / 6.d);
 
 //////////////////////////////////////
 // Declaration of the abstract methods
@@ -432,6 +437,18 @@ public abstract class Dataset {
 // Definition of the methods
 ////////////////////////////
     /**
+     *
+     */
+    public static Dataset getInstance() {
+        return dataset;
+    }
+    /**
+     *
+     */
+    public static void setInstance(Dataset instance) {
+        dataset = instance;
+    }
+    /**
      * Sets up the {@code Dataset}. The method first sets the appropriate
      * variable names, loads the first NetCDF dataset and extract the time
      * non-dependant information, such as grid dimensions, geographical
@@ -543,7 +560,7 @@ public abstract class Dataset {
      * elevation.
      * @return a double[][][], the depth at w point.
      */
-    static double[][][] getSigLevels() {
+    double[][][] getSigLevels() {
 
         //-----------------------------------------------------
         // Daily recalculation of z_w and z_r with zeta
@@ -984,7 +1001,7 @@ public abstract class Dataset {
      * @param k an int, the index of the sigma level
      * @return a double, the depth [meter] at (x, y, k)
      */
-    public static double getDepth(double xRho, double yRho, int k) {
+    public double getDepth(double xRho, double yRho, int k) {
 
         final int i = (int) xRho;
         final int j = (int) yRho;
@@ -1015,7 +1032,7 @@ public abstract class Dataset {
      * @return <code>true</code> if cell(i, j) is in water,
      *         <code>false</code> otherwise.
      */
-    public static boolean isInWater(int i, int j) {
+    public boolean isInWater(int i, int j) {
         return (maskRho[j][i] > 0);
     }
 
@@ -1026,7 +1043,7 @@ public abstract class Dataset {
      *         <code>false</code> otherwise.
      * @see #isInWater(int i, int j)
      */
-    public static boolean isInWater(RhoPoint ptRho) {
+    public boolean isInWater(RhoPoint ptRho) {
         try {
             return (maskRho[(int) Math.round(ptRho.getY())][(int) Math.round(
                     ptRho.getX())] > 0);
@@ -1045,7 +1062,7 @@ public abstract class Dataset {
      * @return <code>true</code> if the grid point is close to cost,
      *         <code>false</code> otherwise.
      */
-    static boolean isCloseToCost(double[] pGrid) {
+    boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
@@ -1064,7 +1081,7 @@ public abstract class Dataset {
      * @param depth a double, the depth of the particle
      * @return a double, the z-coordinate corresponding to the depth
      */
-    public static double depth2z(double xRho, double yRho, double depth) {
+    public double depth2z(double xRho, double yRho, double depth) {
 
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -1092,7 +1109,7 @@ public abstract class Dataset {
      * @param depth a double, the depth of the particle
      * @return a double, the z-coordinate corresponding to the depth
      */
-    public static double depth2z(int i, int j, double depth) {
+    public double depth2z(int i, int j, double depth) {
 
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -1159,7 +1176,7 @@ public abstract class Dataset {
      * @return a double[], the corresponding geographical coordinates
      * (latitude, longitude, depth)
      */
-    public static double[] grid2Geo(double xRho, double yRho, double zRho) {
+    public double[] grid2Geo(double xRho, double yRho, double zRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
@@ -1211,7 +1228,7 @@ public abstract class Dataset {
      * @param yRho double
      * @return double[]
      */
-    public static double[] grid2Geo(double xRho, double yRho) {
+    public double[] grid2Geo(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
@@ -1258,7 +1275,7 @@ public abstract class Dataset {
      * @return a double[], the corresponding grid coordinates (x, y)
      * @see #isInsidePolygone
      */
-    public static double[] geo2Grid(double lon, double lat) {
+    public double[] geo2Grid(double lon, double lat) {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
@@ -1409,7 +1426,7 @@ public abstract class Dataset {
      * @return <code>true</code> if (lon, lat) belongs to the polygon,
      *         <code>false</code>otherwise.
      */
-    public static boolean isInsidePolygone(int imin, int imax, int jmin,
+    public boolean isInsidePolygone(int imin, int imax, int jmin,
             int jmax, double lon, double lat) {
 
         //--------------------------------------------------------------
@@ -1494,7 +1511,7 @@ public abstract class Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
-    public static double getTemperature(double[] pGrid, double time) throws
+    public double getTemperature(double[] pGrid, double time) throws
             ArrayIndexOutOfBoundsException {
 
         if (!FLAG_TP) {
@@ -1560,7 +1577,7 @@ public abstract class Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
-    public static double getSalinity(double[] pGrid, double time) throws
+    public double getSalinity(double[] pGrid, double time) throws
             ArrayIndexOutOfBoundsException {
 
         if (!FLAG_SAL) {
@@ -1967,7 +1984,7 @@ public abstract class Dataset {
      * @param lon2 double, the longitude of the second point
      * @return a double, the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
      */
-    static double geodesicDistance(double lat1, double lon1, double lat2,
+    double geodesicDistance(double lat1, double lon1, double lat2,
             double lon2) {
         //--------------------------------------------------------------
         // Return the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
@@ -2236,7 +2253,7 @@ public abstract class Dataset {
      * superior (or inferior for backward simulation) to the current time of
      * the simulation.
      */
-    public static double getTimeTp1() {
+    public double getTimeTp1() {
         return time_tp1;
     }
 
@@ -2244,7 +2261,7 @@ public abstract class Dataset {
      * Gets the grid dimension in the XI-direction
      * @return an int, the grid dimension in the XI-direction (Zonal)
      */
-    public static int get_nx() {
+    public int get_nx() {
         return nx;
     }
 
@@ -2252,7 +2269,7 @@ public abstract class Dataset {
      * Gets the grid dimension in the ETA-direction
      * @return an int, the grid dimension in the ETA-direction (Meridional)
      */
-    public static int get_ny() {
+    public int get_ny() {
         return ny;
     }
 
@@ -2260,7 +2277,7 @@ public abstract class Dataset {
      * Gets the grid dimension in the vertical direction
      * @return an int, the grid dimension in the vertical direction
      */
-    public static int get_nz() {
+    public int get_nz() {
         return nz;
     }
 
@@ -2268,7 +2285,7 @@ public abstract class Dataset {
      * Gets domain minimum latitude.
      * @return a double, the domain minimum latitude [north degree]
      */
-    public static double getLatMin() {
+    public double getLatMin() {
         return latMin;
     }
 
@@ -2276,7 +2293,7 @@ public abstract class Dataset {
      * Gets domain maximum latitude.
      * @return a double, the domain maximum latitude [north degree]
      */
-    public static double getLatMax() {
+    public double getLatMax() {
         return latMax;
     }
 
@@ -2284,7 +2301,7 @@ public abstract class Dataset {
      * Gets domain minimum longitude.
      * @return a double, the domain minimum longitude [east degree]
      */
-    public static double getLonMin() {
+    public double getLonMin() {
         return lonMin;
     }
 
@@ -2292,7 +2309,7 @@ public abstract class Dataset {
      * Gets domain maximum longitude.
      * @return a double, the domain maximum longitude [east degree]
      */
-    public static double getLonMax() {
+    public double getLonMax() {
         return lonMax;
     }
 
@@ -2300,7 +2317,7 @@ public abstract class Dataset {
      * Gets domain maximum depth.
      * @return a float, the domain maximum depth [meter]
      */
-    public static float getDepthMax() {
+    public float getDepthMax() {
         return (float) depthMax;
     }
 
@@ -2310,7 +2327,7 @@ public abstract class Dataset {
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
-    public static double getLat(int i, int j) {
+    public double getLat(int i, int j) {
         return latRho[j][i];
     }
 
@@ -2320,7 +2337,7 @@ public abstract class Dataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-    public static double getLon(int i, int j) {
+    public double getLon(int i, int j) {
         return lonRho[j][i];
     }
 
@@ -2331,7 +2348,7 @@ public abstract class Dataset {
      * @return a double, the bathymetry [meter] at (i, j) grid point if is in
      * water, return NaN otherwise.
      */
-    public static double getBathy(int i, int j) {
+    public double getBathy(int i, int j) {
 
         if (isInWater(i, j)) {
             return hRho[j][i];

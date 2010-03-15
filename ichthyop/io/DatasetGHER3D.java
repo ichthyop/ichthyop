@@ -26,18 +26,14 @@ public class DatasetGHER3D extends Dataset {
     double[] dxu;
     double dyv;
     float[] s_rho;
-
-/**
- * MaskDoublezone: Double zone Sigma = 1 (for deepest zone), Only one sigma level = 0
- * hlim : depth limit foor the definition of the double sigma zone
- * klim : index of the deepest layer of the surface sigma zone
- */
-
-    static byte[][] maskdoublesigma;
-    static double hlim;
-    static int klim;
-
-
+    /**
+     * MaskDoublezone: Double zone Sigma = 1 (for deepest zone), Only one sigma level = 0
+     * hlim : depth limit foor the definition of the double sigma zone
+     * klim : index of the deepest layer of the surface sigma zone
+     */
+    byte[][] maskdoublesigma;
+    double hlim;
+    int klim;
     private String strSigma;
 
 ///////////////////////////////////
@@ -59,7 +55,6 @@ public class DatasetGHER3D extends Dataset {
 //////////////////////////////////////////////
 // Definition of the inherited abstact methods
 //////////////////////////////////////////////
-
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      */
@@ -101,19 +96,19 @@ public class DatasetGHER3D extends Dataset {
         maskdoublesigma = new byte[ny][nx];
 
         dxu = new double[ny];
-        hlim =0 ;
+        hlim = 0;
         klim = 0;
 
 
         try {
-            arrLon = ncIn.findVariable(strLon).read(new int[] {ipo},
-                    new int[] {nx});
-            arrLat = ncIn.findVariable(strLat).read(new int[] {jpo},
-                    new int[] {ny});
-            arrH = ncIn.findVariable(strBathy).read(new int[] {jpo, ipo},
-                    new int[] {ny, nx});
-            arrZeta = ncIn.findVariable(strZeta).read(new int[] {0, jpo, ipo},
-                    new int[] {1, ny, nx}).reduce();
+            arrLon = ncIn.findVariable(strLon).read(new int[]{ipo},
+                    new int[]{nx});
+            arrLat = ncIn.findVariable(strLat).read(new int[]{jpo},
+                    new int[]{ny});
+            arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo},
+                    new int[]{ny, nx});
+            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo},
+                    new int[]{1, ny, nx}).reduce();
 
             if (arrH.getElementType() == double.class) {
                 hRho = (double[][]) arrH.copyToNDJavaArray();
@@ -131,18 +126,16 @@ public class DatasetGHER3D extends Dataset {
                     copyToNDJavaArray();
 
             // Read the Param in ncIn for the double sigma
-        hlim = (ncIn.findGlobalAttribute("hlim").getNumericValue()).
-                         doubleValue();
+            hlim = (ncIn.findGlobalAttribute("hlim").getNumericValue()).doubleValue();
 
-        //found the index klim of the limit between the two sigma zones
+            //found the index klim of the limit between the two sigma zones
 
-        for (int k = 1; k < nz; k++) {
-            if ( s_rho[k]==0 ) {
-                klim = k ;
+            for (int k = 1; k < nz; k++) {
+                if (s_rho[k] == 0) {
+                    klim = k;
+                }
             }
-        }
-        //-----------------------------------------------------------
-
+            //-----------------------------------------------------------
 
             Index indexLon = arrLon.getIndex();
             Index indexLat = arrLat.getIndex();
@@ -152,10 +145,10 @@ public class DatasetGHER3D extends Dataset {
                     indexLon.set(i);
                     lonRho[j][i] = arrLon.getDouble(indexLon);
                     latRho[j][i] = arrLat.getDouble(indexLat);
-                    maskRho[j][i] = (hRho[j][i] == -999.0) ? (byte) 0 :
-                                    (byte) 1;
-                    maskdoublesigma[j][i] = (hRho[j][i] > hlim) ? (byte) 1 :
-                                    (byte) 0;
+                    maskRho[j][i] = (hRho[j][i] == -999.0) ? (byte) 0
+                            : (byte) 1;
+                    maskdoublesigma[j][i] = (hRho[j][i] > hlim) ? (byte) 1
+                            : (byte) 0;
                 }
             }
 
@@ -176,7 +169,8 @@ public class DatasetGHER3D extends Dataset {
 
         } catch (IOException ex) {
             ex.printStackTrace();
-        } catch (InvalidRangeException ex) {}
+        } catch (InvalidRangeException ex) {
+        }
 
         double[] ptGeo1, ptGeo2;
         for (int j = 0; j < ny; j++) {
@@ -203,26 +197,25 @@ public class DatasetGHER3D extends Dataset {
 
         //---------------------------------------------------
         // Calculation Coeff Huon & Hvom
-        for (int k = nz; k-- > 0; ) {
-            for (int i = 0; i++ < nx - 1; ) {
-                for (int j = ny; j-- > 0; ) {
-                    Huon[k][j][i] = .5d * ((z_w_tmp[k + 1][j][i] -
-                                            z_w_tmp[k][j][i]) +
-                                           (z_w_tmp[k + 1][j][i - 1] -
-                                            z_w_tmp[k][j][i - 1])) * dyv *
-                                    u_tp1[k][j][i - 1];
+        for (int k = nz; k-- > 0;) {
+            for (int i = 0; i++ < nx - 1;) {
+                for (int j = ny; j-- > 0;) {
+                    Huon[k][j][i] = .5d * ((z_w_tmp[k + 1][j][i]
+                            - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j][i - 1]
+                            - z_w_tmp[k][j][i - 1])) * dyv
+                            * u_tp1[k][j][i - 1];
                 }
             }
-            for (int i = nx; i-- > 0; ) {
-                for (int j = 0; j++ < ny - 1; ) {
-                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i] -
-                                              z_w_tmp[k][j][i]) +
-                                             (z_w_tmp[k + 1][j - 1][i] -
-                                              z_w_tmp[k][j - 1][i])) *
-                                            (dxu[j] +
-                                             dxu[j - 1]))
-                                    *
-                                    v_tp1[k][j - 1][i];
+            for (int i = nx; i-- > 0;) {
+                for (int j = 0; j++ < ny - 1;) {
+                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i]
+                            - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j - 1][i]
+                            - z_w_tmp[k][j - 1][i]))
+                            * (dxu[j]
+                            + dxu[j - 1]))
+                            * v_tp1[k][j - 1][i];
                 }
             }
         }
@@ -232,45 +225,45 @@ public class DatasetGHER3D extends Dataset {
         double[] wrk = new double[nx];
         double[][][] w_double = new double[nz + 1][ny][nx];
 
-        for (int j = ny - 1; j-- > 0; ) {
-            for (int i = nx; i-- > 0; ) {
+        for (int j = ny - 1; j-- > 0;) {
+            for (int i = nx; i-- > 0;) {
                 w_double[0][j][i] = 0.f;
             }
-            for (int k = 0; k++ < nz; ) {
-                for (int i = nx - 1; i-- > 0; ) {
-                    w_double[k][j][i] = w_double[k - 1][j][i] +
-                                        (float) (Huon[k - 1][j][i]
-                                                 - Huon[k
-                                                 - 1][j][i + 1] + Hvom[k -
-                                                 1][j][i] - Hvom[k - 1][j +
-                                                 1][i]);
+            for (int k = 0; k++ < nz;) {
+                for (int i = nx - 1; i-- > 0;) {
+                    w_double[k][j][i] = w_double[k - 1][j][i]
+                            + (float) (Huon[k - 1][j][i]
+                            - Huon[k
+                            - 1][j][i + 1] + Hvom[k
+                            - 1][j][i] - Hvom[k - 1][j
+                            + 1][i]);
                 }
             }
-            for (int i = nx; i-- > 0; ) {
-                wrk[i] = w_double[nz][j][i] /
-                         (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
+            for (int i = nx; i-- > 0;) {
+                wrk[i] = w_double[nz][j][i]
+                        / (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
             }
-            for (int k = nz; k-- >= 2; ) {
-                for (int i = nx; i-- > 0; ) {
-                    w_double[k][j][i] += -wrk[i] *
-                            (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
+            for (int k = nz; k-- >= 2;) {
+                for (int i = nx; i-- > 0;) {
+                    w_double[k][j][i] += -wrk[i]
+                            * (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
                 }
             }
-            for (int i = nx; i-- > 0; ) {
+            for (int i = nx; i-- > 0;) {
                 w_double[nz][j][i] = 0.f;
             }
         }
 
         //---------------------------------------------------
         // Boundary Conditions
-        for (int k = nz + 1; k-- > 0; ) {
-            for (int j = ny; j-- > 0; ) {
+        for (int k = nz + 1; k-- > 0;) {
+            for (int j = ny; j-- > 0;) {
                 w_double[k][j][0] = w_double[k][j][1];
                 w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
             }
         }
-        for (int k = nz + 1; k-- > 0; ) {
-            for (int i = nx; i-- > 0; ) {
+        for (int k = nz + 1; k-- > 0;) {
+            for (int i = nx; i-- > 0;) {
                 w_double[k][0][i] = w_double[k][1][i];
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
@@ -279,9 +272,9 @@ public class DatasetGHER3D extends Dataset {
         //---------------------------------------------------
         // w * dxu * dyv
         float[][][] w = new float[nz + 1][ny][nx];
-        for (int i = nx; i-- > 0; ) {
-            for (int j = ny; j-- > 0; ) {
-                for (int k = nz + 1; k-- > 0; ) {
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
+                for (int k = nz + 1; k-- > 0;) {
                     w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j] * dyv));
                 }
             }
@@ -311,22 +304,22 @@ public class DatasetGHER3D extends Dataset {
         s_w[0] = 0.d;
         for (int k = 0; k < nz; k++) {
             s_w[k] = (s_rho[k]);
-       }
+        }
 
         for (int k = 0; k < nz; k++) {
             s_r[k] = .5d * (s_w[k + 1] + s_w[k]);
         }
 
-        for (int i = nx; i-- > 0; ) {
-            for (int j = ny; j-- > 0; ) {
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
                 z_w_tmp[0][j][i] = -hRho[j][i];
-                for (int k = nz; k-- > klim; ) {
-                    z_r_tmp[k][j][i] =     (s_r[k]     - 1.d) * Math.min( hRho[j][i], hlim) ;
+                for (int k = nz; k-- > klim;) {
+                    z_r_tmp[k][j][i] = (s_r[k] - 1.d) * Math.min(hRho[j][i], hlim);
                     z_w_tmp[k + 1][j][i] = (s_w[k + 1] - 1.d) * Math.min(hRho[j][i], hlim);
                 }
-                for (int k = klim-1 ; k-- >0 ; ) {
-                    z_r_tmp[k][j][i] =     -hlim+ (s_r[k]     - 1.d) * ( hRho[j][i] - hlim) ;
-                    z_w_tmp[k + 1][j][i] = -hlim+(s_w[k + 1] - 1.d) * (hRho[j][i] - hlim);
+                for (int k = klim - 1; k-- > 0;) {
+                    z_r_tmp[k][j][i] = -hlim + (s_r[k] - 1.d) * (hRho[j][i] - hlim);
+                    z_w_tmp[k + 1][j][i] = -hlim + (s_w[k + 1] - 1.d) * (hRho[j][i] - hlim);
                 }
 
 
@@ -362,10 +355,10 @@ public class DatasetGHER3D extends Dataset {
         ix = pGrid[0];
         jy = pGrid[1];
 
-        if (isInDoubleZone((int)Math.round(ix),(int)Math.round(jy))) {
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-        } else{
-        kz = Math.max(klim, Math.min(pGrid[2], nz - 1.00001f));
+        if (isInDoubleZone((int) Math.round(ix), (int) Math.round(jy))) {
+            kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+        } else {
+            kz = Math.max(klim, Math.min(pGrid[2], nz - 1.00001f));
         }
 
         du = 0.d;
@@ -388,28 +381,28 @@ public class DatasetGHER3D extends Dataset {
                     for (int kk = 0; kk < 2; kk++) {
                         //if (isInWater(i + ii, j + jj)) {
                         {
-                            co = Math.abs((1.d - (double) ii - dx) *
-                                          (1.d - (double) jj - dy) *
-                                          (.5d - (double) kk - dz));
+                            co = Math.abs((1.d - (double) ii - dx)
+                                    * (1.d - (double) jj - dy)
+                                    * (.5d - (double) kk - dz));
                             CO += co;
                             x = 0.d;
                             x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii]
-                                + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                            dw += 2.d * x * co /
-                                    (z_w_tp0[Math.min(k + kk + 1, nz)][j +
-                                     jj][i + ii]
-                                     - z_w_tp0[Math.max(k + kk - 1, 0)][j +
-                                     jj][i + ii]);
+                                    + x_euler * w_tp1[k + kk][j + jj][i + ii];
+                            dw += 2.d * x * co
+                                    / (z_w_tp0[Math.min(k + kk + 1, nz)][j
+                                    + jj][i + ii]
+                                    - z_w_tp0[Math.max(k + kk - 1, 0)][j
+                                    + jj][i + ii]);
                             /*if (Double.isNaN(dw)) {
-                             System.out.println("co " + co + " " + (1.d - (double) ii - dx) + " "
-                                  + (1.d - (double) jj - dy) + " "
-                                  + (.5d - (double) kk - dz));
-                              System.out.println("x_euler " + x_euler);
-                              System.out.println("w " + w_tp0[k + kk][j + jj][i + ii] + " " + w_tp1[k + kk][j + jj][i + ii]);
-                              System.out.println("zw " + z_w[0][Math.min(k + kk + 1, nz)][j + jj][i + ii] + " " + z_w[0][Math.max(k + kk - 1, 0)][j + jj][i + ii]);
-                              System.out.println("kz " + kz + " " + Math.min(k + kk + 1, nz) + " " + Math.max(k + kk - 1, 0));
-                              System.exit(0);
-                                           }*/
+                            System.out.println("co " + co + " " + (1.d - (double) ii - dx) + " "
+                            + (1.d - (double) jj - dy) + " "
+                            + (.5d - (double) kk - dz));
+                            System.out.println("x_euler " + x_euler);
+                            System.out.println("w " + w_tp0[k + kk][j + jj][i + ii] + " " + w_tp1[k + kk][j + jj][i + ii]);
+                            System.out.println("zw " + z_w[0][Math.min(k + kk + 1, nz)][j + jj][i + ii] + " " + z_w[0][Math.max(k + kk - 1, 0)][j + jj][i + ii]);
+                            System.out.println("kz " + kz + " " + Math.min(k + kk + 1, nz) + " " + Math.max(k + kk - 1, 0));
+                            System.exit(0);
+                            }*/
                         }
                     }
                 }
@@ -435,14 +428,14 @@ public class DatasetGHER3D extends Dataset {
                     for (int kk = 0; kk < 2; kk++) {
                         //if (isInWater(i + ii, j + jj)) {
                         {
-                            co = Math.abs((.5d - (double) ii - dx) *
-                                          (1.d - (double) jj - dy) *
-                                          (1.d - (double) kk - dz));
+                            co = Math.abs((.5d - (double) ii - dx)
+                                    * (1.d - (double) jj - dy)
+                                    * (1.d - (double) kk - dz));
                             CO += co;
                             x = 0.d;
-                            x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii -
-                                1]
-                                + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                            x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii
+                                    - 1]
+                                    + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                             du += x * co / dxu[j + jj];
                         }
                     }
@@ -465,14 +458,14 @@ public class DatasetGHER3D extends Dataset {
                     for (int ii = 0; ii < n; ii++) {
                         //if (isInWater(i + ii, j + jj)) {
                         {
-                            co = Math.abs((1.d - (double) ii - dx) *
-                                          (.5d - (double) jj - dy) *
-                                          (1.d - (double) kk - dz));
+                            co = Math.abs((1.d - (double) ii - dx)
+                                    * (.5d - (double) jj - dy)
+                                    * (1.d - (double) kk - dz));
                             CO += co;
                             x = 0.d;
-                            x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i +
-                                ii]
-                                + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                            x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i
+                                    + ii]
+                                    + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
                             dv += x * co / dyv;
                         }
                     }
@@ -493,7 +486,7 @@ public class DatasetGHER3D extends Dataset {
             System.err.println("! WARNING : CFL broken for v " + (float) dv);
         }
 
-        return (new double[] {du, dv, dw});
+        return (new double[]{du, dv, dw});
     }
 
     /**
@@ -517,7 +510,7 @@ public class DatasetGHER3D extends Dataset {
         return dyv;
     }
 
-    public static boolean isInDoubleZone(int i, int j) {
+    public boolean isInDoubleZone(int i, int j) {
         return (maskdoublesigma[j][i] > 0);
     }
 
@@ -528,7 +521,7 @@ public class DatasetGHER3D extends Dataset {
      *         <code>false</code> otherwise.
      * @see #isInWater(int i, int j)
      */
-    public static boolean isInDoublezone(RhoPoint ptRho) {
+    public boolean isInDoublezone(RhoPoint ptRho) {
         try {
             return (maskdoublesigma[(int) Math.round(ptRho.getY())][(int) Math.round(
                     ptRho.getX())] > 0);
@@ -547,25 +540,27 @@ public class DatasetGHER3D extends Dataset {
      * @return <code>true</code> if the grid point is close to cost,
      *         <code>false</code> otherwise.
      */
-    static boolean isCloseToCost(double[] pGrid) {
+    @Override
+    boolean isCloseToCost(double[] pGrid) {
 
         int i, j, k, ii, jj, kk;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         k = (int) (Math.round(pGrid[2]));
-        if (k<klim) {
-                    ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        return !(isInDoubleZone(i + ii, j) && isInDoubleZone(i + ii, j + jj) &&
-                isInDoubleZone(i, j + jj));
+        if (k < klim) {
+            ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
+            jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+            return !(isInDoubleZone(i + ii, j) && isInDoubleZone(i + ii, j + jj)
+                    && isInDoubleZone(i, j + jj));
         } else {
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) &&
-                isInWater(i, j + jj));
+            ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
+            jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+            return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj)
+                    && isInWater(i, j + jj));
         }
     }
-        /**
+
+    /**
      * Computes the depth  of the specified sigma level and the x-y particle
      * location.
      * @param xRho a double, x-coordinate of the grid point
@@ -573,7 +568,8 @@ public class DatasetGHER3D extends Dataset {
      * @param k an int, the index of the sigma level
      * @return a double, the depth [meter] at (x, y, k)
      */
-    public static double getDepth(double xRho, double yRho, int k) {
+    @Override
+    public double getDepth(double xRho, double yRho, int k) {
 
         final int i = (int) xRho;
         final int j = (int) yRho;
@@ -581,40 +577,39 @@ public class DatasetGHER3D extends Dataset {
         final double dx = (xRho - i);
         final double dy = (yRho - j);
         double co = 0.d;
-        if (k==0){
-            k=isInDoubleZone(i,j) ? 0 : klim;
+        if (k == 0) {
+            k = isInDoubleZone(i, j) ? 0 : klim;
         }
-        if (k<klim){
+        if (k < klim) {
             for (int ii = 0; ii < 2; ii++) {
-            for (int jj = 0; jj < 2; jj++) {
-                if (isInDoubleZone(i + ii, j + jj)) {
-                    co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                    double z_r = 0.d;
-                    z_r = z_rho_cst[k][j + jj][i + ii] ;
-                    hh += co * z_r;
-                }
+                for (int jj = 0; jj < 2; jj++) {
+                    if (isInDoubleZone(i + ii, j + jj)) {
+                        co = Math.abs((1 - ii - dx) * (1 - jj - dy));
+                        double z_r = 0.d;
+                        z_r = z_rho_cst[k][j + jj][i + ii];
+                        hh += co * z_r;
+                    }
                 }
             }
         } else {
-        for (int ii = 0; ii < 2; ii++) {
-            for (int jj = 0; jj < 2; jj++) {
-                if (isInWater(i + ii, j + jj)) {
-                    co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                    double z_r = 0.d;
-                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j +
-                            jj][i + ii] *
-                            (1.d + z_rho_cst[k][j + jj][i + ii] / Math.min(hRho[j + jj][i +
-                            ii],hlim));
-                    hh += co * z_r;
-                }
+            for (int ii = 0; ii < 2; ii++) {
+                for (int jj = 0; jj < 2; jj++) {
+                    if (isInWater(i + ii, j + jj)) {
+                        co = Math.abs((1 - ii - dx) * (1 - jj - dy));
+                        double z_r = 0.d;
+                        z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j
+                                + jj][i + ii]
+                                * (1.d + z_rho_cst[k][j + jj][i + ii] / Math.min(hRho[j + jj][i
+                                + ii], hlim));
+                        hh += co * z_r;
+                    }
                 }
             }
         }
         return (hh);
     }
 
-
-       /**
+    /**
      * Interpolates the temperature field at particle location and specified
      * time.
      *
@@ -626,7 +621,8 @@ public class DatasetGHER3D extends Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
-    public static double getTemperature(double[] pGrid, double time) throws
+    @Override
+    public double getTemperature(double[] pGrid, double time) throws
             ArrayIndexOutOfBoundsException {
 
         if (!FLAG_TP) {
@@ -643,7 +639,7 @@ public class DatasetGHER3D extends Dataset {
         // in the computational grid.
         int i = (int) pGrid[0];
         int j = (int) pGrid[1];
-        double kz = Math.max((double)(isInDoubleZone(i,j)?0:klim), Math.min(pGrid[2], (double) nz - 1.00001f));
+        double kz = Math.max((double) (isInDoubleZone(i, j) ? 0 : klim), Math.min(pGrid[2], (double) nz - 1.00001f));
         int k = (int) kz;
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
@@ -654,19 +650,19 @@ public class DatasetGHER3D extends Dataset {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
                     {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
                         try {
-                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii] +
-                                    frac * temp_tp1[k + kk][j + jj][i + ii];
+                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii]
+                                    + frac * temp_tp1[k + kk][j + jj][i + ii];
                             tp += x * co;
                         } catch (ArrayIndexOutOfBoundsException e) {
                             throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating temperature field : " +
-                                    e.getMessage());
+                                    "Problem interpolating temperature field : "
+                                    + e.getMessage());
                         }
                     }
                 }
@@ -692,7 +688,8 @@ public class DatasetGHER3D extends Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
-    public static double getSalinity(double[] pGrid, double time) throws
+    @Override
+    public double getSalinity(double[] pGrid, double time) throws
             ArrayIndexOutOfBoundsException {
 
         if (!FLAG_SAL) {
@@ -709,7 +706,7 @@ public class DatasetGHER3D extends Dataset {
         // in the computational grid.
         int i = (int) pGrid[0];
         int j = (int) pGrid[1];
-        double kz = Math.max((double)(isInDoubleZone(i,j)?0:klim), Math.min(pGrid[2], (double) nz - 1.00001f));
+        double kz = Math.max((double) (isInDoubleZone(i, j) ? 0 : klim), Math.min(pGrid[2], (double) nz - 1.00001f));
         int k = (int) kz;
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
@@ -720,19 +717,19 @@ public class DatasetGHER3D extends Dataset {
             for (int jj = 0; jj < n; jj++) {
                 for (int ii = 0; ii < n; ii++) {
                     {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
                         try {
-                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii] +
-                                    frac * salt_tp1[k + kk][j + jj][i + ii];
+                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii]
+                                    + frac * salt_tp1[k + kk][j + jj][i + ii];
                             sal += x * co;
                         } catch (ArrayIndexOutOfBoundsException e) {
                             throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating salinity field : " +
-                                    e.getMessage());
+                                    "Problem interpolating salinity field : "
+                                    + e.getMessage());
                         }
                     }
                 }
@@ -759,6 +756,7 @@ public class DatasetGHER3D extends Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
+    @Override
     public double[] getPlankton(double[] pGrid, double time) {
 
         if (!FLAG_PLANKTON) {
@@ -768,14 +766,13 @@ public class DatasetGHER3D extends Dataset {
         double co, CO, x, frac, largePhyto, smallZoo, largeZoo;
 
         frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        ;
 
         //-----------------------------------------------------------
         // Interpolate the plankton concentration fields
         // in the computational grid.
         int i = (int) pGrid[0];
         int j = (int) pGrid[1];
-        final double kz = Math.max((double)(isInDoubleZone(i,j)?0:klim),
+        final double kz = Math.max((double) (isInDoubleZone(i, j) ? 0 : klim),
                 Math.min(pGrid[2],
                 (double) nz - 1.00001f));
         int k = (int) kz;
@@ -791,13 +788,13 @@ public class DatasetGHER3D extends Dataset {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < 2; ii++) {
                     if (isInWater(i + ii, j + jj)) {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
                         CO += co;
                         x = 0.d;
-                        x = (1.d - frac) * largePhyto_tp0[k + kk][j + jj][i +
-                                ii] + frac * largePhyto_tp1[k + kk][j + jj][i + ii];
+                        x = (1.d - frac) * largePhyto_tp0[k + kk][j + jj][i
+                                + ii] + frac * largePhyto_tp1[k + kk][j + jj][i + ii];
                         largePhyto += x * co;
                         x = (1.d - frac) * smallZoo_tp0[k + kk][j + jj][i + ii] + frac * smallZoo_tp1[k + kk][j + jj][i + ii];
                         smallZoo += x * co;
@@ -815,12 +812,5 @@ public class DatasetGHER3D extends Dataset {
 
         return new double[]{largePhyto, smallZoo, largeZoo};
     }
-
-
-
-
-
-
-
     //---------- End of class
 }

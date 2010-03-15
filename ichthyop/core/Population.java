@@ -153,7 +153,7 @@ public class Population extends HashSet {
      */
     void iniStep(long time) throws IOException {
 
-        Particle.data.setAllFieldsAtTime(time);
+        Dataset.getInstance().setAllFieldsAtTime(time);
 
         if (!isAllReleased) {
             release(time);
@@ -314,7 +314,7 @@ public class Population extends HashSet {
 
         if (Dataset.DEBUG_VDISP) {
             depthMin = depthMax = 0.5d *
-                                  Dataset.getDepth((int) xmin, (int) ymin, 0);
+                                  Dataset.getInstance().getDepth((int) xmin, (int) ymin, 0);
 
         }
 
@@ -353,7 +353,7 @@ public class Population extends HashSet {
                                         (nbReleasedNow %
                                          Configuration.getNbPatches()) ?
                                         1 : 0);
-                    radius_grid = Particle.data.adimensionalize(
+                    radius_grid = Dataset.getInstance().adimensionalize(
                             radius_patch, particle.getX(), particle.getY());
                     for (int f = 0; f < nbAgregatedIndiv; f++) {
                         r = radius_grid * Math.random();
@@ -483,7 +483,7 @@ public class Population extends HashSet {
                                             bln3D,
                                             coord[0], coord[1], depth,
                                             true);
-                    if (Dataset.isInWater(particle)) {
+                    if (Dataset.getInstance().isInWater(particle)) {
                         add(particle);
                         index++;
                     } else {

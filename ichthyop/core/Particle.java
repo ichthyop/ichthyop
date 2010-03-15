@@ -128,12 +128,6 @@ public class Particle extends RhoPoint implements IParticle {
      */
     private double largeZoo;
     /**
-     * Associated dataset. Declared static because it is common
-     * to all Particle objects.
-     * @see io.Dataset.java
-     */
-    static Dataset data;
-    /**
      * Model time step [second]. Declared static because it is common
      * to all Particle objects.
      */
@@ -192,12 +186,12 @@ public class Particle extends RhoPoint implements IParticle {
                     y = ymin + Math.random() * (ymax - ymin));
 
             numReleaseZone = getNumZone(Constant.RELEASE);
-            outZone = !Dataset.isInWater(this) || (numReleaseZone == -1) || isOnEdge(Dataset.get_nx(),
-                    Dataset.get_ny());
+            outZone = !Dataset.getInstance().isInWater(this) || (numReleaseZone == -1) || isOnEdge(Dataset.getInstance().get_nx(),
+                    Dataset.getInstance().get_ny());
 
             if (is3D && !outZone) {
                 depth = depthMin + Math.random() * (depthMax - depthMin);
-                outZone = depth < data.getDepth(x, y, 0);
+                outZone = depth < Dataset.getInstance().getDepth(x, y, 0);
             }
 
             if (counter++ > DROP_MAX) {
@@ -298,8 +292,8 @@ public class Particle extends RhoPoint implements IParticle {
         dead = Constant.DEAD_NOT;
         age = 0L;
         numCurrentZone = -1;
-        temperature = data.getTemperature(getPGrid(), Simulation.get_t0());
-        salinity = data.getSalinity(getPGrid(), Simulation.get_t0());
+        temperature = Dataset.getInstance().getTemperature(getPGrid(), Simulation.get_t0());
+        salinity = Dataset.getInstance().getSalinity(getPGrid(), Simulation.get_t0());
         length = GrowthModel.LENGTH_INIT;
 
         if (FLAG_RECRUITMENT) {
@@ -311,7 +305,7 @@ public class Particle extends RhoPoint implements IParticle {
         }
 
         if (FLAG_PLANKTON) {
-            double[] plankton = data.getPlankton(getPGrid(),
+            double[] plankton = Dataset.getInstance().getPlankton(getPGrid(),
                     Simulation.get_t0());
             largePhyto = plankton[0];
             smallZoo = plankton[1];
@@ -340,8 +334,8 @@ public class Particle extends RhoPoint implements IParticle {
      * moving the particle.
      * @see #advectForward() and advectBackward() methods for more details about
      * advection.
-     * @see io/Dataset#getHDispersion() for details about horizontal dispersion
-     * @see io/Dataset#getVDispersion() for details about vertical dispersion
+     * @see io/Dataset.getInstance()#getHDispersion() for details about horizontal dispersion
+     * @see io/Dataset.getInstance()#getVDispersion() for details about vertical dispersion
      * @see #migrate() for details about vertical migration
      */
     void move(double time) throws ArrayIndexOutOfBoundsException {
@@ -354,17 +348,17 @@ public class Particle extends RhoPoint implements IParticle {
         }
 
         if (FLAG_HDISP) {
-            increment(data.getHDispersion(getPGrid(), dt));
+            increment(Dataset.getInstance().getHDispersion(getPGrid(), dt));
         }
 
         if (FLAG_VDISP) {
-            increment(data.getVDispersion(getPGrid(), time, dt));
+            increment(Dataset.getInstance().getVDispersion(getPGrid(), time, dt));
         }
 
         /** Test if particules is living */
-        if (isOnEdge(Dataset.get_nx(), Dataset.get_ny())) {
+        if (isOnEdge(Dataset.getInstance().get_nx(), Dataset.getInstance().get_ny())) {
             die(Constant.DEAD_OUT);
-        } else if (!Dataset.isInWater(this)) {
+        } else if (!Dataset.getInstance().isInWater(this)) {
             die(Constant.DEAD_BEACH);
         }
 
@@ -395,17 +389,17 @@ public class Particle extends RhoPoint implements IParticle {
      * @param time a double, the current time [second] of the simulation
      * @throws an ArrayIndexOutOfBoundsException if an error occured while
      * advecting the particle.
-     * @see ichthyop.io.Dataset#advectEuler() for details about the euler
+     * @see ichthyop.io.Dataset.getInstance()#advectEuler() for details about the euler
      * advection scheme.
-     * @see ichthyop.io.Dataset#advectRk4() for details about the Runge Kutta 4
+     * @see ichthyop.io.Dataset.getInstance()#advectRk4() for details about the Runge Kutta 4
      * advection scheme.
      */
     private void advectForward(double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt = (Configuration.getScheme() == Constant.EULER)
-                ? data.advectEuler(getPGrid(), time, dt)
-                : data.advectRk4(getPGrid(), time, dt);
+                ? Dataset.getInstance().advectEuler(getPGrid(), time, dt)
+                : Dataset.getInstance().advectRk4(getPGrid(), time, dt);
 
         increment(mvt);
     }
@@ -424,9 +418,9 @@ public class Particle extends RhoPoint implements IParticle {
      * @param time a double, the current time [second] of the simulation
      * @throws an ArrayIndexOutOfBoundsException if an error occured while
      * advecting the particle.
-     * @see ichthyop.io.Dataset#advectEuler() for details about the euler
+     * @see ichthyop.io.Dataset.getInstance()#advectEuler() for details about the euler
      * advection scheme.
-     * @see ichthyop.io.Dataset#advectRk4() for details about the Runge Kutta 4
+     * @see ichthyop.io.Dataset.getInstance()#advectRk4() for details about the Runge Kutta 4
      * advection scheme.
      */
     private void advectBackward(double time) throws
@@ -435,17 +429,17 @@ public class Particle extends RhoPoint implements IParticle {
         double[] mvt, pgrid;
 
         if (Configuration.getScheme() == Constant.EULER) {
-            mvt = data.advectEuler(pgrid = getPGrid(), time, dt);
+            mvt = Dataset.getInstance().advectEuler(pgrid = getPGrid(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }
-            mvt = data.advectEuler(pgrid, time, dt);
+            mvt = Dataset.getInstance().advectEuler(pgrid, time, dt);
         } else {
-            mvt = data.advectRk4(pgrid = getPGrid(), time, dt);
+            mvt = Dataset.getInstance().advectRk4(pgrid = getPGrid(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }
-            mvt = data.advectRk4(pgrid, time, dt);
+            mvt = Dataset.getInstance().advectRk4(pgrid, time, dt);
         }
 
         increment(mvt);
@@ -592,9 +586,9 @@ public class Particle extends RhoPoint implements IParticle {
                 depth = Simulation.getDepthDay();
             } else {
                 /** diel vertical migration */
-                depth = DVMPattern.getDepth(getX(), getY(), time, data);
+                depth = DVMPattern.getDepth(getX(), getY(), time, Dataset.getInstance());
             }
-            setZ(Dataset.depth2z(getX(), getY(), depth));
+            setZ(Dataset.getInstance().depth2z(getX(), getY(), depth));
         }
     }
 
@@ -614,9 +608,9 @@ public class Particle extends RhoPoint implements IParticle {
                 : age < BuoyancyScheme.age_lim_buoy) {
             /** update geog coordinates */
             grid2Geog();
-            salinity = data.getSalinity(getPGrid(), time);
-            temperature = data.getTemperature(getPGrid(), time);
-            setZ(Dataset.depth2z(getX(), getY(),
+            salinity = Dataset.getInstance().getSalinity(getPGrid(), time);
+            temperature = Dataset.getInstance().getTemperature(getPGrid(), time);
+            setZ(Dataset.getInstance().depth2z(getX(), getY(),
                     getDepth() +
                     BuoyancyScheme.move(salinity, temperature)));
         }
@@ -640,9 +634,9 @@ public class Particle extends RhoPoint implements IParticle {
 
         /** growth as function of temperature and prey availability */
         if (FLAG_PLANKTON) {
-            double[] plankton = data.getPlankton(getPGrid(), time);
+            double[] plankton = Dataset.getInstance().getPlankton(getPGrid(), time);
             length = GrowthModel.grow(length,
-                    temperature = data.getTemperature(
+                    temperature = Dataset.getInstance().getTemperature(
                     getPGrid(), time),
                     largePhyto = plankton[0],
                     smallZoo = plankton[1],
@@ -650,7 +644,7 @@ public class Particle extends RhoPoint implements IParticle {
         } else {
             /** growth as function of temperature only */
             length = GrowthModel.grow(length,
-                    temperature = data.getTemperature(
+                    temperature = Dataset.getInstance().getTemperature(
                     getPGrid(),
                     time));
         }
@@ -671,7 +665,7 @@ public class Particle extends RhoPoint implements IParticle {
      */
     private void checkTemperature(double time) {
 
-        temperature = data.getTemperature(getPGrid(), time);
+        temperature = Dataset.getInstance().getTemperature(getPGrid(), time);
         if (temperature < lethal_tp) {
             die(Constant.DEAD_COLD);
         }
@@ -853,7 +847,7 @@ public class Particle extends RhoPoint implements IParticle {
     public double getTemperature(double time) {
 
         if (isLiving() && !(FLAG_GROWTH || FLAG_LETHAL_TP)) {
-            temperature = data.getTemperature(getPGrid(), time);
+            temperature = Dataset.getInstance().getTemperature(getPGrid(), time);
         }
         return temperature;
     }
@@ -877,7 +871,7 @@ public class Particle extends RhoPoint implements IParticle {
     public double getSalinity(double time) {
 
         if (isLiving()) {
-            salinity = data.getSalinity(getPGrid(), time);
+            salinity = Dataset.getInstance().getSalinity(getPGrid(), time);
         }
         return salinity;
     }

@@ -17,6 +17,7 @@ import ichthyop.util.Constant;
 import ichthyop.bio.BuoyancyScheme;
 import ichthyop.bio.GrowthModel;
 import ichthyop.bio.DVMPattern;
+import ichthyop.io.Dataset;
 import ichthyop.io.DatasetGHER3D;
 
 /**
@@ -145,20 +146,20 @@ public class Simulation {
 
         switch (Configuration.getTypeModel() + Configuration.getDimSimu()) {
         case (Constant.ROMS + Constant.SIMU_2D):
-            Particle.data = new DatasetR2D();
+            Dataset.setInstance(new DatasetR2D());
             break;
         case (Constant.ROMS + Constant.SIMU_3D):
-            Particle.data = new DatasetR3D();
+            Dataset.setInstance(new DatasetR3D());
             break;
         case (Constant.MARS + Constant.SIMU_2D):
-            Particle.data = new DatasetM2D();
+            Dataset.setInstance(new DatasetM2D());
             break;
         case (Constant.MARS + Constant.SIMU_3D):
-            Particle.data = new DatasetGHER3D();
+            Dataset.setInstance(new DatasetGHER3D());
             break;
         }
 
-        Particle.data.setUp();
+        Dataset.getInstance().setUp();
     }
 
     /**
@@ -234,7 +235,7 @@ public class Simulation {
         initZone();
         population = new Population();
         population.init();
-        Particle.data.init();
+        Dataset.getInstance().init();
     }
 
     /**

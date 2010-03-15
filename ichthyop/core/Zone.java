@@ -157,7 +157,7 @@ public class Zone {
     public void geo2Grid() {
 
         for (int i = 0; i < 4; i++) {
-            double[] po = Dataset.geo2Grid(lon[i], lat[i]);
+            double[] po = Dataset.getInstance().geo2Grid(lon[i], lat[i]);
             xGrid[i] = po[0];
             yGrid[i] = po[1];
         }
@@ -287,9 +287,9 @@ public class Zone {
         }
 
         if (isInBox) {
-            isInBox = (Dataset.getBathy((int) Math.round(x), (int) Math.round(y)) >
+            isInBox = (Dataset.getInstance().getBathy((int) Math.round(x), (int) Math.round(y)) >
                        bathyLineMin &
-                       Dataset.getBathy((int) Math.round(x), (int) Math.round(y)) <
+                       Dataset.getInstance().getBathy((int) Math.round(x), (int) Math.round(y)) <
                        bathyLineMax);
         }
 
