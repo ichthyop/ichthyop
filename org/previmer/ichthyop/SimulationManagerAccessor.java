@@ -15,11 +15,11 @@ import org.previmer.ichthyop.arch.ISimulationManager;
  */
 public class SimulationManagerAccessor {
 
-    public ISimulationManager getSimulationManager() {
+    public static ISimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
     
-    public Logger getLogger() {
+    public static Logger getLogger() {
      return Logger.getLogger(ISimulationManager.class.getName());
     }
 
