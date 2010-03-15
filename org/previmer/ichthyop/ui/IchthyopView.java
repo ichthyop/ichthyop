@@ -3,7 +3,6 @@
  */
 package org.previmer.ichthyop.ui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.beans.PropertyChangeEvent;
@@ -42,7 +41,7 @@ import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
-import org.previmer.ichthyop.ui.WMSMapper.MapStep;
+import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -165,9 +164,9 @@ public class IchthyopView extends FrameView
         @Override
         protected Object doInBackground() throws Exception {
             wmsMapper.createKML();
-            for (int i = 0; i < wmsMapper.getIndexMax() + 1; i++) {
-                setProgress((float) i / wmsMapper.getIndexMax());
-                setMessage("NetCDF to KMZ: exporting step " + (i + 1) + "/" + (wmsMapper.getIndexMax() + 1), true);
+            for (int i = 0; i < wmsMapper.getNbSteps() - 1; i++) {
+                setProgress((float) (i + 1) / wmsMapper.getNbSteps());
+                setMessage("NetCDF to KMZ: exporting step " + (i + 1) + "/" + (wmsMapper.getNbSteps()), true);
                 wmsMapper.writeKMLStep(i);
             }
             setMessage("Compressing KML file into KMZ. It might take some time...", true);
@@ -200,7 +199,9 @@ public class IchthyopView extends FrameView
         return createMapTask = new CreateMapTask(getApplication());
     }
 
-    private class CreateMapTask extends SFTask<Object, MapStep> {
+    private class CreateMapTask extends SFTask<Object, Painter> {
+
+        private int index;
 
         CreateMapTask(Application instance) {
             super(instance);
@@ -209,23 +210,24 @@ public class IchthyopView extends FrameView
             btnMapping.getAction().setEnabled(false);
             btnExportToKMZ.getAction().setEnabled(false);
             btnCancelMapping.getAction().setEnabled(true);
+            index = 0;
         }
 
         @Override
         protected Object doInBackground() throws Exception {
-            for (int i = 0; i < wmsMapper.getIndexMax() - 1; i++) {
-                setProgress((float) i / wmsMapper.getIndexMax());
-                publish(wmsMapper.getMapStep(i));
+            for (int iStep = 0; iStep < wmsMapper.getNbSteps() - 1; iStep++) {
+                setProgress((float) (iStep + 1) / wmsMapper.getNbSteps());
+                publish(wmsMapper.getPainterForStep(iStep));
                 Thread.sleep(500);
             }
             return null;
         }
 
         @Override
-        protected void process(List<MapStep> mapSteps) {
-            for (MapStep mapStep : mapSteps) {
-                wmsMapper.map(mapStep);
-                wmsMapper.screen2File(wmsMapper, mapStep.getCalendar());
+        protected void process(List<Painter> painters) {
+            for (Painter painter : painters) {
+                wmsMapper.map(painter);
+                wmsMapper.screen2File(wmsMapper, index++);
             }
         }
 

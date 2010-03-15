@@ -4,7 +4,6 @@
  */
 package org.previmer.ichthyop.ui;
 
-import de.micromata.opengis.kml.v_2_2_0.ColorMode;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
 import de.micromata.opengis.kml.v_2_2_0.IconStyle;
@@ -12,7 +11,6 @@ import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Style;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,15 +36,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import javax.imageio.ImageIO;
-import org.jdesktop.application.Application;
-import org.jdesktop.application.Task;
+import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
@@ -71,7 +67,6 @@ public class WMSMapper extends JXMapKit {
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private NetcdfFile nc;
     private Variable vlon, vlat, vtime;
-    private int indexMax;
     boolean canRepaint = false;
     private Painter bgPainter;
     boolean loadFromHeap = false;
@@ -81,6 +76,8 @@ public class WMSMapper extends JXMapKit {
     private Kml kml;
     private Document kmlDocument;
     private Folder kmlMainFolder;
+    private double[] time;
+    private int nbSteps;
 
     public WMSMapper() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
@@ -88,7 +85,6 @@ public class WMSMapper extends JXMapKit {
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
         setTileFactory(tileFactory);
-
     }
 
     public void setWMS(String wmsURL) {
@@ -105,13 +101,13 @@ public class WMSMapper extends JXMapKit {
         setZoom(defaultZoom);
     }
 
-    public int getIndexMax() {
-        return indexMax;
+    public int getNbSteps() {
+        return nbSteps;
     }
 
     public void init() {
 
-        indexMax = nc.getUnlimitedDimension().getLength() - 1;
+        nbSteps = nc.getUnlimitedDimension().getLength();
 
         double lonmin = Double.MAX_VALUE;
         double lonmax = -lonmin;
@@ -168,6 +164,11 @@ public class WMSMapper extends JXMapKit {
                     Calendar1900.getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
         }
 
+        time = new double[nbSteps];
+        for (int i = 0; i < nbSteps - 1; i++) {
+            time[i] = readTime(i);
+        }
+
         bgPainter = getBgPainter();
     }
 
@@ -204,8 +205,11 @@ public class WMSMapper extends JXMapKit {
 
     }
 
-    void map(final MapStep mapStep) {
-        Painter<JXMapViewer> particleLayer = new Painter<JXMapViewer>() {
+    Painter getPainterForStep(int index) {
+
+        final List<GeoPosition> listGP = getListGeoPosition(index);
+
+        Painter particleLayer = new Painter<JXMapViewer>() {
 
             public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
                 g = (Graphics2D) g.create();
@@ -214,12 +218,16 @@ public class WMSMapper extends JXMapKit {
                 g.translate(-rect.x, -rect.y);
 
                 //drawRegion(g, map);
-                for (GeoPosition gp : mapStep.getParticlesGP()) {
+                for (GeoPosition gp : listGP) {
                     drawParticle(g, map, gp);
                 }
                 g.dispose();
             }
         };
+        return particleLayer;
+    }
+
+    void map(Painter particleLayer) {
         CompoundPainter cp = new CompoundPainter();
         cp.setPainters(bgPainter, particleLayer);
         cp.setCacheable(false);
@@ -233,7 +241,7 @@ public class WMSMapper extends JXMapKit {
         return region;
     }
 
-    public HashMap<String, DrawableZone> getZones() {
+    HashMap<String, DrawableZone> getZones() {
         if (null == zones) {
             zones = readZones();
         }
@@ -255,7 +263,6 @@ public class WMSMapper extends JXMapKit {
                 g.dispose();
             }
         };
-
 
         return bgOverlay;
     }
@@ -376,19 +383,20 @@ public class WMSMapper extends JXMapKit {
     }
 
     private double readTime(int index) {
-        double time = 0.d;
+        double timeD = 0.d;
         try {
             ArrayDouble.D0 arrTime = (D0) vtime.read(new int[]{index}, new int[]{1}).reduce();
-            time = arrTime.get();
+            timeD = arrTime.get();
         } catch (IOException ex) {
             Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
             Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return time;
+        return timeD;
     }
 
     private List<GeoPosition> getListGeoPosition(int index) {
+        
         List<GeoPosition> list = new ArrayList();
         try {
             ArrayFloat.D1 arrLon = (D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce();
@@ -436,12 +444,11 @@ public class WMSMapper extends JXMapKit {
 
         SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         SimpleDateFormat dtFormat2 = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        MapStep step = getMapStep(i);
         Folder stepFolder = new Folder();
-        dtFormat.setCalendar(step.getCalendar());
-        stepFolder.withName(dtFormat2.format(step.getTime()));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
-        stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(step.getTime())).withEnd(dtFormat.format(step.getNextTime()));
-        for (GeoPosition gp : step.getParticlesGP()) {
+        dtFormat.setCalendar(calendar);
+        stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
+        stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
+        for (GeoPosition gp : getListGeoPosition(i)) {
             String coord = Double.toString(gp.getLongitude()) + "," + Double.toString(gp.getLatitude());
             Placemark placeMark = stepFolder.createAndAddPlacemark();
             placeMark.withStyleUrl("#randomColorIcon").createAndSetPoint().addToCoordinates(coord);
@@ -457,73 +464,51 @@ public class WMSMapper extends JXMapKit {
      * @throws an IOException if an ouput exception occurs when saving the
      * picture.
      */
-    public void screen2File(Component component, Calendar calendar) {
-
-        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
-        dtFormat.setCalendar(calendar);
-        StringBuffer fileName = new StringBuffer(getFile().getParent());
-        fileName.append(File.separator);
-        String id = getFile().getName().substring(0, getFile().getName().indexOf(".nc"));
-        fileName.append(id);
-        fileName.append(File.separator);
-        fileName.append(id);
-        fileName.append("_img");
-        fileName.append(dtFormat.format(calendar.getTime()));
-        fileName.append(".png");
+    public void screen2File(final Component component, final int index) {
 
         BufferedImage bi = new BufferedImage(component.getWidth(),
                 component.getHeight(),
                 BufferedImage.TYPE_INT_RGB);
         Graphics g = bi.getGraphics();
         component.paintAll(g);
-        try {
-            IOTools.makeDirectories(fileName.toString());
-            ImageIO.write(bi, "PNG", new File(fileName.toString()));
-
-        } catch (IOException ex) {
-            Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        new Thread(new ImageWriter(index, bi)).start();
     }
 
-    public MapStep getMapStep(int index) {
-        MapStep mapStep = new MapStep(index);
-        mapStep.process();
-        return mapStep;
+    Date getTime(int index) {
+        calendar.setTimeInMillis((long) (time[Math.min(index, nbSteps - 1)] * 1000L));
+        return calendar.getTime();
     }
 
-    public class MapStep {
+    private class ImageWriter implements Runnable {
 
         private int index;
-        private List<GeoPosition> gp;
-        private Long time;
+        private BufferedImage bi;
+        SimpleDateFormat dtFormat;
 
-        MapStep(int index) {
+        ImageWriter(int index, BufferedImage bi) {
             this.index = index;
+            this.bi = bi;
+            dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
         }
 
-        void process() {
-            gp = getListGeoPosition(index);
-            time = (long) (readTime(index) * 1000L);
-        }
+        public void run() {
+            dtFormat.setCalendar(calendar);
+            StringBuffer filename = new StringBuffer(getFile().getParent());
+            filename.append(File.separator);
+            String id = getFile().getName().substring(0, getFile().getName().indexOf(".nc"));
+            filename.append(id);
+            filename.append(File.separator);
+            filename.append(id);
+            filename.append("_img");
+            filename.append(dtFormat.format(getTime(index)));
+            filename.append(".png");
+            try {
+                IOTools.makeDirectories(filename.toString());
+                ImageIO.write(bi, "PNG", new File(filename.toString()));
 
-        Calendar getCalendar() {
-            calendar.setTimeInMillis(time);
-            return calendar;
-        }
-
-        Date getTime() {
-            calendar.setTimeInMillis(time);
-            return calendar.getTime();
-        }
-
-        Date getNextTime() {
-            calendar.setTimeInMillis((long) (readTime(Math.min(index + 1, getIndexMax())) * 1000L));
-            return calendar.getTime();
-        }
-
-        List<GeoPosition> getParticlesGP() {
-            return gp;
+            } catch (IOException ex) {
+                Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
