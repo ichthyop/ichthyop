@@ -526,7 +526,7 @@ public class IchthyopView extends FrameView
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
         getSimulationManager().setConfigurationFile(file);
-        //getSimulationManager().getZoneManager().loadZones();
+        getSimulationManager().getZoneManager().loadZones();
         isSetup = false;
         saveAsMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
