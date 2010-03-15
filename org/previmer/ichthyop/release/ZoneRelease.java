@@ -22,7 +22,9 @@ public class ZoneRelease extends AbstractReleaseProcess {
 
     public void loadParameters() {
         nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
-        nbReleaseZones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size();
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
+                ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
+                : 0;
         nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
         is3D = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("app.transport", "dimension").matches("three dimensions"));
     }

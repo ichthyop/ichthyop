@@ -33,7 +33,9 @@ public class PatchyRelease extends AbstractReleaseProcess {
         radius_patch = Float.valueOf(getParameter("radius_patch"));
         thickness_patch = Float.valueOf(getParameter("thickness_patch"));
 
-        nbReleaseZones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size();
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
+                ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
+                : 0;
         nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
         is3D = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("app.transport", "three_dimension"));
     }

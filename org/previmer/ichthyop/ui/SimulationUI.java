@@ -13,6 +13,8 @@ import java.util.Iterator;
 import javax.swing.JPanel;
 
 /** local import */
+import org.previmer.ichthyop.TypeZone;
+
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.ISimulationManager;
@@ -155,6 +157,15 @@ public class SimulationUI extends JPanel {
         Graphics2D graphic = background.createGraphics();
         graphic.setColor(new Color(223, 212, 200));
         graphic.fillRect(0, 0, w, h);
+        // If zones should drawn that is time to initialize them
+        for (TypeZone typeZone : TypeZone.values()) {
+            if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
+                for (Zone zone : getSimulationManager().getZoneManager().getZones(typeZone)) {
+                    zone.init();
+                }
+            }
+        }
+
         CellUI cell = new CellUI();
         for (int i = getSimulationManager().getDataset().get_nx() - 1; i-- > 0;) {
             for (int j = getSimulationManager().getDataset().get_ny() - 1; j-- > 0;) {
@@ -219,10 +230,10 @@ public class SimulationUI extends JPanel {
 
         double[] point = new double[2];
 
-        point[0] = w * ((getSimulationManager().getDataset().getLon(igrid, jgrid) - lonmin) /
-                Math.abs(lonmax - lonmin));
-        point[1] = h * (1.d - ((getSimulationManager().getDataset().getLat(igrid, jgrid) - latmin) /
-                Math.abs(latmax - latmin)));
+        point[0] = w * ((getSimulationManager().getDataset().getLon(igrid, jgrid) - lonmin)
+                / Math.abs(lonmax - lonmin));
+        point[1] = h * (1.d - ((getSimulationManager().getDataset().getLat(igrid, jgrid) - latmin)
+                / Math.abs(latmax - latmin)));
 
         return (point);
     }
@@ -242,9 +253,9 @@ public class SimulationUI extends JPanel {
         double ratio = dlon / dlat;
         width = (int) (height * ratio);
         /*if (ratio > 1) {
-            width = (int) (height * ratio);
+        width = (int) (height * ratio);
         } else if (ratio != 0.d) {
-            height = (int) (width / ratio);
+        height = (int) (width / ratio);
         }*/
         //setPreferredSize(new Dimension(width, height));
     }
@@ -293,10 +304,6 @@ public class SimulationUI extends JPanel {
          * in this case) and the second dimension, the (x, y) coordinates.
          */
         private int[][] points;
-        /**
-         * List of the predefined zones. Used to determine cell color.
-         */
-        private ArrayList<Zone> listZones;
 
         ///////////////
         // Constructors
@@ -343,7 +350,24 @@ public class SimulationUI extends JPanel {
         private Color getColor(int i, int j) {
 
             if (getSimulationManager().getDataset().isInWater(i, j)) {
-                return getColor(getSimulationManager().getDataset().getBathy(i, j));
+                Color color = getColor(getSimulationManager().getDataset().getBathy(i, j));
+                boolean found = false;
+                ArrayList<Zone> listZones = new ArrayList();
+                for (TypeZone typeZone : TypeZone.values()) {
+                    if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
+                        listZones.addAll(getSimulationManager().getZoneManager().getZones(typeZone));
+                    }
+                }
+                Iterator<Zone> iter = listZones.iterator();
+                Zone zone;
+                while (!found && iter.hasNext()) {
+                    zone = iter.next();
+                    if (zone.isGridPointInZone(i, j)) {
+                        color = zone.getColor();
+                        found = true;
+                    }
+                }
+                return (color);
             } else {
                 return Color.darkGray;
             }
@@ -360,17 +384,17 @@ public class SimulationUI extends JPanel {
             if (Double.isNaN(depth)) {
                 return (Color.darkGray);
             } else {
-                xdepth = (float) Math.abs((getSimulationManager().getDataset().getDepthMax() - depth) /
-                        getSimulationManager().getDataset().getDepthMax());
+                xdepth = (float) Math.abs((getSimulationManager().getDataset().getDepthMax() - depth)
+                        / getSimulationManager().getDataset().getDepthMax());
                 xdepth = Math.max(0, Math.min(xdepth, 1));
 
             }
-            return (new Color((int) (xdepth * surface.getRed() +
-                    (1 - xdepth) * bottom.getRed()),
-                    (int) (xdepth * surface.getGreen() +
-                    (1 - xdepth) * bottom.getGreen()),
-                    (int) (xdepth * surface.getBlue() +
-                    (1 - xdepth) * bottom.getBlue())));
+            return (new Color((int) (xdepth * surface.getRed()
+                    + (1 - xdepth) * bottom.getRed()),
+                    (int) (xdepth * surface.getGreen()
+                    + (1 - xdepth) * bottom.getGreen()),
+                    (int) (xdepth * surface.getBlue()
+                    + (1 - xdepth) * bottom.getBlue())));
 
         }
         //---------- End of class CellUI

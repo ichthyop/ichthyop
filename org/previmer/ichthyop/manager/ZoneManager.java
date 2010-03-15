@@ -83,7 +83,9 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
     private Collection<XZone> getZones() {
         Collection<XZone> collection = new ArrayList();
         for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.ZONE)) {
-            collection.add(new XZone(block));
+            if (block.isEnabled()) {
+                collection.add(new XZone(block));
+            }
 
         }
         return collection;
