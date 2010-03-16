@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.particle;
 
+import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IMasterParticle;
@@ -64,10 +65,11 @@ public class ParticleFactory {
             if (is3D) {
                 depth = -1.D * (upDepth + Math.random() * (lowDepth - upDepth));
                 particle.setDepth(depth);
+                particle.geo2Grid();
             }
-            //Logger.getAnonymousLogger().info("x " + x + " y " + y + " depth " + depth);
-            //Logger.getAnonymousLogger().info("water " + particle.isInWater() + " edge " + particle.isOnEdge());
-            //Logger.getAnonymousLogger().info(index + " - num zone " + particle.getNumZone(TypeZone.RELEASE));
+            //System.out.println("x " + x + " y " + y + " depth " + depth);
+            //System.out.println("water " + particle.isInWater() + " edge " + particle.isOnEdge());
+            //System.out.println(index + " - num zone " + ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE));
             int numReleaseZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
             outZone = !particle.isInWater() || (numReleaseZone == -1) || particle.isOnEdge();
 

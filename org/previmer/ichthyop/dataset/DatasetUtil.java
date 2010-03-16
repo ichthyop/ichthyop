@@ -61,4 +61,29 @@ public class DatasetUtil {
         return (d);
     }
 
+    /**
+     * <p>The functions computes the 2nd order approximate
+     * derivative at index i</p>
+     * <code>diff2(X, i) == diff(diff(X), i) == diff(diff(X))[i]</code>
+     * @param x double[]
+     * @param i int
+     * @return double
+     */
+    public static double diff2(double[] X, int k) {
+
+        int length = X.length;
+        /** Returns NaN if size <= 2 */
+        if (length < 3) {
+            return Double.NaN;
+        }
+
+        /** This return statement traduces the natural spline hypothesis
+         * M(0) = M(nz - 1) = 0 */
+        if ((k <= 0) || (k >= (length - 1))) {
+            return 0.d;
+        }
+
+        return (X[k + 1] - 2.d * X[k] + X[k - 1]);
+    }
+
 }
