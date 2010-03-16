@@ -26,6 +26,7 @@ import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.UserDefinedTracker;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.InvalidRangeException;
@@ -337,6 +338,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
             addTrackers();
             addGlobalAttributes();
+            IOTools.makeDirectories(ncOut.getLocation());
             ncOut.create();
         } catch (IOException ex) {
             Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
