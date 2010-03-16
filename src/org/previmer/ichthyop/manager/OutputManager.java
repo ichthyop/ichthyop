@@ -112,6 +112,10 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     private void addGlobalAttributes() {
+
+        /* Add transport dimension */
+        ncOut.addGlobalAttribute("transport_dimension", getSimulationManager().getParameterManager().getParameter("app.transport", "dimension"));
+
         /* Add the region edges */
         List<GeoPosition> region = makeRegion();
         ArrayFloat.D1 lonEdge = new ArrayFloat.D1(region.size());

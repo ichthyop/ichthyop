@@ -161,6 +161,10 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         return indexEvent;
     }
 
+    public double getTime() {
+        return timeEvent[indexEvent];
+    }
+
     public int getNbReleaseEvents() {
         return timeEvent.length;
     }
@@ -172,10 +176,10 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     public void setupPerformed(SetupEvent e) {
         indexEvent = 0;
         isAllReleased = false;
+        releaseProcess = null;
     }
 
     public void initializePerformed(InitializeEvent e) {
-        // do nothing
         schedule();
     }
 }
