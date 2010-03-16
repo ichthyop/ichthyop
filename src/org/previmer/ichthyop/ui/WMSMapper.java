@@ -50,6 +50,7 @@ import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayFloat.D1;
+import ucar.ma2.ArrayFloat.D2;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -268,12 +269,14 @@ public class WMSMapper extends JXMapKit {
     }
 
     private List<GeoPosition> readRegion() {
-
         final List<GeoPosition> lregion = new ArrayList<GeoPosition>();
-        ArrayFloat.D1 lonEdge = (D1) nc.findGlobalAttribute("edge_lon").getValues();
-        ArrayFloat.D1 latEdge = (D1) nc.findGlobalAttribute("edge_lat").getValues();
-        for (int i = 0; i < lonEdge.getShape()[0]; i++) {
-            lregion.add(new GeoPosition(latEdge.get(i), lonEdge.get(i)));
+        try {
+            ArrayFloat.D2 regionEdge = (D2) nc.findVariable("region_edge").read();
+            for (int i = 0; i < regionEdge.getShape()[0]; i++) {
+                lregion.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
         }
         return lregion;
     }
@@ -284,15 +287,19 @@ public class WMSMapper extends JXMapKit {
             int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
             for (int iZone = 0; iZone < nbZones; iZone++) {
                 List<GeoPosition> edge = new ArrayList<GeoPosition>();
-                ArrayFloat.D1 lonEdge = (D1) nc.findGlobalAttribute("zone" + iZone + "_lon").getValues();
-                ArrayFloat.D1 latEdge = (D1) nc.findGlobalAttribute("zone" + iZone + "_lat").getValues();
-                String type = nc.findGlobalAttribute("zone" + iZone + "_type").getStringValue();
-                String color = nc.findGlobalAttribute("zone" + iZone + "_color").getStringValue();
-                for (int i = 0; i < lonEdge.getShape()[0]; i++) {
-                    edge.add(new GeoPosition(latEdge.get(i), lonEdge.get(i)));
+                try {
+                    Variable varZone = nc.findVariable("zone" + iZone);
+                    ArrayFloat.D2 zoneEdge = (D2) varZone.read();
+                    String type = varZone.findAttribute("type").getStringValue();
+                    String color = varZone.findAttribute("color").getStringValue();
+                    for (int i = 0; i < zoneEdge.getShape()[0]; i++) {
+                        edge.add(new GeoPosition(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
+                    }
+                    DrawableZone zone = new DrawableZone(edge, color);
+                    lzones.put(type + "_zone" + iZone, zone);
+                } catch (IOException ex) {
+                    Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                DrawableZone zone = new DrawableZone(edge, color);
-                lzones.put(type + "_zone" + iZone, zone);
             }
         }
         return lzones;
@@ -396,7 +403,7 @@ public class WMSMapper extends JXMapKit {
     }
 
     private List<GeoPosition> getListGeoPosition(int index) {
-        
+
         List<GeoPosition> list = new ArrayList();
         try {
             ArrayFloat.D1 arrLon = (D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce();

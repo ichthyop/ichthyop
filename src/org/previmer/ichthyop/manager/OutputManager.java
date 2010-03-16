@@ -29,6 +29,7 @@ import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.UserDefinedTracker;
 import ucar.ma2.ArrayFloat;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -47,6 +48,9 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private int i_record;
     private boolean isRecord;
     private int record_frequency;
+    List<GeoPosition> region;
+    List<List<GeoPosition>> zoneEdges;
+    private Dimension latlonDim;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -111,50 +115,73 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         }
     }
 
-    private void addGlobalAttributes() {
-
-        /* Add transport dimension */
-        ncOut.addGlobalAttribute("transport_dimension", getSimulationManager().getParameterManager().getParameter("app.transport", "dimension"));
+    private void addRegion() {
 
         /* Add the region edges */
-        List<GeoPosition> region = makeRegion();
-        ArrayFloat.D1 lonEdge = new ArrayFloat.D1(region.size());
-        ArrayFloat.D1 latEdge = new ArrayFloat.D1(region.size());
+        region = makeRegion();
+        Dimension edge = ncOut.addDimension("edge", region.size());
+        latlonDim = ncOut.addDimension("latlon", 2);
+        ncOut.addVariable("region_edge", DataType.FLOAT, new Dimension[]{edge, latlonDim});
+        ncOut.addVariableAttribute("region_edge", "long_name", "geoposition of region edge");
+        ncOut.addVariableAttribute("region_edge", "unit", "lat degree north lon degree east");
+    }
+
+    private void writeRegion() throws IOException, InvalidRangeException {
+
+        ArrayFloat.D2 edge = new ArrayFloat.D2(region.size(), 2);
         int i = 0;
         for (GeoPosition gp : region) {
-            lonEdge.set(i, (float) gp.getLongitude());
-            latEdge.set(i, (float) gp.getLatitude());
+            edge.set(i, 0, (float) gp.getLatitude());
+            edge.set(i, 1, (float) gp.getLongitude());
             i++;
         }
-        ncOut.addGlobalAttribute("edge_lat", latEdge);
-        ncOut.addGlobalAttribute("edge_lon", lonEdge);
+        ncOut.write("region_edge", edge);
+    }
 
-        /* Add the zones */
+    private void addZones() {
+
         int iZone = 0;
         getSimulationManager().getZoneManager().init();
+        zoneEdges = new ArrayList();
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
-                    List<GeoPosition> zoneEdge = makeZoneEdge(zone);
-                    lonEdge = new ArrayFloat.D1(zoneEdge.size());
-                    latEdge = new ArrayFloat.D1(zoneEdge.size());
-                    i = 0;
-                    for (GeoPosition gp : zoneEdge) {
-                        lonEdge.set(i, (float) gp.getLongitude());
-                        latEdge.set(i, (float) gp.getLatitude());
-                        i++;
-                    }
-                    ncOut.addGlobalAttribute("zone" + iZone + "_lat", latEdge);
-                    ncOut.addGlobalAttribute("zone" + iZone + "_lon", lonEdge);
-                    ncOut.addGlobalAttribute("zone" + iZone + "_type", zone.getType().toString());
+                    zoneEdges.add(iZone, makeZoneEdge(zone));
+                    Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneEdges.get(iZone).size());
+                    ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
+                    ncOut.addVariableAttribute("zone" + iZone, "long_name", "geoposition of zone edge");
+                    ncOut.addVariableAttribute("zone" + iZone, "unit", "lat degree north lon degree east");
+                    ncOut.addVariableAttribute("zone" + iZone, "type", zone.getType().toString());
                     String color = zone.getColor().toString();
                     color = color.substring(color.lastIndexOf("["));
-                    ncOut.addGlobalAttribute("zone" + iZone + "_color", color);
+                    ncOut.addVariableAttribute("zone" + iZone, "color", color);
                     iZone++;
                 }
             }
         }
         ncOut.addGlobalAttribute("nb_zones", iZone);
+    }
+
+    private void writeZones() throws IOException, InvalidRangeException {
+
+        int iZone = 0;
+        for (List<GeoPosition> zoneEdge : zoneEdges) {
+            ArrayFloat.D2 zoneGp = new ArrayFloat.D2(zoneEdge.size(), 2);
+            int i = 0;
+            for (GeoPosition gp : zoneEdge) {
+                zoneGp.set(i, 0, (float) gp.getLatitude());
+                zoneGp.set(i, 1, (float) gp.getLongitude());
+                i++;
+            }
+            ncOut.write("zone" + iZone, zoneGp);
+            iZone++;
+        }
+    }
+
+    private void addGlobalAttributes() {
+
+        /* Add transport dimension */
+        ncOut.addGlobalAttribute("transport_dimension", getSimulationManager().getParameterManager().getParameter("app.transport", "dimension"));
     }
 
     private List<GeoPosition> makeZoneEdge(Zone zone) {
@@ -342,9 +369,15 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
             addTrackers();
             addGlobalAttributes();
+            addRegion();
+            addZones();
             IOTools.makeDirectories(ncOut.getLocation());
             ncOut.create();
+            writeRegion();
+            writeZones();
         } catch (IOException ex) {
+            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
             Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
