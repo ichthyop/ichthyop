@@ -4,6 +4,8 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
 
@@ -30,6 +32,7 @@ public abstract class SFTask<T, V> extends Task<T, V> {
     @Override
     protected void failed(Throwable throwable) {
         firePropertyChange("failed", null, null);
+        Logger.getLogger(SFTask.class.getName()).log(Level.SEVERE, throwable.getLocalizedMessage());
         onFailure(throwable);
     }
 
