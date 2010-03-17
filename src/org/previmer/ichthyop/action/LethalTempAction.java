@@ -8,6 +8,7 @@ import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
  *
@@ -44,7 +45,7 @@ public class LethalTempAction extends AbstractAction {
     private void checkTp(IBasicParticle particle) {
         double temperature = getSimulationManager().getDataset().getTemperature(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         if (temperature < lethal_tp) {
-            particle.kill(Constant.DEAD_COLD);
+            particle.kill(ParticleMortality.DEAD_COLD);
         }
     }
 
@@ -54,7 +55,7 @@ public class LethalTempAction extends AbstractAction {
         int stage = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getStage();
         boolean frozen = ((stage == egg) && (temperature < lethalTpEgg)) || ((stage > egg) && (temperature < lethalTpLarva));
         if (frozen) {
-            particle.kill(Constant.DEAD_COLD);
+            particle.kill(ParticleMortality.DEAD_COLD);
         }
     }
 }

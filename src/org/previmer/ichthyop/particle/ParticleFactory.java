@@ -4,7 +4,6 @@
  */
 package org.previmer.ichthyop.particle;
 
-import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IMasterParticle;
@@ -16,10 +15,11 @@ import org.previmer.ichthyop.arch.IZoneParticle;
  */
 public class ParticleFactory {
 
-    public static IBasicParticle createParticle(int index, double lon, double lat, double depth, boolean living) {
+    public static IBasicParticle createParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
 
         IMasterParticle particle = new MasterParticle();
         particle.setIndex(index);
+        boolean living = mortality.equals(ParticleMortality.ALIVE);
         if (living) {
             particle.setLon(lon);
             particle.setLat(lat);
@@ -29,17 +29,17 @@ public class ParticleFactory {
             }
             particle.geo2Grid();
         } else {
-            particle.kill("");
+            particle.kill(mortality);
         }
         return particle;
     }
 
     public static IBasicParticle createParticle(int index, double lon, double lat, double depth) {
-        return createParticle(index, lon, lat, depth, true);
+        return createParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
     }
 
     public static IBasicParticle createParticle(int index, double lon, double lat) {
-        return createParticle(index, lon, lat, Double.NaN, true);
+        return createParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
     }
 
     public static IBasicParticle createParticle(int index, double xmin, double xmax, double ymin, double ymax, double upDepth, double lowDepth) {

@@ -10,6 +10,7 @@ import org.previmer.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.particle.ParticleFactory;
+import org.previmer.ichthyop.particle.ParticleMortality;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
@@ -108,7 +109,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
 
             //living = (deathArr.get(rank, i) == Constant.DEAD_NOT);
             living = true;
-            particle = ParticleFactory.createParticle(index, lon, lat, depth, living);
+            particle = ParticleFactory.createParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
         }

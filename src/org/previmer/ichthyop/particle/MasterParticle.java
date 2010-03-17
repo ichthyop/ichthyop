@@ -22,7 +22,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
 
     private int index;
     private long age = 0;
-    private String deathCause;
+    private ParticleMortality deathCause;
     private boolean living = true;
     private boolean locked = false;
     private List<ParticleLayer> layers = new ArrayList();
@@ -73,7 +73,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         age += getSimulationManager().getTimeManager().get_dt();
     }
 
-    public void kill(String cause) {
+    public void kill(ParticleMortality cause) {
 
         this.deathCause = cause;
         living = false;
@@ -82,11 +82,11 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         setDepth(Double.NaN);
     }
 
-    public String getDeathCause() {
-        if (deathCause != null && !deathCause.isEmpty()) {
+    public ParticleMortality getDeathCause() {
+        if (deathCause != null) {
             return deathCause;
         } else {
-            return "not-dead-yet";
+            return ParticleMortality.ALIVE;
         }
     }
 
@@ -105,7 +105,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
     public void step() {
 
         if (getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
-            kill(Constant.DEAD_OLD);
+            kill(ParticleMortality.OLD);
             return;
         }
 
@@ -114,10 +114,10 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         if (!isLocked()) {
             applyMove();
             if (isOnEdge()) {
-                kill(Constant.DEAD_OUT);
+                kill(ParticleMortality.OUT_OF_DOMAIN);
                 return;
             } else if (!isInWater()) {
-                kill(Constant.DEAD_BEACH);
+                kill(ParticleMortality.BEACHED);
                 return;
             }
             grid2Geo();

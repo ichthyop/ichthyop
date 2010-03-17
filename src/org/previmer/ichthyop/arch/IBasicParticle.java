@@ -1,6 +1,7 @@
 package org.previmer.ichthyop.arch;
 
 import org.previmer.ichthyop.particle.ParticleLayer;
+import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
  * Public interface that lists the methods a Particle of the model will have
@@ -81,7 +82,7 @@ public interface IBasicParticle {
      * And sets longitude, latitude and depth to NaN.
      * @param the cause of death.
      */
-    public void kill(String cause);
+    public void kill(ParticleMortality cause);
 
     public boolean isLocked();
 
