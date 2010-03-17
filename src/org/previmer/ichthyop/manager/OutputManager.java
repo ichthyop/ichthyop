@@ -26,7 +26,12 @@ import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.io.LatTracker;
+import org.previmer.ichthyop.io.LonTracker;
+import org.previmer.ichthyop.io.MortalityTracker;
+import org.previmer.ichthyop.io.TimeTracker;
 import org.previmer.ichthyop.io.UserDefinedTracker;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
@@ -40,7 +45,6 @@ import ucar.nc2.Dimension;
  */
 public class OutputManager extends AbstractManager implements IOutputManager, LastStepListener {
 
-    private static final String CLASS_NAME = "class_name";
     final private static OutputManager outputManager = new OutputManager();
     private final static String block_key = "app.output";
     private int dt_record;
@@ -265,27 +269,31 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         return lregion;
     }
 
-    private void addTrackers() {
+    private void addAppTrackers() {
         trackers = new ArrayList();
-        for (XBlock xtrack : getSimulationManager().getParameterManager().getBlocks(BlockType.TRACKER)) {
-            if (xtrack.isEnabled()) {
+        trackers.add(new TimeTracker());
+        trackers.add(new LonTracker());
+        trackers.add(new LatTracker());
+        trackers.add(new MortalityTracker());
+        if (getSimulationManager().getParameterManager().getParameter("app.transport", "dimension").matches("three dimensions")) {
+            trackers.add(new DepthTracker());
+        }
+        for (ITracker tracker : trackers) {
+            addVar2NcOut(tracker);
+        }
+    }
+
+    private void addUserTrackers() {
+        for (XBlock xtracker : getSimulationManager().getParameterManager().getBlocks(BlockType.TRACKER)) {
+            if (xtracker.isEnabled()) {
                 try {
-                    ITracker tracker = createTracker(xtrack);
+                    ITracker tracker = new UserDefinedTracker(xtracker.getKey());
                     trackers.add(tracker);
                     addVar2NcOut(tracker);
                 } catch (Exception ex) {
                     Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        }
-    }
-
-    private ITracker createTracker(XBlock xtracker) throws Exception {
-
-        if (Boolean.valueOf(xtracker.getXParameter("user_defined").getValue())) {
-            return new UserDefinedTracker(xtracker.getKey());
-        } else {
-            return (ITracker) Class.forName(xtracker.getXParameter(CLASS_NAME).getValue()).newInstance();
         }
     }
 
@@ -367,7 +375,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         try {
             i_record = 0;
             dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
-            addTrackers();
+            addAppTrackers();
+            addUserTrackers();
             addGlobalAttributes();
             addRegion();
             addZones();

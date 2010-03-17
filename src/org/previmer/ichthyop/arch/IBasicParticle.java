@@ -84,6 +84,8 @@ public interface IBasicParticle {
      */
     public void kill(ParticleMortality cause);
 
+    public ParticleMortality getDeathCause();
+
     public boolean isLocked();
 
     public void lock();

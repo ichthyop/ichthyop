@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IMasterParticle;
-import org.previmer.ichthyop.util.Constant;
 
 /**
  *
