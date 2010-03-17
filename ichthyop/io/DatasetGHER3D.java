@@ -354,7 +354,7 @@ public class DatasetGHER3D extends Dataset {
         double ix, jy, kz;
         ix = pGrid[0];
         jy = pGrid[1];
-
+        
         if (isInDoubleZone((int) Math.round(ix), (int) Math.round(jy))) {
             kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
         } else {
@@ -546,7 +546,7 @@ public class DatasetGHER3D extends Dataset {
         int i, j, k, ii, jj, kk;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
-        k = (int) (Math.round(pGrid[2]));
+        k = (int) pGrid[2];
         if (k < klim) {
             ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
             jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
@@ -577,6 +577,8 @@ public class DatasetGHER3D extends Dataset {
         final double dx = (xRho - i);
         final double dy = (yRho - j);
         double co = 0.d;
+        //getdepth est souvent utilisé avec un 0 explicite pour avoir la profondeur du fond
+        //ce qui suit permet de guarder cette utilisation
         if (k == 0) {
             k = isInDoubleZone(i, j) ? 0 : klim;
         }
@@ -609,6 +611,41 @@ public class DatasetGHER3D extends Dataset {
         return (hh);
     }
 
+        /**
+     * Computes the depth at w points, taking account of the free surface
+     * elevation.
+     * @return a double[][][], the depth at w point.
+     */
+    @Override
+    double[][][] getSigLevels() {
+
+        //-----------------------------------------------------
+        // Daily recalculation of z_w and z_r with zeta
+
+        double[][][] z_w_tmp = new double[nz + 1][ny][nx];
+        double[][][] z_w_cst_tmp = z_w_cst;
+
+        //System.out.print("Calculation of the s-levels\n");
+
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
+                if (zeta_tp1[j][i] == 999.f) {
+                    zeta_tp1[j][i] = 0.f;
+                }
+                for (int k = klim; k < nz + 1; k++) {
+                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
+                            * (1.f + z_w_cst_tmp[k][j][i] / Math.min(hRho[j][i],hlim));
+                }
+                for (int k = 0; k < klim; k++) {
+                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] ;
+                }
+            }
+        }
+        z_w_cst_tmp = null;
+        return z_w_tmp;
+    }
+
+
     /**
      * Interpolates the temperature field at particle location and specified
      * time.
@@ -637,8 +674,8 @@ public class DatasetGHER3D extends Dataset {
         //-----------------------------------------------------------
         // Interpolate the temperature fields
         // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
+        int i = (int) Math.round(pGrid[0]);
+        int j = (int) Math.round(pGrid[1]);
         double kz = Math.max((double) (isInDoubleZone(i, j) ? 0 : klim), Math.min(pGrid[2], (double) nz - 1.00001f));
         int k = (int) kz;
         double dx = pGrid[0] - (double) i;
@@ -646,9 +683,21 @@ public class DatasetGHER3D extends Dataset {
         double dz = kz - (double) k;
         tp = 0.d;
         CO = 0.d;
+        int iiinit=0;
+        int jjinit=0;
+        int ni=n;
+        int nj=n;
+        if ((ni>1) & (dx<0)){
+            iiinit=-1;
+            ni=0;
+        }
+        if ((nj>1) & (dy<0)){
+            jjinit=-1;
+            nj=0;
+        }
         for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
+            for (int jj = jjinit; jj < nj; jj++) {
+                for (int ii = iiinit; ii < ni; ii++) {
                     {
                         co = Math.abs((1.d - (double) ii - dx)
                                 * (1.d - (double) jj - dy)
@@ -671,7 +720,32 @@ public class DatasetGHER3D extends Dataset {
         if (CO != 0) {
             tp /= CO;
         }
-
+        if (tp > 100) {
+            System.out.println("tp");
+            System.out.println(tp);
+            System.out.println("pGrid");
+            System.out.println(pGrid[0]);
+            System.out.println(pGrid[1]);
+            System.out.println(pGrid[2]);
+            System.out.println(i);
+          System.out.println(j);
+            System.out.println("isclose to cost");
+          System.out.println(isCloseToCost(pGrid));
+            System.out.println("isin water i , j");
+            System.out.println(isInWater(i,j));
+            System.out.println(getDepth(pGrid[0], pGrid[1], k));
+          // System.out.println(isInWater(pGrid));
+         //   System.out.println("time");
+         //   System.out.println(time);
+            System.out.println("kz");
+           System.out.println(kz);
+           System.out.println("klim");
+           System.out.println(klim);
+          //  System.out.println(isInDoubleZone(i,j));
+          //  System.out.println( temp_tp0[k ][j ][i ]);
+                        
+        //    System.out.println("gettem levels lu dans GHER");
+        }
         return tp;
 
     }
@@ -704,18 +778,30 @@ public class DatasetGHER3D extends Dataset {
         //-----------------------------------------------------------
         // Interpolate the temperature fields
         // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
+        int i = (int) Math.round(pGrid[0]);
+        int j = (int) Math.round(pGrid[1]);
         double kz = Math.max((double) (isInDoubleZone(i, j) ? 0 : klim), Math.min(pGrid[2], (double) nz - 1.00001f));
         int k = (int) kz;
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
         double dz = kz - (double) k;
+        int iiinit=0;
+        int jjinit=0;
+        int ni=n;
+        int nj=n;
+        if ((ni>1) & (dx<0)){
+            iiinit=-1;
+            ni=0;
+        }
+        if ((nj>1) & (dy<0)){
+            jjinit=-1;
+            nj=0;
+        }
         sal = 0.d;
         CO = 0.d;
         for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
+            for (int jj = jjinit; jj < nj; jj++) {
+                for (int ii = iiinit; ii < ni; ii++) {
                     {
                         co = Math.abs((1.d - (double) ii - dx)
                                 * (1.d - (double) jj - dy)
@@ -764,14 +850,15 @@ public class DatasetGHER3D extends Dataset {
         }
 
         double co, CO, x, frac, largePhyto, smallZoo, largeZoo;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
 
         frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
 
         //-----------------------------------------------------------
         // Interpolate the plankton concentration fields
         // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
+        int i = (int) Math.round(pGrid[0]);
+        int j = (int) Math.round(pGrid[1]);
         final double kz = Math.max((double) (isInDoubleZone(i, j) ? 0 : klim),
                 Math.min(pGrid[2],
                 (double) nz - 1.00001f));
@@ -780,13 +867,25 @@ public class DatasetGHER3D extends Dataset {
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
         double dz = kz - (double) k;
+        int iiinit=0;
+        int jjinit=0;
+        int ni=n;
+        int nj=n;
+        if ((ni>1) & (dx<0)){
+            iiinit=-1;
+            ni=0;
+        }
+        if ((nj>1) & (dy<0)){
+            jjinit=-1;
+            nj=0;
+        }
         largePhyto = 0.d;
         smallZoo = 0.d;
         largeZoo = 0.d;
         CO = 0.d;
         for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < 2; ii++) {
+            for (int jj = jjinit; jj < nj; jj++) {
+                for (int ii = iiinit; ii < ni; ii++) {
                     if (isInWater(i + ii, j + jj)) {
                         co = Math.abs((1.d - (double) ii - dx)
                                 * (1.d - (double) jj - dy)
