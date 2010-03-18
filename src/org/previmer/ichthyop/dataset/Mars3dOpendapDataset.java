@@ -71,6 +71,7 @@ public class Mars3dOpendapDataset extends Mars3dDatasetCommon {
             if (rank > (nbTimeRecords - 1) || rank < 0) {
                 throw new IOException("Time OutOfBoundException");
             }
+            setAllFieldsTp1AtTime(rank);
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, null, ex);
         }
