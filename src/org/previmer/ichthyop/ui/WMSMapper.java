@@ -166,7 +166,7 @@ public class WMSMapper extends JXMapKit {
         }
 
         time = new double[nbSteps];
-        for (int i = 0; i < nbSteps - 1; i++) {
+        for (int i = 0; i < nbSteps; i++) {
             time[i] = readTime(i);
         }
 
@@ -440,7 +440,7 @@ public class WMSMapper extends JXMapKit {
         if (kmzFile.exists()) {
             kmzFile.delete();
         }
-        return kml.marshalAsKmz(getKMZPath(), kml);
+        return kml.marshalAsKmz(getKMZPath());
     }
 
     public String getKMZPath() {
@@ -453,6 +453,7 @@ public class WMSMapper extends JXMapKit {
         SimpleDateFormat dtFormat2 = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         Folder stepFolder = new Folder();
         dtFormat.setCalendar(calendar);
+        dtFormat2.setCalendar(calendar);
         stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
         stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
         for (GeoPosition gp : getListGeoPosition(i)) {
@@ -482,7 +483,13 @@ public class WMSMapper extends JXMapKit {
     }
 
     Date getTime(int index) {
-        calendar.setTimeInMillis((long) (time[Math.min(index, nbSteps - 1)] * 1000L));
+        if (index > nbSteps - 1) {
+            double dt = time[1] - time[0];
+            long ltime = (long) (time[0] + index * dt) * 1000L;
+            calendar.setTimeInMillis(ltime);
+        } else {
+            calendar.setTimeInMillis((long) (time[index] * 1000L));
+        }
         return calendar.getTime();
     }
 

@@ -164,7 +164,7 @@ public class IchthyopView extends FrameView
         @Override
         protected Object doInBackground() throws Exception {
             wmsMapper.createKML();
-            for (int i = 0; i < wmsMapper.getNbSteps() - 1; i++) {
+            for (int i = 0; i < wmsMapper.getNbSteps(); i++) {
                 setProgress((float) (i + 1) / wmsMapper.getNbSteps());
                 setMessage("NetCDF to KMZ: exporting step " + (i + 1) + "/" + (wmsMapper.getNbSteps()), true);
                 wmsMapper.writeKMLStep(i);
@@ -215,7 +215,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected Object doInBackground() throws Exception {
-            for (int iStep = 0; iStep < wmsMapper.getNbSteps() - 1; iStep++) {
+            for (int iStep = 0; iStep < wmsMapper.getNbSteps(); iStep++) {
                 setProgress((float) (iStep + 1) / wmsMapper.getNbSteps());
                 publish(wmsMapper.getPainterForStep(iStep));
                 Thread.sleep(500);
