@@ -21,12 +21,19 @@ import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -36,7 +43,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
@@ -67,7 +73,7 @@ public class WMSMapper extends JXMapKit {
     private HashMap<String, DrawableZone> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private NetcdfFile nc;
-    private Variable vlon, vlat, vtime;
+    private Variable vlon, vlat, pcolorVariable, vtime;
     boolean canRepaint = false;
     private Painter bgPainter;
     boolean loadFromHeap = false;
@@ -79,6 +85,17 @@ public class WMSMapper extends JXMapKit {
     private Folder kmlMainFolder;
     private double[] time;
     private int nbSteps;
+    /**
+     * Lightest color of the color range.
+     */
+    private Color colormin = Color.YELLOW;
+    /**
+     * Darkest color of the color range.
+     */
+    private Color colormax = Color.RED;
+    private float valmin = 0;
+    private float valmax = 100;
+    private Painter colorbarPainter;
 
     public WMSMapper() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
@@ -190,7 +207,10 @@ public class WMSMapper extends JXMapKit {
             try {
                 nc = NetcdfDataset.openFile(ncfile.getAbsolutePath(), null);
                 init();
-                getMainMap().setOverlayPainter(getBgPainter());
+                CompoundPainter cp = new CompoundPainter();
+                cp.setPainters(getBgPainter());
+                cp.setCacheable(false);
+                getMainMap().setOverlayPainter(cp);
             } catch (IOException ex) {
                 Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -208,7 +228,7 @@ public class WMSMapper extends JXMapKit {
 
     Painter getPainterForStep(int index) {
 
-        final List<GeoPosition> listGP = getListGeoPosition(index);
+        final List<DrawableParticle> listParticles = getParticles(index);
 
         Painter particleLayer = new Painter<JXMapViewer>() {
 
@@ -219,8 +239,8 @@ public class WMSMapper extends JXMapKit {
                 g.translate(-rect.x, -rect.y);
 
                 //drawRegion(g, map);
-                for (GeoPosition gp : listGP) {
-                    drawParticle(g, map, gp);
+                for (DrawableParticle particle : listParticles) {
+                    drawParticle(g, map, particle);
                 }
                 g.dispose();
             }
@@ -230,7 +250,11 @@ public class WMSMapper extends JXMapKit {
 
     void map(Painter particleLayer) {
         CompoundPainter cp = new CompoundPainter();
-        cp.setPainters(bgPainter, particleLayer);
+        if (colorbarPainter != null) {
+            cp.setPainters(bgPainter, particleLayer, colorbarPainter);
+        } else {
+            cp.setPainters(bgPainter, particleLayer);
+        }
         cp.setCacheable(false);
         getMainMap().setOverlayPainter(cp);
     }
@@ -344,45 +368,138 @@ public class WMSMapper extends JXMapKit {
         g.draw(poly);
     }
 
-    /*public void drawParticles() {
-
-    if (getSimulationManager().getSimulation().getPopulation() != null) {
-    Painter<JXMapViewer> particleLayer = new Painter<JXMapViewer>() {
-
-    public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-    g = (Graphics2D) g.create();
-    //convert from viewport to world bitmap
-    Rectangle rect = map.getViewportBounds();
-    g.translate(-rect.x, -rect.y);
-
-    drawRegion(g, map);
-
-    Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();
-    while (it.hasNext()) {
-    IBasicParticle particle = (IBasicParticle) it.next();
-    if (particle.isLiving()) {
-    drawParticle(g, map, particle);
-    }
-    }
-    g.dispose();
-    }
-    };
-
-    CompoundPainter cp = new CompoundPainter();
-    cp.setPainters(particleLayer);
-    cp.setCacheable(false);
-    getMainMap().setOverlayPainter(cp);
-    }
-    }*/
-    private void drawParticle(Graphics2D g, JXMapViewer map, GeoPosition gp) {
+    private void drawParticle(Graphics2D g, JXMapViewer map, DrawableParticle particle) {
 
         //create a polygon
-        Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
+        Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
         Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), 1, 1);
 
         //do the drawing
-        g.setColor(Color.WHITE);
+        g.setColor(getColor(particle.getColorValue()));
         g.draw(ellipse);
+    }
+
+    /**
+     * Determines the color of the particle as a function of its depth or
+     * the sea water temperature (depending on the display option).
+     * @param value a float, the depth or the water temperature
+     * of the particle
+     * @return the Color of the particle.
+     */
+    private Color getColor(float value) {
+
+        if (Float.isNaN(value)) {
+            return Color.WHITE;
+        }
+
+        float xval = bound((valmax - Math.abs(value)) / (valmax - valmin));
+        return (new Color(((int) (xval * colormin.getRed()
+                + (1 - xval) * colormax.getRed())),
+                ((int) (xval * colormin.getGreen()
+                + (1 - xval) * colormax.getGreen())),
+                ((int) (xval * colormin.getBlue()
+                + (1 - xval) * colormax.getBlue()))));
+    }
+
+    public void setColorbar(String variable, float valmin, float valmax, Color colormin, Color colormax) {
+
+        CompoundPainter cp = new CompoundPainter();
+        if (!variable.equalsIgnoreCase("none")) {
+            pcolorVariable = nc.findVariable(variable);
+            if (null != pcolorVariable) {
+                this.valmin = valmin;
+                this.valmax = valmax;
+                this.colormin = colormin;
+                this.colormax = colormax;
+                colorbarPainter = getColorbarPainter();
+                cp.setPainters(bgPainter, colorbarPainter);
+            } else {
+                colorbarPainter = null;
+                cp.setPainters(bgPainter);
+            }
+        } else {
+            colorbarPainter = null;
+            cp.setPainters(bgPainter);
+        }
+        cp.setCacheable(false);
+        getMainMap().setOverlayPainter(cp);
+    }
+
+    private Painter<JXMapViewer> getColorbarPainter() {
+
+        Painter<JXMapViewer> clrbarPainter = new Painter<JXMapViewer>() {
+
+            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
+                g = (Graphics2D) g.create();
+
+                int wbar = 300;
+                int hbar = 20;
+                int xbar = (w - wbar) - hbar / 2;
+                int ybar = h - 3 * hbar / 2;
+
+                RoundRectangle2D bar = new RoundRectangle2D.Double(0.0, 0.0, wbar, hbar, hbar, hbar);
+                g.translate(xbar, ybar);
+                g.setColor(Color.BLACK);
+                g.draw(bar);
+
+                Paint paint = g.getPaint();
+                GradientPaint painter = new GradientPaint(0, 0, colormin, wbar, hbar, colormax);
+                g.setPaint(painter);
+                g.fill(bar);
+
+                FontRenderContext context = g.getFontRenderContext();
+                Font font = new Font("Dialog", Font.PLAIN, 10);
+                TextLayout layout = new TextLayout(String.valueOf(valmin), font, context);
+                Rectangle2D bounds = layout.getBounds();
+
+                float text_x = 10;
+                float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                g.setColor(Color.BLACK);
+                layout.draw(g, text_x, text_y);
+
+                layout = new TextLayout(pcolorVariable.getName(), font, context);
+                bounds = layout.getBounds();
+                text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
+                text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                g.setColor(Color.BLACK);
+                layout.draw(g, text_x, text_y);
+
+                layout = new TextLayout(String.valueOf(valmax), font, context);
+                bounds = layout.getBounds();
+                text_x = (float) (wbar - bounds.getWidth() - 10);
+                text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                g.setColor(Color.BLACK);
+                layout.draw(g, text_x, text_y);
+
+                g.setPaint(paint);
+                g.translate(-xbar, -ybar);
+                g.dispose();
+            }
+        };
+
+        return clrbarPainter;
+    }
+
+    void drawText(Graphics2D g2, float x, float y, String text) {
+
+        if (text != null && text.length() > 0) {
+            FontRenderContext context = g2.getFontRenderContext();
+            Font font = new Font("Dialog", Font.PLAIN, 10);
+            TextLayout layout = new TextLayout(text, font, context);
+            g2.setColor(Color.BLACK);
+            layout.draw(g2, x, y);
+        }
+    }
+
+    /**
+     * Ensures that float {@code x} belongs to [0, 1]
+     * @param x any float
+     * @return <code>x</code> if between 0 and 1, the closest boundary
+     * otherwise.
+     */
+    private float bound(float x) {
+
+        return Math.max(Math.min(1.f, x), 0.f);
     }
 
     public ISimulationManager getSimulationManager() {
@@ -402,19 +519,24 @@ public class WMSMapper extends JXMapKit {
         return timeD;
     }
 
-    private List<GeoPosition> getListGeoPosition(int index) {
-
-        List<GeoPosition> list = new ArrayList();
+    private List<DrawableParticle> getParticles(int index) {
+        List<DrawableParticle> list = new ArrayList();
         try {
             ArrayFloat.D1 arrLon = (D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce();
             ArrayFloat.D1 arrLat = (D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce();
-            //float[] lon = (float[]) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce().copyTo1DJavaArray();
-            //float[] lat = (float[]) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce().copyTo1DJavaArray();
+            ArrayFloat.D1 arrColorVariable = null;
+            if (null != pcolorVariable) {
+                arrColorVariable = (D1) pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
+            }
             int length = arrLon.getShape()[0];
             for (int i = 0; i < length - 1; i++) {
                 float lon = arrLon.get(i);
                 if (!Float.isNaN(lon)) {
-                    list.add(new GeoPosition(arrLat.get(i), lon));
+                    if (null != arrColorVariable) {
+                        list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.get(i)));
+                    } else {
+                        list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
+                    }
                 }
             }
         } catch (IOException ex) {
@@ -456,7 +578,7 @@ public class WMSMapper extends JXMapKit {
         dtFormat2.setCalendar(calendar);
         stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
         stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
-        for (GeoPosition gp : getListGeoPosition(i)) {
+        for (GeoPosition gp : getParticles(i)) {
             String coord = Double.toString(gp.getLongitude()) + "," + Double.toString(gp.getLatitude());
             Placemark placeMark = stepFolder.createAndAddPlacemark();
             placeMark.withStyleUrl("#randomColorIcon").createAndSetPoint().addToCoordinates(coord);
@@ -598,6 +720,20 @@ public class WMSMapper extends JXMapKit {
                     return new WMSService("http://www2.demis.nl/wms/wms.asp?wms=WorldMap&", "Bathymetry,Topography,Borders,Coastlines").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
                 }
             });
+        }
+    }
+
+    class DrawableParticle extends GeoPosition {
+
+        private float colorValue;
+
+        DrawableParticle(float lon, float lat, float colorValue) {
+            super(lat, lon);
+            this.colorValue = colorValue;
+        }
+
+        public float getColorValue() {
+            return colorValue;
         }
     }
 
