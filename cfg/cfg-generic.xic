@@ -1,0 +1,1074 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<icstructure>
+  <block type="option">
+    <tree_path>Time/General time options</tree_path>
+    <key>app.time</key>
+    <description>Set the time options of the simulation.</description>
+    <parameters>
+      <parameter>
+        <key>calendar_type</key>
+        <long_name>Type of calendar</long_name>
+        <value>gregorian</value>
+        <format>list</format>
+        <accepted>climato</accepted>
+        <accepted>gregorian</accepted>
+        <description>Choose the type of calendar. Climato: 360 days per year. Gregorian: the usual calendar.</description>
+      </parameter>
+      <parameter type="serial">
+        <key>initial_time</key>
+        <long_name>Beginning of simulation</long_name>
+        <value>year 2006 month 01 day 17 at 00:00</value>
+        <format>date</format>
+        <description>Set the date of beginning of simulation. Expressed in seconds ellapsed since the origin of time.</description>
+      </parameter>
+      <parameter>
+        <key>time_arrow</key>
+        <long_name>Direction of the simulation</long_name>
+        <value>forward</value>
+        <format>list</format>
+        <accepted>backward</accepted>
+        <accepted>forward</accepted>
+        <description>Run the simulation backward or forward in time.</description>
+      </parameter>
+      <parameter>
+        <key>time_origin</key>
+        <long_name>Origin of tile</long_name>
+        <value>1900/01/01 00:00</value>
+        <description>Origin of time for the Gregorian calendar.</description>
+      </parameter>
+      <parameter type="serial">
+        <key>time_step</key>
+        <long_name>Time step</long_name>
+        <value>3600</value>
+        <format>integer</format>
+        <description>The computational time step (dt) expressed in seconds.</description>
+      </parameter>
+      <parameter type="serial">
+        <key>transport_duration</key>
+        <long_name>Transport duration</long_name>
+        <value>0001 day(s) 13 hour(s) 27 minute(s)</value>
+        <format>duration</format>
+        <description>Set the duration [second] of particle transport.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="option">
+    <key>app.output</key>
+    <tree_path>IO/Output/General output options</tree_path>
+    <parameters>
+      <parameter>
+        <key>file_prefix</key>
+        <long_name>Output filename</long_name>
+        <value>generic</value>
+        <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc</description>
+      </parameter>
+      <parameter>
+        <key>output_path</key>
+        <long_name>Output path</long_name>
+        <value>./output/</value>
+        <format>path</format>
+        <description>Select the folder where the simulation output files should be saved.</description>
+      </parameter>
+      <parameter>
+        <key>record_frequency</key>
+        <long_name>Record frequency</long_name>
+        <value>1</value>
+        <format>integer</format>
+        <description>Set the record frequency as a number of computational time-steps</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="dataset">
+    <key>dataset.mars_2d_opendap</key>
+    <tree_path>IO/Input/MARS 2D</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>north-west-corner.lat</key>
+        <long_name>Latitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>north-west-corner.lon</key>
+        <long_name>Longitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>opendap_url</key>
+        <long_name>OpenDAP URL</long_name>
+        <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+        <description>Folder containing the MARS NetCDF files.</description>
+      </parameter>
+      <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>false</value>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation.</description>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lat</key>
+        <long_name>Latitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lon</key>
+        <long_name>Longitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.dataset.Mars2dOpendapDataset</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_dim_lat</key>
+        <long_name>Dimension in the LAT-direction</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_dim_lon</key>
+        <long_name>Dimension in the LON-direction</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_dim_time</key>
+        <long_name>Dimension in time</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_bathy</key>
+        <long_name>Bathymetry at RHO-points</long_name>
+        <value>H0</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_lat</key>
+        <long_name>Latitude of RHO-points</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_lon</key>
+        <long_name>Longitude of RHO-points</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_salt</key>
+        <long_name>Averaged salinity</long_name>
+        <value>SAL</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_temp</key>
+        <long_name>Averaged potential temperature</long_name>
+        <value>TEMP</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_time</key>
+        <long_name>Averaged time since initialization</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_u</key>
+        <long_name>U-momentum component</long_name>
+        <value>U</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_v</key>
+        <long_name>V-momentum component</long_name>
+        <value>V</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="dataset">
+    <key>dataset.mars_3d_opendap</key>
+    <tree_path>IO/Input/MARS 3D</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter>
+        <key>north-west-corner.lat</key>
+        <long_name>Latitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>north-west-corner.lon</key>
+        <long_name>Longitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>opendap_url</key>
+        <long_name>OpenDAP URL</long_name>
+        <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+        <description>Folder containing the MARS NetCDF files.</description>
+      </parameter>
+      <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>false</value>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation.</description>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lat</key>
+        <long_name>Latitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lon</key>
+        <long_name>Longitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.dataset.Mars3dOpendapDataset</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_dim_lat</key>
+        <long_name>Dimension in the LAT-direction</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_dim_lon</key>
+        <long_name>Dimension in the LON-direction</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_dim_time</key>
+        <long_name>Dimension in time</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_dim_z</key>
+        <long_name>Dimension in the Z-direction</long_name>
+        <value>level</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_bathy</key>
+        <long_name>Bathymetry at RHO-points</long_name>
+        <value>H0</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_lat</key>
+        <long_name>Latitude of RHO-points</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_lon</key>
+        <long_name>Longitude of RHO-points</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_salt</key>
+        <long_name>Averaged salinity</long_name>
+        <value>SAL</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_sigma</key>
+        <long_name>Ocean sigma coordinate</long_name>
+        <value>level</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_temp</key>
+        <long_name>Averaged potential temperature</long_name>
+        <value>TEMP</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_time</key>
+        <long_name>Averaged time since initialization</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_u</key>
+        <long_name>U-momentum component</long_name>
+        <value>UZ</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_v</key>
+        <long_name>V-momentum component</long_name>
+        <value>VZ</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>field_var_zeta</key>
+        <long_name>Free-surface elevation</long_name>
+        <value>XE</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="dataset">
+    <key>dataset.nemo</key>
+    <tree_path>IO/Input/NEMO</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>byte_mask_pattern</key>
+        <long_name>Byte mask pattern</long_name>
+        <value>mesh*mask*</value>
+      </parameter>
+      <parameter>
+        <key>field_dim_time</key>
+        <long_name>Dimension in time</long_name>
+        <value>time_counter</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_x</key>
+        <long_name>Dimension in the X-direction</long_name>
+        <value>x</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_y</key>
+        <long_name>Dimension in the Y-direction</long_name>
+        <value>y</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_z</key>
+        <long_name>Dimension in the Z-direction</long_name>
+        <value>z</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_bathy</key>
+        <long_name>Bathymetry at RHO-points</long_name>
+        <value>hdepw</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_e1t</key>
+        <long_name>e1t</long_name>
+        <value>e1t</value>
+      </parameter>
+      <parameter>
+        <key>field_var_e1v</key>
+        <long_name>e1v</long_name>
+        <value>e1v</value>
+      </parameter>
+      <parameter>
+        <key>field_var_e2t</key>
+        <long_name>e2t</long_name>
+        <value>e2t</value>
+      </parameter>
+      <parameter>
+        <key>field_var_e2u</key>
+        <long_name>e2u</long_name>
+        <value>e2u</value>
+      </parameter>
+      <parameter>
+        <key>field_var_e3t</key>
+        <long_name>e3t ps</long_name>
+        <value>e3t_ps</value>
+      </parameter>
+      <parameter>
+        <key>field_var_gdept</key>
+        <long_name>gdepT</long_name>
+        <value>gdept</value>
+      </parameter>
+      <parameter>
+        <key>field_var_gdepw</key>
+        <long_name>gdepW</long_name>
+        <value>gdepw</value>
+      </parameter>
+      <parameter>
+        <key>field_var_lat</key>
+        <long_name>Latitude of RHO-points</long_name>
+        <value>nav_lat</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_lon</key>
+        <long_name>Longitude of RHO-points</long_name>
+        <value>nav_lon</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_mask</key>
+        <long_name>Mask</long_name>
+        <value>fmask</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_salt</key>
+        <long_name>Averaged salinity</long_name>
+        <value>vosaline</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_temp</key>
+        <long_name>Averaged potential temperature</long_name>
+        <value>votemper</value>
+      </parameter>
+      <parameter>
+        <key>field_var_time</key>
+        <long_name>Averaged time since initialization</long_name>
+        <value>time_counter</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_u</key>
+        <long_name>U-momentum component</long_name>
+        <value>vozocrtx</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_v</key>
+        <long_name>V-momentum component</long_name>
+        <value>vomecrty</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>gridt_pattern</key>
+        <long_name>gridT pattern</long_name>
+        <value>*gridT*</value>
+      </parameter>
+      <parameter>
+        <key>gridu_pattern</key>
+        <long_name>gridU pattern</long_name>
+        <value>*gridU*</value>
+      </parameter>
+      <parameter>
+        <key>gridv_pattern</key>
+        <long_name>gridV pattern</long_name>
+        <value>*gridV*</value>
+      </parameter>
+      <parameter>
+        <key>gridw_pattern</key>
+        <long_name>gridW pattern</long_name>
+        <value>*gridW*</value>
+      </parameter>
+      <parameter>
+        <key>hgr_pattern</key>
+        <long_name>HGR pattern</long_name>
+        <value>mesh*h*</value>
+      </parameter>
+      <parameter>
+        <key>input_path</key>
+        <long_name>Input path</long_name>
+        <value>./input/</value>
+        <format>path</format>
+        <description>Folder containing the NEMO NetCDF files.</description>
+      </parameter>
+      <parameter>
+        <key>zgr_pattern</key>
+        <long_name>ZGR pattern</long_name>
+        <value>mesh*z*</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.dataset.NemoDataset</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="dataset">
+    <key>dataset.roms_3d_ucla</key>
+    <tree_path>IO/Input/Roms 3D UCLA</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>field_attrib_csr</key>
+        <long_name>S-coordinate stretching curves at RHO-points</long_name>
+        <value>Cs_r</value>
+        <description>Set the name of the corresponding NetCDF attribute.</description>
+      </parameter>
+      <parameter>
+        <key>field_attrib_csw</key>
+        <long_name>S-coordinate stretching curves at W-points</long_name>
+        <value>Cs_w</value>
+        <description>Set the name of the corresponding NetCDF attribute.</description>
+      </parameter>
+      <parameter>
+        <key>field_attrib_hc</key>
+        <long_name>S-coordinate critical depth</long_name>
+        <value>hc</value>
+        <description>Set the name of the corresponding NetCDF attribute.</description>
+      </parameter>
+      <parameter>
+        <key>field_attrib_scr</key>
+        <long_name>S-coordinate at RHO-points</long_name>
+        <value>sc_r</value>
+        <description>Set the name of the corresponding NetCDF attribute.</description>
+      </parameter>
+      <parameter>
+        <key>field_attrib_scw</key>
+        <long_name>S-coordinate W-points</long_name>
+        <value>sc_w</value>
+      </parameter>
+      <parameter>
+        <key>field_dim_eta</key>
+        <long_name>Dimension in the ETA-direction</long_name>
+        <value>eta_rho</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_time</key>
+        <long_name>Dimension in time</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_xi</key>
+        <long_name>Dimension in the XI-direction</long_name>
+        <value>xi_rho</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_z</key>
+        <long_name>Dimension in the Z-direction</long_name>
+        <value>s_rho</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_bathy</key>
+        <long_name>Bathymetry at RHO-points</long_name>
+        <value>h</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_kv</key>
+        <long_name>Vertical turbulent diffusion</long_name>
+        <value>AKt</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_lat</key>
+        <long_name>Latitude of RHO-points</long_name>
+        <value>lat_rho</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_lon</key>
+        <long_name>Longitude of RHO-points</long_name>
+        <value>lon_rho</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_mask</key>
+        <long_name>Mask on RHO-points</long_name>
+        <value>mask_rho</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_pm</key>
+        <long_name>Curvilinear coordinate metric in XI</long_name>
+        <value>pm</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_pn</key>
+        <long_name>Curvilinear coordinate metric in ETA</long_name>
+        <value>pn</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_salt</key>
+        <long_name>Averaged salinity</long_name>
+        <value>salt</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_temp</key>
+        <long_name>Averaged potential temperature</long_name>
+        <value>temp</value>
+      </parameter>
+      <parameter>
+        <key>field_var_time</key>
+        <long_name>Averaged time since initialization</long_name>
+        <value>scrum_time</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_u</key>
+        <long_name>U-momentum component</long_name>
+        <value>u</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_v</key>
+        <long_name>V-momentum component</long_name>
+        <value>v</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_zeta</key>
+        <long_name>Free-surface elevation</long_name>
+        <value>zeta</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>file_filter</key>
+        <long_name>File filter</long_name>
+        <value>*.nc*</value>
+        <description>Filename filter (accepted metacharacters * and ?)</description>
+      </parameter>
+      <parameter>
+        <key>input_path</key>
+        <long_name>Input path</long_name>
+        <value>./input/</value>
+        <format>path</format>
+        <description>Folder containing the ROMS NetCDF files.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.dataset.Roms3dUclaDataset</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="option">
+    <key>app.transport</key>
+    <tree_path>Transport/General transport options</tree_path>
+    <parameters>
+      <parameter>
+        <key>dimension</key>
+        <long_name>Dimension</long_name>
+        <value>three dimensions</value>
+        <format>list</format>
+        <accepted>two dimensions</accepted>
+        <accepted>three dimensions</accepted>
+        <description>Simulation in three / two dimensions.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.advection</key>
+    <tree_path>Transport/Advection</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter>
+        <key>scheme</key>
+        <long_name>Numerical scheme</long_name>
+        <value>euler</value>
+        <format>list</format>
+        <accepted>euler</accepted>
+        <accepted>rk4</accepted>
+        <description>Use a forward Euler scheme (euler) or a Runge-Kutta 4th order scheme (rk4)</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.AdvectionAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+        <value>high</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.hdisp</key>
+    <tree_path>Transport/Horizontal dispersion</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter type="serial">
+        <key>epsilon</key>
+        <long_name>Dissipation rate</long_name>
+        <value>1e-9</value>
+        <description>Turbulent dissipation rate used in the parametrization of Lagrangian horizontal diffusion.</description>
+        <format>float</format>
+        <default>1e-9</default>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.HDispAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>normal</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.vdisp</key>
+    <tree_path>Transport/Vertical dispersion</tree_path>
+    <enabled>normal</enabled>
+    <parameters>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.previmer.ichthyop.action.VDispAction</value>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+        <value>high</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.buoyancy</key>
+    <tree_path>Transport/Buoyancy</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter type="serial">
+        <key>egg_density</key>
+        <long_name>Egg density</long_name>
+        <value>1.025</value>
+        <format>float</format>
+        <default>1.025</default>
+        <description>Set the egg density [g/cm3], a long_name parameter to calculate the egg buoyancy.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.BuoyancyAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>normal</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.migration</key>
+    <tree_path>Transport/Vertical migration</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>criterion</key>
+        <long_name>Migration criterion</long_name>
+        <value>Age criterion</value>
+        <format>list</format>
+        <accepted>Length criterion</accepted>
+        <accepted>Age criterion</accepted>
+      </parameter>
+      <parameter>
+        <key>daytime_depth</key>
+        <long_name>Depth at daytime</long_name>
+        <value>30</value>
+      </parameter>
+      <parameter>
+        <key>limit_age</key>
+        <long_name>Limit age</long_name>
+        <value>7</value>
+      </parameter>
+      <parameter>
+        <key>limit_length</key>
+        <long_name>Limit length</long_name>
+        <value>7</value>
+      </parameter>
+      <parameter>
+        <key>nighttime_depth</key>
+        <long_name>Depth at nighttime</long_name>
+        <value>10</value>
+      </parameter>
+      <parameter>
+        <key>sunrise</key>
+        <long_name>Hour of sunrise</long_name>
+        <value>7</value>
+      </parameter>
+      <parameter>
+        <key>sunset</key>
+        <long_name>Hour of sunset</long_name>
+        <value>19</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.MigrationAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>normal</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="option">
+    <key>release.schedule</key>
+    <tree_path>Release/Schedule</tree_path>
+    <parameters>
+      <parameter>
+        <key>event0</key>
+        <long_name>Release event 0</long_name>
+        <value>156945600</value>
+        <format>date</format>
+      </parameter>
+      <parameter>
+        <key>is_enabled</key>
+        <long_name>Use release schedule</long_name>
+        <value>false</value>
+        <format>boolean</format>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="release">
+    <key>release.zone</key>
+    <tree_path>Release/From zone</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>number_particles</key>
+        <long_name>Number of particles</long_name>
+        <value>100</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.release.ZoneRelease</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="release">
+    <key>release.txtfile</key>
+    <tree_path>Release/From text file</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter>
+        <key>txtfile</key>
+        <long_name>Drifter file</long_name>
+        <value>/home/pverley/ichthyop/dev/nb/iv3-ui/drifter_example.txt</value>
+        <format>file</format>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.previmer.ichthyop.release.TxtFileRelease</value>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="option">
+    <key>app.particle_length</key>
+    <tree_path>Biology/Threshold length</tree_path>
+    <parameters>
+      <parameter>
+        <key>hatch_length</key>
+        <long_name>Hatch length</long_name>
+        <value>2.8</value>
+        <format>float</format>
+      </parameter>
+      <parameter>
+        <key>initial_length</key>
+        <long_name>Initial length</long_name>
+        <value>0.025</value>
+        <format>float</format>
+      </parameter>
+      <parameter>
+        <key>yolk2feeding_length</key>
+        <long_name>Yolk to feeding length</long_name>
+        <value>4.5</value>
+        <format>float</format>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.lethal_temp</key>
+    <tree_path>Biology/Lethal temperature</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>lethal_temp</key>
+        <long_name>Lethal temperature</long_name>
+        <value>14</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.LethalTempAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>low</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.growth</key>
+    <tree_path>Biology/Growth</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>coeff1</key>
+        <long_name>Growth coefficient 2</long_name>
+        <value>0.03</value>
+      </parameter>
+      <parameter>
+        <key>threshold_temp</key>
+        <long_name>Threshold temperature</long_name>
+        <value>10</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.LinearGrowthAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>low</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.recruit</key>
+    <tree_path>Biology/Recruitment</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>criterion</key>
+        <long_name>Recruitment criterion</long_name>
+        <value>age_criterion</value>
+      </parameter>
+      <parameter>
+        <key>duration_min</key>
+        <long_name>Minimal duration in recruitment zone</long_name>
+        <value>0</value>
+      </parameter>
+      <parameter>
+        <key>limit_age</key>
+        <long_name>Reruitment limit age</long_name>
+        <value>7</value>
+      </parameter>
+      <parameter>
+        <key>stop_moving</key>
+        <long_name>Stop moving when recruited</long_name>
+        <value>true</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.RecruitmentAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>highest</value>
+        <format>list</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+</icstructure>
+
