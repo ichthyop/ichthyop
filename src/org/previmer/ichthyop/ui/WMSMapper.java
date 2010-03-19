@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import javax.imageio.ImageIO;
 import org.jdesktop.swingx.JXMapViewer;
@@ -52,11 +53,14 @@ import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
+import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayFloat.D1;
 import ucar.ma2.ArrayFloat.D2;
+import ucar.ma2.DataType;
+import ucar.ma2.IndexIterator;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -224,6 +228,81 @@ public class WMSMapper extends JXMapKit {
             region = null;
         }
 
+    }
+
+    public String[] getVariableList() {
+        List<String> list = new ArrayList();
+        list.add(new String("None"));
+        for (Variable variable : nc.getVariables()) {
+            String name = variable.getName();
+            boolean excluded = name.matches("time")
+                    || name.contains("edge")
+                    || name.startsWith("zone")
+                    || !variable.getDataType().equals(DataType.FLOAT);
+            if (!excluded) {
+                list.add(variable.getName());
+            }
+
+        }
+        return list.toArray(new String[list.size()]);
+    }
+
+    public float[] getRange(String variable) throws IOException {
+
+        if (!variable.toLowerCase().contains("none")) {
+            ArrayFloat.D2 array = (D2) nc.findVariable(variable).read();
+            float[] dataset = (float[]) array.copyTo1DJavaArray();
+            double mean = getMean(dataset);
+            double stdDeviation = getStandardDeviation(dataset, mean);
+            float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
+            float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
+            return new float[]{lower, upper};
+        }
+
+        return new float[]{Float.NaN, Float.NaN};
+    }
+
+    private double getMin(float[] dataset) {
+        float min = Float.MAX_VALUE;
+        for (float num : dataset) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+
+    private double getMax(float[] dataset) {
+        float max = -1 * Float.MAX_VALUE;
+        for (float num : dataset) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
+    }
+
+    private double getMean(float[] dataset) {
+        double sum = 0;
+        for (double num : dataset) {
+            sum += num;
+        }
+        return sum / dataset.length;
+    }
+
+    private double getSquareSum(float[] dataset) {
+        double sum = 0;
+        for (double num : dataset) {
+            sum += num * num;
+        }
+        return sum;
+    }
+
+    private double getStandardDeviation(float[] dataset, double mean) {
+        // Return standard deviation of all the items that have been entered.
+        // Value will be Double.NaN if count == 0.
+        double squareSum = getSquareSum(dataset);
+        return Math.sqrt(squareSum / dataset.length - mean * mean);
     }
 
     Painter getPainterForStep(int index) {
@@ -404,7 +483,7 @@ public class WMSMapper extends JXMapKit {
     public void setColorbar(String variable, float valmin, float valmax, Color colormin, Color colormax) {
 
         CompoundPainter cp = new CompoundPainter();
-        if (!variable.equalsIgnoreCase("none")) {
+        if (!variable.toLowerCase().contains("none")) {
             pcolorVariable = nc.findVariable(variable);
             if (null != pcolorVariable) {
                 this.valmin = valmin;
