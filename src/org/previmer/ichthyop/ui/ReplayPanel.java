@@ -31,6 +31,7 @@ public class ReplayPanel extends JXImagePanel {
     private int index;
     private File folder;
     private ImageIcon bgIcon;
+    private int indexMax;
 
     public ReplayPanel() {
         this.setOpaque(false);
@@ -38,7 +39,7 @@ public class ReplayPanel extends JXImagePanel {
     }
 
     public int getIndexMax() {
-        return pictures.size() - 1;
+        return indexMax;
     }
 
     public int getIndex() {
@@ -56,6 +57,7 @@ public class ReplayPanel extends JXImagePanel {
         this.folder = folder;
         pictures = new ArrayList();
         pictureNames = new ArrayList();
+        indexMax = -1;
         if (null != folder && folder.isDirectory()) {
             picturesFinder = new Thread(new PicturesFinderThread(folder, "*.png"));
             picturesFinder.start();
@@ -107,13 +109,15 @@ public class ReplayPanel extends JXImagePanel {
                 MetaFilenameFilter filter = new MetaFilenameFilter(strFilter);
 
                 List<File> files = Arrays.asList(folder.listFiles(filter));
+                indexMax = files.size() - 1;
                 Collections.sort(files);
+                int indexTrigger = Math.max(files.size() / 2, 1);
                 for (int i = 0; i < files.size(); i++) {
                     File file = files.get(i);
                     BufferedImage image = ImageIO.read(file);
                     pictures.add(image);
                     pictureNames.add(file.getName());
-                    if (i > 2) {
+                    if (i > indexTrigger) {
                         setIndex(0);
                     }
 
