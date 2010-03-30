@@ -72,7 +72,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>1</value>
+        <value>6</value>
         <format>integer</format>
         <description>Set the record frequency as a number of computational time-steps</description>
       </parameter>
@@ -80,7 +80,7 @@
   </block>
   <block type="dataset">
     <key>dataset.mars_2d_opendap</key>
-    <tree_path>IO/Input/MARS 2D</tree_path>
+    <tree_path>IO/Input/MARS 2D OpenDAP</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -203,8 +203,139 @@
     </parameters>
   </block>
   <block type="dataset">
+    <key>dataset.mars_2d</key>
+    <tree_path>IO/Input/MARS 2D</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>field_dim_lat</key>
+        <long_name>Dimension in the LAT-direction</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_lon</key>
+        <long_name>Dimension in the LON-direction</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_time</key>
+        <long_name>Dimension in time</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_bathy</key>
+        <long_name>Bathymetry at RHO-points</long_name>
+        <value>H0</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_lat</key>
+        <long_name>Latitude of RHO-points</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_lon</key>
+        <long_name>Longitude of RHO-points</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_salt</key>
+        <long_name>Averaged salinity</long_name>
+        <value>SAL</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_temp</key>
+        <long_name>Averaged potential temperature</long_name>
+        <value>TEMP</value>
+      </parameter>
+      <parameter>
+        <key>field_var_time</key>
+        <long_name>Averaged time since initialization</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_u</key>
+        <long_name>U-momentum component</long_name>
+        <value>U</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_v</key>
+        <long_name>V-momentum component</long_name>
+        <value>V</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>file_filter</key>
+        <long_name>File filter</long_name>
+        <value>*.nc</value>
+        <description>Filename filter (accepted metacharacters * and ?)</description>
+      </parameter>
+      <parameter>
+        <key>input_path</key>
+        <long_name>Input path</long_name>
+        <value>./input/</value>
+        <format>path</format>
+        <description>Folder containing the MARS2D NetCDF files.</description>
+      </parameter>
+      <parameter>
+        <key>north-west-corner.lat</key>
+        <long_name>Latitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>north-west-corner.lon</key>
+        <long_name>Longitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>false</value>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation.</description>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lat</key>
+        <long_name>Latitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lon</key>
+        <long_name>Longitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.dataset.Mars2dDataset</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="dataset">
     <key>dataset.mars_3d_opendap</key>
-    <tree_path>IO/Input/MARS 3D</tree_path>
+    <tree_path>IO/Input/MARS 3D OpenDAP</tree_path>
     <enabled>true</enabled>
     <parameters>
       <parameter>
@@ -341,6 +472,155 @@
         <long_name>Free-surface elevation</long_name>
         <value>XE</value>
         <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="dataset">
+    <key>dataset.mars_3d</key>
+    <tree_path>IO/Input/MARS 3D</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter>
+        <key>field_dim_lat</key>
+        <long_name>Dimension in the LAT-direction</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_lon</key>
+        <long_name>Dimension in the LON-direction</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_time</key>
+        <long_name>Dimension in time</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_dim_z</key>
+        <long_name>Dimension in the Z-direction</long_name>
+        <value>level</value>
+        <description>Set the name of the corresponding NetCDF dimension.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_bathy</key>
+        <long_name>Bathymetry at RHO-points</long_name>
+        <value>H0</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_lat</key>
+        <long_name>Latitude of RHO-points</long_name>
+        <value>latitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_lon</key>
+        <long_name>Longitude of RHO-points</long_name>
+        <value>longitude</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_salt</key>
+        <long_name>Averaged salinity</long_name>
+        <value>SAL</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_sigma</key>
+        <long_name>Ocean sigma coordinate</long_name>
+        <value>level</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_temp</key>
+        <long_name>Averaged potential temperature</long_name>
+        <value>TEMP</value>
+      </parameter>
+      <parameter>
+        <key>field_var_time</key>
+        <long_name>Averaged time since initialization</long_name>
+        <value>time</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_u</key>
+        <long_name>U-momentum component</long_name>
+        <value>UZ</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_v</key>
+        <long_name>V-momentum component</long_name>
+        <value>VZ</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>field_var_zeta</key>
+        <long_name>Free-surface elevation</long_name>
+        <value>XE</value>
+        <description>Set the name of the corresponding NetCDF variable.</description>
+      </parameter>
+      <parameter>
+        <key>file_filter</key>
+        <long_name>File filter</long_name>
+        <value>*.nc</value>
+        <description>Filename filter (accepted metacharacters * and ?)</description>
+      </parameter>
+      <parameter>
+        <key>input_path</key>
+        <long_name>Input path</long_name>
+        <value>./input/</value>
+        <format>path</format>
+        <description>Folder containing the MARS3D NetCDF files.</description>
+      </parameter>
+      <parameter>
+        <key>north-west-corner.lat</key>
+        <long_name>Latitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>north-west-corner.lon</key>
+        <long_name>Longitude of Northwest corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>false</value>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation.</description>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lat</key>
+        <long_name>Latitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lon</key>
+        <long_name>Longitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.dataset.Mars3dDataset</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
       </parameter>
     </parameters>
   </block>
@@ -782,7 +1062,7 @@
   <block type="action">
     <key>action.buoyancy</key>
     <tree_path>Transport/Buoyancy</tree_path>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <parameters>
       <parameter type="serial">
         <key>egg_density</key>
@@ -898,7 +1178,7 @@
   <block type="release">
     <key>release.zone</key>
     <tree_path>Release/From zone</tree_path>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <parameters>
       <parameter>
         <key>number_particles</key>
@@ -917,7 +1197,7 @@
   <block type="release">
     <key>release.txtfile</key>
     <tree_path>Release/From text file</tree_path>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <parameters>
       <parameter>
         <key>txtfile</key>
