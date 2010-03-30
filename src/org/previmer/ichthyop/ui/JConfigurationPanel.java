@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -28,6 +29,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Application;
@@ -175,6 +177,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
         ShowConfigEditorsTask() {
             super(Application.getInstance());
+            blockTree.setEnabled(false);
             busyLabel.setText("Loading parameter editor...");
             busyLabel.setBusy(true);
             tabbedPane.setVisible(false);
@@ -218,6 +221,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         protected void finished() {
             busyLabel.setBusy(false);
             pnlEditors.remove(busyLabel);
+            blockTree.setEnabled(true);
         }
 
         @Override
@@ -314,6 +318,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         final static int ADD = 1;
         final static int REMOVE = -1;
         private int actionType;
+
         SerialValueTask(int actionType) {
             super(Application.getInstance());
             this.actionType = actionType;
@@ -350,14 +355,15 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         hasStructureChanged = false;
     }
 
-    public void loadBlockTree() {
-        IchthyopApp.getApplication().getContext().getTaskService().execute(new CreateBlockTreeTask(IchthyopApp.getApplication()));
+    public Task loadBlockTree() {
+        return new CreateBlockTreeTask(IchthyopApp.getApplication());
     }
 
-    private class CreateBlockTreeTask extends Task {
+    private class CreateBlockTreeTask extends SFTask {
 
         CreateBlockTreeTask(Application instance) {
             super(instance);
+            blockTree.setVisible(false);
         }
 
         @Override
@@ -368,18 +374,22 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
 
         @Override
-        protected void succeeded(Object o) {
-            firePropertyChange("succeeded", null, null);
+        void onSuccess(Object result) {
             setVisible(true);
             blockTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
             blockTree.addTreeSelectionListener(JConfigurationPanel.this);
-            blockTree.setNodeVisible(blockTree.getRoot().getFirstLeaf());
+            //blockTree.setNodeVisible(blockTree.getRoot().getFirstLeaf());
         }
 
         @Override
-        protected void failed(Throwable t) {
-            firePropertyChange("failed", null, null);
-            Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, t);
+        void onFailure(Throwable throwable) {
+            // do nothing
+        }
+
+        @Override
+        protected void finished() {
+            blockTree.setVisible(true);
+            splitPaneCfg.setRightComponent(pnlNoBlockSelected);
         }
     }
 

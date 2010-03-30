@@ -524,17 +524,18 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void openConfigurationFile() {
+    public Task openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            loadConfigurationFile(chooser.getSelectedFile());
+            return loadConfigurationFile(chooser.getSelectedFile());
         }
+        return null;
     }
 
-    private void loadConfigurationFile(File file) {
+    private Task loadConfigurationFile(File file) {
         setMessage("Opened " + file.toString());
         logger.info("Opened " + file.toString());
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
@@ -548,7 +549,7 @@ public class IchthyopView extends FrameView
         btnSimulationRun.getAction().setEnabled(true);
         btnPreview.getAction().setEnabled(true);
         setMainTitle();
-        pnlConfiguration.loadBlockTree();
+        return pnlConfiguration.loadBlockTree();
     }
 
     @Action
@@ -826,7 +827,7 @@ public class IchthyopView extends FrameView
             File file = new File((String) property);
             if (file.isFile()) {
                 cfgPath = file.getParentFile();
-                loadConfigurationFile(file);
+                loadConfigurationFile(file).execute();
             } else if (file.isDirectory()) {
                 cfgPath = file;
             }

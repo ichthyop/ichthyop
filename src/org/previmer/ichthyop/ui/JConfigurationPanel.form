@@ -122,7 +122,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" pref="600" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" pref="493" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jToolBar1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -229,7 +229,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="tabbedPane" alignment="0" pref="560" max="32767" attributes="0"/>
+                              <Component id="tabbedPane" alignment="0" pref="645" max="32767" attributes="0"/>
                               <Component id="ckBoxAdvancedEditorOnly" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -310,15 +310,10 @@
                                   <Group type="102" attributes="0">
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Component id="ckBoxBlock" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="414" max="32767" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Component id="lblBlockInfo" pref="492" max="32767" attributes="0"/>
-                                              <EmptySpace min="-2" max="-2" attributes="0"/>
-                                          </Group>
+                                          <Component id="ckBoxBlock" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="lblBlockInfo" alignment="0" pref="577" max="32767" attributes="0"/>
                                       </Group>
+                                      <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                             </DimensionLayout>
@@ -367,7 +362,7 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="1" attributes="0">
                                           <Component id="pnlParamDescription" alignment="0" max="32767" attributes="1"/>
-                                          <Component id="srollPaneTable" alignment="0" pref="492" max="32767" attributes="1"/>
+                                          <Component id="srollPaneTable" alignment="0" pref="577" max="32767" attributes="1"/>
                                           <Component id="btnHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Group type="102" alignment="0" attributes="0">
                                               <Component id="btnUndo" min="-2" max="-2" attributes="0"/>
@@ -419,7 +414,7 @@
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" alignment="0" attributes="0">
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="lblParameter" pref="456" max="32767" attributes="0"/>
+                                          <Component id="lblParameter" pref="541" max="32767" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
