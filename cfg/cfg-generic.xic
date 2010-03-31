@@ -9,7 +9,7 @@
         <key>calendar_type</key>
         <long_name>Type of calendar</long_name>
         <value>gregorian</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>climato</accepted>
         <accepted>gregorian</accepted>
         <description>Choose the type of calendar. Climato: 360 days per year. Gregorian: the usual calendar.</description>
@@ -25,7 +25,7 @@
         <key>time_arrow</key>
         <long_name>Direction of the simulation</long_name>
         <value>forward</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>backward</accepted>
         <accepted>forward</accepted>
         <description>Run the simulation backward or forward in time.</description>
@@ -957,7 +957,7 @@
         <key>dimension</key>
         <long_name>Dimension</long_name>
         <value>three dimensions</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>two dimensions</accepted>
         <accepted>three dimensions</accepted>
         <description>Simulation in three / two dimensions.</description>
@@ -973,7 +973,7 @@
         <key>scheme</key>
         <long_name>Numerical scheme</long_name>
         <value>euler</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>euler</accepted>
         <accepted>rk4</accepted>
         <description>Use a forward Euler scheme (euler) or a Runge-Kutta 4th order scheme (rk4)</description>
@@ -990,7 +990,7 @@
         <key>priority</key>
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
         <value>high</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -1023,7 +1023,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>normal</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -1050,7 +1050,7 @@
         <long_name>priority</long_name>
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
         <value>high</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -1083,7 +1083,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>normal</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -1102,7 +1102,7 @@
         <key>criterion</key>
         <long_name>Migration criterion</long_name>
         <value>Age criterion</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>Length criterion</accepted>
         <accepted>Age criterion</accepted>
       </parameter>
@@ -1147,7 +1147,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>normal</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -1162,10 +1162,10 @@
     <tree_path>Release/Schedule</tree_path>
     <parameters>
       <parameter>
-        <key>event0</key>
-        <long_name>Release event 0</long_name>
-        <value>156945600</value>
-        <format>date</format>
+        <key>events</key>
+        <long_name>Release event</long_name>
+        <value>"year 2006 month 01 day 17 at 00:00" "year 2006 month 01 day 17 at 01:00"</value>
+        <format>list</format>
       </parameter>
       <parameter>
         <key>is_enabled</key>
@@ -1258,7 +1258,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>low</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -1294,7 +1294,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>low</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -1340,7 +1340,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>highest</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
