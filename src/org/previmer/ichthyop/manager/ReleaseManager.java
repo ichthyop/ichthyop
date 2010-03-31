@@ -108,23 +108,25 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
 
         boolean isEnabled = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled"));
         if (isEnabled) {
-            timeEvent = new long[findNumberReleaseEvents()];
+            String[] events = getReleaseEvents();
+            timeEvent = new long[events.length];
             for (int i = 0; i < timeEvent.length; i++) {
-                
-                timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i));
+                timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i]);
             }
         } else {
             timeEvent = new long[]{getSimulationManager().getTimeManager().date2seconds(getSimulationManager().getParameterManager().getParameter("app.time", "initial_time"))};
         }
     }
 
-    private int findNumberReleaseEvents() {
-        int i = 0;
-        while (!getSimulationManager().getParameterManager().getParameter("release.schedule", "event" + i).isEmpty()) {
-            i++;
+    private String[] getReleaseEvents() {
+        String[] tokens = getSimulationManager().getParameterManager().getParameter("release.schedule", "events").split("\"");
+        List<String> events = new ArrayList();
+        for (String token : tokens) {
+            if (!token.trim().isEmpty()) {
+                events.add(token.trim());
+            }
         }
-        //Logger.getLogger(ReleaseSchedule.class.getName()).log(Level.CONFIG, "Number release events: " + i);
-        return i;
+        return events.toArray(new String[events.size()]);
     }
 
     /**

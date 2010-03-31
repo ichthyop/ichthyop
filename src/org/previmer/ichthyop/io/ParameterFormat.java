@@ -16,11 +16,12 @@ public enum ParameterFormat {
     DURATION("3600"),
     FLOAT("0.0"),
     INTEGER("0"),
-    LIST("value not set yet"),
+    COMBO("value not set yet"),
     BOOLEAN("true"),
     FILE("file not set yet"),
     PATH(System.getProperty("user.dir")),
-    CLASS("class not set yet");
+    CLASS("class not set yet"),
+    LIST("value not set yet");
     
     private String defaultValue;
 

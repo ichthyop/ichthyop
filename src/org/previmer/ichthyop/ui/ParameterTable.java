@@ -109,7 +109,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         for (int row = 0; row < model.getRowCount(); row++) {
             XParameter param = block.getXParameter(getParameterKey(row));
             switch (param.getFormat()) {
-                case LIST:
+                case COMBO:
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(param.getAcceptedValues())));
                     break;
                 case INTEGER:
@@ -135,6 +135,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     break;
                 case CLASS:
                     editorModel.addEditorForRow(row, new ClassEditor());
+                    break;
+                case LIST:
+                    editorModel.addEditorForRow(row, new ListEditor());
                     break;
             }
         }

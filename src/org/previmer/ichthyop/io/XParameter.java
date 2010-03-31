@@ -116,7 +116,7 @@ public class XParameter extends org.jdom.Element {
 
     public String[] getAcceptedValues() {
         List<String> list = new ArrayList();
-        if (getFormat().equals(ParameterFormat.LIST)) {
+        if (getFormat().equals(ParameterFormat.COMBO)) {
             try {
                 for (Object elt : getChildren(ACCEPTED)) {
                     list.add(((Element) elt).getTextNormalize());
