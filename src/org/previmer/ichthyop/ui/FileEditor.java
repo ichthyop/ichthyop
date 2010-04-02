@@ -67,7 +67,12 @@ public class FileEditor extends AbstractCellEditor
         fileChooser.setSelectedFile(new File(path));
         int answer = fileChooser.showOpenDialog(panel);
         if (answer == JFileChooser.APPROVE_OPTION) {
-            textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+            File file = fileChooser.getSelectedFile();
+            String filename = file.getAbsolutePath();
+            if (file.isDirectory() && !filename.endsWith(File.separator)) {
+                filename += File.separator;
+            }
+            textField.setText(filename);
             fireEditingStopped();
         }
     }
