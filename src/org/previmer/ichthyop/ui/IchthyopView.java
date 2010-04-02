@@ -2038,6 +2038,8 @@ public class IchthyopView extends FrameView
                     btnMapping.getAction().setEnabled(true);
                     btnExportToKMZ.getAction().setEnabled(true);
                     btnCloseNC.getAction().setEnabled(true);
+                    setColorbarPanelEnabled(true);
+                    cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getVariableList()));
                 } else {
                     wmsMapper.setFile(null);
                     wmsMapper.setVisible(false);
@@ -2045,6 +2047,8 @@ public class IchthyopView extends FrameView
                     btnMapping.getAction().setEnabled(false);
                     btnExportToKMZ.getAction().setEnabled(false);
                     btnCloseNC.getAction().setEnabled(false);
+                    setColorbarPanelEnabled(false);
+                    cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
                 }
             } else {
                 wmsMapper.setVisible(false);

@@ -89,6 +89,7 @@ public class WMSMapper extends JXMapKit {
     private Folder kmlMainFolder;
     private double[] time;
     private int nbSteps;
+    private List<String> colors;
     /**
      * Lightest color of the color range.
      */
@@ -255,7 +256,6 @@ public class WMSMapper extends JXMapKit {
         double stdDeviation = getStandardDeviation(dataset, mean);
         float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
         float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
-        System.out.println("mean: " + mean + " standard deviation: " + stdDeviation);
         return new float[]{lower, upper};
     }
 
@@ -472,7 +472,7 @@ public class WMSMapper extends JXMapKit {
             return Color.WHITE;
         }
 
-        float xval = bound((valmax - Math.abs(value)) / (valmax - valmin));
+        float xval = Math.abs(bound((valmax - value) / (valmax - valmin)));
         return (new Color(((int) (xval * colormin.getRed()
                 + (1 - xval) * colormax.getRed())),
                 ((int) (xval * colormin.getGreen()
@@ -634,6 +634,7 @@ public class WMSMapper extends JXMapKit {
         final IconStyle iconstyle = style.createAndSetIconStyle().withColor("ffff3df0").withScale(0.3d);
         iconstyle.createAndSetIcon().withHref("http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
         kmlMainFolder = kmlDocument.createAndAddFolder();
+        colors = new ArrayList();
     }
 
     public boolean marshalAndKMZ() throws IOException {
@@ -657,12 +658,48 @@ public class WMSMapper extends JXMapKit {
         dtFormat2.setCalendar(calendar);
         stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
         stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
-        for (GeoPosition gp : getParticles(i)) {
-            String coord = Double.toString(gp.getLongitude()) + "," + Double.toString(gp.getLatitude());
+        for (DrawableParticle particle : getParticles(i)) {
+            String coord = Double.toString(particle.getLongitude()) + "," + Double.toString(particle.getLatitude());
             Placemark placeMark = stepFolder.createAndAddPlacemark();
-            placeMark.withStyleUrl("#randomColorIcon").createAndSetPoint().addToCoordinates(coord);
+            String styleURL = "#" + createStyle(particle);
+            placeMark.withStyleUrl(styleURL).createAndSetPoint().addToCoordinates(coord);
         }
         kmlMainFolder.addToFeature(stepFolder);
+    }
+
+    private String createStyle(DrawableParticle particle) {
+        String color = colorForKML(getColor(particle.getColorValue()));
+        if (!colors.contains(color)) {
+            colors.add(color);
+            Style style = kmlDocument.createAndAddStyle().withId("IconStyle" + color);
+            IconStyle iconstyle = style.createAndSetIconStyle().withColor(color).withScale(0.3d);
+            iconstyle.createAndSetIcon().withHref("http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
+        }
+        return "IconStyle" + color;
+    }
+
+    private String colorForKML(Color color) {
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+        StringBuffer hexColor = new StringBuffer(8);
+        hexColor.append("ff");
+        String hR = Integer.toHexString(red);
+        if (hR.length() < 2) {
+            hR = "0" + hR;
+        }
+        String hB = Integer.toHexString(blue);
+        if (hB.length() < 2) {
+            hB = "0" + hB;
+        }
+        String hG = Integer.toHexString(green);
+        if (hG.length() < 2) {
+            hG = "0" + hG;
+        }
+        hexColor.append(hB);
+        hexColor.append(hG);
+        hexColor.append(hR);
+        return hexColor.toString();
     }
 
     /**
