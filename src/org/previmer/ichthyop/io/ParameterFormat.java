@@ -20,6 +20,7 @@ public enum ParameterFormat {
     BOOLEAN("true"),
     FILE("file not set yet"),
     PATH(System.getProperty("user.dir")),
+    TEXTFILE(System.getProperty("user.dir")),
     CLASS("class not set yet"),
     LIST("value not set yet");
     

@@ -139,6 +139,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 case LIST:
                     editorModel.addEditorForRow(row, new ListEditor());
                     break;
+                case TEXTFILE:
+                    editorModel.addEditorForRow(row, new TextFileEditor());
+                    break;
             }
         }
     }
