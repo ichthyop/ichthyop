@@ -423,7 +423,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void saveAsConfigurationFile() {
+    public Task saveAsConfigurationFile() {
         JFileChooser fc = new JFileChooser(getSimulationManager().getConfigurationFile());
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
@@ -434,11 +434,12 @@ public class IchthyopView extends FrameView
             File file = addExtension(fc.getSelectedFile(), "xic");
             try {
                 IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
-                loadConfigurationFile(file);
+                return loadConfigurationFile(file);
             } catch (IOException ex) {
                 Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        return null;
     }
 
     private File addExtension(File f, String extension) {
@@ -853,8 +854,8 @@ public class IchthyopView extends FrameView
     }
 
     public void setMessage(String text) {
-        //statusBar.setMessage(text);
-        //loggerScrollPane.setMessage(text);
+        statusBar.setMessage(text);
+        loggerScrollPane.setMessage(text);
     }
 
     private class MouseWheelScroller implements MouseWheelListener {
