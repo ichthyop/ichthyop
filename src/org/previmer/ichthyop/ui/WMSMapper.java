@@ -637,7 +637,6 @@ public class WMSMapper extends JXMapKit {
     }
 
     public boolean marshalAndKMZ() throws IOException {
-        kmlDocument.getFeature().add(kmlMainFolder);
         File kmzFile = new File(getKMZPath());
         if (kmzFile.exists()) {
             kmzFile.delete();
