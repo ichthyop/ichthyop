@@ -303,7 +303,7 @@ public class IchthyopView extends FrameView
         btnMapping.getAction().setEnabled(false);
         btnExportToKMZ.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
-        cbBoxVariable.setModel(new DefaultComboBoxModel(new String[] {"None"}));
+        cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
         setColorbarPanelEnabled(false);
     }
 
@@ -1014,24 +1014,28 @@ public class IchthyopView extends FrameView
 
         @Override
         protected float[] doInBackground() throws Exception {
+            if (variable.toLowerCase().matches("none")) {
+                cancel(true);
+            }
             setMessage("Estimating the range of the colorbar. Might take some time for big volume of data...", true);
             return wmsMapper.getRange(variable);
         }
 
         @Override
         void onSuccess(float[] result) {
-            if (Float.isNaN(result[0])) {
-                setMessage("Please select a variable first.");
-            } else {
-                txtFieldMin.setValue(result[0]);
-                txtFieldMax.setValue(result[1]);
-                setMessage("Range suggested [" + txtFieldMin.getText() + " - " + txtFieldMax.getText() + "]");
-            }
+            txtFieldMin.setValue(result[0]);
+            txtFieldMax.setValue(result[1]);
+            setMessage("Range suggested [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]");
         }
 
         @Override
         void onFailure(Throwable throwable) {
             setMessage("An error occurred while reading variable " + variable + " - " + throwable.getMessage());
+        }
+
+        @Override
+        protected void cancelled() {
+            setMessage("Please select a variable first.");
         }
     }
 
@@ -1044,8 +1048,6 @@ public class IchthyopView extends FrameView
         btnAutoRange.getAction().setEnabled(enabled);
         btnApplyColorbar.getAction().setEnabled(enabled);
     }
-
-
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -1492,6 +1494,8 @@ public class IchthyopView extends FrameView
             pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlMappingLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(pnlColorBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnMapping)
                     .addComponent(btnExportToKMZ))
@@ -1505,9 +1509,7 @@ public class IchthyopView extends FrameView
                 .addComponent(lblNC)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pnlWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pnlColorBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         taskPaneMapping.getContentPane().add(pnlMapping);

@@ -249,17 +249,14 @@ public class WMSMapper extends JXMapKit {
 
     public float[] getRange(String variable) throws IOException {
 
-        if (!variable.toLowerCase().contains("none")) {
-            ArrayFloat.D2 array = (D2) nc.findVariable(variable).read();
-            float[] dataset = (float[]) array.copyTo1DJavaArray();
-            double mean = getMean(dataset);
-            double stdDeviation = getStandardDeviation(dataset, mean);
-            float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
-            float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
-            return new float[]{lower, upper};
-        }
-
-        return new float[]{Float.NaN, Float.NaN};
+        ArrayFloat.D2 array = (D2) nc.findVariable(variable).read();
+        float[] dataset = (float[]) array.copyTo1DJavaArray();
+        double mean = getMean(dataset);
+        double stdDeviation = getStandardDeviation(dataset, mean);
+        float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
+        float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
+        System.out.println("mean: " + mean + " standard deviation: " + stdDeviation);
+        return new float[]{lower, upper};
     }
 
     private double getMin(float[] dataset) {
@@ -285,7 +282,9 @@ public class WMSMapper extends JXMapKit {
     private double getMean(float[] dataset) {
         double sum = 0;
         for (double num : dataset) {
-            sum += num;
+            if (!Double.isNaN(num)) {
+                sum += num;
+            }
         }
         return sum / dataset.length;
     }
@@ -293,7 +292,9 @@ public class WMSMapper extends JXMapKit {
     private double getSquareSum(float[] dataset) {
         double sum = 0;
         for (double num : dataset) {
-            sum += num * num;
+            if (!Double.isNaN(num)) {
+                sum += num * num;
+            }
         }
         return sum;
     }

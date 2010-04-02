@@ -327,7 +327,7 @@
                                   <Layout>
                                     <DimensionLayout dim="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="102" alignment="0" attributes="0">
+                                          <Group type="102" attributes="0">
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
                                                   <Component id="pnlWMS" alignment="0" max="32767" attributes="1"/>
@@ -353,6 +353,8 @@
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="pnlColorBar" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="3" attributes="0">
                                                   <Component id="btnMapping" alignment="3" min="-2" max="-2" attributes="0"/>
                                                   <Component id="btnExportToKMZ" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -368,9 +370,7 @@
                                               <Component id="lblNC" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Component id="pnlWMS" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                              <Component id="pnlColorBar" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="32767" attributes="0"/>
+                                              <EmptySpace pref="18" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>

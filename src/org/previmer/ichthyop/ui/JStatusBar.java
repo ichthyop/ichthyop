@@ -61,6 +61,7 @@ public class JStatusBar extends JXStatusBar {
         pnlProgressBar.setOpaque(false);
         statusAnimationLabel.setOpaque(false);
         lblFlag.setOpaque(false);
+        lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.grey"));
 
         pnlProgressBar.setLayout(new GridBagLayout());
         progressBar.setPreferredSize(new Dimension(150, 20));

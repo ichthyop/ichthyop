@@ -32,7 +32,14 @@ public abstract class SFTask<T, V> extends Task<T, V> {
     @Override
     protected void failed(Throwable throwable) {
         firePropertyChange("failed", null, null);
-        Logger.getLogger(SFTask.class.getName()).log(Level.SEVERE, throwable.getLocalizedMessage());
+        StackTraceElement[] stackTrace = throwable.getStackTrace();
+        StringBuffer message = new StringBuffer(throwable.getClass().getSimpleName());
+        message.append(" : ");
+        message.append(stackTrace[0].toString());
+        message.append('\n');
+        message.append("  --> ");
+        message.append(throwable.getMessage());
+        Logger.getLogger(SFTask.class.getName()).log(Level.SEVERE, message.toString());
         onFailure(throwable);
     }
 
