@@ -8,8 +8,11 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JFormattedTextField;
@@ -45,7 +48,7 @@ public class DateEditor extends DefaultCellEditor {
     public final static int DATE = 0;
     public final static int DURATION = 1;
 
-    public DateEditor(int type) {
+    public DateEditor(int type, Object value) {
         super(new JFormattedTextField());
         ftf = (JFormattedTextField) getComponent();
         dtFormat = (type == DATE)
@@ -53,7 +56,11 @@ public class DateEditor extends DefaultCellEditor {
                 : getSimulationManager().getTimeManager().getInputDurationFormat();
         dtFormat.setCalendar(getCalendar());
         ftf.setFormatterFactory(new DefaultFormatterFactory(new DateFormatter(dtFormat)));
-        ftf.setValue(0);
+        try {
+            ftf.setValue(dtFormat.parse(value.toString()));
+        } catch (ParseException ex) {
+            Logger.getLogger(DateEditor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         ftf.setHorizontalAlignment(JTextField.TRAILING);
         ftf.setFocusLostBehavior(JFormattedTextField.PERSIST);
 
