@@ -26,7 +26,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
         nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
-        is3D = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("app.transport", "dimension").matches("three dimensions"));
+        is3D = getSimulationManager().getDataset().is3D();
     }
 
     public void proceedToRelease(ReleaseEvent event) throws IOException {

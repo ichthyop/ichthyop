@@ -289,6 +289,10 @@ public class NemoDataset extends AbstractDataset {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    public boolean is3D() {
+        return true;
+    }
+
     /**
      * Reads time non-dependant fields in NetCDF dataset
      */

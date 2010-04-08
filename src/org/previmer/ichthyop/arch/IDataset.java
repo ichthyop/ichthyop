@@ -71,4 +71,6 @@ public interface IDataset extends NextStepListener {
     public double getLat(int igrid, int jgrid);
 
     public double getDepthMax();
+
+    public boolean is3D();
 }

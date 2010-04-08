@@ -196,6 +196,10 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
     abstract float getHc();
 
+    public boolean is3D() {
+        return true;
+    }
+
     void loadParameters() {
 
         strXiDim = getParameter("field_dim_xi");

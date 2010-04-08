@@ -92,6 +92,10 @@ public abstract class Mars2dDatasetCommon extends MarsDatasetCommon {
      */
     boolean FLAG_SAL;
 
+    public boolean is3D() {
+        return false;
+    }
+
     /**
      * Reads the dimensions of the NetCDF dataset
      * @throws an IOException if an error occurs while reading the dimensions.

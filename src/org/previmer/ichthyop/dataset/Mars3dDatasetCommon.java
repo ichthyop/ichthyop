@@ -151,6 +151,10 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
     static boolean FLAG_VDISP;
     float[] s_rho;
 
+    public boolean is3D() {
+        return true;
+    }
+
     public int get_nz() {
         return nz;
     }
