@@ -83,6 +83,10 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
         }
     }
 
+    public boolean canBeDeactivated() {
+        return null != getChild(ENABLED);
+    }
+
     public void setEnabled(boolean enabled) {
         if (null == getChild(ENABLED)) {
             addContent(new Element(ENABLED));

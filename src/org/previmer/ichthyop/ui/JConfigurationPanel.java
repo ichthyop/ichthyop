@@ -94,7 +94,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private void setupAdvancedEditor(XBlock block) {
 
         pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(block.getTreePath()));
-        if (block.getType().equals(BlockType.OPTION)) {
+        if (block.getType().equals(BlockType.OPTION) || !block.canBeDeactivated()) {
             ckBoxBlock.setVisible(false);
         } else {
             ckBoxBlock.setVisible(true);
