@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -138,7 +139,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     @Action
     public void reloadEditor() {
-        valueChanged(new TreeSelectionEvent(ckBoxAdvancedEditorOnly, null, true, null, null));
+        valueChanged(new TreeSelectionEvent(new JButton(), null, true, null, null));
     }
 
     private JBlockPanel getBlockEditor(XBlock block) {
@@ -173,20 +174,20 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         Application.getInstance().getContext().getTaskService().execute(new ShowConfigEditorsTask());
     }
 
-    private class ShowConfigEditorsTask extends Task<JBlockPanel, Object> {
+    private class ShowConfigEditorsTask extends Task {
 
         ShowConfigEditorsTask() {
             super(Application.getInstance());
             blockTree.setEnabled(false);
             busyLabel.setText("Loading parameter editor...");
             busyLabel.setBusy(true);
-            tabbedPane.setVisible(false);
+            pnlBlock.setVisible(false);
             pnlEditors.setLayout(new StackLayout());
             pnlEditors.add(busyLabel, StackLayout.TOP);
         }
 
         @Override
-        protected JBlockPanel doInBackground() throws Exception {
+        protected Object doInBackground() throws Exception {
 
             DefaultMutableTreeNode node = blockTree.getSelectedNode();
             if (node != null && node.isLeaf()) {
@@ -195,9 +196,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     cancel(true);
                 }
                 setupAdvancedEditor(block);
-                if (!ckBoxAdvancedEditorOnly.isSelected()) {
-                    return getBlockEditor(block);
-                }
             } else {
                 cancel(true);
             }
@@ -205,15 +203,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
 
         @Override
-        protected void succeeded(JBlockPanel blockEditor) {
-            if (tabbedPane.getTabCount() > 1) {
-                tabbedPane.remove(0);
-            }
-            if (blockEditor != null) {
-                tabbedPane.add(blockEditor, "User-friendly editor", 0);
-                blockEditor.addPropertyChangeListener("xicfile", (IchthyopView) IchthyopApp.getApplication().getMainView());
-            }
-            tabbedPane.setVisible(true);
+        protected void succeeded(Object o) {
+            pnlBlock.setVisible(true);
             splitPaneCfg.setRightComponent(scrollPaneEditors);
         }
 
@@ -421,7 +412,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnLower = new javax.swing.JButton();
         scrollPaneEditors = new javax.swing.JScrollPane();
         pnlEditors = new javax.swing.JPanel();
-        tabbedPane = new javax.swing.JTabbedPane();
         pnlBlock = new javax.swing.JPanel();
         pnlBlockInfo = new javax.swing.JPanel();
         lblBlockInfo = new javax.swing.JLabel();
@@ -436,7 +426,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRemoveValue = new javax.swing.JButton();
         srollPaneTable = new javax.swing.JScrollPane();
         table = new ParameterTable();
-        ckBoxAdvancedEditorOnly = new javax.swing.JCheckBox();
 
         blockEditor.setName("blockEditor"); // NOI18N
 
@@ -544,7 +533,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             pnlBlockTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockTreeLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 493, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -555,8 +544,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         scrollPaneEditors.setName("scrollPaneEditors"); // NOI18N
 
         pnlEditors.setName("pnlEditors"); // NOI18N
-
-        tabbedPane.setName("tabbedPane"); // NOI18N
 
         pnlBlock.setName("pnlBlock"); // NOI18N
 
@@ -576,12 +563,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             .addGroup(pnlBlockInfoLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlBlockInfoLayout.createSequentialGroup()
-                        .addComponent(ckBoxBlock)
-                        .addContainerGap(414, Short.MAX_VALUE))
-                    .addGroup(pnlBlockInfoLayout.createSequentialGroup()
-                        .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE)
-                        .addContainerGap())))
+                    .addComponent(ckBoxBlock)
+                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE))
+                .addContainerGap())
         );
         pnlBlockInfoLayout.setVerticalGroup(
             pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -607,7 +591,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 456, Short.MAX_VALUE)
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 338, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlParamDescriptionLayout.setVerticalGroup(
@@ -664,7 +648,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap()
                 .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(pnlParamDescription, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(srollPaneTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE)
+                    .addComponent(srollPaneTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
                     .addComponent(btnHiddenParameter, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlParametersLayout.createSequentialGroup()
                         .addComponent(btnUndo)
@@ -710,34 +694,19 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap()
                 .addComponent(pnlBlockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, 417, Short.MAX_VALUE)
+                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-
-        tabbedPane.addTab("Advanced editor", pnlBlock);
-
-        ckBoxAdvancedEditorOnly.setAction(actionMap.get("reloadEditor")); // NOI18N
-        ckBoxAdvancedEditorOnly.setName("ckBoxAdvancedEditorOnly"); // NOI18N
 
         javax.swing.GroupLayout pnlEditorsLayout = new javax.swing.GroupLayout(pnlEditors);
         pnlEditors.setLayout(pnlEditorsLayout);
         pnlEditorsLayout.setHorizontalGroup(
             pnlEditorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlEditorsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlEditorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 560, Short.MAX_VALUE)
-                    .addComponent(ckBoxAdvancedEditorOnly))
-                .addContainerGap())
+            .addComponent(pnlBlock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         pnlEditorsLayout.setVerticalGroup(
             pnlEditorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlEditorsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 614, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ckBoxAdvancedEditorOnly)
-                .addContainerGap())
+            .addComponent(pnlBlock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         scrollPaneEditors.setViewportView(pnlEditors);
@@ -768,7 +737,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JButton btnUndo;
     private javax.swing.JButton btnUpper;
     private org.jdesktop.swingx.JXBusyLabel busyLabel;
-    private javax.swing.JCheckBox ckBoxAdvancedEditorOnly;
     private javax.swing.JCheckBox ckBoxBlock;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JToolBar jToolBar1;
@@ -785,7 +753,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JScrollPane scrollPaneEditors;
     private javax.swing.JSplitPane splitPaneCfg;
     private javax.swing.JScrollPane srollPaneTable;
-    private javax.swing.JTabbedPane tabbedPane;
     private org.jdesktop.swingx.JXTable table;
     // End of variables declaration//GEN-END:variables
     private boolean showHiddenParameters = true;

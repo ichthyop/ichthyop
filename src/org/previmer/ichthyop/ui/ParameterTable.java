@@ -67,9 +67,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
     }
 
     public void setModel(XBlock block, TableModelListener l) {
+        getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(block));
         setEditors(block);
-        getModel().addTableModelListener(l);
         getColumnExt(XParameter.TYPE_HEADER).setVisible(false);
         getColumnExt(XParameter.HIDDEN_HEADER).setVisible(false);
         getColumnExt(XParameter.KEY_HEADER).setVisible(false);
@@ -95,6 +95,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
             }
         }, new Color(0, 255, 0, 20), Color.BLACK));
         setAllRowsVisible(false);
+        getModel().addTableModelListener(l);
     }
 
     private void setEditors(XBlock block) {
@@ -219,7 +220,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     @Override
     public void tableChanged(TableModelEvent e) {
-        super.tableChanged(e);
+        try {
+            super.tableChanged(e);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         if (null != model) {
             try {
                 if (getParameterKey(e.getLastRow()).matches("calendar_type")
