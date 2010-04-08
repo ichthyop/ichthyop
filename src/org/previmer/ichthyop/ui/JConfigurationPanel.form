@@ -260,7 +260,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="pnlBlockInfo" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="pnlParameters" max="32767" attributes="0"/>
+                              <Component id="pnlParameters" pref="428" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -284,7 +284,7 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="ckBoxBlock" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblBlockInfo" alignment="0" pref="374" max="32767" attributes="0"/>
+                                      <Component id="lblBlockInfo" alignment="0" pref="609" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
@@ -331,12 +331,11 @@
                       <Layout>
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="1" attributes="0">
+                              <Group type="102" attributes="0">
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="1" attributes="0">
-                                      <Component id="pnlParamDescription" alignment="0" max="32767" attributes="1"/>
-                                      <Component id="srollPaneTable" alignment="0" pref="374" max="32767" attributes="1"/>
-                                      <Component id="btnHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="ckBoxHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="srollPaneTable" alignment="0" pref="609" max="32767" attributes="1"/>
                                       <Group type="102" alignment="0" attributes="0">
                                           <Component id="btnUndo" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
@@ -346,6 +345,7 @@
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Component id="btnRemoveValue" min="-2" max="-2" attributes="0"/>
                                       </Group>
+                                      <Component id="pnlParamDescription" alignment="0" max="32767" attributes="1"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
@@ -354,7 +354,7 @@
                         <DimensionLayout dim="1">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
-                                  <Component id="btnHiddenParameter" min="-2" max="-2" attributes="0"/>
+                                  <Component id="ckBoxHiddenParameter" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="srollPaneTable" min="-2" pref="226" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -366,7 +366,7 @@
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="pnlParamDescription" min="-2" max="-2" attributes="1"/>
-                                  <EmptySpace max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -387,7 +387,7 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="lblParameter" pref="338" max="32767" attributes="0"/>
+                                      <Component id="lblParameter" pref="573" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                               </Group>
@@ -410,23 +410,6 @@
                             </Component>
                           </SubComponents>
                         </Container>
-                        <Component class="org.jdesktop.swingx.JXHyperlink" name="btnHiddenParameter">
-                          <Properties>
-                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="showHiddenParameters" methodName="showHiddenParameters"/>
-                            </Property>
-                            <Property name="clickedColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                              <Color blue="1" green="1" red="1" type="rgb"/>
-                            </Property>
-                            <Property name="unclickedColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                              <Color blue="1" green="1" red="1" type="rgb"/>
-                            </Property>
-                            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                              <Font name="DejaVu Sans" size="12" style="0"/>
-                            </Property>
-                            <Property name="name" type="java.lang.String" value="btnHiddenParameter" noResource="true"/>
-                          </Properties>
-                        </Component>
                         <Component class="javax.swing.JButton" name="btnUndo">
                           <Properties>
                             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -500,6 +483,17 @@
                             </Component>
                           </SubComponents>
                         </Container>
+                        <Component class="javax.swing.JCheckBox" name="ckBoxHiddenParameter">
+                          <Properties>
+                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                              <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="showHiddenParameters" methodName="showHiddenParameters"/>
+                            </Property>
+                            <Property name="font" type="java.awt.Font" noResource="true" editor="org.netbeans.beaninfo.editors.FontEditor">
+                              <Font name="DejaVu Sans" size="12" style="0"/>
+                            </Property>
+                            <Property name="name" type="java.lang.String" value="ckBoxHiddenParameter" noResource="true"/>
+                          </Properties>
+                        </Component>
                       </SubComponents>
                     </Container>
                   </SubComponents>
