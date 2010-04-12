@@ -144,6 +144,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 case TEXTFILE:
                     editorModel.addEditorForRow(row, new TextFileEditor());
                     break;
+                case ZONEFILE:
+                    editorModel.addEditorForRow(row, new ZoneEditor());
+                    break;
             }
         }
     }
@@ -210,10 +213,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
             }
         }
         for (int i = 0; i < getRowCount() - 1; i++) {
-            TableCellEditor editor =  getRowEditorModel().getEditor(i);
-            if (null != editor)
-            if (editor instanceof DateEditor) {
-                ((DateEditor) editor).setCalendar(calendar);
+            TableCellEditor editor = getRowEditorModel().getEditor(i);
+            if (null != editor) {
+                if (editor instanceof DateEditor) {
+                    ((DateEditor) editor).setCalendar(calendar);
+                }
             }
         }
     }
@@ -300,8 +304,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
 
         private Object[] getLongValues() {
-            
-            String[] longuest = new String[] {"", ""};
+
+            String[] longuest = new String[]{"", ""};
             Collection<XParameter> list = block.getXParameters();
             for (XParameter xparam : list) {
                 if (xparam.getLongName().length() > longuest[0].length()) {

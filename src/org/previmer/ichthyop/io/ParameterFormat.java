@@ -22,7 +22,8 @@ public enum ParameterFormat {
     PATH(System.getProperty("user.dir")),
     TEXTFILE(System.getProperty("user.dir")),
     CLASS("class not set yet"),
-    LIST("value not set yet");
+    LIST("value not set yet"),
+    ZONEFILE(System.getProperty("user.dir"));
     
     private String defaultValue;
 

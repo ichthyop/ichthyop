@@ -40,19 +40,19 @@ public class Zone extends SimulationManagerAccessor {
     /**
      * Lower bathymetric line [meter]
      */
-    private int inshoreLine;
+    private float inshoreLine;
     /**
      * Higher bathymetric line [meter]
      */
-    private int offshoreLine;
+    private float offshoreLine;
     /**
      *  [meter]
      */
-    private int lowerDepth;
+    private float lowerDepth;
     /**
      *  [meter]
      */
-    private int upperDepth;
+    private float upperDepth;
     /**
      * Zone index
      */
@@ -75,27 +75,27 @@ public class Zone extends SimulationManagerAccessor {
         return color;
     }
 
-    public void setInshoreLine(int inshoreLine) {
+    public void setInshoreLine(float inshoreLine) {
         this.inshoreLine = inshoreLine;
     }
 
-    public void setOffshoreLine(int offshoreLine) {
+    public void setOffshoreLine(float offshoreLine) {
         this.offshoreLine = offshoreLine;
     }
 
-    public void setLowerDepth(int lowerDepth) {
+    public void setLowerDepth(float lowerDepth) {
         this.lowerDepth = lowerDepth;
     }
 
-    public int getUpperDepth() {
+    public float getUpperDepth() {
         return upperDepth;
     }
 
-    public int getLowerDepth() {
+    public float getLowerDepth() {
         return lowerDepth;
     }
 
-    public void setUpperDepth(int upperDepth) {
+    public void setUpperDepth(float upperDepth) {
         this.upperDepth = upperDepth;
     }
 
