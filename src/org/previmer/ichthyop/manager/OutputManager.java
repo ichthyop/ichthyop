@@ -153,7 +153,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                     zoneEdges.add(iZone, makeZoneEdge(zone));
                     Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneEdges.get(iZone).size());
                     ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
-                    ncOut.addVariableAttribute("zone" + iZone, "long_name", "geoposition of zone edge");
+                    ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getKey());
                     ncOut.addVariableAttribute("zone" + iZone, "unit", "lat degree north lon degree east");
                     ncOut.addVariableAttribute("zone" + iZone, "type", zone.getType().toString());
                     String color = zone.getColor().toString();
@@ -185,7 +185,10 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private void addGlobalAttributes() {
 
         /* Add transport dimension */
-        ncOut.addGlobalAttribute("transport_dimension", getSimulationManager().getParameterManager().getParameter("app.transport", "dimension"));
+        String dim = getSimulationManager().getDataset().is3D()
+                ? "3d"
+                : "2d";
+        ncOut.addGlobalAttribute("transport_dimension", dim);
     }
 
     private List<GeoPosition> makeZoneEdge(Zone zone) {
@@ -275,7 +278,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         trackers.add(new LonTracker());
         trackers.add(new LatTracker());
         trackers.add(new MortalityTracker());
-        if (getSimulationManager().getParameterManager().getParameter("app.transport", "dimension").matches("three dimensions")) {
+        if (getSimulationManager().getDataset().is3D()) {
             trackers.add(new DepthTracker());
         }
         for (ITracker tracker : trackers) {

@@ -4,6 +4,8 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdesktop.application.Application;
@@ -32,14 +34,10 @@ public abstract class SFTask<T, V> extends Task<T, V> {
     @Override
     protected void failed(Throwable throwable) {
         firePropertyChange("failed", null, null);
-        StackTraceElement[] stackTrace = throwable.getStackTrace();
-        StringBuffer message = new StringBuffer(throwable.getClass().getSimpleName());
-        message.append(" : ");
-        message.append(stackTrace[0].toString());
-        message.append('\n');
-        message.append("  --> ");
-        message.append(throwable.getMessage());
-        Logger.getLogger(SFTask.class.getName()).log(Level.SEVERE, message.toString());
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw);
+        Logger.getLogger(SFTask.class.getName()).log(Level.SEVERE, sw.toString());
         onFailure(throwable);
     }
 

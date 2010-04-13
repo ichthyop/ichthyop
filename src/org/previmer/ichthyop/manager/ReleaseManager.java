@@ -179,6 +179,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         indexEvent = 0;
         isAllReleased = false;
         releaseProcess = null;
+        getReleaseProcess();
     }
 
     public void initializePerformed(InitializeEvent e) {

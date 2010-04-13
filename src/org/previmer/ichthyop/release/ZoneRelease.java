@@ -17,20 +17,20 @@ import java.io.IOException;
 public class ZoneRelease extends AbstractReleaseProcess {
 
     private int nbReleasedNow, nbReleaseZones, nbTotalToRelease;
-    private int nbReleaseEvents;
     private boolean is3D;
 
     public void loadParameters() {
         nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
+        is3D = getSimulationManager().getDataset().is3D();
+        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
-        nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
-        is3D = getSimulationManager().getDataset().is3D();
     }
 
     public void proceedToRelease(ReleaseEvent event) throws IOException {
 
+        int nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
         int indexEvent = event.getSource().getIndexEvent();
 
         nbReleasedNow = nbTotalToRelease / nbReleaseEvents;

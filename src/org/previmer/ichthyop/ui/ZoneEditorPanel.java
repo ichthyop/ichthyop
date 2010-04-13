@@ -133,6 +133,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         tableZone.setModel(model);
         setPanelZoneEnabled(false);
         tableZone.getSelectionModel().setSelectionInterval(0, 0);
+        tablePolygon.setCellEditor(new FloatEditor());
     }
 
     private Vector array2Vector(Collection<XZone> zones) {
@@ -215,7 +216,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         zone.getThickness().setLowerDepth((Float) txtFieldLowerDepth.getValue());
         zone.cleanupPolygon();
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
-            zone.addPoint(i, (Float) tablePolygon.getModel().getValueAt(i, 0), (Float) tablePolygon.getModel().getValueAt(i, 1));
+            zone.addPoint(i, Float.valueOf(tablePolygon.getModel().getValueAt(i, 0).toString()), Float.valueOf(tablePolygon.getModel().getValueAt(i, 1).toString()));
         }
     }
 

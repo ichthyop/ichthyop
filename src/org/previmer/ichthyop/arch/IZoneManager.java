@@ -18,6 +18,8 @@ public interface IZoneManager {
 
     public void init();
 
-    public void loadZones();
+    public void loadZonesFromFile(String filename, TypeZone type);
+
+    public void cleanup();
 
 }

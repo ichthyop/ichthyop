@@ -291,6 +291,7 @@ public class SimulationManager implements ISimulationManager {
 
     public void setup() {
         flagStop = false;
+        getZoneManager().cleanup();
         fireSetupPerformed();
     }
 

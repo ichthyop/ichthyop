@@ -40,13 +40,14 @@ public class RecruitmentAction extends AbstractAction {
 
         timeInZone = 0;
         durationMinInRecruitArea = Integer.valueOf(getParameter("duration_min"));
-        isAgeCriterion = getParameter("recruitment_criterion").matches("age_criterion");
+        isAgeCriterion = getParameter("criterion").matches("age_criterion");
         if (isAgeCriterion) {
-            ageMinAtRecruitment = Float.valueOf(getParameter("recruitment_limit_age"));
+            ageMinAtRecruitment = Float.valueOf(getParameter("limit_age"));
         } else {
-            lengthMinAtRecruitment = Float.valueOf(getParameter("recruitment_limit_length"));
+            lengthMinAtRecruitment = Float.valueOf(getParameter("limit_length"));
         }
-        stopMovingOnceRecruited = Boolean.valueOf(getParameter("recruitment_stop_moving"));
+        stopMovingOnceRecruited = Boolean.valueOf(getParameter("stop_moving"));
+        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RECRUITMENT);
     }
 
     public void execute(IBasicParticle particle) {

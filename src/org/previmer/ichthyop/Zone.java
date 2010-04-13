@@ -57,13 +57,18 @@ public class Zone extends SimulationManagerAccessor {
      * Zone index
      */
     int index;
+    /*
+     * Zone name
+     */
+    private String key;
     /**
      * Zone color (RGB)
      */
     private Color color;
 
-    public Zone(TypeZone type, int index) {
+    public Zone(TypeZone type, String key, int index) {
         this.type = type;
+        this.key = key;
         this.index = index;
     }
 
@@ -73,6 +78,10 @@ public class Zone extends SimulationManagerAccessor {
 
     public Color getColor() {
         return color;
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public void setInshoreLine(float inshoreLine) {

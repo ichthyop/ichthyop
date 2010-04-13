@@ -46,6 +46,10 @@ import javax.swing.JSpinner;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.io.ParameterFormat;
+import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -543,7 +547,9 @@ public class IchthyopView extends FrameView
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
         getSimulationManager().setConfigurationFile(file);
-        getSimulationManager().getZoneManager().loadZones();
+        /* Here I must find a way to scan all the zones related to the
+        configuration file, maybe checking all the paramters of type
+        ZONEFILE ? */
         isSetup = false;
         saveAsMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
