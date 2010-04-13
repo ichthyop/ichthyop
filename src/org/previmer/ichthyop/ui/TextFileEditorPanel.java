@@ -44,6 +44,10 @@ public class TextFileEditorPanel extends javax.swing.JPanel {
 
     public void editFile(String filename) {
         txtFieldFile.setText(filename);
+        editorPane.setText("");
+        if (!new File(filename).exists()) {
+            save();
+        }
         try {
             editorPane.read(new File(filename).toURI().toURL().openStream(), "");
         } catch (IOException ex) {
@@ -53,6 +57,34 @@ public class TextFileEditorPanel extends javax.swing.JPanel {
 
     public String getFilename() {
         return txtFieldFile.getText();
+    }
+
+    private void save() {
+        try {
+            URL url = new File(txtFieldFile.getText()).toURI().toURL();
+            if (url == null) {
+                return;
+            }
+            FileWriter fw = null;
+            try {
+                File f = new File(url.getPath());
+                fw = new FileWriter(f);
+                fw.write(editorPane.getText());
+                btnSave.setEnabled(false);
+            } catch (IOException ex) {
+                Logger.getLogger(TextFileEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if (fw != null) {
+                        fw.close();
+                    }
+                } catch (IOException ex) {
+                    //Logger.getLogger(LegendPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(TextFileEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /** This method is called from within the constructor to
@@ -125,38 +157,13 @@ public class TextFileEditorPanel extends javax.swing.JPanel {
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        try {
-            URL url = new File(txtFieldFile.getText()).toURI().toURL();
-            if (url == null) {
-                return;
-            }
-            FileWriter fw = null;
-            try {
-                File f = new File(url.getPath());
-                fw = new FileWriter(f);
-                fw.write(editorPane.getText());
-                btnSave.setEnabled(false);
-            } catch (IOException ex) {
-                Logger.getLogger(TextFileEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                try {
-                    if (fw != null) {
-                        fw.close();
-                    }
-                } catch (IOException ex) {
-                    //Logger.getLogger(LegendPanel.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(TextFileEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        save();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void editorPaneKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_editorPaneKeyTyped
         // TODO add your handling code here:
         btnSave.setEnabled(true);
     }//GEN-LAST:event_editorPaneKeyTyped
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSave;
     private javax.swing.JEditorPane editorPane;

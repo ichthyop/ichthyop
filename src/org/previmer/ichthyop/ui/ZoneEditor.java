@@ -127,7 +127,6 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
 
     private JPanel createEditorUI() {
 
-        ResourceManager rm = new ResourceManager(getClass());
         JPanel pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
         textField = new JTextField();

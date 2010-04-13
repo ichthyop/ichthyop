@@ -17,20 +17,16 @@
 package org.previmer.ichthyop.ui;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.AbstractCellEditor;
 import javax.swing.table.TableCellEditor;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JTable;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -38,14 +34,11 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -55,7 +48,8 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
 
     private TextFileEditorPanel fileEditor;
     private JDialog dialog;
-    protected static final String EDIT = "edit";
+    protected static final String EDIT = "Edit";
+    protected static final String NEW = "New";
     private JTextField textField = new JTextField();
     private JPanel panel;
     private JOptionPane optionPane;
@@ -127,13 +121,21 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         pnl.setLayout(new GridBagLayout());
         textField = new JTextField();
         textField.setEditable(true);
-        JButton btn = new JButton("...");
-        btn.setBorderPainted(false);
-        btn.setFont(btn.getFont().deriveFont(Font.PLAIN, 10));
-        btn.setActionCommand(EDIT);
-        btn.addActionListener(this);
+        JButton btnOpen = new JButton(EDIT);
+        btnOpen.setToolTipText("Edit an existing drifter file");
+        //btnOpen.setBorderPainted(false);
+        btnOpen.setFont(btnOpen.getFont().deriveFont(Font.PLAIN, 10));
+        btnOpen.setActionCommand(EDIT);
+        btnOpen.addActionListener(this);
+        JButton btnNew = new JButton(NEW);
+        btnNew.setToolTipText("Create a new drifter file");
+        //btnNew.setBorderPainted(false);
+        btnNew.setFont(btnOpen.getFont().deriveFont(Font.PLAIN, 10));
+        btnNew.setActionCommand(NEW);
+        btnNew.addActionListener(this);
         pnl.add(textField, new GridBagConstraints(0, 0, 1, 1, 100, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        pnl.add(btn, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        pnl.add(btnOpen, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        pnl.add(btnNew, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
         return pnl;
     }
 
@@ -146,12 +148,50 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         String path = textField.getText().isEmpty()
                 ? System.getProperty("user.dir")
                 : textField.getText();
-        fileChooser.setSelectedFile(new File(path));
-        int answer = fileChooser.showOpenDialog(panel);
-        if (answer == JFileChooser.APPROVE_OPTION) {
-            textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-            fileEditor.editFile(textField.getText());
-            dialog.setVisible(true);
+        
+        if (e.getActionCommand().matches(EDIT)) {
+            fileChooser.setSelectedFile(new File(path));
+            int answer = fileChooser.showOpenDialog(panel);
+            if (answer == JFileChooser.APPROVE_OPTION) {
+                textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                fileEditor.editFile(textField.getText());
+                dialog.setVisible(true);
+            }
+        } else if (e.getActionCommand().matches(NEW)) {
+            File f = new File(path);
+            if (f.isFile()) {
+                f = f.getParentFile();
+            }
+            String filename = f.getAbsolutePath();
+            if (!filename.endsWith(File.separator)) {
+                filename += File.separator + "NewTextFile.txt";
+            }
+            fileChooser.setSelectedFile(new File(filename));
+            int answer = fileChooser.showSaveDialog(panel);
+            if (answer == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                if (file.exists()) {
+                    String msg = file.getName() + " already exists. Overwrite it ?";
+
+                    int overwrite = JOptionPane.showConfirmDialog(panel, msg, "Overwrite file ?", JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch (overwrite) {
+                        case JOptionPane.YES_OPTION:
+                            file.delete();
+                            break;
+                        case JOptionPane.NO_OPTION:
+                            actionPerformed(new ActionEvent(new JButton(), 0, NEW));
+                            return;
+                        case JOptionPane.CANCEL_OPTION:
+                            fireEditingStopped();
+                            return;
+                    }
+                }
+                textField.setText(file.getAbsolutePath());
+                fileEditor.editFile(textField.getText());
+                dialog.setVisible(true);
+            } else {
+                fireEditingCanceled();
+            }
         }
     }
 
