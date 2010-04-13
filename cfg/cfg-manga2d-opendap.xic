@@ -1,40 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <icstructure>
   <block type="option">
-    <tree_path>Time/General time options</tree_path>
+    <tree_path>Main/Time</tree_path>
     <key>app.time</key>
     <description>Set the time options of the simulation.</description>
     <parameters>
-      <parameter>
-        <key>calendar_type</key>
-        <long_name>Type of calendar</long_name>
-        <value>gregorian</value>
-        <format>list</format>
-        <accepted>climato</accepted>
-        <accepted>gregorian</accepted>
-        <description>Choose the type of calendar. Climato: 360 days per year. Gregorian: the usual calendar.</description>
-      </parameter>
       <parameter type="serial">
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
         <value>year 2010 month 03 day 01 at 00:00</value>
         <format>date</format>
+        <tree_path>Tome/General time options</tree_path>
         <description>Set the date of beginning of simulation. Expressed in seconds ellapsed since the origin of time.</description>
-      </parameter>
-      <parameter>
-        <key>time_arrow</key>
-        <long_name>Direction of the simulation</long_name>
-        <value>forward</value>
-        <format>list</format>
-        <accepted>backward</accepted>
-        <accepted>forward</accepted>
-        <description>Run the simulation backward or forward in time.</description>
-      </parameter>
-      <parameter>
-        <key>time_origin</key>
-        <long_name>Origin of tile</long_name>
-        <value>1900/01/01 00:00</value>
-        <description>Origin of time for the Gregorian calendar.</description>
       </parameter>
       <parameter type="serial">
         <key>time_step</key>
@@ -50,18 +27,37 @@
         <format>duration</format>
         <description>Set the duration [second] of particle transport.</description>
       </parameter>
+      <parameter hidden="true">
+        <key>calendar_type</key>
+        <long_name>Type of calendar</long_name>
+        <value>gregorian</value>
+        <format>combo</format>
+        <accepted>climato</accepted>
+        <accepted>gregorian</accepted>
+        <tree_path>Tome/General time options</tree_path>
+        <description>Choose the type of calendar. Climato: 360 days per year. Gregorian: the usual calendar.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>time_arrow</key>
+        <long_name>Direction of the simulation</long_name>
+        <value>forward</value>
+        <format>combo</format>
+        <accepted>backward</accepted>
+        <accepted>forward</accepted>
+        <description>Run the simulation backward or forward in time.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>time_origin</key>
+        <long_name>Origin of tile</long_name>
+        <value>1900/01/01 00:00</value>
+        <description>Origin of time for the Gregorian calendar.</description>
+      </parameter>
     </parameters>
   </block>
   <block type="option">
     <key>app.output</key>
-    <tree_path>IO/Output/General output options</tree_path>
+    <tree_path>Main/Output</tree_path>
     <parameters>
-      <parameter>
-        <key>file_prefix</key>
-        <long_name>Output filename</long_name>
-        <value>irsn-manga2d-opendap</value>
-        <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc</description>
-      </parameter>
       <parameter>
         <key>output_path</key>
         <long_name>Output path</long_name>
@@ -76,45 +72,70 @@
         <format>integer</format>
         <description>Set the record frequency as a number of computational time-steps</description>
       </parameter>
-    </parameters>
-  </block>
-  <block type="tracker">
-    <key>tracker.temp</key>
-    <tree_path>IO/Output/Temperature tracker</tree_path>
-    <enabled>false</enabled>
-    <parameters>
-      <parameter>
-        <key>long_name</key>
-        <long_name>Long name</long_name>
-        <value>sea water temperature</value>
-        <description>Long name of the tracked variable.</description>
-      </parameter>
-      <parameter>
-        <key>short_name</key>
-        <long_name>Short name</long_name>
-        <value>temp</value>
-        <description>Name of the tracked variable. It must exactly match the name of the corresponding variable in the NetCDF input file.</description>
-      </parameter>
-      <parameter>
-        <key>unit</key>
-        <long_name>Unit</long_name>
-        <value>Celsius degree</value>
-        <description>Unit of the tracked variable</description>
-      </parameter>
       <parameter hidden="true">
-        <key>user_defined</key>
-        <long_name>User defined tracker</long_name>
-        <value>true</value>
-        <format>boolean</format>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+        <key>file_prefix</key>
+        <long_name>Output filename prefix</long_name>
+        <value>irsn-manga2d-opendap</value>
+        <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc</description>
       </parameter>
     </parameters>
   </block>
   <block type="dataset">
     <key>dataset.mars_2d_opendap</key>
-    <tree_path>IO/Input/MARS 2D</tree_path>
-    <enabled>true</enabled>
+    <tree_path>Main/MARS 2D OpenDAP</tree_path>
     <parameters>
+      <parameter>
+        <key>north-west-corner.lat</key>
+        <long_name>Latitude of Northwest corner</long_name>
+        <value>50.0</value>
+        <description>Set the latitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>north-west-corner.lon</key>
+        <long_name>Longitude of Northwest corner</long_name>
+        <value>-8.0</value>
+        <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>opendap_url</key>
+        <long_name>OpenDAP URL</long_name>
+        <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+        <description>Folder containing the MARS NetCDF files.</description>
+      </parameter>
+      <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>true</value>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation.</description>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lat</key>
+        <long_name>Latitude of Southeast corner</long_name>
+        <value>45.0</value>
+        <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter>
+        <key>south-east-corner.lon</key>
+        <long_name>Longitude of Southeast corner</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Southeast corner for resizing the simulated domain.</description>
+        <format>float</format>
+        <default>0.0</default>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.dataset.Mars2dOpendapDataset</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
       <parameter hidden="true">
         <key>field_dim_lat</key>
         <long_name>Dimension in the LAT-direction</long_name>
@@ -180,78 +201,36 @@
         <value>V</value>
         <description>Set the name of the corresponding NetCDF variable.</description>
       </parameter>
+    </parameters>
+  </block>
+  <block type="release">
+    <key>release.zone</key>
+    <tree_path>Main/Zone release</tree_path>
+    <enabled>true</enabled>
+    <parameters>
       <parameter>
-        <key>opendap_url</key>
-        <long_name>OpenDAP URL</long_name>
-        <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
-        <description>Folder containing the MARS NetCDF files.</description>
+        <key>number_particles</key>
+        <long_name>Number of particles</long_name>
+        <value>1000</value>
       </parameter>
       <parameter>
-        <key>shrink_domain</key>
-        <long_name>Shrink simulated domain</long_name>
-        <value>false</value>
-        <format>boolean</format>
-        <description>Shrink the size of the domain for running the simulation.</description>
-      </parameter>
-      <parameter>
-        <key>north-west-corner.lon</key>
-        <long_name>Longitude of Northwest corner</long_name>
-        <value>0.0</value>
-        <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
-      </parameter>
-      <parameter>
-        <key>north-west-corner.lat</key>
-        <long_name>Latitude of Northwest corner</long_name>
-        <value>0.0</value>
-        <description>Set the latitude of Northwest corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
-      </parameter>
-      <parameter>
-        <key>south-east-corner.lon</key>
-        <long_name>Longitude of Southeast corner</long_name>
-        <value>0.0</value>
-        <description>Set the longitude of Southeast corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
-      </parameter>
-      <parameter>
-        <key>south-east-corner.lat</key>
-        <long_name>Latitude of Southeast corner</long_name>
-        <value>0.0</value>
-        <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
+        <key>zone_file</key>
+        <long_name>Zone file</long_name>
+        <value>./cfg/zone-mars2d.xml</value>
+        <format>zonefile</format>
       </parameter>
       <parameter hidden="true">
         <key>class_name</key>
         <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.dataset.Mars2dOpendapDataset</value>
+        <value>org.previmer.ichthyop.release.ZoneRelease</value>
         <format>class</format>
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
       </parameter>
     </parameters>
   </block>
-  <block type="option">
-    <key>app.transport</key>
-    <tree_path>Transport/General transport options</tree_path>
-    <parameters>
-      <parameter>
-        <key>dimension</key>
-        <long_name>Dimension</long_name>
-        <value>two dimensions</value>
-        <format>list</format>
-        <accepted>two dimensions</accepted>
-        <accepted>three dimensions</accepted>
-        <description>Simulation in three / two dimensions.</description>
-      </parameter>
-    </parameters>
-  </block>
   <block type="action">
     <key>action.advection</key>
-    <tree_path>Transport/Advection</tree_path>
+    <tree_path>Advanced/Transport/Advection</tree_path>
     <enabled>true</enabled>
     <parameters>
       <parameter>
@@ -286,7 +265,7 @@
   </block>
   <block type="action">
     <key>action.hdisp</key>
-    <tree_path>Transport/Horizontal dispersion</tree_path>
+    <tree_path>Advanced/Transport/Horizontal dispersion</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter type="serial">
@@ -320,7 +299,7 @@
   </block>
   <block type="action">
     <key>action.vdisp</key>
-    <tree_path>Transport/Vertical dispersion</tree_path>
+    <tree_path>Advanced/Transport/Vertical dispersion</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter hidden="true">
@@ -346,7 +325,7 @@
   </block>
   <block type="action">
     <key>action.buoyancy</key>
-    <tree_path>Transport/Buoyancy</tree_path>
+    <tree_path>Advanced/Transport/Buoyancy</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter type="serial">
@@ -380,7 +359,7 @@
   </block>
   <block type="action">
     <key>action.migration</key>
-    <tree_path>Transport/Vertical migration</tree_path>
+    <tree_path>Advanced/Transport/Vertical migration</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -444,7 +423,7 @@
   </block>
   <block type="option">
     <key>release.schedule</key>
-    <tree_path>Release/Schedule</tree_path>
+    <tree_path>Advanced/Release/Schedule</tree_path>
     <parameters>
       <parameter>
         <key>event0</key>
@@ -461,27 +440,8 @@
     </parameters>
   </block>
   <block type="release">
-    <key>release.zone</key>
-    <tree_path>Release/From zone</tree_path>
-    <enabled>true</enabled>
-    <parameters>
-      <parameter>
-        <key>number_particles</key>
-        <long_name>Number of particles</long_name>
-        <value>1000</value>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.release.ZoneRelease</value>
-        <format>class</format>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="release">
     <key>release.txtfile</key>
-    <tree_path>Release/From text file</tree_path>
+    <tree_path>Advanced/Release/Drifters</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -500,7 +460,7 @@
   </block>
   <block type="option">
     <key>app.particle_length</key>
-    <tree_path>Biology/Threshold length</tree_path>
+    <tree_path>Advanced/Biology/Threshold length</tree_path>
     <parameters>
       <parameter>
         <key>hatch_length</key>
@@ -524,7 +484,7 @@
   </block>
   <block type="action">
     <key>action.lethal_temp</key>
-    <tree_path>Biology/Lethal temperature</tree_path>
+    <tree_path>Advanced/Biology/Lethal temperature</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -555,7 +515,7 @@
   </block>
   <block type="action">
     <key>action.growth</key>
-    <tree_path>Biology/Growth</tree_path>
+    <tree_path>Advanced/Biology/Growth</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -590,8 +550,8 @@
     </parameters>
   </block>
   <block type="action">
-    <key>action.recruit</key>
-    <tree_path>Biology/Recruitment</tree_path>
+    <key>action.recruitment</key>
+    <tree_path>Advanced/Biology/Recruitment</tree_path>
     <enabled>false</enabled>
     <parameters>
       <parameter>
@@ -612,7 +572,13 @@
       <parameter>
         <key>stop_moving</key>
         <long_name>Stop moving when recruited</long_name>
-        <value>true</value>
+        <value>false</value>
+      </parameter>
+      <parameter>
+        <key>zone_file</key>
+        <long_name>Zone file</long_name>
+        <value>/home/pverley/ichthyop/dev/nb/iv3/cfg/zone-mars3d.xml</value>
+        <format>zonefile</format>
       </parameter>
       <parameter hidden="true">
         <key>class_name</key>
@@ -625,7 +591,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>highest</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -634,41 +600,6 @@
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
       </parameter>
     </parameters>
-  </block>
-  <block type="zone">
-    <key>zone.release0</key>
-    <tree_path>Zones/Release zone 0</tree_path>
-    <type>release</type>
-    <index>0</index>
-    <polygon>
-      <point>
-        <lon>-2</lon>
-        <lat>49.9</lat>
-        <index>0</index>
-      </point>
-      <point>
-        <lon>-1.9</lon>
-        <lat>49.9</lat>
-        <index>1</index>
-      </point>
-      <point>
-        <lon>-1.9</lon>
-        <lat>49.8</lat>
-        <index>2</index>
-      </point>
-      <point>
-        <lon>-2</lon>
-        <lat>49.8</lat>
-        <index>3</index>
-      </point>
-    </polygon>
-    <bathy_mask>
-      <line_inshore>0</line_inshore>
-      <line_offshore>12000</line_offshore>
-      <lower_depth>100</lower_depth>
-      <upper_depth>0</upper_depth>
-    </bathy_mask>
-    <parameters />
   </block>
 </icstructure>
 
