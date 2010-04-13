@@ -53,10 +53,12 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
         for (XZone xzone : zoneFile.getZones()) {
             if (xzone.getTypeZone().equals(type)) {
                 Zone zone = new Zone(xzone.getTypeZone(), xzone.getKey(), getNewIndex());
-                zone.setOffshoreLine(xzone.getBathyMask().getOffshoreLine());
-                zone.setInshoreLine(xzone.getBathyMask().getInshoreLine());
-                zone.setLowerDepth(xzone.getThickness().getLowerDepth());
-                zone.setUpperDepth(xzone.getThickness().getUpperDepth());
+                zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());
+                zone.setOffshoreLine(xzone.getOffshoreLine());
+                zone.setInshoreLine(xzone.getInshoreLine());
+                zone.setThicknessEnabled(xzone.isThicknessEnabled());
+                zone.setLowerDepth(xzone.getLowerDepth());
+                zone.setUpperDepth(xzone.getUpperDepth());
                 zone.setColor(xzone.getColor());
                 for (XPoint point : xzone.getPolygon()) {
                     zone.addPoint(point.createRhoPoint());

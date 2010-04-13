@@ -65,6 +65,8 @@ public class Zone extends SimulationManagerAccessor {
      * Zone color (RGB)
      */
     private Color color;
+    private boolean enabledThickness;
+    private  boolean enabledBathyMask;
 
     public Zone(TypeZone type, String key, int index) {
         this.type = type;
@@ -82,6 +84,14 @@ public class Zone extends SimulationManagerAccessor {
 
     public String getKey() {
         return key;
+    }
+
+    public void setThicknessEnabled(boolean enabled) {
+        enabledThickness = enabled;
+    }
+
+    public void setBathyMaskEnabled(boolean enabled) {
+        enabledBathyMask = enabled;
     }
 
     public void setInshoreLine(float inshoreLine) {
@@ -123,11 +133,13 @@ public class Zone extends SimulationManagerAccessor {
     public boolean isParticleInZone(IBasicParticle particle) {
 
         boolean isInZone = true;
-        if (particle.getGridCoordinates().length > 2) {
+        if (particle.getGridCoordinates().length > 2 && enabledThickness) {
             isInZone = isDepthInLayer(Math.abs(particle.getDepth()));
-            //System.out.println("depth in layer " + (float)Math.abs(point.getDepth()) + " " + isDepthInLayer(Math.abs(point.getDepth())));
         }
-        isInZone = isInZone && isXYBetweenBathyLines(particle.getX(), particle.getY()) && isXYInPolygon(particle.getX(), particle.getY());
+        if (enabledBathyMask) {
+            isInZone = isInZone && isXYBetweenBathyLines(particle.getX(), particle.getY());
+        }
+        isInZone = isInZone && isXYInPolygon(particle.getX(), particle.getY());
 
         return isInZone;
     }
@@ -137,7 +149,12 @@ public class Zone extends SimulationManagerAccessor {
     }
 
     public boolean isGridPointInZone(double x, double y) {
-        return isXYInPolygon(x, y) && isXYBetweenBathyLines(x, y);
+        /*boolean isIn = true;
+        if (enabledBathyMask) {
+            isIn = isXYBetweenBathyLines(x, y);
+        }
+        return isIn && isXYInPolygon(x, y);*/
+        return isXYInPolygon(x, y);
     }
 
     private boolean isXYBetweenBathyLines(double x, double y) {

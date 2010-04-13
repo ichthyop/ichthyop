@@ -158,9 +158,9 @@ public class ZoneFile {
         return lmap;
     }
 
-    private void addZone(Content child) {
-        XZone zone = (XZone) child.detach();
-        structure.getRootElement().addContent(zone);
+    private void addZone(XZone zone) {
+        //zone.prepairForWriting();
+        structure.getRootElement().addContent(zone.detach());
     }
 
     public void removeZone(String key) {

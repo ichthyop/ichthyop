@@ -157,6 +157,9 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
         String path = textField.getText().isEmpty()
                 ? System.getProperty("user.dir")
                 : textField.getText();
+        if (path.startsWith(".")) {
+            path = System.getProperty("user.dir") + path.substring(1);
+        }
         if (e.getActionCommand().matches(EDIT)) {
             fileChooser.setSelectedFile(new File(path));
             int answer = fileChooser.showOpenDialog(panel);

@@ -23,15 +23,17 @@ public class XZone extends org.jdom.Element {
     final public static String COLOR = "color";
     final public static String KEY = "key";
     final public static String ENABLED = "enabled";
-    private XBathyMask bathyMask;
-    private XThickness thickness;
+    private static final String THICKNESS = "thickness";
+    private static final String LOWER_DEPTH = "lower_depth";
+    private static final String UPPER_DEPTH = "upper_depth";
+    private static final String BATHY_MASK = "bathy_mask";
+    private static final String LINE_INSHORE = "line_inshore";
+    private static final String LINE_OFFSHORE = "line_offshore";
 
     public XZone(Element xzone) {
         super(ZONE);
         if (xzone != null) {
             addContent(xzone.cloneContent());
-            bathyMask = new XBathyMask(getChild(XBathyMask.BATHY_MASK));
-            thickness = new XThickness(getChild(XThickness.THICKNESS));
         }
     }
 
@@ -49,13 +51,15 @@ public class XZone extends org.jdom.Element {
     }
 
     private void addBathyMask() {
-        bathyMask = new XBathyMask();
-        addContent(bathyMask);
+        this.setBathyMaskEnabled(true);
+        this.setInshoreLine(0);
+        this.setOffshoreLine(12000);
     }
 
     private void addThickness() {
-        thickness = new XThickness();
-        addContent(thickness);
+        this.setThicknessEnabled(true);
+        this.setUpperDepth(0.f);
+        this.setLowerDepth(50.f);
     }
 
     public String getKey() {
@@ -102,12 +106,12 @@ public class XZone extends org.jdom.Element {
         getChild(TYPE_ZONE).setText(type.toString());
     }
 
-    public XBathyMask getBathyMask() {
-        return bathyMask;
+    public Element getBathyMask() {
+        return getChild(BATHY_MASK);
     }
 
-    public XThickness getThickness() {
-        return thickness;
+    public Element getThickness() {
+        return getChild(THICKNESS);
     }
 
     public Color getColor() {
@@ -169,113 +173,77 @@ public class XZone extends org.jdom.Element {
         getChild(INDEX).setText(String.valueOf(index));
     }
 
-    public class XThickness extends org.jdom.Element {
-
-        private static final String THICKNESS = "thickness";
-        private static final String LOWER_DEPTH = "lower_depth";
-        private static final String UPPER_DEPTH = "upper_depth";
-
-        XThickness(Element xBathyMask) {
-            super(THICKNESS);
-            if (xBathyMask != null) {
-                addContent(xBathyMask.cloneContent());
-            }
-        }
-
-        XThickness() {
-            super(THICKNESS);
-            setEnabled(true);
-            setUpperDepth(0);
-            setLowerDepth(50);
-        }
-
-        public float getLowerDepth() {
-            return Float.valueOf(getChildTextNormalize(LOWER_DEPTH));
-        }
-
-        public void setLowerDepth(float depth) {
-            if (null == getChild(LOWER_DEPTH)) {
-                addContent(new Element(LOWER_DEPTH));
-            }
-            getChild(LOWER_DEPTH).setText(String.valueOf(depth));
-        }
-
-        public float getUpperDepth() {
-            return Float.valueOf(getChildTextNormalize(UPPER_DEPTH));
-        }
-
-        public void setUpperDepth(float depth) {
-            if (null == getChild(UPPER_DEPTH)) {
-                addContent(new Element(UPPER_DEPTH));
-            }
-            getChild(UPPER_DEPTH).setText(String.valueOf(depth));
-        }
-
-        public boolean isEnabled() {
-            return Boolean.valueOf(getChildTextNormalize(ENABLED));
-        }
-
-        public void setEnabled(boolean enabled) {
-            if (null == getChild(ENABLED)) {
-                addContent(new Element(ENABLED));
-            }
-            getChild(ENABLED).setText(String.valueOf(enabled));
-        }
+    /*
+     * Thickness 
+     */
+    public float getLowerDepth() {
+        return Float.valueOf(getThickness().getChildTextNormalize(LOWER_DEPTH));
     }
 
-    public class XBathyMask extends org.jdom.Element {
-
-        private static final String BATHY_MASK = "bathy_mask";
-        private static final String LINE_INSHORE = "line_inshore";
-        private static final String LINE_OFFSHORE = "line_offshore";
-
-        XBathyMask(Element xBathyMask) {
-            super(BATHY_MASK);
-            if (xBathyMask != null) {
-                addContent(xBathyMask.cloneContent());
-            }
+    public void setLowerDepth(float depth) {
+        if (null == getThickness().getChild(LOWER_DEPTH)) {
+            getThickness().addContent(new Element(LOWER_DEPTH));
         }
+        getThickness().getChild(LOWER_DEPTH).setText(String.valueOf(depth));
+    }
 
-        XBathyMask() {
-            super(BATHY_MASK);
-            setEnabled(false);
-            setInshoreLine(0);
-            setOffshoreLine(12000);
+    public float getUpperDepth() {
+        return Float.valueOf(getThickness().getChildTextNormalize(UPPER_DEPTH));
+    }
+
+    public void setUpperDepth(float depth) {
+        if (null == getThickness().getChild(UPPER_DEPTH)) {
+            getThickness().addContent(new Element(UPPER_DEPTH));
         }
+        getThickness().getChild(UPPER_DEPTH).setText(String.valueOf(depth));
+    }
 
-        public float getInshoreLine() {
-            return Float.valueOf(getChildTextNormalize(LINE_INSHORE));
+    public boolean isThicknessEnabled() {
+        return Boolean.valueOf(getThickness().getChildTextNormalize(ENABLED));
+    }
+
+    public void setThicknessEnabled(boolean enabled) {
+        if (null == getThickness().getChild(ENABLED)) {
+            getThickness().addContent(new Element(ENABLED));
+        }
+        getThickness().getChild(ENABLED).setText(String.valueOf(enabled));
+    }
+
+    /*
+     * BathyMask
+     */
+    public float getInshoreLine() {
+            return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_INSHORE));
         }
 
         public void setInshoreLine(float depth) {
-            if (null == getChild(LINE_INSHORE)) {
-                addContent(new Element(LINE_INSHORE));
+            if (null == getBathyMask().getChild(LINE_INSHORE)) {
+                getBathyMask().addContent(new Element(LINE_INSHORE));
             }
-            getChild(LINE_INSHORE).setText(String.valueOf(depth));
+            getBathyMask().getChild(LINE_INSHORE).setText(String.valueOf(depth));
         }
 
         public float getOffshoreLine() {
-            return Float.valueOf(getChildTextNormalize(LINE_OFFSHORE));
+            return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_OFFSHORE));
         }
 
         public void setOffshoreLine(float depth) {
-            if (null == getChild(LINE_OFFSHORE)) {
-                addContent(new Element(LINE_OFFSHORE));
+            if (null == getBathyMask().getChild(LINE_OFFSHORE)) {
+                getBathyMask().addContent(new Element(LINE_OFFSHORE));
             }
-            getChild(LINE_OFFSHORE).setText(String.valueOf(depth));
+            getBathyMask().getChild(LINE_OFFSHORE).setText(String.valueOf(depth));
         }
 
-        public boolean isEnabled() {
-            return Boolean.valueOf(getChildTextNormalize(ENABLED));
+        public boolean isBathyMaskEnabled() {
+            return Boolean.valueOf(getBathyMask().getChildTextNormalize(ENABLED));
         }
 
-        public void setEnabled(boolean enabled) {
-            if (null == getChild(ENABLED)) {
-                addContent(new Element(ENABLED));
+        public void setBathyMaskEnabled(boolean enabled) {
+            if (null == getBathyMask().getChild(ENABLED)) {
+                getBathyMask().addContent(new Element(ENABLED));
             }
-            getChild(ENABLED).setText(String.valueOf(enabled));
+            getBathyMask().getChild(ENABLED).setText(String.valueOf(enabled));
         }
-    }
 
     public class XPoint extends org.jdom.Element {
 

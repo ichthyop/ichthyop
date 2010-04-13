@@ -161,12 +161,12 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         ckBoxEnabled.setSelected(zone.isEnabled());
         cbBoxType.setSelectedItem(zone.getTypeZone());
         repaintBtnColor(zone.getColor());
-        txtFieldUpperDepth.setValue(zone.getThickness().getUpperDepth());
-        txtFieldLowerDepth.setValue(zone.getThickness().getLowerDepth());
-        txtFieldInshore.setValue(zone.getBathyMask().getInshoreLine());
-        txtFieldOffshore.setValue(zone.getBathyMask().getOffshoreLine());
-        ckBoxBathyMask.setSelected(zone.getBathyMask().isEnabled());
-        ckBoxThickness.setSelected(zone.getThickness().isEnabled());
+        txtFieldUpperDepth.setValue(zone.getUpperDepth());
+        txtFieldLowerDepth.setValue(zone.getLowerDepth());
+        txtFieldInshore.setValue(zone.getInshoreLine());
+        txtFieldOffshore.setValue(zone.getOffshoreLine());
+        ckBoxBathyMask.setSelected(zone.isBathyMaskEnabled());
+        ckBoxThickness.setSelected(zone.isThicknessEnabled());
         txtFieldUpperDepth.setEnabled(ckBoxThickness.isSelected());
         txtFieldLowerDepth.setEnabled(ckBoxThickness.isSelected());
         txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
@@ -215,12 +215,12 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         zone.setEnabled(ckBoxEnabled.isSelected());
         zone.setColor(btnColor.getBackground());
         zone.setType((TypeZone) cbBoxType.getSelectedItem());
-        zone.getBathyMask().setEnabled(ckBoxBathyMask.isSelected());
-        zone.getBathyMask().setInshoreLine(Float.valueOf(txtFieldInshore.getText()));
-        zone.getBathyMask().setInshoreLine(Float.valueOf(txtFieldOffshore.getText()));
-        zone.getThickness().setEnabled(ckBoxThickness.isSelected());
-        zone.getThickness().setUpperDepth(Float.valueOf(txtFieldUpperDepth.getText()));
-        zone.getThickness().setLowerDepth(Float.valueOf(txtFieldLowerDepth.getText()));
+        zone.setBathyMaskEnabled(ckBoxBathyMask.isSelected());
+        zone.setInshoreLine(Float.valueOf(txtFieldInshore.getText()));
+        zone.setOffshoreLine(Float.valueOf(txtFieldOffshore.getText()));
+        zone.setThicknessEnabled(ckBoxThickness.isSelected());
+        zone.setUpperDepth(Float.valueOf(txtFieldUpperDepth.getText()));
+        zone.setLowerDepth(Float.valueOf(txtFieldLowerDepth.getText()));
         zone.cleanupPolygon();
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             zone.addPoint(i, Float.valueOf(tablePolygon.getModel().getValueAt(i, 0).toString()), Float.valueOf(tablePolygon.getModel().getValueAt(i, 1).toString()));
