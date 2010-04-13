@@ -40,10 +40,23 @@ public class ZoneFile {
     private File file;
     private Document structure;
     private HashMap<String, XZone> zones;
+    private final static String ZONES = "zones";
 
     public ZoneFile(File file) {
         this.file = file;
-        load();
+        if (file.exists()) {
+            load();
+        } else {
+            structure = new Document(new Element(ZONES));
+            zones = new HashMap();
+            try {
+                save(new String[]{});
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     public File getFile() {

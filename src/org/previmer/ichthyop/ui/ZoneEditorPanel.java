@@ -132,8 +132,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         model.setDataVector(array2Vector(zoneFile.getZones()), dummyHeader);
         tableZone.setModel(model);
         setPanelZoneEnabled(false);
-        tableZone.getSelectionModel().setSelectionInterval(0, 0);
         tablePolygon.setCellEditor(new FloatEditor());
+        if (tableZone.getRowCount() > 0) {
+            tableZone.getSelectionModel().setSelectionInterval(0, 0);
+        }
+        addChangeListeners(this, this);
     }
 
     private Vector array2Vector(Collection<XZone> zones) {
@@ -204,16 +207,20 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         txtFieldLowerDepth.setEnabled(enabled);
     }
 
+    public void save() {
+        btnSave.doClick();
+    }
+
     private void updateZone(XZone zone) {
         zone.setEnabled(ckBoxEnabled.isSelected());
         zone.setColor(btnColor.getBackground());
         zone.setType((TypeZone) cbBoxType.getSelectedItem());
         zone.getBathyMask().setEnabled(ckBoxBathyMask.isSelected());
-        zone.getBathyMask().setInshoreLine((Float) txtFieldInshore.getValue());
-        zone.getBathyMask().setInshoreLine((Float) txtFieldOffshore.getValue());
+        zone.getBathyMask().setInshoreLine(Float.valueOf(txtFieldInshore.getText()));
+        zone.getBathyMask().setInshoreLine(Float.valueOf(txtFieldOffshore.getText()));
         zone.getThickness().setEnabled(ckBoxThickness.isSelected());
-        zone.getThickness().setUpperDepth((Float) txtFieldUpperDepth.getValue());
-        zone.getThickness().setLowerDepth((Float) txtFieldLowerDepth.getValue());
+        zone.getThickness().setUpperDepth(Float.valueOf(txtFieldUpperDepth.getText()));
+        zone.getThickness().setLowerDepth(Float.valueOf(txtFieldLowerDepth.getText()));
         zone.cleanupPolygon();
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             zone.addPoint(i, Float.valueOf(tablePolygon.getModel().getValueAt(i, 0).toString()), Float.valueOf(tablePolygon.getModel().getValueAt(i, 1).toString()));
@@ -575,7 +582,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Thickness"));
         jPanel6.setName("jPanel6"); // NOI18N
 
-        txtFieldUpperDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldUpperDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat(""))));
         txtFieldUpperDepth.setName("txtFieldUpperDepth"); // NOI18N
 
         ckBoxThickness.setText("Activated");
@@ -592,7 +599,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblLowerDepth.setText("Lower depth [meter]");
         lblLowerDepth.setName("lblLowerDepth"); // NOI18N
 
-        txtFieldLowerDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldLowerDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat(""))));
         txtFieldLowerDepth.setName("txtFieldLowerDepth"); // NOI18N
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -916,7 +923,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         if (index < 0) {
             index = tableZone.getRowCount();
         }
-        String newZone = "New zone " + increment++;
+        String newZone = "New zone " + tableZone.getRowCount();
         model.insertRow(index, new String[]{newZone});
         zoneFile.addZone(newZone);
         tableZone.setRowSelectionInterval(index, index);
@@ -1141,7 +1148,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private ZoneFile zoneFile;
     private XZone zone;
     private boolean hasZoneChanged = false;
-    private int increment = 0;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame();

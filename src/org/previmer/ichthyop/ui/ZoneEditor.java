@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.previmer.ichthyop.ui;
 
 import javax.swing.AbstractCellEditor;
@@ -50,7 +49,8 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
 
     private ZoneEditorPanel zoneEditor;
     private JDialog dialog;
-    protected static final String EDIT = "edit";
+    protected static final String EDIT = "Edit";
+    protected static final String NEW = "New";
     private JTextField textField = new JTextField();
     private JPanel panel;
     private JOptionPane optionPane;
@@ -103,8 +103,11 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
 
                             int answer = ((Integer) value).intValue();
                             if (answer == JOptionPane.OK_OPTION) {
+                                zoneEditor.save();
                                 textField.setText(zoneEditor.getFilename());
                                 fireEditingStopped();
+                            } else {
+                                fireEditingCanceled();
                             }
 
                             //If you were going to check something
@@ -123,17 +126,27 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
     }
 
     private JPanel createEditorUI() {
+
+        ResourceManager rm = new ResourceManager(getClass());
         JPanel pnl = new JPanel();
         pnl.setLayout(new GridBagLayout());
         textField = new JTextField();
         textField.setEditable(true);
-        JButton btn = new JButton("...");
-        btn.setBorderPainted(false);
-        btn.setFont(btn.getFont().deriveFont(Font.PLAIN, 10));
-        btn.setActionCommand(EDIT);
-        btn.addActionListener(this);
+        JButton btnOpen = new JButton(EDIT);
+        btnOpen.setToolTipText("Edit an existing zone file");
+        //btnOpen.setBorderPainted(false);
+        btnOpen.setFont(btnOpen.getFont().deriveFont(Font.PLAIN, 10));
+        btnOpen.setActionCommand(EDIT);
+        btnOpen.addActionListener(this);
+        JButton btnNew = new JButton(NEW);
+        btnNew.setToolTipText("Create a new zone file");
+        //btnNew.setBorderPainted(false);
+        btnNew.setFont(btnOpen.getFont().deriveFont(Font.PLAIN, 10));
+        btnNew.setActionCommand(NEW);
+        btnNew.addActionListener(this);
         pnl.add(textField, new GridBagConstraints(0, 0, 1, 1, 100, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        pnl.add(btn, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        pnl.add(btnOpen, new GridBagConstraints(1, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+        pnl.add(btnNew, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.EAST, GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
         return pnl;
     }
 
@@ -142,16 +155,54 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
      * the dialog's OK button.
      */
     public void actionPerformed(ActionEvent e) {
-
         String path = textField.getText().isEmpty()
                 ? System.getProperty("user.dir")
                 : textField.getText();
-        fileChooser.setSelectedFile(new File(path));
-        int answer = fileChooser.showOpenDialog(panel);
-        if (answer == JFileChooser.APPROVE_OPTION) {
-            textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-            zoneEditor.loadZonesFromFile(fileChooser.getSelectedFile());
-            dialog.setVisible(true);
+        if (e.getActionCommand().matches(EDIT)) {
+            fileChooser.setSelectedFile(new File(path));
+            int answer = fileChooser.showOpenDialog(panel);
+            if (answer == JFileChooser.APPROVE_OPTION) {
+                textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                zoneEditor.loadZonesFromFile(fileChooser.getSelectedFile());
+                dialog.setVisible(true);
+            } else {
+                fireEditingCanceled();
+            }
+        } else if (e.getActionCommand().matches(NEW)) {
+            File f = new File(path);
+            if (f.isFile()) {
+                f = f.getParentFile();
+            }
+            String filename = f.getAbsolutePath();
+            if (!filename.endsWith(File.separator)) {
+                filename += File.separator + "NewZoneFile.xml";
+            }
+            fileChooser.setSelectedFile(new File(filename));
+            int answer = fileChooser.showSaveDialog(panel);
+            if (answer == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                if (file.exists()) {
+                    String msg = file.getName() + " already exists. Overwrite it ?";
+
+                    int overwrite = JOptionPane.showConfirmDialog(panel, msg, "Overwrite file ?", JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch (overwrite) {
+                        case JOptionPane.YES_OPTION:
+                            file.delete();
+                            break;
+                        case JOptionPane.NO_OPTION:
+                            actionPerformed(new ActionEvent(new JButton(), 0, NEW));
+                            return;
+                        case JOptionPane.CANCEL_OPTION:
+                            fireEditingStopped();
+                            return;
+                    }
+                }
+                textField.setText(file.getAbsolutePath());
+                zoneEditor.loadZonesFromFile(file);
+                dialog.setVisible(true);
+            } else {
+                fireEditingCanceled();
+            }
         }
     }
 
@@ -168,5 +219,4 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
         textField.setText(value.toString());
         return panel;
     }
-
 }
