@@ -44,6 +44,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import org.jdesktop.application.ResourceMap;
 
 /**
  *
@@ -67,6 +68,8 @@ public class ListEditor extends AbstractCellEditor implements ActionListener, Ta
                 JOptionPane.PLAIN_MESSAGE,
                 JOptionPane.OK_CANCEL_OPTION);
         dialog = new JDialog(new JFrame(), false);
+        dialog.setTitle(getResource().getString("ListEditor.title"));
+        dialog.setIconImage(getResource().getImageIcon("Application.icon").getImage());
         dialog.setLocation(MouseInfo.getPointerInfo().getLocation());
         dialog.setContentPane(optionPane);
         dialog.setDefaultCloseOperation(
@@ -115,6 +118,10 @@ public class ListEditor extends AbstractCellEditor implements ActionListener, Ta
         dialog.pack();
         panel = createEditorUI();
 
+    }
+
+    private ResourceMap getResource() {
+        return IchthyopApp.getApplication().getContext().getResourceMap();
     }
 
     private JPanel createEditorUI() {

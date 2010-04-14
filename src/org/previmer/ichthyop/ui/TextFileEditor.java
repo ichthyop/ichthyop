@@ -39,6 +39,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.jdesktop.application.ResourceMap;
 
 /**
  *
@@ -66,6 +67,8 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
                 JOptionPane.PLAIN_MESSAGE,
                 JOptionPane.OK_CANCEL_OPTION);
         dialog = new JDialog(new JFrame(), false);
+        dialog.setTitle(getResource().getString("TextfileEditor.title"));
+        dialog.setIconImage(getResource().getImageIcon("Application.icon").getImage());
         dialog.setLocation(MouseInfo.getPointerInfo().getLocation());
         dialog.setContentPane(optionPane);
         dialog.setDefaultCloseOperation(
@@ -114,6 +117,10 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         dialog.pack();
         panel = createEditorUI();
 
+    }
+
+    private ResourceMap getResource() {
+        return IchthyopApp.getApplication().getContext().getResourceMap();
     }
 
     private JPanel createEditorUI() {
