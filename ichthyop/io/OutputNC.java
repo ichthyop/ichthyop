@@ -435,6 +435,7 @@ public class OutputNC {
             e.printStackTrace();
         } catch (NullPointerException e) {
         }
+        ncOut = null;
     }
 
     /**
@@ -582,7 +583,7 @@ public class OutputNC {
         ZGRID("zgrid", "coordinate in z", "scalar", DataType.DOUBLE),
         TIME("time", "time in second since origin", "second",
         Configuration.getTimeOrigin(), Configuration.getCalendar(),
-        DataType.DOUBLE, 1),
+        DataType.DOUBLE, 1, true),
         TEMPERATURE("temp", "water temperature at particle location",
         "celsius",
         DataType.FLOAT),
@@ -591,7 +592,7 @@ public class OutputNC {
         LENGTH("length", "particle length", "millimeter",
         DataType.FLOAT),
         RELEASE_ZONE("release_zone", "release zone number at particle location",
-        "release zone > 0, out zone = 0", null, null, DataType.INT, new Dimension[] {drifter}),
+        "release zone > 0, out zone = 0", null, null, DataType.INT, 1, false),
         RECRUITMENT_ZONE("recruitment_zone", "recruitment zone number at particle location",
         "recruitment zone > 0, out zone = 0",
         DataType.INT),
@@ -640,10 +641,7 @@ public class OutputNC {
          * Number of dimensions of the variable
          */
         private final int nb_dimensions;
-        /**
-         * List of dimensions
-         */
-        private final List<Dimension> dimensions;
+        private final boolean isUnlimited;
 
         ///////////////
         // Constructors
@@ -658,7 +656,7 @@ public class OutputNC {
          * @param type a DataType, the variable data type
          */
         Field(String name, String description, String unit, DataType type) {
-            this(name, description, unit, null, null, type, 2);
+            this(name, description, unit, null, null, type, 2, true);
         }
 
         /**
@@ -673,7 +671,7 @@ public class OutputNC {
          */
         Field(String name, String description, String unit, DataType type,
                 int nb_dimensions) {
-            this(name, description, unit, null, null, type, nb_dimensions);
+            this(name, description, unit, null, null, type, nb_dimensions, true);
         }
 
         /**
@@ -688,7 +686,7 @@ public class OutputNC {
          * @param attribute2 a String for the second additional attribute
          */
         Field(String name, String description, String unit, String attribute1,
-                String attribute2, DataType type, int nb_dimensions) {
+                String attribute2, DataType type, int nb_dimensions, boolean isUnlimited) {
 
             this.short_name = name;
             this.long_name = description;
@@ -697,24 +695,7 @@ public class OutputNC {
             this.attribute1 = attribute1;
             this.attribute2 = attribute2;
             this.nb_dimensions = nb_dimensions;
-            dimensions = createDimensions();
-        }
-
-        Field(String name, String description, String unit, String attribute1,
-                String attribute2, DataType type, Dimension[] dimensions) {
-
-            this.short_name = name;
-            this.long_name = description;
-            this.unit = unit;
-            this.type = type;
-            this.attribute1 = attribute1;
-            this.attribute2 = attribute2;
-            this.nb_dimensions = dimensions.length;
-            this.dimensions = new ArrayList(nb_dimensions);
-            for (Dimension dimension : dimensions) {
-                this.dimensions.add(dimension);
-
-            }
+            this.isUnlimited = true;
         }
 
         ////////////////////////////
@@ -773,17 +754,12 @@ public class OutputNC {
          * @return the List of the variable {@code Dimension}s
          */
         public List<Dimension> dimensions() {
-            return dimensions;
-        }
-
-        /**
-         * Create the list of the variable dimensions.
-         * @return the List of the variable {@code Dimension}s
-         */
-        private List<Dimension> createDimensions() {
-
             ArrayList<Dimension> arrDimensions = new ArrayList<Dimension>(nb_dimensions);
-            arrDimensions.add(time);
+            if (isUnlimited) {
+                arrDimensions.add(time);
+            } else if(nb_dimensions == 1) {
+                arrDimensions.add(drifter);
+            }
             if (nb_dimensions >= 2) {
                 arrDimensions.add(drifter);
             }
