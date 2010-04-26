@@ -560,11 +560,6 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void showChartsPopup() {
-        //popupCharts.show(btnCharts, 0, btnCharts.getHeight());
-    }
-
-    @Action
     public void first() {
         sliderTime.setValue(0);
     }
@@ -769,7 +764,7 @@ public class IchthyopView extends FrameView
                 bln = true;
             }
             pnlProgress.printProgress();
-            //setMessage(getSimulationManager().getTimeManager().stepToString() + " - Time " + getSimulationManager().getTimeManager().timeToString());
+            setMessage(getSimulationManager().getTimeManager().stepToString() + " - Time " + getSimulationManager().getTimeManager().timeToString());
         }
 
         @Override

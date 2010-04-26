@@ -52,7 +52,8 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
         }
         for (XZone xzone : zoneFile.getZones()) {
             if (xzone.getTypeZone().equals(type)) {
-                Zone zone = new Zone(xzone.getTypeZone(), xzone.getKey(), getNewIndex());
+                int index = map.get(type).size();
+                Zone zone = new Zone(xzone.getTypeZone(), xzone.getKey(), index);
                 zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());
                 zone.setOffshoreLine(xzone.getOffshoreLine());
                 zone.setInshoreLine(xzone.getInshoreLine());
@@ -66,14 +67,6 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
                 map.get(type).add(zone);
             }
         }
-    }
-
-    private int getNewIndex() {
-        int index = 0;
-        for (ArrayList<Zone> zones : map.values()) {
-            index += zones.size();
-        }
-        return index;
     }
 
     public void init() {

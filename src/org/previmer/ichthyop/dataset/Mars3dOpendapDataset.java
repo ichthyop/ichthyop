@@ -18,6 +18,7 @@ public class Mars3dOpendapDataset extends Mars3dDatasetCommon {
 
     public void setUp() {
        loadParameters();
+       clearRequiredVariables();
 
         try {
             open(getParameter("opendap_url"));
@@ -40,6 +41,7 @@ public class Mars3dOpendapDataset extends Mars3dDatasetCommon {
         try {
             long t0 = getSimulationManager().getTimeManager().get_tO();
             FLAG_TP = FLAG_SAL = FLAG_VDISP = false;
+            checkRequiredVariable(ncIn);
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
@@ -60,9 +62,6 @@ public class Mars3dOpendapDataset extends Mars3dDatasetCommon {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         zeta_tp0 = zeta_tp1;
-        temp_tp0 = temp_tp1;
-        salt_tp0 = salt_tp1;
-        kv_tp0 = kv_tp1;
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
         }

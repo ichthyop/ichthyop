@@ -52,8 +52,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private int i_record;
     private boolean isRecord;
     private int record_frequency;
-    List<GeoPosition> region;
-    List<List<GeoPosition>> zoneEdges;
+    private List<GeoPosition> region;
+    private List<List<GeoPosition>> zoneEdges;
     private Dimension latlonDim;
     /**
      * Object for creating/writing netCDF files.
@@ -63,6 +63,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
      *
      */
     private List<ITracker> trackers;
+    private List<Class> requestedTrackers;
 
     private OutputManager() {
         super();
@@ -272,6 +273,10 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         return lregion;
     }
 
+    public void addTracker(Class trackerClass) {
+        requestedTrackers.add(trackerClass);
+    }
+
     private void addAppTrackers() {
         trackers = new ArrayList();
         trackers.add(new TimeTracker());
@@ -280,6 +285,15 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         trackers.add(new MortalityTracker());
         if (getSimulationManager().getDataset().is3D()) {
             trackers.add(new DepthTracker());
+        }
+        /* Add trackers requested by external actions */
+        for (Class trackerClass : requestedTrackers) {
+            try {
+                    ITracker tracker = (ITracker) trackerClass.newInstance();
+                    trackers.add(tracker);
+                } catch (Exception ex) {
+                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
         }
         for (ITracker tracker : trackers) {
             addVar2NcOut(tracker);
@@ -368,6 +382,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                 record_frequency = Integer.valueOf(getParameter("record_frequency"));
                 ncOut.setLocation(getFileLocation());
                 getDimensionFactory().resetDimensions();
+                requestedTrackers = new ArrayList();
             } catch (IOException ex) {
                 Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -398,8 +413,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     public class NCDimFactory {
 
         private Dimension time, drifter;
-        private Hashtable<TypeZone, Dimension> zoneDimension = new Hashtable();
-        private Hashtable<String, Dimension> dimensions = new Hashtable();
+        private Hashtable<TypeZone, Dimension> zoneDimension;
+        private Hashtable<String, Dimension> dimensions;
 
         private void fillHashtable() {
             dimensions.put(time.getName(), time);
@@ -415,7 +430,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             }
             if (dimensions.containsKey(dim.getName())) {
                 if (dim.getLength() != dimensions.get(dim.getName()).getLength()) {
-                    throw new IllegalArgumentException("Variable name (" + dim.getName() + ") has already been defined with a different length.");
+                    throw new IllegalArgumentException("Dimension (" + dim.getName() + ") has already been defined with a different length.");
                 } else {
                     return dimensions.get(dim.getName());
                 }
@@ -441,6 +456,9 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         }
 
         public Dimension getZoneDimension(TypeZone type) {
+            if (null == zoneDimension) {
+                zoneDimension = new Hashtable();
+            }
             if (null == zoneDimension.get(type)) {
                 String name = type.toString() + "_zone";
                 zoneDimension.put(type, ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size()));

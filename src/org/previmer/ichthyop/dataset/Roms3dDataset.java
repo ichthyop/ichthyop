@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.logging.Level;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
@@ -90,33 +91,9 @@ public abstract class Roms3dDataset extends AbstractDataset {
      */
     static float[][][] w_tp1;
     /**
-     * Water salinity at time t + dt
-     */
-    private static float[][][] salt_tp1;
-    /**
-     * Water salinity at current time
-     */
-    private static float[][][] salt_tp0;
-    /**
-     * Water temperature at current time
-     */
-    private static float[][][] temp_tp0;
-    /**
-     * Water temperature at time t + dt
-     */
-    private static float[][][] temp_tp1;
-    /**
      *
      */
     private double[][] pm, pn;
-    /**
-     * Vertical diffusion coefficient at time t + dt
-     */
-    private float[][][] kv_tp1;
-    /**
-     * Vertical diffusion coefficient at current time
-     */
-    private float[][][] kv_tp0;
     /**
      * Depth at rho point
      */
@@ -163,7 +140,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strU, strV, strTp, strSal, strTime, strZeta;
+    static String strU, strV, strTime, strZeta;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -171,30 +148,49 @@ public abstract class Roms3dDataset extends AbstractDataset {
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strKv;
     String strCs_r, strCs_w, strSc_r, strSc_w, strPn, strPm;
-    /**
-     * Determines whether or not the temperature field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    private static boolean FLAG_TP;
-    /**
-     * Determines whether or not the salinity field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    private static boolean FLAG_SAL;
     /**
      * Determines whether or not the turbulent diffusivity should be read in the
      * NetCDF file, function of the user's options.
      */
-    private static boolean FLAG_VDISP;
     private String gridFile;
     /**
      * Geographical boundary of the domain
      */
     private double latMin, lonMin, latMax, lonMax, depthMax;
+    /*
+     *
+     */
+    HashMap<String, RequiredVariable> requiredVariables;
 
     abstract float getHc();
+
+    public Number get(String variableName, double[] pGrid, double time) {
+        return requiredVariables.get(variableName).get(pGrid, time);
+    }
+
+    public void requireVariable(String name) {
+        if (!requiredVariables.containsKey(name)) {
+            requiredVariables.put(name, new RequiredVariable(name));
+        }
+    }
+
+    public void clearRequiredVariables() {
+        if (requiredVariables != null) {
+            requiredVariables.clear();
+        } else {
+            requiredVariables = new HashMap();
+        }
+    }
+
+    public void checkRequiredVariable() {
+        for (RequiredVariable variable : requiredVariables.values()) {
+            //System.out.println(variable.getName()  + " " + variable.checked(nc));
+            if (!variable.checked(ncIn)) {
+                requiredVariables.remove(variable.getName());
+            }
+        }
+    }
 
     public boolean is3D() {
         return true;
@@ -213,10 +209,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strZeta = getParameter("field_var_zeta");
-        strTp = getParameter("field_var_temp");
-        strSal = getParameter("field_var_salt");
         strTime = getParameter("field_var_time");
-        strKv = getParameter("field_var_kv");
         strPn = getParameter("field_var_pn");
         strPm = getParameter("field_var_pm");
         strCs_r = getParameter("field_attrib_csr");
@@ -283,6 +276,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
     public void setUp() {
 
         loadParameters();
+        clearRequiredVariables();
 
         try {
             openLocation(getParameter("input_path"));
@@ -305,7 +299,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         try {
             long t0 = getSimulationManager().getTimeManager().get_tO();
             open(getFile(t0));
-            FLAG_TP = FLAG_SAL = FLAG_VDISP = true;
+            checkRequiredVariable();
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
@@ -332,12 +326,12 @@ public abstract class Roms3dDataset extends AbstractDataset {
                         timeArr.getLong(timeArr.getIndex().set(lrank)));
             }
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + ncIn.getLocation().toString() + " : " +
-                    e.getCause());
+            throw new IOException("Problem reading file " + ncIn.getLocation().toString() + " : "
+                    + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                    " variable in file " + ncIn.getLocation().toString() + " : " +
-                    e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + ncIn.getLocation().toString() + " : "
+                    + e.getCause());
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
         }
@@ -395,8 +389,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
         } catch (IOException e) {
             throw new IOException("Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                    " variable in file " + filename + " : " + e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + filename + " : " + e.getCause());
         }
         //return false;
 
@@ -424,8 +418,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
         } catch (IOException e) {
             throw new IOException("Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime +
-                    " variable in file " + filename + " : " + e.getCause());
+            throw new IOException("Unable to read " + strTime
+                    + " variable in file " + filename + " : " + e.getCause());
         }
         return false;
     }
@@ -486,8 +480,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
                 z_w_tmp[0][j][i] = -hRho[j][i];
                 for (int k = nz; k-- > 0;) {
                     z_r_tmp[k][j][i] = cff_r[k] + Cs_r[k] * hRho[j][i];
-                    z_w_tmp[k +
-                            1][j][i] = cff_w[k + 1] + Cs_w[k + 1] * hRho[j][i];
+                    z_w_tmp[k
+                            + 1][j][i] = cff_w[k + 1] + Cs_w[k + 1] * hRho[j][i];
 
                 }
                 z_w_tmp[nz][j][i] = 0.d;
@@ -735,8 +729,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
         } else {
             double pr = getDepth(x, y, lk);
             z = Math.max(0.d,
-                    (double) lk +
-                    (depth - pr) / (getDepth(x, y, lk + 1) - pr));
+                    (double) lk
+                    + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
         }
         return (z);
     }
@@ -756,13 +750,13 @@ public abstract class Roms3dDataset extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx) *
-                            (1.d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     if (isInWater(i + ii, j + jj)) {
-                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii] *
-                                (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j +
-                                jj][i + ii]);
+                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
+                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
+                                + jj][i + ii]);
                         depth += co * z_r;
                     }
                 }
@@ -827,9 +821,9 @@ public abstract class Roms3dDataset extends AbstractDataset {
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
-                    co = Math.abs((1.d - (double) ii - dx) *
-                            (.5d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (.5d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
                     dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
@@ -864,9 +858,9 @@ public abstract class Roms3dDataset extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((.5d - (double) ii - dx) *
-                            (1.d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
+                    co = Math.abs((.5d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                     du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
@@ -892,10 +886,10 @@ public abstract class Roms3dDataset extends AbstractDataset {
     }
 
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[0] > (nx - 2.0f)) ||
-                (pGrid[0] < 1.0f) ||
-                (pGrid[1] > (ny - 2.0f)) ||
-                (pGrid[1] < 1.0f));
+        return ((pGrid[0] > (nx - 2.0f))
+                || (pGrid[0] < 1.0f)
+                || (pGrid[1] > (ny - 2.0f))
+                || (pGrid[1] < 1.0f));
     }
 
     public double getBathy(int i, int j) {
@@ -918,111 +912,15 @@ public abstract class Roms3dDataset extends AbstractDataset {
                 if (isInWater(i + ii, j + jj)) {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                     double z_r = 0.d;
-                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j +
-                            jj][i + ii] *
-                            (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i +
-                            ii]);
+                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j
+                            + jj][i + ii]
+                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i
+                            + ii]);
                     hh += co * z_r;
                 }
             }
         }
         return (hh);
-    }
-
-    public double getTemperature(double[] pGrid, double time) {
-
-        double co, CO, x, frac, tp;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
-        tp = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii] +
-                                    frac * temp_tp1[k + kk][j + jj][i + ii];
-                            tp += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating temperature field : " +
-                                    e.getMessage());
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            tp /= CO;
-        }
-
-        return tp;
-    }
-
-    public double getSalinity(double[] pGrid, double time) {
-
-        double co, CO, x, frac, sal;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
-        sal = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                (1.d - (double) jj - dy) *
-                                (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii] +
-                                    frac * salt_tp1[k + kk][j + jj][i + ii];
-                            sal += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating salinity field : " +
-                                    e.getMessage());
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            sal /= CO;
-        }
-
-        return sal;
     }
 
     public int get_nx() {
@@ -1043,45 +941,6 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
     public double getdeta(int j, int i) {
         return (pn[j][i] != 0) ? (1 / pn[j][i]) : 0.d;
-    }
-
-    public double[] getKv(double[] pGrid, double time, double dt) {
-
-        double co, CO = 0.d, Kv = 0.d, diffKv = 0.d, Hz = 0.d;
-        double x, y, z, dx, dy;
-        int i, j, k;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        double[] kvSpline;
-        double depth;
-
-        x = pGrid[0];
-        y = pGrid[1];
-        z = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-        depth = z2depth(x, y, z);
-
-        i = (int) x;
-        j = (int) y;
-        k = (int) Math.round(z);
-        dx = x - Math.floor(x);
-        dy = y - Math.floor(y);
-
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
-                CO += co;
-                kvSpline = getKv(i + ii, j + jj, depth, time, dt);
-                diffKv += kvSpline[0] * co;
-                Kv += kvSpline[1] * co;
-                Hz += co * (z_w_tp0[k + 1][j + jj][i + ii] - z_w_tp0[Math.max(k - 1, 0)][j + jj][i + ii]);
-            }
-        }
-        if (CO != 0) {
-            diffKv /= CO;
-            Kv /= CO;
-            Hz /= CO;
-        }
-
-        return new double[]{diffKv, Kv, Hz};
     }
 
     private boolean isInsidePolygone(int imin, int imax, int jmin, int jmax, double lon, double lat) {
@@ -1136,8 +995,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
                 inc = 0;
                 if ((xb[k] == lon) & (yb[k] == lat)) {
                     crossings = 1;
-                } else if (((dx1 == 0.) & (lat >= yb[k])) |
-                        ((dx2 == 0.) & (lat >= yb[k + 1]))) {
+                } else if (((dx1 == 0.) & (lat >= yb[k]))
+                        | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
                     inc = 1;
                 } else if ((dx1 * dx2 > 0.) & ((xb[k + 1] - xb[k]) * dxy >= 0.)) {
                     inc = 2;
@@ -1159,7 +1018,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         return (maskRho[j][i] > 0);
     }
 
-    private boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
@@ -1167,75 +1026,6 @@ public abstract class Roms3dDataset extends AbstractDataset {
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
-    }
-
-    private double[] getKv(int i, int j, double depth, double time, double dt) {
-
-        double diffzKv, Kvzz, ddepth, dz, zz;
-        double[] Kv = new double[nz];
-        double a, b, c, d;
-        double xTime;
-        int k;
-        double z;
-        xTime = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        for (k = nz; k-- > 0;) {
-            Kv[k] = (1.d - xTime) * kv_tp0[k][j][i] + xTime * kv_tp1[k][j][i];
-        }
-
-        z = Math.min(depth2z(i, j, depth), nz - 1.00001f);
-        k = (int) z;
-        //dz = z - Math.floor(z);
-        ddepth = depth - z_rho_cst[k][j][i];
-        /** Compute the polynomial coefficients of the piecewise of the spline
-         * contained between [k; k + 1]. Let's take M = Kv''
-         * a = (M(k + 1) - M(k)) / 6
-         * b = M(k) / 2
-         * c = Kv(k + 1) - Kv(k) - (M(k + 1) - M(k)) / 6
-         * d = Kv(k);
-         */
-        a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
-        b = diff2(Kv, k) / 2.d;
-        c = (Kv[k + 1] - Kv[k]) - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
-        d = Kv[k];
-
-        /** Compute Kv'(z)
-         * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c; */
-        diffzKv = c + ddepth * (2.d * b + 3.d * a * ddepth);
-
-        zz = Math.min(depth2z(i, j, depth + 0.5d * diffzKv * dt), nz - 1.00001f);
-        dz = zz - Math.floor(z);
-        if (dz >= 1.f || dz < 0) {
-            k = (int) zz;
-            a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
-            b = diff2(Kv, k) / 2.d;
-            c = (Kv[k + 1] - Kv[k]) -
-                    (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
-            d = Kv[k];
-        }
-        ddepth = depth + 0.5d * diffzKv * dt - z_rho_cst[k][j][i];
-        /** Compute Kv(z)
-         * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
-        Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
-        Kvzz = Math.max(0.d, Kvzz);
-
-        return new double[]{diffzKv, Kvzz};
-    }
-
-    private double diff2(double[] X, int k) {
-
-        int length = X.length;
-        /** Returns NaN if size <= 2 */
-        if (length < 3) {
-            return Double.NaN;
-        }
-
-        /** This return statement traduces the natural spline hypothesis
-         * M(0) = M(nz - 1) = 0 */
-        if ((k <= 0) || (k >= (length - 1))) {
-            return 0.d;
-        }
-
-        return (X[k + 1] - 2.d * X[k] + X[k - 1]);
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -1252,9 +1042,6 @@ public abstract class Roms3dDataset extends AbstractDataset {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         zeta_tp0 = zeta_tp1;
-        temp_tp0 = temp_tp1;
-        salt_tp0 = salt_tp1;
-        kv_tp0 = kv_tp1;
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
         }
@@ -1291,8 +1078,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
         } catch (IOException e) {
             throw new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem reading " + strTimeDim + " dimension at location " + filename +
-                    " : " + e.getMessage());
+            throw new IOException("Problem reading " + strTimeDim + " dimension at location " + filename
+                    + " : " + e.getMessage());
         }
     }
 
@@ -1316,34 +1103,22 @@ public abstract class Roms3dDataset extends AbstractDataset {
                     new int[]{rank, 0, 0},
                     new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
 
-            if (FLAG_TP) {
-                temp_tp1 = (float[][][]) ncIn.findVariable(strTp).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }
-
-            if (FLAG_SAL) {
-                salt_tp1 = (float[][][]) ncIn.findVariable(strSal).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }
-
-            if (FLAG_VDISP) {
-                kv_tp1 = (float[][][]) ncIn.findVariable(strKv).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }
-
 
         } catch (IOException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (InvalidRangeException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (NullPointerException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : " +
-                    e.getMessage());
+            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
+        for (RequiredVariable variable : requiredVariables.values()) {
+            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+        }
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
     }
@@ -1360,22 +1135,22 @@ public abstract class Roms3dDataset extends AbstractDataset {
         for (int k = nz; k-- > 0;) {
             for (int i = 0; i++ < nx - 1;) {
                 for (int j = ny; j-- > 0;) {
-                    Huon[k][j][i] = (((z_w_tmp[k + 1][j][i] -
-                            z_w_tmp[k][j][i]) +
-                            (z_w_tmp[k + 1][j][i - 1] -
-                            z_w_tmp[k][j][i - 1])) /
-                            (pn[j][i] + pn[j][i - 1])) *
-                            u_tp1[k][j][i - 1];
+                    Huon[k][j][i] = (((z_w_tmp[k + 1][j][i]
+                            - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j][i - 1]
+                            - z_w_tmp[k][j][i - 1]))
+                            / (pn[j][i] + pn[j][i - 1]))
+                            * u_tp1[k][j][i - 1];
                 }
             }
             for (int i = nx; i-- > 0;) {
                 for (int j = 0; j++ < ny - 1;) {
-                    Hvom[k][j][i] = (((z_w_tmp[k + 1][j][i] -
-                            z_w_tmp[k][j][i]) +
-                            (z_w_tmp[k + 1][j - 1][i] -
-                            z_w_tmp[k][j - 1][i])) /
-                            (pm[j][i] + pm[j - 1][i])) *
-                            v_tp1[k][j - 1][i];
+                    Hvom[k][j][i] = (((z_w_tmp[k + 1][j][i]
+                            - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j - 1][i]
+                            - z_w_tmp[k][j - 1][i]))
+                            / (pm[j][i] + pm[j - 1][i]))
+                            * v_tp1[k][j - 1][i];
                 }
             }
         }
@@ -1391,20 +1166,20 @@ public abstract class Roms3dDataset extends AbstractDataset {
             }
             for (int k = 0; k++ < nz;) {
                 for (int i = nx - 1; i-- > 0;) {
-                    w_double[k][j][i] = w_double[k - 1][j][i] +
-                            (float) (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1] +
-                            Hvom[k - 1][j][i] - Hvom[k -
-                            1][j + 1][i]);
+                    w_double[k][j][i] = w_double[k - 1][j][i]
+                            + (float) (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1]
+                            + Hvom[k - 1][j][i] - Hvom[k
+                            - 1][j + 1][i]);
                 }
             }
             for (int i = nx; i-- > 0;) {
-                wrk[i] = w_double[nz][j][i] /
-                        (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
+                wrk[i] = w_double[nz][j][i]
+                        / (z_w_tmp[nz][j][i] - z_w_tmp[0][j][i]);
             }
             for (int k = nz; k-- >= 2;) {
                 for (int i = nx; i-- > 0;) {
-                    w_double[k][j][i] += -wrk[i] *
-                            (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
+                    w_double[k][j][i] += -wrk[i]
+                            * (z_w_tmp[k][j][i] - z_w_tmp[0][j][i]);
                 }
             }
             for (int i = nx; i-- > 0;) {
@@ -1433,8 +1208,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = (float) (w_double[k][j][i] * pm[j][i] *
-                            pn[j][i]);
+                    w[k][j][i] = (float) (w_double[k][j][i] * pm[j][i]
+                            * pn[j][i]);
                 }
             }
         }
@@ -1460,8 +1235,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
                     zeta_tp1[j][i] = 0.f;
                 }
                 for (int k = 0; k < nz + 1; k++) {
-                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i] *
-                            (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
+                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
+                            * (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
                 }
             }
         }
@@ -1543,131 +1318,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
         //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 
-    /**
-     * Computes the Hyperbolic Sinus of x
-     */
-    private static double sinh(double x) {
-        return ((Math.exp(x) - Math.exp(-x)) / 2.d);
-    }
-
-    /**
-     * Computes the Hyperbolic Cosinus of x
-     */
-    private static double cosh(double x) {
-        return ((Math.exp(x) + Math.exp(-x)) / 2.d);
-    }
-
-    /**
-     * Computes the Hyperbolic Tangent of x
-     */
-    private static double tanh(double x) {
-        return (sinh(x) / cosh(x));
-    }
-
     private long skipSeconds(long time) {
         return time - time % 60L;
-    }
-
-    public Number get(String variableName, double[] pGrid, double time) {
-        Variable variable = ncIn.findVariable(variableName);
-        if (!variable.getDataType().isNumeric()) {
-            throw new NumberFormatException(variableName + " is not a numeric variable");
-        }
-        int[] origin = new int[variable.getShape().length];
-        int[] shape = variable.getShape();
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double kz, dz, value_t0, value_t1;
-        int k;
-        Array array;
-        try {
-            switch (variable.getShape().length) {
-                case 4:
-                    kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-                    k = (int) kz;
-                    dz = kz - (double) k;
-                    shape = new int[]{2, 2, 2, 2};
-                    origin = new int[]{rank - 1, k, j, i};
-                    array = variable.read(origin, shape);
-                    value_t0 = interp3D((ArrayFloat.D3) array.section(new int[]{0, 0, 0, 0}, new int[]{1, 2, 2, 2}).reduce(), dx, dy, dz, n);
-                    value_t1 = interp3D((ArrayFloat.D3) array.section(new int[]{1, 0, 0, 0}, new int[]{1, 2, 2, 2}).reduce(), dx, dy, dz, n);
-                    return interpTime(value_t0, value_t1, time);
-                case 3:
-                    if (variable.isUnlimited()) {
-                        shape = new int[]{2, 2, 2};
-                        origin = new int[]{rank - 1, j, i};
-                        array = variable.read(origin, shape);
-                        value_t0 = interp2D((ArrayFloat.D2) array.section(new int[]{0, 0, 0}, new int[]{1, 2, 2}).reduce(), dx, dy, n);
-                        value_t1 = interp2D((ArrayFloat.D2) array.section(new int[]{1, 0, 0}, new int[]{1, 2, 2}).reduce(), dx, dy, n);
-                        return interpTime(value_t0, value_t1, time);
-                    } else {
-                        kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-                        k = (int) kz;
-                        dz = kz - (double) k;
-                        shape = new int[]{2, 2, 2};
-                        origin = new int[]{k, j, i};
-                        array = variable.read(origin, shape);
-                        return interp3D((ArrayFloat.D3) array, dx, dy, dz, n);
-                    }
-                case 2:
-                    shape = new int[]{2, 2};
-                    origin = new int[]{j, i};
-                    array = variable.read(origin, shape);
-                    return interp2D((ArrayFloat.D2) array, dx, dy, n);
-            }
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
-
-    private double interpTime(double value_t0, double value_t1, double time) {
-        double frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        return (1.d - frac) * value_t0 + frac * value_t1;
-    }
-
-    private double interp2D(ArrayFloat.D2 array, double dx, double dy, int n) {
-        double value = 0.d;
-        double CO = 0.d;
-
-        for (int jj = 0; jj < n; jj++) {
-            for (int ii = 0; ii < n; ii++) {
-                double co = Math.abs((1.d - (double) ii - dx) *
-                        (1.d - (double) jj - dy));
-                CO += co;
-                value += array.get(jj, ii) * co;
-            }
-        }
-
-        if (CO != 0) {
-            value /= CO;
-        }
-        return value;
-    }
-
-    private double interp3D(ArrayFloat.D3 array, double dx, double dy, double dz, int n) {
-        double value = 0.d;
-        double CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    double co = Math.abs((1.d - (double) ii - dx) *
-                            (1.d - (double) jj - dy) *
-                            (1.d - (double) kk - dz));
-                    CO += co;
-                    value += array.get(kk, jj, ii) * co;
-                }
-            }
-        }
-        if (CO != 0) {
-            value /= CO;
-        }
-        return value;
     }
 
     /**

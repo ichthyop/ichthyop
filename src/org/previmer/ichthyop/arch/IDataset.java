@@ -34,13 +34,11 @@ public interface IDataset extends NextStepListener {
 
     public boolean isInWater(int i, int j);
 
+    boolean isCloseToCost(double[] pGrid);
+
     public boolean isOnEdge(double[] pGrid);
 
     public double getBathy(int i, int j);
-
-    public double getTemperature(double[] pGrid, double time);
-
-    public double getSalinity(double[] pGrid, double time);
 
     public int get_nx();
 
@@ -52,11 +50,11 @@ public interface IDataset extends NextStepListener {
 
     public double getdeta(int j, int i);
 
-    public double[] getKv(double[] pGrid, double time, double dt);
-
     public void init();
 
     public Number get(String variableName, double[] pGrid, double time);
+
+    public void requireVariable(String name);
 
     public double getLatMin();
 

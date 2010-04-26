@@ -4,6 +4,9 @@
  */
 package org.previmer.ichthyop.dataset;
 
+import java.util.HashMap;
+import ucar.nc2.NetcdfFile;
+
 /**
  *
  * @author pverley
@@ -46,6 +49,34 @@ public abstract class MarsDatasetCommon extends AbstractDataset {
      * 
      */
     double dyv;
+    HashMap<String, RequiredVariable> requiredVariables;
+
+    public Number get(String variableName, double[] pGrid, double time) {
+        return requiredVariables.get(variableName).get(pGrid, time);
+    }
+
+    public void requireVariable(String name) {
+        if (!requiredVariables.containsKey(name)) {
+            requiredVariables.put(name, new RequiredVariable(name));
+        }
+    }
+
+    public void clearRequiredVariables() {
+        if (requiredVariables != null) {
+            requiredVariables.clear();
+        } else {
+            requiredVariables = new HashMap();
+        }
+    }
+
+    public void checkRequiredVariable(NetcdfFile nc) {
+        for (RequiredVariable variable : requiredVariables.values()) {
+            //System.out.println(variable.getName()  + " " + variable.checked(nc));
+            if (!variable.checked(nc)) {
+                requiredVariables.remove(variable.getName());
+            }
+        }
+    }
 
     /**
      * Adimensionalizes the given magnitude at the specified grid location.
@@ -237,7 +268,7 @@ public abstract class MarsDatasetCommon extends AbstractDataset {
         return (maskRho[j][i] > 0);
     }
 
-    boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));

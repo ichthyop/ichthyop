@@ -10,6 +10,7 @@ import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IZoneParticle;
+import org.previmer.ichthyop.io.RecruitmentTracker;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import org.previmer.ichthyop.particle.ZoneParticleLayer;
@@ -48,6 +49,7 @@ public class RecruitmentAction extends AbstractAction {
         }
         stopMovingOnceRecruited = Boolean.valueOf(getParameter("stop_moving"));
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RECRUITMENT);
+        getSimulationManager().getOutputManager().addTracker(RecruitmentTracker.class);
     }
 
     public void execute(IBasicParticle particle) {

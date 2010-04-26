@@ -57,8 +57,15 @@ public class BuoyancyAction extends AbstractAction {
      */
     private static double waterDensity;
 
+    private String salinity_field;
+    private String temperature_field;
+
     public void loadParameters() {
         eggDensity = Float.valueOf(getParameter("egg_density"));
+        salinity_field = getParameter("salinity_field");
+        temperature_field = getParameter("temperature_field");
+        getSimulationManager().getDataset().requireVariable(temperature_field);
+        getSimulationManager().getDataset().requireVariable(salinity_field);
     }
 
     public void execute(IBasicParticle particle) {
@@ -66,8 +73,8 @@ public class BuoyancyAction extends AbstractAction {
         if (true) {
             
             double time = getSimulationManager().getTimeManager().getTime();
-            double sal = getSimulationManager().getDataset().getSalinity(particle.getGridCoordinates(), time);
-            double tp = getSimulationManager().getDataset().getSalinity(particle.getGridCoordinates(), time);
+            double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
+            double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
             double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp)) - particle.getZ();
             particle.increment(new double[] {0.d, 0.d, dz});
         }

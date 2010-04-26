@@ -379,6 +379,9 @@ public abstract class Mars2dDatasetCommon extends MarsDatasetCommon {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
+        for (RequiredVariable variable : requiredVariables.values()) {
+            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+        }
     }
 
     @Override

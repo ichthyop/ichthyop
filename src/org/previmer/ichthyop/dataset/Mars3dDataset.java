@@ -19,6 +19,7 @@ public class Mars3dDataset extends Mars3dDatasetCommon {
 
         loadParameters();
         MarsDatasetIO.setTimeField(strTime);
+        clearRequiredVariables();
 
         try {
             ncIn = MarsDatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
@@ -42,6 +43,7 @@ public class Mars3dDataset extends Mars3dDatasetCommon {
         try {
             long t0 = getSimulationManager().getTimeManager().get_tO();
             ncIn = MarsDatasetIO.open(MarsDatasetIO.getFile(t0));
+            checkRequiredVariable(ncIn);
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             FLAG_TP = FLAG_SAL = FLAG_VDISP = false;
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
@@ -66,9 +68,6 @@ public class Mars3dDataset extends Mars3dDatasetCommon {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         zeta_tp0 = zeta_tp1;
-        temp_tp0 = temp_tp1;
-        salt_tp0 = salt_tp1;
-        kv_tp0 = kv_tp1;
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
         }

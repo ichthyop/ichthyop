@@ -22,4 +22,6 @@ public interface IOutputManager extends NextStepListener {
 
     public String getFileLocation();
 
+    public void addTracker(Class trackerClass);
+
 }

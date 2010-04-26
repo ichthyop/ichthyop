@@ -61,30 +61,6 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
      */
     static float[][][] w_tp1;
     /**
-     * Water salinity at time t + dt
-     */
-    static float[][][] salt_tp1;
-    /**
-     * Water salinity at current time
-     */
-    static float[][][] salt_tp0;
-    /**
-     * Water temperature at current time
-     */
-    static float[][][] temp_tp0;
-    /**
-     * Water temperature at time t + dt
-     */
-    static float[][][] temp_tp1;
-    /**
-     * Vertical diffusion coefficient at time t + dt
-     */
-    float[][][] kv_tp1;
-    /**
-     * Vertical diffusion coefficient at current time
-     */
-    float[][][] kv_tp0;
-    /**
      * Depth at rho point
      */
     static double[][][] z_rho_cst;
@@ -121,7 +97,7 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strU, strV, strTp, strSal, strTime, strZeta;
+    static String strU, strV, strTime, strZeta;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -171,8 +147,6 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strZeta = getParameter("field_var_zeta");
-        strTp = getParameter("field_var_temp");
-        //strSal = getParameter("Averaged salinity");
         strTime = getParameter("field_var_time");
         strSigma = getParameter("field_var_sigma");
     }
@@ -529,210 +503,6 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
         return (hh);
     }
 
-    public double getTemperature(double[] pGrid, double time) {
-
-        double co, CO, x, frac, tp;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
-        tp = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    {
-                        co = Math.abs((1.d - (double) ii - dx)
-                                * (1.d - (double) jj - dy)
-                                * (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii]
-                                    + frac * temp_tp1[k + kk][j + jj][i + ii];
-                            tp += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating temperature field : "
-                                    + e.getMessage());
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            tp /= CO;
-        }
-
-        return tp;
-    }
-
-    public double getSalinity(double[] pGrid, double time) {
-
-        double co, CO, x, frac, sal;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
-        sal = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    {
-                        co = Math.abs((1.d - (double) ii - dx)
-                                * (1.d - (double) jj - dy)
-                                * (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii]
-                                    + frac * salt_tp1[k + kk][j + jj][i + ii];
-                            sal += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating salinity field : "
-                                    + e.getMessage());
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            sal /= CO;
-        }
-
-        return sal;
-    }
-
-    public double[] getKv(double[] pGrid, double time, double dt) {
-
-        double co, CO = 0.d, Kv = 0.d, diffKv = 0.d, Hz = 0.d;
-        double x, y, z, dx, dy;
-        int i, j, k;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        double[] kvSpline;
-        double depth;
-
-        x = pGrid[0];
-        y = pGrid[1];
-        z = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-        depth = z2depth(x, y, z);
-
-        i = (int) x;
-        j = (int) y;
-        k = (int) Math.round(z);
-        dx = x - Math.floor(x);
-        dy = y - Math.floor(y);
-
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
-                CO += co;
-                kvSpline = getKv(i + ii, j + jj, depth, time, dt);
-                diffKv += kvSpline[0] * co;
-                Kv += kvSpline[1] * co;
-                Hz += co * (z_w_tp0[k + 1][j + jj][i + ii] - z_w_tp0[Math.max(k - 1, 0)][j + jj][i + ii]);
-            }
-        }
-        if (CO != 0) {
-            diffKv /= CO;
-            Kv /= CO;
-            Hz /= CO;
-        }
-
-        return new double[]{diffKv, Kv, Hz};
-    }
-
-    double[] getKv(int i, int j, double depth, double time, double dt) {
-
-        double diffzKv, Kvzz, ddepth, dz, zz;
-        double[] Kv = new double[nz];
-        double a, b, c, d;
-        double xTime;
-        int k;
-        double z;
-        xTime = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        for (k = nz; k-- > 0;) {
-            Kv[k] = (1.d - xTime) * kv_tp0[k][j][i] + xTime * kv_tp1[k][j][i];
-        }
-
-        z = Math.min(depth2z(i, j, depth), nz - 1.00001f);
-        k = (int) z;
-        //dz = z - Math.floor(z);
-        ddepth = depth - z_rho_cst[k][j][i];
-        /** Compute the polynomial coefficients of the piecewise of the spline
-         * contained between [k; k + 1]. Let's take M = Kv''
-         * a = (M(k + 1) - M(k)) / 6
-         * b = M(k) / 2
-         * c = Kv(k + 1) - Kv(k) - (M(k + 1) - M(k)) / 6
-         * d = Kv(k);
-         */
-        a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
-        b = diff2(Kv, k) / 2.d;
-        c = (Kv[k + 1] - Kv[k]) - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
-        d = Kv[k];
-
-        /** Compute Kv'(z)
-         * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c; */
-        diffzKv = c + ddepth * (2.d * b + 3.d * a * ddepth);
-
-        zz = Math.min(depth2z(i, j, depth + 0.5d * diffzKv * dt), nz - 1.00001f);
-        dz = zz - Math.floor(z);
-        if (dz >= 1.f || dz < 0) {
-            k = (int) zz;
-            a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
-            b = diff2(Kv, k) / 2.d;
-            c = (Kv[k + 1] - Kv[k])
-                    - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
-            d = Kv[k];
-        }
-        ddepth = depth + 0.5d * diffzKv * dt - z_rho_cst[k][j][i];
-        /** Compute Kv(z)
-         * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
-        Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
-        Kvzz = Math.max(0.d, Kvzz);
-
-        return new double[]{diffzKv, Kvzz};
-    }
-
-    double diff2(double[] X, int k) {
-
-        int length = X.length;
-        /** Returns NaN if size <= 2 */
-        if (length < 3) {
-            return Double.NaN;
-        }
-
-        /** This return statement traduces the natural spline hypothesis
-         * M(0) = M(nz - 1) = 0 */
-        if ((k <= 0) || (k >= (length - 1))) {
-            return 0.d;
-        }
-
-        return (X[k + 1] - 2.d * X[k] + X[k - 1]);
-    }
-
     void setAllFieldsTp1AtTime(int rank) throws IOException {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
@@ -753,17 +523,6 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
                     new int[]{rank, 0, 0},
                     new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
 
-            if (FLAG_TP) {
-                temp_tp1 = (float[][][]) ncIn.findVariable(strTp).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }
-
-            if (FLAG_SAL) {
-                salt_tp1 = (float[][][]) ncIn.findVariable(strSal).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }
-
-
         } catch (IOException e) {
             throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
                     + e.getMessage());
@@ -776,6 +535,9 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
+        for (RequiredVariable variable : requiredVariables.values()) {
+            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+        }
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
     }
@@ -965,107 +727,5 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
         nx = Math.min(nx, ipn - ipo + 1);
         ny = Math.min(ny, jpn - jpo + 1);
         //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
-    }
-
-    public Number get(String variableName, double[] pGrid, double time) {
-        Variable variable = ncIn.findVariable(variableName);
-        if (!variable.getDataType().isNumeric()) {
-            throw new NumberFormatException(variableName + " is not a numeric variable");
-        }
-        int[] origin = new int[variable.getShape().length];
-        int[] shape = variable.getShape();
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double kz, dz, value_t0, value_t1;
-        int k;
-        Array array;
-        try {
-            switch (variable.getShape().length) {
-                case 4:
-                    kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-                    k = (int) kz;
-                    dz = kz - (double) k;
-                    shape = new int[]{2, 2, 2, 2};
-                    origin = new int[]{rank - 1, k, j, i};
-                    array = variable.read(origin, shape);
-                    value_t0 = interp3D((ArrayFloat.D3) array.section(new int[]{0, 0, 0, 0}, new int[]{1, 2, 2, 2}).reduce(), dx, dy, dz, n);
-                    value_t1 = interp3D((ArrayFloat.D3) array.section(new int[]{1, 0, 0, 0}, new int[]{1, 2, 2, 2}).reduce(), dx, dy, dz, n);
-                    return interpTime(value_t0, value_t1, time);
-                case 3:
-                    if (variable.isUnlimited()) {
-                        shape = new int[]{2, 2, 2};
-                        origin = new int[]{rank - 1, j, i};
-                        array = variable.read(origin, shape);
-                        value_t0 = interp2D((ArrayFloat.D2) array.section(new int[]{0, 0, 0}, new int[]{1, 2, 2}).reduce(), dx, dy, n);
-                        value_t1 = interp2D((ArrayFloat.D2) array.section(new int[]{1, 0, 0}, new int[]{1, 2, 2}).reduce(), dx, dy, n);
-                        return interpTime(value_t0, value_t1, time);
-                    } else {
-                        kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-                        k = (int) kz;
-                        dz = kz - (double) k;
-                        shape = new int[]{2, 2, 2};
-                        origin = new int[]{k, j, i};
-                        array = variable.read(origin, shape);
-                        return interp3D((ArrayFloat.D3) array, dx, dy, dz, n);
-                    }
-                case 2:
-                    shape = new int[]{2, 2};
-                    origin = new int[]{j, i};
-                    array = variable.read(origin, shape);
-                    return interp2D((ArrayFloat.D2) array, dx, dy, n);
-            }
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
-
-    private double interpTime(double value_t0, double value_t1, double time) {
-        double frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        return (1.d - frac) * value_t0 + frac * value_t1;
-    }
-
-    private double interp2D(ArrayFloat.D2 array, double dx, double dy, int n) {
-        double value = 0.d;
-        double CO = 0.d;
-
-        for (int jj = 0; jj < n; jj++) {
-            for (int ii = 0; ii < n; ii++) {
-                double co = Math.abs((1.d - (double) ii - dx)
-                        * (1.d - (double) jj - dy));
-                CO += co;
-                value += array.get(jj, ii) * co;
-            }
-        }
-
-        if (CO != 0) {
-            value /= CO;
-        }
-        return value;
-    }
-
-    private double interp3D(ArrayFloat.D3 array, double dx, double dy, double dz, int n) {
-        double value = 0.d;
-        double CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    double co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
-                    value += array.get(kk, jj, ii) * co;
-                }
-            }
-        }
-        if (CO != 0) {
-            value /= CO;
-        }
-        return value;
     }
 }

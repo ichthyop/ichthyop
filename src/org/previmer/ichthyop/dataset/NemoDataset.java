@@ -13,16 +13,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.logging.Level;
-import org.previmer.ichthyop.util.MTRandom;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
 import ucar.ma2.Index;
-import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.Attribute;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -30,17 +26,6 @@ import ucar.nc2.Variable;
  */
 public class NemoDataset extends AbstractDataset {
 
-    ////////////////
-// Debug purpose
-////////////////
-    /**
-     * Constant for debugging vertical dispersion
-     */
-    public final static boolean DEBUG_VDISP = false;
-    /**
-     * Constant for debugginf horizontal dispersion
-     */
-    public final static boolean DEBUG_HDISP = false;
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -119,54 +104,6 @@ public class NemoDataset extends AbstractDataset {
      */
     static float[][][] w_tp1;
     /**
-     * Water salinity at time t + dt
-     */
-    private static float[][][] salt_tp1;
-    /**
-     * Water salinity at current time
-     */
-    private static float[][][] salt_tp0;
-    /**
-     * Water temperature at current time
-     */
-    private static float[][][] temp_tp0;
-    /**
-     * Water temperature at time t + dt
-     */
-    private static float[][][] temp_tp1;
-    /**
-     * Large zooplankton concentration at current time
-     */
-    private float[][][] largeZoo_tp0;
-    /**
-     * Large zooplankton concentration at time t + dt
-     */
-    private float[][][] largeZoo_tp1;
-    /**
-     * Small zooplankton concentration at current time
-     */
-    private float[][][] smallZoo_tp0;
-    /**
-     * Small zooplankton concentration at time t + dt
-     */
-    private float[][][] smallZoo_tp1;
-    /**
-     * Large phytoplankton concentration at current time
-     */
-    private float[][][] largePhyto_tp0;
-    /**
-     * Large phytoplankton concentration at time t + dt
-     */
-    private float[][][] largePhyto_tp1;
-    /**
-     * Vertical diffusion coefficient at time t + dt
-     */
-    private float[][][] kv_tp1;
-    /**
-     * Vertical diffusion coefficient at current time
-     */
-    private float[][][] kv_tp0;
-    /**
      * Depth at rho point
      */
     static float[] z_rho_cst;
@@ -217,60 +154,21 @@ public class NemoDataset extends AbstractDataset {
      */
     private static int time_arrow;
     /**
-     * Mersenne Twister pseudo random number generator
-     * @see ichthyop.util.MTRandom
-     */
-    private MTRandom random;
-    /**
      * Name of the Dimension in NetCDF file
      */
     static String strXiDim, strEtaDim, strZDim, strTimeDim;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strU, strV, strTp, strSal, strTime, strZeta;
+    static String strU, strV, strTime, strZeta;
     /**
      * Name of the Variable in NetCDF file
      */
     static String strLon, strLat, strMask, strBathy;
-    /**
-     * Name of the Variable in NetCDF file
+    /*
+     *
      */
-    static String strKv;
-    /**
-     * Name of the Variable in NetCDF file
-     */
-    static String strLargePhyto, strLargeZoo, strSmallZoo;
-    /**
-     * Determines whether or not the temperature field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    private static boolean FLAG_TP;
-    /**
-     * Determines whether or not the salinity field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    private static boolean FLAG_SAL;
-    /**
-     * Determines whether or not the turbulent diffusivity should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    private static boolean FLAG_VDISP;
-    /**
-     * Determines whether or not the plankton concentration fields should be
-     * read in the NetCDF file, function of the user's options.
-     */
-    private static boolean FLAG_PLANKTON;
-///////////////////////////////
-// Declaration of the constants
-///////////////////////////////
-    /**
-     * Turbulent dissipation rate used in the parametrization of Lagrangian
-     * horizontal diffusion.
-     * @see Monin and Ozmidov, 1981
-     */
-    private final static double EPSILON = 1e-9;
-    private final static double EPSILON16 = Math.pow(EPSILON, 1.d / 6.d);
+    HashMap<String, RequiredVariable> requiredVariables;
 //////////////////////////////
 // New variables added for OPA
 //////////////////////////////
@@ -280,15 +178,40 @@ public class NemoDataset extends AbstractDataset {
     static String strueiv, strveiv, strweiv;
     static String str_gdepT, str_gdepW;
     private ArrayList<String> listUFiles, listVFiles, listWFiles, listTFiles;
-    //modif sp : lecture du kv
     private static NetcdfFile ncU, ncV, ncW, ncT;
-    //modif sp : lecture du kv
     private static String file_hgr, file_zgr, file_mask;
     private static boolean isGridInfoInOneFile;
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    public Number get(String variableName, double[] pGrid, double time) {
+        return requiredVariables.get(variableName).get(pGrid, time);
+    }
+
+    public void requireVariable(String name) {
+        if (!requiredVariables.containsKey(name)) {
+            requiredVariables.put(name, new RequiredVariable(name));
+        }
+    }
+
+    public void clearRequiredVariables() {
+        if (requiredVariables != null) {
+            requiredVariables.clear();
+        } else {
+            requiredVariables = new HashMap();
+        }
+    }
+
+    public void checkRequiredVariable() {
+        for (RequiredVariable variable : requiredVariables.values()) {
+            //System.out.println(variable.getName()  + " " + variable.checked(nc));
+            if (!variable.checked(ncT)) {
+                requiredVariables.remove(variable.getName());
+            }
+        }
+    }
+
     public boolean is3D() {
         return true;
     }
@@ -719,6 +642,7 @@ public class NemoDataset extends AbstractDataset {
     public void setUp() {
 
         loadParameters();
+        clearRequiredVariables();
 
         try {
             sortInputFiles();
@@ -756,12 +680,7 @@ public class NemoDataset extends AbstractDataset {
         strMask = getParameter("field_var_mask");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
-        //strZeta = Configuration.getStrZeta();
-        strTp = getParameter("field_var_temp");
-        strSal = getParameter("field_var_salt");
         strTime = getParameter("field_var_time");
-        //strKv = Configuration.getStrKv();
-        strKv = getParameter("field_var_kv");
         // modif sp : lecture du kv
         stre3t = getParameter("field_var_e3t");
         str_gdepT = getParameter("field_var_gdept"); // z_rho
@@ -770,45 +689,6 @@ public class NemoDataset extends AbstractDataset {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
-
-        // Ces trois variables concernent des champs BIO existant dans
-        // certaines config de ROMS couplé avec un modèle de biogéochimie.
-        strLargePhyto = getParameter("");
-        strLargeZoo = getParameter("");
-        strSmallZoo = getParameter("");
-
-        //fichier *mask*
-        /*strXiDim = "x";
-        strEtaDim = "y";
-        strZDim = "z";
-        strTimeDim = "time_counter";
-        strLon = "nav_lon";
-        strLat = "nav_lat";
-        strMask = "fmask";
-        strTime = "time_counter";
-        // fichier *zgr*
-        stre3t = "e3t_ps";
-        strBathy = "hdepw";
-        str_gdepT = "gdept"; // z_rho
-        str_gdepW = "gdepw"; // z_w
-        // fichier *gridu*
-        strU = "vozocrtx";
-        strueiv = "vozoeivu";
-        //fichier *gridv*
-        strV = "vomecrty";
-        strveiv = "vomeeivv";
-        //fichier *gridt*
-        strTp = "votemper";
-        strSal = "vosaline";
-        //fichier *hgr*
-        stre1t = "e1t";
-        stre2t = "e2t";
-        stre1v = "e1v";
-        stre2u = "e2u";
-        //fichier *gridw*
-        strKv = "votkeavt";
-        // modif sp : lecture du kv
-        //strweiv = "voveeivx";*/
     }
 
     /**
@@ -961,8 +841,7 @@ public class NemoDataset extends AbstractDataset {
             time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
             long t0 = getSimulationManager().getTimeManager().get_tO();
             open(indexFile = getIndexFile(t0));
-            FLAG_TP = FLAG_SAL = true;
-            FLAG_VDISP = false;
+            checkRequiredVariable();
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
@@ -994,46 +873,14 @@ public class NemoDataset extends AbstractDataset {
             time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
             xTimeTp1 = null;
 
-            // Est-ce que le zeta existe dans OPA (variation surface libre) ?
-            /*zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(new int[] {
-            rank, 0, 0}, new int[] {1, ny, nx}).reduce().
-            copyToNDJavaArray();*/
-
-            if (FLAG_TP) {
-                temp_tp1 = (float[][][]) ncT.findVariable(strTp).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }
-
-            if (FLAG_SAL) {
-                salt_tp1 = (float[][][]) ncT.findVariable(strSal).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-            }
-
-            if (FLAG_VDISP) {
-                /*kv_tp1 = (float[][][]) ncIn.findVariable(strKv).read(origin,
-                new int[] {1, nz, ny, nx}).reduce().copyToNDJavaArray();*/
-                kv_tp1 = (float[][][]) ncW.findVariable(strKv).read(origin,
-                        new int[]{1, nz, ny, nx}).reduce().copyToNDJavaArray();
-                // modif sp : lecture du kv
-            }
-
-            if (FLAG_PLANKTON) {
-                /*largePhyto_tp1 = (float[][][]) ncIn.findVariable(strLargePhyto).
-                read(origin, new int[] {1, nz, ny, nx}).reduce().
-                copyToNDJavaArray();
-                largeZoo_tp1 = (float[][][]) ncIn.findVariable(strLargeZoo).
-                read(origin, new int[] {1, nz, ny, nx}).reduce().
-                copyToNDJavaArray();
-                smallZoo_tp1 = (float[][][]) ncIn.findVariable(strSmallZoo).
-                read(origin, new int[] {1, nz, ny, nx}).reduce().
-                copyToNDJavaArray();*/
-            }
         } catch (Exception e) {
             throw new IOException(e);
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-        //z_w_tp1 = getSigLevels(); // inutile puisque pas de niveau sigma
+        for (RequiredVariable variable : requiredVariables.values()) {
+            variable.nextStep(ncT, rank, ipo, jpo, time_tp1, dt_HyMo);
+        }
         w_tp1 = computeW();
     }
 
@@ -1091,7 +938,7 @@ public class NemoDataset extends AbstractDataset {
      * @return <code>true</code> if the grid point is close to cost,
      *         <code>false</code> otherwise.
      */
-    boolean isCloseToCost(double[] pGrid) {
+    public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, k, ii, jj;
         i = (int) (Math.round(pGrid[0]));
@@ -1485,209 +1332,6 @@ public class NemoDataset extends AbstractDataset {
     }
 
     /**
-     * Interpolates the temperature field at particle location and specified
-     * time.
-     *
-     * @param pGrid a double[], the particle grid coordinates.
-     * @param time a double, the current time [second] of the simulation
-     * @return a double, the sea water temperature [celsius] at particle
-     * location. Returns <code>NaN</code> if the temperature field could not
-     * be found in the NetCDF dataset.
-     * @throws an ArrayIndexOutOfBoundsException if the particle is out of
-     * the domain.
-     */
-    public double getTemperature(double[] pGrid, double time) throws
-            ArrayIndexOutOfBoundsException {
-
-        if (!FLAG_TP) {
-            return Double.NaN;
-        }
-
-        double co, CO, x, frac, tp;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
-        tp = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    {
-                        co = Math.abs((1.d - (double) ii - dx)
-                                * (1.d - (double) jj - dy)
-                                * (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * temp_tp0[k + kk][j + jj][i + ii]
-                                    + frac * temp_tp1[k + kk][j + jj][i + ii];
-                            tp += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating temperature field : "
-                                    + e.getMessage());
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            tp /= CO;
-        }
-
-        return tp;
-
-    }
-
-    /**
-     * Interpolates the salinity field at particle location and specified
-     * time.
-     *
-     * @param pGrid a double[], the particle grid coordinates.
-     * @param time a double, the current time [second] of the simulation
-     * @return a double, the sea water salinity [psu] at particle
-     * location. Returns <code>NaN</code> if the salinity field could not
-     * be found in the NetCDF dataset.
-     * @throws an ArrayIndexOutOfBoundsException if the particle is out of
-     * the domain.
-     */
-    public double getSalinity(double[] pGrid, double time) throws
-            ArrayIndexOutOfBoundsException {
-
-        if (!FLAG_SAL) {
-            return Double.NaN;
-        }
-
-        double co, CO, x, frac, sal;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double kz = Math.max(0.d, Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
-        sal = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    {
-                        co = Math.abs((1.d - (double) ii - dx)
-                                * (1.d - (double) jj - dy)
-                                * (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * salt_tp0[k + kk][j + jj][i + ii]
-                                    + frac * salt_tp1[k + kk][j + jj][i + ii];
-                            sal += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating salinity field : "
-                                    + e.getMessage());
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            sal /= CO;
-        }
-
-        return sal;
-    }
-
-    /**
-     * Interpolates the prey concentration fields at particle location and
-     * specified time: large phytoplankton, small zooplankton and large
-     * zooplankton.
-     *
-     * @param pGrid a double[], the particle grid coordinates.
-     * @param time a double, the current time [second] of the simulation
-     * @return a double, the concentration [mMol/m3] of arge phytoplankton,
-     * small zooplankton and large zooplankton at particle
-     * location. Returns <code>NaN</code> if the prey concentration fields
-     * could not be found in the NetCDF dataset.
-     * @throws an ArrayIndexOutOfBoundsException if the particle is out of
-     * the domain.
-     */
-    public double[] getPlankton(double[] pGrid, double time) {
-
-        if (!FLAG_PLANKTON) {
-            return new double[]{Double.NaN, Double.NaN, Double.NaN};
-        }
-
-        double co, CO, x, frac, largePhyto, smallZoo, largeZoo;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the plankton concentration fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        final double kz = Math.max(0.d,
-                Math.min(pGrid[2], (double) nz - 1.00001f));
-        int k = (int) kz;
-        //System.out.println("i " + i + " j " + j + " k " + k);
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
-        largePhyto = 0.d;
-        smallZoo = 0.d;
-        largeZoo = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < 2; jj++) {
-                for (int ii = 0; ii < 2; ii++) {
-                    if (isInWater(i + ii, j + jj, k + kk)) {
-                        co = Math.abs((1.d - (double) ii - dx)
-                                * (1.d - (double) jj - dy)
-                                * (1.d - (double) kk - dz));
-                        CO += co;
-                        x = 0.d;
-                        x = (1.d - frac) * largePhyto_tp0[k + kk][j + jj][i
-                                + ii] + frac * largePhyto_tp1[k + kk][j + jj][i
-                                + ii];
-                        largePhyto += x * co;
-                        x = (1.d - frac) * smallZoo_tp0[k + kk][j + jj][i + ii]
-                                + frac * smallZoo_tp1[k + kk][j + jj][i + ii];
-                        smallZoo += x * co;
-                        x = (1.d - frac) * largeZoo_tp0[k + kk][j + jj][i + ii]
-                                + frac * largeZoo_tp1[k + kk][j + jj][i + ii];
-                        largeZoo += x * co;
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            largePhyto /= CO;
-            smallZoo /= CO;
-            largeZoo /= CO;
-        }
-
-        return new double[]{largePhyto, smallZoo, largeZoo};
-    }
-
-    /**
      * Gets the list of NetCDF input files that satisfy the file filter and
      * sorts them according to the chronological order induced by the
      * {@code NCComparator}.
@@ -1954,174 +1598,6 @@ public class NemoDataset extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
-    /**
-     * Computes the diffusivity at specified grid point (i, j, depth), using a
-     * cubic spline interpolation. The idea behind cubic spline is to draw
-     * smooth curves through a number of points, here the values of the
-     * vertical turbulent diffusion in water column (i, j).
-     *
-     * <p>
-     * The algorithme used to smooth the profile of diffusivity has been adapted
-     * from an article written by Sky McKinley and Megan Levine
-     * "Cubic spline interpolation : An introduction into the theory and
-     * application of cubic splines." It can be download from
-     * {@link http://online.redwoods.cc.ca.us/instruct/darnold/laproj/Fall98/SkyMeg/Proj.PDF}
-     * </p>
-     *
-     * <pre>
-     * Let's briefly sum up the drill.
-     * 1. We first interpolate in time the values of Kv(t0) and Kv(t1) read in
-     * the NetCDF dataset, where t0 and t1 are the values of the time NetCDF
-     * variable bounding the specified time.
-     * 2. We transform the depth into the corresponding z level and we determine
-     * the kth piecewise of the spline corresponding to the given z level such
-     * as k <= z < k + 1
-     * 3. We compute the polynomial coefficients of the piecewise of the spline
-     * contained between [k; k + 1]. Let's take M = Kv''
-     * a = (M(k + 1) - M(k)) / 6
-     * b = M(k) / 2
-     * c = Kv(k + 1) - Kv(k) - (M(k + 1) - M(k)) / 6
-     * d = Kv(k);
-     * 4. We compute Kv'(z). Let's take dz = z - truncate(z)
-     * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c;
-     * 5. zz = depthToz(depth + 0.5 * Kv'(depth) * dt). dz = zz - truncate(z)
-     * Kv(zz) = a * dz3 + b * dz2 + c * dz + d
-     * </pre>
-     *
-     * @param i an int, the i-coordinate
-     * @param j an int, the j-coordinate
-     * @param z a double, the z-coordinate
-     * @param dt a double, the simulation time step [second]
-     * @return a double[], the diffusivity and its first derivate at
-     * (i, j, depth) {diffKv(depth), Kv(depth)}
-     */
-    private double[] getKv(int i, int j, double depth, double time, double dt) {
-
-        double diffzKv, Kvzz, ddepth, dz, zz;
-        double[] Kv = new double[nz];
-        double a, b, c, d;
-        double xTime;
-        int k;
-        double z;
-        xTime = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        for (k = nz; k-- > 0;) {
-            Kv[k] = (1.d - xTime) * kv_tp0[k][j][i] + xTime * kv_tp1[k][j][i];
-        }
-
-        z = depth2z(i, j, depth);
-        k = (int) z;
-        //dz = z - Math.floor(z);
-        ddepth = Math.abs(depth - z_rho_cst[k]);
-        /** Compute the polynomial coefficients of the piecewise of the spline
-         * contained between [k; k + 1]. Let's take M = Kv''
-         * a = (M(k + 1) - M(k)) / 6
-         * b = M(k) / 2
-         * c = Kv(k + 1) - Kv(k) - (M(k + 1) - M(k)) / 6
-         * d = Kv(k);
-         */
-        a = (DatasetUtil.diff2(Kv, k + 1) - DatasetUtil.diff2(Kv, k)) / 6.d;
-        b = DatasetUtil.diff2(Kv, k) / 2.d;
-        c = (Kv[k + 1] - Kv[k]) - (DatasetUtil.diff2(Kv, k + 1) + 2.d * DatasetUtil.diff2(Kv, k)) / 6.d;
-        d = Kv[k];
-
-        /** Compute Kv'(z)
-         * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c; */
-        diffzKv = c + ddepth * (2.d * b + 3.d * a * ddepth);
-
-        zz = depth2z(i, j, depth + 0.5d * diffzKv * dt);
-        dz = zz - Math.floor(z);
-        ddepth = Math.abs(depth + 0.5d * diffzKv * dt - z_rho_cst[k]);
-        if (dz >= 1.f || dz < 0) {
-            k = (int) zz;
-            a = (DatasetUtil.diff2(Kv, k + 1) - DatasetUtil.diff2(Kv, k)) / 6.d;
-            b = DatasetUtil.diff2(Kv, k) / 2.d;
-            c = (Kv[k + 1] - Kv[k])
-                    - (DatasetUtil.diff2(Kv, k + 1) + 2.d * DatasetUtil.diff2(Kv, k)) / 6.d;
-            d = Kv[k];
-        }
-        /** Compute Kv(z)
-         * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
-        Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
-        Kvzz = Math.max(0.d, Kvzz);
-
-        return new double[]{diffzKv, Kvzz};
-    }
-
-    /**
-     * Computes the vertical turbulent diffusivity , the
-     * first derivative and the coefficient to adimensionalize the move due to
-     * vertical dispersion at the specified location.
-     * <pre>
-     * Drill:
-     * Particle current location: X(x, y, depth)
-     * Let's take i = truncate(x), j = truncate(y)
-     * The method interpolates the values of the diffusivity at the surounding
-     * points K(i, j, depth) K(i + 1, j, depth) K(i, j + 1, depth)
-     * and K(i + 1,  j + 1, depth). Be aware that we are working at a specified
-     * depth and not a specified z level for computing the diffusivity (and the
-     * first derivative).
-     * </pre>
-     *
-     * @param pGrid a double[], the grid coordinates
-     * @param dt a double, the simulation time step [second]
-     * @return a double[], the diffusivity and its first derivative at (x, y, z)
-     * {diffKv, Kv}
-     */
-    public double[] getKv(double[] pGrid, double time, double dt) {
-
-        double co, CO = 0.d, Kv = 0.d, diffKv = 0.d, Hz = 0.d;
-        double x, y, z, dx, dy;
-        int i, j, k;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        double[] kvSpline;
-        double depth;
-
-        x = pGrid[0];
-        y = pGrid[1];
-        z = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-        depth = z2depth(x, y, z);
-
-        i = (int) x;
-        j = (int) y;
-        k = (int) Math.round(z);
-        dx = x - Math.floor(x);
-        dy = y - Math.floor(y);
-
-        if (DEBUG_VDISP) {
-            for (int ii = 0; ii < n; ii++) {
-                for (int jj = 0; jj < n; jj++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy));
-                    CO += co;
-                    Hz += co * (z_w_cst[k + 1] - z_w_cst[k]);
-                }
-            }
-            if (CO != 0) {
-                Hz /= CO;
-            }
-            return new double[]{0, 1e-2, Hz};
-        }
-
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                co = Math.abs((1.d - (double) ii - dx)
-                        * (1.d - (double) jj - dy));
-                CO += co;
-                kvSpline = getKv(i + ii, j + jj, depth, time, dt);
-                diffKv += kvSpline[0] * co;
-                Kv += kvSpline[1] * co;
-                Hz += co * (z_w_cst[k + 1] - z_w_cst[Math.max(k - 1, 0)]);
-            }
-        }
-        if (CO != 0) {
-            diffKv /= CO;
-            Kv /= CO;
-            Hz /= CO;
-        }
-
-        return new double[]{diffKv, Kv, Hz};
-    }
-
 //////////
 // Getters
 //////////
@@ -2249,10 +1725,6 @@ public class NemoDataset extends AbstractDataset {
         System.out.println("  ++++ " + depth + " " + z2depth(0, 0, depth2z(0, 0, depth)));
     }
 
-    public Number get(String variableName, double[] pGrid, double time) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     public void nextStepTriggered(NextStepEvent e) {
 
         long time = e.getSource().getTime();
@@ -2265,12 +1737,6 @@ public class NemoDataset extends AbstractDataset {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         zeta_tp0 = zeta_tp1;
-        temp_tp0 = temp_tp1;
-        salt_tp0 = salt_tp1;
-        kv_tp0 = kv_tp1;
-        largePhyto_tp0 = largePhyto_tp1;
-        largeZoo_tp0 = largeZoo_tp1;
-        smallZoo_tp0 = smallZoo_tp1;
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
         }
