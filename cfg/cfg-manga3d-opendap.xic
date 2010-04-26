@@ -234,7 +234,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>./cfg/zone-mars3d.xml</value>
+        <value>/home/pverley/ichthyop/dev/nb/iv3/cfg/zone-mars3d.xml</value>
         <format>zonefile</format>
       </parameter>
       <parameter hidden="true">
