@@ -38,22 +38,6 @@ public abstract class Mars2dDatasetCommon extends MarsDatasetCommon {
      */
     float[][] v_tp1;
     /**
-     * Water salinity at time t + dt
-     */
-    float[][] salt_tp1;
-    /**
-     * Water salinity at current time
-     */
-    float[][] salt_tp0;
-    /**
-     * Water temperature at current time
-     */
-    float[][] temp_tp0;
-    /**
-     * Water temperature at time t + dt
-     */
-    float[][] temp_tp1;
-    /**
      * Time step [second] between two records in NetCDF dataset
      */
     double dt_HyMo;
@@ -72,7 +56,7 @@ public abstract class Mars2dDatasetCommon extends MarsDatasetCommon {
     /**
      * Name of the Variable in NetCDF file
      */
-    String strU, strV, strTp, strSal, strTime;
+    String strU, strV, strTime;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -81,16 +65,6 @@ public abstract class Mars2dDatasetCommon extends MarsDatasetCommon {
      * Current rank in NetCDF dataset
      */
     int rank;
-    /**
-     * Determines whether or not the temperature field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    boolean FLAG_TP;
-    /**
-     * Determines whether or not the salinity field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    boolean FLAG_SAL;
 
     public boolean is3D() {
         return false;
@@ -394,8 +368,6 @@ public abstract class Mars2dDatasetCommon extends MarsDatasetCommon {
         strBathy = getParameter("field_var_bathy");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
-        strTp = getParameter("field_var_temp");
-        strSal = getParameter("field_var_salt");
         strTime = getParameter("field_var_time");
     }
 
@@ -405,86 +377,6 @@ public abstract class Mars2dDatasetCommon extends MarsDatasetCommon {
 
     public double z2depth(double x, double y, double z) {
         throw new UnsupportedOperationException("Not supported in 2D.");
-    }
-
-    public double getTemperature(double[] pGrid, double time) {
-        double co, CO, x, frac, tp;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        tp = 0.d;
-        CO = 0.d;
-
-        for (int jj = 0; jj < n; jj++) {
-            for (int ii = 0; ii < n; ii++) {
-                co = Math.abs((1.d - (double) ii - dx)
-                        * (1.d - (double) jj - dy));
-                CO += co;
-                x = 0.d;
-                try {
-                    x = (1.d - frac) * temp_tp0[j + jj][i + ii]
-                            + frac * temp_tp1[j + jj][i + ii];
-                    tp += x * co;
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new ArrayIndexOutOfBoundsException("Problem interpolating temperature field : " + e.getMessage());
-                }
-            }
-
-        }
-        if (CO != 0) {
-            tp /= CO;
-        }
-
-        return tp;
-    }
-
-    public double getSalinity(double[] pGrid, double time) {
-
-        double co, CO, x, frac, sal;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
-        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        //-----------------------------------------------------------
-        // Interpolate the temperature fields
-        // in the computational grid.
-        int i = (int) pGrid[0];
-        int j = (int) pGrid[1];
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        sal = 0.d;
-        CO = 0.d;
-        for (int kk = 0; kk < 2; kk++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy));
-                    CO += co;
-                    x = 0.d;
-                    try {
-                        x = (1.d - frac) * salt_tp0[j + jj][i + ii]
-                                + frac * salt_tp1[j + jj][i + ii];
-                        sal += x * co;
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        throw new ArrayIndexOutOfBoundsException("Problem interpolating salinity field : " + e.getMessage());
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            sal /= CO;
-        }
-
-        return sal;
     }
 
     public int get_nz() {

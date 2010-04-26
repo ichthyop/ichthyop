@@ -17,6 +17,7 @@ public class Mars2dOpendapDataset extends Mars2dDatasetCommon {
 
     public void setUp() {
         loadParameters();
+        clearRequiredVariables();
 
         try {
             open(getParameter("opendap_url"));
@@ -36,7 +37,7 @@ public class Mars2dOpendapDataset extends Mars2dDatasetCommon {
     public void init() {
         try {
             long t0 = getSimulationManager().getTimeManager().get_tO();
-            FLAG_TP = FLAG_SAL = false;
+            checkRequiredVariable(ncIn);
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
@@ -55,8 +56,6 @@ public class Mars2dOpendapDataset extends Mars2dDatasetCommon {
 
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
-        temp_tp0 = temp_tp1;
-        salt_tp0 = salt_tp1;
         rank += time_arrow;
         try {
             if (rank > (nbTimeRecords - 1) || rank < 0) {
