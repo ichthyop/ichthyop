@@ -755,6 +755,11 @@ public class OutputNC {
          */
         public List<Dimension> dimensions() {
             ArrayList<Dimension> arrDimensions = new ArrayList<Dimension>(nb_dimensions);
+
+            if (short_name().matches("time")) {
+                arrDimensions.add(time);
+                return arrDimensions;
+            }
             if (isUnlimited) {
                 arrDimensions.add(time);
             } else if(nb_dimensions == 1) {
