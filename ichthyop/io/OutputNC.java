@@ -575,44 +575,37 @@ public class OutputNC {
     public enum Field {
 
         LONGITUDE("lon", "particle longitude", "degree east", DataType.FLOAT),
-        LATITUDE("lat", "particle latitude", "degree north",
-        DataType.FLOAT),
+        LATITUDE("lat", "particle latitude", "degree north", DataType.FLOAT),
         DEPTH("depth", "particle depth", "meter", DataType.FLOAT),
         XGRID("xgrid", "coordinate in x", "scalar", DataType.DOUBLE),
         YGRID("ygrid", "coordinate in y", "scalar", DataType.DOUBLE),
         ZGRID("zgrid", "coordinate in z", "scalar", DataType.DOUBLE),
         TIME("time", "time in second since origin", "second",
         Configuration.getTimeOrigin(), Configuration.getCalendar(),
-        DataType.DOUBLE, 1, true),
-        TEMPERATURE("temp", "water temperature at particle location",
-        "celsius",
+        DataType.DOUBLE, new Dimension[]{time}),
+        TEMPERATURE("temp", "water temperature at particle location", "celsius",
         DataType.FLOAT),
         SALINITY("salt", "water salinity at particle location", "psu",
         DataType.FLOAT),
-        LENGTH("length", "particle length", "millimeter",
-        DataType.FLOAT),
+        LENGTH("length", "particle length", "millimeter", DataType.FLOAT),
         RELEASE_ZONE("release_zone", "release zone number at particle location",
-        "release zone > 0, out zone = 0", null, null, DataType.INT, 1, false),
+        "release zone > 0, out zone = 0", null, null, DataType.INT, new Dimension[]{drifter}),
         RECRUITMENT_ZONE("recruitment_zone", "recruitment zone number at particle location",
-        "recruitment zone > 0, out zone = 0",
-        DataType.INT),
-        RECRUITED("recruited", "status of recruitment", "boolean",
-        DataType.INT, 3),
+        "recruitment zone > 0, out zone = 0", DataType.INT),
+        RECRUITED("recruited", "status of recruitment", "boolean", null, null,
+        DataType.INT, new Dimension[]{time, drifter, zone}),
         DEATH("death", "cause of death",
         "error = -1, alive = 0, out = 1, cold = 2, cold larve = 3, beached = 4, old = 5",
         DataType.INT),
         LARGE_PHYTO("largePhyto",
         "concentration in large phytoplankton at particule location ",
-        "mMol N m-3",
-        DataType.FLOAT),
+        "mMol N m-3", DataType.FLOAT),
         LARGE_ZOO("largeZoo",
         "concentration in large zooplankton at particule location ",
-        "mMol N m-3",
-        DataType.FLOAT),
+        "mMol N m-3", DataType.FLOAT),
         SMALL_ZOO("smallZoo",
         "concentration in small zooplankton at particule location ",
-        "mMol N m-3",
-        DataType.FLOAT);
+        "mMol N m-3", DataType.FLOAT);
         /**
          * Variable name
          */
@@ -638,17 +631,16 @@ public class OutputNC {
          */
         private final DataType type;
         /**
-         * Number of dimensions of the variable
+         * Dimensions of the variable
          */
-        private final int nb_dimensions;
-        private final boolean isUnlimited;
+        private final List<Dimension> dimensions;
 
         ///////////////
         // Constructors
         ///////////////
         /**
-         * Constructs a new {@code Field} with two dimensions and no additional
-         * attributes.
+         * Constructs a new {@code Field} with two dimensions, time & drifter
+         * and no additional attributes.
          *
          * @param name a String, the variable name
          * @param description the String that describes the variable
@@ -656,22 +648,7 @@ public class OutputNC {
          * @param type a DataType, the variable data type
          */
         Field(String name, String description, String unit, DataType type) {
-            this(name, description, unit, null, null, type, 2, true);
-        }
-
-        /**
-         * Constructs a new {@code Field} with the specified dimensions
-         * and no additional attributes.
-         *
-         * @param name a String, the variable name
-         * @param description the String that describes the variable
-         * @param unit  a String, the variable unit
-         * @param type a DataType, the variable data type
-         * @param nb_dimensions an int, the number of dimensions
-         */
-        Field(String name, String description, String unit, DataType type,
-                int nb_dimensions) {
-            this(name, description, unit, null, null, type, nb_dimensions, true);
+            this(name, description, unit, null, null, type, new Dimension[]{time, drifter});
         }
 
         /**
@@ -686,7 +663,7 @@ public class OutputNC {
          * @param attribute2 a String for the second additional attribute
          */
         Field(String name, String description, String unit, String attribute1,
-                String attribute2, DataType type, int nb_dimensions, boolean isUnlimited) {
+                String attribute2, DataType type, Dimension[] dimensions) {
 
             this.short_name = name;
             this.long_name = description;
@@ -694,8 +671,11 @@ public class OutputNC {
             this.type = type;
             this.attribute1 = attribute1;
             this.attribute2 = attribute2;
-            this.nb_dimensions = nb_dimensions;
-            this.isUnlimited = true;
+            this.dimensions = new ArrayList();
+            for (Dimension dimension : dimensions) {
+                this.dimensions.add(dimension);
+            }
+
         }
 
         ////////////////////////////
@@ -754,24 +734,7 @@ public class OutputNC {
          * @return the List of the variable {@code Dimension}s
          */
         public List<Dimension> dimensions() {
-            ArrayList<Dimension> arrDimensions = new ArrayList<Dimension>(nb_dimensions);
-
-            if (short_name().matches("time")) {
-                arrDimensions.add(time);
-                return arrDimensions;
-            }
-            if (isUnlimited) {
-                arrDimensions.add(time);
-            } else if(nb_dimensions == 1) {
-                arrDimensions.add(drifter);
-            }
-            if (nb_dimensions >= 2) {
-                arrDimensions.add(drifter);
-            }
-            if (nb_dimensions >= 3) {
-                arrDimensions.add(zone);
-            }
-            return arrDimensions;
+            return dimensions;
         }
         //----------- End of enum
     }
