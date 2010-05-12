@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 public abstract class AbstractReleaseProcess extends SimulationManagerAccessor implements IReleaseProcess {
 
     private String releaseKey;
-    private boolean paramLoaded = false;
 
     public AbstractReleaseProcess() {
         releaseKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
@@ -30,10 +29,6 @@ public abstract class AbstractReleaseProcess extends SimulationManagerAccessor i
     abstract void proceedToRelease(ReleaseEvent event) throws IOException;
 
     final public void release(ReleaseEvent event) {
-        /*if (!paramLoaded) {
-            loadParameters();
-            paramLoaded = true;
-        }*/
         try {
             proceedToRelease(event);
         } catch (IOException ex) {

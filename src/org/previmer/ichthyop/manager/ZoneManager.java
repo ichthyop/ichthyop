@@ -78,50 +78,6 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
         }
     }
 
-    /*public void loadZones() {
-
-    Iterator<XZone> it = getZones().iterator();
-    map = new HashMap();
-    while (it.hasNext()) {
-    XZone xzone = it.next();
-    if (!map.containsKey(xzone.getTypeZone())) {
-    map.put(xzone.getTypeZone(), new ArrayList());
-    }
-    }
-    it = getZones().iterator();
-    while (it.hasNext()) {
-    XZone xzone = it.next();
-    Zone zone = new Zone(xzone.getTypeZone(), xzone.getIndex());
-    zone.setOffshoreLine(xzone.getBathyMask().getOffshoreLine());
-    zone.setInshoreLine(xzone.getBathyMask().getInshoreLine());
-    zone.setLowerDepth(xzone.getThickness().getLowerDepth());
-    zone.setUpperDepth(xzone.getThickness().getUpperDepth());
-    zone.setColor(xzone.getColor());
-    for (XPoint point : xzone.getPolygon()) {
-    zone.addPoint(point.createRhoPoint());
-    }
-    //zone.init();
-    map.get(zone.getType()).add(zone.getIndex(), zone);
-    }
-
-    /*for (TypeZone type : map.keySet()) {
-    System.out.println(type.toString());
-    for (Zone zone : map.get(type)) {
-    System.out.println(zone.toString());
-    }
-    }
-    }*/
-    private Collection<XZone> getZones() {
-        Collection<XZone> collection = new ArrayList();
-        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.ZONE)) {
-            if (block.isEnabled()) {
-                collection.add(new XZone(block));
-            }
-
-        }
-        return collection;
-    }
-
     public ArrayList<Zone> getZones(TypeZone type) {
         return map.get(type);
     }
