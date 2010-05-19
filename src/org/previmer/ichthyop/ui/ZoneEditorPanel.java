@@ -23,6 +23,7 @@
 package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -30,9 +31,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,11 +40,11 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.io.IOTools;
@@ -132,11 +131,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         model.setDataVector(array2Vector(zoneFile.getZones()), dummyHeader);
         tableZone.setModel(model);
         setPanelZoneEnabled(false);
-        tablePolygon.setCellEditor(new FloatEditor());
         if (tableZone.getRowCount() > 0) {
             tableZone.getSelectionModel().setSelectionInterval(0, 0);
         }
-        addChangeListeners(this, this);
     }
 
     private Vector array2Vector(Collection<XZone> zones) {
@@ -185,14 +182,32 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         header.addElement("Latitude (North)");
         model.setDataVector(vector, header);
         tablePolygon.setModel(model);
+        for (int i = 0; i < tablePolygon.getColumnCount(); i++) {
+            tablePolygon.getColumnModel().getColumn(i).setCellEditor(new FloatEditor());
+        }
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
         hasZoneChanged = false;
         addChangeListeners(this, this);
     }
 
-    public void setPanelZoneEnabled(boolean enabled) {
+    public void setPanelZoneEnabled(final boolean enabled) {
         ckBoxEnabled.setEnabled(enabled);
         tablePolygon.setEnabled(enabled);
+        tablePolygon.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table,
+                    Object value, boolean isSelected, boolean hasFocus,
+                    int row,
+                    int column) {
+                Component comp = super.getTableCellRendererComponent(table,
+                        value, isSelected, hasFocus, row, column);
+                if (!enabled) {
+                    comp.setForeground(Color.LIGHT_GRAY);
+                }
+                return comp;
+            }
+        });
         btnUpPoint.setEnabled(enabled);
         btnDownPoint.setEnabled(enabled);
         btnNewPoint.setEnabled(enabled);
@@ -200,11 +215,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         cbBoxType.setEnabled(enabled);
         btnColor.setEnabled(enabled);
         ckBoxBathyMask.setEnabled(enabled);
-        txtFieldInshore.setEnabled(enabled);
-        txtFieldOffshore.setEnabled(enabled);
+        txtFieldInshore.setEnabled(enabled && ckBoxBathyMask.isSelected());
+        txtFieldOffshore.setEnabled(enabled && ckBoxBathyMask.isSelected());
         ckBoxThickness.setEnabled(enabled);
-        txtFieldUpperDepth.setEnabled(enabled);
-        txtFieldLowerDepth.setEnabled(enabled);
+        txtFieldUpperDepth.setEnabled(enabled && ckBoxThickness.isSelected());
+        txtFieldLowerDepth.setEnabled(enabled && ckBoxThickness.isSelected());
     }
 
     public void save() {
@@ -263,7 +278,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
-        //System.out.println(evt.getSource() + " " + evt.getPropertyName());
+        //System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
         String prop = evt.getPropertyName();
         if (prop.matches("enabled")
                 || prop.matches("value")
@@ -1030,7 +1045,13 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
     private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
         // TODO add your handling code here:
-        repaintBtnColor(JColorChooser.showDialog(btnColor, "", btnColor.getBackground()));
+        Color currentColor = btnColor.getBackground();
+        Color newColor = JColorChooser.showDialog(btnColor, "", btnColor.getBackground());
+        if (null != newColor) {
+            repaintBtnColor(newColor);
+        } else {
+            repaintBtnColor(currentColor);
+        }
     }//GEN-LAST:event_btnColorActionPerformed
 
     private void ckBoxThicknessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxThicknessActionPerformed
