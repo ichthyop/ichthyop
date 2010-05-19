@@ -51,15 +51,21 @@ public class XZone extends org.jdom.Element {
     }
 
     private void addBathyMask() {
-        this.setBathyMaskEnabled(true);
-        this.setInshoreLine(0);
-        this.setOffshoreLine(12000);
+        if (null == getChild(BATHY_MASK)) {
+            addContent(new Element(BATHY_MASK));
+        }
+        setBathyMaskEnabled(true);
+        setInshoreLine(0);
+        setOffshoreLine(12000);
     }
 
     private void addThickness() {
-        this.setThicknessEnabled(true);
-        this.setUpperDepth(0.f);
-        this.setLowerDepth(50.f);
+        if (null == getChild(THICKNESS)) {
+            addContent(new Element(THICKNESS));
+        }
+        setThicknessEnabled(true);
+        setUpperDepth(0.f);
+        setLowerDepth(50.f);
     }
 
     public String getKey() {
