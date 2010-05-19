@@ -492,7 +492,7 @@
                                             <Property name="name" type="java.lang.String" value="txtFieldMax" noResource="true"/>
                                           </Properties>
                                           <AuxValues>
-                                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFieldMax.setValue(new Float(100.f));"/>
+                                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="NumberFormat floatFormat = NumberFormat.getNumberInstance(Locale.US);&#xa;floatFormat.setGroupingUsed(false);&#xa;NumberFormatter floatFormatter = new NumberFormatter(floatFormat);&#xa;floatFormatter.setFormat(floatFormat);&#xa;txtFieldMax.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));&#xa;txtFieldMax.setValue(new Float(100.f));"/>
                                           </AuxValues>
                                         </Component>
                                         <Component class="javax.swing.JButton" name="btnAutoRange">
@@ -536,12 +536,12 @@
                                         <Component class="javax.swing.JFormattedTextField" name="txtFieldMin">
                                           <Properties>
                                             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
-                                              <Format format="###0.###" subtype="-1" type="0"/>
+                                              <Format subtype="0" type="0"/>
                                             </Property>
                                             <Property name="name" type="java.lang.String" value="txtFieldMin" noResource="true"/>
                                           </Properties>
                                           <AuxValues>
-                                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFieldMin.setValue(new Float(0.f));"/>
+                                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));&#xa;txtFieldMin.setValue(new Float(0.f));"/>
                                           </AuxValues>
                                         </Component>
                                       </SubComponents>

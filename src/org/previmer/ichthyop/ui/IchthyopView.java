@@ -21,8 +21,11 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.EventObject;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +46,8 @@ import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
@@ -1338,6 +1343,11 @@ public class IchthyopView extends FrameView
 
         txtFieldMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
         txtFieldMax.setName("txtFieldMax"); // NOI18N
+        NumberFormat floatFormat = NumberFormat.getNumberInstance(Locale.US);
+        floatFormat.setGroupingUsed(false);
+        NumberFormatter floatFormatter = new NumberFormatter(floatFormat);
+        floatFormatter.setFormat(floatFormat);
+        txtFieldMax.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
         txtFieldMax.setValue(new Float(100.f));
 
         btnAutoRange.setAction(actionMap.get("autoRangeColorbar")); // NOI18N
@@ -1366,8 +1376,9 @@ public class IchthyopView extends FrameView
             }
         });
 
-        txtFieldMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
+        txtFieldMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
         txtFieldMin.setName("txtFieldMin"); // NOI18N
+        txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
         txtFieldMin.setValue(new Float(0.f));
 
         javax.swing.GroupLayout pnlColorBarLayout = new javax.swing.GroupLayout(pnlColorBar);
