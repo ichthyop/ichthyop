@@ -45,6 +45,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Component;
 import java.awt.Toolkit;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
@@ -85,6 +87,21 @@ public class IntegerEditor extends DefaultCellEditor {
         ftf.setValue(minimum);
         ftf.setHorizontalAlignment(JTextField.TRAILING);
         ftf.setFocusLostBehavior(JFormattedTextField.PERSIST);
+        ftf.addFocusListener(new FocusListener() {
+
+            public void focusGained(FocusEvent e) {
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    public void run() {
+                        ftf.selectAll();
+                    }
+                });
+            }
+
+            public void focusLost(FocusEvent e) {
+                // do nothing
+            }
+        });
 
         //React when the user presses Enter while the editor is
         //active.  (Tab is handled as specified by
