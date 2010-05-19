@@ -90,6 +90,7 @@ public class WMSMapper extends JXMapKit {
     private double[] time;
     private int nbSteps;
     private List<String> colors;
+    private Color defaultColor = Color.WHITE;
     /**
      * Lightest color of the color range.
      */
@@ -469,7 +470,7 @@ public class WMSMapper extends JXMapKit {
     private Color getColor(float value) {
 
         if (Float.isNaN(value)) {
-            return Color.WHITE;
+            return defaultColor;
         }
 
         float xval = Math.abs(bound((valmax - value) / (valmax - valmin)));
@@ -479,6 +480,10 @@ public class WMSMapper extends JXMapKit {
                 + (1 - xval) * colormax.getGreen())),
                 ((int) (xval * colormin.getBlue()
                 + (1 - xval) * colormax.getBlue()))));
+    }
+
+    public void setDefaultColor(Color color) {
+        defaultColor = color;
     }
 
     public void setColorbar(String variable, float valmin, float valmax, Color colormin, Color colormax) {

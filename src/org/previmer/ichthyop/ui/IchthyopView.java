@@ -1047,6 +1047,7 @@ public class IchthyopView extends FrameView
     }
 
     private void setColorbarPanelEnabled(boolean enabled) {
+        btnColor.setEnabled(enabled);
         cbBoxVariable.setEnabled(enabled);
         txtFieldMin.setEnabled(enabled);
         txtFieldMax.setEnabled(enabled);
@@ -1085,6 +1086,16 @@ public class IchthyopView extends FrameView
         btnSimulationRun = new javax.swing.JButton();
         taskPaneMapping = new org.jdesktop.swingx.JXTaskPane();
         pnlMapping = new javax.swing.JPanel();
+        btnMapping = new javax.swing.JButton();
+        btnCancelMapping = new javax.swing.JButton();
+        btnOpenNC = new javax.swing.JButton();
+        pnlWMS = new javax.swing.JPanel();
+        cbBoxWMS = new javax.swing.JComboBox();
+        lblWMS = new javax.swing.JLabel();
+        lblNC = new javax.swing.JLabel();
+        btnCloseNC = new javax.swing.JButton();
+        btnExportToKMZ = new javax.swing.JButton();
+        pnlColor = new javax.swing.JPanel();
         pnlColorBar = new javax.swing.JPanel();
         lblVariable = new javax.swing.JLabel();
         cbBoxVariable = new javax.swing.JComboBox();
@@ -1096,15 +1107,8 @@ public class IchthyopView extends FrameView
         btnColorMin = new javax.swing.JButton();
         btnColorMax = new javax.swing.JButton();
         txtFieldMin = new javax.swing.JFormattedTextField();
-        btnMapping = new javax.swing.JButton();
-        btnCancelMapping = new javax.swing.JButton();
-        btnOpenNC = new javax.swing.JButton();
-        pnlWMS = new javax.swing.JPanel();
-        cbBoxWMS = new javax.swing.JComboBox();
-        lblWMS = new javax.swing.JLabel();
-        lblNC = new javax.swing.JLabel();
-        btnCloseNC = new javax.swing.JButton();
-        btnExportToKMZ = new javax.swing.JButton();
+        lblColor = new javax.swing.JLabel();
+        btnColor = new javax.swing.JButton();
         taskPaneAnimation = new org.jdesktop.swingx.JXTaskPane();
         pnlAnimation = new javax.swing.JPanel();
         btnFirst = new javax.swing.JButton();
@@ -1325,6 +1329,59 @@ public class IchthyopView extends FrameView
         pnlMapping.setName("pnlMapping"); // NOI18N
         pnlMapping.setOpaque(false);
 
+        btnMapping.setAction(actionMap.get("createMaps")); // NOI18N
+        btnMapping.setName("btnMapping"); // NOI18N
+
+        btnCancelMapping.setAction(actionMap.get("cancelMapping")); // NOI18N
+        btnCancelMapping.setName("btnCancelMapping"); // NOI18N
+
+        btnOpenNC.setAction(actionMap.get("openNcMapping")); // NOI18N
+        btnOpenNC.setName("btnOpenNC"); // NOI18N
+
+        pnlWMS.setBorder(javax.swing.BorderFactory.createTitledBorder("Web Map Service"));
+        pnlWMS.setName("pnlWMS"); // NOI18N
+        pnlWMS.setOpaque(false);
+
+        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "http://www.marine-geo.org/services/wms?", "http://wms.jpl.nasa.gov/wms.cgi?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
+        cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
+        cbBoxWMS.setName("cbBoxWMS"); // NOI18N
+
+        lblWMS.setName("lblWMS"); // NOI18N
+
+        javax.swing.GroupLayout pnlWMSLayout = new javax.swing.GroupLayout(pnlWMS);
+        pnlWMS.setLayout(pnlWMSLayout);
+        pnlWMSLayout.setHorizontalGroup(
+            pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlWMSLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblWMS)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cbBoxWMS, 0, 385, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        pnlWMSLayout.setVerticalGroup(
+            pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlWMSLayout.createSequentialGroup()
+                .addGroup(pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblWMS)
+                    .addComponent(cbBoxWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        lblNC.setFont(resourceMap.getFont("lblNC.font")); // NOI18N
+        lblNC.setText(resourceMap.getString("lblNC.text")); // NOI18N
+        lblNC.setName("lblNC"); // NOI18N
+
+        btnCloseNC.setAction(actionMap.get("closeNetCDF")); // NOI18N
+        btnCloseNC.setName("btnCloseNC"); // NOI18N
+
+        btnExportToKMZ.setAction(actionMap.get("exportToKMZ")); // NOI18N
+        btnExportToKMZ.setName("btnExportToKMZ"); // NOI18N
+
+        pnlColor.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlColor.border.title"))); // NOI18N
+        pnlColor.setOpaque(false);
+        pnlColor.setName("pnlColor"); // NOI18N
+
         pnlColorBar.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlColorBar.border.title"))); // NOI18N
         pnlColorBar.setName("pnlColorBar"); // NOI18N
         pnlColorBar.setOpaque(false);
@@ -1399,7 +1456,7 @@ public class IchthyopView extends FrameView
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtFieldMax)
-                            .addComponent(txtFieldMin, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE))
+                            .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnColorMax)
@@ -1408,7 +1465,7 @@ public class IchthyopView extends FrameView
                         .addComponent(btnAutoRange)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnApplyColorbar)))
-                .addContainerGap())
+                .addContainerGap(62, Short.MAX_VALUE))
         );
         pnlColorBarLayout.setVerticalGroup(
             pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1433,54 +1490,43 @@ public class IchthyopView extends FrameView
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        btnMapping.setAction(actionMap.get("createMaps")); // NOI18N
-        btnMapping.setName("btnMapping"); // NOI18N
+        lblColor.setText(resourceMap.getString("lblColor.text")); // NOI18N
+        lblColor.setName("lblColor"); // NOI18N
 
-        btnCancelMapping.setAction(actionMap.get("cancelMapping")); // NOI18N
-        btnCancelMapping.setName("btnCancelMapping"); // NOI18N
+        btnColor.setForeground(resourceMap.getColor("btnColor.foreground")); // NOI18N
+        btnColor.setIcon(resourceMap.getIcon("btnColor.icon")); // NOI18N
+        btnColor.setText(resourceMap.getString("btnColor.text")); // NOI18N
+        btnColor.setName("btnColor"); // NOI18N
+        btnColor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnColorActionPerformed(evt);
+            }
+        });
 
-        btnOpenNC.setAction(actionMap.get("openNcMapping")); // NOI18N
-        btnOpenNC.setName("btnOpenNC"); // NOI18N
-
-        pnlWMS.setBorder(javax.swing.BorderFactory.createTitledBorder("Web Map Service"));
-        pnlWMS.setName("pnlWMS"); // NOI18N
-        pnlWMS.setOpaque(false);
-
-        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "http://www.marine-geo.org/services/wms?", "http://wms.jpl.nasa.gov/wms.cgi?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
-        cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
-        cbBoxWMS.setName("cbBoxWMS"); // NOI18N
-
-        lblWMS.setName("lblWMS"); // NOI18N
-
-        javax.swing.GroupLayout pnlWMSLayout = new javax.swing.GroupLayout(pnlWMS);
-        pnlWMS.setLayout(pnlWMSLayout);
-        pnlWMSLayout.setHorizontalGroup(
-            pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlWMSLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlColorLayout = new javax.swing.GroupLayout(pnlColor);
+        pnlColor.setLayout(pnlColorLayout);
+        pnlColorLayout.setHorizontalGroup(
+            pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlColorLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblWMS)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbBoxWMS, 0, 372, Short.MAX_VALUE)
+                .addGroup(pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlColorBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(pnlColorLayout.createSequentialGroup()
+                        .addComponent(lblColor)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnColor)))
                 .addContainerGap())
         );
-        pnlWMSLayout.setVerticalGroup(
-            pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlWMSLayout.createSequentialGroup()
-                .addGroup(pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblWMS)
-                    .addComponent(cbBoxWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        pnlColorLayout.setVerticalGroup(
+            pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlColorLayout.createSequentialGroup()
+                .addGroup(pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblColor)
+                    .addComponent(btnColor))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlColorBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
-
-        lblNC.setFont(resourceMap.getFont("lblNC.font")); // NOI18N
-        lblNC.setText(resourceMap.getString("lblNC.text")); // NOI18N
-        lblNC.setName("lblNC"); // NOI18N
-
-        btnCloseNC.setAction(actionMap.get("closeNetCDF")); // NOI18N
-        btnCloseNC.setName("btnCloseNC"); // NOI18N
-
-        btnExportToKMZ.setAction(actionMap.get("exportToKMZ")); // NOI18N
-        btnExportToKMZ.setName("btnExportToKMZ"); // NOI18N
 
         javax.swing.GroupLayout pnlMappingLayout = new javax.swing.GroupLayout(pnlMapping);
         pnlMapping.setLayout(pnlMappingLayout);
@@ -1500,15 +1546,15 @@ public class IchthyopView extends FrameView
                         .addComponent(btnCloseNC))
                     .addComponent(lblNC)
                     .addComponent(btnCancelMapping)
-                    .addComponent(pnlColorBar, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE))
+                    .addComponent(pnlColor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlMappingLayout.setVerticalGroup(
             pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlMappingLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlColorBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnMapping)
                     .addComponent(btnExportToKMZ))
@@ -1522,7 +1568,7 @@ public class IchthyopView extends FrameView
                 .addComponent(lblNC)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pnlWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneMapping.getContentPane().add(pnlMapping);
@@ -2100,6 +2146,14 @@ public class IchthyopView extends FrameView
         JButton btn = (JButton) evt.getSource();
         btn.setForeground(chooseColor(btn, btn.getForeground()));
     }//GEN-LAST:event_btnColorMaxActionPerformed
+
+    private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
+        // TODO add your handling code here:
+        JButton btn = (JButton) evt.getSource();
+        btn.setForeground(chooseColor(btn, btn.getForeground()));
+        wmsMapper.setDefaultColor(btn.getForeground());
+    }//GEN-LAST:event_btnColorActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem animactionMenuItem;
     private javax.swing.JMenu animationMenu;
@@ -2110,6 +2164,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
     private javax.swing.JButton btnCloseNC;
+    private javax.swing.JButton btnColor;
     private javax.swing.JButton btnColorMax;
     private javax.swing.JButton btnColorMin;
     private javax.swing.JButton btnDeleteMaps;
@@ -2146,6 +2201,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblCfgFile;
+    private javax.swing.JLabel lblColor;
     private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblMax;
@@ -2165,6 +2221,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem openNCMenuItem;
     private javax.swing.JPanel pnlAnimation;
+    private javax.swing.JPanel pnlColor;
     private javax.swing.JPanel pnlColorBar;
     private javax.swing.JPanel pnlFile;
     private org.jdesktop.swingx.JXPanel pnlLogo;
