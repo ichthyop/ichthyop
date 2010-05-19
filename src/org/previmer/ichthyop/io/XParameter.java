@@ -24,12 +24,6 @@ public class XParameter extends org.jdom.Element {
     final public static String FORMAT = "format";
     final public static String ACCEPTED = "accepted";
     final public static String DEFAULT = "default";
-    final public static String KEY_HEADER = "Key";
-    final public static String INDEX_HEADER = "Index";
-    final public static String NAME_HEADER = "Name";
-    final public static String VALUE_HEADER = "Value";
-    final public static String TYPE_HEADER = "Type";
-    final public static String HIDDEN_HEADER = "Hidden";
 
     private int index;
     private final ParamType param_type;
@@ -53,21 +47,6 @@ public class XParameter extends org.jdom.Element {
             values = getChildren(VALUE);
         }
         reset();
-    }
-
-    public static String[] getHeaders() {
-        return new String[] {KEY_HEADER, INDEX_HEADER, NAME_HEADER, VALUE_HEADER, TYPE_HEADER, HIDDEN_HEADER};
-    }
-
-    public String[] toTableRow() {
-        String[] row;
-        String longName = getLongName();
-        if (this.getLength() > 1) {
-            longName += " [" + String.valueOf(index + 1) + "]";
-        }
-        row = new String[] {getKey(), String.valueOf(index), longName, getValue(), param_type.toString(), Boolean.toString(hidden)};
-        //System.out.println(getKey() + " - " +  String.valueOf(index) + " - " + longName + " - " + getValue() + " - " + param_type.toString() + " - " + Boolean.toString(hidden));
-        return row;
     }
 
     public String getKey() {
@@ -137,6 +116,10 @@ public class XParameter extends org.jdom.Element {
 
     @Override
     public String getValue() {
+        return getValue(index);
+    }
+
+    public String getValue(int index) {
         return values.get(index).getTextNormalize();
     }
 

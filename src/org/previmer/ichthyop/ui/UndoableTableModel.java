@@ -9,6 +9,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
@@ -20,7 +21,7 @@ import javax.swing.undo.UndoableEdit;
  *
  * @author pverley
  */
-public class UndoableTableModel extends DefaultTableModel {
+public abstract class UndoableTableModel extends AbstractTableModel {
 
     private JUndoManager undoManager;
 
@@ -30,6 +31,9 @@ public class UndoableTableModel extends DefaultTableModel {
     }
 
     public JUndoManager getUndoManager() {
+        if (undoManager == null) {
+            addUndoableEditListener(undoManager = new JUndoManager());
+        }
         return undoManager;
     }
 

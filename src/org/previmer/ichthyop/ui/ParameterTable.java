@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  Copyright (C) 2010 Philippe Verley <philippe dot verley at ird dot fr>
+ * 
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.previmer.ichthyop.ui;
 
@@ -13,31 +25,30 @@ import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.undo.UndoManager;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
-import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 
 /**
  *
- * @author pverley
+ * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
 public class ParameterTable extends JMultiCellEditorsTable {
 
-///////////////////////////////
+    ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
@@ -70,30 +81,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(block));
         setEditors(block);
-        getColumnExt(XParameter.TYPE_HEADER).setVisible(false);
-        getColumnExt(XParameter.HIDDEN_HEADER).setVisible(false);
-        getColumnExt(XParameter.KEY_HEADER).setVisible(false);
-        getColumnExt(XParameter.INDEX_HEADER).setVisible(false);
-        addHighlighter(new ColorHighlighter(new HighlightPredicate() {
-
-            public boolean isHighlighted(Component cmpnt, ComponentAdapter ca) {
-                try {
-                    return Boolean.valueOf(model.getValueAt(ca.row, getColumnExt(XParameter.HIDDEN_HEADER).getModelIndex()).toString());
-                } catch (Exception ex) {
-                    return false;
-                }
-            }
-        }, new Color(255, 0, 0, 20), Color.BLACK));
-        addHighlighter(new ColorHighlighter(new HighlightPredicate() {
-
-            public boolean isHighlighted(Component cmpnt, ComponentAdapter ca) {
-                try {
-                    return model.getValueAt(ca.row, getColumnExt(XParameter.TYPE_HEADER).getModelIndex()).toString().matches(ParamType.SERIAL.toString());
-                } catch (Exception ex) {
-                    return false;
-                }
-            }
-        }, new Color(0, 255, 0, 20), Color.BLACK));
         setAllRowsVisible(false);
         getModel().addTableModelListener(l);
     }
@@ -107,9 +94,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
             setupDateEditor(block);
         }
 
+        setDefaultRenderer(Object.class, new ParamTableCellRenderer());
+
         for (int row = 0; row < model.getRowCount(); row++) {
             XParameter param = block.getXParameter(getParameterKey(row));
-            Object value = model.getValueAt(row, getColumnExt(XParameter.VALUE_HEADER).getModelIndex());
+            Object value = model.getValueAt(row, 1);
             switch (param.getFormat()) {
                 case COMBO:
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(param.getAcceptedValues())));
@@ -151,17 +140,23 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
     }
 
-    public void setAllRowsVisible(boolean visible) {
-        if (visible) {
-            setRowFilter(null);
-        } else {
-            setRowFilter(new RowFilter<Object, Object>() {
+    public void setAllRowsVisible(final boolean visible) {
+        TableRowSorter sorter = new TableRowSorter<ParameterTableModel>(model);
+        sorter.setRowFilter(new RowFilter() {
 
-                public boolean include(Entry<? extends Object, ? extends Object> entry) {
-                    return !Boolean.valueOf(entry.getStringValue(getColumnExt(XParameter.HIDDEN_HEADER).getModelIndex()));
+            @Override
+            public boolean include(Entry entry) {
+                int row = (Integer) entry.getIdentifier();
+                boolean hidden = model.getTableParameter(row).getXParameter().isHidden();
+                if (visible) {
+                    return true;
+                } else {
+                    return !hidden;
                 }
-            });
-        }
+            }
+        });
+        setRowSorter(sorter);
+        adjustColumnSizes();
     }
 
     /*
@@ -249,7 +244,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
     public String getParameterKey(int row) {
         String key = "";
         if (row >= 0) {
-            key = model.getValueAt(row, getColumnExt(XParameter.KEY_HEADER).getModelIndex()).toString();
+            key = model.getTableParameter(row).getXParameter().getKey();
         }
         return key;
     }
@@ -257,14 +252,14 @@ public class ParameterTable extends JMultiCellEditorsTable {
     public String getParameterValue(int row) {
         String value = "";
         if (row >= 0) {
-            value = model.getValueAt(row, getColumnExt(XParameter.VALUE_HEADER).getModelIndex()).toString();
+            value = model.getTableParameter(row).getValue();
         }
         return value;
     }
 
     public int getParameterIndex(int row) {
         if (row >= 0) {
-            return Integer.valueOf(model.getValueAt(row, getColumnExt(XParameter.INDEX_HEADER).getModelIndex()).toString());
+            return Integer.valueOf(model.getTableParameter(row).getIndex());
         }
         return 0;
     }
@@ -272,35 +267,96 @@ public class ParameterTable extends JMultiCellEditorsTable {
     public class ParameterTableModel extends UndoableTableModel {
 
         private XBlock block;
+        private TableParameter[] data;
+        final public static String NAME_HEADER = "Name";
+        final public static String VALUE_HEADER = "Value";
+        private final String[] HEADERS = new String[]{NAME_HEADER, VALUE_HEADER};
 
         ParameterTableModel(XBlock block) {
             this.block = block;
-            setDataVector(createData(), XParameter.getHeaders());
+            data = createData();
         }
 
-        public Object[][] createData() {
+        @Override
+        public int getColumnCount() {
+            return HEADERS.length;
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.length;
+        }
+
+        @Override
+        public String getColumnName(int col) {
+            return HEADERS[col];
+        }
+
+        @Override
+        public Object getValueAt(int row, int col) {
+            if (col == 0) {
+                return data[row].getLongName();
+            } else {
+                return data[row].getValue();
+            }
+        }
+
+        TableParameter getTableParameter(int row) {
+            return data[row];
+        }
+
+        @Override
+        public Class getColumnClass(int c) {
+            return getValueAt(0, c).getClass();
+        }
+
+        /*
+         * Don't need to implement this method unless your table's
+         * editable.
+         */
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            //Note that the data/cell address is constant,
+            //no matter where the cell appears onscreen.
+            if (col == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /*
+         * Don't need to implement this method unless your table's
+         * data can change.
+         */
+        @Override
+        public void setValueAt(Object value, int row, int col) {
+            data[row].getXParameter().setValue(value.toString(), data[row].getIndex());
+            fireTableCellUpdated(row, col);
+        }
+
+        private TableParameter[] createData() {
 
             Collection<XParameter> list = block.getXParameters();
-            List<String[]> listData = new ArrayList();
-            String[][] tableData;
+            List<TableParameter> listData = new ArrayList();
+            TableParameter[] tableData;
             int i = 0;
             for (XParameter xparam : list) {
                 xparam.reset();
-                listData.add(xparam.toTableRow());
+                listData.add(new TableParameter(xparam, xparam.index()));
                 if (xparam.hasNext()) {
                     do {
                         xparam.increment();
-                        listData.add(xparam.toTableRow());
+                        listData.add(new TableParameter(xparam, xparam.index()));
                     } while (xparam.hasNext());
                 }
                 xparam.reset();
             }
-            tableData = new String[listData.size()][XParameter.getHeaders().length];
-            for (String[] arr : listData) {
+            tableData = new TableParameter[listData.size()];
+            for (TableParameter arr : listData) {
                 tableData[i++] = arr;
             }
             return tableData;
-
         }
 
         private Object[] getLongValues() {
@@ -317,15 +373,61 @@ public class ParameterTable extends JMultiCellEditorsTable {
             }
             return longuest;
         }
+    }
+
+    class ParamTableCellRenderer extends DefaultTableCellRenderer {
 
         @Override
-        public boolean isCellEditable(int row, int col) {
+        public Component getTableCellRendererComponent(JTable table,
+                Object value, boolean isSelected, boolean hasFocus,
+                int row,
+                int column) {
+            Component comp = super.getTableCellRendererComponent(table,
+                    value, isSelected, hasFocus, row, column);
 
-            if (getColumnName(col).matches(XParameter.VALUE_HEADER)) {
-                return true;
-            } else {
-                return false;
+            if (model.getTableParameter(row).getXParameter().isSerial()) {
+                comp.setBackground(new Color(0, 255, 0, 20));
+            } else if (model.getTableParameter(row).getXParameter().isHidden()) {
+                comp.setBackground(new Color(255, 0, 0, 20));
             }
+            return comp;
+        }
+    }
+
+    class ParamTableRowFilter extends TableRowSorter<ParameterTableModel> {
+        
+    }
+
+    private class TableParameter {
+
+        private XParameter xparameter;
+        private int index;
+        private String value;
+
+        TableParameter(XParameter xparameter, int index) {
+            this.xparameter = xparameter;
+            this.index = index;
+            this.value = xparameter.getValue(index);
+        }
+
+        XParameter getXParameter() {
+            return xparameter;
+        }
+
+        int getIndex() {
+            return index;
+        }
+
+        String getLongName() {
+            String longName = xparameter.getLongName();
+            if (xparameter.getLength() > 1) {
+                longName += " [" + String.valueOf(index + 1) + "]";
+            }
+            return longName;
+        }
+
+        String getValue() {
+            return value;
         }
     }
 }

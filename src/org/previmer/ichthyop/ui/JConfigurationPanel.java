@@ -10,7 +10,6 @@
  */
 package org.previmer.ichthyop.ui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
@@ -21,8 +20,6 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -30,14 +27,12 @@ import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
 import org.jdesktop.swingx.JXBusyLabel;
-import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import org.previmer.ichthyop.arch.ISimulationManager;
@@ -235,7 +230,15 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             try {
-                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(table.getSelectedRow()));
+                int viewRow = table.getSelectedRow();
+                int modelRow = viewRow;
+                if (viewRow < 0) {
+                    //Selection got filtered away.
+                    return;
+                } else {
+                    modelRow = table.convertRowIndexToModel(viewRow);
+                }
+                XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(modelRow));
                 pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
                 StringBuffer info = new StringBuffer("<html><i>");
                 info.append(xparam.getDescription());
@@ -302,7 +305,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             this.actionType = actionType;
             busyLabel.setBusy(true);
             busyLabel.setText("");
-            srollPaneTable.setViewportView(busyLabel);
+            scrollPaneTable.setViewportView(busyLabel);
             btnRemoveValue.getAction().setEnabled(false);
             btnAddValue.getAction().setEnabled(false);
         }
@@ -323,7 +326,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
         @Override
         protected void succeeded(Object o) {
-            srollPaneTable.setViewportView(table);
+            scrollPaneTable.setViewportView(table);
             JConfigurationPanel.this.firePropertyChange("xicfile", null, null);
         }
     }
@@ -410,9 +413,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRedo = new javax.swing.JButton();
         btnAddValue = new javax.swing.JButton();
         btnRemoveValue = new javax.swing.JButton();
-        srollPaneTable = new javax.swing.JScrollPane();
-        table = new ParameterTable();
         ckBoxHiddenParameter = new javax.swing.JCheckBox();
+        scrollPaneTable = new javax.swing.JScrollPane();
+        table = new ParameterTable();
 
         blockEditor.setName("blockEditor"); // NOI18N
 
@@ -551,7 +554,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap()
                 .addGroup(pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(ckBoxBlock)
-                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE))
+                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 462, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlBlockInfoLayout.setVerticalGroup(
@@ -578,7 +581,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlParamDescriptionLayout.setVerticalGroup(
@@ -604,7 +607,11 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRemoveValue.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
         btnRemoveValue.setName("btnRemoveValue"); // NOI18N
 
-        srollPaneTable.setName("srollPaneTable"); // NOI18N
+        ckBoxHiddenParameter.setAction(actionMap.get("showHiddenParameters")); // NOI18N
+        ckBoxHiddenParameter.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
+        ckBoxHiddenParameter.setName("ckBoxHiddenParameter"); // NOI18N
+
+        scrollPaneTable.setName("scrollPaneTable"); // NOI18N
 
         table.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -618,31 +625,28 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             }
         ));
         table.setName("table"); // NOI18N
+        table.getModel().addTableModelListener(this);
         table.getSelectionModel().addListSelectionListener(this);
-        srollPaneTable.setViewportView(table);
-
-        ckBoxHiddenParameter.setAction(actionMap.get("showHiddenParameters")); // NOI18N
-        ckBoxHiddenParameter.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
-        ckBoxHiddenParameter.setName("ckBoxHiddenParameter"); // NOI18N
+        scrollPaneTable.setViewportView(table);
 
         javax.swing.GroupLayout pnlParametersLayout = new javax.swing.GroupLayout(pnlParameters);
         pnlParameters.setLayout(pnlParametersLayout);
         pnlParametersLayout.setHorizontalGroup(
             pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlParametersLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlParametersLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ckBoxHiddenParameter)
-                    .addComponent(srollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE)
-                    .addGroup(pnlParametersLayout.createSequentialGroup()
+                .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(scrollPaneTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 462, Short.MAX_VALUE)
+                    .addComponent(ckBoxHiddenParameter, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlParametersLayout.createSequentialGroup()
                         .addComponent(btnUndo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnRedo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnAddValue)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemoveValue))
-                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(btnRemoveValue)))
                 .addContainerGap())
         );
         pnlParametersLayout.setVerticalGroup(
@@ -650,8 +654,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             .addGroup(pnlParametersLayout.createSequentialGroup()
                 .addComponent(ckBoxHiddenParameter)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(srollPaneTable, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUndo)
                     .addComponent(btnRedo)
@@ -659,7 +663,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     .addComponent(btnRemoveValue))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlParamDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout pnlBlockLayout = new javax.swing.GroupLayout(pnlBlock);
@@ -669,8 +673,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlBlockInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlBlockLayout.setVerticalGroup(
@@ -679,7 +683,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap()
                 .addComponent(pnlBlockInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                .addComponent(pnlParameters, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -736,9 +740,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JPanel pnlParamDescription;
     private javax.swing.JPanel pnlParameters;
     private javax.swing.JScrollPane scrollPaneEditors;
+    private javax.swing.JScrollPane scrollPaneTable;
     private javax.swing.JSplitPane splitPaneCfg;
-    private javax.swing.JScrollPane srollPaneTable;
-    private org.jdesktop.swingx.JXTable table;
+    private javax.swing.JTable table;
     // End of variables declaration//GEN-END:variables
-private boolean hasStructureChanged;
+    private boolean hasStructureChanged;
 }

@@ -10,13 +10,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import org.jdesktop.swingx.JXTable;
 
 /**
  *
  * @author pverley
  */
-public class JMultiCellEditorsTable extends JXTable {
+public class JMultiCellEditorsTable extends JTable {
 
 ///////////////////////////////
 // Declaration of the variables
