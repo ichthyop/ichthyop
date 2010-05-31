@@ -30,17 +30,27 @@ import javax.swing.RowFilter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.undo.UndoManager;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 
 /**
  *
@@ -264,17 +274,19 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return 0;
     }
 
-    public class ParameterTableModel extends UndoableTableModel {
+    public class ParameterTableModel extends AbstractTableModel {
 
         private XBlock block;
         private TableParameter[] data;
         final public static String NAME_HEADER = "Name";
         final public static String VALUE_HEADER = "Value";
         private final String[] HEADERS = new String[]{NAME_HEADER, VALUE_HEADER};
+        private JUndoManager undoManager;
 
         ParameterTableModel(XBlock block) {
             this.block = block;
             data = createData();
+            addUndoableEditListener(undoManager = new JUndoManager());
         }
 
         @Override
@@ -325,15 +337,40 @@ public class ParameterTable extends JMultiCellEditorsTable {
             }
         }
 
-        /*
-         * Don't need to implement this method unless your table's
-         * data can change.
-         */
-        @Override
-        public void setValueAt(Object value, int row, int col) {
-            data[row].setValue((String) value);
-            fireTableCellUpdated(row, col);
+        public JUndoManager getUndoManager() {
+        if (undoManager == null) {
+            addUndoableEditListener(undoManager = new JUndoManager());
         }
+        return undoManager;
+    }
+
+    @Override
+    public void setValueAt(Object value, int row, int column) {
+        setValueAt(value, row, column, true);
+    }
+
+    public void setValueAt(Object value, int row, int column, boolean undoable) {
+        UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
+        if (undoable == false || listeners == null) {
+            data[row].setValue((String) value);
+            fireTableCellUpdated(row, column);
+            return;
+        }
+
+        Object oldValue = getValueAt(row, column);
+        data[row].setValue((String) value);
+        fireTableCellUpdated(row, column);
+        JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
+        UndoableEditEvent editEvent = new UndoableEditEvent(this, cellEdit);
+        for (UndoableEditListener listener : listeners) {
+            listener.undoableEditHappened(editEvent);
+        }
+    }
+
+    public void addUndoableEditListener(UndoableEditListener listener) {
+        listenerList.add(UndoableEditListener.class, listener);
+    }
+
 
         private TableParameter[] createData() {
 
@@ -433,6 +470,132 @@ public class ParameterTable extends JMultiCellEditorsTable {
         void setValue(String value) {
             this.value = value;
             xparameter.setValue(value, index);
+        }
+    }
+
+    public class JUndoManager extends UndoManager {
+
+        protected Action undoAction;
+        protected Action redoAction;
+
+        public JUndoManager() {
+            this.undoAction = new JvUndoAction(this);
+            this.redoAction = new JvRedoAction(this);
+
+            synchronizeActions();           // to set initial names
+        }
+
+        public Action getUndoAction() {
+            return undoAction;
+        }
+
+        public Action getRedoAction() {
+            return redoAction;
+        }
+
+        @Override
+        public boolean addEdit(UndoableEdit anEdit) {
+            try {
+                return super.addEdit(anEdit);
+            } finally {
+                synchronizeActions();
+            }
+        }
+
+        @Override
+        protected void undoTo(UndoableEdit edit) throws CannotUndoException {
+            try {
+                super.undoTo(edit);
+            } finally {
+                synchronizeActions();
+            }
+        }
+
+        @Override
+        protected void redoTo(UndoableEdit edit) throws CannotRedoException {
+            try {
+                super.redoTo(edit);
+            } finally {
+                synchronizeActions();
+            }
+        }
+
+        protected void synchronizeActions() {
+            undoAction.setEnabled(canUndo());
+            undoAction.putValue(Action.NAME, getUndoPresentationName());
+
+            redoAction.setEnabled(canRedo());
+            redoAction.putValue(Action.NAME, getRedoPresentationName());
+        }
+    }
+
+    class JvUndoAction extends AbstractAction {
+
+        protected final UndoManager manager;
+
+        public JvUndoAction(UndoManager manager) {
+            this.manager = manager;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            try {
+                manager.undo();
+            } catch (CannotUndoException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    class JvRedoAction extends AbstractAction {
+
+        protected final UndoManager manager;
+
+        public JvRedoAction(UndoManager manager) {
+            this.manager = manager;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            try {
+                manager.redo();
+            } catch (CannotRedoException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    class JvCellEdit extends AbstractUndoableEdit {
+
+        protected ParameterTableModel tableModel;
+        protected Object oldValue;
+        protected Object newValue;
+        protected int row;
+        protected int column;
+
+        public JvCellEdit(ParameterTableModel tableModel, Object oldValue, Object newValue, int row, int column) {
+            this.tableModel = tableModel;
+            this.oldValue = oldValue;
+            this.newValue = newValue;
+            this.row = row;
+            this.column = column;
+        }
+
+        @Override
+        public String getPresentationName() {
+            return "Cell Edit";
+        }
+
+        @Override
+        public void undo() throws CannotUndoException {
+            super.undo();
+
+            tableModel.setValueAt(oldValue, row, column, false);
+        }
+
+        @Override
+        public void redo() throws CannotUndoException {
+            super.redo();
+
+            tableModel.setValueAt(newValue, row, column, false);
         }
     }
 }
