@@ -352,13 +352,13 @@ public class ParameterTable extends JMultiCellEditorsTable {
     public void setValueAt(Object value, int row, int column, boolean undoable) {
         UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
         if (undoable == false || listeners == null) {
-            data[row].setValue((String) value);
+            data[row].setValue(value.toString());
             fireTableCellUpdated(row, column);
             return;
         }
 
         Object oldValue = getValueAt(row, column);
-        data[row].setValue((String) value);
+        data[row].setValue(value.toString());
         fireTableCellUpdated(row, column);
         JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
         UndoableEditEvent editEvent = new UndoableEditEvent(this, cellEdit);
