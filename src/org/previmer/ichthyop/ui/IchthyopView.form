@@ -30,6 +30,7 @@
             <Container class="javax.swing.JSplitPane" name="leftSplitPane">
               <Properties>
                 <Property name="orientation" type="int" value="0"/>
+                <Property name="resizeWeight" type="double" value="1.0"/>
                 <Property name="name" type="java.lang.String" value="leftSplitPane" noResource="true"/>
               </Properties>
               <Constraints>
@@ -418,7 +419,7 @@
                                                   <EmptySpace max="-2" attributes="0"/>
                                                   <Component id="lblWMS" min="-2" max="-2" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="cbBoxWMS" pref="385" max="32767" attributes="0"/>
+                                                  <Component id="cbBoxWMS" pref="372" max="32767" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
                                               </Group>
                                           </Group>
@@ -490,8 +491,8 @@
                                             </TitledBorder>
                                           </Border>
                                         </Property>
-                                        <Property name="opaque" type="boolean" value="false"/>
                                         <Property name="name" type="java.lang.String" value="pnlColor" noResource="true"/>
+                                        <Property name="opaque" type="boolean" value="false"/>
                                       </Properties>
 
                                       <Layout>
@@ -572,7 +573,7 @@
                                                               <Component id="btnApplyColorbar" min="-2" max="-2" attributes="0"/>
                                                           </Group>
                                                       </Group>
-                                                      <EmptySpace pref="62" max="32767" attributes="0"/>
+                                                      <EmptySpace pref="49" max="32767" attributes="0"/>
                                                   </Group>
                                               </Group>
                                             </DimensionLayout>

@@ -1169,6 +1169,7 @@ public class IchthyopView extends FrameView
         splitPane.setName("splitPane"); // NOI18N
 
         leftSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        leftSplitPane.setResizeWeight(1.0);
         leftSplitPane.setName("leftSplitPane"); // NOI18N
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopView.class);
@@ -1356,7 +1357,7 @@ public class IchthyopView extends FrameView
                 .addContainerGap()
                 .addComponent(lblWMS)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbBoxWMS, 0, 385, Short.MAX_VALUE)
+                .addComponent(cbBoxWMS, 0, 372, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlWMSLayout.setVerticalGroup(
@@ -1465,7 +1466,7 @@ public class IchthyopView extends FrameView
                         .addComponent(btnAutoRange)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnApplyColorbar)))
-                .addContainerGap(62, Short.MAX_VALUE))
+                .addContainerGap(49, Short.MAX_VALUE))
         );
         pnlColorBarLayout.setVerticalGroup(
             pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
