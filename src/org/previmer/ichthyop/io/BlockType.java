@@ -11,12 +11,11 @@ package org.previmer.ichthyop.io;
  */
 public enum BlockType {
 
-    OPTION("blue"),
-    ACTION("green"),
-    ZONE("brown"),
-    RELEASE("violet"),
-    DATASET("orange"),
-    TRACKER("red");
+    OPTION,
+    ACTION,
+    RELEASE,
+    DATASET,
+    TRACKER;
 
     static BlockType getType(String value) {
         for (BlockType type : values()) {
@@ -25,20 +24,9 @@ public enum BlockType {
         }
         return null;
     }
-    
-    String color;
-
-    BlockType(String color) {
-        this.color = color;
-    }
 
     @Override
     public String toString() {
         return name().toLowerCase();
     }
-
-    public String getColor() {
-        return color;
-    }
-
 }

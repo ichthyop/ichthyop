@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -118,7 +119,33 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     public void setBlockEnabled() {
         blockTree.getSelectedBlock().setEnabled(ckBoxBlock.isSelected());
         setParameterEditorEnabled(ckBoxBlock.isSelected());
+        ensureSingleBlockSelection(BlockType.DATASET);
+        ensureSingleBlockSelection(BlockType.RELEASE);
         firePropertyChange("xicfile", null, null);
+    }
+
+    private void ensureSingleBlockSelection(BlockType type) {
+        XBlock selectedBlock = blockTree.getSelectedBlock();
+        if (selectedBlock.getType().equals(type)) {
+            /* If the selected block is newly enable, we
+             deactivate all the others blocks with same type */
+            if (selectedBlock.isEnabled()) {
+                for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
+                    if (!block.getKey().matches(selectedBlock.getKey())) {
+                        blockTree.get(block.getTreePath()).setEnabled(false);
+                    }
+                }
+            } else {
+                /* Warn user in case no block of this type is enable */
+                StringBuffer msg = new StringBuffer();
+                msg.append(getResourceMap().getString("noBlockEnabled.text.part1"));
+                msg.append(" <");
+                msg.append(type.toString());
+                msg.append("> ");
+                msg.append(getResourceMap().getString("noBlockEnabled.text.part2"));
+                JOptionPane.showMessageDialog(this, msg.toString());
+            }
+        }
     }
 
     private void setParameterEditorEnabled(boolean enabled) {
@@ -185,9 +212,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             DefaultMutableTreeNode node = blockTree.getSelectedNode();
             if (node != null && node.isLeaf()) {
                 XBlock block = blockTree.getSelectedBlock();
-                if (block.getType().equals(BlockType.ZONE)) {
-                    cancel(true);
-                }
                 setupAdvancedEditor(block);
             } else {
                 cancel(true);
