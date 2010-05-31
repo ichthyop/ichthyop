@@ -331,7 +331,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
          */
         @Override
         public void setValueAt(Object value, int row, int col) {
-            data[row].getXParameter().setValue(value.toString(), data[row].getIndex());
+            data[row].setValue((String) value);
             fireTableCellUpdated(row, col);
         }
 
@@ -428,6 +428,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
         String getValue() {
             return value;
+        }
+
+        void setValue(String value) {
+            this.value = value;
+            xparameter.setValue(value, index);
         }
     }
 }

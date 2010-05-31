@@ -216,9 +216,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     public void tableChanged(TableModelEvent e) {
         if (e != null) {
-            int row = table.getSelectedRow();
-            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
-            xparam.setValue(table.getValueAt(row, 1).toString(), getTable().getParameterIndex(row));
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
             firePropertyChange("xicfile", null, null);

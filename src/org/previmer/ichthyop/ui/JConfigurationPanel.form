@@ -284,7 +284,7 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="ckBoxBlock" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="lblBlockInfo" alignment="0" pref="462" max="32767" attributes="0"/>
+                                      <Component id="lblBlockInfo" alignment="0" pref="626" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
@@ -334,7 +334,7 @@
                               <Group type="102" alignment="1" attributes="0">
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="1" attributes="0">
-                                      <Component id="scrollPaneTable" alignment="0" pref="462" max="32767" attributes="0"/>
+                                      <Component id="scrollPaneTable" alignment="0" pref="626" max="32767" attributes="0"/>
                                       <Component id="ckBoxHiddenParameter" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Component id="pnlParamDescription" alignment="0" max="32767" attributes="1"/>
                                       <Group type="102" alignment="0" attributes="0">
@@ -387,7 +387,7 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="lblParameter" pref="426" max="32767" attributes="0"/>
+                                      <Component id="lblParameter" pref="590" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                               </Group>
