@@ -40,7 +40,6 @@ public class Mars3dOpendapDataset extends Mars3dDatasetCommon {
     public void init() {
         try {
             long t0 = getSimulationManager().getTimeManager().get_tO();
-            FLAG_TP = FLAG_SAL = FLAG_VDISP = false;
             checkRequiredVariable(ncIn);
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;

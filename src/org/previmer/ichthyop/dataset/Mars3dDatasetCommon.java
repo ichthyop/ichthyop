@@ -5,13 +5,10 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
-import java.util.logging.Level;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -110,21 +107,7 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
      * Current rank in NetCDF dataset
      */
     static int rank;
-    /**
-     * Determines whether or not the temperature field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    static boolean FLAG_TP;
-    /**
-     * Determines whether or not the salinity field should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    static boolean FLAG_SAL;
-    /**
-     * Determines whether or not the turbulent diffusivity should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    static boolean FLAG_VDISP;
+    
     float[] s_rho;
 
     public boolean is3D() {
@@ -286,6 +269,11 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
             zeta_tp1 = zeta_tp0;
 
             s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
+            if (s_rho[0] < 0) {
+                for (int k = 0; k < s_rho.length; k++) {
+                    s_rho[k] += 1.d;
+                }
+            }
 
         } catch (IOException ex) {
             ex.printStackTrace();

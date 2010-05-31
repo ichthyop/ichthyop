@@ -45,7 +45,6 @@ public class Mars3dDataset extends Mars3dDatasetCommon {
             ncIn = MarsDatasetIO.open(MarsDatasetIO.getFile(t0));
             checkRequiredVariable(ncIn);
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            FLAG_TP = FLAG_SAL = FLAG_VDISP = false;
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
         } catch (IOException ex) {
