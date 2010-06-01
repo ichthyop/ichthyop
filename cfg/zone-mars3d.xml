@@ -3,7 +3,7 @@
   <zone>
     <key>Recruitment zone</key>
     <type>recruitment</type>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <color>[r=102,g=255,b=102]</color>
     <polygon>
       <point>

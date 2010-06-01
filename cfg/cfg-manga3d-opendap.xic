@@ -8,7 +8,7 @@
       <parameter type="serial">
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
-        <value>year 2010 month 03 day 01 at 00:00</value>
+        <value>year 2010 month 05 day 13 at 10:00</value>
         <format>date</format>
         <tree_path>Tome/General time options</tree_path>
         <description>Set the date of beginning of simulation. Expressed in seconds ellapsed since the origin of time.</description>
@@ -16,14 +16,14 @@
       <parameter type="serial">
         <key>time_step</key>
         <long_name>Time step</long_name>
-        <value>300</value>
+        <value>600</value>
         <format>integer</format>
         <description>The computational time step (dt) expressed in seconds.</description>
       </parameter>
       <parameter type="serial">
         <key>transport_duration</key>
         <long_name>Transport duration</long_name>
-        <value>0000 day(s) 2 hour(s) 00 minute(s)</value>
+        <value>0000 day(s) 12 hour(s) 00 minute(s)</value>
         <format>duration</format>
         <description>Set the duration [second] of particle transport.</description>
       </parameter>
