@@ -104,7 +104,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRedo.getAction().setEnabled(false);
         btnAddValue.getAction().setEnabled(false);
         btnRemoveValue.getAction().setEnabled(false);
-        getTable().setAllRowsVisible(false);
         ckBoxHiddenParameter.setSelected(false);
         getTable().setModel(block, this);
         if (block.getNbHiddenParameters() > 0) {

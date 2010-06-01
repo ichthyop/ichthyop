@@ -157,11 +157,15 @@ public class ParameterTable extends JMultiCellEditorsTable {
             @Override
             public boolean include(Entry entry) {
                 int row = (Integer) entry.getIdentifier();
-                boolean hidden = model.getTableParameter(row).getXParameter().isHidden();
-                if (visible) {
-                    return true;
-                } else {
-                    return !hidden;
+                try {
+                    boolean hidden = model.getTableParameter(row).getXParameter().isHidden();
+                    if (visible) {
+                        return true;
+                    } else {
+                        return !hidden;
+                    }
+                } catch (Exception ex) {
+                    return false;
                 }
             }
         });
@@ -338,39 +342,38 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
 
         public JUndoManager getUndoManager() {
-        if (undoManager == null) {
-            addUndoableEditListener(undoManager = new JUndoManager());
+            if (undoManager == null) {
+                addUndoableEditListener(undoManager = new JUndoManager());
+            }
+            return undoManager;
         }
-        return undoManager;
-    }
 
-    @Override
-    public void setValueAt(Object value, int row, int column) {
-        setValueAt(value, row, column, true);
-    }
+        @Override
+        public void setValueAt(Object value, int row, int column) {
+            setValueAt(value, row, column, true);
+        }
 
-    public void setValueAt(Object value, int row, int column, boolean undoable) {
-        UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
-        if (undoable == false || listeners == null) {
+        public void setValueAt(Object value, int row, int column, boolean undoable) {
+            UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
+            if (undoable == false || listeners == null) {
+                data[row].setValue(value.toString());
+                fireTableCellUpdated(row, column);
+                return;
+            }
+
+            Object oldValue = getValueAt(row, column);
             data[row].setValue(value.toString());
             fireTableCellUpdated(row, column);
-            return;
+            JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
+            UndoableEditEvent editEvent = new UndoableEditEvent(this, cellEdit);
+            for (UndoableEditListener listener : listeners) {
+                listener.undoableEditHappened(editEvent);
+            }
         }
 
-        Object oldValue = getValueAt(row, column);
-        data[row].setValue(value.toString());
-        fireTableCellUpdated(row, column);
-        JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
-        UndoableEditEvent editEvent = new UndoableEditEvent(this, cellEdit);
-        for (UndoableEditListener listener : listeners) {
-            listener.undoableEditHappened(editEvent);
+        public void addUndoableEditListener(UndoableEditListener listener) {
+            listenerList.add(UndoableEditListener.class, listener);
         }
-    }
-
-    public void addUndoableEditListener(UndoableEditListener listener) {
-        listenerList.add(UndoableEditListener.class, listener);
-    }
-
 
         private TableParameter[] createData() {
 
@@ -426,13 +429,14 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 comp.setBackground(new Color(0, 255, 0, 20));
             } else if (model.getTableParameter(row).getXParameter().isHidden()) {
                 comp.setBackground(new Color(255, 0, 0, 20));
+            } else {
+                comp.setBackground(Color.WHITE);
             }
             return comp;
         }
     }
 
     class ParamTableRowFilter extends TableRowSorter<ParameterTableModel> {
-        
     }
 
     private class TableParameter {
