@@ -33,6 +33,7 @@ import org.previmer.ichthyop.io.LonTracker;
 import org.previmer.ichthyop.io.MortalityTracker;
 import org.previmer.ichthyop.io.TimeTracker;
 import org.previmer.ichthyop.io.UserDefinedTracker;
+import org.previmer.ichthyop.io.XParameter;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -190,6 +191,21 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                 ? "3d"
                 : "2d";
         ncOut.addGlobalAttribute("transport_dimension", dim);
+        for (BlockType type : BlockType.values()) {
+            for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
+                if (!block.getType().equals(BlockType.OPTION)) {
+                    ncOut.addGlobalAttribute(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
+                }
+                if (block.isEnabled()) {
+                    for (XParameter param : block.getXParameters()) {
+                        if (!param.isHidden()) {
+                            String key = block.getKey() + "." + param.getKey();
+                            ncOut.addGlobalAttribute(key, param.getValue());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private List<GeoPosition> makeZoneEdge(Zone zone) {
@@ -289,11 +305,11 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         /* Add trackers requested by external actions */
         for (Class trackerClass : requestedTrackers) {
             try {
-                    ITracker tracker = (ITracker) trackerClass.newInstance();
-                    trackers.add(tracker);
-                } catch (Exception ex) {
-                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                ITracker tracker = (ITracker) trackerClass.newInstance();
+                trackers.add(tracker);
+            } catch (Exception ex) {
+                Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         for (ITracker tracker : trackers) {
             addVar2NcOut(tracker);
