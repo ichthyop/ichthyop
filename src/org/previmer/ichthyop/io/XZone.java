@@ -9,6 +9,8 @@ import org.previmer.ichthyop.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom.Element;
+import org.previmer.ichthyop.ui.LonLatConverter;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
 /**
  *
@@ -42,10 +44,10 @@ public class XZone extends org.jdom.Element {
         setKey(key);
         setEnabled(true);
         setType(TypeZone.RELEASE);
-        addPoint(0, 0.f, 0.f);
-        addPoint(1, 0.f, 0.f);
-        addPoint(2, 0.f, 0.f);
-        addPoint(3, 0.f, 0.f);
+        addPoint(0, "0.0", "0.0");
+        addPoint(1, "0.0", "0.0");
+        addPoint(2, "0.0", "0.0");
+        addPoint(3, "0.0", "0.0");
         addBathyMask();
         addThickness();
     }
@@ -161,7 +163,7 @@ public class XZone extends org.jdom.Element {
         getChild(POLYGON).removeContent();
     }
 
-    public void addPoint(int index, float lon, float lat) {
+    public void addPoint(int index, String lon, String lat) {
         if (null == getChild(POLYGON)) {
             addContent(new Element(POLYGON));
         }
@@ -219,37 +221,37 @@ public class XZone extends org.jdom.Element {
      * BathyMask
      */
     public float getInshoreLine() {
-            return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_INSHORE));
-        }
+        return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_INSHORE));
+    }
 
-        public void setInshoreLine(float depth) {
-            if (null == getBathyMask().getChild(LINE_INSHORE)) {
-                getBathyMask().addContent(new Element(LINE_INSHORE));
-            }
-            getBathyMask().getChild(LINE_INSHORE).setText(String.valueOf(depth));
+    public void setInshoreLine(float depth) {
+        if (null == getBathyMask().getChild(LINE_INSHORE)) {
+            getBathyMask().addContent(new Element(LINE_INSHORE));
         }
+        getBathyMask().getChild(LINE_INSHORE).setText(String.valueOf(depth));
+    }
 
-        public float getOffshoreLine() {
-            return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_OFFSHORE));
-        }
+    public float getOffshoreLine() {
+        return Float.valueOf(getBathyMask().getChildTextNormalize(LINE_OFFSHORE));
+    }
 
-        public void setOffshoreLine(float depth) {
-            if (null == getBathyMask().getChild(LINE_OFFSHORE)) {
-                getBathyMask().addContent(new Element(LINE_OFFSHORE));
-            }
-            getBathyMask().getChild(LINE_OFFSHORE).setText(String.valueOf(depth));
+    public void setOffshoreLine(float depth) {
+        if (null == getBathyMask().getChild(LINE_OFFSHORE)) {
+            getBathyMask().addContent(new Element(LINE_OFFSHORE));
         }
+        getBathyMask().getChild(LINE_OFFSHORE).setText(String.valueOf(depth));
+    }
 
-        public boolean isBathyMaskEnabled() {
-            return Boolean.valueOf(getBathyMask().getChildTextNormalize(ENABLED));
-        }
+    public boolean isBathyMaskEnabled() {
+        return Boolean.valueOf(getBathyMask().getChildTextNormalize(ENABLED));
+    }
 
-        public void setBathyMaskEnabled(boolean enabled) {
-            if (null == getBathyMask().getChild(ENABLED)) {
-                getBathyMask().addContent(new Element(ENABLED));
-            }
-            getBathyMask().getChild(ENABLED).setText(String.valueOf(enabled));
+    public void setBathyMaskEnabled(boolean enabled) {
+        if (null == getBathyMask().getChild(ENABLED)) {
+            getBathyMask().addContent(new Element(ENABLED));
         }
+        getBathyMask().getChild(ENABLED).setText(String.valueOf(enabled));
+    }
 
     public class XPoint extends org.jdom.Element {
 
@@ -265,33 +267,33 @@ public class XZone extends org.jdom.Element {
             }
         }
 
-        XPoint(int index, float lon, float lat) {
+        XPoint(int index, String lon, String lat) {
             super(POINT);
             setIndex(index);
             setLon(lon);
             setLat(lat);
         }
 
-        public double getLon() {
-            return Float.valueOf(getChildTextNormalize(LON));
+        public String getLon() {
+            return getChildTextNormalize(LON);
         }
 
-        public void setLon(float lon) {
+        public void setLon(String lon) {
             if (null == getChild(LON)) {
                 addContent(new Element(LON));
             }
-            getChild(LON).setText(String.valueOf(lon));
+            getChild(LON).setText(lon);
         }
 
-        public double getLat() {
-            return Float.valueOf(getChildTextNormalize(LAT));
+        public String getLat() {
+            return getChildTextNormalize(LAT);
         }
 
-        public void setLat(float lat) {
+        public void setLat(String lat) {
             if (null == getChild(LAT)) {
                 addContent(new Element(LAT));
             }
-            getChild(LAT).setText(String.valueOf(lat));
+            getChild(LAT).setText(lat);
         }
 
         public int getIndex() {
@@ -307,8 +309,17 @@ public class XZone extends org.jdom.Element {
 
         public GridPoint createRhoPoint() {
             GridPoint rhoPoint = new GridPoint(false);
-            rhoPoint.setLat(getLat());
-            rhoPoint.setLon(getLon());
+            double lat = 0.d;
+            double lon = 0.d;
+            if (LonLatConverter.getFormat(getLat()).equals(LonLatFormat.DegMinSec)) {
+                lat = LonLatConverter.degMinToDecimal(getLat());
+                lon = LonLatConverter.degMinToDecimal(getLon());
+            } else {
+                lat = Double.valueOf(getLat());
+                lon = Double.valueOf(getLon());
+            }
+            rhoPoint.setLat(lat);
+            rhoPoint.setLon(lon);
             return rhoPoint;
         }
     }

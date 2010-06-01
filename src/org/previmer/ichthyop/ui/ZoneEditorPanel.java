@@ -36,9 +36,11 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
@@ -51,6 +53,7 @@ import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.XZone;
 import org.previmer.ichthyop.io.XZone.XPoint;
 import org.previmer.ichthyop.io.ZoneFile;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
 /**
  *
@@ -83,6 +86,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnDeleteZone.addPropertyChangeListener(pl);
         btnColor.addPropertyChangeListener(pl);
         tableZone.addPropertyChangeListener(pl);
+        rdButtonDegMin.addPropertyChangeListener(pl);
+        rdButtonDecimal.addPropertyChangeListener(pl);
         //
         cbBoxType.addActionListener(al);
         ckBoxThickness.addActionListener(al);
@@ -111,6 +116,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnDeleteZone.removePropertyChangeListener(pl);
         btnColor.removePropertyChangeListener(pl);
         tableZone.removePropertyChangeListener(pl);
+        rdButtonDegMin.removePropertyChangeListener(pl);
+        rdButtonDecimal.removePropertyChangeListener(pl);
         //
         cbBoxType.removeActionListener(al);
         ckBoxThickness.removeActionListener(al);
@@ -172,8 +179,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         Vector vector = new Vector();
         for (XPoint point : zone.getPolygon()) {
             Vector v = new Vector();
-            v.addElement((float) point.getLon());
-            v.addElement((float) point.getLat());
+            v.addElement(point.getLon());
+            v.addElement(point.getLat());
             vector.addElement(v);
         }
         DefaultTableModel model = new DefaultTableModel();
@@ -182,8 +189,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         header.addElement("Latitude (North)");
         model.setDataVector(vector, header);
         tablePolygon.setModel(model);
-        for (int i = 0; i < tablePolygon.getColumnCount(); i++) {
-            tablePolygon.getColumnModel().getColumn(i).setCellEditor(new FloatEditor());
+        LonLatFormat format = LonLatConverter.getFormat(zone.getPolygon().get(0).getLat());
+        if (format.equals(LonLatFormat.DegMinSec)) {
+            rdButtonDegMin.doClick();
+        } else {
+            rdButtonDecimal.doClick();
         }
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
         hasZoneChanged = false;
@@ -238,7 +248,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         zone.setLowerDepth(Float.valueOf(txtFieldLowerDepth.getText()));
         zone.cleanupPolygon();
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
-            zone.addPoint(i, Float.valueOf(tablePolygon.getModel().getValueAt(i, 0).toString()), Float.valueOf(tablePolygon.getModel().getValueAt(i, 1).toString()));
+            zone.addPoint(i, tablePolygon.getModel().getValueAt(i, 0).toString(), tablePolygon.getModel().getValueAt(i, 1).toString());
         }
     }
 
@@ -284,7 +294,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 || prop.matches("value")
                 || prop.matches("tableCellEditor")
                 || prop.matches("color")
-                || prop.matches("point")) {
+                || prop.matches("point")
+                || prop.matches("format")) {
             hasZoneChanged = true;
             btnSave.setEnabled(true);
         }
@@ -351,8 +362,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         cbBoxType = new javax.swing.JComboBox();
         jPanel3 = new javax.swing.JPanel();
         lblLonlat = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        rdButtonDecimal = new javax.swing.JRadioButton();
+        rdButtonDegMin = new javax.swing.JRadioButton();
         btnSave = new javax.swing.JButton();
         btnSaveAs = new javax.swing.JButton();
         lblFile = new javax.swing.JLabel();
@@ -807,24 +818,22 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblLonlat.setText("Sow lon / lat");
         lblLonlat.setName("lblLonlat"); // NOI18N
 
-        buttonGroup1.add(jRadioButton1);
-        jRadioButton1.setSelected(true);
-        jRadioButton1.setText("Decimal Degrees");
-        jRadioButton1.setEnabled(false);
-        jRadioButton1.setName("jRadioButton1"); // NOI18N
-        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroup1.add(rdButtonDecimal);
+        rdButtonDecimal.setSelected(true);
+        rdButtonDecimal.setText("Decimal Degrees");
+        rdButtonDecimal.setName("rdButtonDecimal"); // NOI18N
+        rdButtonDecimal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton1ActionPerformed(evt);
+                rdButtonDecimalActionPerformed(evt);
             }
         });
 
-        buttonGroup1.add(jRadioButton2);
-        jRadioButton2.setText("Degrees, Minutes, Seconds");
-        jRadioButton2.setEnabled(false);
-        jRadioButton2.setName("jRadioButton2"); // NOI18N
-        jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroup1.add(rdButtonDegMin);
+        rdButtonDegMin.setText("Degrees, Minutes, Seconds");
+        rdButtonDegMin.setName("rdButtonDegMin"); // NOI18N
+        rdButtonDegMin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton2ActionPerformed(evt);
+                rdButtonDegMinActionPerformed(evt);
             }
         });
 
@@ -837,9 +846,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(12, 12, 12)
-                        .addComponent(jRadioButton1)
+                        .addComponent(rdButtonDecimal)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jRadioButton2))
+                        .addComponent(rdButtonDegMin))
                     .addComponent(lblLonlat))
                 .addContainerGap(205, Short.MAX_VALUE))
         );
@@ -849,8 +858,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 .addComponent(lblLonlat)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jRadioButton2))
+                    .addComponent(rdButtonDecimal)
+                    .addComponent(rdButtonDegMin))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -994,7 +1003,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         if (index < 0) {
             index = tablePolygon.getRowCount();
         }
-        model.insertRow(index, new Float[]{0.f, 0.f});
+        if (rdButtonDecimal.isSelected()) {
+            model.insertRow(index, new Float[]{0.f, 0.f});
+        } else {
+            model.insertRow(index, new String[]{"0° 0\' 0.0\"", "0° 0\' 0.0\""});
+        }
         tablePolygon.setRowSelectionInterval(index, index);
         btnNewPoint.firePropertyChange("point", 0, 1);
     }//GEN-LAST:event_btnNewPointActionPerformed
@@ -1066,15 +1079,39 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
     }//GEN-LAST:event_ckBoxBathyMaskActionPerformed
 
-    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
+    private void rdButtonDecimalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdButtonDecimalActionPerformed
         // TODO add your handling code here:
-        //tablePolygon.setCellEditor(new FloatEditor());
-    }//GEN-LAST:event_jRadioButton1ActionPerformed
+        if (LonLatConverter.getFormat(tablePolygon.getModel().getValueAt(0, 0).toString()).equals(LonLatFormat.DegMinSec)) {
+            for (int i = 0; i < tablePolygon.getRowCount(); i++) {
+                String lon = tablePolygon.getModel().getValueAt(i, 0).toString();
+                String lat = tablePolygon.getModel().getValueAt(i, 1).toString();
+                tablePolygon.getModel().setValueAt(LonLatConverter.degMinToDecimal(lon), i, 0);
+                tablePolygon.getModel().setValueAt(LonLatConverter.degMinToDecimal(lat), i, 1);
 
-    private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
+            }
+            rdButtonDecimal.firePropertyChange("format", 0, 1);
+        }
+        for (int i = 0; i < tablePolygon.getColumnCount(); i++) {
+            tablePolygon.getColumnModel().getColumn(i).setCellEditor(new FloatEditor());
+        }
+    }//GEN-LAST:event_rdButtonDecimalActionPerformed
+
+    private void rdButtonDegMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdButtonDegMinActionPerformed
         // TODO add your handling code here:
-        //tablePolygon.setCellEditor(new LonLatEditor());
-    }//GEN-LAST:event_jRadioButton2ActionPerformed
+        if (LonLatConverter.getFormat(tablePolygon.getModel().getValueAt(0, 0).toString()).equals(LonLatFormat.Decimal)) {
+            for (int i = 0; i < tablePolygon.getRowCount(); i++) {
+                float lon = Float.valueOf(tablePolygon.getModel().getValueAt(i, 0).toString());
+                float lat = Float.valueOf(tablePolygon.getModel().getValueAt(i, 1).toString());
+                tablePolygon.getModel().setValueAt(LonLatConverter.decimalToDegMin(lon), i, 0);
+                tablePolygon.getModel().setValueAt(LonLatConverter.decimalToDegMin(lat), i, 1);
+
+            }
+            rdButtonDegMin.firePropertyChange("format", 0, 1);
+        }
+        for (int i = 0; i < tablePolygon.getColumnCount(); i++) {
+            tablePolygon.getColumnModel().getColumn(i).setCellEditor(new DefaultCellEditor(new JFormattedTextField()));
+        }
+    }//GEN-LAST:event_rdButtonDegMinActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         try {
@@ -1142,8 +1179,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -1159,6 +1194,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JLabel lblOffshore;
     private javax.swing.JLabel lblUpperDepth;
     private javax.swing.JPanel pnlZone;
+    private javax.swing.JRadioButton rdButtonDecimal;
+    private javax.swing.JRadioButton rdButtonDegMin;
     private javax.swing.JTable tablePolygon;
     private javax.swing.JTable tableZone;
     private javax.swing.JFormattedTextField txtFieldInshore;
