@@ -7,12 +7,16 @@ package org.previmer.ichthyop.arch;
 import org.previmer.ichthyop.event.InitializeListener;
 import org.previmer.ichthyop.event.SetupListener;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  *
  * @author pverley
  */
 public interface ISimulationManager extends Runnable {
+
+    public Logger getLogger();
 
     public IActionManager getActionManager();
 
@@ -42,7 +46,7 @@ public interface ISimulationManager extends Runnable {
 
     public void removeInitializeListener(InitializeListener listener);
 
-    public void setConfigurationFile(File file);
+    public void setConfigurationFile(File file) throws IOException;
 
     public File getConfigurationFile();
 

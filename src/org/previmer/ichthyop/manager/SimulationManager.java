@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.manager;
 
+import org.jdom.JDOMException;
 import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.arch.IActionManager;
 import org.previmer.ichthyop.arch.IDataset;
@@ -23,6 +24,8 @@ import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,6 +33,7 @@ import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
+import org.jdom.input.SAXBuilder;
 import org.previmer.ichthyop.calendar.Calendar1900;
 
 /**
@@ -61,20 +65,58 @@ public class SimulationManager implements ISimulationManager {
     private String id;
     private static SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
     private static SimpleDateFormat dtformatterReadableId = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    private static final Logger logger = Logger.getLogger(SimulationManager.class.getName());
 
     public static SimulationManager getInstance() {
         return simulationManager;
     }
 
-    public void setConfigurationFile(File file) {
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public void setConfigurationFile(File file) throws IOException {
+        
         cfgFile = file;
         nb_simulations = 1;
         if (file != null) {
+            /* Make sure file exists */
+            if (!file.exists()) {
+                throw new FileNotFoundException(file.toString());
+            }
+            if (!isXML(file)) {
+                throw new IOException(file.getName() + " is not a XML file.");
+            }
+            if (!isValidConfigFile(file)) {
+                throw new IOException(file.getName() + " is not a valid Ichthyop configuration file.");
+            }
             getParameterManager().setConfigurationFile(file);
             for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
                 nb_simulations *= xparam.getLength();
             }
             mobiliseManagers();
+        }
+    }
+
+    private boolean isXML(File file) {
+        try {
+            new SAXBuilder().build(file).getRootElement();
+            return true;
+        } catch (JDOMException ex) {
+            return false;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+
+    private boolean isValidConfigFile(File file) {
+        try {
+            return new SAXBuilder().build(file).getRootElement().getName().matches("icstructure");
+
+        } catch (JDOMException ex) {
+            return false;
+        } catch (IOException ex) {
+            return false;
         }
     }
 

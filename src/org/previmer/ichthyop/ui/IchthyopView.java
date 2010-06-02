@@ -21,7 +21,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.EventObject;
 import java.util.List;
@@ -51,10 +50,6 @@ import javax.swing.text.NumberFormatter;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
-import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.io.ParameterFormat;
-import org.previmer.ichthyop.io.XBlock;
-import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -82,7 +77,7 @@ public class IchthyopView extends FrameView
         btnCloseNC.getAction().setEnabled(false);
         btnExportToKMZ.getAction().setEnabled(false);
         setAnimationToolsEnabled(false);
-        pnlConfiguration.addPropertyChangeListener("xicfile", this);
+        pnlConfiguration.addPropertyChangeListener("configurationFile", this);
 
         /* Colorbar settings setEnabled(false) */
         setColorbarPanelEnabled(false);
@@ -100,14 +95,14 @@ public class IchthyopView extends FrameView
             logfile.append(".log");
             IOTools.makeDirectories(logfile.toString());
             FileHandler fh = new FileHandler(logfile.toString());
-            logger.addHandler(fh);
+            getLogger().addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
-            logger.info("Created log file " + logfile.toString());
+            getLogger().info("Created log file " + logfile.toString());
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         } catch (SecurityException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
@@ -436,16 +431,16 @@ public class IchthyopView extends FrameView
         JFileChooser fc = new JFileChooser(getSimulationManager().getConfigurationFile());
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
-        fc.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
+        fc.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xml)", "xml"));
         fc.setSelectedFile(getSimulationManager().getConfigurationFile());
         int returnVal = fc.showSaveDialog(getFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = addExtension(fc.getSelectedFile(), "xic");
+            File file = addExtension(fc.getSelectedFile(), "xml");
             try {
                 IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
                 return loadConfigurationFile(file);
             } catch (IOException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger().log(Level.SEVERE, null, ex);
             }
         }
         return null;
@@ -505,7 +500,9 @@ public class IchthyopView extends FrameView
             }
         }
         setMessage("Closed " + getSimulationManager().getConfigurationFile().toString());
-        getSimulationManager().setConfigurationFile(null);
+        try {
+            getSimulationManager().setConfigurationFile(null);
+        } catch (IOException ex) {}
         lblCfgFile.setText("Configuration file");
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
         btnSimulationRun.getAction().setEnabled(false);
@@ -537,7 +534,7 @@ public class IchthyopView extends FrameView
     public Task openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xic)", "xic"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xml)", "xml"));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             return loadConfigurationFile(chooser.getSelectedFile());
@@ -545,13 +542,46 @@ public class IchthyopView extends FrameView
         return null;
     }
 
+    private class FailedTask extends SFTask {
+
+        private Exception exception;
+
+        FailedTask(Application instance, Exception exception) {
+            super(instance);
+            this.exception = exception;
+        }
+
+        @Override
+        void onSuccess(Object result) {
+            // never happens
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+            // do nothing
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            throw exception;
+        }
+    }
+
+    private Logger getLogger() {
+        return getSimulationManager().getLogger();
+    }
+
     private Task loadConfigurationFile(File file) {
+        try {
+            getSimulationManager().setConfigurationFile(file);
+        } catch (IOException ex) {
+            return new FailedTask(getApplication(), ex);
+        }
         setMessage("Opened " + file.toString());
-        logger.info("Opened " + file.toString());
+        getLogger().info("Opened " + file.toString());
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
-        getSimulationManager().setConfigurationFile(file);
         /* Here I must find a way to scan all the zones related to the
         configuration file, maybe checking all the paramters of type
         ZONEFILE ? */
@@ -759,7 +789,6 @@ public class IchthyopView extends FrameView
         }
 
         protected void onFailure(Throwable t) {
-            logger.log(Level.SEVERE, null, t);
         }
 
         @Override
@@ -817,7 +846,7 @@ public class IchthyopView extends FrameView
                 getContext().getLocalStorage().save(property, filename);
             }
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
@@ -854,7 +883,7 @@ public class IchthyopView extends FrameView
         try {
             return getContext().getLocalStorage().load(beanFilename(bean));
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -2251,7 +2280,6 @@ public class IchthyopView extends FrameView
     private javax.swing.JFormattedTextField txtFieldMin;
     // End of variables declaration//GEN-END:variables
     private JDialog aboutBox;
-    private static final Logger logger = Logger.getLogger(ISimulationManager.class.getName());
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
     private Task simulActionTask;

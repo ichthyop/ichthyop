@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -37,7 +38,8 @@ public abstract class SFTask<T, V> extends Task<T, V> {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
-        Logger.getLogger(SFTask.class.getName()).log(Level.SEVERE, sw.toString());
+        SimulationManager.getInstance().getLogger().log(Level.SEVERE, sw.toString());
+        setMessage(throwable.toString());
         onFailure(throwable);
     }
 
