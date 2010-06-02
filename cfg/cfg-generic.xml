@@ -478,7 +478,7 @@
   <block type="dataset">
     <key>dataset.mars_3d</key>
     <tree_path>IO/Input/MARS 3D</tree_path>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <parameters>
       <parameter>
         <key>field_dim_lat</key>
