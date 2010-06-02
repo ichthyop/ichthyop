@@ -89,15 +89,21 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     private void setupAdvancedEditor(XBlock block) {
 
-        pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(block.getTreePath()));
+        String title = getResourceMap().getString("block.text") + " " + block.getTreePath();
+        pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(title));
         if (block.getType().equals(BlockType.OPTION) || !block.canBeDeactivated()) {
             ckBoxBlock.setVisible(false);
         } else {
             ckBoxBlock.setVisible(true);
             ckBoxBlock.setSelected(block.isEnabled());
         }
+
         StringBuffer info = new StringBuffer("<html><i>");
-        info.append(block.getDescription());
+        if (null != block.getDescription()) {
+            info.append(block.getDescription());
+        } else {
+            info.append(getResourceMap().getString("noDescription.text"));
+        }
         info.append("</i></html>");
         lblBlockInfo.setText(info.toString());
         btnUndo.getAction().setEnabled(false);
@@ -127,7 +133,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         XBlock selectedBlock = blockTree.getSelectedBlock();
         if (selectedBlock.getType().equals(type)) {
             /* If the selected block is newly enable, we
-             deactivate all the others blocks with same type */
+            deactivate all the others blocks with same type */
             if (selectedBlock.isEnabled()) {
                 for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
                     if (!block.getKey().matches(selectedBlock.getKey())) {
@@ -198,7 +204,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         ShowConfigEditorsTask() {
             super(Application.getInstance());
             blockTree.setEnabled(false);
-            busyLabel.setText("Loading parameter editor...");
+            busyLabel.setText(getResourceMap().getString("ShowConfigEditorsTask.loading.text"));
             busyLabel.setBusy(true);
             pnlBlock.setVisible(false);
             pnlEditors.setLayout(new StackLayout());
@@ -259,9 +265,22 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     modelRow = table.convertRowIndexToModel(viewRow);
                 }
                 XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(modelRow));
-                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(xparam.getKey()));
-                StringBuffer info = new StringBuffer("<html><i>");
-                info.append(xparam.getDescription());
+                String title = getResourceMap().getString("parameter.text") + " " + xparam.getLongName();
+                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(title));
+                StringBuffer info = new StringBuffer("<html><i><p>");
+                if (null != xparam.getDescription()) {
+                    info.append(xparam.getDescription());
+                } else {
+                    info.append(getResourceMap().getString("noDescription.text"));
+                }
+                info.append("</p><br>");
+                if (xparam.isSerial()) {
+                    info.append(getResourceMap().getString("serialParameterDescription.text"));
+                    info.append("<br>");
+                }
+                if (xparam.isHidden()) {
+                    info.append(getResourceMap().getString("hiddenParameterDescription.text"));
+                }
                 info.append("</i></html>");
                 lblParameter.setText(info.toString());
                 btnAddValue.getAction().setEnabled(xparam.isSerial());

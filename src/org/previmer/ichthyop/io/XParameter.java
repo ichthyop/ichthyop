@@ -77,7 +77,7 @@ public class XParameter extends org.jdom.Element {
         if (null != getChild(DESCRIPTION)) {
             return getChildTextNormalize(DESCRIPTION);
         } else {
-            return "No description available";
+            return null;
         }
     }
 

@@ -98,7 +98,7 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
         if (null != getChild(DESCRIPTION)) {
             return getChildTextNormalize(DESCRIPTION);
         } else {
-            return "No description available";
+            return null;
         }
     }
 
