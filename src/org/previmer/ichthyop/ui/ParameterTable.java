@@ -420,15 +420,24 @@ public class ParameterTable extends JMultiCellEditorsTable {
         @Override
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus,
-                int row,
-                int column) {
+                int row, int column) {
+
             Component comp = super.getTableCellRendererComponent(table,
                     value, isSelected, hasFocus, row, column);
 
-            if (model.getTableParameter(row).getXParameter().isSerial()) {
-                comp.setBackground(new Color(0, 255, 0, 20));
-            } else if (model.getTableParameter(row).getXParameter().isHidden()) {
-                comp.setBackground(new Color(255, 0, 0, 20));
+            if (!table.isEnabled()) {
+                comp.setForeground(Color.LIGHT_GRAY);
+                comp.setBackground(Color.WHITE);
+                return comp;
+            } else {
+                comp.setForeground(Color.BLACK);
+            }
+
+            int mrow = table.convertRowIndexToModel(row);
+            if (model.getTableParameter(mrow).getXParameter().isSerial()) {
+                comp.setBackground(new Color(0, 255, 0, 10));
+            } else if (model.getTableParameter(mrow).getXParameter().isHidden()) {
+                comp.setBackground(new Color(255, 0, 0, 10));
             } else {
                 comp.setBackground(Color.WHITE);
             }

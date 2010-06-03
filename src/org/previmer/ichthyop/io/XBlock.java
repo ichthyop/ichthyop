@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +31,7 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     public final static String DESCRIPTION = "description";
     private final BlockType block_type;
     private HashMap<String, XParameter> map;
+    private List<String> sortedKey;
     private int nbHiddenParameters;
 
     public XBlock(Element element) {
@@ -108,8 +110,10 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
 
     private HashMap<String, XParameter> createMap() {
         HashMap<String, XParameter> lmap = new HashMap();
+        sortedKey = new ArrayList();
         for (XParameter xparam : readParameters()) {
             lmap.put(xparam.getKey(), xparam);
+            sortedKey.add(xparam.getKey());
             if (xparam.isHidden()) {
                 nbHiddenParameters++;
             }
@@ -134,8 +138,11 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     public Collection<XParameter> getXParameters() {
-        List<XParameter> list = new ArrayList(map.values());
-        Collections.sort(list, new XParameterComparator());
+        List<XParameter> list = new ArrayList(map.values().size());
+        Iterator<String> it = sortedKey.iterator();
+        while (it.hasNext()) {
+            list.add(map.get(it.next()));
+        }
         return list;
     }
 
@@ -220,7 +227,6 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     }*/
-
     private class XParameterComparator implements Comparator<XParameter> {
 
         public int compare(XParameter o1, XParameter o2) {
