@@ -98,7 +98,7 @@ public class IchthyopView extends FrameView
             getLogger().addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
-            getLogger().info("Created log file " + logfile.toString());
+            getLogger().info(getResourceMap().getString("createdLogFile.msg") + " " + logfile.toString());
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, null, ex);
         } catch (SecurityException ex) {
@@ -130,17 +130,19 @@ public class IchthyopView extends FrameView
     @Action
     public void deleteMaps() {
         File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
-        StringBuffer message = new StringBuffer("Delete maps from ");
+        StringBuffer message = new StringBuffer(getResourceMap().getString("deleteMaps.dialog.msg.part1"));
+        message.append(" ");
         message.append(outputFolder.getName());
         message.append(" ?");
         message.append('\n');
         message.append(files2Delete.length);
-        message.append(" PNG pictures will be deleted from your computer.");
-        int dialog = JOptionPane.showConfirmDialog(getFrame(), message.toString(), "Ichthytop - Delete snapshots", JOptionPane.OK_CANCEL_OPTION);
+        message.append(" ");
+        message.append(getResourceMap().getString("deleteMaps.dialog.msg.part2"));
+        int dialog = JOptionPane.showConfirmDialog(getFrame(), message.toString(), getResourceMap().getString("deleteMaps.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
         if (dialog == JOptionPane.OK_OPTION) {
             for (File file : outputFolder.listFiles(new MetaFilenameFilter("*.png"))) {
                 if (file.delete()) {
-                    setMessage("Deleted " + file.toString());
+                    setMessage(getResourceMap().getString("deleteMaps.deleted") + " " + file.toString());
                 }
             }
             outputFolder.delete();
@@ -164,7 +166,7 @@ public class IchthyopView extends FrameView
 
         ExportToKMZTask(Application instance) {
             super(instance);
-            setMessage("Export NetCDF output files to KMZ format for visualizing results with GoogleEarth.");
+            setMessage(resourceMap.getString("exportToKMZ.msg.init"));
             wmsMapper.setAlpha(0.2f);
             wmsMapper.setEnabled(false);
             btnMapping.getAction().setEnabled(false);
@@ -178,10 +180,10 @@ public class IchthyopView extends FrameView
             wmsMapper.createKML();
             for (int i = 0; i < wmsMapper.getNbSteps(); i++) {
                 setProgress((float) (i + 1) / wmsMapper.getNbSteps());
-                setMessage("NetCDF to KMZ: exporting step " + (i + 1) + "/" + (wmsMapper.getNbSteps()), true);
+                setMessage(resourceMap.getString("exportToKMZ.msg.exporting") + " " + (i + 1) + "/" + (wmsMapper.getNbSteps()), true);
                 wmsMapper.writeKMLStep(i);
             }
-            setMessage("Compressing KML file into KMZ. It might take some time...", true);
+            setMessage(resourceMap.getString("exportToKMZ.msg.compressing"), true);
             wmsMapper.marshalAndKMZ();
             return null;
         }
@@ -198,12 +200,11 @@ public class IchthyopView extends FrameView
 
         @Override
         void onSuccess(Object o) {
-            setMessage("Exported KMZ file: " + wmsMapper.getKMZPath());
+            setMessage(resourceMap.getString("exportToKMZ.msg.exported") + " " + wmsMapper.getKMZPath());
         }
 
         @Override
         void onFailure(Throwable t) {
-            setMessage("NetCDF export to KMZ failed: " + t.getLocalizedMessage());
         }
     }
 
@@ -280,7 +281,7 @@ public class IchthyopView extends FrameView
                 : outputFile.getParentFile();
         JFileChooser chooser = new JFileChooser(file);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop output file (*.nc)", "nc"));
+        chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.outputFile"), getResourceMap().getString("Application.outputFile.extension")));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             outputFile = chooser.getSelectedFile();
@@ -319,7 +320,7 @@ public class IchthyopView extends FrameView
                 : outputFolder;
         JFileChooser chooser = new JFileChooser(file);
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int returnPath = chooser.showDialog(getFrame(), "Select folder");
+        int returnPath = chooser.showDialog(getFrame(), getResourceMap().getString("openFolderAnimation.dialog"));
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             return new OpenFolderAnimationTask(getApplication(), chooser.getSelectedFile());
         }
@@ -342,7 +343,7 @@ public class IchthyopView extends FrameView
             if (nbPNG > 0) {
                 return null;
             } else {
-                throw new NullPointerException("No PNG pictures found in folder " + folder.getAbsolutePath());
+                throw new NullPointerException(resourceMap.getString("openFolderAnimation.failed") + " " + folder.getAbsolutePath());
             }
         }
 
@@ -358,13 +359,11 @@ public class IchthyopView extends FrameView
         }
 
         public void onFailure(Throwable t) {
-            firePropertyChange("failed", null, null);
-            lblFolder.setText(IchthyopView.this.getResourceMap().getString("lblFolder.text"));
+            lblFolder.setText(resourceMap.getString("lblFolder.text"));
             lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
             sliderTime.setMaximum(0);
             sliderTime.setValue(0);
             setAnimationToolsEnabled(false);
-            setMessage(t.getLocalizedMessage());
             outputFolder = null;
         }
 
@@ -407,16 +406,15 @@ public class IchthyopView extends FrameView
         @Override
         protected Object doInBackground() throws Exception {
             if (!isSetup) {
-                setMessage("Setting up...");
+                setMessage(resourceMap.getString("previewSimulation.Action.settingup"));
                 getSimulationManager().setup();
             }
             return null;
         }
 
         protected void onSuccess(Object obj) {
-            firePropertyChange("succeeded", null, null);
             isSetup = true;
-            setMessage("Setup [OK]");
+            setMessage(resourceMap.getString("previewSimulation.Action.setup"));
             showSimulationPreview();
         }
 
@@ -431,11 +429,11 @@ public class IchthyopView extends FrameView
         JFileChooser fc = new JFileChooser(getSimulationManager().getConfigurationFile());
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
-        fc.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xml)", "xml"));
+        fc.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.configurationFile"), getResourceMap().getString("Application.configurationFile.extension")));
         fc.setSelectedFile(getSimulationManager().getConfigurationFile());
         int returnVal = fc.showSaveDialog(getFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = addExtension(fc.getSelectedFile(), "xml");
+            File file = addExtension(fc.getSelectedFile(), getResourceMap().getString("Application.configurationFile.extension"));
             try {
                 IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
                 return loadConfigurationFile(file);
@@ -463,7 +461,7 @@ public class IchthyopView extends FrameView
 
         SaveCfgFileTask(Application instance) {
             super(instance);
-            setMessage("Saving " + getSimulationManager().getConfigurationFile().getName() + "...");
+            setMessage(resourceMap.getString("saveConfigurationFile.Action.pending") + " " + getSimulationManager().getConfigurationFile().getName() + "...");
         }
 
         @Override
@@ -479,7 +477,7 @@ public class IchthyopView extends FrameView
         protected void onSuccess(Object o) {
             btnSaveCfgFile.getAction().setEnabled(false);
             isSetup = false;
-            setMessage(getSimulationManager().getConfigurationFile().getName() + " saved.");
+            setMessage(getSimulationManager().getConfigurationFile().getName() + " " + resourceMap.getString("saveConfigurationFile.Action.finished"));
         }
 
         @Override
@@ -499,11 +497,11 @@ public class IchthyopView extends FrameView
                 return;
             }
         }
-        setMessage("Closed " + getSimulationManager().getConfigurationFile().toString());
+        setMessage(getResourceMap().getString("closeConfigurationFile.Action.finished") + getSimulationManager().getConfigurationFile().toString());
         try {
             getSimulationManager().setConfigurationFile(null);
         } catch (IOException ex) {}
-        lblCfgFile.setText("Configuration file");
+        lblCfgFile.setText(getResourceMap().getString("lblCfgFile.text"));
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
         btnSimulationRun.getAction().setEnabled(false);
         btnSaveAsCfgFile.getAction().setEnabled(false);
@@ -520,8 +518,9 @@ public class IchthyopView extends FrameView
     }
 
     private int dialogSave() {
-        String msg = "Save changes in " + getSimulationManager().getConfigurationFile().getName() + " ?";
-        int answer = JOptionPane.showConfirmDialog(getFrame(), msg, "Save before exit", JOptionPane.YES_NO_CANCEL_OPTION);
+
+        String msg = getResourceMap().getString("dialogSave.msg") + " " + getSimulationManager().getConfigurationFile().getName() + " ?";
+        int answer = JOptionPane.showConfirmDialog(getFrame(), msg, getResourceMap().getString("dialogSave.title"), JOptionPane.YES_NO_CANCEL_OPTION);
         switch (answer) {
             case JOptionPane.YES_OPTION:
                 btnSaveCfgFile.doClick();
@@ -534,7 +533,7 @@ public class IchthyopView extends FrameView
     public Task openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setFileFilter(new FileNameExtensionFilter("Ichthyop configuration file" + " (*.xml)", "xml"));
+        chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.configurationFile"), getResourceMap().getString("Application.configurationFile.extension")));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             return loadConfigurationFile(chooser.getSelectedFile());
@@ -577,14 +576,11 @@ public class IchthyopView extends FrameView
         } catch (IOException ex) {
             return new FailedTask(getApplication(), ex);
         }
-        setMessage("Opened " + file.toString());
-        getLogger().info("Opened " + file.toString());
+        setMessage(getResourceMap().getString("loadConfigurationFile.opened") + " " + file.toString());
+        getLogger().info(getResourceMap().getString("loadConfigurationFile.opened") + " " + file.toString());
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
-        /* Here I must find a way to scan all the zones related to the
-        configuration file, maybe checking all the paramters of type
-        ZONEFILE ? */
         isSetup = false;
         saveAsMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
@@ -631,7 +627,6 @@ public class IchthyopView extends FrameView
 
     private void animate(boolean animated) {
 
-        ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         if (animated) {
             //animator.setStartDelay(1000);
             animator.setAcceleration(0.01f);
@@ -747,13 +742,12 @@ public class IchthyopView extends FrameView
 
     public class SimulationRunTask extends SFTask {
 
-        ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         JLabel lblProgress;
         private boolean bln;
 
         SimulationRunTask(Application instance) {
             super(instance);
-            setMessage("Simulation started");
+            setMessage(resourceMap.getString("simulationRun.started"));
             setMenuEnabled(false);
             bln = false;
             pnlProgress.setupProgress();
@@ -772,8 +766,8 @@ public class IchthyopView extends FrameView
         protected Object doInBackground() throws Exception {
             getSimulationManager().resetTimerGlobal();
             do {
-                setMessage("Simulation " + getSimulationManager().indexSimulationToString());
-                setMessage("Initializing...", true);
+                setMessage(resourceMap.getString("simulationRun.simulation") + getSimulationManager().indexSimulationToString());
+                setMessage(resourceMap.getString("simulationRun.initialize"), true);
                 getSimulationManager().setup();
                 isSetup = true;
                 getSimulationManager().init();
@@ -798,17 +792,23 @@ public class IchthyopView extends FrameView
                 bln = true;
             }
             pnlProgress.printProgress();
-            setMessage(getSimulationManager().getTimeManager().stepToString() + " - Time " + getSimulationManager().getTimeManager().timeToString());
+            StringBuffer msg = new StringBuffer();
+            msg.append(getSimulationManager().getTimeManager().stepToString());
+            msg.append(" - ");
+            msg.append(resourceMap.getString("simulationRun.time"));
+            msg.append(" " );
+            msg.append(getSimulationManager().getTimeManager().timeToString());
+            setMessage(msg.toString());
         }
 
         @Override
         protected void cancelled() {
             getSimulationManager().stop();
-            setMessage("Simulation interrupted");
+            setMessage(resourceMap.getString("simulationRun.interrupted"));
         }
 
         public void onSuccess(Object obj) {
-            setMessage("End of simulation");
+            setMessage(resourceMap.getString("simulationRun.completed"));
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
             lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
@@ -868,7 +868,7 @@ public class IchthyopView extends FrameView
                 cfgPath = file;
             }
         } else {
-            setMessage("Please, open a configuration file or create a new one");
+            setMessage(getResourceMap().getString("restorePreferences.msg"));
         }
 
         property = restorePreference(animationSpeed);
@@ -973,32 +973,33 @@ public class IchthyopView extends FrameView
     private void setMainTitle() {
 
         pnlLogo.setVisible(false);
+        String title = getResourceMap().getString("Application.title") + " - ";
         if (!taskPaneConfiguration.isCollapsed()) {
             if (null != getSimulationManager().getConfigurationFile()) {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneConfiguration.getTitle() + " - " + lblCfgFile.getText());
+                titledPanelMain.setTitle(title + taskPaneConfiguration.getTitle() + " - " + lblCfgFile.getText());
             } else {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneConfiguration.getTitle());
+                titledPanelMain.setTitle(title + taskPaneConfiguration.getTitle());
             }
         } else if (!taskPaneSimulation.isCollapsed()) {
             if (null != getSimulationManager().getConfigurationFile()) {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneSimulation.getTitle() + " - " + lblCfgFile.getText());
+                titledPanelMain.setTitle(title + taskPaneSimulation.getTitle() + " - " + lblCfgFile.getText());
             } else {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneSimulation.getTitle());
+                titledPanelMain.setTitle(title + taskPaneSimulation.getTitle());
             }
         } else if (!taskPaneMapping.isCollapsed()) {
             if (null != outputFile) {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneMapping.getTitle() + " - " + outputFile.getName());
+                titledPanelMain.setTitle(title + taskPaneMapping.getTitle() + " - " + outputFile.getName());
             } else {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneMapping.getTitle());
+                titledPanelMain.setTitle(title + taskPaneMapping.getTitle());
             }
         } else if (!taskPaneAnimation.isCollapsed()) {
             if (null != outputFolder) {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneAnimation.getTitle() + " - " + outputFolder.getName());
+                titledPanelMain.setTitle(title + taskPaneAnimation.getTitle() + " - " + outputFolder.getName());
             } else {
-                titledPanelMain.setTitle("Ichthyop - " + taskPaneAnimation.getTitle());
+                titledPanelMain.setTitle(title + taskPaneAnimation.getTitle());
             }
         } else {
-            titledPanelMain.setTitle("Ichthyop");
+            titledPanelMain.setTitle(title);
             pnlLogo.setVisible(true);
         }
     }
@@ -1031,7 +1032,7 @@ public class IchthyopView extends FrameView
         Color cmin = btnColorMin.getForeground();
         Color cmax = btnColorMax.getForeground();
         wmsMapper.setColorbar(vname, vmin, vmax, cmin, cmax);
-        setMessage("Applied colorbar settings.");
+        setMessage(getResourceMap().getString("applyColorbarSettings.applied"));
     }
 
     @Action
@@ -1040,6 +1041,8 @@ public class IchthyopView extends FrameView
     }
 
     private class AutoRangeTask extends SFTask<float[], Object> {
+
+        ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
 
         String variable;
 
@@ -1053,7 +1056,7 @@ public class IchthyopView extends FrameView
             if (variable.toLowerCase().matches("none")) {
                 cancel(true);
             }
-            setMessage("Estimating the range of the colorbar. Might take some time for big volume of data...", true);
+            setMessage(resourceMap.getString("applyColorbarSettings.range"), true);
             return wmsMapper.getRange(variable);
         }
 
@@ -1061,17 +1064,17 @@ public class IchthyopView extends FrameView
         void onSuccess(float[] result) {
             txtFieldMin.setValue(result[0]);
             txtFieldMax.setValue(result[1]);
-            setMessage("Range suggested [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]");
+            setMessage(resourceMap.getString("applyColorbarSettings.suggested") + " [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]");
         }
 
         @Override
         void onFailure(Throwable throwable) {
-            setMessage("An error occurred while reading variable " + variable + " - " + throwable.getMessage());
+            setMessage(resourceMap.getString("applyColorbarSettings.error") + " " + variable + " - " + throwable.getMessage());
         }
 
         @Override
         protected void cancelled() {
-            setMessage("Please select a variable first.");
+            setMessage(resourceMap.getString("applyColorbarSettings.cancelled"));
         }
     }
 
@@ -2298,4 +2301,5 @@ public class IchthyopView extends FrameView
     private JConfigurationPanel pnlConfiguration = new JConfigurationPanel();
     private JStatusBar statusBar = new JStatusBar();
     private JRunProgressPanel pnlProgress = new JRunProgressPanel();
+    ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
 }
