@@ -13,12 +13,7 @@ package org.previmer.ichthyop.ui;
 import java.awt.Dimension;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
@@ -59,7 +54,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         hasStructureChanged |= blockTree.upper();
         blockTree.addTreeSelectionListener(this);
         if (hasStructureChanged) {
-            firePropertyChange("xicfile", null, null);
+            firePropertyChange("configurationFile", null, null);
         }
     }
 
@@ -69,7 +64,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         hasStructureChanged |= blockTree.lower();
         blockTree.addTreeSelectionListener(this);
         if (hasStructureChanged) {
-            firePropertyChange("xicfile", null, null);
+            firePropertyChange("configurationFile", null, null);
         }
     }
 
@@ -89,7 +84,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     private void setupAdvancedEditor(XBlock block) {
 
-        String title = getResourceMap().getString("block.text") + " " + block.getTreePath();
+        /* Display block information */
+        String title = getResourceMap().getString("pnlBlockInfo.border.title") + " " + block.getTreePath();
         pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(title));
         if (block.getType().equals(BlockType.OPTION) || !block.canBeDeactivated()) {
             ckBoxBlock.setVisible(false);
@@ -106,6 +102,14 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
         info.append("</i></html>");
         lblBlockInfo.setText(info.toString());
+        /* Initializes parameter information */
+        pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParameterInfo.border.title")));
+        info = new StringBuffer("<html><i>");
+        info.append(getResourceMap().getString("noDescription.text"));
+        info.append("</i></html>");
+        lblParameter.setText(info.toString());
+
+        /* Disabled buttons */
         btnUndo.getAction().setEnabled(false);
         btnRedo.getAction().setEnabled(false);
         btnAddValue.getAction().setEnabled(false);
@@ -126,7 +130,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         setParameterEditorEnabled(ckBoxBlock.isSelected());
         ensureSingleBlockSelection(BlockType.DATASET);
         ensureSingleBlockSelection(BlockType.RELEASE);
-        firePropertyChange("xicfile", null, null);
+        firePropertyChange("configurationFile", null, null);
     }
 
     private void ensureSingleBlockSelection(BlockType type) {
@@ -160,39 +164,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         ckBoxHiddenParameter.getAction().setEnabled(enabled && (blockTree.getSelectedBlock().getNbHiddenParameters() > 0));
         btnAddValue.getAction().setEnabled(false);
         btnRemoveValue.getAction().setEnabled(false);
-    }
-
-    @Action
-    public void reloadEditor() {
-        valueChanged(new TreeSelectionEvent(new JButton(), null, true, null, null));
-    }
-
-    private JBlockPanel getBlockEditor(XBlock block) {
-
-        if (null != block.getXParameter("editor")) {
-            String editorClass = block.getXParameter("editor").getValue();
-            try {
-                Constructor constructor = Class.forName(editorClass).getConstructor(XBlock.class);
-                return (JBlockPanel) constructor.newInstance(block);
-            } catch (InstantiationException ex) {
-                Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvocationTargetException ex) {
-                Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchMethodException ex) {
-                Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SecurityException ex) {
-                Logger.getLogger(JConfigurationPanel.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return null;
-        } else {
-            return null;
-        }
     }
 
     public void valueChanged(TreeSelectionEvent e) {
@@ -247,7 +218,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         if (e != null) {
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
-            firePropertyChange("xicfile", null, null);
+            firePropertyChange("configurationFile", null, null);
         }
         btnAddValue.getAction().setEnabled(false);
         btnRemoveValue.getAction().setEnabled(false);
@@ -265,8 +236,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     modelRow = table.convertRowIndexToModel(viewRow);
                 }
                 XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(modelRow));
-                String title = getResourceMap().getString("parameter.text") + " " + xparam.getLongName();
-                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(title));
+                String title = getResourceMap().getString("pnlParameterInfo.border.title") + " " + xparam.getLongName();
+                pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(title));
                 StringBuffer info = new StringBuffer("<html><i><p>");
                 if (null != xparam.getDescription()) {
                     info.append(xparam.getDescription());
@@ -286,8 +257,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 btnAddValue.getAction().setEnabled(xparam.isSerial());
                 btnRemoveValue.getAction().setEnabled(xparam.isSerial() && (xparam.getLength() > 1));
             } catch (Exception ex) {
-                pnlParamDescription.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParamDescription.border.title")));
-                lblParameter.setText(getResourceMap().getString("lblParameter.text"));
+                pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParameterInfo.border.title")));
+                lblParameter.setText(getResourceMap().getString("noDescription.text"));
             }
         }
     }
@@ -366,7 +337,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         @Override
         protected void succeeded(Object o) {
             scrollPaneTable.setViewportView(table);
-            JConfigurationPanel.this.firePropertyChange("xicfile", null, null);
+            JConfigurationPanel.this.firePropertyChange("configurationFile", null, null);
         }
     }
 
@@ -446,7 +417,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         lblBlockInfo = new javax.swing.JLabel();
         ckBoxBlock = new javax.swing.JCheckBox();
         pnlParameters = new javax.swing.JPanel();
-        pnlParamDescription = new javax.swing.JPanel();
+        pnlParameterInfo = new javax.swing.JPanel();
         lblParameter = new javax.swing.JLabel();
         btnUndo = new javax.swing.JButton();
         btnRedo = new javax.swing.JButton();
@@ -454,7 +425,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRemoveValue = new javax.swing.JButton();
         ckBoxHiddenParameter = new javax.swing.JCheckBox();
         scrollPaneTable = new javax.swing.JScrollPane();
-        table = new ParameterTable();
+        table = new org.previmer.ichthyop.ui.ParameterTable();
 
         blockEditor.setName("blockEditor"); // NOI18N
 
@@ -576,7 +547,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
         pnlBlock.setName("pnlBlock"); // NOI18N
 
-        pnlBlockInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Block name"));
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(JConfigurationPanel.class);
+        pnlBlockInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlBlockInfo.border.title"))); // NOI18N
         pnlBlockInfo.setName("pnlBlockInfo"); // NOI18N
 
         lblBlockInfo.setText("Block information");
@@ -593,7 +565,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap()
                 .addGroup(pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(ckBoxBlock)
-                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 462, Short.MAX_VALUE))
+                    .addComponent(lblBlockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 626, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlBlockInfoLayout.setVerticalGroup(
@@ -605,27 +577,27 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap())
         );
 
-        pnlParameters.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameters"));
+        pnlParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlParameters.border.title"))); // NOI18N
         pnlParameters.setName("pnlParameters"); // NOI18N
 
-        pnlParamDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameter"));
-        pnlParamDescription.setName("pnlParamDescription"); // NOI18N
+        pnlParameterInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlParameterInfo.border.title"))); // NOI18N
+        pnlParameterInfo.setName("pnlParameterInfo"); // NOI18N
 
         lblParameter.setText("<html><i>No description available</i><html>");
         lblParameter.setName("lblParameter"); // NOI18N
 
-        javax.swing.GroupLayout pnlParamDescriptionLayout = new javax.swing.GroupLayout(pnlParamDescription);
-        pnlParamDescription.setLayout(pnlParamDescriptionLayout);
-        pnlParamDescriptionLayout.setHorizontalGroup(
-            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlParameterInfoLayout = new javax.swing.GroupLayout(pnlParameterInfo);
+        pnlParameterInfo.setLayout(pnlParameterInfoLayout);
+        pnlParameterInfoLayout.setHorizontalGroup(
+            pnlParameterInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParameterInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
+                .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        pnlParamDescriptionLayout.setVerticalGroup(
-            pnlParamDescriptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlParamDescriptionLayout.createSequentialGroup()
+        pnlParameterInfoLayout.setVerticalGroup(
+            pnlParameterInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlParameterInfoLayout.createSequentialGroup()
                 .addComponent(lblParameter, javax.swing.GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -675,9 +647,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlParametersLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(scrollPaneTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 462, Short.MAX_VALUE)
+                    .addComponent(scrollPaneTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 626, Short.MAX_VALUE)
                     .addComponent(ckBoxHiddenParameter, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlParamDescription, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlParameterInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlParametersLayout.createSequentialGroup()
                         .addComponent(btnUndo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -701,7 +673,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     .addComponent(btnAddValue)
                     .addComponent(btnRemoveValue))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlParamDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pnlParameterInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -776,7 +748,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JPanel pnlBlockTree;
     private javax.swing.JPanel pnlEditors;
     private javax.swing.JPanel pnlNoBlockSelected;
-    private javax.swing.JPanel pnlParamDescription;
+    private javax.swing.JPanel pnlParameterInfo;
     private javax.swing.JPanel pnlParameters;
     private javax.swing.JScrollPane scrollPaneEditors;
     private javax.swing.JScrollPane scrollPaneTable;
