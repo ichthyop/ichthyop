@@ -76,20 +76,17 @@ public class SimulationManager implements ISimulationManager {
     }
 
     public void setConfigurationFile(File file) throws IOException {
-        
-        cfgFile = file;
+
+        cfgFile = null;
         nb_simulations = 1;
         if (file != null) {
-            /* Make sure file exists */
-            if (!file.exists()) {
-                throw new FileNotFoundException(file.toString());
+            /* Make sure file exists ans is valid */
+            if (isValidXML(file)) {
+                if (!isValidConfigFile(file)) {
+                    throw new IOException(file.getName() + " is not a valid Ichthyop configuration file.");
+                }
             }
-            if (!isXML(file)) {
-                throw new IOException(file.getName() + " is not a XML file.");
-            }
-            if (!isValidConfigFile(file)) {
-                throw new IOException(file.getName() + " is not a valid Ichthyop configuration file.");
-            }
+            cfgFile = file;
             getParameterManager().setConfigurationFile(file);
             for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
                 nb_simulations *= xparam.getLength();
@@ -98,15 +95,15 @@ public class SimulationManager implements ISimulationManager {
         }
     }
 
-    private boolean isXML(File file) {
+    private boolean isValidXML(File file) throws IOException {
         try {
             new SAXBuilder().build(file).getRootElement();
-            return true;
         } catch (JDOMException ex) {
-            return false;
-        } catch (IOException ex) {
-            return false;
+            IOException ioex = new IOException("Error occured reading " + file.getName() + " \n" + ex.getMessage(), ex);
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
         }
+        return true;
     }
 
     private boolean isValidConfigFile(File file) {
