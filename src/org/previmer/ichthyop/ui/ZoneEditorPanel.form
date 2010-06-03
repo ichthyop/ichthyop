@@ -768,13 +768,15 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace min="12" pref="12" max="12" attributes="0"/>
-                                      <Component id="rdButtonDecimal" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Component id="rdButtonDegMin" min="-2" max="-2" attributes="0"/>
+                                      <Component id="rdBtnDecimalDeg" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                                      <Component id="rdBtnDegDecimalMin" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="rdBtnDegMinSec" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Component id="lblLonlat" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="205" max="32767" attributes="0"/>
+                              <EmptySpace pref="15" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -784,8 +786,9 @@
                               <Component id="lblLonlat" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="rdButtonDecimal" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="rdButtonDegMin" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="rdBtnDecimalDeg" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="rdBtnDegMinSec" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="rdBtnDegDecimalMin" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                           </Group>
@@ -799,29 +802,41 @@
                         <Property name="name" type="java.lang.String" value="lblLonlat" noResource="true"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JRadioButton" name="rdButtonDecimal">
+                    <Component class="javax.swing.JRadioButton" name="rdBtnDecimalDeg">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                           <ComponentRef name="buttonGroup1"/>
                         </Property>
                         <Property name="selected" type="boolean" value="true"/>
-                        <Property name="text" type="java.lang.String" value="Decimal Degrees"/>
-                        <Property name="name" type="java.lang.String" value="rdButtonDecimal" noResource="true"/>
+                        <Property name="text" type="java.lang.String" value="Decimal degrees"/>
+                        <Property name="name" type="java.lang.String" value="rdBtnDecimalDeg" noResource="true"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rdButtonDecimalActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rdBtnDecimalDegActionPerformed"/>
                       </Events>
                     </Component>
-                    <Component class="javax.swing.JRadioButton" name="rdButtonDegMin">
+                    <Component class="javax.swing.JRadioButton" name="rdBtnDegMinSec">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                           <ComponentRef name="buttonGroup1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Degrees, Minutes, Seconds"/>
-                        <Property name="name" type="java.lang.String" value="rdButtonDegMin" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="rdBtnDegMinSec" noResource="true"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rdButtonDegMinActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rdBtnDegMinSecActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JRadioButton" name="rdBtnDegDecimalMin">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="buttonGroup1"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Degree, Decimal minutes"/>
+                        <Property name="name" type="java.lang.String" value="rdBtnDegDecimalMin" noResource="true"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rdBtnDegDecimalMinActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>

@@ -309,15 +309,8 @@ public class XZone extends org.jdom.Element {
 
         public GridPoint createRhoPoint() {
             GridPoint rhoPoint = new GridPoint(false);
-            double lat = 0.d;
-            double lon = 0.d;
-            if (LonLatConverter.getFormat(getLat()).equals(LonLatFormat.DegMinSec)) {
-                lat = LonLatConverter.degMinToDecimal(getLat());
-                lon = LonLatConverter.degMinToDecimal(getLon());
-            } else {
-                lat = Double.valueOf(getLat());
-                lon = Double.valueOf(getLon());
-            }
+            double lat = Double.valueOf(LonLatConverter.convert(getLat(), LonLatFormat.DecimalDeg));
+            double lon = Double.valueOf(LonLatConverter.convert(getLon(), LonLatFormat.DecimalDeg));
             rhoPoint.setLat(lat);
             rhoPoint.setLon(lon);
             return rhoPoint;
