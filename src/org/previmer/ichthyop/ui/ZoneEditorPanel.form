@@ -23,7 +23,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
-                  <Component id="jSplitPane1" alignment="0" pref="930" max="32767" attributes="1"/>
+                  <Component id="jSplitPane1" alignment="0" pref="730" max="32767" attributes="1"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="btnSave" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -78,14 +78,16 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
-            <Container class="javax.swing.JPanel" name="jPanel1">
+            <Container class="javax.swing.JPanel" name="pnlTableZone">
               <Properties>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                    <TitledBorder title="Zones"/>
+                    <TitledBorder title="Zones">
+                      <Property name="titleX" resourceKey="pnlTableZone.border.title"/>
+                    </TitledBorder>
                   </Border>
                 </Property>
-                <Property name="name" type="java.lang.String" value="jPanel1" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="pnlTableZone" noResource="true"/>
               </Properties>
 
               <Layout>
@@ -95,7 +97,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jScrollPane1" alignment="1" pref="212" max="32767" attributes="0"/>
-                              <Component id="jToolBar1" alignment="1" pref="212" max="32767" attributes="0"/>
+                              <Component id="toolBarZone" alignment="1" pref="212" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -107,27 +109,25 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jScrollPane1" pref="453" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jToolBar1" min="-2" pref="25" max="-2" attributes="0"/>
+                          <Component id="toolBarZone" min="-2" pref="25" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
               </Layout>
               <SubComponents>
-                <Container class="javax.swing.JToolBar" name="jToolBar1">
+                <Container class="javax.swing.JToolBar" name="toolBarZone">
                   <Properties>
                     <Property name="floatable" type="boolean" value="false"/>
                     <Property name="rollover" type="boolean" value="true"/>
-                    <Property name="name" type="java.lang.String" value="jToolBar1" noResource="true"/>
+                    <Property name="name" type="java.lang.String" value="toolBarZone" noResource="true"/>
                   </Properties>
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
                   <SubComponents>
                     <Component class="javax.swing.JButton" name="btnNewZone">
                       <Properties>
-                        <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
-                          <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico22/list-add.png"/>
-                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" resourceKey="btnNewZone.icon"/>
                         <Property name="focusable" type="boolean" value="false"/>
                         <Property name="horizontalTextPosition" type="int" value="0"/>
                         <Property name="name" type="java.lang.String" value="btnNewZone" noResource="true"/>
@@ -139,9 +139,7 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="btnDeleteZone">
                       <Properties>
-                        <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
-                          <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico22/list-remove.png"/>
-                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" resourceKey="btnDeleteZone.icon"/>
                         <Property name="focusable" type="boolean" value="false"/>
                         <Property name="horizontalTextPosition" type="int" value="0"/>
                         <Property name="name" type="java.lang.String" value="btnDeleteZone" noResource="true"/>
@@ -158,9 +156,7 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="btnUpZone">
                       <Properties>
-                        <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
-                          <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico22/up.png"/>
-                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" resourceKey="btnUpZone.icon"/>
                         <Property name="focusable" type="boolean" value="false"/>
                         <Property name="horizontalTextPosition" type="int" value="0"/>
                         <Property name="name" type="java.lang.String" value="btnUpZone" noResource="true"/>
@@ -172,9 +168,7 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="btnDownZone">
                       <Properties>
-                        <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
-                          <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico22/down.png"/>
-                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" resourceKey="btnDownZone.icon"/>
                         <Property name="focusable" type="boolean" value="false"/>
                         <Property name="horizontalTextPosition" type="int" value="0"/>
                         <Property name="name" type="java.lang.String" value="btnDownZone" noResource="true"/>
@@ -245,7 +239,7 @@
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="1" attributes="0">
-                              <Component id="jPanel3" alignment="0" max="32767" attributes="1"/>
+                              <Component id="pnlOption" alignment="0" max="32767" attributes="1"/>
                               <Component id="pnlZone" alignment="0" max="32767" attributes="1"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -257,7 +251,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="pnlZone" min="-2" max="-2" attributes="1"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jPanel3" max="32767" attributes="0"/>
+                          <Component id="pnlOption" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -268,7 +262,9 @@
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                        <TitledBorder title="Select a zone"/>
+                        <TitledBorder title="Select a zone">
+                          <Property name="titleX" resourceKey="pnlZone.border.title"/>
+                        </TitledBorder>
                       </Border>
                     </Property>
                     <Property name="name" type="java.lang.String" value="pnlZone" noResource="true"/>
@@ -282,16 +278,16 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="ckBoxEnabled" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="jPanel5" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pnlPolygon" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="1" attributes="0">
-                                              <Component id="jPanel9" max="32767" attributes="0"/>
+                                              <Component id="pnlTypeZone" max="32767" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="jPanel8" min="-2" max="-2" attributes="0"/>
+                                              <Component id="pnlColor" min="-2" max="-2" attributes="0"/>
                                           </Group>
-                                          <Component id="jPanel6" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jPanel7" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="pnlThickness" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="pnlBathyMask" alignment="0" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
@@ -305,16 +301,16 @@
                               <Component id="ckBoxEnabled" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jPanel5" alignment="0" min="-2" max="32767" attributes="0"/>
+                                  <Component id="pnlPolygon" alignment="0" min="-2" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="jPanel9" max="32767" attributes="1"/>
-                                          <Component id="jPanel8" alignment="0" max="32767" attributes="1"/>
+                                          <Component id="pnlTypeZone" max="32767" attributes="1"/>
+                                          <Component id="pnlColor" alignment="0" max="32767" attributes="1"/>
                                       </Group>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jPanel6" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pnlThickness" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jPanel7" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pnlBathyMask" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -325,21 +321,23 @@
                   <SubComponents>
                     <Component class="javax.swing.JCheckBox" name="ckBoxEnabled">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Enabled"/>
+                        <Property name="text" type="java.lang.String" resourceKey="ckBoxEnabled.text"/>
                         <Property name="name" type="java.lang.String" value="ckBoxEnabled" noResource="true"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ckBoxEnabledActionPerformed"/>
                       </Events>
                     </Component>
-                    <Container class="javax.swing.JPanel" name="jPanel5">
+                    <Container class="javax.swing.JPanel" name="pnlPolygon">
                       <Properties>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                            <TitledBorder title="Polygon"/>
+                            <TitledBorder title="Polygon">
+                              <Property name="titleX" resourceKey="pnlPolygon.border.title"/>
+                            </TitledBorder>
                           </Border>
                         </Property>
-                        <Property name="name" type="java.lang.String" value="jPanel5" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="pnlPolygon" noResource="true"/>
                       </Properties>
 
                       <Layout>
@@ -465,14 +463,16 @@
                         </Container>
                       </SubComponents>
                     </Container>
-                    <Container class="javax.swing.JPanel" name="jPanel6">
+                    <Container class="javax.swing.JPanel" name="pnlThickness">
                       <Properties>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                            <TitledBorder title="Thickness"/>
+                            <TitledBorder title="Thickness">
+                              <Property name="titleX" resourceKey="pnlThickness.border.title"/>
+                            </TitledBorder>
                           </Border>
                         </Property>
-                        <Property name="name" type="java.lang.String" value="jPanel6" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="pnlThickness" noResource="true"/>
                       </Properties>
 
                       <Layout>
@@ -487,12 +487,12 @@
                                               <Group type="102" alignment="0" attributes="0">
                                                   <Component id="lblLowerDepth" min="-2" max="-2" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="txtFieldLowerDepth" pref="127" max="32767" attributes="0"/>
+                                                  <Component id="txtFieldLowerDepth" pref="175" max="32767" attributes="0"/>
                                               </Group>
                                               <Group type="102" alignment="0" attributes="0">
                                                   <Component id="lblUpperDepth" min="-2" max="-2" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="txtFieldUpperDepth" pref="128" max="32767" attributes="0"/>
+                                                  <Component id="txtFieldUpperDepth" pref="176" max="32767" attributes="0"/>
                                               </Group>
                                           </Group>
                                       </Group>
@@ -533,7 +533,7 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="ckBoxThickness">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Activated"/>
+                            <Property name="text" type="java.lang.String" resourceKey="ckBoxThickness.text"/>
                             <Property name="name" type="java.lang.String" value="ckBoxThickness" noResource="true"/>
                           </Properties>
                           <Events>
@@ -542,13 +542,13 @@
                         </Component>
                         <Component class="javax.swing.JLabel" name="lblUpperDepth">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Upper depth [meter]"/>
+                            <Property name="text" type="java.lang.String" resourceKey="lblUpperDepth.text"/>
                             <Property name="name" type="java.lang.String" value="lblUpperDepth" noResource="true"/>
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JLabel" name="lblLowerDepth">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Lower depth [meter]"/>
+                            <Property name="text" type="java.lang.String" resourceKey="lblLowerDepth.text"/>
                             <Property name="name" type="java.lang.String" value="lblLowerDepth" noResource="true"/>
                           </Properties>
                         </Component>
@@ -562,14 +562,16 @@
                         </Component>
                       </SubComponents>
                     </Container>
-                    <Container class="javax.swing.JPanel" name="jPanel7">
+                    <Container class="javax.swing.JPanel" name="pnlBathyMask">
                       <Properties>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                            <TitledBorder title="Bathymetric mask"/>
+                            <TitledBorder title="Bathymetric mask">
+                              <Property name="titleX" resourceKey="pnlBathyMask.border.title"/>
+                            </TitledBorder>
                           </Border>
                         </Property>
-                        <Property name="name" type="java.lang.String" value="jPanel7" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="pnlBathyMask" noResource="true"/>
                       </Properties>
 
                       <Layout>
@@ -581,7 +583,7 @@
                                       <Group type="102" alignment="1" attributes="0">
                                           <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              <Component id="lblInshore" alignment="0" min="-2" max="-2" attributes="0"/>
                                               <Component id="lblOffshore" alignment="0" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
@@ -589,8 +591,8 @@
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtFieldOffshore" pref="123" max="32767" attributes="1"/>
-                                      <Component id="txtFieldInshore" alignment="0" pref="123" max="32767" attributes="1"/>
+                                      <Component id="txtFieldOffshore" pref="171" max="32767" attributes="1"/>
+                                      <Component id="txtFieldInshore" alignment="0" pref="171" max="32767" attributes="1"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
@@ -603,7 +605,7 @@
                                   <Component id="ckBoxBathyMask" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblInshore" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="txtFieldInshore" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -627,17 +629,17 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="ckBoxBathyMask">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Activated"/>
+                            <Property name="text" type="java.lang.String" resourceKey="ckBoxBathyMask.text"/>
                             <Property name="name" type="java.lang.String" value="ckBoxBathyMask" noResource="true"/>
                           </Properties>
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ckBoxBathyMaskActionPerformed"/>
                           </Events>
                         </Component>
-                        <Component class="javax.swing.JLabel" name="jLabel4">
+                        <Component class="javax.swing.JLabel" name="lblInshore">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Line inshore [meter]"/>
-                            <Property name="name" type="java.lang.String" value="jLabel4" noResource="true"/>
+                            <Property name="text" type="java.lang.String" resourceKey="lblInshore.text"/>
+                            <Property name="name" type="java.lang.String" value="lblInshore" noResource="true"/>
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JFormattedTextField" name="txtFieldOffshore">
@@ -650,20 +652,22 @@
                         </Component>
                         <Component class="javax.swing.JLabel" name="lblOffshore">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Line offshore [meter]"/>
+                            <Property name="text" type="java.lang.String" resourceKey="lblOffshore.text"/>
                             <Property name="name" type="java.lang.String" value="lblOffshore" noResource="true"/>
                           </Properties>
                         </Component>
                       </SubComponents>
                     </Container>
-                    <Container class="javax.swing.JPanel" name="jPanel8">
+                    <Container class="javax.swing.JPanel" name="pnlColor">
                       <Properties>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                            <TitledBorder title="Color"/>
+                            <TitledBorder title="Color">
+                              <Property name="titleX" resourceKey="pnlColor.border.title"/>
+                            </TitledBorder>
                           </Border>
                         </Property>
-                        <Property name="name" type="java.lang.String" value="jPanel8" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="pnlColor" noResource="true"/>
                       </Properties>
 
                       <Layout>
@@ -691,7 +695,7 @@
                             <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
                               <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico22/fill-color.png"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Choose..."/>
+                            <Property name="text" type="java.lang.String" resourceKey="btnColor.text"/>
                             <Property name="name" type="java.lang.String" value="btnColor" noResource="true"/>
                           </Properties>
                           <Events>
@@ -700,14 +704,14 @@
                         </Component>
                       </SubComponents>
                     </Container>
-                    <Container class="javax.swing.JPanel" name="jPanel9">
+                    <Container class="javax.swing.JPanel" name="pnlTypeZone">
                       <Properties>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                             <TitledBorder title="Type of zone"/>
                           </Border>
                         </Property>
-                        <Property name="name" type="java.lang.String" value="jPanel9" noResource="true"/>
+                        <Property name="name" type="java.lang.String" value="pnlTypeZone" noResource="true"/>
                       </Properties>
 
                       <Layout>
@@ -715,7 +719,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="cbBoxType" pref="169" max="32767" attributes="0"/>
+                                  <Component id="cbBoxType" pref="217" max="32767" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
                           </Group>
@@ -750,14 +754,16 @@
                     </Container>
                   </SubComponents>
                 </Container>
-                <Container class="javax.swing.JPanel" name="jPanel3">
+                <Container class="javax.swing.JPanel" name="pnlOption">
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                        <TitledBorder title="Options"/>
+                        <TitledBorder title="Options">
+                          <Property name="titleX" resourceKey="pnlOption.border.title"/>
+                        </TitledBorder>
                       </Border>
                     </Property>
-                    <Property name="name" type="java.lang.String" value="jPanel3" noResource="true"/>
+                    <Property name="name" type="java.lang.String" value="pnlOption" noResource="true"/>
                   </Properties>
 
                   <Layout>
@@ -808,7 +814,7 @@
                           <ComponentRef name="buttonGroup1"/>
                         </Property>
                         <Property name="selected" type="boolean" value="true"/>
-                        <Property name="text" type="java.lang.String" value="Decimal degrees"/>
+                        <Property name="text" type="java.lang.String" resourceKey="rdBtnDecimalDeg.text"/>
                         <Property name="name" type="java.lang.String" value="rdBtnDecimalDeg" noResource="true"/>
                       </Properties>
                       <Events>
@@ -820,7 +826,7 @@
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                           <ComponentRef name="buttonGroup1"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Degrees, Minutes, Seconds"/>
+                        <Property name="text" type="java.lang.String" resourceKey="rdBtnDegMinSec.text"/>
                         <Property name="name" type="java.lang.String" value="rdBtnDegMinSec" noResource="true"/>
                       </Properties>
                       <Events>
@@ -832,7 +838,7 @@
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                           <ComponentRef name="buttonGroup1"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Degree, Decimal minutes"/>
+                        <Property name="text" type="java.lang.String" resourceKey="rdBtnDegDecimalMin.text"/>
                         <Property name="name" type="java.lang.String" value="rdBtnDegDecimalMin" noResource="true"/>
                       </Properties>
                       <Events>
@@ -852,7 +858,7 @@
         <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico22/save.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Save"/>
+        <Property name="text" type="java.lang.String" resourceKey="btnSave.text"/>
         <Property name="enabled" type="boolean" value="false"/>
         <Property name="name" type="java.lang.String" value="btnSave" noResource="true"/>
       </Properties>
@@ -865,7 +871,7 @@
         <Property name="icon" type="javax.swing.Icon" noResource="true" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/org/previmer/ichthyop/ui/resources/images/ico22/save-as.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Save as..."/>
+        <Property name="text" type="java.lang.String" resourceKey="btnSaveAs.text"/>
         <Property name="name" type="java.lang.String" value="btnSaveAs" noResource="true"/>
       </Properties>
       <Events>
@@ -877,7 +883,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="DejaVu Sans" size="12" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="File name"/>
+        <Property name="text" type="java.lang.String" resourceKey="lblFile.text"/>
         <Property name="name" type="java.lang.String" value="lblFile" noResource="true"/>
       </Properties>
     </Component>
