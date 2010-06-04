@@ -16,8 +16,6 @@ import java.util.logging.Logger;
  */
 public interface ISimulationManager extends Runnable {
 
-    public Logger getLogger();
-
     public IActionManager getActionManager();
 
     public IDatasetManager getDatasetManager();

@@ -19,7 +19,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class MarsDatasetIO extends SimulationManagerAccessor {
+public class MarsIO extends SimulationManagerAccessor {
 
     /**
      * List on NetCDF input files in which dataset is read.
@@ -44,7 +44,7 @@ public class MarsDatasetIO extends SimulationManagerAccessor {
             throw new IOException(rawPath + " is not a valid directory.");
         }
         listInputFiles = getInputList(rawPath, fileMask);
-        return open(listInputFiles.get(0));
+        return openFile(listInputFiles.get(0));
     }
 
     static ArrayList<String> getInputList(String path, String fileMask) throws IOException {
@@ -170,15 +170,34 @@ public class MarsDatasetIO extends SimulationManagerAccessor {
         return listInputFiles.get(indexFile);
     }
 
-    static NetcdfFile open(String filename) throws IOException {
+    static NetcdfFile openFile(String filename) throws IOException {
         NetcdfFile nc;
         try {
             nc = NetcdfDataset.openFile(filename, null);
-            //nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             getLogger().info("Open dataset " + filename);
             return nc;
         } catch (IOException e) {
-            throw new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
+            IOException ioex = new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+    }
+
+    /**
+     * Loads the NetCDF dataset from the specified filename.
+     * @param opendapURL a String that can be a local pathname or an OPeNDAP URL.
+     * @throws IOException
+     */
+    static NetcdfFile openURL(String opendapURL) throws IOException {
+        NetcdfFile ncIn;
+        try {
+            ncIn = NetcdfDataset.openFile(opendapURL, null);
+            getLogger().info("Open remote dataset " + opendapURL + "\n");
+            return ncIn;
+        } catch (IOException e) {
+            IOException ioex = new IOException("Problem opening dataset " + opendapURL + " - " + e.getMessage());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
         }
     }
 }

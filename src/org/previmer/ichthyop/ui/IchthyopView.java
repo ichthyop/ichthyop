@@ -50,6 +50,7 @@ import javax.swing.text.NumberFormatter;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.ui.logging.SystemOutHandler;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -61,17 +62,16 @@ public class IchthyopView extends FrameView
     public IchthyopView(SingleFrameApplication app) {
         super(app);
 
-        createLogfile();
-
         initComponents();
         setStatusBar(statusBar);
+
+        /* Initialize the logs */
+        initLogging();
+
+        /* Set frame icon */
         getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
-        getApplication().addExitListener(new ConfirmExit());
 
-        /* plug some components to the logger */
-        loggerScrollPane.connectToLogger(getLogger());
-        statusBar.connectToLogger(getLogger());
-
+        /* Disabled some actions */
         closeMenuItem.getAction().setEnabled(false);
         saveAsMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
@@ -81,17 +81,21 @@ public class IchthyopView extends FrameView
         btnCloseNC.getAction().setEnabled(false);
         btnExportToKMZ.getAction().setEnabled(false);
         setAnimationToolsEnabled(false);
+        setColorbarPanelEnabled(false);
+
+        /* Add some listeners */
+        getApplication().addExitListener(new ConfirmExit());
         pnlConfiguration.addPropertyChangeListener("configurationFile", this);
 
-        /* Colorbar settings setEnabled(false) */
-        setColorbarPanelEnabled(false);
     }
 
     public ISimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 
-    private void createLogfile() {
+    private void initLogging() {
+
+        /* Create a FileHandler (logs will be recorded in a file */
         try {
             String logPath = System.getProperty("user.dir") + File.separator + "log" + File.separator;
             StringBuffer logfile = new StringBuffer(logPath);
@@ -108,6 +112,13 @@ public class IchthyopView extends FrameView
         } catch (SecurityException ex) {
             getLogger().log(Level.SEVERE, null, ex);
         }
+
+        /* Plug the loggerPanel and the StatusBar */
+        loggerScrollPane.connectToLogger(getLogger());
+        statusBar.connectToLogger(getLogger());
+
+        /* Connect to the java console */
+        getLogger().addHandler(new SystemOutHandler());
     }
 
     @Action
@@ -146,7 +157,7 @@ public class IchthyopView extends FrameView
         if (dialog == JOptionPane.OK_OPTION) {
             for (File file : outputFolder.listFiles(new MetaFilenameFilter("*.png"))) {
                 if (file.delete()) {
-                    setMessage(getResourceMap().getString("deleteMaps.deleted") + " " + file.toString());
+                    getLogger().info(getResourceMap().getString("deleteMaps.deleted") + " " + file.toString());
                 }
             }
             outputFolder.delete();
@@ -395,7 +406,6 @@ public class IchthyopView extends FrameView
     }
 
     private void hideSimulationPreview() {
-        setMessage("");
         scrollPaneSimulationUI.setVisible(false);
         if (!taskPaneSimulation.isCollapsed()) {
             pnlProgress.setVisible(true);
@@ -502,10 +512,11 @@ public class IchthyopView extends FrameView
                 return;
             }
         }
-        setMessage(getResourceMap().getString("closeConfigurationFile.Action.finished") + getSimulationManager().getConfigurationFile().toString());
+        getLogger().info(getResourceMap().getString("closeConfigurationFile.Action.finished") + getSimulationManager().getConfigurationFile().toString());
         try {
             getSimulationManager().setConfigurationFile(null);
-        } catch (IOException ex) {}
+        } catch (IOException ex) {
+        }
         lblCfgFile.setText(getResourceMap().getString("lblCfgFile.text"));
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
         btnSimulationRun.getAction().setEnabled(false);
@@ -572,7 +583,7 @@ public class IchthyopView extends FrameView
     }
 
     private Logger getLogger() {
-        return getSimulationManager().getLogger();
+        return SimulationManager.getLogger();
     }
 
     private Task loadConfigurationFile(File file) {
@@ -581,7 +592,7 @@ public class IchthyopView extends FrameView
         } catch (IOException ex) {
             return new FailedTask(getApplication(), ex);
         }
-        setMessage(getResourceMap().getString("loadConfigurationFile.opened") + " " + file.toString());
+        getLogger().info(getResourceMap().getString("loadConfigurationFile.opened") + " " + file.toString());
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
@@ -667,13 +678,13 @@ public class IchthyopView extends FrameView
     public void begin() {
         nbfps = (Float) animationSpeed.getValue();
         time = 0;
-        setMessage(getResourceMap().getString("animAction.started.message") + " " + getResourceMap().getString("animAction.speedup.message"));
+        getLogger().info(getResourceMap().getString("animAction.started.message") + " " + getResourceMap().getString("animAction.speedup.message"));
         startAccelerationProgress();
     }
 
     public void end() {
         btnOpenAnimation.getAction().setEnabled(true);
-        setMessage(getResourceMap().getString("animAction.stopped.message"));
+        getLogger().info(getResourceMap().getString("animAction.stopped.message"));
     }
 
     public void repeat() {
@@ -707,7 +718,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public void newConfigurationFile() {
-        setMessage("New configuration file - not supported yet.");
+        getLogger().info("New configuration file - not supported yet.");
     }
 
     @Action
@@ -800,7 +811,7 @@ public class IchthyopView extends FrameView
             msg.append(getSimulationManager().getTimeManager().stepToString());
             msg.append(" - ");
             msg.append(resourceMap.getString("simulationRun.time"));
-            msg.append(" " );
+            msg.append(" ");
             msg.append(getSimulationManager().getTimeManager().timeToString());
             setMessage(msg.toString());
         }
@@ -872,7 +883,7 @@ public class IchthyopView extends FrameView
                 cfgPath = file;
             }
         } else {
-            setMessage(getResourceMap().getString("restorePreferences.msg"));
+            getLogger().info(getResourceMap().getString("restorePreferences.msg"));
         }
 
         property = restorePreference(animationSpeed);
@@ -890,10 +901,6 @@ public class IchthyopView extends FrameView
             getLogger().log(Level.SEVERE, null, ex);
             return null;
         }
-    }
-
-    public void setMessage(String text) {
-        getLogger().info(text);
     }
 
     private class MouseWheelScroller implements MouseWheelListener {
@@ -967,9 +974,9 @@ public class IchthyopView extends FrameView
     public void browse() {
         try {
             IOTools.browse(URI.create(getResourceMap().getString("Application.homepage")));
-            setMessage(getResourceMap().getString("browse.Action.openurl") + " " + getResourceMap().getString("Application.homepage"));
+            getLogger().info(getResourceMap().getString("browse.Action.openurl") + " " + getResourceMap().getString("Application.homepage"));
         } catch (IOException ex) {
-            setMessage(getResourceMap().getString("browse.Action.no-browser") + " " + getResourceMap().getString("Application.homepage"));
+            getLogger().info(getResourceMap().getString("browse.Action.no-browser") + " " + getResourceMap().getString("Application.homepage"));
         }
     }
 
@@ -1022,8 +1029,6 @@ public class IchthyopView extends FrameView
     }
 
     private Color chooseColor(Component component, Color initial) {
-        //Color newColor = JColorChooser.showDialog(component, "", initial);
-        //return new Color(newColor.getRed(), newColor.getGreen(), newColor.getBlue(), 50);
         return JColorChooser.showDialog(component, "", initial);
     }
 
@@ -1035,7 +1040,7 @@ public class IchthyopView extends FrameView
         Color cmin = btnColorMin.getForeground();
         Color cmax = btnColorMax.getForeground();
         wmsMapper.setColorbar(vname, vmin, vmax, cmin, cmax);
-        setMessage(getResourceMap().getString("applyColorbarSettings.applied"));
+        getLogger().info(getResourceMap().getString("applyColorbarSettings.applied"));
     }
 
     @Action
@@ -1046,7 +1051,6 @@ public class IchthyopView extends FrameView
     private class AutoRangeTask extends SFTask<float[], Object> {
 
         ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
-
         String variable;
 
         AutoRangeTask(Application instance, String variable) {
@@ -2189,7 +2193,6 @@ public class IchthyopView extends FrameView
         btn.setForeground(chooseColor(btn, btn.getForeground()));
         wmsMapper.setDefaultColor(btn.getForeground());
     }//GEN-LAST:event_btnColorActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem animactionMenuItem;
     private javax.swing.JMenu animationMenu;

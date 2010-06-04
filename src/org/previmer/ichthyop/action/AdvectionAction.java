@@ -25,7 +25,7 @@ public class AdvectionAction extends AbstractAction {
              */
             isEuler = false;
             // print the info in the log
-            getSimulationManager().getLogger().info("Failed to read the advection numerical scheme. Set by default to " + AdvectionScheme.RUNGE_KUTTA_4.getName());
+            getLogger().info("Failed to read the advection numerical scheme. Set by default to " + AdvectionScheme.RUNGE_KUTTA_4.getName());
         }
         isForward = getSimulationManager().getTimeManager().get_dt() >= 0;
         int n = 3 / 0;

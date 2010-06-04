@@ -4,55 +4,39 @@
  */
 package org.previmer.ichthyop.dataset;
 
+import java.util.logging.Logger;
 import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.IOException;
 import java.util.logging.Level;
+import ucar.ma2.InvalidRangeException;
 
 /**
  *
  * @author pverley
  */
-public class Mars3dDataset extends Mars3dDatasetCommon {
+public class Mars3dDataset extends Mars3dCommon {
 
-
-    public void setUp() {
-
-        loadParameters();
-        MarsDatasetIO.setTimeField(strTime);
-        clearRequiredVariables();
-
-        try {
-            ncIn = MarsDatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
-            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            getDimNC();
-            if (Boolean.valueOf(getParameter("shrink_domain"))) {
-                float[] p1 = new float[]{Float.valueOf(getParameter("north-west-corner.lon")), Float.valueOf(getParameter("north-west-corner.lat"))};
-                float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
-                range(p1, p2);
-            }
-            readConstantField();
-            getDimGeogArea();
-            getCstSigLevels();
-            z_w_tp0 = getSigLevels();
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
+    void openDataset() throws IOException {
+        MarsIO.setTimeField(strTime);
+        ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
+        nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
     }
 
     public void init() {
         try {
             long t0 = getSimulationManager().getTimeManager().get_tO();
-            ncIn = MarsDatasetIO.open(MarsDatasetIO.getFile(t0));
-            checkRequiredVariable(ncIn);
+            ncIn = MarsIO.openFile(MarsIO.getFile(t0));
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+            checkRequiredVariable(ncIn);
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
+        } catch (InvalidRangeException ex) {
+            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
         }
     }
 
-    
     public void nextStepTriggered(NextStepEvent e) {
 
         long time = e.getSource().getTime();
@@ -73,13 +57,15 @@ public class Mars3dDataset extends Mars3dDatasetCommon {
         rank += time_arrow;
         try {
             if (rank > (nbTimeRecords - 1) || rank < 0) {
-                ncIn = MarsDatasetIO.open(MarsDatasetIO.getNextFile(time_arrow));
+                ncIn = MarsIO.openFile(MarsIO.getNextFile(time_arrow));
                 nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
                 rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
             }
             setAllFieldsTp1AtTime(rank);
+        } catch (InvalidRangeException ex) {
+            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
         }
     }
 }

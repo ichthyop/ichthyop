@@ -92,7 +92,7 @@ public class SimulationManager implements ISimulationManager {
         return simulationManager;
     }
 
-    public Logger getLogger() {
+    public static Logger getLogger() {
         return logger;
     }
 

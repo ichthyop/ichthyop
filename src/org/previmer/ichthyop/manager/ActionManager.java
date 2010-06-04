@@ -18,8 +18,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.IAction;
 
 /**
@@ -95,7 +93,7 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
 
     public String getParameter(String actionKey, String key) {
         return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
-    }
+        }
 
     private class ActionComparator implements Comparator<IAction> {
 

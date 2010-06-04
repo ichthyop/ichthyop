@@ -55,7 +55,7 @@ public class ParameterManager extends AbstractManager implements IParameterManag
         if (xparam != null) {
             return xparam.getValue();
         } else {
-            return null;
+            throw new NullPointerException("Could not retrieve parameter " + blockKey + "." + key);
         }
     }
 
@@ -111,7 +111,7 @@ public class ParameterManager extends AbstractManager implements IParameterManag
                 structure = new Document(racine);
                 map = createMap();
             } catch (Exception e) {
-                getSimulationManager().getLogger().log(Level.SEVERE, null, e);
+                getLogger().log(Level.SEVERE, null, e);
             }
         }
 

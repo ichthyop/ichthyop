@@ -8,22 +8,17 @@ import java.io.IOException;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFile;
 
 /**
  *
  * @author pverley
  */
-abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
+abstract class Mars3dCommon extends MarsCommon {
 
     /**
      * Vertical grid dimension
      */
     int nz;
-    /**
-     * Number of time records in current NetCDF file
-     */
-    static int nbTimeRecords;
     /**
      * Ocean free surface elevetation at current time
      */
@@ -76,39 +71,24 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
      */
     static double[][][] z_w_cst;
     /**
-     * Time step [second] between two records in NetCDF dataset
+     * Name of the Dimension in NetCDF file
      */
-    static double dt_HyMo;
-    /**
-     * Time t + dt expressed in seconds
-     */
-    static double time_tp1;
+    static String strZDim, strZeta, strSigma;
     /**
      * 
      */
-    static NetcdfFile ncIn;
-    /**
-     * Name of the Dimension in NetCDF file
-     */
-    static String strLonDim, strLatDim, strZDim, strTimeDim;
-    /**
-     * Name of the Variable in NetCDF file
-     */
-    static String strU, strV, strTime, strZeta;
-    /**
-     * Name of the Variable in NetCDF file
-     */
-    static String strLon, strLat, strBathy;
-    /**
-     * Name of the Variable in NetCDF file
-     */
-    String strSigma;
-    /**
-     * Current rank in NetCDF dataset
-     */
-    static int rank;
-    
     float[] s_rho;
+
+    @Override
+    public void setUp() {
+
+        /* Call the common method */
+        super.setUp();
+
+        /* Copute sigma levels */
+        getCstSigLevels();
+        z_w_tp0 = getSigLevels();
+    }
 
     public boolean is3D() {
         return true;
@@ -118,60 +98,23 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
         return nz;
     }
 
+    @Override
     void loadParameters() {
 
-        strLonDim = getParameter("field_dim_lon");
-        strLatDim = getParameter("field_dim_lat");
+        /* Call the common method */
+        super.loadParameters();
+
+        /* Read specific 3D variable names */
         strZDim = getParameter("field_dim_z");
-        strTimeDim = getParameter("field_dim_time");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strBathy = getParameter("field_var_bathy");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
         strZeta = getParameter("field_var_zeta");
-        strTime = getParameter("field_var_time");
         strSigma = getParameter("field_var_sigma");
-    }
-
-    int findCurrentRank(long time) throws IOException {
-
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncIn.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(
-                    timeArr.getLong(timeArr.getIndex().set(lrank)));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = DatasetUtil.skipSeconds(
-                        timeArr.getLong(timeArr.getIndex().set(lrank)));
-            }
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + ncIn.getLocation().toString() + " : "
-                    + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + ncIn.getLocation().toString() + " : "
-                    + e.getCause());
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
     }
 
     /**
      * Computes the depth at sigma levels disregarding the free
      * surface elevation.
      */
-    void getCstSigLevels() throws IOException {
+    void getCstSigLevels() {
 
         double[][][] z_r_tmp = new double[nz][ny][nx];
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
@@ -204,109 +147,48 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
 
     }
 
-    void readConstantField() throws IOException {
+    @Override
+    void readConstantField() throws IOException, InvalidRangeException {
 
-        Array arrLon, arrLat, arrH, arrZeta;
-        Index index;
-        lonRho = new double[nx];
-        latRho = new double[ny];
-        maskRho = new byte[ny][nx];
-        dxu = new double[ny];
+        /* Call the common method */
+        super.readConstantField();
 
-        try {
-            arrLon = ncIn.findVariable(strLon).read(new int[]{ipo},
-                    new int[]{nx});
-            arrLat = ncIn.findVariable(strLat).read(new int[]{jpo},
-                    new int[]{ny});
-            arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo},
-                    new int[]{ny, nx});
-            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo},
-                    new int[]{1, ny, nx}).reduce();
+        /* read zeta ocean free surface */
+        Array arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo},
+                new int[]{1, ny, nx}).reduce();
 
-            if (arrH.getElementType() == double.class) {
-                hRho = (double[][]) arrH.copyToNDJavaArray();
-            } else {
-                hRho = new double[ny][nx];
-                index = arrH.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        hRho[j][i] = arrH.getDouble(index.set(j, i));
-                    }
-                }
-            }
-
-            Index indexLon = arrLon.getIndex();
-            Index indexLat = arrLat.getIndex();
+        if (arrZeta.getElementType() == float.class) {
+            zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
+        } else {
+            zeta_tp0 = new float[ny][nx];
+            Index index = arrZeta.getIndex();
             for (int j = 0; j < ny; j++) {
-                indexLat.set(j);
-                latRho[j] = arrLat.getDouble(indexLat);
-            }
-            for (int i = 0; i < nx; i++) {
-                indexLon.set(i);
-                lonRho[i] = arrLon.getDouble(indexLon);
-            }
-            for (int j = 0; j < ny; j++) {
-                indexLat.set(j);
                 for (int i = 0; i < nx; i++) {
-                    indexLon.set(i);
-                    maskRho[j][i] = (hRho[j][i] == -999.0)
-                            ? (byte) 0
-                            : (byte) 1;
+                    zeta_tp0[j][i] = arrZeta.getFloat(index.set(j, i));
                 }
             }
-
-            if (arrZeta.getElementType() == float.class) {
-                zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
-            } else {
-                zeta_tp0 = new float[ny][nx];
-                index = arrZeta.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        zeta_tp0[j][i] = arrZeta.getFloat(index.set(j, i));
-                    }
-                }
-            }
-            zeta_tp1 = zeta_tp0;
-
-            s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
-            if (s_rho[0] < 0) {
-                for (int k = 0; k < s_rho.length; k++) {
-                    s_rho[k] += 1.d;
-                }
-            }
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (InvalidRangeException ex) {
         }
+        zeta_tp1 = zeta_tp0;
 
-        double[] ptGeo1, ptGeo2;
-        for (int j = 0; j < ny; j++) {
-            ptGeo1 = xy2lonlat(1.5d, (double) j);
-            ptGeo2 = xy2lonlat(2.5d, (double) j);
-            dxu[j] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
+        /* read sigma levels */
+        s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
+        if (s_rho[0] < 0) {
+            for (int k = 0; k < s_rho.length; k++) {
+                s_rho[k] += 1.d;
+            }
         }
-        ptGeo1 = xy2lonlat(1.d, 1.5d);
-        ptGeo2 = xy2lonlat(1.d, 2.5d);
-        dyv = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
     }
 
     /**
      * Reads the dimensions of the NetCDF dataset
      * @throws an IOException if an error occurs while reading the dimensions.
      */
+    @Override
     void getDimNC() throws IOException {
 
-        try {
-            nx = ncIn.findDimension(strLonDim).getLength();
-            ny = ncIn.findDimension(strLatDim).getLength();
-            nz = ncIn.findDimension(strZDim).getLength();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            //throw new IOException("Problem reading dimensions from dataset " + ncIn.getLocation() + " : " + e.getMessage());
-        }
-        //Logger.getLogger(getClass().getName()).info("nx " + nx + " - ny " + ny + " - nz " + nz);
-        ipo = jpo = 0;
+        super.getDimNC();
+        /* read the vertical dimension */
+        nz = ncIn.findDimension(strZDim).getLength();
     }
 
     public double depth2z(double x, double y, double depth) {
@@ -491,36 +373,26 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
         return (hh);
     }
 
-    void setAllFieldsTp1AtTime(int rank) throws IOException {
+    void setAllFieldsTp1AtTime(int rank) throws IOException, InvalidRangeException {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
-        try {
-            u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
 
-            v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
-                    new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
+        u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
 
-            Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 60;
-            xTimeTp1 = null;
+        v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
+                new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
 
-            zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
-                    new int[]{rank, 0, 0},
-                    new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+        Array xTimeTp1 = ncIn.findVariable(strTime).read();
+        time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
+        time_tp1 -= time_tp1 % 60;
+        xTimeTp1 = null;
 
-        } catch (IOException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
-                    + e.getMessage());
-        } catch (InvalidRangeException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
-                    + e.getMessage());
-        } catch (NullPointerException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
-                    + e.getMessage());
-        }
+        zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
+                new int[]{rank, 0, 0},
+                new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
@@ -639,7 +511,7 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
 
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
-                if (zeta_tp1[j][i] == 999.f) {
+                if (Math.abs(zeta_tp1[j][i]) > 10.f) {
                     zeta_tp1[j][i] = 0.f;
                 }
                 for (int k = 0; k < nz + 1; k++) {
@@ -650,70 +522,5 @@ abstract class Mars3dDatasetCommon extends MarsDatasetCommon {
         }
         z_w_cst_tmp = null;
         return z_w_tmp;
-    }
-
-    /**
-     * Reads longitude and latitude fields in NetCDF dataset
-     */
-    void readLonLat() throws IOException {
-        Array arrLon, arrLat;
-        lonRho = new double[nx];
-        latRho = new double[ny];
-        try {
-            arrLon = ncIn.findVariable(strLon).read();
-            arrLat = ncIn.findVariable(strLat).read();
-            Index indexLon = arrLon.getIndex();
-            Index indexLat = arrLat.getIndex();
-            for (int j = 0; j < ny; j++) {
-                indexLat.set(j);
-                latRho[j] = arrLat.getDouble(indexLat);
-            }
-            for (int i = 0; i < nx; i++) {
-                indexLon.set(i);
-                lonRho[i] = arrLon.getDouble(indexLon);
-            }
-            arrLon = null;
-            arrLat = null;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
-     * Resizes the domain and determines the range of the grid indexes
-     * taht will be used in the simulation.
-     * The new domain is limited by the Northwest and the Southeast corners.
-     * @param pGeog1 a float[], the geodesic coordinates of the domain
-     * Northwest corner
-     * @param pGeog2  a float[], the geodesic coordinates of the domain
-     * Southeast corner
-     * @throws an IOException if the new domain is not strictly nested
-     * within the NetCDF dataset domain.
-     */
-    void range(float[] pGeog1, float[] pGeog2) throws IOException {
-
-        double[] pGrid1, pGrid2;
-        int ipn, jpn;
-
-        readLonLat();
-
-        pGrid1 = lonlat2xy(pGeog1[0], pGeog1[1]);
-        pGrid2 = lonlat2xy(pGeog2[0], pGeog2[1]);
-        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            throw new IOException(
-                    "Impossible to proportion the simulation area : points out of domain");
-        }
-        lonRho = null;
-        latRho = null;
-
-        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
-        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
-        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
-        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
-        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
-
-        nx = Math.min(nx, ipn - ipo + 1);
-        ny = Math.min(ny, jpn - jpo + 1);
-        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 }

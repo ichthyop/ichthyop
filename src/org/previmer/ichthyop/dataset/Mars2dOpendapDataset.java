@@ -6,33 +6,15 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.event.NextStepEvent;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.ma2.InvalidRangeException;
 
 /**
  *
  * @author pverley
  */
-public class Mars2dOpendapDataset extends Mars2dDatasetCommon {
-
-    public void setUp() {
-        loadParameters();
-        clearRequiredVariables();
-
-        try {
-            open(getParameter("opendap_url"));
-            getDimNC();
-            if (Boolean.valueOf(getParameter("shrink_domain"))) {
-                float[] p1 = new float[]{Float.valueOf(getParameter("north-west-corner.lon")), Float.valueOf(getParameter("north-west-corner.lat"))};
-                float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
-                range(p1, p2);
-            }
-            readConstantField();
-            getDimGeogArea();
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
-    }
+public class Mars2dOpendapDataset extends Mars2dCommon {
 
     public void init() {
         try {
@@ -40,8 +22,10 @@ public class Mars2dOpendapDataset extends Mars2dDatasetCommon {
             checkRequiredVariable(ncIn);
             setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
             time_tp1 = t0;
+        } catch (InvalidRangeException ex) {
+            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
         }
     }
 
@@ -59,11 +43,13 @@ public class Mars2dOpendapDataset extends Mars2dDatasetCommon {
         rank += time_arrow;
         try {
             if (rank > (nbTimeRecords - 1) || rank < 0) {
-                throw new IOException("Time OutOfBoundException");
+                throw new IndexOutOfBoundsException(ErrorMessage.TIME_OUTOF_BOUND.message());
             }
             setAllFieldsTp1AtTime(rank);
+        } catch (InvalidRangeException ex) {
+            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
         }
     }
 
@@ -72,21 +58,8 @@ public class Mars2dOpendapDataset extends Mars2dDatasetCommon {
      * @param opendapURL a String that can be a local pathname or an OPeNDAP URL.
      * @throws IOException
      */
-    private void open(String opendapURL) throws IOException {
-
-        try {
-            if (ncIn == null) {
-                ncIn = NetcdfDataset.openFile(opendapURL, null);
-                nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            }
-            System.out.print("Open remote dataset " + opendapURL + "\n");
-        } catch (IOException e) {
-            throw new IOException("Problem opening dataset "
-                    + opendapURL + " - " + e.getMessage());
-        } catch (NullPointerException e) {
-            throw new IOException("Problem reading " + strTimeDim
-                    + " dimension at location " + opendapURL
-                    + " : " + e.getMessage());
-        }
+    void openDataset() throws IOException {
+        ncIn = MarsIO.openURL(getParameter("opendap_url"));
+        nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
     }
 }

@@ -20,7 +20,7 @@ public class SimulationManagerAccessor {
     }
     
     public static Logger getLogger() {
-     return Logger.getLogger(ISimulationManager.class.getName());
+     return SimulationManager.getLogger();
     }
 
 }

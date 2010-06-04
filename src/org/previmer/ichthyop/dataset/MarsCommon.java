@@ -4,15 +4,25 @@
  */
 package org.previmer.ichthyop.dataset;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.Array;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 
 /**
  *
  * @author pverley
  */
-public abstract class MarsDatasetCommon extends AbstractDataset {
+public abstract class MarsCommon extends AbstractDataset {
 
+    /**
+     * Number of time records in NetCDF dataset
+     */
+    int nbTimeRecords;
     /**
      * Grid dimension
      */
@@ -42,6 +52,26 @@ public abstract class MarsDatasetCommon extends AbstractDataset {
      */
     double latMin, lonMin, latMax, lonMax, depthMax;
     /**
+     * Time step [second] between two records in NetCDF dataset
+     */
+    static double dt_HyMo;
+    /**
+     * Time t + dt expressed in seconds
+     */
+    static double time_tp1;
+    /**
+     * Name of the Dimension in NetCDF file
+     */
+    static String strLonDim, strLatDim, strTimeDim;
+    /**
+     * Name of the Variable in NetCDF file
+     */
+    static String strU, strV, strTime;
+    /**
+     * Name of the Variable in NetCDF file
+     */
+    static String strLon, strLat, strBathy;
+    /**
      *
      */
     double[] dxu;
@@ -49,8 +79,150 @@ public abstract class MarsDatasetCommon extends AbstractDataset {
      * 
      */
     double dyv;
+    /*
+     *
+     */
     HashMap<String, RequiredVariable> requiredVariables;
+    /**
+     *
+     */
+    NetcdfFile ncIn;
+    /**
+     * Current rank in NetCDF dataset
+     */
+    static int rank;
 
+    abstract void openDataset() throws IOException;
+
+    public void setUp() {
+        loadParameters();
+        clearRequiredVariables();
+
+        try {
+            openDataset();
+            getDimNC();
+            shrinkGrid();
+            readConstantField();
+            getDimGeogArea();
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    void loadParameters() {
+        strLonDim = getParameter("field_dim_lon");
+        strLatDim = getParameter("field_dim_lat");
+        strTimeDim = getParameter("field_dim_time");
+        strLon = getParameter("field_var_lon");
+        strLat = getParameter("field_var_lat");
+        strBathy = getParameter("field_var_bathy");
+        strU = getParameter("field_var_u");
+        strV = getParameter("field_var_v");
+        strTime = getParameter("field_var_time");
+    }
+
+    /**
+     * Reads the dimensions of the NetCDF dataset
+     * @throws an IOException if an error occurs while reading the dimensions.
+     */
+    void getDimNC() throws IOException {
+
+        nx = ncIn.findDimension(strLonDim).getLength();
+        ny = ncIn.findDimension(strLatDim).getLength();
+        ipo = jpo = 0;
+    }
+
+    void readConstantField() throws IOException, InvalidRangeException {
+
+        Array arrLon, arrLat, arrH;
+        Index index;
+        lonRho = new double[nx];
+        latRho = new double[ny];
+        maskRho = new byte[ny][nx];
+        dxu = new double[ny];
+
+        arrLon = ncIn.findVariable(strLon).read(new int[]{ipo},
+                new int[]{nx});
+        arrLat = ncIn.findVariable(strLat).read(new int[]{jpo},
+                new int[]{ny});
+        arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo},
+                new int[]{ny, nx});
+
+        if (arrH.getElementType() == double.class) {
+            hRho = (double[][]) arrH.copyToNDJavaArray();
+        } else {
+            hRho = new double[ny][nx];
+            index = arrH.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    hRho[j][i] = arrH.getDouble(index.set(j, i));
+                }
+            }
+        }
+
+        Index indexLon = arrLon.getIndex();
+        Index indexLat = arrLat.getIndex();
+        for (int j = 0; j < ny; j++) {
+            indexLat.set(j);
+            latRho[j] = arrLat.getDouble(indexLat);
+        }
+        for (int i = 0; i < nx; i++) {
+            indexLon.set(i);
+            lonRho[i] = arrLon.getDouble(indexLon);
+        }
+        for (int j = 0; j < ny; j++) {
+            indexLat.set(j);
+            for (int i = 0; i < nx; i++) {
+                indexLon.set(i);
+                maskRho[j][i] = (hRho[j][i] == -999.0)
+                        ? (byte) 0
+                        : (byte) 1;
+            }
+        }
+
+        double[] ptGeo1, ptGeo2;
+        for (int j = 0; j < ny; j++) {
+            ptGeo1 = xy2lonlat(1.5d, (double) j);
+            ptGeo2 = xy2lonlat(2.5d, (double) j);
+            dxu[j] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
+        }
+        ptGeo1 = xy2lonlat(1.d, 1.5d);
+        ptGeo2 = xy2lonlat(1.d, 2.5d);
+        dyv = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
+    }
+
+    int findCurrentRank(long time) throws IOException {
+
+        int lrank = 0;
+        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
+        long time_rank;
+        Array timeArr;
+        try {
+            timeArr = ncIn.findVariable(strTime).read();
+            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+            while (time >= time_rank) {
+                if (time_arrow < 0 && time == time_rank) {
+                    break;
+                }
+                lrank++;
+                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            lrank = nbTimeRecords;
+        }
+        lrank = lrank - (time_arrow + 1) / 2;
+
+        return lrank;
+    }
+
+    /**
+     * 
+     * @param variableName
+     * @param pGrid
+     * @param time
+     * @return
+     */
     public Number get(String variableName, double[] pGrid, double time) {
         return requiredVariables.get(variableName).get(pGrid, time);
     }
@@ -73,6 +245,7 @@ public abstract class MarsDatasetCommon extends AbstractDataset {
         for (RequiredVariable variable : requiredVariables.values()) {
             //System.out.println(variable.getName()  + " " + variable.checked(nc));
             if (!variable.checked(nc)) {
+
                 requiredVariables.remove(variable.getName());
             }
         }
@@ -348,6 +521,86 @@ public abstract class MarsDatasetCommon extends AbstractDataset {
         }
     }
 
+    public void shrinkGrid() {
+        boolean isParamDefined = false;
+        try {
+            Boolean.valueOf(getParameter("shrink_domain"));
+            isParamDefined = true;
+        } catch (NullPointerException ex) {
+            isParamDefined = false;
+        }
+
+        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+            try {
+                float[] p1 = new float[]{Float.valueOf(getParameter("north-west-corner.lon")), Float.valueOf(getParameter("north-west-corner.lat"))};
+                float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
+                range(p1, p2);
+            } catch (Exception ex) {
+                getLogger().log(Level.WARNING, "Failed to resize domain", ex);
+            }
+        }
+    }
+
+    /**
+     * Resizes the domain and determines the range of the grid indexes
+     * taht will be used in the simulation.
+     * The new domain is limited by the Northwest and the Southeast corners.
+     * @param pGeog1 a float[], the geodesic coordinates of the domain
+     * Northwest corner
+     * @param pGeog2  a float[], the geodesic coordinates of the domain
+     * Southeast corner
+     * @throws an IOException if the new domain is not strictly nested
+     * within the NetCDF dataset domain.
+     */
+    void range(float[] pGeog1, float[] pGeog2) throws IOException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        readLonLat();
+
+        pGrid1 = lonlat2xy(pGeog1[0], pGeog1[1]);
+        pGrid2 = lonlat2xy(pGeog2[0], pGeog2[1]);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
+        }
+        lonRho = null;
+        latRho = null;
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        nx = Math.min(nx, ipn - ipo + 1);
+        ny = Math.min(ny, jpn - jpo + 1);
+        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+    }
+
+    /**
+     * Reads longitude and latitude fields in NetCDF dataset
+     */
+    void readLonLat() throws IOException {
+        Array arrLon, arrLat;
+        lonRho = new double[nx];
+        latRho = new double[ny];
+        arrLon = ncIn.findVariable(strLon).read();
+        arrLat = ncIn.findVariable(strLat).read();
+        Index indexLon = arrLon.getIndex();
+        Index indexLat = arrLat.getIndex();
+        for (int j = 0; j < ny; j++) {
+            indexLat.set(j);
+            latRho[j] = arrLat.getDouble(indexLat);
+        }
+        for (int i = 0; i < nx; i++) {
+            indexLon.set(i);
+            lonRho[i] = arrLon.getDouble(indexLon);
+        }
+        arrLon = null;
+        arrLat = null;
+    }
+
     /**
      * Gets domain minimum latitude.
      * @return a double, the domain minimum latitude [north degree]
@@ -406,5 +659,23 @@ public abstract class MarsDatasetCommon extends AbstractDataset {
      */
     public double getLon(int i, int j) {
         return lonRho[i];
+    }
+
+    public enum ErrorMessage {
+
+        INIT("Error reading some dataset variables at initialization"),
+        NEXT_STEP("Error reading dataset variables for next timestep"),
+        NOT_IN_2D("Method not supported in 2D"),
+        TIME_OUTOF_BOUND("Time out of dataset range");
+        
+        private String msg;
+
+        ErrorMessage(String msg) {
+            this.msg = msg;
+        }
+
+        String message() {
+            return msg;
+        }
     }
 }
