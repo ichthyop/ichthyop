@@ -68,6 +68,10 @@ public class IchthyopView extends FrameView
         getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
         getApplication().addExitListener(new ConfirmExit());
 
+        /* plug some components to the logger */
+        loggerScrollPane.connectToLogger(getLogger());
+        statusBar.connectToLogger(getLogger());
+
         closeMenuItem.getAction().setEnabled(false);
         saveAsMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
@@ -391,6 +395,7 @@ public class IchthyopView extends FrameView
     }
 
     private void hideSimulationPreview() {
+        setMessage("");
         scrollPaneSimulationUI.setVisible(false);
         if (!taskPaneSimulation.isCollapsed()) {
             pnlProgress.setVisible(true);
@@ -577,7 +582,6 @@ public class IchthyopView extends FrameView
             return new FailedTask(getApplication(), ex);
         }
         setMessage(getResourceMap().getString("loadConfigurationFile.opened") + " " + file.toString());
-        getLogger().info(getResourceMap().getString("loadConfigurationFile.opened") + " " + file.toString());
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
         lblCfgFile.setText(file.getAbsolutePath());
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
@@ -889,8 +893,7 @@ public class IchthyopView extends FrameView
     }
 
     public void setMessage(String text) {
-        statusBar.setMessage(text);
-        loggerScrollPane.setMessage(text);
+        getLogger().info(text);
     }
 
     private class MouseWheelScroller implements MouseWheelListener {

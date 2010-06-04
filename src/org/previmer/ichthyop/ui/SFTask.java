@@ -7,7 +7,6 @@ package org.previmer.ichthyop.ui;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.manager.SimulationManager;
@@ -39,7 +38,8 @@ public abstract class SFTask<T, V> extends Task<T, V> {
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
         SimulationManager.getInstance().getLogger().log(Level.SEVERE, sw.toString());
-        setMessage(throwable.toString());
+        super.setMessage(throwable.toString());
+        firePropertyChange("reset", null, null);
         onFailure(throwable);
     }
 
@@ -50,6 +50,7 @@ public abstract class SFTask<T, V> extends Task<T, V> {
 
     public void setMessage(String message, boolean persistent) {
         super.setMessage(message);
+        SimulationManager.getInstance().getLogger().info(message);
         if (!persistent) {
             firePropertyChange("reset", null, null);
         }

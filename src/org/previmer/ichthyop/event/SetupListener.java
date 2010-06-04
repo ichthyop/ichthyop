@@ -13,6 +13,6 @@ import java.util.EventListener;
  */
 public interface SetupListener extends EventListener {
 
-    public void setupPerformed(SetupEvent e);
+    public void setupPerformed(SetupEvent e) throws Exception;
 
 }

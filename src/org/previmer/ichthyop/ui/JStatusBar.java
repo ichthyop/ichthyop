@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -26,6 +27,8 @@ import org.jdesktop.swingx.JXStatusBar;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import org.jdesktop.swingx.plaf.basic.BasicStatusBarUI;
+import org.previmer.ichthyop.manager.SimulationManager;
+import org.previmer.ichthyop.ui.logging.JStatusBarHandler;
 
 /**
  *
@@ -68,15 +71,15 @@ public class JStatusBar extends JXStatusBar {
         JLabel emptyLabel = new JLabel();
         emptyLabel.setOpaque(false);
         pnlProgressBar.add(emptyLabel, new GridBagConstraints(0, 0,
-                              1, 1,
-                              90.d, 0.d,
-                              GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
-                              new Insets(0, 0, 0, 0), 0, 0));
+                1, 1,
+                90.d, 0.d,
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+                new Insets(0, 0, 0, 0), 0, 0));
         pnlProgressBar.add(progressBar, new GridBagConstraints(1, 0,
-                              1, 1,
-                              10.d, 0.d,
-                              GridBagConstraints.EAST, GridBagConstraints.NONE,
-                              new Insets(0, 0, 0, 0), 0, 0));
+                1, 1,
+                10.d, 0.d,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(0, 0, 0, 0), 0, 0));
 
         // Designed of the statusAnimationLabel (the JXBusyLabel)
         statusAnimationLabel.setMaximumSize(new java.awt.Dimension(20, 20));
@@ -84,13 +87,13 @@ public class JStatusBar extends JXStatusBar {
         statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
         statusAnimationLabel.setPreferredSize(new java.awt.Dimension(20, 20));
         BusyPainter painter = new BusyPainter(
-            new RoundRectangle2D.Float(0, 0,4.0f,1.8f,10.0f,10.0f),
-            new Ellipse2D.Float(3.0f,3.0f,14.0f,14.0f));
+                new RoundRectangle2D.Float(0, 0, 4.0f, 1.8f, 10.0f, 10.0f),
+                new Ellipse2D.Float(3.0f, 3.0f, 14.0f, 14.0f));
         painter.setTrailLength(4);
         painter.setPoints(8);
         painter.setFrame(-1);
-        statusAnimationLabel.setPreferredSize(new Dimension(20,20));
-        statusAnimationLabel.setIcon(new EmptyIcon(20,20));
+        statusAnimationLabel.setPreferredSize(new Dimension(20, 20));
+        statusAnimationLabel.setIcon(new EmptyIcon(20, 20));
         statusAnimationLabel.setBusyPainter(painter);
 
         // Add the components in the status bar
@@ -148,6 +151,9 @@ public class JStatusBar extends JXStatusBar {
                 } else if ("message".equals(propertyName)) {
                     String text = (String) (evt.getNewValue());
                     statusMessageLabel.setText((text == null) ? "" : text);
+                    if (messageTimer.isRunning()) {
+                        messageTimer.stop();
+                    }
                 } else if ("reset".equals(propertyName)) {
                     messageTimer.restart();
                 } else if ("progress".equals(propertyName)) {
@@ -173,7 +179,15 @@ public class JStatusBar extends JXStatusBar {
         messageTimer.restart();
     }
 
+    public String getMessage() {
+        return statusMessageLabel.getText();
+    }
+
     private ResourceMap getResourceMap() {
         return Application.getInstance().getContext().getResourceMap(JStatusBar.class);
+    }
+
+    public void connectToLogger(Logger logger) {
+        logger.addHandler(new JStatusBarHandler(this));
     }
 }

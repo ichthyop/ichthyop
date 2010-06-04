@@ -54,6 +54,7 @@ import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.XZone;
 import org.previmer.ichthyop.io.XZone.XPoint;
 import org.previmer.ichthyop.io.ZoneFile;
+import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
 /**
@@ -326,6 +327,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
     public ResourceMap getResourceMap() {
         return org.jdesktop.application.Application.getInstance().getContext().getResourceMap(ZoneEditorPanel.class);
+    }
+
+    public Logger getLogger() {
+        return SimulationManager.getInstance().getLogger();
     }
 
     /** This method is called from within the constructor to
@@ -1154,9 +1159,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             hasZoneChanged = false;
             btnSave.setEnabled(false);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(ZoneEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(ZoneEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
@@ -1176,7 +1181,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 btnSave.doClick();
                 lblFile.setText(file.toString());
             } catch (IOException ex) {
-                Logger.getLogger(ZoneEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger().log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_btnSaveAsActionPerformed

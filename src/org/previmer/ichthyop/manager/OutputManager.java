@@ -51,7 +51,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private int dt_record;
     private NCDimFactory dimensionFactory;
     private int i_record;
-    private boolean isRecord;
     private int record_frequency;
     private List<GeoPosition> region;
     private List<List<GeoPosition>> zoneEdges;
@@ -68,16 +67,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     private OutputManager() {
         super();
-        //isRecord = getSimulationManager().getParameterManager().isBlockEnabled(BlockType.OPTION, block_key);
-        /*
-         * phv 07-01-2010
-         * Ichthyop systematically generates output files for postprocessing mapping.
-         */
-        isRecord = true;
-        if (isRecord()) {
-            getSimulationManager().getTimeManager().addNextStepListener(this);
-            getSimulationManager().getTimeManager().addLastStepListener(this);
-        }
+        getSimulationManager().getTimeManager().addNextStepListener(this);
+        getSimulationManager().getTimeManager().addLastStepListener(this);
     }
 
     public static OutputManager getInstance() {
@@ -97,10 +88,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     public String getFileLocation() {
         return getParameter("output_path") + getParameter("file_prefix") + "_" + getSimulationManager().getId() + ".nc";
-    }
-
-    private boolean isRecord() {
-        return isRecord;
     }
 
     public boolean isTrackerEnabled(String trackerKey) {
@@ -390,19 +377,13 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         close();
     }
 
-    public void setupPerformed(SetupEvent e) {
+    public void setupPerformed(SetupEvent e) throws Exception {
 
-        if (isRecord()) {
-            try {
-                ncOut = NetcdfFileWriteable.createNew("");
-                record_frequency = Integer.valueOf(getParameter("record_frequency"));
-                ncOut.setLocation(getFileLocation());
-                getDimensionFactory().resetDimensions();
-                requestedTrackers = new ArrayList();
-            } catch (IOException ex) {
-                Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        ncOut = NetcdfFileWriteable.createNew("");
+        record_frequency = Integer.valueOf(getParameter("record_frequency"));
+        ncOut.setLocation(getFileLocation());
+        getDimensionFactory().resetDimensions();
+        requestedTrackers = new ArrayList();
     }
 
     public void initializePerformed(InitializeEvent e) {

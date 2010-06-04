@@ -17,8 +17,18 @@ public class AdvectionAction extends AbstractAction {
 
     public void loadParameters() {
 
-        isEuler = getParameter("scheme").matches("euler");
+        try {
+            isEuler = getParameter("scheme").matches(AdvectionScheme.FORWARD_EULER.getKey());
+        } catch (Exception ex) {
+            /*  set RK4 as default in case could not determine the scheme
+             * defined by user.
+             */
+            isEuler = false;
+            // print the info in the log
+            getSimulationManager().getLogger().info("Failed to read the advection numerical scheme. Set by default to " + AdvectionScheme.RUNGE_KUTTA_4.getName());
+        }
         isForward = getSimulationManager().getTimeManager().get_dt() >= 0;
+        int n = 3 / 0;
     }
 
     public void execute(IBasicParticle particle) {
@@ -132,5 +142,26 @@ public class AdvectionAction extends AbstractAction {
 
         return (dU);
 
+    }
+
+    public enum AdvectionScheme {
+
+        FORWARD_EULER("euler", "Forward Euler"),
+        RUNGE_KUTTA_4("rk4", "Runge Kutta 4");
+        private String key;
+        private String name;
+
+        AdvectionScheme(String key, String name) {
+            this.key = key;
+            this.name = name;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }

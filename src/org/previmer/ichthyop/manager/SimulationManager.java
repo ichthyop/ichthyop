@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.manager;
 
+import java.util.logging.Level;
 import org.jdom.JDOMException;
 import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.arch.IActionManager;
@@ -294,23 +295,27 @@ public class SimulationManager implements ISimulationManager {
     public void run() {
         resetTimerGlobal();
         do {
-            System.out.println("=========================");
-            System.out.println("Simulation " + indexSimulationToString());
-            System.out.println("=========================");
-            setup();
-            init();
-            getTimeManager().firstStepTriggered();
-            resetTimerCurrent();
-            do {
-                System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
-                getSimulation().step();
-                System.out.println(timeLeftGlobal());
-            } while (!isStopped() && getTimeManager().hasNextStep());
+            try {
+                System.out.println("=========================");
+                System.out.println("Simulation " + indexSimulationToString());
+                System.out.println("=========================");
+                setup();
+                init();
+                getTimeManager().firstStepTriggered();
+                resetTimerCurrent();
+                do {
+                    System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
+                    getSimulation().step();
+                    System.out.println(timeLeftGlobal());
+                } while (!isStopped() && getTimeManager().hasNextStep());
+            } catch (Exception ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
         } while (!isStopped() && hasNextSimulation());
         System.out.println("End of simulation");
     }
 
-    public void setup() {
+    public void setup() throws Exception {
         flagStop = false;
         getZoneManager().cleanup();
         fireSetupPerformed();
@@ -349,7 +354,7 @@ public class SimulationManager implements ISimulationManager {
         listeners.remove(SetupListener.class, listener);
     }
 
-    private void fireSetupPerformed() {
+    private void fireSetupPerformed() throws Exception {
         getLogger().info("Setting up simulation");
         SetupListener[] listenerList = (SetupListener[]) listeners.getListeners(SetupListener.class);
 

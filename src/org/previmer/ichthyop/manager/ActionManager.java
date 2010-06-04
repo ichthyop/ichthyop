@@ -35,17 +35,25 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         return actionManager;
     }
 
-    private void loadActions() {
+    private void loadActions() throws InstantiationException {
         actionMap = new HashMap();
         Iterator<XBlock> it = getSimulationManager().getParameterManager().getBlocks(BlockType.ACTION).iterator();
         while (it.hasNext()) {
             XBlock xaction = it.next();
             if (xaction.isEnabled()) {
                 try {
-                    Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
+                Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
                     actionMap.put(xaction.getKey(), createAction(actionClass));
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    StringBuffer msg = new StringBuffer();
+                    msg.append("Failed to setup action ");
+                    msg.append(xaction.getTreePath());
+                    msg.append("\n");
+                    msg.append(ex.toString());
+                    InstantiationException iex = new InstantiationException(msg.toString());
+                    iex.setStackTrace(ex.getStackTrace());
+                    throw iex;
                 }
             }
         }
@@ -57,17 +65,8 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         return actions;
     }
 
-    public AbstractAction createAction(Class actionClass) {
-
-        try {
-            return (AbstractAction) actionClass.newInstance();
-        } catch (InstantiationException ex) {
-            Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ActionManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-
+    public AbstractAction createAction(Class actionClass) throws InstantiationException, IllegalAccessException {
+        return (AbstractAction) actionClass.newInstance();
     }
 
     public void executeActions(IBasicParticle particle) {
@@ -82,7 +81,7 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         return actionMap.get((String) key);
     }
 
-    public void setupPerformed(SetupEvent e) {
+    public void setupPerformed(SetupEvent e) throws Exception {
         loadActions();
     }
 

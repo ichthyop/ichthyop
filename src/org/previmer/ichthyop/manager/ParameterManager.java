@@ -1,5 +1,7 @@
 package org.previmer.ichthyop.manager;
 
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.arch.IParameterManager;
 import org.previmer.ichthyop.io.ParamType;
@@ -13,10 +15,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -28,7 +28,7 @@ import org.jdom.output.XMLOutputter;
  *
  * @author pverley
  */
-public class ParameterManager implements IParameterManager {
+public class ParameterManager extends AbstractManager implements IParameterManager {
 
     private static ParameterManager parameterManager = new ParameterManager();
     private ConfigurationFile cfgFile;
@@ -55,7 +55,7 @@ public class ParameterManager implements IParameterManager {
         if (xparam != null) {
             return xparam.getValue();
         } else {
-            return "";
+            return null;
         }
     }
 
@@ -83,6 +83,14 @@ public class ParameterManager implements IParameterManager {
         cfgFile.addBlock(block);
     }
 
+    public void setupPerformed(SetupEvent e) throws Exception {
+        // does nothing
+    }
+
+    public void initializePerformed(InitializeEvent e) {
+        // does nothing
+    }
+
     private class ConfigurationFile {
 
         private File file;
@@ -103,7 +111,7 @@ public class ParameterManager implements IParameterManager {
                 structure = new Document(racine);
                 map = createMap();
             } catch (Exception e) {
-                Logger.getLogger(ConfigurationFile.class.getName()).log(Level.SEVERE, null, e);
+                getSimulationManager().getLogger().log(Level.SEVERE, null, e);
             }
         }
 
@@ -220,44 +228,6 @@ public class ParameterManager implements IParameterManager {
             StringBuffer id = new StringBuffer(getBlockType().toString());
             id.append('/');
             id.append(getBlockKey());
-            return id.toString();
-        }
-    }
-
-    private class ParameterId {
-
-        private BlockType type;
-        private String blockName;
-        private String key;
-
-        ParameterId(BlockType type, String blockName, String key) {
-            this.type = type;
-            this.blockName = blockName;
-            this.key = key;
-        }
-
-        private BlockType getBlockType() {
-            return type;
-        }
-
-        private String getBlockName() {
-            return blockName.trim().toLowerCase();
-        }
-
-        /**
-         * @return the key
-         */
-        private String getKey() {
-            return key.trim().toLowerCase();
-        }
-
-        @Override
-        public String toString() {
-            StringBuffer id = new StringBuffer(getBlockType().toString());
-            id.append('/');
-            id.append(getBlockName());
-            id.append('/');
-            id.append(getKey());
             return id.toString();
         }
     }

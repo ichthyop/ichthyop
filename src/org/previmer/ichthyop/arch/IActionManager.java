@@ -13,7 +13,7 @@ import org.previmer.ichthyop.action.AbstractAction;
  */
 public interface IActionManager {
 
-    public AbstractAction createAction(Class actionClass);
+    public AbstractAction createAction(Class actionClass) throws InstantiationException, IllegalAccessException;
 
     public void executeActions(IBasicParticle particle);
 
