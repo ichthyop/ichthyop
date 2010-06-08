@@ -435,7 +435,7 @@ public class IchthyopView extends FrameView
 
         @Override
         void onFailure(Throwable throwable) {
-            // do nothing
+            btnPreview.setSelected(false);
         }
     }
 
