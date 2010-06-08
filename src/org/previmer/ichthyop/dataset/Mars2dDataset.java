@@ -15,7 +15,7 @@ import ucar.ma2.InvalidRangeException;
  */
 public class Mars2dDataset extends Mars2dCommon {
 
-    void openDataset() throws IOException {
+    void openDataset() throws Exception {
         MarsIO.setTimeField(strTime);
         ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();

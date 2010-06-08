@@ -12,7 +12,7 @@ import org.previmer.ichthyop.event.NextStepListener;
  */
 public interface IDataset extends NextStepListener {
 
-    public void setUp();
+    public void setUp() throws Exception ;
 
     public double[] lonlat2xy(double lon, double lat);
 

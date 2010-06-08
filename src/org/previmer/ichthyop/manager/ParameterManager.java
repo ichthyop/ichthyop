@@ -55,7 +55,7 @@ public class ParameterManager extends AbstractManager implements IParameterManag
         if (xparam != null) {
             return xparam.getValue();
         } else {
-            throw new NullPointerException("Could not retrieve parameter " + blockKey + "." + key);
+            throw new NullPointerException("Could not retrieve parameter " + blockKey + "/" + key);
         }
     }
 

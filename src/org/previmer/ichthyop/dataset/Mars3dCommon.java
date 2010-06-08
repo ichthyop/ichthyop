@@ -80,7 +80,7 @@ abstract class Mars3dCommon extends MarsCommon {
     float[] s_rho;
 
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
 
         /* Call the common method */
         super.setUp();
@@ -148,14 +148,21 @@ abstract class Mars3dCommon extends MarsCommon {
     }
 
     @Override
-    void readConstantField() throws IOException, InvalidRangeException {
+    void readConstantField() throws Exception {
 
         /* Call the common method */
         super.readConstantField();
 
         /* read zeta ocean free surface */
-        Array arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo},
-                new int[]{1, ny, nx}).reduce();
+        Array arrZeta = null;
+        try {
+            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading ocean free surface elevation. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
 
         if (arrZeta.getElementType() == float.class) {
             zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
@@ -171,7 +178,13 @@ abstract class Mars3dCommon extends MarsCommon {
         zeta_tp1 = zeta_tp0;
 
         /* read sigma levels */
-        s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
+        try {
+            s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading sigma levels. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
         if (s_rho[0] < 0) {
             for (int k = 0; k < s_rho.length; k++) {
                 s_rho[k] += 1.d;
@@ -188,7 +201,13 @@ abstract class Mars3dCommon extends MarsCommon {
 
         super.getDimNC();
         /* read the vertical dimension */
-        nz = ncIn.findDimension(strZDim).getLength();
+        try {
+            nz = ncIn.findDimension(strZDim).getLength();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Failed to read dataset vertical dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
     }
 
     public double depth2z(double x, double y, double depth) {

@@ -4,7 +4,6 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import java.util.logging.Logger;
 import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -16,10 +15,16 @@ import ucar.ma2.InvalidRangeException;
  */
 public class Mars3dDataset extends Mars3dCommon {
 
-    void openDataset() throws IOException {
+    void openDataset() throws Exception {
         MarsIO.setTimeField(strTime);
         ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
+        try {
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Failed to read dataset time dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
     }
 
     public void init() {

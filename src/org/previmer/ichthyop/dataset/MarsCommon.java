@@ -92,21 +92,16 @@ public abstract class MarsCommon extends AbstractDataset {
      */
     static int rank;
 
-    abstract void openDataset() throws IOException;
+    abstract void openDataset() throws Exception;
 
-    public void setUp() {
+    public void setUp() throws Exception {
         loadParameters();
         clearRequiredVariables();
-
-        try {
-            openDataset();
-            getDimNC();
-            shrinkGrid();
-            readConstantField();
-            getDimGeogArea();
-        } catch (Exception ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
+        openDataset();
+        getDimNC();
+        shrinkGrid();
+        readConstantField();
+        getDimGeogArea();
     }
 
     @Override
@@ -128,26 +123,37 @@ public abstract class MarsCommon extends AbstractDataset {
      */
     void getDimNC() throws IOException {
 
-        nx = ncIn.findDimension(strLonDim).getLength();
-        ny = ncIn.findDimension(strLatDim).getLength();
+        try {
+            nx = ncIn.findDimension(strLonDim).getLength();
+            ny = ncIn.findDimension(strLatDim).getLength();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset lon/lat dimensions. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
         ipo = jpo = 0;
     }
 
-    void readConstantField() throws IOException, InvalidRangeException {
+    void readConstantField() throws Exception {
 
-        Array arrLon, arrLat, arrH;
+        Array arrLon = null,
+                arrLat = null,
+                arrH = null;
         Index index;
         lonRho = new double[nx];
         latRho = new double[ny];
         maskRho = new byte[ny][nx];
         dxu = new double[ny];
+        try {
+            arrLon = ncIn.findVariable(strLon).read(new int[]{ipo}, new int[]{nx});
+            arrLat = ncIn.findVariable(strLat).read(new int[]{jpo}, new int[]{ny});
+            arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset coordinate variables. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
-        arrLon = ncIn.findVariable(strLon).read(new int[]{ipo},
-                new int[]{nx});
-        arrLat = ncIn.findVariable(strLat).read(new int[]{jpo},
-                new int[]{ny});
-        arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo},
-                new int[]{ny, nx});
 
         if (arrH.getElementType() == double.class) {
             hRho = (double[][]) arrH.copyToNDJavaArray();
@@ -667,7 +673,6 @@ public abstract class MarsCommon extends AbstractDataset {
         NEXT_STEP("Error reading dataset variables for next timestep"),
         NOT_IN_2D("Method not supported in 2D"),
         TIME_OUTOF_BOUND("Time out of dataset range");
-        
         private String msg;
 
         ErrorMessage(String msg) {

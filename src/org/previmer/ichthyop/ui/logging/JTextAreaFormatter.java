@@ -37,21 +37,12 @@ public class JTextAreaFormatter extends Formatter {
         sb.append("[");
         sb.append(sdf.format(cld.getTime()));
         sb.append("]$");
-        /*if (null != record.getSourceClassName() && !record.getSourceClassName().isEmpty()) {
-        if (null != record.getSourceMethodName() && !record.getSourceMethodName().isEmpty())
-        sb.append(" (");
-        sb.append(record.getSourceClassName());
-        sb.append(".");
-        sb.append(record.getSourceMethodName());
-        sb.append(")");
-        }*/
-        //sb.append("\n");
         String message = formatMessage(record);
         if (message.trim().isEmpty()) {
             return null;
         }
-        if (message.indexOf("\n") > 0) {
-            message = message.substring(0, message.indexOf("\n") - 1);
+        if (message.indexOf("\t") > 0) {
+            message = message.substring(0, message.indexOf("\t") - 1);
         }
         sb.append(record.getLevel().getLocalizedName());
         sb.append(": ");

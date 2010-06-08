@@ -28,7 +28,6 @@ public class AdvectionAction extends AbstractAction {
             getLogger().info("Failed to read the advection numerical scheme. Set by default to " + AdvectionScheme.RUNGE_KUTTA_4.getName());
         }
         isForward = getSimulationManager().getTimeManager().get_dt() >= 0;
-        int n = 3 / 0;
     }
 
     public void execute(IBasicParticle particle) {

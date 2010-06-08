@@ -177,7 +177,7 @@ public class MarsIO extends SimulationManagerAccessor {
             getLogger().info("Open dataset " + filename);
             return nc;
         } catch (IOException e) {
-            IOException ioex = new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
+            IOException ioex = new IOException("Problem opening dataset " + filename + " - " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
@@ -195,7 +195,7 @@ public class MarsIO extends SimulationManagerAccessor {
             getLogger().info("Open remote dataset " + opendapURL + "\n");
             return ncIn;
         } catch (IOException e) {
-            IOException ioex = new IOException("Problem opening dataset " + opendapURL + " - " + e.getMessage());
+            IOException ioex = new IOException("Problem opening dataset " + opendapURL + " - " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
