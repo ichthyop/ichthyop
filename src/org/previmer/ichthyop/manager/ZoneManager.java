@@ -4,23 +4,16 @@
  */
 package org.previmer.ichthyop.manager;
 
-import java.awt.Color;
 import java.io.File;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
-import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IZoneManager;
-import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XZone;
 import org.previmer.ichthyop.io.XZone.XPoint;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import org.previmer.ichthyop.io.ParameterFormat;
-import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.io.ZoneFile;
 
 /**
@@ -51,7 +44,7 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
             map.put(type, new ArrayList());
         }
         for (XZone xzone : zoneFile.getZones()) {
-            if (xzone.getTypeZone().equals(type)) {
+            if (xzone.getTypeZone().equals(type) && xzone.isEnabled()) {
                 int index = map.get(type).size();
                 Zone zone = new Zone(xzone.getTypeZone(), xzone.getKey(), index);
                 zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());

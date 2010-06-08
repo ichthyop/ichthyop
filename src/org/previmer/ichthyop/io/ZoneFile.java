@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +42,7 @@ public class ZoneFile {
     private Document structure;
     private HashMap<String, XZone> zones;
     private final static String ZONES = "zones";
+    private List<String> sortedKey;
 
     public ZoneFile(File file) {
         this.file = file;
@@ -111,7 +113,12 @@ public class ZoneFile {
     }
 
     public Collection<XZone> getZones() {
-        return zones.values();
+        List<XZone> list = new ArrayList(zones.values().size());
+        Iterator<String> it = sortedKey.iterator();
+        while (it.hasNext()) {
+            list.add(zones.get(it.next()));
+        }
+        return list;
     }
 
     public XZone getZone(String key) {
@@ -152,7 +159,9 @@ public class ZoneFile {
 
     private HashMap<String, XZone> createMap() {
         HashMap<String, XZone> lmap = new HashMap();
+        sortedKey = new ArrayList();
         for (XZone xzone : readZones()) {
+            sortedKey.add(xzone.getKey());
             lmap.put(xzone.getKey(), xzone);
         }
         return lmap;
