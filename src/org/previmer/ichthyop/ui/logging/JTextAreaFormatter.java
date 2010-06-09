@@ -19,6 +19,7 @@ package org.previmer.ichthyop.ui.logging;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.Formatter;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
@@ -32,6 +33,7 @@ public class JTextAreaFormatter extends Formatter {
     @Override
     public String format(LogRecord record) {
         StringBuffer sb = new StringBuffer();
+        String thrown = null;
         Calendar cld = Calendar.getInstance();
         cld.setTimeInMillis(record.getMillis());
         sb.append("[");
@@ -42,11 +44,17 @@ public class JTextAreaFormatter extends Formatter {
             return null;
         }
         if (message.indexOf("\t") > 0) {
+            thrown = message.substring(message.indexOf("\t") + 1);
+            thrown = thrown.substring(0, thrown.indexOf("\n"));
             message = message.substring(0, message.indexOf("\t") - 1);
         }
         sb.append(record.getLevel().getLocalizedName());
         sb.append(": ");
         sb.append(message);
+        if (null != thrown) {
+            sb.append("\n");
+            sb.append(thrown);
+        }
         sb.append("\n");
         return sb.toString();
     }

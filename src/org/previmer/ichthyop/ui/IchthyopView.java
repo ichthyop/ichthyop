@@ -195,10 +195,10 @@ public class IchthyopView extends FrameView
             wmsMapper.createKML();
             for (int i = 0; i < wmsMapper.getNbSteps(); i++) {
                 setProgress((float) (i + 1) / wmsMapper.getNbSteps());
-                setMessage(resourceMap.getString("exportToKMZ.msg.exporting") + " " + (i + 1) + "/" + (wmsMapper.getNbSteps()), true);
+                setMessage(resourceMap.getString("exportToKMZ.msg.exporting") + " " + (i + 1) + "/" + (wmsMapper.getNbSteps()), true, Level.INFO);
                 wmsMapper.writeKMLStep(i);
             }
-            setMessage(resourceMap.getString("exportToKMZ.msg.compressing"), true);
+            setMessage(resourceMap.getString("exportToKMZ.msg.compressing"), true, Level.INFO);
             wmsMapper.marshalAndKMZ();
             return null;
         }
@@ -421,7 +421,7 @@ public class IchthyopView extends FrameView
         @Override
         protected Object doInBackground() throws Exception {
             if (!isSetup) {
-                setMessage(resourceMap.getString("previewSimulation.Action.settingup"));
+                setMessage(resourceMap.getString("previewSimulation.Action.setup.start"));
                 getSimulationManager().setup();
             }
             return null;
@@ -429,12 +429,13 @@ public class IchthyopView extends FrameView
 
         protected void onSuccess(Object obj) {
             isSetup = true;
-            setMessage(resourceMap.getString("previewSimulation.Action.setup"));
+            setMessage(resourceMap.getString("previewSimulation.Action.setup.ok"));
             showSimulationPreview();
         }
 
         @Override
         void onFailure(Throwable throwable) {
+            setMessage(resourceMap.getString("previewSimulation.Action.setup.failed"), false, Level.WARNING);
             btnPreview.setSelected(false);
         }
     }
@@ -759,6 +760,7 @@ public class IchthyopView extends FrameView
 
         JLabel lblProgress;
         private boolean bln;
+        private boolean isInit;
 
         SimulationRunTask(Application instance) {
             super(instance);
@@ -775,17 +777,26 @@ public class IchthyopView extends FrameView
             }
             btnPreview.getAction().setEnabled(false);
             getSimulationManager().resetId();
+            isSetup = false;
+            isInit = false;
         }
 
         @Override
         protected Object doInBackground() throws Exception {
             getSimulationManager().resetTimerGlobal();
             do {
-                setMessage(resourceMap.getString("simulationRun.simulation") + getSimulationManager().indexSimulationToString());
-                setMessage(resourceMap.getString("simulationRun.initialize"), true);
+                setMessage(resourceMap.getString("simulationRun.Action.simulation") + getSimulationManager().indexSimulationToString());
+                /* setup */
+                setMessage(resourceMap.getString("simulationRun.Action.setup.start"));
                 getSimulationManager().setup();
+                setMessage(resourceMap.getString("simulationRun.Action.setup.ok"));
                 isSetup = true;
+                /* initialization */
+                setMessage(resourceMap.getString("simulationRun.Action.init.start"), true, Level.INFO);
                 getSimulationManager().init();
+                setMessage(resourceMap.getString("simulationRun.Action.init.ok"), true, Level.INFO);
+                isInit = true;
+                /* */
                 getSimulationManager().getTimeManager().firstStepTriggered();
                 getSimulationManager().resetTimerCurrent();
                 do {
@@ -798,6 +809,13 @@ public class IchthyopView extends FrameView
         }
 
         protected void onFailure(Throwable t) {
+            if (!isSetup) {
+                setMessage(resourceMap.getString("simulationRun.Action.setup.failed"), false, Level.WARNING);
+            } else if (!isInit) {
+                setMessage(resourceMap.getString("simulationRun.Action.init.failed"), false, Level.WARNING);
+            }
+            btnSimulationRun.getAction().setEnabled(true);
+            finished();
         }
 
         @Override
@@ -810,7 +828,7 @@ public class IchthyopView extends FrameView
             StringBuffer msg = new StringBuffer();
             msg.append(getSimulationManager().getTimeManager().stepToString());
             msg.append(" - ");
-            msg.append(resourceMap.getString("simulationRun.time"));
+            msg.append(resourceMap.getString("simulationRun.Action.time"));
             msg.append(" ");
             msg.append(getSimulationManager().getTimeManager().timeToString());
             setMessage(msg.toString());
@@ -819,11 +837,11 @@ public class IchthyopView extends FrameView
         @Override
         protected void cancelled() {
             getSimulationManager().stop();
-            setMessage(resourceMap.getString("simulationRun.interrupted"));
+            setMessage(resourceMap.getString("simulationRun.Action.interrupted"));
         }
 
         public void onSuccess(Object obj) {
-            setMessage(resourceMap.getString("simulationRun.completed"));
+            setMessage(resourceMap.getString("simulationRun.Action.completed"));
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
             lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
@@ -839,6 +857,7 @@ public class IchthyopView extends FrameView
             isRunning = false;
             pnlProgress.hideBars();
             pnlProgress.resetProgressBar();
+            btnPreview.getAction().setEnabled(true);
         }
     }
 
@@ -1063,7 +1082,7 @@ public class IchthyopView extends FrameView
             if (variable.toLowerCase().matches("none")) {
                 cancel(true);
             }
-            setMessage(resourceMap.getString("applyColorbarSettings.range"), true);
+            setMessage(resourceMap.getString("applyColorbarSettings.range"), true, Level.INFO);
             return wmsMapper.getRange(variable);
         }
 

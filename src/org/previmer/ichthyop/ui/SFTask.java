@@ -37,7 +37,7 @@ public abstract class SFTask<T, V> extends Task<T, V> {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
-        SimulationManager.getInstance().getLogger().log(Level.SEVERE, sw.toString());
+        SimulationManager.getLogger().log(Level.SEVERE, sw.toString());
         super.setMessage(throwable.toString());
         firePropertyChange("reset", null, null);
         onFailure(throwable);
@@ -45,12 +45,12 @@ public abstract class SFTask<T, V> extends Task<T, V> {
 
     @Override
     public void setMessage(String message) {
-        setMessage(message, false);
+        setMessage(message, false, Level.INFO);
     }
 
-    public void setMessage(String message, boolean persistent) {
+    public void setMessage(String message, boolean persistent, Level level) {
         super.setMessage(message);
-        SimulationManager.getInstance().getLogger().info(message);
+        SimulationManager.getLogger().log(level, message);
         if (!persistent) {
             firePropertyChange("reset", null, null);
         }
