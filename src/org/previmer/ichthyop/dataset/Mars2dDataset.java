@@ -18,25 +18,19 @@ public class Mars2dDataset extends Mars2dCommon {
     void openDataset() throws Exception {
         MarsIO.setTimeField(strTime);
         ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
-        nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+        readTimeLength();
     }
 
-    public void init() {
-        try {
-            long t0 = getSimulationManager().getTimeManager().get_tO();
-            ncIn = MarsIO.openFile(MarsIO.getFile(t0));
-            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            checkRequiredVariable(ncIn);
-            setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
-            time_tp1 = t0;
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
-        }
+    void setOnFirstTime() throws Exception {
+        
+        long t0 = getSimulationManager().getTimeManager().get_tO();
+        ncIn = MarsIO.openFile(MarsIO.getFile(t0));
+        readTimeLength();
+        rank = findCurrentRank(t0);
+        time_tp1 = t0;
     }
 
-    public void nextStepTriggered(NextStepEvent e) {
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());

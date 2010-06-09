@@ -18,28 +18,14 @@ public class Mars3dDataset extends Mars3dCommon {
     void openDataset() throws Exception {
         MarsIO.setTimeField(strTime);
         ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
-        try {
-            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("Failed to read dataset time dimension. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
+        readTimeLength();
     }
 
-    public void init() throws Exception {
-
+    void setOnFirstTime() throws Exception {
         long t0 = getSimulationManager().getTimeManager().get_tO();
         ncIn = MarsIO.openFile(MarsIO.getFile(t0));
-        try {
-            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("Failed to read dataset time dimension. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        checkRequiredVariable(ncIn);
-        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
+        readTimeLength();
+        rank = findCurrentRank(t0);
         time_tp1 = t0;
     }
 

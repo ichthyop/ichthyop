@@ -6,7 +6,6 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.InvalidRangeException;
 
@@ -16,17 +15,21 @@ import ucar.ma2.InvalidRangeException;
  */
 public class Mars2dOpendapDataset extends Mars2dCommon {
 
-    public void init() {
-        try {
-            long t0 = getSimulationManager().getTimeManager().get_tO();
-            checkRequiredVariable(ncIn);
-            setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
-            time_tp1 = t0;
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
-        }
+    /**
+     * Loads the NetCDF dataset from the specified filename.
+     * @param opendapURL a String that can be a local pathname or an OPeNDAP URL.
+     * @throws IOException
+     */
+    void openDataset() throws Exception {
+        ncIn = MarsIO.openURL(getParameter("opendap_url"));
+        readTimeLength();
+    }
+
+    void setOnFirstTime() throws Exception {
+        long t0 = getSimulationManager().getTimeManager().get_tO();
+        MarsIO.checkInitTime(ncIn, strTime);
+        rank = findCurrentRank(t0);
+        time_tp1 = t0;
     }
 
     public void nextStepTriggered(NextStepEvent e) {
@@ -51,15 +54,5 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
         }
-    }
-
-    /**
-     * Loads the NetCDF dataset from the specified filename.
-     * @param opendapURL a String that can be a local pathname or an OPeNDAP URL.
-     * @throws IOException
-     */
-    void openDataset() throws IOException {
-        ncIn = MarsIO.openURL(getParameter("opendap_url"));
-        nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
     }
 }

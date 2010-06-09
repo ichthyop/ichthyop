@@ -92,6 +92,10 @@ public abstract class MarsCommon extends AbstractDataset {
 
     abstract void openDataset() throws Exception;
 
+    abstract void setOnFirstTime() throws Exception;
+
+    abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
+
     public void setUp() throws Exception {
         loadParameters();
         clearRequiredVariables();
@@ -100,6 +104,12 @@ public abstract class MarsCommon extends AbstractDataset {
         shrinkGrid();
         readConstantField();
         getDimGeogArea();
+    }
+
+     public void init() throws Exception {
+        setOnFirstTime();
+        checkRequiredVariable(ncIn);
+        setAllFieldsTp1AtTime(rank);
     }
 
     @Override
@@ -130,6 +140,16 @@ public abstract class MarsCommon extends AbstractDataset {
             throw ioex;
         }
         ipo = jpo = 0;
+    }
+
+    void readTimeLength() throws IOException {
+        try {
+            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Failed to read dataset time dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
     }
 
     void readConstantField() throws Exception {
@@ -196,12 +216,12 @@ public abstract class MarsCommon extends AbstractDataset {
         dyv = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
     }
 
-    int findCurrentRank(long time) throws IOException {
+    int findCurrentRank(long time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         long time_rank;
-        Array timeArr;
+        Array timeArr = null;
         try {
             timeArr = ncIn.findVariable(strTime).read();
             time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));

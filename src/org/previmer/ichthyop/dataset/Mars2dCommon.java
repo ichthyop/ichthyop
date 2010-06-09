@@ -112,17 +112,34 @@ public abstract class Mars2dCommon extends MarsCommon {
         v_tp1 = new float[ny - 1][nx];
         double time_tp0 = time_tp1;
 
-        u_tp1 = (float[][]) ncIn.findVariable(strU).read(origin,
-                new int[]{1, ny, (nx - 1)}).reduce().copyToNDJavaArray();
+        try {
+            u_tp1 = (float[][]) ncIn.findVariable(strU).read(origin,
+                    new int[]{1, ny, (nx - 1)}).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
+            v_tp1 = (float[][]) ncIn.findVariable(strV).read(origin,
+                    new int[]{1, (ny - 1), nx}).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
 
-        v_tp1 = (float[][]) ncIn.findVariable(strV).read(origin,
-                new int[]{1, (ny - 1), nx}).reduce().copyToNDJavaArray();
+        }
 
-        Array xTimeTp1 = ncIn.findVariable(strTime).read();
-        time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(i_time));
-        time_tp1 -= time_tp1 % 60;
-        xTimeTp1 = null;
-
+        try {
+            Array xTimeTp1 = ncIn.findVariable(strTime).read();
+            time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(i_time));
+            time_tp1 -= time_tp1 % 60;
+            xTimeTp1 = null;
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading time variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {

@@ -2,13 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.previmer.ichthyop.event.NextStepEvent;
+import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 
 /**
@@ -17,22 +16,16 @@ import ucar.ma2.InvalidRangeException;
  */
 public class Mars3dOpendapDataset extends Mars3dCommon {
 
-    void openDataset() throws IOException {
+    void openDataset() throws Exception {
         ncIn = MarsIO.openURL(getParameter("opendap_url"));
-        nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+        readTimeLength();
     }
 
-    public void init() throws Exception {
-        try {
-            long t0 = getSimulationManager().getTimeManager().get_tO();
-            checkRequiredVariable(ncIn);
-            setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
-            time_tp1 = t0;
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
-        }
+    void setOnFirstTime() throws Exception {
+        long t0 = getSimulationManager().getTimeManager().get_tO();
+        MarsIO.checkInitTime(ncIn, strTime);
+        rank = findCurrentRank(t0);
+        time_tp1 = t0;
     }
 
     public void nextStepTriggered(NextStepEvent e) throws Exception {

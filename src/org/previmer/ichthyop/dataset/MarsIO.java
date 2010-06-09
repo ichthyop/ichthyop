@@ -181,7 +181,7 @@ public class MarsIO extends SimulationManagerAccessor {
             nc = NetcdfDataset.openFile(filename, null);
             getLogger().info("Open dataset " + filename);
             return nc;
-        } catch (IOException e) {
+        } catch (Exception e) {
             IOException ioex = new IOException("Problem opening dataset " + filename + " - " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
@@ -197,12 +197,37 @@ public class MarsIO extends SimulationManagerAccessor {
         NetcdfFile ncIn;
         try {
             ncIn = NetcdfDataset.openFile(opendapURL, null);
-            getLogger().info("Open remote dataset " + opendapURL + "\n");
+            getLogger().info("Open remote dataset " + opendapURL);
             return ncIn;
-        } catch (IOException e) {
-            IOException ioex = new IOException("Problem opening dataset " + opendapURL + " - " + e.toString());
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem opening dataset " + opendapURL + " ==> " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
+        }
+    }
+
+    public static void checkInitTime(NetcdfFile nc, String strTime) throws IOException, IndexOutOfBoundsException {
+
+        long time = getSimulationManager().getTimeManager().get_tO();
+        Array timeArr = null;
+        try {
+            timeArr = nc.findVariable(strTime).read();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Failed to read dataset time variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        int ntime = timeArr.getShape()[0];
+        long time0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
+        long timeN = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1)));
+        if (time < time0 || time > timeN) {
+            StringBuffer msg = new StringBuffer();
+            msg.append("Time value ");
+            msg.append(getSimulationManager().getTimeManager().timeToString());
+            msg.append(" (");
+            msg.append(time);
+            msg.append(" seconds) not contained in dataset " + nc.getLocation());
+            throw new IndexOutOfBoundsException(msg.toString());
         }
     }
 }
