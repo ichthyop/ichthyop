@@ -26,7 +26,7 @@ public interface ITimeManager {
 
     public Calendar getCalendar();
 
-    public boolean hasNextStep();
+    public boolean hasNextStep() throws Exception;
 
     public String timeToString();
 
@@ -34,7 +34,7 @@ public interface ITimeManager {
 
     public void addLastStepListener(LastStepListener listener);
 
-    public void firstStepTriggered();
+    public void firstStepTriggered() throws Exception;
 
     public int index();
 

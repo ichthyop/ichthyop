@@ -50,7 +50,7 @@ public interface ISimulationManager extends Runnable {
 
     public void setup() throws Exception;
 
-    public void init();
+    public void init() throws Exception;
 
     public void stop();
 

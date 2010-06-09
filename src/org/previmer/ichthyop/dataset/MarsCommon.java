@@ -250,9 +250,18 @@ public abstract class MarsCommon extends AbstractDataset {
     public void checkRequiredVariable(NetcdfFile nc) {
         for (RequiredVariable variable : requiredVariables.values()) {
             //System.out.println(variable.getName()  + " " + variable.checked(nc));
-            if (!variable.checked(nc)) {
-
+            try {
+                variable.checked(nc);
+            } catch (Exception ex) {
                 requiredVariables.remove(variable.getName());
+                StringBuffer msg = new StringBuffer();
+                msg.append("Dataset variable ");
+                msg.append(variable.getName());
+                msg.append(" is required by some modules in the code, but reading failed ==> ");
+                msg.append(ex.toString());
+                msg.append("\n");
+                msg.append("Therefore, the modules requiring this variable might not work correctly.");
+                getLogger().log(Level.WARNING, msg.toString(), ex);
             }
         }
     }

@@ -108,7 +108,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         nb_steps = (int) (simuDuration / dt);
     }
 
-    public void firstStepTriggered() {
+    public void firstStepTriggered() throws Exception {
         fireNextStepTriggered();
     }
 
@@ -185,7 +185,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
      * @return <code>true</code> if the incremented time is still smaller than
      * the end time of the simulation; <code>false</code> otherwise.
      */
-    public boolean hasNextStep() {
+    public boolean hasNextStep() throws Exception {
 
         time += dt;
         calendar.setTimeInMillis(time * 1000L);
@@ -294,7 +294,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         listeners.remove(LastStepListener.class, listener);
     }
 
-    private void fireNextStepTriggered() {
+    private void fireNextStepTriggered() throws Exception {
 
         //Logger.getAnonymousLogger().info("-----< " + timeManager.timeToString() + " >-----");
 

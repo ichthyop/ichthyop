@@ -19,7 +19,7 @@ public class Mars3dDataset extends Mars3dCommon {
         MarsIO.setTimeField(strTime);
         ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
         try {
-        nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Failed to read dataset time dimension. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -27,22 +27,23 @@ public class Mars3dDataset extends Mars3dCommon {
         }
     }
 
-    public void init() {
+    public void init() throws Exception {
+
+        long t0 = getSimulationManager().getTimeManager().get_tO();
+        ncIn = MarsIO.openFile(MarsIO.getFile(t0));
         try {
-            long t0 = getSimulationManager().getTimeManager().get_tO();
-            ncIn = MarsIO.openFile(MarsIO.getFile(t0));
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            checkRequiredVariable(ncIn);
-            setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
-            time_tp1 = t0;
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.INIT.message(), ex);
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Failed to read dataset time dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
         }
+        checkRequiredVariable(ncIn);
+        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
+        time_tp1 = t0;
     }
 
-    public void nextStepTriggered(NextStepEvent e) {
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);

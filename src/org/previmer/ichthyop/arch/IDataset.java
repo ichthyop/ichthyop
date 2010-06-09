@@ -50,7 +50,7 @@ public interface IDataset extends NextStepListener {
 
     public double getdeta(int j, int i);
 
-    public void init();
+    public void init() throws Exception;
 
     public Number get(String variableName, double[] pGrid, double time);
 

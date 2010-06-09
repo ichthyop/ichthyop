@@ -392,26 +392,47 @@ abstract class Mars3dCommon extends MarsCommon {
         return (hh);
     }
 
-    void setAllFieldsTp1AtTime(int rank) throws IOException, InvalidRangeException {
+    void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
 
-        u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
+        try {
+            u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
-        v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
-                new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
 
-        Array xTimeTp1 = ncIn.findVariable(strTime).read();
-        time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
-        time_tp1 -= time_tp1 % 60;
-        xTimeTp1 = null;
+        try {
+            v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin, new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
-        zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
-                new int[]{rank, 0, 0},
-                new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+        try {
+            Array xTimeTp1 = ncIn.findVariable(strTime).read();
+            time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
+            time_tp1 -= time_tp1 % 60;
+            xTimeTp1 = null;
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading time variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
+        try {
+            zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading ocean free surface elevation. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {

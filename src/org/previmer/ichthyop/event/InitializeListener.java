@@ -13,6 +13,6 @@ import java.util.EventListener;
  */
 public interface InitializeListener extends EventListener {
 
-    public void initializePerformed(InitializeEvent e);
+    public void initializePerformed(InitializeEvent e) throws Exception;
 
 }

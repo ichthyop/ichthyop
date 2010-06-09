@@ -22,7 +22,7 @@ public class Mars3dOpendapDataset extends Mars3dCommon {
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
     }
 
-    public void init() {
+    public void init() throws Exception {
         try {
             long t0 = getSimulationManager().getTimeManager().get_tO();
             checkRequiredVariable(ncIn);
@@ -35,7 +35,7 @@ public class Mars3dOpendapDataset extends Mars3dCommon {
         }
     }
 
-    public void nextStepTriggered(NextStepEvent e) {
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());

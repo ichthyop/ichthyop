@@ -68,7 +68,7 @@ public class DatasetManager extends AbstractManager implements IDatasetManager {
         getDataset().setUp();
     }
 
-    public void initializePerformed(InitializeEvent e) {
+    public void initializePerformed(InitializeEvent e) throws Exception {
         getDataset().init();
     }
 }

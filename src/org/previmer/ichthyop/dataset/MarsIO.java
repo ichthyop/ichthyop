@@ -94,8 +94,13 @@ public class MarsIO extends SimulationManagerAccessor {
             indexFile = indexLast;
             return listInputFiles.get(indexLast);
         }
-
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files.");
+        StringBuffer msg = new StringBuffer();
+        msg.append("Time value ");
+        msg.append(getSimulationManager().getTimeManager().timeToString());
+        msg.append(" (");
+        msg.append(time);
+        msg.append(" seconds) not contained among NetCDF files.");
+        throw new IndexOutOfBoundsException(msg.toString());
     }
 
     static boolean isTimeIntoFile(long time, int index) throws IOException {

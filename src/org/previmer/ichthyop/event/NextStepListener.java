@@ -13,6 +13,6 @@ import java.util.EventListener;
  */
 public interface NextStepListener extends EventListener {
 
-     public void nextStepTriggered(NextStepEvent e);
+     public void nextStepTriggered(NextStepEvent e) throws Exception;
 
 }

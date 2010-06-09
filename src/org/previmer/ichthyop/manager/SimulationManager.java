@@ -321,7 +321,7 @@ public class SimulationManager implements ISimulationManager {
         fireSetupPerformed();
     }
 
-    public void init() {
+    public void init() throws Exception {
         fireInitializePerformed();
     }
 
@@ -355,9 +355,7 @@ public class SimulationManager implements ISimulationManager {
     }
 
     private void fireSetupPerformed() throws Exception {
-        getLogger().info("Setting up simulation");
         SetupListener[] listenerList = (SetupListener[]) listeners.getListeners(SetupListener.class);
-
         for (SetupListener listener : listenerList) {
             //System.out.println("fire setup to " + listener.getClass().getCanonicalName());
             listener.setupPerformed(new SetupEvent(this));
@@ -372,8 +370,7 @@ public class SimulationManager implements ISimulationManager {
         listeners.remove(InitializeListener.class, listener);
     }
 
-    private void fireInitializePerformed() {
-       getLogger().info("Initializing simulation");
+    private void fireInitializePerformed() throws Exception {
         InitializeListener[] listenerList = (InitializeListener[]) listeners.getListeners(InitializeListener.class);
 
         for (InitializeListener listener : listenerList) {
