@@ -28,16 +28,16 @@ public class MigrationAction extends AbstractAction {
     public void loadParameters() {
 
         calendar = getSimulationManager().getTimeManager().getCalendar();
-        isAgeLimitation = getParameter("migration_criterion").matches("age_criterion");
+        isAgeLimitation = getParameter("criterion").matches(Criterion.AGE.getName());
         if (isAgeLimitation) {
-            limitAge = Float.valueOf(getParameter("migration_limit_age"));
+            limitAge = Float.valueOf(getParameter("limit_age"));
         } else {
-            limitLength = Float.valueOf(getParameter("migration_limit_length"));
+            limitLength = Float.valueOf(getParameter("limit_length"));
         }
-        depthDay = Float.valueOf(getParameter("migration_depth_day"));
-        depthNight = Float.valueOf(getParameter("migration_depth_night"));
-        sunset = Integer.valueOf(getParameter("sunset_hour"));
-        sunrise = Integer.valueOf(getParameter("sunrise_hour"));
+        depthDay = Float.valueOf(getParameter("daytime_depth"));
+        depthNight = Float.valueOf(getParameter("nighttime_depth"));
+        sunset = Integer.valueOf(getParameter("sunset"));
+        sunrise = Integer.valueOf(getParameter("sunrise"));
 
         isodepth = (depthDay == depthNight);
     }
@@ -62,7 +62,7 @@ public class MigrationAction extends AbstractAction {
                 depth = getDepth(particle.getX(), particle.getY());
             }
             double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
-            particle.increment(new double[] {0.d, 0.d, dz}, false, true);
+            particle.increment(new double[]{0.d, 0.d, dz}, false, true);
         }
     }
 
@@ -89,6 +89,21 @@ public class MigrationAction extends AbstractAction {
             return Math.max(bottom, depthDay);
         } else {
             return Math.max(bottom, depthNight);
+        }
+    }
+
+    enum Criterion {
+
+        AGE("Age criterion"),
+        LENGTH("Length criterion");
+        private String name;
+
+        Criterion(String name) {
+            this.name = name;
+        }
+
+        String getName() {
+            return name;
         }
     }
 }
