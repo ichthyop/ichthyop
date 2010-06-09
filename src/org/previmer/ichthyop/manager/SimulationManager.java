@@ -275,9 +275,14 @@ public class SimulationManager implements ISimulationManager {
         return strBf.toString();
     }
 
+    /**
+     * Order is of primary importance since the setup events and the
+     * initialization events will be called in the same order they are called
+     * here.
+     */
     private void mobiliseManagers() {
-        getActionManager();
         getDatasetManager();
+        getActionManager();
         getOutputManager();
         getReleaseManager();
         getTimeManager();
@@ -356,8 +361,8 @@ public class SimulationManager implements ISimulationManager {
 
     private void fireSetupPerformed() throws Exception {
         SetupListener[] listenerList = (SetupListener[]) listeners.getListeners(SetupListener.class);
-        for (SetupListener listener : listenerList) {
-            //System.out.println("fire setup to " + listener.getClass().getCanonicalName());
+        for (int i = listenerList.length; i-- > 0;) {
+            SetupListener listener = listenerList[i];
             listener.setupPerformed(new SetupEvent(this));
         }
     }
@@ -372,8 +377,8 @@ public class SimulationManager implements ISimulationManager {
 
     private void fireInitializePerformed() throws Exception {
         InitializeListener[] listenerList = (InitializeListener[]) listeners.getListeners(InitializeListener.class);
-
-        for (InitializeListener listener : listenerList) {
+        for (int i = listenerList.length; i-- > 0;) {
+            InitializeListener listener = listenerList[i];
             listener.initializePerformed(new InitializeEvent(this));
         }
     }
