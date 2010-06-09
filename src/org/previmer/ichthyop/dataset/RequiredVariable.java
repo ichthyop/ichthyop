@@ -17,6 +17,8 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.IDataset;
@@ -38,14 +40,29 @@ public class RequiredVariable {
     private Array array_tp0, array_tp1;
     private double time_tp1, dt_dataset;
     private boolean isUnlimited;
+    private List<Class> requiredByList;
 
-    public RequiredVariable(String name) {
+    public RequiredVariable(String name, Class requiredBy) {
         this.name = name;
         this.dataset = SimulationManager.getInstance().getDataset();
+        requiredByList = new ArrayList();
+        requiredByList.add(requiredBy);
+    }
+
+    public RequiredVariable(String name) {
+        this(name, null);
     }
 
     public String getName() {
         return name;
+    }
+
+    public void addRequiredBy(Class requiredBy) {
+        requiredByList.add(requiredBy);
+    }
+
+    public List<Class> getRequiredBy() {
+        return requiredByList;
     }
 
     public boolean checked(NetcdfFile nc) throws NumberFormatException, NullPointerException {

@@ -30,7 +30,7 @@ public class UserDefinedTracker extends SimulationManagerAccessor implements ITr
         this.trackerKey = trackerKey;
         variableName = short_name();
         array = new ArrayFloat.D2(1, getSimulationManager().getOutputManager().getDimensionFactory().getDrifterDimension().getLength());
-        getSimulationManager().getDataset().requireVariable(variableName);
+        getSimulationManager().getDataset().requireVariable(variableName, getClass());
     }
 
     public void track() {

@@ -64,8 +64,8 @@ public class BuoyancyAction extends AbstractAction {
         eggDensity = Float.valueOf(getParameter("egg_density"));
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
-        getSimulationManager().getDataset().requireVariable(temperature_field);
-        getSimulationManager().getDataset().requireVariable(salinity_field);
+        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
     }
 
     public void execute(IBasicParticle particle) {

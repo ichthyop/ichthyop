@@ -15,13 +15,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.Attribute;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -169,9 +167,11 @@ public abstract class Roms3dDataset extends AbstractDataset {
         return requiredVariables.get(variableName).get(pGrid, time);
     }
 
-    public void requireVariable(String name) {
+    public void requireVariable(String name, Class requiredBy) {
         if (!requiredVariables.containsKey(name)) {
-            requiredVariables.put(name, new RequiredVariable(name));
+            requiredVariables.put(name, new RequiredVariable(name, requiredBy));
+        } else {
+            requiredVariables.get(name).addRequiredBy(requiredBy);
         }
     }
 
@@ -185,9 +185,24 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
     public void checkRequiredVariable() {
         for (RequiredVariable variable : requiredVariables.values()) {
-            //System.out.println(variable.getName()  + " " + variable.checked(nc));
-            if (!variable.checked(ncIn)) {
+            try {
+                variable.checked(ncIn);
+            } catch (Exception ex) {
                 requiredVariables.remove(variable.getName());
+                StringBuffer msg = new StringBuffer();
+                msg.append("Failed to read dataset variable ");
+                msg.append(variable.getName());
+                msg.append(" ==> ");
+                msg.append(ex.toString());
+                msg.append("\n");
+                msg.append("Required by classes ");
+                for (Class aClass : variable.getRequiredBy()) {
+                    msg.append(aClass.getCanonicalName());
+                    msg.append(", ");
+                }
+                msg.append("\n");
+                msg.append("Watch out, these classes might not work correctly.");
+                getLogger().log(Level.WARNING, msg.toString(), ex);
             }
         }
     }

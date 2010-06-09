@@ -7,10 +7,8 @@ package org.previmer.ichthyop.dataset;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
-import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -233,9 +231,11 @@ public abstract class MarsCommon extends AbstractDataset {
         return requiredVariables.get(variableName).get(pGrid, time);
     }
 
-    public void requireVariable(String name) {
+    public void requireVariable(String name, Class requiredBy) {
         if (!requiredVariables.containsKey(name)) {
-            requiredVariables.put(name, new RequiredVariable(name));
+            requiredVariables.put(name, new RequiredVariable(name, requiredBy));
+        } else {
+            requiredVariables.get(name).addRequiredBy(requiredBy);
         }
     }
 
@@ -249,18 +249,23 @@ public abstract class MarsCommon extends AbstractDataset {
 
     public void checkRequiredVariable(NetcdfFile nc) {
         for (RequiredVariable variable : requiredVariables.values()) {
-            //System.out.println(variable.getName()  + " " + variable.checked(nc));
             try {
                 variable.checked(nc);
             } catch (Exception ex) {
                 requiredVariables.remove(variable.getName());
                 StringBuffer msg = new StringBuffer();
-                msg.append("Dataset variable ");
+                msg.append("Failed to read dataset variable ");
                 msg.append(variable.getName());
-                msg.append(" is required by some modules in the code, but reading failed ==> ");
+                msg.append(" ==> ");
                 msg.append(ex.toString());
                 msg.append("\n");
-                msg.append("Therefore, the modules requiring this variable might not work correctly.");
+                msg.append("Required by classes ");
+                for (Class aClass : variable.getRequiredBy()) {
+                    msg.append(aClass.getCanonicalName());
+                    msg.append(", ");
+                }
+                msg.append("\n");
+                msg.append("Watch out, these classes might not work correctly.");
                 getLogger().log(Level.WARNING, msg.toString(), ex);
             }
         }

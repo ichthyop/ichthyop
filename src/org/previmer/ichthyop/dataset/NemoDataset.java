@@ -189,9 +189,9 @@ public class NemoDataset extends AbstractDataset {
         return requiredVariables.get(variableName).get(pGrid, time);
     }
 
-    public void requireVariable(String name) {
+    public void requireVariable(String name, Class requiredBy) {
         if (!requiredVariables.containsKey(name)) {
-            requiredVariables.put(name, new RequiredVariable(name));
+            requiredVariables.put(name, new RequiredVariable(name, requiredBy));
         }
     }
 
@@ -205,9 +205,24 @@ public class NemoDataset extends AbstractDataset {
 
     public void checkRequiredVariable() {
         for (RequiredVariable variable : requiredVariables.values()) {
-            //System.out.println(variable.getName()  + " " + variable.checked(nc));
-            if (!variable.checked(ncT)) {
+            try {
+                variable.checked(ncT);
+            } catch (Exception ex) {
                 requiredVariables.remove(variable.getName());
+                StringBuffer msg = new StringBuffer();
+                msg.append("Failed to read dataset variable ");
+                msg.append(variable.getName());
+                msg.append(" ==> ");
+                msg.append(ex.toString());
+                msg.append("\n");
+                msg.append("Required by classes ");
+                for (Class aClass : variable.getRequiredBy()) {
+                    msg.append(aClass.getCanonicalName());
+                    msg.append(", ");
+                }
+                msg.append("\n");
+                msg.append("Watch out, these classes might not work correctly.");
+                getLogger().log(Level.WARNING, msg.toString(), ex);
             }
         }
     }

@@ -20,7 +20,7 @@ public class VDispAction extends AbstractAction {
     public void loadParameters() {
         random = new MTRandom();
         kv_field = getParameter("kv_field");
-        getSimulationManager().getDataset().requireVariable(kv_field);
+        getSimulationManager().getDataset().requireVariable(kv_field, getClass());
     }
 
     public void execute(IBasicParticle particle) {

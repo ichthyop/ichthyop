@@ -29,7 +29,7 @@ public class LinearGrowthAction extends AbstractAction {
         coeff1 = Float.valueOf(getParameter("coeff1"));
         coeff2 = Float.valueOf(getParameter("coeff2"));
         temperature_field = getParameter("temperature_field");
-        getSimulationManager().getDataset().requireVariable(temperature_field);
+        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getOutputManager().addTracker(LengthTracker.class);
     }
 

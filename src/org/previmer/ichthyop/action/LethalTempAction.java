@@ -32,7 +32,7 @@ public class LethalTempAction extends AbstractAction {
             lethalTpLarva = Float.valueOf(getParameter("lethal_temperature_larva"));
             egg = Integer.valueOf(getSimulationManager().getPropertyManager(GrowingParticleLayer.class).getProperty("stage.egg.code"));
         }
-        getSimulationManager().getDataset().requireVariable(temperature_field);
+        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
     }
 
     public void execute(IBasicParticle particle) {
