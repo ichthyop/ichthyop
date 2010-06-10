@@ -65,12 +65,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private List<ITracker> trackers;
     private List<Class> requestedTrackers;
 
-    private OutputManager() {
-        super();
-        getSimulationManager().getTimeManager().addNextStepListener(this);
-        getSimulationManager().getTimeManager().addLastStepListener(this);
-    }
-
     public static OutputManager getInstance() {
         return outputManager;
     }
@@ -387,6 +381,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     public void initializePerformed(InitializeEvent e) {
+        getSimulationManager().getTimeManager().addNextStepListener(this);
+        getSimulationManager().getTimeManager().addLastStepListener(this);
         try {
             i_record = 0;
             dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();

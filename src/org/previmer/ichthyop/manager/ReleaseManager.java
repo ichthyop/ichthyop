@@ -4,6 +4,8 @@
  */
 package org.previmer.ichthyop.manager;
 
+import java.io.IOException;
+import java.text.ParseException;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.SetupEvent;
@@ -16,7 +18,6 @@ import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -36,32 +37,29 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     /** */
     private EventListenerList listeners = new EventListenerList();
 
-    public ReleaseManager() {
-        super();
-        addReleaseListener(this);
-        getSimulationManager().getTimeManager().addNextStepListener(this);
-    }
-
     public static IReleaseManager getInstance() {
         return releaseManager;
     }
 
-    private IReleaseProcess getReleaseProcess() {
-        if (releaseProcess == null) {
+    private void instantiateReleaseProcess() throws Exception {
+
+        XBlock releaseBlock = findActiveReleaseProcess();
+        String className = getParameter(releaseBlock.getKey(), "class_name");
+        if (releaseBlock != null) {
             try {
-                XBlock releaseBlock = findActiveReleaseProcess();
-                if (releaseBlock != null) {
-                    releaseProcess = (IReleaseProcess) Class.forName(releaseBlock.getXParameter("class_name").getValue()).newInstance();
-                }
-            } catch (InstantiationException ex) {
-                Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                ex.printStackTrace();
-                Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(ReleaseManager.class.getName()).log(Level.SEVERE, null, ex);
+                releaseProcess = (IReleaseProcess) Class.forName(className).newInstance();
+            } catch (Exception ex) {
+                StringBuffer sb = new StringBuffer();
+                sb.append("Release process instantiation failed ==> ");
+                sb.append(ex.toString());
+                InstantiationException ieex = new InstantiationException(sb.toString());
+                ieex.setStackTrace(ex.getStackTrace());
+                throw ieex;
             }
         }
+    }
+
+    private IReleaseProcess getReleaseProcess() {
         return releaseProcess;
     }
 
@@ -69,18 +67,20 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         return getSimulationManager().getParameterManager().getParameter(BlockType.RELEASE, releaseKey, key);
     }
 
-    private XBlock findActiveReleaseProcess() {
+    private XBlock findActiveReleaseProcess() throws Exception {
         List<XBlock> list = new ArrayList();
         for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.RELEASE)) {
             if (block.isEnabled()) {
                 list.add(block);
             }
         }
-        if (list.size() > 0 && list.size() < 2) {
-            return list.get(0);
-        } else {
-            return null;
+        if (list.isEmpty()) {
+            throw new NullPointerException("Could not find any enabled " + BlockType.RELEASE.toString() + " block in the configuration file.");
         }
+        if (list.size() > 1) {
+            throw new IOException("Found several " + BlockType.RELEASE.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
+        }
+        return list.get(0);
     }
 
     public void releaseTriggered(ReleaseEvent event) {
@@ -104,21 +104,55 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         }
     }
 
-    private void schedule() {
+    private long get_t0() throws Exception {
+        String iniTime = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
+            try {
+                return getSimulationManager().getTimeManager().date2seconds(iniTime);
+            } catch (ParseException ex) {
+                StringBuffer sb = new StringBuffer();
+                sb.append("Release schedule - error converting initial time into seconds ==> ");
+                sb.append(ex.toString());
+                IOException ioex = new IOException(sb.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
+            }
+    }
 
-        boolean isEnabled = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled"));
+    private void schedule() throws Exception {
+
+        boolean isEnabled = false;
+        try {
+            String isScheduleEnabled = getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled");
+            isEnabled = Boolean.valueOf(isScheduleEnabled);
+        } catch (NullPointerException ex) {
+            getLogger().log(Level.WARNING, ex.toString() + ". By default, particles will all be released at simulation initial time.");
+        }
         if (isEnabled) {
             String[] events = getReleaseEvents();
             timeEvent = new long[events.length];
+            long t0 = get_t0();
+            String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
             for (int i = 0; i < timeEvent.length; i++) {
-                timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i]);
+                try {
+                    timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i]);
+                    if (timeEvent[i] < t0) {
+                        throw new IndexOutOfBoundsException("Release event " + events[i] + " cannot occur prior to simulation initial time " + st0);
+                    }
+                } catch (ParseException ex) {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("Release schedule - error converting release time into seconds ==> ");
+                    sb.append(ex.toString());
+                    IOException ioex = new IOException(sb.toString());
+                    ioex.setStackTrace(ex.getStackTrace());
+                    throw ioex;
+                }
             }
         } else {
-            timeEvent = new long[]{getSimulationManager().getTimeManager().date2seconds(getSimulationManager().getParameterManager().getParameter("app.time", "initial_time"))};
+            timeEvent = new long[] {get_t0()};
         }
     }
 
-    private String[] getReleaseEvents() {
+    private String[] getReleaseEvents() throws Exception {
         String[] tokens = getSimulationManager().getParameterManager().getParameter("release.schedule", "events").split("\"");
         List<String> events = new ArrayList();
         for (String token : tokens) {
@@ -145,6 +179,15 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
      */
     public void removeReleaseListener(ReleaseListener listener) {
         listeners.remove(ReleaseListener.class, listener);
+    }
+    
+    private void cleanReleaseListener() {
+        ReleaseListener[] listenerList = (ReleaseListener[]) listeners.getListeners(
+                ReleaseListener.class);
+
+        for (ReleaseListener listener : listenerList) {
+            removeReleaseListener(listener);
+        }
     }
 
     private void fireReleaseTriggered() {
@@ -175,14 +218,17 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         return timeEvent[getNbReleaseEvents() - 1] - timeEvent[0];
     }
 
-    public void setupPerformed(SetupEvent e) {
+    public void setupPerformed(SetupEvent e) throws Exception {
+        cleanReleaseListener();
         indexEvent = 0;
         isAllReleased = false;
         releaseProcess = null;
-        getReleaseProcess();
+        instantiateReleaseProcess();
     }
 
-    public void initializePerformed(InitializeEvent e) {
+    public void initializePerformed(InitializeEvent e) throws Exception {
+        addReleaseListener(this);
+        getSimulationManager().getTimeManager().addNextStepListener(this);
         schedule();
     }
 }

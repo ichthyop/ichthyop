@@ -5,6 +5,7 @@
 
 package org.previmer.ichthyop.arch;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import org.previmer.ichthyop.event.LastStepListener;
 import org.previmer.ichthyop.event.NextStepListener;
@@ -44,9 +45,9 @@ public interface ITimeManager {
 
     public void lastStepTriggered();
 
-    public long duration2seconds(String duration);
+    public long duration2seconds(String duration) throws ParseException;
 
-    public long date2seconds(String date);
+    public long date2seconds(String date) throws ParseException;
 
     public SimpleDateFormat getInputDurationFormat();
 

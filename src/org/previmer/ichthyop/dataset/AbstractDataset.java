@@ -21,7 +21,6 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
 
     public AbstractDataset() {
         datasetKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
-        getSimulationManager().getTimeManager().addNextStepListener(this);
     }
 
     public String getParameter(String key) {
