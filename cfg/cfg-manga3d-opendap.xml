@@ -289,7 +289,7 @@
       <parameter type="serial">
         <key>epsilon</key>
         <long_name>Dissipation rate</long_name>
-        <value>1e-9</value>
+        <value>1.0E-9</value>
         <description>Turbulent dissipation rate used in the parametrization of Lagrangian horizontal diffusion.</description>
         <format>float</format>
         <default>1e-9</default>
@@ -441,13 +441,13 @@
   </block>
   <block type="option">
     <key>release.schedule</key>
-    <tree_path>Advanced/Release/Schedule</tree_path>
+    <tree_path>Advanced/Release/Shedule</tree_path>
     <parameters>
       <parameter>
-        <key>event0</key>
-        <long_name>Release event 0</long_name>
-        <value>year 2010 month 03 day 01 at 00:00</value>
-        <format>date</format>
+        <key>events</key>
+        <long_name>Release event</long_name>
+        <value>year 2008 month 01 day 07 at 06:00</value>
+        <format>list</format>
       </parameter>
       <parameter>
         <key>is_enabled</key>
