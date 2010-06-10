@@ -22,13 +22,11 @@ import ucar.nc2.Dimension;
  */
 public class UserDefinedTracker extends SimulationManagerAccessor implements ITracker {
 
-    private String trackerKey;
     private String variableName;
     private ArrayFloat.D2 array;
 
-    public UserDefinedTracker(String trackerKey) {
-        this.trackerKey = trackerKey;
-        variableName = short_name();
+    public UserDefinedTracker(String variableName) {
+        this.variableName = variableName;
         array = new ArrayFloat.D2(1, getSimulationManager().getOutputManager().getDimensionFactory().getDrifterDimension().getLength());
         getSimulationManager().getDataset().requireVariable(variableName, getClass());
     }
@@ -43,10 +41,6 @@ public class UserDefinedTracker extends SimulationManagerAccessor implements ITr
         }
     }
 
-    public boolean isEnabled() {
-        return getSimulationManager().getOutputManager().isTrackerEnabled(trackerKey);
-    }
-
     @Override
     public ArrayFloat.D2 getArray() {
         return array;
@@ -57,15 +51,15 @@ public class UserDefinedTracker extends SimulationManagerAccessor implements ITr
     }
 
     public String short_name() {
-        return getParameter("short_name");
+        return variableName;
     }
 
     public String long_name() {
-        return getParameter("long_name");
+        return null;
     }
 
     public String unit() {
-        return getParameter("unit");
+        return null;
     }
 
     public Attribute[] attributes() {
@@ -82,9 +76,5 @@ public class UserDefinedTracker extends SimulationManagerAccessor implements ITr
         list.add(dimFactory.getTimeDimension());
         list.add(dimFactory.getDrifterDimension());
         return list;
-    }
-
-    private String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getParameter(BlockType.TRACKER, trackerKey, key);
     }
 }

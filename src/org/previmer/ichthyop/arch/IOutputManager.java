@@ -18,8 +18,6 @@ public interface IOutputManager extends NextStepListener {
 
     public NCDimFactory getDimensionFactory();
 
-    public boolean isTrackerEnabled(String trackerKey);
-
     public String getFileLocation();
 
     public void addTracker(Class trackerClass);

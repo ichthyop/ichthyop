@@ -14,8 +14,7 @@ public enum BlockType {
     OPTION,
     ACTION,
     RELEASE,
-    DATASET,
-    TRACKER;
+    DATASET;
 
     static BlockType getType(String value) {
         for (BlockType type : values()) {

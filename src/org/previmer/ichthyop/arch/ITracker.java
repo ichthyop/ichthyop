@@ -17,12 +17,6 @@ import ucar.nc2.Dimension;
 public interface ITracker {
 
     /**
-     * Determines whether the tracker is enabled.
-     * @return
-     */
-    public boolean isEnabled();
-
-    /**
      *
      * @param time
      * @return

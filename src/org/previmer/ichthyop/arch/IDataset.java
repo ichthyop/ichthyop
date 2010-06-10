@@ -56,6 +56,8 @@ public interface IDataset extends NextStepListener {
 
     public void requireVariable(String name, Class requiredBy);
 
+    public void removeRequiredVariable(String name, Class requiredBy);
+
     public double getLatMin();
 
     public double getLatMax();

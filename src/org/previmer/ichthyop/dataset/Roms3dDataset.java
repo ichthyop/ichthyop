@@ -183,6 +183,8 @@ public abstract class Roms3dDataset extends AbstractDataset {
         }
     }
 
+    public void removeRequiredVariable(String name, Class requiredBy) {}
+
     public void checkRequiredVariable() {
         for (RequiredVariable variable : requiredVariables.values()) {
             try {

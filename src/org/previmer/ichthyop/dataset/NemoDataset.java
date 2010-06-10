@@ -195,6 +195,8 @@ public class NemoDataset extends AbstractDataset {
         }
     }
 
+    public void removeRequiredVariable(String name, Class requiredBy) {}
+
     public void clearRequiredVariables() {
         if (requiredVariables != null) {
             requiredVariables.clear();

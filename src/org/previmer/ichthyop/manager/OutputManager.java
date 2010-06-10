@@ -84,21 +84,15 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         return getParameter("output_path") + getParameter("file_prefix") + "_" + getSimulationManager().getId() + ".nc";
     }
 
-    public boolean isTrackerEnabled(String trackerKey) {
-        return getSimulationManager().getParameterManager().isBlockEnabled(BlockType.TRACKER, trackerKey);
-    }
-
     /**
      * Closes the NetCDF file.
      */
     private void close() {
         try {
             ncOut.close();
-            System.out.println("close ncOut");
-        } catch (IOException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NullPointerException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().info("Closed NetCDF output file.");
+        } catch (Exception ex) {
+            getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> " + ex.toString());
         }
     }
 
@@ -274,7 +268,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         requestedTrackers.add(trackerClass);
     }
 
-    private void addAppTrackers() {
+    private void addAppTrackers() throws Exception {
         trackers = new ArrayList();
         trackers.add(new TimeTracker());
         trackers.add(new LonTracker());
@@ -289,42 +283,100 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                 ITracker tracker = (ITracker) trackerClass.newInstance();
                 trackers.add(tracker);
             } catch (Exception ex) {
-                Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+                StringBuffer msg = new StringBuffer();
+                msg.append("Error instanciating application tracker ");
+                msg.append(trackerClass.getCanonicalName());
+                msg.append(" == >");
+                msg.append(ex.toString());
+                IOException ioex = new IOException(msg.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
             }
         }
         for (ITracker tracker : trackers) {
-            addVar2NcOut(tracker);
-        }
-    }
-
-    private void addUserTrackers() {
-        for (XBlock xtracker : getSimulationManager().getParameterManager().getBlocks(BlockType.TRACKER)) {
-            if (xtracker.isEnabled()) {
-                try {
-                    ITracker tracker = new UserDefinedTracker(xtracker.getKey());
-                    trackers.add(tracker);
-                    addVar2NcOut(tracker);
-                } catch (Exception ex) {
-                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            try {
+                addVar2NcOut(tracker);
+            } catch (Exception ex) {
+                StringBuffer msg = new StringBuffer();
+                msg.append("Error adding application tracker ");
+                msg.append(tracker.short_name());
+                msg.append(" in the NetCDF output file == >");
+                msg.append(ex.toString());
+                IOException ioex = new IOException(msg.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
             }
         }
     }
 
-    public void nextStepTriggered(NextStepEvent e) {
+    private String[] getVarToTrack() throws Exception {
+        String[] tokens = getParameter("trackers").split("\"");
+        List<String> variables = new ArrayList();
+        for (String token : tokens) {
+            if (!token.trim().isEmpty()) {
+                variables.add(token.trim());
+            }
+        }
+        return variables.toArray(new String[variables.size()]);
+    }
+
+    private void addUserTrackers() {
+        String[] variables = null;
+        try {
+            variables = getVarToTrack();
+        } catch (Exception ex) {
+            // ignored, no user def tracker.
+        }
+
+        if (null != variables) {
+            for (String variable : variables) {
+                ITracker tracker = new UserDefinedTracker(variable);
+                try {
+                    addVar2NcOut(tracker);
+                } catch (Exception ex) {
+                    getSimulationManager().getDataset().removeRequiredVariable(variable, tracker.getClass());
+                    StringBuffer msg = new StringBuffer();
+                    msg.append("Error adding user defined tracker ");
+                    msg.append(tracker.short_name());
+                    msg.append(" in the NetCDF output file == >");
+                    msg.append(ex.toString());
+                    msg.append("\n");
+                    msg.append("It has been removed from the NetCDF output file to avoir any further problem.");
+                    getLogger().log(Level.WARNING, msg.toString());
+                    continue;
+                }
+                /* tracker is only added to the list if addition in the
+                 NetCDF output file succedeed */
+                trackers.add(tracker);
+            }
+        }
+    }
+
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         ITimeManager timeManager = e.getSource();
-        //Logger.getAnonymousLogger().info(step.getTime() + " " + step.get_tO());
         if (((timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
             writeToNetCDF(i_record++);
         }
     }
 
     private void writeToNetCDF(int i_record) {
-        System.out.println("  --> record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
-        //Logger.getAnonymousLogger().info("  --> record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
+        getLogger().info("NetCDF output file, writing record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
         for (ITracker tracker : trackers) {
-            tracker.track();
+            try {
+                tracker.track();
+            } catch (Exception ex) {
+                trackers.remove(tracker);
+                getSimulationManager().getDataset().removeRequiredVariable(tracker.short_name(), tracker.getClass());
+                StringBuffer sb = new StringBuffer();
+                sb.append("Error tracking variable ");
+                sb.append(tracker.short_name());
+                sb.append(" == >");
+                sb.append(ex.toString());
+                sb.append("\n");
+                sb.append("The variable will no longer be recorded in the NetCDF output file.");
+                getLogger().log(Level.WARNING, sb.toString());
+            }
             writeTrackerToNetCDF(tracker, i_record);
         }
     }
@@ -339,12 +391,18 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
      */
     private void writeTrackerToNetCDF(ITracker tracker, int index) {
         try {
-
             ncOut.write(tracker.short_name(), tracker.origin(index), tracker.getArray());
-        } catch (IOException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            trackers.remove(tracker);
+            getSimulationManager().getDataset().removeRequiredVariable(tracker.short_name(), tracker.getClass());
+            StringBuffer sb = new StringBuffer();
+            sb.append("Error writing ");
+            sb.append(tracker.short_name());
+            sb.append(" in the NetCDF output file == >");
+            sb.append(ex.toString());
+            sb.append("\n");
+            sb.append("The variable will no longer be recorded in the NetCDF output file.");
+            getLogger().log(Level.WARNING, sb.toString());
         }
     }
 
@@ -356,13 +414,20 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private void addVar2NcOut(ITracker tracker) {
 
         ncOut.addVariable(tracker.short_name(), tracker.type(), tracker.dimensions());
-        ncOut.addVariableAttribute(tracker.short_name(), "long_name",
-                tracker.long_name());
-        ncOut.addVariableAttribute(tracker.short_name(), "unit", tracker.unit());
-        if (tracker.attributes() != null) {
-            for (Attribute attribute : tracker.attributes()) {
-                ncOut.addVariableAttribute(tracker.short_name(), attribute);
+        try {
+            if (null != tracker.long_name()) {
+                ncOut.addVariableAttribute(tracker.short_name(), "long_name", tracker.long_name());
             }
+            if (null != tracker.unit()) {
+                ncOut.addVariableAttribute(tracker.short_name(), "unit", tracker.unit());
+            }
+            if (tracker.attributes() != null) {
+                for (Attribute attribute : tracker.attributes()) {
+                    ncOut.addVariableAttribute(tracker.short_name(), attribute);
+                }
+            }
+        } catch (Exception ex) {
+            // do nothing, attributes have minor importance
         }
     }
 
@@ -378,29 +443,70 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         ncOut.setLocation(getFileLocation());
         getDimensionFactory().resetDimensions();
         requestedTrackers = new ArrayList();
+        getLogger().info("Output manager setup [OK]");
     }
 
-    public void initializePerformed(InitializeEvent e) {
+    public void initializePerformed(InitializeEvent e) throws Exception {
+
+        /* add listeners */
         getSimulationManager().getTimeManager().addNextStepListener(this);
         getSimulationManager().getTimeManager().addLastStepListener(this);
+
+        /* reset counter and record time step */
+        i_record = 0;
+        dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
+
+        /* add application trackers lon lat depth time */
+        addAppTrackers();
+
+        /* add user defined trackers */
+        addUserTrackers();
+
+        /* add gloabal attributes */
+        addGlobalAttributes();
+
+        /* add definition of the simulated area */
+        addRegion();
+
+        /* add the zones */
+        addZones();
+
+        /* create the NetCDF file */
         try {
-            i_record = 0;
-            dt_record = record_frequency * getSimulationManager().getTimeManager().get_dt();
-            addAppTrackers();
-            addUserTrackers();
-            addGlobalAttributes();
-            addRegion();
-            addZones();
             IOTools.makeDirectories(ncOut.getLocation());
             ncOut.create();
-            writeRegion();
-            writeZones();
-        } catch (IOException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Failed to create NetCDF output file ==> " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
         }
-        Logger.getAnonymousLogger().info("Created output file : " + ncOut.getLocation());
+
+        /* write the definition of the simulated area */
+        try {
+            writeRegion();
+        } catch (Exception ex) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Problem occured writing the simulation area in the NetCDF output file == >");
+            sb.append(ex.toString());
+            sb.append("\n");
+            sb.append("Map creation might not work correctly later on.");
+            getLogger().log(Level.WARNING, sb.toString());
+        }
+
+        /* wrtie the zones */
+        try {
+            writeZones();
+        } catch (Exception ex) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Problem occured writing the zones in the NetCDF output file == >");
+            sb.append(ex.toString());
+            sb.append("\n");
+            sb.append("Map creation might not work correctly later on.");
+            getLogger().log(Level.WARNING, sb.toString());
+        }
+
+        /* initialization completed */
+        getLogger().info("Output manager initialization [OK] Created output file " + ncOut.getLocation());
     }
 
     public class NCDimFactory {

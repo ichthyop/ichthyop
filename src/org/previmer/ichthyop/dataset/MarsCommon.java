@@ -106,7 +106,7 @@ public abstract class MarsCommon extends AbstractDataset {
         getDimGeogArea();
     }
 
-     public void init() throws Exception {
+    public void init() throws Exception {
         setOnFirstTime();
         checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank);
@@ -249,6 +249,19 @@ public abstract class MarsCommon extends AbstractDataset {
      */
     public Number get(String variableName, double[] pGrid, double time) {
         return requiredVariables.get(variableName).get(pGrid, time);
+    }
+
+    public void removeRequiredVariable(String name, Class requiredBy) {
+        RequiredVariable var = requiredVariables.get(name);
+        if (null != var) {
+            if (var.getRequiredBy().size() > 1) {
+                /* just remove the reference but dont remove the
+                variable because other classes might need it */
+                var.getRequiredBy().remove(requiredBy);
+            } else if (var.getRequiredBy().get(0).equals(requiredBy)) {
+                requiredVariables.remove(name);
+            }
+        }
     }
 
     public void requireVariable(String name, Class requiredBy) {
