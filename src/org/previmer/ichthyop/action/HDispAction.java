@@ -26,7 +26,7 @@ public class HDispAction extends AbstractAction {
 
     public void loadParameters() {
         random = new MTRandom();
-        epsilon = Double.valueOf(getParameter("dissipation_rate"));
+        epsilon = Double.valueOf(getParameter("epsilon"));
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);
     }
 
@@ -37,6 +37,10 @@ public class HDispAction extends AbstractAction {
     public double[] getHDispersion(double[] pGrid, double dt) {
 
         int i = (int) Math.round(pGrid[0]), j = (int) Math.round(pGrid[1]);
+        int nx = getSimulationManager().getDataset().get_nx();
+        int ny = getSimulationManager().getDataset().get_ny();
+        i = Math.max(Math.min(i, nx - 1), 0);
+        j = Math.max(Math.min(j, ny - 1), 0);
         double R = 2.d * random.nextDouble() - 1.d;
 
         if (DEBUG_HDISP) {
