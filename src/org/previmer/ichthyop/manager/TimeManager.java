@@ -333,6 +333,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         cleanNextStepListener();
         cleanLastStepListener();
         loadParameters();
+        getLogger().info("Time manager setup [OK]");
     }
 
     public void initializePerformed(InitializeEvent e) throws Exception {
@@ -340,6 +341,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         i_step = 0;
         time = t0;
         nb_steps = (int) (simuDuration / dt);
+        getLogger().info("Time manager initialization [OK]");
     }
 
     public SimpleDateFormat getInputDurationFormat() {

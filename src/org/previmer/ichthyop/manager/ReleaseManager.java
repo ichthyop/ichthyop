@@ -224,11 +224,13 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         isAllReleased = false;
         releaseProcess = null;
         instantiateReleaseProcess();
+        getLogger().info("Release manager setup [OK]");
     }
 
     public void initializePerformed(InitializeEvent e) throws Exception {
         addReleaseListener(this);
         getSimulationManager().getTimeManager().addNextStepListener(this);
         schedule();
+        getLogger().info("Release manager initialization [OK]");
     }
 }

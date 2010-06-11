@@ -15,7 +15,6 @@ import org.previmer.ichthyop.arch.IOutputManager;
 import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import ucar.nc2.NetcdfFileWriteable;
 import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.arch.ITracker;
@@ -525,7 +524,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         }
 
         /* initialization completed */
-        getLogger().info("Output manager initialization [OK] Created output file " + ncOut.getLocation());
+        getLogger().info("Created output file " + ncOut.getLocation());
+        getLogger().info("Output manager initialization [OK]");
     }
 
     public class NCDimFactory {

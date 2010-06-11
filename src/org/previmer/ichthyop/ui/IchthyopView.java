@@ -119,6 +119,9 @@ public class IchthyopView extends FrameView
 
         /* Connect to the java console */
         getLogger().addHandler(new SystemOutHandler());
+
+        /* Welcome user */
+        getLogger().info(getResourceMap().getString("Application.title") + " - Welcome on board !");
     }
 
     @Action
@@ -764,7 +767,7 @@ public class IchthyopView extends FrameView
 
         SimulationRunTask(Application instance) {
             super(instance);
-            setMessage(resourceMap.getString("simulationRun.started"));
+            setMessage(resourceMap.getString("simulationRun.Action.started"));
             setMenuEnabled(false);
             bln = false;
             pnlProgress.setupProgress();
@@ -787,14 +790,15 @@ public class IchthyopView extends FrameView
             do {
                 setMessage(resourceMap.getString("simulationRun.Action.simulation") + getSimulationManager().indexSimulationToString());
                 /* setup */
-                setMessage(resourceMap.getString("simulationRun.Action.setup.start"));
+                setMessage(resourceMap.getString("simulationRun.Action.setup.start"), true, Level.INFO);
                 getSimulationManager().setup();
                 setMessage(resourceMap.getString("simulationRun.Action.setup.ok"));
                 isSetup = true;
                 /* initialization */
                 setMessage(resourceMap.getString("simulationRun.Action.init.start"), true, Level.INFO);
+                Thread.sleep(10 * 1000);
                 getSimulationManager().init();
-                setMessage(resourceMap.getString("simulationRun.Action.init.ok"), true, Level.INFO);
+                setMessage(resourceMap.getString("simulationRun.Action.init.ok"));
                 isInit = true;
                 /* */
                 getSimulationManager().getTimeManager().firstStepTriggered();
@@ -825,6 +829,9 @@ public class IchthyopView extends FrameView
                 bln = true;
             }
             pnlProgress.printProgress();
+            if (getSimulationManager().isStopped()) {
+                return;
+            }
             StringBuffer msg = new StringBuffer();
             msg.append(getSimulationManager().getTimeManager().stepToString());
             msg.append(" - ");

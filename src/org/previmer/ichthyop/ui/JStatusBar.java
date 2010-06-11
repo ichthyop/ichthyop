@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.ui;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -27,7 +26,6 @@ import org.jdesktop.swingx.JXStatusBar;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import org.jdesktop.swingx.plaf.basic.BasicStatusBarUI;
-import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.ui.logging.JStatusBarHandler;
 
 /**
@@ -149,8 +147,10 @@ public class JStatusBar extends JXStatusBar {
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
                 } else if ("message".equals(propertyName)) {
-                    String text = (String) (evt.getNewValue());
-                    statusMessageLabel.setText((text == null) ? "" : text);
+                    /* Here we do not handle the display of the message since
+                     * it is done through the logger. Just ensure the message
+                     * timer is not running from previous message.
+                     */
                     if (messageTimer.isRunning()) {
                         messageTimer.stop();
                     }

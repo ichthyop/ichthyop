@@ -80,6 +80,7 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
 
     public void setupPerformed(SetupEvent e) throws Exception {
         loadActions();
+        getLogger().info("Action manager setup [OK]");
     }
 
     public void initializePerformed(InitializeEvent e) {

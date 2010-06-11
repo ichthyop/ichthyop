@@ -75,26 +75,17 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
         return map.get(type);
     }
 
-    public void setupPerformed(SetupEvent e) {
-        /*cleanup();
-        for (XBlock block : getSimulationManager().getParameterManager().readBlocks()) {
-            if (block.isEnabled()) {
-                for (XParameter param : block.getXParameters()) {
-                    if (param.getFormat().equals(ParameterFormat.ZONEFILE)) {
-                        for (TypeZone type : TypeZone.values()) {
-                            getSimulationManager().getZoneManager().loadZonesFromFile(param.getValue(), type);
-                        }
-                    }
-                }
-            }
-        }*/
+    public void setupPerformed(SetupEvent e) throws Exception {
+        /* Nothing to do. Zones are loaded by other classes such as Action
+         or ReleaseProcess */
     }
 
-    public void initializePerformed(InitializeEvent e) {
+    public void initializePerformed(InitializeEvent e) throws Exception {
         for (List<Zone> listZone : map.values()) {
             for (Zone zone : listZone) {
                 zone.init();
             }
         }
+        getLogger().info("Zone manager initialization [OK]");
     }
 }
