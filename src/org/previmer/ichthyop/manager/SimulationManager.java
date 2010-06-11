@@ -281,12 +281,25 @@ public class SimulationManager implements ISimulationManager {
      * here.
      */
     private void mobiliseManagers() {
+        /* the very first one, since most of the other managers will need it
+         later on */
         getDatasetManager();
+
+        /* */
         getActionManager();
-        getOutputManager();
+        
+        /* Time manager must come after the release manager because the 
+         calculation of the simulation duration required the release schedule */
         getReleaseManager();
         getTimeManager();
+
+        /* Zone manager must be called  after the action manager and the
+         release manager */
         getZoneManager();
+
+        /* the very last one, because it sums up all the setup info in order
+         to record it in the NetCDF output file */
+        getOutputManager();
     }
 
     public String indexSimulationToString() {
