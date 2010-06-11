@@ -145,7 +145,7 @@ public class Zone extends SimulationManagerAccessor {
     }
 
     private boolean isDepthInLayer(double depth) {
-        return depth <= lowerDepth & depth > upperDepth;
+        return depth <= lowerDepth & depth >= upperDepth;
     }
 
     public boolean isGridPointInZone(double x, double y) {
