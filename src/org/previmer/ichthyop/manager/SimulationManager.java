@@ -284,14 +284,15 @@ public class SimulationManager implements ISimulationManager {
         /* the very first one, since most of the other managers will need it
          later on */
         getDatasetManager();
-
-        /* */
-        getActionManager();
         
         /* Time manager must come after the release manager because the 
          calculation of the simulation duration required the release schedule */
         getReleaseManager();
         getTimeManager();
+
+        /* It'd better come after TimeManager in case some actions need to
+         access some time information */
+        getActionManager();
 
         /* Zone manager must be called  after the action manager and the
          release manager */
