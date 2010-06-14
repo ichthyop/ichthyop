@@ -251,6 +251,7 @@ public class IchthyopView extends FrameView
             for (int iStep = 0; iStep < wmsMapper.getNbSteps(); iStep++) {
                 setProgress((float) (iStep + 1) / wmsMapper.getNbSteps());
                 publish(wmsMapper.getPainterForStep(iStep));
+                Thread.sleep(500);
             }
             return null;
         }
@@ -795,7 +796,6 @@ public class IchthyopView extends FrameView
                 isSetup = true;
                 /* initialization */
                 setMessage(resourceMap.getString("simulationRun.Action.init.start"), true, Level.INFO);
-                Thread.sleep(10 * 1000);
                 getSimulationManager().init();
                 setMessage(resourceMap.getString("simulationRun.Action.init.ok"));
                 isInit = true;
