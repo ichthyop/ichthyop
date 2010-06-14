@@ -122,11 +122,58 @@ public class Zone extends SimulationManagerAccessor {
         polygon.add(point);
     }
 
-    public void init() {
+    public void init() throws Exception {
 
         for (GridPoint rhoPoint : polygon) {
             rhoPoint.geo2Grid();
+            /* make sure the point belongs to the simulated domain */
+            if (rhoPoint.getX() < 0 || rhoPoint.getY() < 0) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(getType());
+                sb.append(" zone \"");
+                sb.append(getKey());
+                sb.append("\". Initialization error. Point [lon: ");
+                sb.append(rhoPoint.getLon());
+                sb.append(" ; lat: ");
+                sb.append(rhoPoint.getLat());
+                sb.append("] is out of domain.");
+                throw new IllegalArgumentException(sb.toString());
+            }
         }
+
+        /* make sure the layer thickness is properly defined */
+        if (enabledThickness) {
+            if (lowerDepth < upperDepth) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(getType());
+                sb.append(" zone \"");
+                sb.append(getKey());
+                sb.append("\". Thickness error. Lower depth (");
+                sb.append(lowerDepth);
+                sb.append("m) must be deeper than upper depth (");
+                sb.append(upperDepth);
+                sb.append("m)");
+                throw new IllegalArgumentException(sb.toString());
+            }
+        }
+
+        /* make sure bathy mask is correctly defined */
+        if (enabledBathyMask) {
+            if (offshoreLine < inshoreLine) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(getType());
+                sb.append(" zone \"");
+                sb.append(getKey());
+                sb.append("\". Bathymetric mask error. Offshore line (");
+                sb.append(offshoreLine);
+                sb.append("m) must be deeper than inshore line (");
+                sb.append(inshoreLine);
+                sb.append("m)");
+                throw new IllegalArgumentException(sb.toString());
+            }
+        }
+
+        /* Closes the polygon adding first point as last point */
         polygon.add((GridPoint) polygon.get(0).clone());
     }
 

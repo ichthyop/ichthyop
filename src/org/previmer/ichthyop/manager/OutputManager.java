@@ -121,7 +121,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private void addZones() {
 
         int iZone = 0;
-        getSimulationManager().getZoneManager().init();
         zoneEdges = new ArrayList();
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {

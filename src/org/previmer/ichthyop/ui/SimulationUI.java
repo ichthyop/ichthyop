@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 /** import Swing */
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 
 /** local import */
@@ -161,7 +163,11 @@ public class SimulationUI extends JPanel {
         for (TypeZone typeZone : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(typeZone)) {
-                    zone.init();
+                    try {
+                        zone.init();
+                    } catch (Exception ex) {
+                        SimulationManager.getLogger().log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }

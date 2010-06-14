@@ -62,25 +62,17 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
         }
     }
 
-    public void init() {
-        //loadZones();
-        for (List<Zone> listZone : map.values()) {
-            for (Zone zone : listZone) {
-                zone.init();
-            }
-        }
-    }
-
     public ArrayList<Zone> getZones(TypeZone type) {
         return map.get(type);
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {
         /* Nothing to do. Zones are loaded by other classes such as Action
-         or ReleaseProcess */
+        or ReleaseProcess */
     }
 
     public void initializePerformed(InitializeEvent e) throws Exception {
+
         for (List<Zone> listZone : map.values()) {
             for (Zone zone : listZone) {
                 zone.init();

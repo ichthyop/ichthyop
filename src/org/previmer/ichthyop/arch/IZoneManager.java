@@ -16,8 +16,6 @@ public interface IZoneManager {
 
     public ArrayList<Zone> getZones(TypeZone type);
 
-    public void init();
-
     public void loadZonesFromFile(String filename, TypeZone type);
 
     public void cleanup();
