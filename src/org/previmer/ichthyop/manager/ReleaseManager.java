@@ -83,7 +83,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         return list.get(0);
     }
 
-    public void releaseTriggered(ReleaseEvent event) {
+    public void releaseTriggered(ReleaseEvent event) throws Exception {
         getReleaseProcess().release(event);
     }
 
@@ -91,7 +91,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         return getReleaseProcess().getNbParticles();
     }
 
-    public void nextStepTriggered(NextStepEvent e) {
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         if (!isAllReleased) {
             long time = e.getSource().getTime();
@@ -106,16 +106,16 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
 
     private long get_t0() throws Exception {
         String iniTime = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
-            try {
-                return getSimulationManager().getTimeManager().date2seconds(iniTime);
-            } catch (ParseException ex) {
-                StringBuffer sb = new StringBuffer();
-                sb.append("Release schedule - error converting initial time into seconds ==> ");
-                sb.append(ex.toString());
-                IOException ioex = new IOException(sb.toString());
-                ioex.setStackTrace(ex.getStackTrace());
-                throw ioex;
-            }
+        try {
+            return getSimulationManager().getTimeManager().date2seconds(iniTime);
+        } catch (ParseException ex) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Release schedule - error converting initial time into seconds ==> ");
+            sb.append(ex.toString());
+            IOException ioex = new IOException(sb.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
     }
 
     private void schedule() throws Exception {
@@ -148,7 +148,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
                 }
             }
         } else {
-            timeEvent = new long[] {get_t0()};
+            timeEvent = new long[]{get_t0()};
         }
     }
 
@@ -180,7 +180,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     public void removeReleaseListener(ReleaseListener listener) {
         listeners.remove(ReleaseListener.class, listener);
     }
-    
+
     private void cleanReleaseListener() {
         ReleaseListener[] listenerList = (ReleaseListener[]) listeners.getListeners(
                 ReleaseListener.class);
@@ -190,12 +190,11 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         }
     }
 
-    private void fireReleaseTriggered() {
+    private void fireReleaseTriggered() throws Exception {
 
         //Logger.getLogger(getClass().getName()).info("Triggered release event " + indexEvent);
 
-        ReleaseListener[] listenerList = (ReleaseListener[]) listeners.getListeners(
-                ReleaseListener.class);
+        ReleaseListener[] listenerList = (ReleaseListener[]) listeners.getListeners(ReleaseListener.class);
 
         for (ReleaseListener listener : listenerList) {
             listener.releaseTriggered(new ReleaseEvent(this));

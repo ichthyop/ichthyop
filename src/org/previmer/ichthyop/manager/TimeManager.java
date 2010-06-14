@@ -311,7 +311,8 @@ public class TimeManager extends AbstractManager implements ITimeManager {
 
         NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(NextStepListener.class);
 
-        for (NextStepListener listener : listenerList) {
+        for (int i = listenerList.length; i-- > 0;) {
+            NextStepListener listener = listenerList[i];
             listener.nextStepTriggered(new NextStepEvent(this));
         }
     }

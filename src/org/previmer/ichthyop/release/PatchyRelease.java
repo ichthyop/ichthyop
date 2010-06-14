@@ -9,7 +9,6 @@ import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import java.io.IOException;
 
 /**
  *
@@ -26,24 +25,24 @@ public class PatchyRelease extends AbstractReleaseProcess {
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     @Override
-    void loadParameters() {
+    public void loadParameters() {
         
         nb_patches = Integer.valueOf(getParameter("number_patches"));
         nb_agregated = Integer.valueOf(getParameter("number_agregated"));
         radius_patch = Float.valueOf(getParameter("radius_patch"));
         thickness_patch = Float.valueOf(getParameter("thickness_patch"));
-
+        is3D = getSimulationManager().getDataset().is3D();
+        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
-        nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
-        is3D = Boolean.valueOf(getSimulationManager().getParameterManager().getParameter("app.transport", "three_dimension"));
     }
 
     @Override
-    void proceedToRelease(ReleaseEvent event) throws IOException {
+    public void release(ReleaseEvent event) throws Exception {
 
         int indexEvent = event.getSource().getIndexEvent();
+        nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
 
         nbPatchesNow = nb_patches / nbReleaseEvents;
         int mod = nb_patches % nbReleaseEvents;
@@ -89,11 +88,18 @@ public class PatchyRelease extends AbstractReleaseProcess {
                 index++;
             }
         }
+        StringBuffer sb = new StringBuffer();
+        sb.append("Release event (");
+        sb.append(getClass().getSimpleName());
+        sb.append(") time = ");
+        sb.append(event.getSource().getTime());
+        sb.append(" seconds. Released ");
+        sb.append(index);
+        sb.append(" particles.");
+        getLogger().info(sb.toString());
     }
 
     public int getNbParticles() {
-        nb_patches = Integer.valueOf(getParameter("number_patches"));
-        nb_agregated = Integer.valueOf(getParameter("number_agregated"));
         return nb_patches * nb_agregated;
     }
 }

@@ -64,6 +64,7 @@ public class ParticleFactory {
             particle.setY(y);
             if (is3D) {
                 depth = -1.D * (upDepth + Math.random() * (lowDepth - upDepth));
+                //System.out.println("x " + x + " y " + y + " depth " + depth);
                 particle.setDepth(depth);
                 particle.geo2Grid();
             }

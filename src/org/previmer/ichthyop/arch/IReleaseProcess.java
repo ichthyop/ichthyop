@@ -13,7 +13,9 @@ import org.previmer.ichthyop.event.ReleaseEvent;
  */
 public interface IReleaseProcess {
 
-    public void release(ReleaseEvent event);
+    public void loadParameters();
+
+    public void release(ReleaseEvent event) throws Exception;
 
     public int getNbParticles();
 

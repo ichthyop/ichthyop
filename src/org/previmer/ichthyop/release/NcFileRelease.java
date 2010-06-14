@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.release;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
 import org.previmer.ichthyop.arch.IBasicParticle;
@@ -13,7 +12,6 @@ import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
@@ -26,12 +24,12 @@ public class NcFileRelease extends AbstractReleaseProcess {
     private String pathname;
 
     @Override
-    void loadParameters() {
+    public void loadParameters() {
         pathname = getParameter("ncfile");
     }
 
     @Override
-    void proceedToRelease(ReleaseEvent event) throws IOException {
+    public void release(ReleaseEvent event) throws Exception {
 
         double time = event.getSource().getTime();
         int index = 0;
@@ -69,23 +67,14 @@ public class NcFileRelease extends AbstractReleaseProcess {
         ArrayFloat.D2 lonArr = (ArrayFloat.D2) nc.findVariable("lon").read();
         ArrayFloat.D2 latArr = (ArrayFloat.D2) nc.findVariable("lat").read();
         //ArrayInt.D2 deathArr = (ArrayInt.D2) nc.findVariable("death").read();
-        boolean bln3D = true;
-        if (null != nc.findGlobalAttribute("transport_dimension")) {
-            /* This test allows backward compatibility with ichthyop
-             * output files anterior to v3.0, since the
-             * "transport_dimension" attribute only exists from v3.0
-             */
-            bln3D = nc.findGlobalAttribute("transport_dimension").getStringValue().matches("three dimensions");
-        } else {
-            bln3D = (null != nc.findVariable("depth"));
-        }
+        boolean bln3D = getSimulationManager().getDataset().is3D();
         ArrayFloat.D2 depthArr = null;
         if (bln3D) {
             depthArr = (ArrayFloat.D2) nc.findVariable("depth").read();
         }
         double lon, lat, depth = Double.NaN;
         IBasicParticle particle;
-        int nb_particles = getNbParticles();
+        int nb_particles = lonArr.getShape()[1];
 
         boolean living;
         for (int i = 0; i < nb_particles; i++) {
@@ -126,7 +115,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
         try {
             return NetcdfDataset.open(pathname).findDimension("drifter").getLength();
         } catch (IOException ex) {
-            Logger.getLogger(NcFileRelease.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
         return -1;
     }

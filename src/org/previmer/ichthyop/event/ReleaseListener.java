@@ -13,6 +13,6 @@ import java.util.EventListener;
  */
 public interface ReleaseListener extends EventListener {
 
-    public void releaseTriggered(ReleaseEvent e);
+    public void releaseTriggered(ReleaseEvent e) throws Exception;
 
 }

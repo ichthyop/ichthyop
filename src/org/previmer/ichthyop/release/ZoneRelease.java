@@ -8,7 +8,6 @@ import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import java.io.IOException;
 
 /**
  *
@@ -28,7 +27,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
                 : 0;
     }
 
-    public void proceedToRelease(ReleaseEvent event) throws IOException {
+    public void release(ReleaseEvent event) throws Exception {
 
         int nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
         int indexEvent = event.getSource().getIndexEvent();
@@ -65,6 +64,15 @@ public class ZoneRelease extends AbstractReleaseProcess {
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
         }
+        StringBuffer sb = new StringBuffer();
+        sb.append("Release event (");
+        sb.append(getClass().getSimpleName());
+        sb.append(") time = ");
+        sb.append((long) event.getSource().getTime());
+        sb.append(" seconds. Released ");
+        sb.append(index);
+        sb.append(" particles.");
+        getLogger().info(sb.toString());
     }
 
     public int getNbParticles() {

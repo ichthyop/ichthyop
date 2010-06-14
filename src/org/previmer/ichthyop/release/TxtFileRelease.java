@@ -26,7 +26,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     private String pathname;
 
     @Override
-    void loadParameters() {
+    public void loadParameters() {
         pathname = getParameter("txtfile");
     }
 
@@ -40,7 +40,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     }
 
     @Override
-    void proceedToRelease(ReleaseEvent event) throws IOException {
+    public void release(ReleaseEvent event) throws IOException {
 
         File fDrifter = getFile(pathname);
 
@@ -78,7 +78,15 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         } catch (java.io.IOException e) {
             throw new IOException("Problem reading drifter file " + fDrifter);
         }
-        Logger.getAnonymousLogger().info("Released " + index + " particles.");
+        StringBuffer sb = new StringBuffer();
+        sb.append("Release event (");
+        sb.append(getClass().getSimpleName());
+        sb.append(") time = ");
+        sb.append(event.getSource().getTime());
+        sb.append(" seconds. Released ");
+        sb.append(index);
+        sb.append(" particles.");
+        getLogger().info(sb.toString());
     }
 
     public int getNbParticles() {
