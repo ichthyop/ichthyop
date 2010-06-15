@@ -3,24 +3,19 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
 import org.jdesktop.application.Action;
-import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
-import org.jdesktop.application.TaskMonitor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FilenameFilter;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultListModel;
-import javax.swing.Timer;
-import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.ListModel;
 import org.jdesktop.application.Application;
+import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
@@ -36,8 +31,11 @@ public class ExportMapsView extends FrameView {
         super(app);
         JFrame frame = new JFrame();
         frame.setName("backupView");
-        //frame.setResizable(false);
         setFrame(frame);
+
+        JStatusBar statusBar = new JStatusBar();
+        setStatusBar(statusBar);
+        statusBar.connectToLogger(getLogger());
 
         this.folder = folder;
 
@@ -46,71 +44,9 @@ public class ExportMapsView extends FrameView {
         initComponents();
         getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
 
-        // status bar initialization - message timeout, idle icon and busy animation, etc
-        ResourceMap resourceMap = getResourceMap();
-        int messageTimeout = resourceMap.getInteger("StatusBar.messageTimeout");
-        messageTimer = new Timer(messageTimeout, new ActionListener() {
+        resourceMap = getResourceMap();
 
-            public void actionPerformed(ActionEvent e) {
-                statusMessageLabel.setText("");
-                statusAnimationLabel.setIcon(getResourceMap().getIcon("StatusBar.idleIcon"));
-            }
-        });
-        messageTimer.setRepeats(false);
-        int busyAnimationRate = resourceMap.getInteger("StatusBar.busyAnimationRate");
-        for (int i = 0; i < busyIcons.length; i++) {
-            busyIcons[i] = resourceMap.getIcon("StatusBar.busyIcons[" + i + "]");
-        }
-        busyIconTimer = new Timer(busyAnimationRate, new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
-                statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
-            }
-        });
-        idleIcon = resourceMap.getIcon("StatusBar.idleIcon");
-        statusAnimationLabel.setIcon(idleIcon);
-        progressBar.setVisible(false);
-
-        // connecting action tasks to status bar via TaskMonitor
-        TaskMonitor taskMonitor = new TaskMonitor(getApplication().getContext());
-        taskMonitor.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                String propertyName = evt.getPropertyName();
-                if ("started".equals(propertyName)) {
-                    if (!busyIconTimer.isRunning()) {
-                        statusAnimationLabel.setIcon(busyIcons[0]);
-                        busyIconIndex = 0;
-                        busyIconTimer.start();
-                    }
-                    progressBar.setVisible(true);
-                    progressBar.setIndeterminate(true);
-                } else if ("message".equals(propertyName)) {
-                    String text = (String) (evt.getNewValue());
-                    statusMessageLabel.setText((text == null) ? "" : text);
-                    messageTimer.restart();
-                } else if ("progress".equals(propertyName)) {
-                    int value = (Integer) (evt.getNewValue());
-                    progressBar.setVisible(true);
-                    progressBar.setIndeterminate(false);
-                    progressBar.setValue(value);
-                } else if ("failed".equals(propertyName)) {
-                    busyIconTimer.stop();
-                    progressBar.setVisible(false);
-                    progressBar.setValue(0);
-                    statusAnimationLabel.setIcon(getResourceMap().getIcon("StatusBar.failedIcon"));
-                } else if ("succeeded".equals(propertyName)) {
-                    busyIconTimer.stop();
-                    statusAnimationLabel.setIcon(getResourceMap().getIcon("StatusBar.succeededIcon"));
-                    progressBar.setVisible(false);
-                    progressBar.setValue(0);
-                }
-            }
-        });
-
-        setMessage("Please set a path for saving the snapshots.");
-
+        btnSave.getAction().setEnabled(false);
     }
 
     public ISimulationManager getSimulationManager() {
@@ -128,11 +64,10 @@ public class ExportMapsView extends FrameView {
                 backupPath = chooser.getSelectedFile();
                 textFieldPath.setEnabled(true);
                 textFieldPath.setText(backupPath.toString());
-                statusAnimationLabel.setIcon(getResourceMap().getIcon("StatusBar.succeededIcon"));
-                setMessage("Set path " + backupPath.toString());
+                getLogger().info(resourceMap.getString("changePath.newPath") + " " + backupPath.toString());
             } else {
-                statusAnimationLabel.setIcon(getResourceMap().getIcon("StatusBar.failedIcon"));
-                setMessage("Please select a destination folder distinct from the source folder.");
+                getLogger().log(Level.WARNING, resourceMap.getString("changePath.wrongPath"));
+                btnSave.getAction().setEnabled(false);
             }
         }
     }
@@ -142,7 +77,7 @@ public class ExportMapsView extends FrameView {
         return new SaveTask(getApplication());
     }
 
-    private class SaveTask extends Task {
+    private class SaveTask extends SFTask {
 
         SaveTask(Application instance) {
             super(instance);
@@ -150,6 +85,7 @@ public class ExportMapsView extends FrameView {
 
         @Override
         protected Object doInBackground() throws Exception {
+
             File[] pictures = folder.listFiles(new MetaFilenameFilter("*.png"));
             int nbFiles = pictures.length;
             for (int i = 0; i < nbFiles; i++) {
@@ -157,22 +93,20 @@ public class ExportMapsView extends FrameView {
                 File dfile = rename(sfile);
                 setProgress(i / (float) nbFiles);
                 IOTools.copyFile(sfile, dfile);
-                setMessage("Saved " + dfile.getPath());
+                setMessage(resourceMap.getString("save.Action.saved") + " " + dfile.getPath());
             }
             return null;
         }
 
         @Override
-        protected void succeeded(Object o) {
-            firePropertyChange("succeeded", null, null);
+        void onSuccess(Object result) {
             btnSave.getAction().setEnabled(false);
-            setMessage("Backup succeeded.");
+            setMessage(resourceMap.getString("save.Action.succeeded"));
         }
 
         @Override
-        protected void failed(Throwable t) {
-            firePropertyChange("failed", null, null);
-            setMessage("Backup failed : " + t.getMessage());
+        void onFailure(Throwable throwable) {
+            // nothing to do
         }
     }
 
@@ -188,6 +122,7 @@ public class ExportMapsView extends FrameView {
 
     @Action
     public void cancel() {
+        getLogger().info(resourceMap.getString("view.close.text"));
         try {
             getFrame().setVisible(false);
             finalize();
@@ -195,13 +130,8 @@ public class ExportMapsView extends FrameView {
         }
     }
 
-    private IchthyopView getIchthyopView() {
-        return (IchthyopView) IchthyopApp.getApplication().getMainView();
-    }
-
-    public void setMessage(String text) {
-        statusMessageLabel.setText((text == null) ? "" : text);
-        messageTimer.restart();
+    private Logger getLogger() {
+        return SimulationManager.getLogger();
     }
 
     /** This method is called from within the constructor to
@@ -214,34 +144,34 @@ public class ExportMapsView extends FrameView {
     private void initComponents() {
 
         mainPanel = new javax.swing.JPanel();
-        lblPath = new javax.swing.JLabel();
-        textFieldPath = new javax.swing.JTextField();
         btnChoosePath = new javax.swing.JButton();
+        lblName = new javax.swing.JLabel();
+        textFieldPath = new javax.swing.JTextField();
+        lblPath = new javax.swing.JLabel();
         textFieldName = new javax.swing.JTextField();
         textFieldName.setText(folder.getName());
-        lblName = new javax.swing.JLabel();
+        pnlInfo = new javax.swing.JPanel();
+        lblInfo = new javax.swing.JLabel();
         btnCancel = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
-        statusPanel = new javax.swing.JPanel();
-        javax.swing.JSeparator statusPanelSeparator = new javax.swing.JSeparator();
-        statusMessageLabel = new javax.swing.JLabel();
-        statusAnimationLabel = new javax.swing.JLabel();
-        progressBar = new javax.swing.JProgressBar();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(ExportMapsView.class);
-        lblPath.setText(resourceMap.getString("lblPath.text")); // NOI18N
-        lblPath.setName("lblPath"); // NOI18N
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(ExportMapsView.class, this);
+        btnChoosePath.setAction(actionMap.get("changePath")); // NOI18N
+        btnChoosePath.setName("btnChoosePath"); // NOI18N
+
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(ExportMapsView.class);
+        lblName.setText(resourceMap.getString("lblName.text")); // NOI18N
+        lblName.setName("lblName"); // NOI18N
 
         textFieldPath.setEditable(false);
         textFieldPath.setName("textFieldPath"); // NOI18N
         textFieldPath.setText("Path not set yet");
         textFieldPath.setEnabled(false);
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getActionMap(ExportMapsView.class, this);
-        btnChoosePath.setAction(actionMap.get("changePath")); // NOI18N
-        btnChoosePath.setName("btnChoosePath"); // NOI18N
+        lblPath.setText(resourceMap.getString("lblPath.text")); // NOI18N
+        lblPath.setName("lblPath"); // NOI18N
 
         textFieldName.setName("textFieldName"); // NOI18N
         textFieldName.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -250,8 +180,32 @@ public class ExportMapsView extends FrameView {
             }
         });
 
-        lblName.setText(resourceMap.getString("lblName.text")); // NOI18N
-        lblName.setName("lblName"); // NOI18N
+        pnlInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlInfo.border.title"))); // NOI18N
+        pnlInfo.setName("pnlInfo"); // NOI18N
+
+        lblInfo.setText(resourceMap.getString("lblInfo.text")); // NOI18N
+        lblInfo.setName("lblInfo"); // NOI18N
+
+        javax.swing.GroupLayout pnlInfoLayout = new javax.swing.GroupLayout(pnlInfo);
+        pnlInfo.setLayout(pnlInfoLayout);
+        pnlInfoLayout.setHorizontalGroup(
+            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 457, Short.MAX_VALUE)
+            .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlInfoLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(lblInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 433, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        pnlInfoLayout.setVerticalGroup(
+            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 118, Short.MAX_VALUE)
+            .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlInfoLayout.createSequentialGroup()
+                    .addGap(19, 19, 19)
+                    .addComponent(lblInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(19, Short.MAX_VALUE)))
+        );
 
         btnCancel.setAction(actionMap.get("cancel")); // NOI18N
         btnCancel.setName("btnCancel"); // NOI18N
@@ -265,82 +219,49 @@ public class ExportMapsView extends FrameView {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblPath)
                             .addComponent(lblName))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(18, 18, 18)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addComponent(textFieldPath, javax.swing.GroupLayout.DEFAULT_SIZE, 410, Short.MAX_VALUE)
+                                .addComponent(textFieldPath)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnChoosePath))
-                            .addComponent(textFieldName, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                        .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnCancel)))
+                            .addComponent(textFieldName, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE))))
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                .addContainerGap(286, Short.MAX_VALUE)
+                .addComponent(btnSave)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCancel)
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(pnlInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPath)
                     .addComponent(textFieldPath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblPath)
                     .addComponent(btnChoosePath))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblName)
                     .addComponent(textFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE, false)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
                     .addComponent(btnSave))
-                .addGap(25, 25, 25))
-        );
-
-        statusPanel.setName("statusPanel"); // NOI18N
-
-        statusPanelSeparator.setName("statusPanelSeparator"); // NOI18N
-
-        statusMessageLabel.setName("statusMessageLabel"); // NOI18N
-
-        statusAnimationLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        statusAnimationLabel.setName("statusAnimationLabel"); // NOI18N
-
-        progressBar.setName("progressBar"); // NOI18N
-
-        javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
-        statusPanel.setLayout(statusPanelLayout);
-        statusPanelLayout.setHorizontalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE)
-            .addGroup(statusPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 345, Short.MAX_VALUE)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(statusAnimationLabel)
-                .addContainerGap())
-        );
-        statusPanelLayout.setVerticalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(statusPanelLayout.createSequentialGroup()
-                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(statusMessageLabel)
-                    .addComponent(statusAnimationLabel)
-                    .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         setComponent(mainPanel);
-        setStatusBar(statusPanel);
     }// </editor-fold>//GEN-END:initComponents
 
     private void textFieldNameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldNameKeyTyped
@@ -353,22 +274,16 @@ public class ExportMapsView extends FrameView {
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnChoosePath;
     private javax.swing.JButton btnSave;
+    private javax.swing.JLabel lblInfo;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblPath;
     private javax.swing.JPanel mainPanel;
-    private javax.swing.JProgressBar progressBar;
-    private javax.swing.JLabel statusAnimationLabel;
-    private javax.swing.JLabel statusMessageLabel;
-    private javax.swing.JPanel statusPanel;
+    private javax.swing.JPanel pnlInfo;
     private javax.swing.JTextField textFieldName;
     private javax.swing.JTextField textFieldPath;
     // End of variables declaration//GEN-END:variables
-    private final Timer messageTimer;
-    private final Timer busyIconTimer;
-    private final Icon idleIcon;
-    private final Icon[] busyIcons = new Icon[15];
-    private int busyIconIndex = 0;
-    private static final Logger logger = Logger.getLogger(ISimulationManager.class.getName());
+
     private File folder;
     private File backupPath = new File(System.getProperty("user.dir"));
+    private ResourceMap resourceMap;
 }

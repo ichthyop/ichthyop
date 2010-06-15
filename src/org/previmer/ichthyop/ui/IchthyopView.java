@@ -97,7 +97,7 @@ public class IchthyopView extends FrameView
 
         /* Create a FileHandler (logs will be recorded in a file */
         try {
-            String logPath = System.getProperty("user.dir") + File.separator + "log" + File.separator;
+            String logPath = System.getProperty("user.dir") + File.separator;
             StringBuffer logfile = new StringBuffer(logPath);
             logfile.append("ichthyop");
             logfile.append(".log");
@@ -142,11 +142,16 @@ public class IchthyopView extends FrameView
         btnAnimaction.getAction().setEnabled(enabled);
         btnNext.getAction().setEnabled(enabled);
         btnLast.getAction().setEnabled(enabled);
+        if (!enabled) {
+            sliderTime.setValue(0);
+            lblTime.setText(resourceMap.getString("lblTime.text"));
+        }
         sliderTime.setEnabled(enabled);
     }
 
     @Action
     public void deleteMaps() {
+        animate(false);
         File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
         StringBuffer message = new StringBuffer(getResourceMap().getString("deleteMaps.dialog.msg.part1"));
         message.append(" ");
@@ -333,6 +338,7 @@ public class IchthyopView extends FrameView
     @Action
     public Task openFolderAnimation() {
 
+        animate(false);
         File file = (null == outputFolder)
                 ? new File(System.getProperty("user.dir"))
                 : outputFolder;
@@ -398,6 +404,8 @@ public class IchthyopView extends FrameView
 
     @Action
     public void exportMaps() {
+        animate(false);
+        getLogger().info(getResourceMap().getString("exportMaps.Action.info"));
         getApplication().show(new ExportMapsView(IchthyopApp.getApplication(), replayPanel.getFolder()));
     }
 
@@ -650,7 +658,7 @@ public class IchthyopView extends FrameView
             //animator.setStartDelay(1000);
             animator.setAcceleration(0.01f);
             btnAnimaction.setEnabled(true);
-            btnOpenAnimation.getAction().setEnabled(false);
+            //btnOpenAnimation.getAction().setEnabled(false);
             animator.start();
             btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
         } else {
