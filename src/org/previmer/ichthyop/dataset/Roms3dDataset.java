@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
-import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.Attribute;
@@ -183,7 +182,18 @@ public abstract class Roms3dDataset extends AbstractDataset {
         }
     }
 
-    public void removeRequiredVariable(String name, Class requiredBy) {}
+    public void removeRequiredVariable(String name, Class requiredBy) {
+        RequiredVariable var = requiredVariables.get(name);
+        if (null != var) {
+            if (var.getRequiredBy().size() > 1) {
+                /* just remove the reference but dont remove the
+                variable because other classes might need it */
+                var.getRequiredBy().remove(requiredBy);
+            } else if (var.getRequiredBy().get(0).equals(requiredBy)) {
+                requiredVariables.remove(name);
+            }
+        }
+    }
 
     public void checkRequiredVariable() {
         for (RequiredVariable variable : requiredVariables.values()) {
@@ -257,7 +267,6 @@ public abstract class Roms3dDataset extends AbstractDataset {
         if (!filename.exists()) {
             throw new IOException("Grid file " + rawFile + " does not exist");
         }
-
         return filename.toString();
     }
 
@@ -290,41 +299,49 @@ public abstract class Roms3dDataset extends AbstractDataset {
         return f.isDirectory();
     }
 
-    public void setUp() {
+    public void shrinkGrid() {
+        boolean isParamDefined = false;
+        try {
+            Boolean.valueOf(getParameter("shrink_domain"));
+            isParamDefined = true;
+        } catch (NullPointerException ex) {
+            isParamDefined = false;
+        }
+
+        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+            try {
+                float[] p1 = new float[]{Float.valueOf(getParameter("north-west-corner.lon")), Float.valueOf(getParameter("north-west-corner.lat"))};
+                float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
+                range(p1, p2);
+            } catch (Exception ex) {
+                getLogger().log(Level.WARNING, "Failed to resize domain", ex);
+            }
+        }
+    }
+
+    public void setUp() throws Exception {
 
         loadParameters();
         clearRequiredVariables();
-
-        try {
-            openLocation(getParameter("input_path"));
-            getDimNC();
-            if (Boolean.valueOf(getParameter("is_ranged"))) {
-                float[] p1 = new float[]{Float.valueOf(getParameter("range_P1_lon")), Float.valueOf(getParameter("range_P1_lat"))};
-                float[] p2 = new float[]{Float.valueOf(getParameter("range_P2_lon")), Float.valueOf(getParameter("range_P2_lat"))};
-                range(p1, p2);
-            }
-            readConstantField(gridFile);
-            getDimGeogArea();
-            getCstSigLevels();
-            z_w_tp0 = getSigLevels();
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
+        openLocation(getParameter("input_path"));
+        getDimNC();
+        shrinkGrid();
+        readConstantField(gridFile);
+        getDimGeogArea();
+        getCstSigLevels();
+        z_w_tp0 = getSigLevels();
     }
 
-    public void init() {
-        try {
-            long t0 = getSimulationManager().getTimeManager().get_tO();
-            open(getFile(t0));
-            checkRequiredVariable();
-            setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
-            time_tp1 = t0;
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
+    public void init() throws Exception {
+
+        long t0 = getSimulationManager().getTimeManager().get_tO();
+        open(getFile(t0));
+        checkRequiredVariable();
+        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
+        time_tp1 = t0;
     }
 
-    private int findCurrentRank(long time) throws IOException {
+    private int findCurrentRank(long time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -332,23 +349,14 @@ public abstract class Roms3dDataset extends AbstractDataset {
         Array timeArr;
         try {
             timeArr = ncIn.findVariable(strTime).read();
-            time_rank = skipSeconds(
-                    timeArr.getLong(timeArr.getIndex().set(lrank)));
+            time_rank = skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
             while (time >= time_rank) {
                 if (time_arrow < 0 && time == time_rank) {
                     break;
                 }
                 lrank++;
-                time_rank = skipSeconds(
-                        timeArr.getLong(timeArr.getIndex().set(lrank)));
+                time_rank = skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
             }
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + ncIn.getLocation().toString() + " : "
-                    + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + ncIn.getLocation().toString() + " : "
-                    + e.getCause());
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
         }
@@ -376,7 +384,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             indexFile = indexLast;
             return listInputFiles.get(indexLast);
         }
-
+        
         throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
     }
 
@@ -392,8 +400,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             nc = NetcdfDataset.openFile(filename, null);
             timeArr = nc.findVariable(strTime).read();
             time_r0 = skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                    timeArr.getShape()[0] - 1)));
+            time_rf = skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
             nc.close();
 
             return (time >= time_r0 && time < time_rf);
@@ -404,12 +411,14 @@ public abstract class Roms3dDataset extends AbstractDataset {
             return (time > time_r0 && time <= time_rf);
             }*/
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
+            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : " + e.getCause());
+            IOException ioex = new IOException("Unable to read " + strTime + " variable in file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
         }
-        //return false;
 
     }
 
@@ -433,10 +442,13 @@ public abstract class Roms3dDataset extends AbstractDataset {
                 return true;
             }
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
+            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : " + e.getCause());
+            IOException ioex = new IOException("Unable to read " + strTime + " variable in file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
         }
         return false;
     }
@@ -523,124 +535,146 @@ public abstract class Roms3dDataset extends AbstractDataset {
         int[] size = new int[]{ny, nx};
         Array arrLon, arrLat, arrMask, arrH, arrZeta, arrPm, arrPn;
         Index index;
-        StringBuffer list = new StringBuffer(strLon);
-        list.append(", ");
-        list.append(strLat);
-        list.append(", ");
-        list.append(strMask);
-        list.append(", ");
-        list.append(strBathy);
-        list.append(", ");
-        list.append(strZeta);
-        list.append(", ");
-        list.append(strPm);
-        list.append(", ");
-        list.append(strPn);
+
+        NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
         try {
-
-            NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
             arrLon = ncGrid.findVariable(strLon).read(origin, size);
-            arrLat = ncGrid.findVariable(strLat).read(origin, size);
-            arrMask = ncGrid.findVariable(strMask).read(origin, size);
-            arrH = ncGrid.findVariable(strBathy).read(origin, size);
-            arrPm = ncGrid.findVariable(strPm).read(origin, size);
-            arrPn = ncGrid.findVariable(strPn).read(origin, size);
-            ncGrid.close();
-
-            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
-
-            if (arrLon.getElementType() == double.class) {
-                lonRho = (double[][]) arrLon.copyToNDJavaArray();
-                latRho = (double[][]) arrLat.copyToNDJavaArray();
-            } else {
-                lonRho = new double[ny][nx];
-                latRho = new double[ny][nx];
-                index = arrLon.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        index.set(j, i);
-                        lonRho[j][i] = arrLon.getDouble(index);
-                        latRho[j][i] = arrLat.getDouble(index);
-                    }
-                }
-            }
-
-            if (arrMask.getElementType() != byte.class) {
-                maskRho = new byte[ny][nx];
-                index = arrMask.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        maskRho[j][i] = arrMask.getByte(index.set(j, i));
-                    }
-                }
-            } else {
-                maskRho = (byte[][]) arrMask.copyToNDJavaArray();
-            }
-
-            if (arrPm.getElementType() == double.class) {
-                pm = (double[][]) arrPm.copyToNDJavaArray();
-                pn = (double[][]) arrPn.copyToNDJavaArray();
-            } else {
-                pm = new double[ny][nx];
-                pn = new double[ny][nx];
-                index = arrPm.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        index.set(j, i);
-                        pm[j][i] = arrPm.getDouble(index);
-                        pn[j][i] = arrPn.getDouble(index);
-                    }
-                }
-            }
-
-            if (arrH.getElementType() == double.class) {
-                hRho = (double[][]) arrH.copyToNDJavaArray();
-            } else {
-                hRho = new double[ny][nx];
-                index = arrH.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        hRho[j][i] = arrH.getDouble(index.set(j, i));
-                    }
-                }
-            }
-
-            if (arrZeta.getElementType() == float.class) {
-                zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
-            } else {
-                zeta_tp0 = new float[ny][nx];
-                index = arrZeta.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        zeta_tp0[j][i] = arrZeta.getFloat(index.set(j, i));
-                    }
-                }
-            }
-            zeta_tp1 = zeta_tp0;
-        } catch (IOException e) {
-            throw new IOException("Problem reading one of the fields " + list.toString() + " at location: " + e.getMessage());
-        } catch (InvalidRangeException e) {
-            throw new IOException("Problem reading one of the fields " + list.toString() + " at location: " + e.getMessage());
-        } catch (NullPointerException e) {
-            throw new IOException("Problem reading one of the fields " + list.toString() + " at location: " + e.getMessage());
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset longitude. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
         }
+        try {
+            arrLat = ncGrid.findVariable(strLat).read(origin, size);
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset latitude. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrMask = ncGrid.findVariable(strMask).read(origin, size);
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset mask. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrH = ncGrid.findVariable(strBathy).read(origin, size);
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset bathymetry. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrPm = ncGrid.findVariable(strPm).read(origin, size);
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset pm metrics. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+
+        try {
+            arrPn = ncGrid.findVariable(strPn).read(origin, size);
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset pn metrics. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        ncGrid.close();
+
+        try {
+            arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset ocean free surface elevation. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+
+        if (arrLon.getElementType() == double.class) {
+            lonRho = (double[][]) arrLon.copyToNDJavaArray();
+            latRho = (double[][]) arrLat.copyToNDJavaArray();
+        } else {
+            lonRho = new double[ny][nx];
+            latRho = new double[ny][nx];
+            index = arrLon.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    index.set(j, i);
+                    lonRho[j][i] = arrLon.getDouble(index);
+                    latRho[j][i] = arrLat.getDouble(index);
+                }
+            }
+        }
+
+        if (arrMask.getElementType() != byte.class) {
+            maskRho = new byte[ny][nx];
+            index = arrMask.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    maskRho[j][i] = arrMask.getByte(index.set(j, i));
+                }
+            }
+        } else {
+            maskRho = (byte[][]) arrMask.copyToNDJavaArray();
+        }
+
+        if (arrPm.getElementType() == double.class) {
+            pm = (double[][]) arrPm.copyToNDJavaArray();
+            pn = (double[][]) arrPn.copyToNDJavaArray();
+        } else {
+            pm = new double[ny][nx];
+            pn = new double[ny][nx];
+            index = arrPm.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    index.set(j, i);
+                    pm[j][i] = arrPm.getDouble(index);
+                    pn[j][i] = arrPn.getDouble(index);
+                }
+            }
+        }
+
+        if (arrH.getElementType() == double.class) {
+            hRho = (double[][]) arrH.copyToNDJavaArray();
+        } else {
+            hRho = new double[ny][nx];
+            index = arrH.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    hRho[j][i] = arrH.getDouble(index.set(j, i));
+                }
+            }
+        }
+
+        if (arrZeta.getElementType() == float.class) {
+            zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
+        } else {
+            zeta_tp0 = new float[ny][nx];
+            index = arrZeta.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    zeta_tp0[j][i] = arrZeta.getFloat(index.set(j, i));
+                }
+            }
+        }
+        zeta_tp1 = zeta_tp0;
     }
 
     /**
      * Reads the dimensions of the NetCDF dataset
      * @throws an IOException if an error occurs while reading the dimensions.
      */
-    private void getDimNC() throws IOException {
+    private void getDimNC() throws Exception {
 
         try {
             nx = ncIn.findDimension(strXiDim).getLength();
             ny = ncIn.findDimension(strEtaDim).getLength();
             nz = ncIn.findDimension(strZDim).getLength();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            //throw new IOException("Problem reading dimensions from dataset " + ncIn.getLocation() + " : " + e.getMessage());
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset grid dimensions. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
         }
-        //Logger.getLogger(getClass().getName()).info("nx " + nx + " - ny " + ny + " - nz " + nz);
         ipo = jpo = 0;
     }
 
@@ -1045,7 +1079,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
-    public void nextStepTriggered(NextStepEvent e) {
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
@@ -1063,15 +1097,11 @@ public abstract class Roms3dDataset extends AbstractDataset {
             z_w_tp0 = z_w_tp1;
         }
         rank += time_arrow;
-        try {
-            if (rank > (nbTimeRecords - 1) || rank < 0) {
-                open(getNextFile(time_arrow));
-                rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
-            }
-            setAllFieldsTp1AtTime(rank);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+        if (rank > (nbTimeRecords - 1) || rank < 0) {
+            open(getNextFile(time_arrow));
+            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
+        setAllFieldsTp1AtTime(rank);
     }
 
     private String getNextFile(int time_arrow) throws IOException {
@@ -1086,18 +1116,24 @@ public abstract class Roms3dDataset extends AbstractDataset {
     }
 
     private void open(String filename) throws IOException {
-        try {
-            if (ncIn == null || (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
+        if (ncIn == null || (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
+
+            try {
                 ncIn = NetcdfDataset.openFile(filename, null);
-                nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+            } catch (Exception ex) {
+                IOException ioex = new IOException("Error opening dataset " + filename + " ==> " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
             }
-            getLogger().info("Open dataset " + filename);
-        } catch (IOException e) {
-            throw new IOException("Problem opening dataset " + filename + " - " + e.getMessage());
-        } catch (NullPointerException e) {
-            throw new IOException("Problem reading " + strTimeDim + " dimension at location " + filename
-                    + " : " + e.getMessage());
+            try {
+                nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+            } catch (Exception ex) {
+                IOException ioex = new IOException("Error dataset time dimension ==> " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
+            }
         }
+        getLogger().info("Opened dataset " + filename);
     }
 
     void setAllFieldsTp1AtTime(int rank) throws IOException {
@@ -1108,28 +1144,40 @@ public abstract class Roms3dDataset extends AbstractDataset {
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
 
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
             v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
                     new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
+        try {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
             time_tp1 -= time_tp1 % 60;
             xTimeTp1 = null;
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
+
+        try {
             zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
                     new int[]{rank, 0, 0},
                     new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
-
-
-        } catch (IOException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
-                    + e.getMessage());
-        } catch (InvalidRangeException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
-                    + e.getMessage());
-        } catch (NullPointerException e) {
-            throw new IOException("Problem extracting fields at location " + ncIn.getLocation().toString() + " : "
-                    + e.getMessage());
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset ocean free surface elevation. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
@@ -1265,36 +1313,42 @@ public abstract class Roms3dDataset extends AbstractDataset {
      * Reads longitude and latitude fields in NetCDF dataset
      */
     void readLonLat(String gridFile) throws IOException {
+
         Array arrLon, arrLat;
+        NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
         try {
-
-            NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
             arrLon = ncIn.findVariable(strLon).read();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset longitude. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
             arrLat = ncIn.findVariable(strLat).read();
-            ncGrid.close();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset latitude. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        ncGrid.close();
 
-            if (arrLon.getElementType() == double.class) {
-                lonRho = (double[][]) arrLon.copyToNDJavaArray();
-                latRho = (double[][]) arrLat.copyToNDJavaArray();
-            } else {
-                lonRho = new double[ny][nx];
-                latRho = new double[ny][nx];
-                Index index = arrLon.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        index.set(j, i);
-                        lonRho[j][i] = arrLon.getDouble(index);
-                        latRho[j][i] = arrLat.getDouble(index);
-                    }
+        if (arrLon.getElementType() == double.class) {
+            lonRho = (double[][]) arrLon.copyToNDJavaArray();
+            latRho = (double[][]) arrLat.copyToNDJavaArray();
+        } else {
+            lonRho = new double[ny][nx];
+            latRho = new double[ny][nx];
+            Index index = arrLon.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    index.set(j, i);
+                    lonRho[j][i] = arrLon.getDouble(index);
+                    latRho[j][i] = arrLat.getDouble(index);
                 }
             }
-            arrLon = null;
-            arrLat = null;
-        } catch (IOException e) {
-            throw new IOException("Problem reading lon/lat fields at location: " + e.getMessage());
-        } catch (NullPointerException e) {
-            throw new IOException("Problem reading lon/lat at location: " + e.getMessage());
         }
+        arrLon = null;
+        arrLat = null;
     }
 
     /**
@@ -1318,8 +1372,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
         pGrid1 = lonlat2xy(pGeog1[0], pGeog1[1]);
         pGrid2 = lonlat2xy(pGeog2[0], pGeog2[1]);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            throw new IOException(
-                    "Impossible to proportion the simulation area : points out of domain");
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
         }
         lonRho = null;
         latRho = null;
