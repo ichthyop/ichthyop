@@ -6,7 +6,6 @@ package org.previmer.ichthyop.action;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Properties;
@@ -23,22 +22,18 @@ public class WindAction extends AbstractAction {
     private HashMap<Integer, WindScenario> scenarios;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
 
         windprop = new Properties();
         scenarios = new HashMap();
 
         File file = new File(getParameter("wind_file"));
         if (file.isFile()) {
-            try {
-                windprop.load(new FileInputStream(file));
-                int rank = 0;
-                while (null != getProperty("wind.intensity", rank)) {
-                    scenarios.put(rank, new WindScenario(rank));
-                    rank++;
-                }
-            } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
+            windprop.load(new FileInputStream(file));
+            int rank = 0;
+            while (null != getProperty("wind.intensity", rank)) {
+                scenarios.put(rank, new WindScenario(rank));
+                rank++;
             }
         }
     }

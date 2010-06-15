@@ -24,7 +24,7 @@ public class HDispAction extends AbstractAction {
     private static double epsilon16;
     private MTRandom random;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
         random = new MTRandom();
         epsilon = Double.valueOf(getParameter("epsilon"));
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);

@@ -4,7 +4,6 @@
  */
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
@@ -21,7 +20,7 @@ public class LethalTempAction extends AbstractAction {
     private int egg;
     private String temperature_field;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
 
         FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
         temperature_field = getParameter("temperature_field");

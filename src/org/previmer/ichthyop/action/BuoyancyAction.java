@@ -60,7 +60,7 @@ public class BuoyancyAction extends AbstractAction {
     private String salinity_field;
     private String temperature_field;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
         eggDensity = Float.valueOf(getParameter("egg_density"));
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");

@@ -25,7 +25,7 @@ public class MigrationAction extends AbstractAction {
     private float limitAge;
     private double limitLength;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
 
         calendar = getSimulationManager().getTimeManager().getCalendar();
         isAgeLimitation = getParameter("criterion").matches(Criterion.AGE.getName());

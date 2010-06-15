@@ -17,8 +17,6 @@ public interface IActionManager {
 
     public void executeActions(IBasicParticle particle);
 
-    public AbstractAction get(Object key);
-
     public boolean isEnabled(String actionName);
 
     public String getParameter(String actionName, String key);

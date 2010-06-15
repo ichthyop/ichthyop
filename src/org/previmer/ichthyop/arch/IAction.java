@@ -11,7 +11,7 @@ import org.previmer.ichthyop.action.ActionPriority;
  */
 public interface IAction {
 
-    public void loadParameters();
+    public void loadParameters() throws Exception;
 
     public void execute(IBasicParticle particle);
 

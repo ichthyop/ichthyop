@@ -27,7 +27,7 @@ import org.previmer.ichthyop.arch.IAction;
 public class ActionManager extends AbstractManager implements IActionManager, SetupListener {
 
     final private static ActionManager actionManager = new ActionManager();
-    private HashMap<String, AbstractAction> actionMap;
+    private HashMap<String, IAction> actionMap;
 
     public static ActionManager getInstance() {
         return actionManager;
@@ -41,7 +41,9 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
             if (xaction.isEnabled()) {
                 try {
                 Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
-                    actionMap.put(xaction.getKey(), createAction(actionClass));
+                IAction action = createAction(actionClass);
+                action.loadParameters();
+                    actionMap.put(xaction.getKey(), action);
                 } catch (Exception ex) {
                     StringBuffer msg = new StringBuffer();
                     msg.append("Failed to setup action ");
@@ -72,10 +74,6 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
                 action.execute(particle);
             }
         }
-    }
-
-    public AbstractAction get(Object key) {
-        return actionMap.get((String) key);
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {

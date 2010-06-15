@@ -15,7 +15,7 @@ public class AdvectionAction extends AbstractAction {
     private boolean isEuler = true;
     private boolean isForward = true;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
 
         try {
             isEuler = getParameter("scheme").matches(AdvectionScheme.FORWARD_EULER.getKey());

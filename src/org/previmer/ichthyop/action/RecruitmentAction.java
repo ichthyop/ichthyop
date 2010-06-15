@@ -37,7 +37,7 @@ public class RecruitmentAction extends AbstractAction {
     private boolean isAgeCriterion;
     private boolean stopMovingOnceRecruited;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
 
         timeInZone = 0;
         durationMinInRecruitArea = Integer.valueOf(getParameter("duration_min"));

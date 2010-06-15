@@ -17,7 +17,6 @@ public abstract class AbstractAction extends SimulationManagerAccessor implement
 
     public AbstractAction() {
         actionKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
-        loadParameters();
     }
 
     public String getParameter(String key) {

@@ -24,7 +24,7 @@ public class LinearGrowthAction extends AbstractAction {
     private double coeff2; //0.03d
     private String temperature_field;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
         tp_threshold = Float.valueOf(getParameter("threshold_temp"));
         coeff1 = Float.valueOf(getParameter("coeff1"));
         coeff2 = Float.valueOf(getParameter("coeff2"));
