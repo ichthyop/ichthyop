@@ -40,10 +40,6 @@ public class BuoyancyAction extends AbstractAction {
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Model time step [second]
-     */
-    private static double dt;
-    /**
      * Buoyuancy scheme only operates during the egg stage. But when the growth
      * of the particle is not simulated, it operates up to this age limit [day].
      */
@@ -56,7 +52,6 @@ public class BuoyancyAction extends AbstractAction {
      * Sea water density at particle location.
      */
     private static double waterDensity;
-
     private String salinity_field;
     private String temperature_field;
 
@@ -70,14 +65,12 @@ public class BuoyancyAction extends AbstractAction {
 
     public void execute(IBasicParticle particle) {
 
-        if (true) {
-            
-            double time = getSimulationManager().getTimeManager().getTime();
-            double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
-            double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
-            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp)) - particle.getZ();
-            particle.increment(new double[] {0.d, 0.d, dz});
-        }
+        double time = getSimulationManager().getTimeManager().getTime();
+        double dt = getSimulationManager().getTimeManager().get_dt();
+        double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
+        double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
+        double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
+        particle.increment(new double[]{0.d, 0.d, dz});
     }
 
     /**
@@ -101,7 +94,7 @@ public class BuoyancyAction extends AbstractAction {
      * location
      * @return a double, the vertical move of the particle [meter] dw * dt / 100
      */
-    private double move(double sal, double tp) {
+    private double move(double sal, double tp, double dt) {
 
         /* Methodology:
         waterDensity = waterDensity(salt, temperature);
@@ -116,8 +109,8 @@ public class BuoyancyAction extends AbstractAction {
 
         waterDensity = waterDensity(sal, tp);
 
-        return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f) *
-                (waterDensity - eggDensity)) / 100.0f) * dt);
+        return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
+                * (waterDensity - eggDensity)) / 100.0f) * dt);
     }
 
     /**
