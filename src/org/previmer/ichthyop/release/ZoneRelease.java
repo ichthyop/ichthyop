@@ -18,9 +18,15 @@ public class ZoneRelease extends AbstractReleaseProcess {
     private int nbReleasedNow, nbReleaseZones, nbTotalToRelease;
     private boolean is3D;
 
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
+        
+        /* Get number of particles to release */
         nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
+
+        /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
+
+        /* Load release zones*/
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()

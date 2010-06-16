@@ -28,13 +28,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.filter.Filter;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 public class ZoneFile {
 
@@ -54,9 +53,9 @@ public class ZoneFile {
             try {
                 save(new String[]{});
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, ex);
+                SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
-                Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, ex);
+                SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -78,7 +77,7 @@ public class ZoneFile {
             structure = new Document(racine);
             zones = createMap();
         } catch (Exception e) {
-            Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, e);
+            SimulationManager.getLogger().log(Level.SEVERE, null, e);
         }
     }
 
@@ -114,9 +113,11 @@ public class ZoneFile {
 
     public Collection<XZone> getZones() {
         List<XZone> list = new ArrayList(zones.values().size());
-        Iterator<String> it = sortedKey.iterator();
-        while (it.hasNext()) {
-            list.add(zones.get(it.next()));
+        if (null != sortedKey) {
+            Iterator<String> it = sortedKey.iterator();
+            while (it.hasNext()) {
+                list.add(zones.get(it.next()));
+            }
         }
         return list;
     }

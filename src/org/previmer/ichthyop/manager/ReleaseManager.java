@@ -48,6 +48,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         if (releaseBlock != null) {
             try {
                 releaseProcess = (IReleaseProcess) Class.forName(className).newInstance();
+                releaseProcess.loadParameters();
             } catch (Exception ex) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("Release process instantiation failed ==> ");

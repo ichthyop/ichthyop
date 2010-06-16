@@ -132,7 +132,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnDownZone.removeActionListener(al);
     }
 
-    public void loadZonesFromFile(File file) {
+    public void loadZonesFromFile(File file) throws Exception {
         lblFile.setText(file.getAbsolutePath());
         lblFile.setToolTipText(lblFile.getText());
         zoneFile = new ZoneFile(file);
@@ -330,7 +330,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }
 
     public Logger getLogger() {
-        return SimulationManager.getInstance().getLogger();
+        return SimulationManager.getLogger();
     }
 
     /** This method is called from within the constructor to
@@ -665,11 +665,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlThicknessLayout.createSequentialGroup()
                                 .addComponent(lblLowerDepth)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFieldLowerDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
+                                .addComponent(txtFieldLowerDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlThicknessLayout.createSequentialGroup()
                                 .addComponent(lblUpperDepth)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFieldUpperDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))))
+                                .addComponent(txtFieldUpperDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE))))
                     .addComponent(ckBoxThickness))
                 .addContainerGap())
         );
@@ -727,8 +727,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                     .addComponent(ckBoxBathyMask))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlBathyMaskLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFieldOffshore, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
-                    .addComponent(txtFieldInshore, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
+                    .addComponent(txtFieldOffshore, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)
+                    .addComponent(txtFieldInshore, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlBathyMaskLayout.setVerticalGroup(
@@ -788,7 +788,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             pnlTypeZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlTypeZoneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(cbBoxType, 0, 217, Short.MAX_VALUE)
+                .addComponent(cbBoxType, 0, 265, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlTypeZoneLayout.setVerticalGroup(
@@ -885,7 +885,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(rdBtnDegMinSec))
                     .addComponent(lblLonlat))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(63, Short.MAX_VALUE))
         );
         pnlOptionLayout.setVerticalGroup(
             pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -953,7 +953,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 730, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1058, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -972,7 +972,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                     .addComponent(btnSave)
                     .addComponent(btnSaveAs)
                     .addComponent(lblFile))
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -999,6 +999,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         model.removeRow(index);
         index = Math.max(Math.min(model.getRowCount() - 1, index), 0);
         zoneFile.removeZone(zone.getKey());
+        if (model.getRowCount() < 1) {
+            setPanelZoneEnabled(false);
+            return;
+        }
         tableZone.setRowSelectionInterval(index, index);
 }//GEN-LAST:event_btnDeleteZoneActionPerformed
 
@@ -1257,12 +1261,16 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private boolean hasZoneChanged = false;
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        ZoneEditorPanel editor = new ZoneEditorPanel();
-        editor.loadZonesFromFile(new File("/home/pverley/ichthyop/dev/nb/iv3/cfg/zone-mars3d.xml"));
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.add(editor);
-        frame.pack();
-        frame.setVisible(true);
+        try {
+            JFrame frame = new JFrame();
+            ZoneEditorPanel editor = new ZoneEditorPanel();
+            editor.loadZonesFromFile(new File("/home/pverley/ichthyop/dev/nb/iv3/cfg/NewZoneFile.xml"));
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.add(editor);
+            frame.pack();
+            frame.setVisible(true);
+        } catch (Exception ex) {
+            Logger.getLogger(ZoneEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

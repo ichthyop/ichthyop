@@ -40,9 +40,9 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
             XBlock xaction = it.next();
             if (xaction.isEnabled()) {
                 try {
-                Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
-                IAction action = createAction(actionClass);
-                action.loadParameters();
+                    Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
+                    IAction action = createAction(actionClass);
+                    action.loadParameters();
                     actionMap.put(xaction.getKey(), action);
                     getLogger().info("Instantiated action \"" + xaction.getTreePath() + "\"");
                 } catch (Exception ex) {
@@ -92,7 +92,7 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
 
     public String getParameter(String actionKey, String key) {
         return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
-        }
+    }
 
     private class ActionComparator implements Comparator<IAction> {
 

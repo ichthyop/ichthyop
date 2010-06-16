@@ -25,13 +25,18 @@ public class PatchyRelease extends AbstractReleaseProcess {
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     @Override
-    public void loadParameters() {
+    public void loadParameters() throws Exception {
         
+        /* retrieve patches parameters */
         nb_patches = Integer.valueOf(getParameter("number_patches"));
         nb_agregated = Integer.valueOf(getParameter("number_agregated"));
         radius_patch = Float.valueOf(getParameter("radius_patch"));
         thickness_patch = Float.valueOf(getParameter("thickness_patch"));
+        
+        /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
+
+        /* Load release zones*/
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()

@@ -16,6 +16,8 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractCellEditor;
 import javax.swing.table.TableCellEditor;
 import javax.swing.JButton;
@@ -40,6 +42,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.jdesktop.application.ResourceMap;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -157,16 +160,18 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
         String path = textField.getText().isEmpty()
                 ? System.getProperty("user.dir")
                 : textField.getText();
-        if (path.startsWith(".")) {
-            path = System.getProperty("user.dir") + path.substring(1);
-        }
+        path = new File(path).getAbsolutePath();
         if (e.getActionCommand().matches(EDIT)) {
             fileChooser.setSelectedFile(new File(path));
             int answer = fileChooser.showOpenDialog(panel);
             if (answer == JFileChooser.APPROVE_OPTION) {
                 textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                zoneEditor.loadZonesFromFile(fileChooser.getSelectedFile());
-                dialog.setVisible(true);
+                try {
+                    zoneEditor.loadZonesFromFile(fileChooser.getSelectedFile());
+                    dialog.setVisible(true);
+                } catch (Exception ex) {
+                    Logger.getLogger(ZoneEditor.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } else {
                 fireEditingCanceled();
             }
@@ -199,9 +204,14 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
                             return;
                     }
                 }
+                System.out.println("file accepted " + file.getAbsolutePath());
                 textField.setText(file.getAbsolutePath());
-                zoneEditor.loadZonesFromFile(file);
-                dialog.setVisible(true);
+                try {
+                    zoneEditor.loadZonesFromFile(file);
+                    dialog.setVisible(true);
+                } catch (Exception ex) {
+                    SimulationManager.getLogger().log(Level.SEVERE, null, ex);
+                }
             } else {
                 fireEditingCanceled();
             }

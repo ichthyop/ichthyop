@@ -23,7 +23,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
-                  <Component id="jSplitPane1" alignment="0" pref="730" max="32767" attributes="1"/>
+                  <Component id="jSplitPane1" alignment="0" pref="1058" max="32767" attributes="1"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="btnSave" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -47,7 +47,7 @@
                   <Component id="btnSaveAs" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="lblFile" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="17" max="32767" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -486,12 +486,12 @@
                                               <Group type="102" alignment="0" attributes="0">
                                                   <Component id="lblLowerDepth" min="-2" max="-2" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="txtFieldLowerDepth" pref="175" max="32767" attributes="0"/>
+                                                  <Component id="txtFieldLowerDepth" pref="223" max="32767" attributes="0"/>
                                               </Group>
                                               <Group type="102" alignment="0" attributes="0">
                                                   <Component id="lblUpperDepth" min="-2" max="-2" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="txtFieldUpperDepth" pref="176" max="32767" attributes="0"/>
+                                                  <Component id="txtFieldUpperDepth" pref="224" max="32767" attributes="0"/>
                                               </Group>
                                           </Group>
                                       </Group>
@@ -590,8 +590,8 @@
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtFieldOffshore" pref="171" max="32767" attributes="1"/>
-                                      <Component id="txtFieldInshore" alignment="0" pref="171" max="32767" attributes="1"/>
+                                      <Component id="txtFieldOffshore" pref="219" max="32767" attributes="1"/>
+                                      <Component id="txtFieldInshore" alignment="0" pref="219" max="32767" attributes="1"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
@@ -718,7 +718,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="cbBoxType" pref="217" max="32767" attributes="0"/>
+                                  <Component id="cbBoxType" pref="265" max="32767" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                               </Group>
                           </Group>
@@ -781,7 +781,7 @@
                                   </Group>
                                   <Component id="lblLonlat" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace pref="15" max="32767" attributes="0"/>
+                              <EmptySpace pref="63" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>

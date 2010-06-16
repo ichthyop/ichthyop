@@ -155,6 +155,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         String path = textField.getText().isEmpty()
                 ? System.getProperty("user.dir")
                 : textField.getText();
+        path = new File(path).getAbsolutePath();
         
         if (e.getActionCommand().matches(EDIT)) {
             fileChooser.setSelectedFile(new File(path));

@@ -5,6 +5,7 @@
 package org.previmer.ichthyop.manager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.*;
@@ -38,8 +39,14 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
         map.clear();
     }
 
-    public void loadZonesFromFile(String filename, TypeZone type) {
-        ZoneFile zoneFile = new ZoneFile(new File(filename));
+    public void loadZonesFromFile(String filename, TypeZone type) throws Exception {
+
+        File f = new File(filename);
+        if (!f.isFile()) {
+            throw new FileNotFoundException("Zone file " + filename + " not found.");
+        }
+
+        ZoneFile zoneFile = new ZoneFile(f);
         if (!map.containsKey(type)) {
             map.put(type, new ArrayList());
         }

@@ -17,7 +17,6 @@ public abstract class AbstractReleaseProcess extends SimulationManagerAccessor i
 
     public AbstractReleaseProcess() {
         releaseKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
-        loadParameters();
     }
 
     String getParameter(String key) {
