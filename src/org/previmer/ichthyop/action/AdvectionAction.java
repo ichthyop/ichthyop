@@ -12,11 +12,15 @@ import org.previmer.ichthyop.arch.IBasicParticle;
  */
 public class AdvectionAction extends AbstractAction {
 
-    private boolean isEuler = true;
-    private boolean isForward = true;
+    private boolean isEuler;
+    private boolean isForward;
+    private boolean horizontal;
+    private boolean vertical;
+
 
     public void loadParameters() throws Exception {
 
+        /* numerical scheme */
         try {
             isEuler = getParameter("scheme").matches(AdvectionScheme.FORWARD_EULER.getKey());
         } catch (Exception ex) {
@@ -27,7 +31,23 @@ public class AdvectionAction extends AbstractAction {
             // print the info in the log
             getLogger().info("Failed to read the advection numerical scheme. Set by default to " + AdvectionScheme.RUNGE_KUTTA_4.getName());
         }
+
+        /* time direction */
         isForward = getSimulationManager().getTimeManager().get_dt() >= 0;
+
+        /* Horizontal advection enabled ? */
+        try {
+            horizontal = Boolean.valueOf(getParameter("horizontal"));
+        } catch(Exception ex) {
+            horizontal = true;
+        }
+
+        /* Vertical advection enabled ? */
+        try {
+            vertical = Boolean.valueOf(getParameter("vertical"));
+        } catch(Exception ex) {
+            vertical = true;
+        }
     }
 
     public void execute(IBasicParticle particle) {
@@ -45,6 +65,13 @@ public class AdvectionAction extends AbstractAction {
                 ? advectEuler(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt())
                 : advectRk4(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt());
         //Logger.getAnonymousLogger().info("dx " + mvt[0] + " dy " + mvt[1] + " dz " + mvt[2]);
+        if (!horizontal) {
+            mvt[0] = 0;
+            mvt[1] = 1;
+        }
+        if (!vertical && mvt.length > 2) {
+            mvt[2] = 0;
+        }
         particle.increment(mvt);
     }
 
@@ -85,6 +112,13 @@ public class AdvectionAction extends AbstractAction {
             mvt = advectRk4(pgrid, time, dt);
         }
 
+        if (!horizontal) {
+            mvt[0] = 0;
+            mvt[1] = 1;
+        }
+        if (!vertical && mvt.length > 2) {
+            mvt[2] = 0;
+        }
         particle.increment(mvt);
     }
 
