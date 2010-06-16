@@ -44,6 +44,7 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
                 IAction action = createAction(actionClass);
                 action.loadParameters();
                     actionMap.put(xaction.getKey(), action);
+                    getLogger().info("Instantiated action \"" + xaction.getTreePath() + "\"");
                 } catch (Exception ex) {
                     StringBuffer msg = new StringBuffer();
                     msg.append("Failed to setup action ");

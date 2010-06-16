@@ -394,7 +394,6 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
         jSplitPane1.setBorder(null);
         jSplitPane1.setDividerLocation(250);
-        jSplitPane1.setResizeWeight(0.5);
         jSplitPane1.setName("jSplitPane1"); // NOI18N
 
         jScrollPane4.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
@@ -943,7 +942,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             }
         });
 
-        lblFile.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
+        lblFile.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
         lblFile.setText(resourceMap.getString("lblFile.text")); // NOI18N
         lblFile.setName("lblFile"); // NOI18N
 

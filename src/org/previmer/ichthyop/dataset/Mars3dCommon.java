@@ -7,7 +7,6 @@ package org.previmer.ichthyop.dataset;
 import java.io.IOException;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
-import ucar.ma2.InvalidRangeException;
 
 /**
  *
@@ -381,10 +380,9 @@ abstract class Mars3dCommon extends MarsCommon {
                 if (isInWater(i + ii, j + jj)) {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                     double z_r = 0.d;
-                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j
-                            + jj][i + ii]
-                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i
-                            + ii]);
+                    z_r = z_rho_cst[k][j + jj][i + ii]
+                            + (double) zeta_tp0[j + jj][i + ii]
+                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i + ii]);
                     hh += co * z_r;
                 }
             }
