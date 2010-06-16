@@ -8,7 +8,7 @@
       <parameter type="serial">
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
-        <value>year 2010 month 03 day 01 at 00:00</value>
+        <value>year 2010 month 05 day 13 at 10:00</value>
         <format>date</format>
         <tree_path>Tome/General time options</tree_path>
         <description>Set the date of beginning of simulation. Expressed in seconds ellapsed since the origin of time.</description>
@@ -23,7 +23,7 @@
       <parameter type="serial">
         <key>transport_duration</key>
         <long_name>Transport duration</long_name>
-        <value>0000 day(s) 12 hour(s) 00 minute(s)</value>
+        <value>0001 day(s) 00 hour(s) 00 minute(s)</value>
         <format>duration</format>
         <description>Set the duration [second] of particle transport.</description>
       </parameter>
@@ -68,7 +68,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>6</value>
+        <value>12</value>
         <format>integer</format>
         <description>Set the record frequency as a number of computational time-steps</description>
       </parameter>
@@ -85,6 +85,19 @@
     <tree_path>Main/MARS 2D OpenDAP</tree_path>
     <parameters>
       <parameter>
+        <key>opendap_url</key>
+        <long_name>OpenDAP URL</long_name>
+        <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+        <description>Folder containing the MARS NetCDF files.</description>
+      </parameter>
+      <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>true</value>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation.</description>
+      </parameter>
+      <parameter>
         <key>north-west-corner.lat</key>
         <long_name>Latitude of Northwest corner</long_name>
         <value>50.0</value>
@@ -99,19 +112,6 @@
         <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
         <format>float</format>
         <default>0.0</default>
-      </parameter>
-      <parameter>
-        <key>opendap_url</key>
-        <long_name>OpenDAP URL</long_name>
-        <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
-        <description>Folder containing the MARS NetCDF files.</description>
-      </parameter>
-      <parameter>
-        <key>shrink_domain</key>
-        <long_name>Shrink simulated domain</long_name>
-        <value>true</value>
-        <format>boolean</format>
-        <description>Shrink the size of the domain for running the simulation.</description>
       </parameter>
       <parameter>
         <key>south-east-corner.lat</key>
@@ -216,7 +216,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>./cfg/zone-mars2d.xml</value>
+        <value>cfg/zone-iroise.xml</value>
         <format>zonefile</format>
       </parameter>
       <parameter hidden="true">
@@ -229,232 +229,33 @@
     </parameters>
   </block>
   <block type="action">
-    <key>action.advection</key>
-    <tree_path>Advanced/Transport/Advection</tree_path>
-    <enabled>true</enabled>
-    <parameters>
-      <parameter>
-        <key>scheme</key>
-        <long_name>Numerical scheme</long_name>
-        <value>euler</value>
-        <format>list</format>
-        <accepted>euler</accepted>
-        <accepted>rk4</accepted>
-        <description>Use a forward Euler scheme (euler) or a Runge-Kutta 4th order scheme (rk4)</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.action.AdvectionAction</value>
-        <format>class</format>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-      <parameter hidden="true">
-        <long_name>priority</long_name>
-        <key>priority</key>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-        <value>high</value>
-        <format>list</format>
-        <accepted>lowest</accepted>
-        <accepted>low</accepted>
-        <accepted>normal</accepted>
-        <accepted>high</accepted>
-        <accepted>highest</accepted>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="action">
-    <key>action.hdisp</key>
-    <tree_path>Advanced/Transport/Horizontal dispersion</tree_path>
+    <key>action.lethal_temp</key>
+    <tree_path>Advanced/Biology/Lethal temperature</tree_path>
     <enabled>false</enabled>
     <parameters>
-      <parameter type="serial">
-        <key>epsilon</key>
-        <long_name>Dissipation rate</long_name>
-        <value>1.0E-9</value>
-        <description>Turbulent dissipation rate used in the parametrization of Lagrangian horizontal diffusion.</description>
-        <format>float</format>
-        <default>1e-9</default>
+      <parameter>
+        <key>lethal_temp</key>
+        <long_name>Lethal temperature</long_name>
+        <value>14</value>
       </parameter>
       <parameter hidden="true">
         <key>class_name</key>
         <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.action.HDispAction</value>
+        <value>org.previmer.ichthyop.action.LethalTempAction</value>
         <format>class</format>
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
       </parameter>
       <parameter hidden="true">
         <key>priority</key>
         <long_name>priority</long_name>
-        <value>normal</value>
-        <format>list</format>
+        <value>low</value>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
         <accepted>high</accepted>
         <accepted>highest</accepted>
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="action">
-    <key>action.vdisp</key>
-    <tree_path>Advanced/Transport/Vertical dispersion</tree_path>
-    <enabled>false</enabled>
-    <parameters>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <format>class</format>
-        <value>org.previmer.ichthyop.action.VDispAction</value>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>priority</key>
-        <long_name>priority</long_name>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-        <value>high</value>
-        <format>list</format>
-        <accepted>lowest</accepted>
-        <accepted>low</accepted>
-        <accepted>normal</accepted>
-        <accepted>high</accepted>
-        <accepted>highest</accepted>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="action">
-    <key>action.buoyancy</key>
-    <tree_path>Advanced/Transport/Buoyancy</tree_path>
-    <enabled>false</enabled>
-    <parameters>
-      <parameter type="serial">
-        <key>egg_density</key>
-        <long_name>Egg density</long_name>
-        <value>1.025</value>
-        <format>float</format>
-        <default>1.025</default>
-        <description>Set the egg density [g/cm3], a long_name parameter to calculate the egg buoyancy.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.action.BuoyancyAction</value>
-        <format>class</format>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>priority</key>
-        <long_name>priority</long_name>
-        <value>normal</value>
-        <format>list</format>
-        <accepted>lowest</accepted>
-        <accepted>low</accepted>
-        <accepted>normal</accepted>
-        <accepted>high</accepted>
-        <accepted>highest</accepted>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="action">
-    <key>action.migration</key>
-    <tree_path>Advanced/Transport/Vertical migration</tree_path>
-    <enabled>false</enabled>
-    <parameters>
-      <parameter>
-        <key>criterion</key>
-        <long_name>Migration criterion</long_name>
-        <value>Age criterion</value>
-        <format>list</format>
-        <accepted>Length criterion</accepted>
-        <accepted>Age criterion</accepted>
-      </parameter>
-      <parameter>
-        <key>daytime_depth</key>
-        <long_name>Depth at daytime</long_name>
-        <value>30</value>
-      </parameter>
-      <parameter>
-        <key>limit_age</key>
-        <long_name>Limit age</long_name>
-        <value>7</value>
-      </parameter>
-      <parameter>
-        <key>limit_length</key>
-        <long_name>Limit length</long_name>
-        <value>7</value>
-      </parameter>
-      <parameter>
-        <key>nighttime_depth</key>
-        <long_name>Depth at nighttime</long_name>
-        <value>10</value>
-      </parameter>
-      <parameter>
-        <key>sunrise</key>
-        <long_name>Hour of sunrise</long_name>
-        <value>7</value>
-      </parameter>
-      <parameter>
-        <key>sunset</key>
-        <long_name>Hour of sunset</long_name>
-        <value>19</value>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.action.MigrationAction</value>
-        <format>class</format>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>priority</key>
-        <long_name>priority</long_name>
-        <value>normal</value>
-        <format>list</format>
-        <accepted>lowest</accepted>
-        <accepted>low</accepted>
-        <accepted>normal</accepted>
-        <accepted>high</accepted>
-        <accepted>highest</accepted>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="option">
-    <key>release.schedule</key>
-    <tree_path>Advanced/Release/Shedule</tree_path>
-    <parameters>
-      <parameter>
-        <key>events</key>
-        <long_name>Release event</long_name>
-        <value>year 2008 month 01 day 07 at 06:00</value>
-        <format>list</format>
-      </parameter>
-      <parameter>
-        <key>is_enabled</key>
-        <long_name>Use release schedule</long_name>
-        <value>false</value>
-        <format>boolean</format>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="release">
-    <key>release.txtfile</key>
-    <tree_path>Advanced/Release/Drifters</tree_path>
-    <enabled>false</enabled>
-    <parameters>
-      <parameter>
-        <key>txtfile</key>
-        <long_name>Drifter file</long_name>
-        <value>./drifter_example.txt</value>
-        <format>file</format>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <format>class</format>
-        <value>org.previmer.ichthyop.release.TxtFileRelease</value>
       </parameter>
     </parameters>
   </block>
@@ -483,37 +284,6 @@
     </parameters>
   </block>
   <block type="action">
-    <key>action.lethal_temp</key>
-    <tree_path>Advanced/Biology/Lethal temperature</tree_path>
-    <enabled>false</enabled>
-    <parameters>
-      <parameter>
-        <key>lethal_temp</key>
-        <long_name>Lethal temperature</long_name>
-        <value>14</value>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.action.LethalTempAction</value>
-        <format>class</format>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>priority</key>
-        <long_name>priority</long_name>
-        <value>low</value>
-        <format>list</format>
-        <accepted>lowest</accepted>
-        <accepted>low</accepted>
-        <accepted>normal</accepted>
-        <accepted>high</accepted>
-        <accepted>highest</accepted>
-        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
-      </parameter>
-    </parameters>
-  </block>
-  <block type="action">
     <key>action.growth</key>
     <tree_path>Advanced/Biology/Growth</tree_path>
     <enabled>false</enabled>
@@ -522,6 +292,16 @@
         <key>coeff1</key>
         <long_name>Growth coefficient 2</long_name>
         <value>0.03</value>
+      </parameter>
+      <parameter>
+        <key>coeff2</key>
+        <long_name>Growth coefficient 2</long_name>
+        <value>0.01</value>
+      </parameter>
+      <parameter>
+        <key>temperature_field</key>
+        <long_name>Name of the NetCDF variable for temperature</long_name>
+        <value>temp</value>
       </parameter>
       <parameter>
         <key>threshold_temp</key>
@@ -539,7 +319,7 @@
         <key>priority</key>
         <long_name>priority</long_name>
         <value>low</value>
-        <format>list</format>
+        <format>combo</format>
         <accepted>lowest</accepted>
         <accepted>low</accepted>
         <accepted>normal</accepted>
@@ -567,7 +347,7 @@
       <parameter>
         <key>limit_age</key>
         <long_name>Reruitment limit age</long_name>
-        <value>7</value>
+        <value>0.5</value>
       </parameter>
       <parameter>
         <key>stop_moving</key>
@@ -598,6 +378,331 @@
         <accepted>high</accepted>
         <accepted>highest</accepted>
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.migration</key>
+    <tree_path>Advanced/Transport/Vertical migration</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>criterion</key>
+        <long_name>Migration criterion</long_name>
+        <value>Age criterion</value>
+        <format>combo</format>
+        <accepted>Length criterion</accepted>
+        <accepted>Age criterion</accepted>
+      </parameter>
+      <parameter>
+        <key>daytime_depth</key>
+        <long_name>Depth at daytime</long_name>
+        <value>-10</value>
+      </parameter>
+      <parameter>
+        <key>limit_age</key>
+        <long_name>Limit age</long_name>
+        <value>7</value>
+      </parameter>
+      <parameter>
+        <key>limit_length</key>
+        <long_name>Limit length</long_name>
+        <value>7</value>
+      </parameter>
+      <parameter>
+        <key>nighttime_depth</key>
+        <long_name>Depth at nighttime</long_name>
+        <value>-10</value>
+      </parameter>
+      <parameter>
+        <key>sunrise</key>
+        <long_name>Hour of sunrise</long_name>
+        <value>7</value>
+      </parameter>
+      <parameter>
+        <key>sunset</key>
+        <long_name>Hour of sunset</long_name>
+        <value>19</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.MigrationAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>normal</value>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.buoyancy</key>
+    <tree_path>Advanced/Transport/Buoyancy</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter type="serial">
+        <key>egg_density</key>
+        <long_name>Egg density</long_name>
+        <value>1.025</value>
+        <format>float</format>
+        <default>1.025</default>
+        <description>Set the egg density [g/cm3], a long_name parameter to calculate the egg buoyancy.</description>
+      </parameter>
+      <parameter>
+        <key>salinity_field</key>
+        <long_name>Salinity variable name</long_name>
+        <value>SAL</value>
+        <default>salt</default>
+        <description>The name of the salinity field in the dataset.</description>
+      </parameter>
+      <parameter>
+        <key>temperature_field</key>
+        <long_name>Temperature variable name</long_name>
+        <value>TEMP</value>
+        <default>temp</default>
+        <description>The name of the temperature field in the dataset.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.BuoyancyAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>normal</value>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.advection</key>
+    <tree_path>Advanced/Transport/Advection</tree_path>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter>
+        <key>scheme</key>
+        <long_name>Numerical scheme</long_name>
+        <value>euler</value>
+        <format>combo</format>
+        <accepted>euler</accepted>
+        <accepted>rk4</accepted>
+        <description>Use a forward Euler scheme (euler) or a Runge-Kutta 4th order scheme (rk4)</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>horizontal</key>
+        <long_name>Horizontal advection</long_name>
+        <value>true</value>
+        <format>boolean</format>
+        <description>Determine whether horizontal advection is enabled</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>vertical</key>
+        <long_name>Vertical advection</long_name>
+        <value>true</value>
+        <format>boolean</format>
+        <description>Determine whether vertical advection is enabled</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.AdvectionAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <long_name>priority</long_name>
+        <key>priority</key>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+        <value>high</value>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.hdisp</key>
+    <tree_path>Advanced/Transport/Horizontal dispersion</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter type="serial">
+        <key>epsilon</key>
+        <long_name>Dissipation rate</long_name>
+        <value>1e-9</value>
+        <description>Turbulent dissipation rate used in the parametrization of Lagrangian horizontal diffusion.</description>
+        <format>float</format>
+        <default>1e-9</default>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.action.HDispAction</value>
+        <format>class</format>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <value>normal</value>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
+    <key>action.wind</key>
+    <tree_path>Advanced/Transport/Wind</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>wind_file</key>
+        <long_name>File of wind scenario</long_name>
+        <value>cfg/wind-manga.txt</value>
+        <format>textfile</format>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.previmer.ichthyop.action.WindAction</value>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+        <value>normal</value>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="release">
+    <key>release.txtfile</key>
+    <tree_path>Advanced/Release/From text file</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>txtfile</key>
+        <long_name>Drifter file</long_name>
+        <value>cfg/drifter_manga.txt</value>
+        <format>textfile</format>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.previmer.ichthyop.release.TxtFileRelease</value>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="release">
+    <key>release.ncfile</key>
+    <tree_path>Advanced/Release/From NetCDF file</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>ncfile</key>
+        <long_name>NetCDF file</long_name>
+        <value>/home/pverley/ichthyop/dev/nb/iv3/output/iroise3d_ichthyop-run201006141813.nc</value>
+        <format>file</format>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.previmer.ichthyop.release.NcFileRelease</value>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="release">
+    <key>release.patches</key>
+    <tree_path>Advanced/Release/Patches</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>number_patches</key>
+        <long_name>Number of patches</long_name>
+        <value>10</value>
+        <format>integer</format>
+      </parameter>
+      <parameter>
+        <key>number_agregated</key>
+        <long_name>Number of particles per patch</long_name>
+        <value>100</value>
+        <format>integer</format>
+      </parameter>
+      <parameter>
+        <key>radius_patch</key>
+        <long_name>Radius of the patch</long_name>
+        <value>2000.0</value>
+        <format>float</format>
+      </parameter>
+      <parameter>
+        <key>thickness_patch</key>
+        <long_name>Thickness of the patch</long_name>
+        <value>2.0</value>
+        <format>float</format>
+      </parameter>
+      <parameter>
+        <key>zone_file</key>
+        <long_name>Zone file</long_name>
+        <value>/home/pverley/ichthyop/dev/nb/iv3/cfg/zone-mars3d.xml</value>
+        <format>zonefile</format>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.previmer.ichthyop.release.PatchyRelease</value>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="option">
+    <key>release.schedule</key>
+    <tree_path>Advanced/Release/Shedule</tree_path>
+    <parameters>
+      <parameter>
+        <key>events</key>
+        <long_name>Release event</long_name>
+        <value>"year 2010 month 05 day 13 at 10:00" "year 2010 month 05 day 13 at 12:00"</value>
+        <format>list</format>
+      </parameter>
+      <parameter>
+        <key>is_enabled</key>
+        <long_name>Use release schedule</long_name>
+        <value>false</value>
+        <format>boolean</format>
       </parameter>
     </parameters>
   </block>
