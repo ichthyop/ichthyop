@@ -46,6 +46,8 @@ public class GridPoint extends SimulationManagerAccessor {
         xyHaveChanged = false;
         zHasChanged = false;
         dx = dy = dz = 0.d;
+        x = y = z = -1;
+        lon = lat = depth = Double.NaN;
     }
 
     public GridPoint() {
