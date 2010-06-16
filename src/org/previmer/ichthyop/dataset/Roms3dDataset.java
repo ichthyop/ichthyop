@@ -252,9 +252,13 @@ public abstract class Roms3dDataset extends AbstractDataset {
 
         if (isDirectory(path)) {
             listInputFiles = getInputList(path);
-            if (!getParameter("grid_file").isEmpty()) {
-                gridFile = getGridFile(getParameter("grid_file"));
-            } else {
+            try {
+                if (!getParameter("grid_file").isEmpty()) {
+                    gridFile = getGridFile(getParameter("grid_file"));
+                } else {
+                    gridFile = listInputFiles.get(0);
+                }
+            } catch (NullPointerException ex) {
                 gridFile = listInputFiles.get(0);
             }
         }
@@ -384,7 +388,7 @@ public abstract class Roms3dDataset extends AbstractDataset {
             indexFile = indexLast;
             return listInputFiles.get(indexLast);
         }
-        
+
         throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
     }
 
