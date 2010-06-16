@@ -34,8 +34,10 @@ public class ReplayPanel extends JXImagePanel {
     private int indexMax;
 
     public ReplayPanel() {
-        this.setOpaque(false);
-        this.setStyle(JXImagePanel.Style.CENTERED);
+        setOpaque(false);
+        setStyle(JXImagePanel.Style.CENTERED);
+        pictures = new ArrayList();
+        pictureNames = new ArrayList();
     }
 
     public int getIndexMax() {
@@ -55,8 +57,8 @@ public class ReplayPanel extends JXImagePanel {
 
     void setFolder(File folder) {
         this.folder = folder;
-        pictures = new ArrayList();
-        pictureNames = new ArrayList();
+        pictures.clear();
+        pictureNames.clear();
         indexMax = -1;
         if (null != folder && folder.isDirectory()) {
             picturesFinder = new Thread(new PicturesFinderThread(folder, "*.png"));

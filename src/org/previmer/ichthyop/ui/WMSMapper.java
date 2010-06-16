@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import javax.imageio.ImageIO;
 import org.jdesktop.swingx.JXMapViewer;
@@ -53,14 +52,12 @@ import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
-import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayFloat.D1;
 import ucar.ma2.ArrayFloat.D2;
 import ucar.ma2.DataType;
-import ucar.ma2.IndexIterator;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -206,6 +203,13 @@ public class WMSMapper extends JXMapKit {
         } else {
             return null;
         }
+    }
+
+    public void drawBackground() {
+        CompoundPainter cp = new CompoundPainter();
+        cp.setPainters(getBgPainter());
+        cp.setCacheable(false);
+        getMainMap().setOverlayPainter(cp);
     }
 
     public void setFile(File ncfile) {
@@ -762,9 +766,8 @@ public class WMSMapper extends JXMapKit {
             try {
                 IOTools.makeDirectories(filename.toString());
                 ImageIO.write(bi, "PNG", new File(filename.toString()));
-
             } catch (IOException ex) {
-                Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+                SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             }
         }
     }
