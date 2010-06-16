@@ -40,6 +40,15 @@ public class WindAction extends AbstractAction {
 
     public void execute(IBasicParticle particle) {
 
+        /* for 3D simulation, ckeck whether the particle is close surface */
+        if (particle.getZ() >= 0) {
+            double dz = Math.abs(particle.getZ() - (getSimulationManager().getDataset().get_nz() - 1));
+            if (dz > 0.01) {
+                return;
+            }
+        }
+
+        /* wind effect */
         double time = getSimulationManager().getTimeManager().getTime();
         int rank = findCurrentRank(time);
         if (rank >= 0) {
