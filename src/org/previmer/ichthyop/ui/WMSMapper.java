@@ -333,12 +333,12 @@ public class WMSMapper extends JXMapKit {
         return particleLayer;
     }
 
-    void map(Painter particleLayer) {
+    void map(Painter particleLayer, Painter timeLayer) {
         CompoundPainter cp = new CompoundPainter();
         if (colorbarPainter != null) {
-            cp.setPainters(bgPainter, particleLayer, colorbarPainter);
+            cp.setPainters(bgPainter, particleLayer, timeLayer, colorbarPainter);
         } else {
-            cp.setPainters(bgPainter, particleLayer);
+            cp.setPainters(bgPainter, particleLayer, timeLayer);
         }
         cp.setCacheable(false);
         getMainMap().setOverlayPainter(cp);
@@ -514,6 +514,49 @@ public class WMSMapper extends JXMapKit {
         getMainMap().setOverlayPainter(cp);
     }
 
+    Painter getTimePainter(final int index) {
+        
+        Painter<JXMapViewer> timePainter = new Painter<JXMapViewer>() {
+
+            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
+                
+                g = (Graphics2D) g.create();
+                Paint paint = g.getPaint();
+
+                int wbar = 300;
+                int hbar = 20;
+                int xbar = hbar / 2;
+                int ybar = h - 3 * hbar / 2;
+
+                RoundRectangle2D bar = new RoundRectangle2D.Double(0.0, 0.0, wbar, hbar, hbar, hbar);
+                g.translate(xbar, ybar);
+                g.setColor(Color.BLACK);
+                g.draw(bar);
+
+                g.setColor(Color.WHITE);
+                g.fill(bar);
+
+                SimpleDateFormat dtFormat = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+                dtFormat.setCalendar(calendar);
+                String time = "Time: " + dtFormat.format(getTime(index));
+                FontRenderContext context = g.getFontRenderContext();
+                Font font = new Font("Dialog", Font.PLAIN, 12);
+                TextLayout layout = new TextLayout(time, font, context);
+
+                Rectangle2D bounds = layout.getBounds();
+                float text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
+                float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                g.setColor(Color.BLACK);
+                layout.draw(g, text_x, text_y);
+
+                g.setPaint(paint);
+                g.translate(-xbar, -ybar);
+                g.dispose();
+            }
+        };
+        return timePainter;
+    }
+
     private Painter<JXMapViewer> getColorbarPainter() {
 
         Painter<JXMapViewer> clrbarPainter = new Painter<JXMapViewer>() {
@@ -537,7 +580,7 @@ public class WMSMapper extends JXMapKit {
                 g.fill(bar);
 
                 FontRenderContext context = g.getFontRenderContext();
-                Font font = new Font("Dialog", Font.PLAIN, 10);
+                Font font = new Font("Dialog", Font.PLAIN, 12);
                 TextLayout layout = new TextLayout(String.valueOf(valmin), font, context);
                 Rectangle2D bounds = layout.getBounds();
 

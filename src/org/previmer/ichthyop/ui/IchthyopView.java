@@ -242,7 +242,7 @@ public class IchthyopView extends FrameView
         return createMapTask = new CreateMapTask(getApplication());
     }
 
-    private class CreateMapTask extends SFTask<Object, Painter> {
+    private class CreateMapTask extends SFTask<Object, Painter[]> {
 
         private int index;
 
@@ -273,16 +273,16 @@ public class IchthyopView extends FrameView
             setMessage(resourceMap.getString("createMaps.msg.start"), true, Level.INFO);
             for (int iStep = 0; iStep < wmsMapper.getNbSteps(); iStep++) {
                 setProgress((float) (iStep + 1) / wmsMapper.getNbSteps());
-                publish(wmsMapper.getPainterForStep(iStep));
+                publish(new Painter[]{wmsMapper.getPainterForStep(iStep), wmsMapper.getTimePainter(iStep)});
                 Thread.sleep(500);
             }
             return null;
         }
 
         @Override
-        protected void process(List<Painter> painters) {
-            for (Painter painter : painters) {
-                wmsMapper.map(painter);
+        protected void process(List<Painter[]> painters) {
+            for (Painter[] painter : painters) {
+                wmsMapper.map(painter[0], painter[1]);
                 wmsMapper.screen2File(wmsMapper, index++);
             }
         }
@@ -457,8 +457,16 @@ public class IchthyopView extends FrameView
                 path = path.substring(0, path.length() - 1);
             }
             path += ".gif";
+            if (new File(path).exists()) {
+                String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
+                int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
+                if (!(dialog == JOptionPane.OK_OPTION)) {
+                    cancel(true);
+                    return null;
+                }
+            }
             gif.start(path);
-            gif.setDelay((int) (nbfps * 1000));
+            gif.setDelay((int) (1000 / nbfps));
             setMessage(resourceMap.getString("createAnimatedGif.msg.start"), true, Level.INFO);
             List<BufferedImage> pictures = replayPanel.getImages();
             if (ckBoxReverseTime.isSelected()) {
@@ -473,7 +481,9 @@ public class IchthyopView extends FrameView
 
         @Override
         void onSuccess(Object result) {
-            setMessage(resourceMap.getString("createAnimatedGif.msg.succeeded") + " " + result);
+            if (null != result) {
+                setMessage(resourceMap.getString("createAnimatedGif.msg.succeeded") + " " + result);
+            }
         }
 
         @Override
@@ -1783,12 +1793,14 @@ public class IchthyopView extends FrameView
         btnSaveAsMaps.setFocusable(false);
         btnSaveAsMaps.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnSaveAsMaps.setName("btnSaveAsMaps"); // NOI18N
+        btnSaveAsMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
         lblAnimationSpeed.setText(resourceMap.getString("lblAnimationSpeed.text")); // NOI18N
         lblAnimationSpeed.setName("lblAnimationSpeed"); // NOI18N
 
         btnOpenAnimation.setAction(actionMap.get("openFolderAnimation")); // NOI18N
         btnOpenAnimation.setName("btnOpenAnimation"); // NOI18N
+        btnOpenAnimation.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
         lblFolder.setFont(resourceMap.getFont("lblFolder.font")); // NOI18N
         lblFolder.setText(resourceMap.getString("lblFolder.text")); // NOI18N
@@ -1864,6 +1876,7 @@ public class IchthyopView extends FrameView
 
         btnAnimatedGif.setAction(actionMap.get("createAnimatedGif")); // NOI18N
         btnAnimatedGif.setName("btnAnimatedGif"); // NOI18N
+        btnAnimatedGif.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
         ckBoxReverseTime.setText(resourceMap.getString("ckBoxReverseTime.text")); // NOI18N
         ckBoxReverseTime.setName("ckBoxReverseTime"); // NOI18N
