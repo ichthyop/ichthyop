@@ -17,11 +17,13 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.text.NumberFormat;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Locale;
@@ -135,7 +137,7 @@ public class IchthyopView extends FrameView
     }
 
     private void setAnimationToolsEnabled(boolean enabled) {
-        btnExportMaps.getAction().setEnabled(enabled);
+        btnSaveAsMaps.getAction().setEnabled(enabled);
         btnDeleteMaps.getAction().setEnabled(enabled);
         btnFirst.getAction().setEnabled(enabled);
         btnPrevious.getAction().setEnabled(enabled);
@@ -144,6 +146,8 @@ public class IchthyopView extends FrameView
         btnAnimationStop.getAction().setEnabled(enabled);
         btnNext.getAction().setEnabled(enabled);
         btnLast.getAction().setEnabled(enabled);
+        btnAnimatedGif.getAction().setEnabled(enabled);
+        ckBoxReverseTime.setEnabled(enabled);
         if (!enabled) {
             sliderTime.setValue(0);
             lblTime.setText(resourceMap.getString("lblTime.text"));
@@ -427,10 +431,54 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void exportMaps() {
+    public void saveasMaps() {
         stopAnimation();
-        getLogger().info(getResourceMap().getString("exportMaps.msg.launch"));
+        getLogger().info(getResourceMap().getString("saveasMaps.msg.launch"));
         getApplication().show(new ExportMapsView(IchthyopApp.getApplication(), replayPanel.getFolder()));
+    }
+
+    @Action
+    public Task createAnimatedGif() {
+        return new CreateAnimatedGifTask(getApplication());
+    }
+
+    private class CreateAnimatedGifTask extends SFTask {
+
+        CreateAnimatedGifTask(Application instance) {
+            super(instance);
+            stopAnimation();
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            AnimatedGifEncoder gif = new AnimatedGifEncoder();
+            String path = replayPanel.getFolder().getAbsolutePath();
+            if (path.endsWith(File.separator)) {
+                path = path.substring(0, path.length() - 1);
+            }
+            path += ".gif";
+            gif.start(path);
+            gif.setDelay((int) (nbfps * 1000));
+            setMessage(resourceMap.getString("createAnimatedGif.msg.start"), true, Level.INFO);
+            List<BufferedImage> pictures = replayPanel.getImages();
+            if (ckBoxReverseTime.isSelected()) {
+                Collections.reverse(pictures);
+            }
+            for (int i = 0; i < pictures.size(); i++) {
+                gif.addFrame(pictures.get(i));
+            }
+            gif.finish();
+            return path;
+        }
+
+        @Override
+        void onSuccess(Object result) {
+            setMessage(resourceMap.getString("createAnimatedGif.msg.succeeded") + " " + result);
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+        }
     }
 
     private void showSimulationPreview() {
@@ -1224,7 +1272,7 @@ public class IchthyopView extends FrameView
         lblFramePerSecond = new javax.swing.JLabel();
         animationSpeed = new javax.swing.JSpinner();
         btnDeleteMaps = new javax.swing.JButton();
-        btnExportMaps = new javax.swing.JButton();
+        btnSaveAsMaps = new javax.swing.JButton();
         lblAnimationSpeed = new javax.swing.JLabel();
         btnOpenAnimation = new javax.swing.JButton();
         lblFolder = new javax.swing.JLabel();
@@ -1238,6 +1286,8 @@ public class IchthyopView extends FrameView
         btnAnimationFW = new javax.swing.JButton();
         btnNext = new javax.swing.JButton();
         btnLast = new javax.swing.JButton();
+        btnAnimatedGif = new javax.swing.JButton();
+        ckBoxReverseTime = new javax.swing.JCheckBox();
         titledPanelLogger = new org.jdesktop.swingx.JXTitledPanel();
         loggerScrollPane = new org.previmer.ichthyop.ui.LoggerScrollPane();
         titledPanelMain = new org.jdesktop.swingx.JXTitledPanel();
@@ -1281,6 +1331,7 @@ public class IchthyopView extends FrameView
 
         mainPanel.setName("mainPanel"); // NOI18N
 
+        splitPane.setDividerLocation(490);
         splitPane.setName("splitPane"); // NOI18N
         splitPane.setOneTouchExpandable(true);
 
@@ -1336,7 +1387,6 @@ public class IchthyopView extends FrameView
 
         btnSaveAsCfgFile.setAction(actionMap.get("saveAsConfigurationFile")); // NOI18N
         btnSaveAsCfgFile.setFocusable(false);
-        btnSaveAsCfgFile.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         btnSaveAsCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         btnSaveAsCfgFile.setName("btnSaveAsCfgFile"); // NOI18N
         btnSaveAsCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -1356,15 +1406,16 @@ public class IchthyopView extends FrameView
                 .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                     .addGroup(pnlFileLayout.createSequentialGroup()
-                        .addComponent(btnNewCfgFile)
+                        .addComponent(btnNewCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnOpenCfgFile)
+                        .addComponent(btnOpenCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCloseCfgFile))
+                        .addComponent(btnCloseCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
                     .addGroup(pnlFileLayout.createSequentialGroup()
-                        .addComponent(btnSaveCfgFile)
+                        .addComponent(btnSaveCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsCfgFile)))
+                        .addComponent(btnSaveAsCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+                        .addGap(106, 106, 106)))
                 .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
@@ -1377,11 +1428,11 @@ public class IchthyopView extends FrameView
                     .addComponent(btnCloseCfgFile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSaveAsCfgFile)
-                    .addComponent(btnSaveCfgFile))
+                    .addComponent(btnSaveCfgFile)
+                    .addComponent(btnSaveAsCfgFile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCfgFile)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         taskPaneConfiguration.getContentPane().add(pnlFile);
@@ -1417,10 +1468,10 @@ public class IchthyopView extends FrameView
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSimulationLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnSimulationRun)
+                .addComponent(btnSimulationRun, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnPreview)
-                .addContainerGap(135, Short.MAX_VALUE))
+                .addComponent(btnPreview, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+                .addContainerGap())
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1728,11 +1779,10 @@ public class IchthyopView extends FrameView
         btnDeleteMaps.setName("btnDeleteMaps"); // NOI18N
         btnDeleteMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        btnExportMaps.setAction(actionMap.get("exportMaps")); // NOI18N
-        btnExportMaps.setFocusable(false);
-        btnExportMaps.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnExportMaps.setName("btnExportMaps"); // NOI18N
-        btnExportMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnSaveAsMaps.setAction(actionMap.get("saveasMaps")); // NOI18N
+        btnSaveAsMaps.setFocusable(false);
+        btnSaveAsMaps.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        btnSaveAsMaps.setName("btnSaveAsMaps"); // NOI18N
 
         lblAnimationSpeed.setText(resourceMap.getString("lblAnimationSpeed.text")); // NOI18N
         lblAnimationSpeed.setName("lblAnimationSpeed"); // NOI18N
@@ -1812,6 +1862,12 @@ public class IchthyopView extends FrameView
         btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(btnLast);
 
+        btnAnimatedGif.setAction(actionMap.get("createAnimatedGif")); // NOI18N
+        btnAnimatedGif.setName("btnAnimatedGif"); // NOI18N
+
+        ckBoxReverseTime.setText(resourceMap.getString("ckBoxReverseTime.text")); // NOI18N
+        ckBoxReverseTime.setName("ckBoxReverseTime"); // NOI18N
+
         javax.swing.GroupLayout pnlAnimationLayout = new javax.swing.GroupLayout(pnlAnimation);
         pnlAnimation.setLayout(pnlAnimationLayout);
         pnlAnimationLayout.setHorizontalGroup(
@@ -1821,20 +1877,25 @@ public class IchthyopView extends FrameView
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                     .addComponent(lblTime)
-                    .addComponent(lblFolder)
-                    .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(lblAnimationSpeed)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFramePerSecond))
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(btnOpenAnimation)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnExportMaps)
+                        .addComponent(btnDeleteMaps)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteMaps))
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE))
+                        .addComponent(btnSaveAsMaps))
+                    .addComponent(lblFolder)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addGap(379, 379, 379)
+                        .addComponent(lblFramePerSecond))
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addComponent(btnAnimatedGif)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(ckBoxReverseTime))
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addComponent(lblAnimationSpeed)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
@@ -1848,17 +1909,24 @@ public class IchthyopView extends FrameView
                 .addComponent(sliderTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnExportMaps)
-                    .addComponent(btnOpenAnimation)
-                    .addComponent(btnDeleteMaps))
+                    .addGroup(pnlAnimationLayout.createSequentialGroup()
+                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnOpenAnimation)
+                            .addComponent(btnDeleteMaps))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblFolder))
+                    .addComponent(btnSaveAsMaps))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblFolder)
+                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblFramePerSecond)
+                    .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnAnimatedGif)
+                        .addComponent(ckBoxReverseTime)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblAnimationSpeed)
-                    .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblFramePerSecond))
-                .addContainerGap(41, Short.MAX_VALUE))
+                    .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12))
         );
 
         taskPaneAnimation.getContentPane().add(pnlAnimation);
@@ -1891,7 +1959,7 @@ public class IchthyopView extends FrameView
         titledPanelSteps.getContentContainer().setLayout(titledPanelStepsLayout);
         titledPanelStepsLayout.setHorizontalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(stepsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         titledPanelStepsLayout.setVerticalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1909,7 +1977,7 @@ public class IchthyopView extends FrameView
         titledPanelLogger.getContentContainer().setLayout(titledPanelLoggerLayout);
         titledPanelLoggerLayout.setHorizontalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
+            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         titledPanelLoggerLayout.setVerticalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1946,7 +2014,7 @@ public class IchthyopView extends FrameView
         titledPanelMain.getContentContainer().setLayout(titledPanelMainLayout);
         titledPanelMainLayout.setHorizontalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
         );
         titledPanelMainLayout.setVerticalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2283,11 +2351,14 @@ public class IchthyopView extends FrameView
         // TODO add your handling code here:
         JButton btn = (JButton) evt.getSource();
         btn.setForeground(chooseColor(btn, btn.getForeground()));
+        wmsMapper.setColorbar(null, 0, 0, null, null);
         wmsMapper.setDefaultColor(btn.getForeground());
+        getLogger().info(resourceMap.getString("btnColor.msg.apply"));
     }//GEN-LAST:event_btnColorActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
+    private javax.swing.JButton btnAnimatedGif;
     private javax.swing.JButton btnAnimationBW;
     private javax.swing.JButton btnAnimationFW;
     private javax.swing.JButton btnAnimationStop;
@@ -2301,7 +2372,6 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnColorMin;
     private javax.swing.JButton btnDeleteMaps;
     private javax.swing.JButton btnExit;
-    private javax.swing.JButton btnExportMaps;
     private javax.swing.JButton btnExportToKMZ;
     private javax.swing.JButton btnFirst;
     private javax.swing.JButton btnLast;
@@ -2314,11 +2384,13 @@ public class IchthyopView extends FrameView
     private javax.swing.JToggleButton btnPreview;
     private javax.swing.JButton btnPrevious;
     private javax.swing.JButton btnSaveAsCfgFile;
+    private javax.swing.JButton btnSaveAsMaps;
     private javax.swing.JButton btnSaveCfgFile;
     private javax.swing.JButton btnSimulationRun;
     private javax.swing.JMenuItem cancelMapMenuItem;
     private javax.swing.JComboBox cbBoxVariable;
     private javax.swing.JComboBox cbBoxWMS;
+    private javax.swing.JCheckBox ckBoxReverseTime;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem exportMenuItem;

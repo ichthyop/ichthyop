@@ -42,6 +42,10 @@ public class ReplayPanel extends JXImagePanel {
         setFolder(null);
     }
 
+    public List<BufferedImage> getImages() {
+        return pictures;
+    }
+
     public int getIndexMax() {
         return indexMax;
     }

@@ -493,7 +493,7 @@ public class WMSMapper extends JXMapKit {
     public void setColorbar(String variable, float valmin, float valmax, Color colormin, Color colormax) {
 
         CompoundPainter cp = new CompoundPainter();
-        if (!variable.toLowerCase().contains("none")) {
+        if (null != variable && !variable.toLowerCase().contains("none")) {
             pcolorVariable = nc.findVariable(variable);
             if (null != pcolorVariable) {
                 this.valmin = valmin;

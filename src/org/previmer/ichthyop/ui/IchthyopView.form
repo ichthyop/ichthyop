@@ -22,6 +22,7 @@
       <SubComponents>
         <Container class="javax.swing.JSplitPane" name="splitPane">
           <Properties>
+            <Property name="dividerLocation" type="int" value="490"/>
             <Property name="name" type="java.lang.String" value="splitPane" noResource="true"/>
             <Property name="oneTouchExpandable" type="boolean" value="true"/>
           </Properties>
@@ -60,7 +61,7 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="stepsScrollPane" alignment="1" pref="196" max="32767" attributes="0"/>
+                          <Component id="stepsScrollPane" alignment="1" pref="486" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                     <DimensionLayout dim="1">
@@ -131,23 +132,24 @@
                                     <DimensionLayout dim="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" attributes="0">
-                                              <EmptySpace max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
                                                   <Component id="lblCfgFile" alignment="0" pref="420" max="32767" attributes="0"/>
                                                   <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="btnNewCfgFile" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnOpenCfgFile" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnCloseCfgFile" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="btnNewCfgFile" pref="136" max="32767" attributes="0"/>
+                                                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                                                      <Component id="btnOpenCfgFile" pref="142" max="32767" attributes="0"/>
+                                                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                                                      <Component id="btnCloseCfgFile" pref="130" max="32767" attributes="0"/>
                                                   </Group>
                                                   <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="btnSaveCfgFile" pref="143" max="32767" attributes="0"/>
                                                       <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="btnSaveAsCfgFile" pref="165" max="32767" attributes="0"/>
+                                                      <EmptySpace min="-2" pref="106" max="-2" attributes="0"/>
                                                   </Group>
                                               </Group>
-                                              <EmptySpace max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -162,12 +164,12 @@
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
                                                   <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="lblCfgFile" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="32767" attributes="0"/>
+                                              <EmptySpace pref="36" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -220,7 +222,6 @@
                                           <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveAsConfigurationFile" methodName="saveAsConfigurationFile"/>
                                         </Property>
                                         <Property name="focusable" type="boolean" value="false"/>
-                                        <Property name="horizontalAlignment" type="int" value="4"/>
                                         <Property name="horizontalTextPosition" type="int" value="4"/>
                                         <Property name="name" type="java.lang.String" value="btnSaveAsCfgFile" noResource="true"/>
                                         <Property name="verticalTextPosition" type="int" value="3"/>
@@ -262,11 +263,11 @@
                                     <DimensionLayout dim="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="btnSimulationRun" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="btnPreview" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="135" max="32767" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                                              <Component id="btnSimulationRun" pref="237" max="32767" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                                              <Component id="btnPreview" pref="177" max="32767" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -747,22 +748,29 @@
                                               <Group type="103" groupAlignment="0" attributes="0">
                                                   <Component id="sliderTime" alignment="0" pref="420" max="32767" attributes="0"/>
                                                   <Component id="lblTime" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                  <Group type="102" alignment="0" attributes="0">
+                                                      <Component id="btnOpenAnimation" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Component id="btnDeleteMaps" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Component id="btnSaveAsMaps" min="-2" max="-2" attributes="0"/>
+                                                  </Group>
                                                   <Component id="lblFolder" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="jToolBar1" alignment="0" pref="420" max="32767" attributes="0"/>
+                                                  <Group type="102" attributes="0">
+                                                      <EmptySpace min="-2" pref="379" max="-2" attributes="0"/>
+                                                      <Component id="lblFramePerSecond" min="-2" max="-2" attributes="0"/>
+                                                  </Group>
+                                                  <Group type="102" alignment="0" attributes="0">
+                                                      <Component id="btnAnimatedGif" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Component id="ckBoxReverseTime" min="-2" max="-2" attributes="0"/>
+                                                  </Group>
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Component id="lblAnimationSpeed" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace max="-2" attributes="0"/>
                                                       <Component id="animationSpeed" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="lblFramePerSecond" min="-2" max="-2" attributes="0"/>
                                                   </Group>
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="btnOpenAnimation" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnExportMaps" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnDeleteMaps" min="-2" max="-2" attributes="0"/>
-                                                  </Group>
-                                                  <Component id="jToolBar1" alignment="0" pref="420" max="32767" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                           </Group>
@@ -779,19 +787,30 @@
                                               <Component id="sliderTime" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="btnExportMaps" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnOpenAnimation" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnDeleteMaps" min="-2" max="-2" attributes="0"/>
+                                                  <Group type="102" attributes="0">
+                                                      <Group type="103" groupAlignment="0" attributes="0">
+                                                          <Component id="btnOpenAnimation" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                          <Component id="btnDeleteMaps" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                      </Group>
+                                                      <EmptySpace max="32767" attributes="0"/>
+                                                      <Component id="lblFolder" min="-2" max="-2" attributes="0"/>
+                                                  </Group>
+                                                  <Component id="btnSaveAsMaps" min="-2" max="-2" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="lblFolder" min="-2" max="-2" attributes="0"/>
+                                              <Group type="103" groupAlignment="1" attributes="0">
+                                                  <Component id="lblFramePerSecond" min="-2" max="-2" attributes="0"/>
+                                                  <Group type="103" groupAlignment="3" attributes="0">
+                                                      <Component id="btnAnimatedGif" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="ckBoxReverseTime" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                  </Group>
+                                              </Group>
                                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="3" attributes="0">
                                                   <Component id="lblAnimationSpeed" alignment="3" min="-2" max="-2" attributes="0"/>
                                                   <Component id="animationSpeed" alignment="3" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="lblFramePerSecond" alignment="3" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace pref="41" max="32767" attributes="0"/>
+                                              <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -832,15 +851,14 @@
                                         <Property name="verticalTextPosition" type="int" value="3"/>
                                       </Properties>
                                     </Component>
-                                    <Component class="javax.swing.JButton" name="btnExportMaps">
+                                    <Component class="javax.swing.JButton" name="btnSaveAsMaps">
                                       <Properties>
                                         <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="exportMaps" methodName="exportMaps"/>
+                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveasMaps" methodName="saveasMaps"/>
                                         </Property>
                                         <Property name="focusable" type="boolean" value="false"/>
                                         <Property name="horizontalTextPosition" type="int" value="4"/>
-                                        <Property name="name" type="java.lang.String" value="btnExportMaps" noResource="true"/>
-                                        <Property name="verticalTextPosition" type="int" value="3"/>
+                                        <Property name="name" type="java.lang.String" value="btnSaveAsMaps" noResource="true"/>
                                       </Properties>
                                     </Component>
                                     <Component class="javax.swing.JLabel" name="lblAnimationSpeed">
@@ -971,6 +989,20 @@
                                         </Component>
                                       </SubComponents>
                                     </Container>
+                                    <Component class="javax.swing.JButton" name="btnAnimatedGif">
+                                      <Properties>
+                                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="createAnimatedGif" methodName="createAnimatedGif"/>
+                                        </Property>
+                                        <Property name="name" type="java.lang.String" value="btnAnimatedGif" noResource="true"/>
+                                      </Properties>
+                                    </Component>
+                                    <Component class="javax.swing.JCheckBox" name="ckBoxReverseTime">
+                                      <Properties>
+                                        <Property name="text" type="java.lang.String" resourceKey="ckBoxReverseTime.text"/>
+                                        <Property name="name" type="java.lang.String" value="ckBoxReverseTime" noResource="true"/>
+                                      </Properties>
+                                    </Component>
                                   </SubComponents>
                                 </Container>
                               </SubComponents>
@@ -995,7 +1027,7 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="loggerScrollPane" alignment="0" pref="196" max="32767" attributes="0"/>
+                          <Component id="loggerScrollPane" alignment="0" pref="486" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                     <DimensionLayout dim="1">
@@ -1031,7 +1063,7 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jScrollPane3" alignment="1" pref="659" max="32767" attributes="0"/>
+                      <Component id="jScrollPane3" alignment="1" pref="369" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">

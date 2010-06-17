@@ -3,6 +3,7 @@
  */
 package org.previmer.ichthyop.ui;
 
+import javax.swing.JFrame;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.previmer.ichthyop.IchthyopBatch;
@@ -20,6 +21,7 @@ public class IchthyopApp extends SingleFrameApplication {
     @Override
     protected void startup() {
         show(new IchthyopView(this));
+        getMainFrame().setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     /**
