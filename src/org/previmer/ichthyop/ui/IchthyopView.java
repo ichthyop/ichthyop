@@ -139,7 +139,9 @@ public class IchthyopView extends FrameView
         btnDeleteMaps.getAction().setEnabled(enabled);
         btnFirst.getAction().setEnabled(enabled);
         btnPrevious.getAction().setEnabled(enabled);
-        btnAnimaction.getAction().setEnabled(enabled);
+        btnAnimationFW.getAction().setEnabled(enabled);
+        btnAnimationBW.getAction().setEnabled(enabled);
+        btnAnimationStop.getAction().setEnabled(enabled);
         btnNext.getAction().setEnabled(enabled);
         btnLast.getAction().setEnabled(enabled);
         if (!enabled) {
@@ -151,7 +153,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public void deleteMaps() {
-        animate(false);
+        stopAnimation();
         File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
         StringBuffer message = new StringBuffer(getResourceMap().getString("deleteMaps.dialog.msg.part1"));
         message.append(" ");
@@ -359,7 +361,7 @@ public class IchthyopView extends FrameView
     @Action
     public Task openFolderAnimation() {
 
-        animate(false);
+        stopAnimation();
         File file = (null == outputFolder)
                 ? new File(System.getProperty("user.dir"))
                 : outputFolder;
@@ -401,7 +403,7 @@ public class IchthyopView extends FrameView
             sliderTime.setMaximum(nbPNG - 1);
             setAnimationToolsEnabled(true);
             sliderTime.setValue(0);
-            animate(true);
+            startAnimationFW();
         }
 
         public void onFailure(Throwable t) {
@@ -426,7 +428,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public void exportMaps() {
-        animate(false);
+        stopAnimation();
         getLogger().info(getResourceMap().getString("exportMaps.msg.launch"));
         getApplication().show(new ExportMapsView(IchthyopApp.getApplication(), replayPanel.getFolder()));
     }
@@ -654,11 +656,6 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void animAction() {
-        animate(!animator.isRunning());
-    }
-
-    @Action
     public void next() {
         int index = sliderTime.getValue();
         if (index == replayPanel.getIndexMax()) {
@@ -673,25 +670,35 @@ public class IchthyopView extends FrameView
         sliderTime.setValue(replayPanel.getIndexMax());
     }
 
-    private void animate(boolean animated) {
+    @Action
+    public void startAnimationBW() {
+        animationDirection = TimeDirection.BACKWARD;
+        startAnimation();
+    }
 
-        if (animated) {
-            //animator.setStartDelay(1000);
+    @Action
+    public void startAnimationFW() {
+        animationDirection = TimeDirection.FORWARD;
+        startAnimation();
+    }
+
+    @Action
+    public void stopAnimation() {
+        if (progressTimer != null && progressTimer.isRunning()) {
+            progressTimer.stop();
+            statusBar.getProgressBar().setValue(0);
+            statusBar.getProgressBar().setVisible(false);
+        }
+        if (animator.isRunning()) {
+            animator.stop();
+        }
+    }
+
+    private void startAnimation() {
+        if (!animator.isRunning()) {
             animator.setAcceleration(0.01f);
-            btnAnimaction.setEnabled(true);
-            //btnOpenAnimation.getAction().setEnabled(false);
+            btnAnimationFW.setEnabled(true);
             animator.start();
-            btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.stop"));
-        } else {
-            btnAnimaction.setIcon(resourceMap.getIcon("animAction.Action.icon.play"));
-            if (progressTimer != null && progressTimer.isRunning()) {
-                progressTimer.stop();
-                statusBar.getProgressBar().setValue(0);
-                statusBar.getProgressBar().setVisible(false);
-            }
-            if (animator.isRunning()) {
-                animator.stop();
-            }
         }
     }
 
@@ -704,20 +711,24 @@ public class IchthyopView extends FrameView
         float ellpased_time = (fraction * TEN_MINUTES - time) * nbfps;
         if (ellpased_time > 1) {
             time = fraction * TEN_MINUTES;
-            next();
+            if (animationDirection.equals(TimeDirection.FORWARD)) {
+                next();
+            } else {
+                previous();
+            }
         }
     }
 
     public void begin() {
         nbfps = (Float) animationSpeed.getValue();
         time = 0;
-        getLogger().info(getResourceMap().getString("animAction.msg.started"));
+        getLogger().info(getResourceMap().getString("animation.msg.started"));
         startAccelerationProgress();
     }
 
     public void end() {
         btnOpenAnimation.getAction().setEnabled(true);
-        getLogger().info(getResourceMap().getString("animAction.msg.stopped"));
+        getLogger().info(getResourceMap().getString("animation.msg.stopped"));
     }
 
     public void repeat() {
@@ -1210,11 +1221,6 @@ public class IchthyopView extends FrameView
         btnColor = new javax.swing.JButton();
         taskPaneAnimation = new org.jdesktop.swingx.JXTaskPane();
         pnlAnimation = new javax.swing.JPanel();
-        btnFirst = new javax.swing.JButton();
-        btnPrevious = new javax.swing.JButton();
-        btnAnimaction = new javax.swing.JButton();
-        btnNext = new javax.swing.JButton();
-        btnLast = new javax.swing.JButton();
         lblFramePerSecond = new javax.swing.JLabel();
         animationSpeed = new javax.swing.JSpinner();
         btnDeleteMaps = new javax.swing.JButton();
@@ -1224,6 +1230,14 @@ public class IchthyopView extends FrameView
         lblFolder = new javax.swing.JLabel();
         sliderTime = new javax.swing.JSlider();
         lblTime = new javax.swing.JLabel();
+        jToolBar1 = new javax.swing.JToolBar();
+        btnFirst = new javax.swing.JButton();
+        btnPrevious = new javax.swing.JButton();
+        btnAnimationBW = new javax.swing.JButton();
+        btnAnimationStop = new javax.swing.JButton();
+        btnAnimationFW = new javax.swing.JButton();
+        btnNext = new javax.swing.JButton();
+        btnLast = new javax.swing.JButton();
         titledPanelLogger = new org.jdesktop.swingx.JXTitledPanel();
         loggerScrollPane = new org.previmer.ichthyop.ui.LoggerScrollPane();
         titledPanelMain = new org.jdesktop.swingx.JXTitledPanel();
@@ -1249,7 +1263,9 @@ public class IchthyopView extends FrameView
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         openNCMenuItem = new javax.swing.JMenuItem();
         animationMenu = new javax.swing.JMenu();
-        animactionMenuItem = new javax.swing.JMenuItem();
+        startFWMenuItem = new javax.swing.JMenuItem();
+        stopMenuItem = new javax.swing.JMenuItem();
+        startBWMenuItem = new javax.swing.JMenuItem();
         jSeparator15 = new javax.swing.JPopupMenu.Separator();
         openAnimationMenuItem = new javax.swing.JMenuItem();
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
@@ -1266,10 +1282,12 @@ public class IchthyopView extends FrameView
         mainPanel.setName("mainPanel"); // NOI18N
 
         splitPane.setName("splitPane"); // NOI18N
+        splitPane.setOneTouchExpandable(true);
 
         leftSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         leftSplitPane.setResizeWeight(1.0);
         leftSplitPane.setName("leftSplitPane"); // NOI18N
+        leftSplitPane.setOneTouchExpandable(true);
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopView.class);
         titledPanelSteps.setTitle(resourceMap.getString("titledPanelSteps.title")); // NOI18N
@@ -1686,39 +1704,6 @@ public class IchthyopView extends FrameView
         pnlAnimation.setName("pnlAnimation"); // NOI18N
         pnlAnimation.setOpaque(false);
 
-        btnFirst.setAction(actionMap.get("first")); // NOI18N
-        btnFirst.setFocusable(false);
-        btnFirst.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnFirst.setName("btnFirst"); // NOI18N
-        btnFirst.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-
-        btnPrevious.setAction(actionMap.get("previous")); // NOI18N
-        btnPrevious.setFocusable(false);
-        btnPrevious.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnPrevious.setName("btnPrevious"); // NOI18N
-        btnPrevious.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-
-        btnAnimaction.setAction(actionMap.get("animAction")); // NOI18N
-        btnAnimaction.setText(resourceMap.getString("btnAnimaction.text")); // NOI18N
-        btnAnimaction.setFocusable(false);
-        btnAnimaction.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAnimaction.setName("btnAnimaction"); // NOI18N
-        btnAnimaction.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-
-        btnNext.setAction(actionMap.get("next")); // NOI18N
-        btnNext.setFocusable(false);
-        btnNext.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnNext.setName("btnNext"); // NOI18N
-        btnNext.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-
-        btnLast.setAction(actionMap.get("last")); // NOI18N
-        btnLast.setFocusable(false);
-        btnLast.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnLast.setName("btnLast"); // NOI18N
-        btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-
-        lblFramePerSecond.setText(resourceMap.getString("lblFramePerSecond.text")); // NOI18N
-        lblFramePerSecond.setToolTipText(resourceMap.getString("lblFramePerSecond.toolTipText")); // NOI18N
         lblFramePerSecond.setName("lblFramePerSecond"); // NOI18N
         lblFramePerSecond.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -1771,6 +1756,62 @@ public class IchthyopView extends FrameView
         lblTime.setText(resourceMap.getString("lblTime.text")); // NOI18N
         lblTime.setName("lblTime"); // NOI18N
 
+        jToolBar1.setFloatable(false);
+        jToolBar1.setRollover(true);
+        jToolBar1.setName("jToolBar1"); // NOI18N
+
+        btnFirst.setAction(actionMap.get("first")); // NOI18N
+        btnFirst.setFocusable(false);
+        btnFirst.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnFirst.setName("btnFirst"); // NOI18N
+        btnFirst.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnFirst);
+
+        btnPrevious.setAction(actionMap.get("previous")); // NOI18N
+        btnPrevious.setFocusable(false);
+        btnPrevious.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnPrevious.setName("btnPrevious"); // NOI18N
+        btnPrevious.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnPrevious);
+
+        btnAnimationBW.setAction(actionMap.get("startAnimationBW")); // NOI18N
+        btnAnimationBW.setText(resourceMap.getString("btnAnimationBW.text")); // NOI18N
+        btnAnimationBW.setFocusable(false);
+        btnAnimationBW.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnAnimationBW.setName("btnAnimationBW"); // NOI18N
+        btnAnimationBW.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnAnimationBW);
+
+        btnAnimationStop.setAction(actionMap.get("stopAnimation")); // NOI18N
+        btnAnimationStop.setText(resourceMap.getString("btnAnimationStop.text")); // NOI18N
+        btnAnimationStop.setFocusable(false);
+        btnAnimationStop.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnAnimationStop.setName("btnAnimationStop"); // NOI18N
+        btnAnimationStop.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnAnimationStop);
+
+        btnAnimationFW.setAction(actionMap.get("startAnimationFW")); // NOI18N
+        btnAnimationFW.setText(resourceMap.getString("btnAnimationFW.text")); // NOI18N
+        btnAnimationFW.setFocusable(false);
+        btnAnimationFW.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnAnimationFW.setName("btnAnimationFW"); // NOI18N
+        btnAnimationFW.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnAnimationFW);
+
+        btnNext.setAction(actionMap.get("next")); // NOI18N
+        btnNext.setFocusable(false);
+        btnNext.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnNext.setName("btnNext"); // NOI18N
+        btnNext.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnNext);
+
+        btnLast.setAction(actionMap.get("last")); // NOI18N
+        btnLast.setFocusable(false);
+        btnLast.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnLast.setName("btnLast"); // NOI18N
+        btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnLast);
+
         javax.swing.GroupLayout pnlAnimationLayout = new javax.swing.GroupLayout(pnlAnimation);
         pnlAnimation.setLayout(pnlAnimationLayout);
         pnlAnimationLayout.setHorizontalGroup(
@@ -1780,16 +1821,6 @@ public class IchthyopView extends FrameView
                 .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                     .addComponent(lblTime)
-                    .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addComponent(btnFirst)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnPrevious)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAnimaction)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnNext)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnLast))
                     .addComponent(lblFolder)
                     .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addComponent(lblAnimationSpeed)
@@ -1802,19 +1833,15 @@ public class IchthyopView extends FrameView
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnExportMaps)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteMaps)))
+                        .addComponent(btnDeleteMaps))
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
             pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAnimationLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnLast)
-                    .addComponent(btnNext)
-                    .addComponent(btnAnimaction)
-                    .addComponent(btnPrevious)
-                    .addComponent(btnFirst))
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTime)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1831,7 +1858,7 @@ public class IchthyopView extends FrameView
                     .addComponent(lblAnimationSpeed)
                     .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblFramePerSecond))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         taskPaneAnimation.getContentPane().add(pnlAnimation);
@@ -2016,9 +2043,17 @@ public class IchthyopView extends FrameView
         animationMenu.setText(resourceMap.getString("animationMenu.text")); // NOI18N
         animationMenu.setName("animationMenu"); // NOI18N
 
-        animactionMenuItem.setAction(actionMap.get("animAction")); // NOI18N
-        animactionMenuItem.setName("animactionMenuItem"); // NOI18N
-        animationMenu.add(animactionMenuItem);
+        startFWMenuItem.setAction(actionMap.get("startAnimationFW")); // NOI18N
+        startFWMenuItem.setName("startFWMenuItem"); // NOI18N
+        animationMenu.add(startFWMenuItem);
+
+        stopMenuItem.setAction(actionMap.get("stopAnimation")); // NOI18N
+        stopMenuItem.setName("stopMenuItem"); // NOI18N
+        animationMenu.add(stopMenuItem);
+
+        startBWMenuItem.setAction(actionMap.get("startAnimationBW")); // NOI18N
+        startBWMenuItem.setName("startBWMenuItem"); // NOI18N
+        animationMenu.add(startBWMenuItem);
 
         jSeparator15.setName("jSeparator15"); // NOI18N
         animationMenu.add(jSeparator15);
@@ -2225,9 +2260,7 @@ public class IchthyopView extends FrameView
                 replayPanel.setVisible(true);
                 //replayPanel.setFolder(outputFolder);
             } else {
-                if (animator.isRunning()) {
-                    animate(false);
-                }
+                stopAnimation();
                 replayPanel.setVisible(false);
             }
             setMainTitle();
@@ -2253,10 +2286,11 @@ public class IchthyopView extends FrameView
         wmsMapper.setDefaultColor(btn.getForeground());
     }//GEN-LAST:event_btnColorActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem animactionMenuItem;
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
-    private javax.swing.JButton btnAnimaction;
+    private javax.swing.JButton btnAnimationBW;
+    private javax.swing.JButton btnAnimationFW;
+    private javax.swing.JButton btnAnimationStop;
     private javax.swing.JButton btnApplyColorbar;
     private javax.swing.JButton btnAutoRange;
     private javax.swing.JButton btnCancelMapping;
@@ -2297,6 +2331,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblCfgFile;
     private javax.swing.JLabel lblColor;
@@ -2335,8 +2370,11 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenu simulationMenu;
     private javax.swing.JSlider sliderTime;
     private javax.swing.JSplitPane splitPane;
+    private javax.swing.JMenuItem startBWMenuItem;
+    private javax.swing.JMenuItem startFWMenuItem;
     private javax.swing.JPanel stepsPanel;
     private javax.swing.JScrollPane stepsScrollPane;
+    private javax.swing.JMenuItem stopMenuItem;
     private org.jdesktop.swingx.JXTaskPane taskPaneAnimation;
     private org.jdesktop.swingx.JXTaskPane taskPaneConfiguration;
     private org.jdesktop.swingx.JXTaskPane taskPaneMapping;
@@ -2366,5 +2404,11 @@ public class IchthyopView extends FrameView
     private JConfigurationPanel pnlConfiguration = new JConfigurationPanel();
     private JStatusBar statusBar = new JStatusBar();
     private JRunProgressPanel pnlProgress = new JRunProgressPanel();
-    ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+    private ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+    private TimeDirection animationDirection;
+
+    private enum TimeDirection {
+
+        FORWARD, BACKWARD;
+    }
 }

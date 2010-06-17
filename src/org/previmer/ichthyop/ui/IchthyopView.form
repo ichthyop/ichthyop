@@ -23,6 +23,7 @@
         <Container class="javax.swing.JSplitPane" name="splitPane">
           <Properties>
             <Property name="name" type="java.lang.String" value="splitPane" noResource="true"/>
+            <Property name="oneTouchExpandable" type="boolean" value="true"/>
           </Properties>
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout"/>
@@ -32,6 +33,7 @@
                 <Property name="orientation" type="int" value="0"/>
                 <Property name="resizeWeight" type="double" value="1.0"/>
                 <Property name="name" type="java.lang.String" value="leftSplitPane" noResource="true"/>
+                <Property name="oneTouchExpandable" type="boolean" value="true"/>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
@@ -745,17 +747,6 @@
                                               <Group type="103" groupAlignment="0" attributes="0">
                                                   <Component id="sliderTime" alignment="0" pref="420" max="32767" attributes="0"/>
                                                   <Component id="lblTime" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="btnFirst" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnPrevious" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnAnimaction" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnNext" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnLast" min="-2" max="-2" attributes="0"/>
-                                                  </Group>
                                                   <Component id="lblFolder" alignment="0" min="-2" max="-2" attributes="0"/>
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Component id="lblAnimationSpeed" min="-2" max="-2" attributes="0"/>
@@ -771,6 +762,7 @@
                                                       <EmptySpace max="-2" attributes="0"/>
                                                       <Component id="btnDeleteMaps" min="-2" max="-2" attributes="0"/>
                                                   </Group>
+                                                  <Component id="jToolBar1" alignment="0" pref="420" max="32767" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                           </Group>
@@ -780,13 +772,7 @@
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="btnLast" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnNext" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnAnimaction" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnPrevious" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnFirst" alignment="0" min="-2" max="-2" attributes="0"/>
-                                              </Group>
+                                              <Component id="jToolBar1" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Component id="lblTime" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
@@ -805,72 +791,14 @@
                                                   <Component id="animationSpeed" alignment="3" min="-2" max="-2" attributes="0"/>
                                                   <Component id="lblFramePerSecond" alignment="3" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace max="32767" attributes="0"/>
+                                              <EmptySpace pref="41" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
                                   </Layout>
                                   <SubComponents>
-                                    <Component class="javax.swing.JButton" name="btnFirst">
-                                      <Properties>
-                                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="first" methodName="first"/>
-                                        </Property>
-                                        <Property name="focusable" type="boolean" value="false"/>
-                                        <Property name="horizontalTextPosition" type="int" value="0"/>
-                                        <Property name="name" type="java.lang.String" value="btnFirst" noResource="true"/>
-                                        <Property name="verticalTextPosition" type="int" value="3"/>
-                                      </Properties>
-                                    </Component>
-                                    <Component class="javax.swing.JButton" name="btnPrevious">
-                                      <Properties>
-                                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="previous" methodName="previous"/>
-                                        </Property>
-                                        <Property name="focusable" type="boolean" value="false"/>
-                                        <Property name="horizontalTextPosition" type="int" value="0"/>
-                                        <Property name="name" type="java.lang.String" value="btnPrevious" noResource="true"/>
-                                        <Property name="verticalTextPosition" type="int" value="3"/>
-                                      </Properties>
-                                    </Component>
-                                    <Component class="javax.swing.JButton" name="btnAnimaction">
-                                      <Properties>
-                                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="animAction" methodName="animAction"/>
-                                        </Property>
-                                        <Property name="text" type="java.lang.String" resourceKey="btnAnimaction.text"/>
-                                        <Property name="focusable" type="boolean" value="false"/>
-                                        <Property name="horizontalTextPosition" type="int" value="0"/>
-                                        <Property name="name" type="java.lang.String" value="btnAnimaction" noResource="true"/>
-                                        <Property name="verticalTextPosition" type="int" value="3"/>
-                                      </Properties>
-                                    </Component>
-                                    <Component class="javax.swing.JButton" name="btnNext">
-                                      <Properties>
-                                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="next" methodName="next"/>
-                                        </Property>
-                                        <Property name="focusable" type="boolean" value="false"/>
-                                        <Property name="horizontalTextPosition" type="int" value="0"/>
-                                        <Property name="name" type="java.lang.String" value="btnNext" noResource="true"/>
-                                        <Property name="verticalTextPosition" type="int" value="3"/>
-                                      </Properties>
-                                    </Component>
-                                    <Component class="javax.swing.JButton" name="btnLast">
-                                      <Properties>
-                                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                          <action class="org.previmer.ichthyop.ui.IchthyopView" id="last" methodName="last"/>
-                                        </Property>
-                                        <Property name="focusable" type="boolean" value="false"/>
-                                        <Property name="horizontalTextPosition" type="int" value="0"/>
-                                        <Property name="name" type="java.lang.String" value="btnLast" noResource="true"/>
-                                        <Property name="verticalTextPosition" type="int" value="3"/>
-                                      </Properties>
-                                    </Component>
                                     <Component class="javax.swing.JLabel" name="lblFramePerSecond">
                                       <Properties>
-                                        <Property name="text" type="java.lang.String" resourceKey="lblFramePerSecond.text"/>
-                                        <Property name="toolTipText" type="java.lang.String" resourceKey="lblFramePerSecond.toolTipText"/>
                                         <Property name="name" type="java.lang.String" value="lblFramePerSecond" noResource="true"/>
                                       </Properties>
                                       <Events>
@@ -952,6 +880,97 @@
                                         <Property name="name" type="java.lang.String" value="lblTime" noResource="true"/>
                                       </Properties>
                                     </Component>
+                                    <Container class="javax.swing.JToolBar" name="jToolBar1">
+                                      <Properties>
+                                        <Property name="floatable" type="boolean" value="false"/>
+                                        <Property name="rollover" type="boolean" value="true"/>
+                                        <Property name="name" type="java.lang.String" value="jToolBar1" noResource="true"/>
+                                      </Properties>
+
+                                      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
+                                      <SubComponents>
+                                        <Component class="javax.swing.JButton" name="btnFirst">
+                                          <Properties>
+                                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="first" methodName="first"/>
+                                            </Property>
+                                            <Property name="focusable" type="boolean" value="false"/>
+                                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                                            <Property name="name" type="java.lang.String" value="btnFirst" noResource="true"/>
+                                            <Property name="verticalTextPosition" type="int" value="3"/>
+                                          </Properties>
+                                        </Component>
+                                        <Component class="javax.swing.JButton" name="btnPrevious">
+                                          <Properties>
+                                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="previous" methodName="previous"/>
+                                            </Property>
+                                            <Property name="focusable" type="boolean" value="false"/>
+                                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                                            <Property name="name" type="java.lang.String" value="btnPrevious" noResource="true"/>
+                                            <Property name="verticalTextPosition" type="int" value="3"/>
+                                          </Properties>
+                                        </Component>
+                                        <Component class="javax.swing.JButton" name="btnAnimationBW">
+                                          <Properties>
+                                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="startAnimationBW" methodName="startAnimationBW"/>
+                                            </Property>
+                                            <Property name="text" type="java.lang.String" resourceKey="btnAnimationBW.text"/>
+                                            <Property name="focusable" type="boolean" value="false"/>
+                                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                                            <Property name="name" type="java.lang.String" value="btnAnimationBW" noResource="true"/>
+                                            <Property name="verticalTextPosition" type="int" value="3"/>
+                                          </Properties>
+                                        </Component>
+                                        <Component class="javax.swing.JButton" name="btnAnimationStop">
+                                          <Properties>
+                                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="stopAnimation" methodName="stopAnimation"/>
+                                            </Property>
+                                            <Property name="text" type="java.lang.String" resourceKey="btnAnimationStop.text"/>
+                                            <Property name="focusable" type="boolean" value="false"/>
+                                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                                            <Property name="name" type="java.lang.String" value="btnAnimationStop" noResource="true"/>
+                                            <Property name="verticalTextPosition" type="int" value="3"/>
+                                          </Properties>
+                                        </Component>
+                                        <Component class="javax.swing.JButton" name="btnAnimationFW">
+                                          <Properties>
+                                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="startAnimationFW" methodName="startAnimationFW"/>
+                                            </Property>
+                                            <Property name="text" type="java.lang.String" resourceKey="btnAnimationFW.text"/>
+                                            <Property name="focusable" type="boolean" value="false"/>
+                                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                                            <Property name="name" type="java.lang.String" value="btnAnimationFW" noResource="true"/>
+                                            <Property name="verticalTextPosition" type="int" value="3"/>
+                                          </Properties>
+                                        </Component>
+                                        <Component class="javax.swing.JButton" name="btnNext">
+                                          <Properties>
+                                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="next" methodName="next"/>
+                                            </Property>
+                                            <Property name="focusable" type="boolean" value="false"/>
+                                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                                            <Property name="name" type="java.lang.String" value="btnNext" noResource="true"/>
+                                            <Property name="verticalTextPosition" type="int" value="3"/>
+                                          </Properties>
+                                        </Component>
+                                        <Component class="javax.swing.JButton" name="btnLast">
+                                          <Properties>
+                                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                              <action class="org.previmer.ichthyop.ui.IchthyopView" id="last" methodName="last"/>
+                                            </Property>
+                                            <Property name="focusable" type="boolean" value="false"/>
+                                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                                            <Property name="name" type="java.lang.String" value="btnLast" noResource="true"/>
+                                            <Property name="verticalTextPosition" type="int" value="3"/>
+                                          </Properties>
+                                        </Component>
+                                      </SubComponents>
+                                    </Container>
                                   </SubComponents>
                                 </Container>
                               </SubComponents>
@@ -1216,12 +1235,28 @@
             <Property name="name" type="java.lang.String" value="animationMenu" noResource="true"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="animactionMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="startFWMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="animAction" methodName="animAction"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="startAnimationFW" methodName="startAnimationFW"/>
                 </Property>
-                <Property name="name" type="java.lang.String" value="animactionMenuItem" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="startFWMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="stopMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="stopAnimation" methodName="stopAnimation"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="stopMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="startBWMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="startAnimationBW" methodName="startAnimationBW"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="startBWMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator15">

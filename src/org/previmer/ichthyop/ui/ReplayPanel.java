@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import org.jdesktop.application.Application;
 import org.jdesktop.swingx.JXImagePanel;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
@@ -38,6 +39,7 @@ public class ReplayPanel extends JXImagePanel {
         setStyle(JXImagePanel.Style.CENTERED);
         pictures = new ArrayList();
         pictureNames = new ArrayList();
+        setFolder(null);
     }
 
     public int getIndexMax() {
@@ -64,7 +66,7 @@ public class ReplayPanel extends JXImagePanel {
             picturesFinder = new Thread(new PicturesFinderThread(folder, "*.png"));
             picturesFinder.start();
         } else {
-            bgIcon = IchthyopApp.getApplication().getMainView().getResourceMap().getImageIcon("step.Animation.bgicon");
+            bgIcon = Application.getInstance().getContext().getResourceMap(IchthyopView.class).getImageIcon("step.Animation.bgicon");
             setImage(bgIcon.getImage());
         }
     }

@@ -92,17 +92,29 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         return getReleaseProcess().getNbParticles();
     }
 
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
+    public void nextStepTriggered(NextStepEvent event) throws Exception {
 
         if (!isAllReleased) {
-            long time = e.getSource().getTime();
 
-            while (!isAllReleased && timeEvent[indexEvent] >= time && timeEvent[indexEvent] < (time + e.getSource().get_dt())) {
+            while (canRelease(event)) {
                 fireReleaseTriggered();
                 indexEvent++;
                 isAllReleased = indexEvent >= timeEvent.length;
             }
         }
+    }
+
+    private boolean canRelease(NextStepEvent e) {
+
+        long time = e.getSource().getTime();
+        int dt = e.getSource().get_dt();
+        boolean isForward = Math.signum(dt) > 0;
+
+        boolean canRelease = isForward
+                ? !isAllReleased && timeEvent[indexEvent] >= time && timeEvent[indexEvent] < (time + e.getSource().get_dt())
+                : !isAllReleased && timeEvent[indexEvent] <= time && timeEvent[indexEvent] > (time + e.getSource().get_dt());
+
+        return canRelease;
     }
 
     private long get_t0() throws Exception {

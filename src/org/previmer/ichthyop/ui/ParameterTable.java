@@ -435,9 +435,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
             int mrow = table.convertRowIndexToModel(row);
             if (model.getTableParameter(mrow).getXParameter().isSerial()) {
-                comp.setBackground(new Color(0, 255, 0, 10));
+                comp.setBackground(new Color(0, 255, 0, 20));
             } else if (model.getTableParameter(mrow).getXParameter().isHidden()) {
-                comp.setBackground(new Color(255, 0, 0, 10));
+                comp.setBackground(new Color(255, 0, 0, 20));
             } else {
                 comp.setBackground(Color.WHITE);
             }

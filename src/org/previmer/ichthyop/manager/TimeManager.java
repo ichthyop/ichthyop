@@ -341,7 +341,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         simuDuration = transportDuration + getSimulationManager().getReleaseManager().getReleaseDuration();
         i_step = 0;
         time = t0;
-        nb_steps = (int) (simuDuration / dt);
+        nb_steps = (int) Math.abs(simuDuration / dt);
         getLogger().info("Time manager initialization [OK]");
     }
 
