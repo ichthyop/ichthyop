@@ -457,14 +457,15 @@ public class IchthyopView extends FrameView
                 path = path.substring(0, path.length() - 1);
             }
             path += ".gif";
-            if (new File(path).exists()) {
+            /* Should i ask every time if user agrees to overwrite */
+            /*if (new File(path).exists()) {
                 String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
                 int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
                 if (!(dialog == JOptionPane.OK_OPTION)) {
                     cancel(true);
                     return null;
                 }
-            }
+            }*/
             gif.start(path);
             gif.setDelay((int) (1000 / nbfps));
             setMessage(resourceMap.getString("createAnimatedGif.msg.start"), true, Level.INFO);

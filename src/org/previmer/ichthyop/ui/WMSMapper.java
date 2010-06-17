@@ -59,6 +59,7 @@ import ucar.ma2.ArrayFloat.D1;
 import ucar.ma2.ArrayFloat.D2;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
@@ -515,11 +516,11 @@ public class WMSMapper extends JXMapKit {
     }
 
     Painter getTimePainter(final int index) {
-        
+
         Painter<JXMapViewer> timePainter = new Painter<JXMapViewer>() {
 
             public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-                
+
                 g = (Graphics2D) g.create();
                 Paint paint = g.getPaint();
 
@@ -540,7 +541,7 @@ public class WMSMapper extends JXMapKit {
                 dtFormat.setCalendar(calendar);
                 String time = "Time: " + dtFormat.format(getTime(index));
                 FontRenderContext context = g.getFontRenderContext();
-                Font font = new Font("Dialog", Font.PLAIN, 12);
+                Font font = new Font("Dialog", Font.PLAIN, 11);
                 TextLayout layout = new TextLayout(time, font, context);
 
                 Rectangle2D bounds = layout.getBounds();
@@ -580,7 +581,7 @@ public class WMSMapper extends JXMapKit {
                 g.fill(bar);
 
                 FontRenderContext context = g.getFontRenderContext();
-                Font font = new Font("Dialog", Font.PLAIN, 12);
+                Font font = new Font("Dialog", Font.PLAIN, 11);
                 TextLayout layout = new TextLayout(String.valueOf(valmin), font, context);
                 Rectangle2D bounds = layout.getBounds();
 
@@ -589,7 +590,21 @@ public class WMSMapper extends JXMapKit {
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 
-                layout = new TextLayout(pcolorVariable.getName(), font, context);
+                String vname = pcolorVariable.getName();
+                try {
+                    List<Attribute> attributes = pcolorVariable.getAttributes();
+
+                    for (Attribute attribute : attributes) {
+                        if (attribute.getName().matches("unit")) {
+                            vname += " (" + attribute.getStringValue() + ")";
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    // do nothing, unit will not be displayed
+                }
+
+                layout = new TextLayout(vname, font, context);
                 bounds = layout.getBounds();
                 text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
                 text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
