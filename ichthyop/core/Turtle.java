@@ -51,11 +51,19 @@ public class Turtle extends Particle {
 
     private void resetActivity(OrientationZone zone) {
         isActive = false;
+        
+        /* reset speed activity */
         Integer[] zeros = new Integer[zone.getSpeedActivity().length];
         for (int i = 0; i < zeros.length; i++) {
             zeros[i] = 0;
         }
         currentSpeedActivity.put(zone.getIndex(), zeros);
+        
+        /* reset orientation activity */
+        zeros = new Integer[zone.getOrientationActivity().length];
+        for (int i = 0; i < zeros.length; i++) {
+            zeros[i] = 0;
+        }
         currentOrientationActivity.put(zone.getIndex(), zeros);
     }
 
@@ -134,6 +142,7 @@ public class Turtle extends Particle {
         int rank = (int) (Math.random() * zone.getOrientationActivity().length);
 
         if (currentOrientationActivity.get(zone.getIndex())[rank] < zone.getDurationSwimmingOrientation(time, rank)) {
+            currentOrientationActivity.get(zone.getIndex())[rank] += (int) dt;
             if (rank < zone.getSwimmingOrientation().length) {
                 return zone.getSwimmingOrientation()[rank];
             } else {

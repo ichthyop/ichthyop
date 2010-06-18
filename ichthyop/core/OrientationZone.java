@@ -74,6 +74,42 @@ public class OrientationZone extends Zone {
         for (int i = 0; i < activePeriod.length; i++) {
             durationActivePeriod[i] = computeActivePeriodDuration(i);
         }
+
+        System.out.println(toString());
+    }
+
+    @Override
+    public String toString() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("[[ Orientation zone ");
+        sb.append(getIndex());
+        sb.append(" ]]\n");
+        sb.append("  [Swim period] ");
+        for (String s : activePeriod) {
+            sb.append(s);
+            sb.append(" ");
+        }
+        sb.append("\n");
+        sb.append("  [Speed] ");
+        for (int i = 0; i < speedActivity.length; i++) {
+            sb.append("(");
+            sb.append(swimmingSpeed[i]);
+            sb.append("m/s : ");
+            sb.append(speedActivity[i]);
+            sb.append("%) ");
+        }
+        sb.append("\n");
+        sb.append("  [Orientation] ");
+        for (int i = 0; i < orientationActivity.length; i++) {
+            sb.append("(");
+            sb.append(swimmingOrientation[i]);
+            sb.append("° : ");
+            sb.append(orientationActivity[i]);
+            sb.append("%) ");
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     private int computeActivePeriodDuration(int indexPeriod) {
