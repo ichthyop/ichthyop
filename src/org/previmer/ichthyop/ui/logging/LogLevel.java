@@ -25,7 +25,7 @@ import java.util.logging.Level;
  */
 public class LogLevel extends Level {
 
-    public static final LogLevel COMPLETE = new LogLevel("COMPLETE");
+    public static final LogLevel COMPLETE = new LogLevel("INFO");
 
     public LogLevel(String name) {
         super(name, 850);

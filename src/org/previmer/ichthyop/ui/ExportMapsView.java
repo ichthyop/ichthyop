@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
@@ -65,10 +66,9 @@ public class ExportMapsView extends FrameView {
                 backupPath = chooser.getSelectedFile();
                 textFieldPath.setEnabled(true);
                 textFieldPath.setText(backupPath.toString());
-                getLogger().info(resourceMap.getString("changePath.newPath") + " " + backupPath.toString());
             } else {
-                getLogger().log(Level.WARNING, resourceMap.getString("changePath.wrongPath"));
-                btnSave.getAction().setEnabled(false);
+                JOptionPane.showMessageDialog(mainPanel, resourceMap.getString("changePath.wrongPath"), resourceMap.getString("changePath.Action.shortDescription"), JOptionPane.OK_OPTION);
+                changePath();
             }
         }
     }
@@ -87,6 +87,7 @@ public class ExportMapsView extends FrameView {
         @Override
         protected Object doInBackground() throws Exception {
 
+            setMessage(resourceMap.getString("save.Action.saving"));
             File[] pictures = folder.listFiles(new MetaFilenameFilter("*.png"));
             int nbFiles = pictures.length;
             for (int i = 0; i < nbFiles; i++) {
@@ -94,15 +95,15 @@ public class ExportMapsView extends FrameView {
                 File dfile = rename(sfile);
                 setProgress(i / (float) nbFiles);
                 IOTools.copyFile(sfile, dfile);
-                setMessage(resourceMap.getString("save.Action.saved") + " " + dfile.getPath());
             }
-            return null;
+            return new Integer(nbFiles);
         }
 
         @Override
         void onSuccess(Object result) {
             btnSave.getAction().setEnabled(false);
-            setMessage(resourceMap.getString("save.Action.succeeded"), false, LogLevel.COMPLETE);
+            int nbFiles = (Integer) result;
+            setMessage(resourceMap.getString("save.Action.succeeded") + " " + nbFiles, false, LogLevel.COMPLETE);
         }
 
         @Override

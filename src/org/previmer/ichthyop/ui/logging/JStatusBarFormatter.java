@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.previmer.ichthyop.ui.logging;
 
 import java.util.logging.Formatter;
@@ -28,10 +27,11 @@ public class JStatusBarFormatter extends Formatter {
 
     @Override
     public String format(LogRecord record) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(formatMessage(record));
-        sb.append("\n");
-        return sb.toString();
+        String msg = formatMessage(record);
+        if (msg.indexOf("\n") > 0) {
+            msg = msg.substring(0, msg.indexOf("\n"));
+        }
+        msg += "\n";
+        return msg;
     }
-
 }

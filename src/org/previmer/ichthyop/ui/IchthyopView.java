@@ -170,12 +170,17 @@ public class IchthyopView extends FrameView
         message.append(getResourceMap().getString("deleteMaps.dialog.msg.part2"));
         int dialog = JOptionPane.showConfirmDialog(getFrame(), message.toString(), getResourceMap().getString("deleteMaps.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
         if (dialog == JOptionPane.OK_OPTION) {
-            for (File file : outputFolder.listFiles(new MetaFilenameFilter("*.png"))) {
-                if (file.delete()) {
-                    getLogger().info(getResourceMap().getString("deleteMaps.msg.deleted") + " " + file.toString());
-                }
+            for (File file : files2Delete) {
+                file.delete();
             }
             outputFolder.delete();
+            StringBuffer sb = new StringBuffer();
+            sb.append(resourceMap.getString("animation.text"));
+            sb.append(" ");
+            sb.append(files2Delete.length);
+            sb.append(" ");
+            sb.append(resourceMap.getString("deleteMaps.msg.deleted"));
+            getLogger().log(Level.INFO, sb.toString());
             lblFolder.setText(getResourceMap().getString("lblFolder.text"));
             outputFolder = null;
             replayPanel.setFolder(null);
@@ -189,7 +194,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public Task exportToKMZ() {
-        return new ExportToKMZTask(getApplication());
+        return kmzTask = new ExportToKMZTask(getApplication());
     }
 
     private class ExportToKMZTask extends SFTask {
@@ -202,15 +207,16 @@ public class IchthyopView extends FrameView
             btnMapping.getAction().setEnabled(false);
             btnExportToKMZ.getAction().setEnabled(false);
             btnCloseNC.getAction().setEnabled(false);
+            btnCancelMapping.getAction().setEnabled(true);
             setColorbarPanelEnabled(false);
         }
 
         @Override
         protected Object doInBackground() throws Exception {
             wmsMapper.createKML();
+            setMessage(resourceMap.getString("exportToKMZ.msg.exporting"), true, Level.INFO);
             for (int i = 0; i < wmsMapper.getNbSteps(); i++) {
                 setProgress((float) (i + 1) / wmsMapper.getNbSteps());
-                setMessage(resourceMap.getString("exportToKMZ.msg.exporting") + " " + (i + 1) + "/" + (wmsMapper.getNbSteps()), true, Level.INFO);
                 wmsMapper.writeKMLStep(i);
             }
             setMessage(resourceMap.getString("exportToKMZ.msg.compressing"), true, Level.INFO);
@@ -225,6 +231,7 @@ public class IchthyopView extends FrameView
             btnMapping.getAction().setEnabled(true);
             btnExportToKMZ.getAction().setEnabled(true);
             btnCloseNC.getAction().setEnabled(true);
+            btnCancelMapping.getAction().setEnabled(false);
             setColorbarPanelEnabled(true);
         }
 
@@ -235,6 +242,11 @@ public class IchthyopView extends FrameView
 
         @Override
         void onFailure(Throwable t) {
+        }
+
+        @Override
+        protected void cancelled() {
+            setMessage(resourceMap.getString("exportToKMZ.msg.cancelled"));
         }
     }
 
@@ -253,6 +265,8 @@ public class IchthyopView extends FrameView
             wmsMapper.setZoomSliderVisible(false);
             btnMapping.getAction().setEnabled(false);
             btnExportToKMZ.getAction().setEnabled(false);
+            btnOpenNC.getAction().setEnabled(false);
+            btnCloseNC.getAction().setEnabled(false);
             btnCancelMapping.getAction().setEnabled(true);
             setColorbarPanelEnabled(false);
             index = 0;
@@ -295,12 +309,22 @@ public class IchthyopView extends FrameView
             btnMapping.getAction().setEnabled(true);
             btnExportToKMZ.getAction().setEnabled(true);
             btnCancelMapping.getAction().setEnabled(false);
+            btnOpenNC.getAction().setEnabled(true);
+            btnCloseNC.getAction().setEnabled(true);
             setColorbarPanelEnabled(true);
         }
 
         @Override
         void onSuccess(Object result) {
-            setMessage(index + " " + resourceMap.getString("createMaps.msg.succeeded"), false, LogLevel.COMPLETE);
+            StringBuffer sb = new StringBuffer();
+            sb.append(resourceMap.getString("createMaps.msg.prefix"));
+            sb.append(" ");
+            sb.append(resourceMap.getString("createMaps.msg.succeeded"));
+            sb.append(" ");
+            sb.append(index);
+            sb.append(" ");
+            sb.append(resourceMap.getString("createMaps.msg.succeeded"));
+            setMessage(sb.toString(), false, LogLevel.COMPLETE);
             replayPanel.setFolder(null);
             taskPaneMapping.setCollapsed(true);
             taskPaneAnimation.setCollapsed(false);
@@ -321,6 +345,7 @@ public class IchthyopView extends FrameView
     @Action
     public void cancelMapping() {
         createMapTask.cancel(true);
+        kmzTask.cancel(true);
     }
 
     @Action
@@ -448,6 +473,8 @@ public class IchthyopView extends FrameView
         CreateAnimatedGifTask(Application instance) {
             super(instance);
             stopAnimation();
+            setAnimationToolsEnabled(false);
+            btnOpenAnimation.getAction().setEnabled(false);
         }
 
         @Override
@@ -460,12 +487,12 @@ public class IchthyopView extends FrameView
             path += ".gif";
             /* Should i ask every time if user agrees to overwrite */
             /*if (new File(path).exists()) {
-                String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
-                int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
-                if (!(dialog == JOptionPane.OK_OPTION)) {
-                    cancel(true);
-                    return null;
-                }
+            String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
+            int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
+            if (!(dialog == JOptionPane.OK_OPTION)) {
+            cancel(true);
+            return null;
+            }
             }*/
             gif.start(path);
             gif.setDelay((int) (1000 / nbfps));
@@ -475,6 +502,7 @@ public class IchthyopView extends FrameView
                 Collections.reverse(pictures);
             }
             for (int i = 0; i < pictures.size(); i++) {
+                setProgress((i + 1.f) / pictures.size());
                 gif.addFrame(pictures.get(i));
             }
             gif.finish();
@@ -490,6 +518,12 @@ public class IchthyopView extends FrameView
 
         @Override
         void onFailure(Throwable throwable) {
+        }
+
+        @Override
+        protected void finished() {
+            setAnimationToolsEnabled(true);
+            btnOpenAnimation.getAction().setEnabled(true);
         }
     }
 
@@ -545,12 +579,39 @@ public class IchthyopView extends FrameView
         int returnVal = fc.showSaveDialog(getFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = addExtension(fc.getSelectedFile(), getResourceMap().getString("Application.configurationFile.extension"));
+            if (file.getAbsolutePath().matches(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
+                JOptionPane.showMessageDialog(fc, getResourceMap().getString("saveAsConfigurationFile.msg.different"), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.OK_OPTION);
+                saveAsConfigurationFile();
+                return null;
+            } else if (file.exists()) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(file.toString());
+                sb.append(" ");
+                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.exist"));
+                sb.append("\n");
+                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.overwrite"));
+                int answer = JOptionPane.showConfirmDialog(fc, sb.toString(), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.YES_NO_OPTION);
+                if (answer != JOptionPane.YES_OPTION) {
+                    saveAsConfigurationFile();
+                    return null;
+                }
+            }
             try {
                 IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
+                StringBuffer sb = new StringBuffer();
+                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.prefix"));
+                sb.append(" ");
+                sb.append(getSimulationManager().getConfigurationFile().getName());
+                sb.append(" ");
+                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.saved"));
+                sb.append(" ");
+                sb.append(file.getName());
+                getLogger().info(sb.toString());
                 return loadConfigurationFile(file);
             } catch (IOException ex) {
                 getLogger().log(Level.SEVERE, getResourceMap().getString("saveAsConfigurationFile.msg.failed"), ex);
             }
+
         }
         return null;
     }
@@ -889,7 +950,7 @@ public class IchthyopView extends FrameView
         protected Object doInBackground() throws Exception {
             getSimulationManager().resetTimerGlobal();
             do {
-                setMessage(resourceMap.getString("simulationRun.msg.simulation") + getSimulationManager().indexSimulationToString());
+                setMessage(resourceMap.getString("simulationRun.msg.simulation") + " " + getSimulationManager().indexSimulationToString());
                 /* setup */
                 setMessage(resourceMap.getString("simulationRun.msg.setup.start"), true, Level.INFO);
                 getSimulationManager().setup();
@@ -2478,6 +2539,7 @@ public class IchthyopView extends FrameView
     private boolean isRunning = false;
     private Task simulActionTask;
     private Task createMapTask;
+    private Task kmzTask;
     private boolean isSetup;
     private ReplayPanel replayPanel = new ReplayPanel();
     private final float TEN_MINUTES = 10.f * 60.f;
