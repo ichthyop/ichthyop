@@ -51,8 +51,8 @@ public abstract class SFTask<T, V> extends Task<T, V> {
     public void setMessage(String message, boolean persistent, Level level) {
         super.setMessage(message);
         SimulationManager.getLogger().log(level, message);
-        if (!persistent) {
-            firePropertyChange("reset", null, null);
+        if (persistent) {
+            firePropertyChange("persistent", null, null);
         }
     }
 }

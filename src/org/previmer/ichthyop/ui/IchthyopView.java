@@ -52,6 +52,7 @@ import javax.swing.text.NumberFormatter;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.ui.logging.LogLevel;
 import org.previmer.ichthyop.ui.logging.SystemOutHandler;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
@@ -229,7 +230,7 @@ public class IchthyopView extends FrameView
 
         @Override
         void onSuccess(Object o) {
-            setMessage(resourceMap.getString("exportToKMZ.msg.exported") + " " + wmsMapper.getKMZPath());
+            setMessage(resourceMap.getString("exportToKMZ.msg.exported") + " " + wmsMapper.getKMZPath(), false, LogLevel.COMPLETE);
         }
 
         @Override
@@ -299,7 +300,7 @@ public class IchthyopView extends FrameView
 
         @Override
         void onSuccess(Object result) {
-            setMessage(index + " " + resourceMap.getString("createMaps.msg.succeeded"));
+            setMessage(index + " " + resourceMap.getString("createMaps.msg.succeeded"), false, LogLevel.COMPLETE);
             replayPanel.setFolder(null);
             taskPaneMapping.setCollapsed(true);
             taskPaneAnimation.setCollapsed(false);
@@ -483,7 +484,7 @@ public class IchthyopView extends FrameView
         @Override
         void onSuccess(Object result) {
             if (null != result) {
-                setMessage(resourceMap.getString("createAnimatedGif.msg.succeeded") + " " + result);
+                setMessage(resourceMap.getString("createAnimatedGif.msg.succeeded") + " " + result, false, LogLevel.COMPLETE);
             }
         }
 
@@ -523,13 +524,13 @@ public class IchthyopView extends FrameView
 
         protected void onSuccess(Object obj) {
             isSetup = true;
-            setMessage(resourceMap.getString("previewSimulation.msg.setup.ok"));
+            setMessage(resourceMap.getString("previewSimulation.msg.setup.ok"), false, LogLevel.COMPLETE);
             showSimulationPreview();
         }
 
         @Override
         void onFailure(Throwable throwable) {
-            setMessage(resourceMap.getString("previewSimulation.msg.setup.failed"), false, Level.WARNING);
+            setMessage(resourceMap.getString("previewSimulation.msg.setup.failed"), false, Level.SEVERE);
             btnPreview.setSelected(false);
         }
     }
@@ -548,7 +549,7 @@ public class IchthyopView extends FrameView
                 IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
                 return loadConfigurationFile(file);
             } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
+                getLogger().log(Level.SEVERE, getResourceMap().getString("saveAsConfigurationFile.msg.failed"), ex);
             }
         }
         return null;
@@ -586,7 +587,7 @@ public class IchthyopView extends FrameView
         protected void onSuccess(Object o) {
             btnSaveCfgFile.getAction().setEnabled(false);
             isSetup = false;
-            setMessage(resourceMap.getString("saveConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().getName());
+            setMessage(resourceMap.getString("saveConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().getName(), false, LogLevel.COMPLETE);
         }
 
         @Override
@@ -821,7 +822,8 @@ public class IchthyopView extends FrameView
 
     @Action
     public void newConfigurationFile() {
-        getLogger().info("New configuration file - not supported yet.");
+        //getApplication().show(new NewConfigView(IchthyopApp.getApplication()));
+        getLogger().log(Level.WARNING, "New configuration file - not supported yet.");
     }
 
     @Action
@@ -912,9 +914,9 @@ public class IchthyopView extends FrameView
 
         protected void onFailure(Throwable t) {
             if (!isSetup) {
-                setMessage(resourceMap.getString("simulationRun.msg.setup.failed"), false, Level.WARNING);
+                setMessage(resourceMap.getString("simulationRun.msg.setup.failed"), false, Level.SEVERE);
             } else if (!isInit) {
-                setMessage(resourceMap.getString("simulationRun.msg.init.failed"), false, Level.WARNING);
+                setMessage(resourceMap.getString("simulationRun.msg.init.failed"), false, Level.SEVERE);
             }
             btnSimulationRun.getAction().setEnabled(true);
             finished();
@@ -946,7 +948,7 @@ public class IchthyopView extends FrameView
         }
 
         public void onSuccess(Object obj) {
-            setMessage(resourceMap.getString("simulationRun.msg.completed"));
+            setMessage(resourceMap.getString("simulationRun.msg.completed"), false, LogLevel.COMPLETE);
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
             lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
@@ -1022,7 +1024,7 @@ public class IchthyopView extends FrameView
         try {
             return getContext().getLocalStorage().load(beanFilename(bean));
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            //getLogger().log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -1200,7 +1202,7 @@ public class IchthyopView extends FrameView
             if (null != result) {
                 txtFieldMin.setValue(result[0]);
                 txtFieldMax.setValue(result[1]);
-                setMessage(resourceMap.getString("autoRangeColorbar.msg.suggested") + " [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]");
+                setMessage(resourceMap.getString("autoRangeColorbar.msg.suggested") + " [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]", false, LogLevel.COMPLETE);
             }
         }
 
@@ -1211,7 +1213,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void cancelled() {
-            setMessage(resourceMap.getString("autoRangeColorbar.msg.cancelled"));
+            setMessage(resourceMap.getString("autoRangeColorbar.msg.cancelled"), false, Level.WARNING);
         }
     }
 

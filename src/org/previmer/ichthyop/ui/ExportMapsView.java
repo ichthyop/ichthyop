@@ -20,6 +20,7 @@ import org.jdesktop.application.Task;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
+import org.previmer.ichthyop.ui.logging.LogLevel;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -101,7 +102,7 @@ public class ExportMapsView extends FrameView {
         @Override
         void onSuccess(Object result) {
             btnSave.getAction().setEnabled(false);
-            setMessage(resourceMap.getString("save.Action.succeeded"));
+            setMessage(resourceMap.getString("save.Action.succeeded"), false, LogLevel.COMPLETE);
         }
 
         @Override

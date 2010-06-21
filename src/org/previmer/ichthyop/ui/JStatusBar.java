@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.logging.Logger;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -136,26 +137,18 @@ public class JStatusBar extends JXStatusBar {
                     statusAnimationLabel.setBusy(false);
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
-                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.red"));
                 } else if ("succeeded".equals(propertyName)) {
                     statusAnimationLabel.setBusy(false);
-                    lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.green"));
+                    setIcon(ICON.COMPLETE);
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
                 } else if ("done".equals(propertyName)) {
                     statusAnimationLabel.setBusy(false);
                     progressBar.setVisible(false);
                     progressBar.setValue(0);
-                } else if ("message".equals(propertyName)) {
-                    /* Here we do not handle the display of the message since
-                     * it is done through the logger. Just ensure the message
-                     * timer is not running from previous message.
-                     */
-                    if (messageTimer.isRunning()) {
-                        messageTimer.stop();
-                    }
-                } else if ("reset".equals(propertyName)) {
-                    messageTimer.restart();
+                } else if ("persistent".equals(propertyName)) {
+                    /* We ensure the message won't be deleted */
+                    messageTimer.stop();
                 } else if ("progress".equals(propertyName)) {
                     int value = (Integer) (evt.getNewValue());
                     progressBar.setVisible(true);
@@ -164,6 +157,10 @@ public class JStatusBar extends JXStatusBar {
                 }
             }
         });
+    }
+
+    public void setIcon(ICON icon) {
+        lblFlag.setIcon(icon.getIcon());
     }
 
     public JProgressBar getProgressBar() {
@@ -183,11 +180,30 @@ public class JStatusBar extends JXStatusBar {
         return statusMessageLabel.getText();
     }
 
-    private ResourceMap getResourceMap() {
+    private static ResourceMap getResourceMap() {
         return Application.getInstance().getContext().getResourceMap(JStatusBar.class);
     }
 
     public void connectToLogger(Logger logger) {
         logger.addHandler(new JStatusBarHandler(this));
+    }
+
+    public enum ICON {
+
+        STANDBY("lblFlag.icon.grey"),
+        WARNING("lblFlag.icon.yellow"),
+        INFO("lblFlag.icon.blue"),
+        ERROR("lblFlag.icon.red"),
+        COMPLETE("lblFlag.icon.green");
+        
+        private Icon icon;
+
+        ICON(String iconKey) {
+            icon = getResourceMap().getIcon(iconKey);
+        }
+
+        public Icon getIcon() {
+            return icon;
+        }
     }
 }

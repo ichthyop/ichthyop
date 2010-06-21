@@ -44,10 +44,7 @@ public class JStatusBarOutputStream extends OutputStream {
     public void write(int b) throws IOException {
         byte[] bytes = new byte[1];
         bytes[0] = (byte) b;
-        StringBuffer sb = new StringBuffer();
-        if (!statusBar.getMessage().endsWith("\n")) sb.append(statusBar.getMessage());
-        sb.append(new String(bytes));
-        statusBar.setMessage(sb.toString());
+        write(bytes);
     }
 
     /**
