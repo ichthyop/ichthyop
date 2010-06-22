@@ -199,7 +199,7 @@ public abstract class MarsCommon extends AbstractDataset {
             indexLat.set(j);
             for (int i = 0; i < nx; i++) {
                 indexLon.set(i);
-                maskRho[j][i] = (hRho[j][i] == -999.0)
+                maskRho[j][i] = (hRho[j][i] < 0)
                         ? (byte) 0
                         : (byte) 1;
             }
@@ -589,7 +589,7 @@ public abstract class MarsCommon extends AbstractDataset {
                 float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
                 range(p1, p2);
             } catch (Exception ex) {
-                getLogger().log(Level.WARNING, "Failed to resize domain", ex);
+                getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
         }
     }
