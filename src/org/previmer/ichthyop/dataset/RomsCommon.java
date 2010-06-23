@@ -746,9 +746,18 @@ abstract class RomsCommon extends AbstractDataset {
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
+        boolean isAllWater = isInWater(i, j);
+        for (ii = -1; ii <= 1; ii++) {
+            for (jj = -1; jj <= 1; jj++) {
+                isAllWater &= isInWater(i + ii, j + jj);
+                if (!isAllWater) {
+                    /* no need to continue as soon as one surrounding cell
+                     * is not in water */
+                    return true;
+                }
+            }
+        }
+        return !isAllWater;
     }
 
     String getNextFile(int time_arrow) throws IOException {

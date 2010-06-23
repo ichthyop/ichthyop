@@ -967,15 +967,23 @@ public class NemoDataset extends AbstractDataset {
      *         <code>false</code> otherwise.
      */
     public boolean isCloseToCost(double[] pGrid) {
-
+        
         int i, j, k, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         k = (int) (Math.round(pGrid[2]));
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k)
-                && isInWater(i, j + jj, k));
+        boolean isAllWater = isInWater(i, j, k);
+        for (ii = -1; ii <= 1; ii++) {
+            for (jj = -1; jj <= 1; jj++) {
+                isAllWater &= isInWater(i + ii, j + jj, k);
+                if (!isAllWater) {
+                    /* no need to continue as soon as one surrounding cell
+                     * is not in water */
+                    return true;
+                }
+            }
+        }
+        return !isAllWater;
     }
 
     /**
