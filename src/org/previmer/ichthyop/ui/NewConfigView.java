@@ -194,6 +194,15 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         templateTree.setModel(new DefaultTreeModel(treeNode1));
     }
 
+    private static String getDefaultPath() {
+        String path = System.getProperty("user.dir");
+        if (!path.endsWith(File.separator)) {
+            path += File.separator;
+        }
+        path += "cfg";
+        return path;
+    }
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -283,7 +292,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         lblName.setName("lblName"); // NOI18N
 
         textFieldPath.setEditable(false);
-        textFieldPath.setText(System.getProperty("user.dir"));
+        textFieldPath.setText(getDefaultPath());
         textFieldPath.setName("textFieldPath"); // NOI18N
 
         lblPath.setText(resourceMap.getString("lblPath.text")); // NOI18N
@@ -319,7 +328,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         lblFile.setName("lblFile"); // NOI18N
 
         textFieldFile.setEditable(false);
-        textFieldFile.setText(getFilename(System.getProperty("user.dir"), "NewConfig"));
+        textFieldFile.setText(getFilename(getDefaultPath(), "NewConfig"));
         textFieldFile.setName("textFieldFile"); // NOI18N
 
         textFieldName.setText(resourceMap.getString("textFieldName.text")); // NOI18N
@@ -394,7 +403,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
                 .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblFile)
                     .addComponent(textFieldFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 96, Short.MAX_VALUE)
                 .addComponent(lblChecker)
                 .addContainerGap())
         );
@@ -485,7 +494,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private javax.swing.JTextField textFieldPath;
     private javax.swing.JTextField textFieldTemplate;
     // End of variables declaration//GEN-END:variables
-    private File location = new File(System.getProperty("user.dir"));
+    private File location = new File(getDefaultPath());
     private ResourceMap resourceMap;
     private JStatusBar statusBar = new JStatusBar();
 

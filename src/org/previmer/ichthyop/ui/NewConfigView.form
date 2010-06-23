@@ -237,7 +237,7 @@
                       <Properties>
                         <Property name="editable" type="boolean" value="false"/>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="System.getProperty(&quot;user.dir&quot;)" type="code"/>
+                          <Connection code="getDefaultPath()" type="code"/>
                         </Property>
                         <Property name="name" type="java.lang.String" value="textFieldPath" noResource="true"/>
                       </Properties>
@@ -304,7 +304,7 @@
                       <Properties>
                         <Property name="editable" type="boolean" value="false"/>
                         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                          <Connection code="getFilename(System.getProperty(&quot;user.dir&quot;), &quot;NewConfig&quot;)" type="code"/>
+                          <Connection code="getFilename(getDefaultPath(), &quot;NewConfig&quot;)" type="code"/>
                         </Property>
                         <Property name="name" type="java.lang.String" value="textFieldFile" noResource="true"/>
                       </Properties>
