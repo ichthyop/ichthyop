@@ -777,13 +777,11 @@ public class WMSMapper extends JXMapKit {
      * @throws an IOException if an ouput exception occurs when saving the
      * picture.
      */
-    public void screen2File(final Component component, final int index) {
+    public void screen2File(final int index) {
 
-        BufferedImage bi = new BufferedImage(component.getWidth(),
-                component.getHeight(),
-                BufferedImage.TYPE_INT_RGB);
+        BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = bi.getGraphics();
-        component.paintAll(g);
+        paintAll(g);
         new Thread(new ImageWriter(index, bi)).start();
     }
 

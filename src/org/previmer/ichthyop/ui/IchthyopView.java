@@ -13,8 +13,6 @@ import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
@@ -47,6 +45,7 @@ import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
+import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import org.jdesktop.animation.timing.Animator;
@@ -298,7 +297,7 @@ public class IchthyopView extends FrameView
         protected void process(List<Painter[]> painters) {
             for (Painter[] painter : painters) {
                 wmsMapper.map(painter[0], painter[1]);
-                wmsMapper.screen2File(wmsMapper, index++);
+                wmsMapper.screen2File(index++);
             }
         }
 
@@ -812,11 +811,13 @@ public class IchthyopView extends FrameView
         }
         if (animator.isRunning()) {
             animator.stop();
+            replayPanel.addMouseWheelListener(mouseScroller);
         }
     }
 
     private void startAnimation() {
         if (!animator.isRunning()) {
+            replayPanel.removeMouseWheelListener(mouseScroller);
             animator.setAcceleration(0.01f);
             btnAnimationFW.setEnabled(true);
             animator.start();
@@ -1093,32 +1094,14 @@ public class IchthyopView extends FrameView
 
         public void mouseWheelMoved(MouseWheelEvent e) {
             int increment = e.getWheelRotation();
-            int index = sliderTime.getValue();
-            int newIndex = index + increment;
-            newIndex = Math.min(sliderTime.getMaximum(), Math.max(0, newIndex));
-            sliderTime.setValue(newIndex);
-        }
-    }
-
-    private class KeyScroller extends KeyAdapter {
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            int keyCode = e.getKeyCode();
-            switch (keyCode) {
-                case KeyEvent.VK_RIGHT:
-                case KeyEvent.VK_UP:
+            if (increment > 0) {
+                for (int i = 0; i < increment; i++) {
                     next();
-                    break;
-                case KeyEvent.VK_LEFT:
-                case KeyEvent.VK_DOWN:
+                }
+            } else {
+                for (int i = 0; i < Math.abs(increment); i++) {
                     previous();
-                    break;
-                case KeyEvent.VK_PAGE_DOWN:
-                    first();
-                    break;
-                case KeyEvent.VK_PAGE_UP:
-                    last();
+                }
             }
         }
     }
@@ -2307,8 +2290,13 @@ public class IchthyopView extends FrameView
 
     private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
         // TODO add your handling code here:
-        replayPanel.setIndex(sliderTime.getValue());
-        lblTime.setText(replayPanel.getTime());
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                replayPanel.setIndex(sliderTime.getValue());
+                lblTime.setText(replayPanel.getTime());
+            }
+        });
     }//GEN-LAST:event_sliderTimeStateChanged
 
     private void hyperLinkLogoMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_hyperLinkLogoMouseEntered
@@ -2402,7 +2390,6 @@ public class IchthyopView extends FrameView
                 taskPaneConfiguration.setCollapsed(true);
                 taskPaneMapping.setCollapsed(true);
                 replayPanel.setVisible(true);
-                //replayPanel.setFolder(outputFolder);
             } else {
                 stopAnimation();
                 replayPanel.setVisible(false);
@@ -2413,22 +2400,37 @@ public class IchthyopView extends FrameView
 
     private void btnColorMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMinActionPerformed
         // TODO add your handling code here:
-        JButton btn = (JButton) evt.getSource();
-        btn.setForeground(chooseColor(btn, btn.getForeground()));
+        final JButton btn = (JButton) evt.getSource();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                btn.setForeground(chooseColor(btn, btn.getForeground()));
+            }
+        });
     }//GEN-LAST:event_btnColorMinActionPerformed
 
     private void btnColorMaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMaxActionPerformed
         // TODO add your handling code here:
-        JButton btn = (JButton) evt.getSource();
-        btn.setForeground(chooseColor(btn, btn.getForeground()));
+        final JButton btn = (JButton) evt.getSource();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                btn.setForeground(chooseColor(btn, btn.getForeground()));
+            }
+        });
     }//GEN-LAST:event_btnColorMaxActionPerformed
 
     private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
         // TODO add your handling code here:
-        JButton btn = (JButton) evt.getSource();
-        btn.setForeground(chooseColor(btn, btn.getForeground()));
-        wmsMapper.setColorbar(null, 0, 0, null, null);
-        wmsMapper.setDefaultColor(btn.getForeground());
+        final JButton btn = (JButton) evt.getSource();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                btn.setForeground(chooseColor(btn, btn.getForeground()));
+                wmsMapper.setColorbar(null, 0, 0, null, null);
+                wmsMapper.setDefaultColor(btn.getForeground());
+            }
+        });
         getLogger().info(resourceMap.getString("btnColor.msg.apply"));
     }//GEN-LAST:event_btnColorActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -2555,6 +2557,7 @@ public class IchthyopView extends FrameView
     private JRunProgressPanel pnlProgress = new JRunProgressPanel();
     private ResourceMap resourceMap = Application.getInstance(org.previmer.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
     private TimeDirection animationDirection;
+    private MouseWheelScroller mouseScroller = new MouseWheelScroller();
 
     private enum TimeDirection {
 
