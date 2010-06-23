@@ -28,8 +28,6 @@ public interface IDataset extends NextStepListener {
 
     double get_dWz(double[] pGrid, double time);
 
-    abstract public double adimensionalize(double number, double xRho, double yRho);
-
     public boolean isInWater(double[] pGrid);
 
     public boolean isInWater(int i, int j);
