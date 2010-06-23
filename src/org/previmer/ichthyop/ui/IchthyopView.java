@@ -883,8 +883,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public void newConfigurationFile() {
-        //getApplication().show(new NewConfigView(IchthyopApp.getApplication()));
-        getLogger().log(Level.WARNING, "New configuration file - not supported yet.");
+        getApplication().show(new NewConfigView(IchthyopApp.getApplication()));
     }
 
     @Action
