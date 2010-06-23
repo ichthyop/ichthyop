@@ -133,9 +133,15 @@ public abstract class MarsCommon extends AbstractDataset {
 
         try {
             nx = ncIn.findDimension(strLonDim).getLength();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset longitude dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
             ny = ncIn.findDimension(strLatDim).getLength();
         } catch (Exception ex) {
-            IOException ioex = new IOException("Error reading dataset lon/lat dimensions. " + ex.toString());
+            IOException ioex = new IOException("Error reading dataset latitude dimension. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
