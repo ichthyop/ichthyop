@@ -16,6 +16,8 @@ public class AdvectionAction extends AbstractAction {
     private boolean isForward;
     private boolean horizontal;
     private boolean vertical;
+    // Threshold for CFL error message
+    public static final float THRESHOLD_CFL = 1.0f;
 
 
     public void loadParameters() throws Exception {
@@ -81,9 +83,18 @@ public class AdvectionAction extends AbstractAction {
         double[] dU = new double[dim];
 
         dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time);
+        if (Math.abs(dU[0]) > THRESHOLD_CFL) {
+            getLogger().warning("CFL broken for U " + (float) dU[0]);
+        }
         dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time);
+        if (Math.abs(dU[1]) > THRESHOLD_CFL) {
+            getLogger().warning("CFL broken for V " + (float) dU[1]);
+        }
         if (dim > 2) {
             dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time);
+            if (Math.abs(dU[2]) > THRESHOLD_CFL) {
+            getLogger().warning("CFL broken for W " + (float) dU[2]);
+        }
         }
 
         for (int i = 0; i < dim; i++) {
