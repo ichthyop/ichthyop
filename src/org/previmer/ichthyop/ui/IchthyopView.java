@@ -742,7 +742,7 @@ public class IchthyopView extends FrameView
         return SimulationManager.getLogger();
     }
 
-    private Task loadConfigurationFile(File file) {
+    public Task loadConfigurationFile(File file) {
         try {
             getSimulationManager().setConfigurationFile(file);
         } catch (IOException ex) {

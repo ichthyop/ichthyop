@@ -51,6 +51,10 @@ public class IchthyopApp extends SingleFrameApplication {
         return Application.getInstance(IchthyopApp.class);
     }
 
+    public static IchthyopView getIchthyopView() {
+        return (IchthyopView) getApplication().getMainView();
+    }
+
     /**
      * Main method launching the application.
      */

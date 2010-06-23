@@ -5,23 +5,29 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import javax.swing.event.TreeSelectionEvent;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
 import java.io.File;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.arch.ISimulationManager;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -42,6 +48,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + resourceMap.getString("View.title"));
 
         initComponents();
+        createTemplateTree();
         getFrame().setIconImage(resourceMap.getImageIcon("Application.icon").getImage());
 
         btnSave.getAction().setEnabled(false);
@@ -75,42 +82,50 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         }
     }
 
+    private File getFileTemplate(String filename) throws Exception {
+        Class ioClass = IOTools.class;
+        String path = "templates/" + filename;
+        URL url = ioClass.getResource(path);
+        File src = new File(url.toURI());
+        File dst = new File(textFieldFile.getText());
+        if (dst.exists()) {
+            int answer = JOptionPane.showConfirmDialog(getFrame(), resourceMap.getString("save.dialog.overwrite"), resourceMap.getString("save.dialog.title"), JOptionPane.YES_NO_OPTION);
+            if (answer != JOptionPane.YES_OPTION) {
+                return null;
+            }
+        }
+        IOTools.copyFile(src, dst);
+        return dst;
+    }
+
     @Action
     public Task save() {
-        //return new SaveTask(getApplication());
-        getLogger().log(Level.WARNING, "Create configuration file - not supported yet.");
+
+        TEMPLATE template = TEMPLATE.getTemplate(textFieldTemplate.getText());
+        File cfgFile = null;
+        try {
+            cfgFile = getFileTemplate(template.getFilename());
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, "Failed to create new configuration file ==> " + ex.toString(), ex);
+            return null;
+        }
+        if (cfgFile != null) {
+            getLogger().log(Level.INFO, resourceMap.getString("save.msg.created") + " " + cfgFile.getPath());
+            cancel(); // close the view
+            return IchthyopApp.getIchthyopView().loadConfigurationFile(cfgFile);
+        }
         return null;
     }
 
     public void valueChanged(TreeSelectionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) templateTree.getLastSelectedPathComponent();
         if (node != null && node.isLeaf()) {
-            textFieldTemplate.setText((String) node.getUserObject());
+            String strTemplate = node.getUserObject().toString();
+            textFieldTemplate.setText(strTemplate);
             btnSave.getAction().setEnabled(verifyName(textFieldName.getText()));
-        }
-    }
-
-    private class SaveTask extends SFTask {
-
-        SaveTask(Application instance) {
-            super(instance);
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-
-            return null;
-        }
-
-        @Override
-        void onSuccess(Object result) {
-
-            setMessage(resourceMap.getString("save.Action.succeeded"));
-        }
-
-        @Override
-        void onFailure(Throwable throwable) {
-            // nothing to do
+            descriptionTextPane.setText(TEMPLATE.getTemplate(strTemplate).getDescription());
+        } else {
+            descriptionTextPane.setText("");
         }
     }
 
@@ -143,6 +158,42 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         return filename;
     }
 
+    private void createTemplateTree() {
+
+        DefaultMutableTreeNode treeNode1 = new DefaultMutableTreeNode("Config templates");
+
+        DefaultMutableTreeNode treeNode2 = new DefaultMutableTreeNode("MARS");
+        DefaultMutableTreeNode treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MANGA_2D_OPENDAP);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MANGA_3D_OPENDAP);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MENOR_3D_OPENDAP);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MARS2D);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MARS3D);
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+
+        treeNode2 = new DefaultMutableTreeNode("ROMS");
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS2D);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS3D);
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+
+        treeNode2 = new DefaultMutableTreeNode("OPA");
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OPA3D_NEMO);
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+
+        treeNode2 = new DefaultMutableTreeNode("Miscellaneous");
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.GENERIC);
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
+        templateTree.setModel(new DefaultTreeModel(treeNode1));
+    }
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -157,6 +208,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         pnlConfig = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         templateTree = new javax.swing.JTree();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        descriptionTextPane = new javax.swing.JTextPane();
         jScrollPane2 = new javax.swing.JScrollPane();
         newFilePanel = new javax.swing.JPanel();
         btnChoosePath = new javax.swing.JButton();
@@ -185,58 +238,35 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
-        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Config templates");
-        javax.swing.tree.DefaultMutableTreeNode treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("MARS");
-        javax.swing.tree.DefaultMutableTreeNode treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("Manga 2D OpenDAP");
-        treeNode2.add(treeNode3);
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("Manga 3D OpenDAP");
-        treeNode2.add(treeNode3);
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("Menor 2D OpenDAP");
-        treeNode2.add(treeNode3);
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("Menor 3D OpenDAP");
-        treeNode2.add(treeNode3);
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MARS 2D file");
-        treeNode2.add(treeNode3);
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("MARS 3D file");
-        treeNode2.add(treeNode3);
-        treeNode1.add(treeNode2);
-        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("ROMS");
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("ROMS 3D Rutgers");
-        treeNode2.add(treeNode3);
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("ROMS 3D UCLA");
-        treeNode2.add(treeNode3);
-        treeNode1.add(treeNode2);
-        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("OPA NEMO");
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("OPA 3D");
-        treeNode2.add(treeNode3);
-        treeNode1.add(treeNode2);
-        treeNode2 = new javax.swing.tree.DefaultMutableTreeNode("Miscellaneous");
-        treeNode3 = new javax.swing.tree.DefaultMutableTreeNode("Generic configuration");
-        treeNode2.add(treeNode3);
-        treeNode1.add(treeNode2);
-        templateTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         templateTree.setName("templateTree"); // NOI18N
         jScrollPane1.setViewportView(templateTree);
+
+        jScrollPane3.setName("jScrollPane3"); // NOI18N
+
+        descriptionTextPane.setContentType(resourceMap.getString("descriptionTextPane.contentType")); // NOI18N
+        descriptionTextPane.setEditable(false);
+        descriptionTextPane.setName("descriptionTextPane"); // NOI18N
+        jScrollPane3.setViewportView(descriptionTextPane);
 
         javax.swing.GroupLayout pnlConfigLayout = new javax.swing.GroupLayout(pnlConfig);
         pnlConfig.setLayout(pnlConfigLayout);
         pnlConfigLayout.setHorizontalGroup(
             pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 238, Short.MAX_VALUE)
-            .addGroup(pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(pnlConfigLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
-                    .addContainerGap()))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlConfigLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
+                .addContainerGap())
         );
         pnlConfigLayout.setVerticalGroup(
             pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 376, Short.MAX_VALUE)
-            .addGroup(pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(pnlConfigLayout.createSequentialGroup()
-                    .addGap(1, 1, 1)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 363, Short.MAX_VALUE)
-                    .addContainerGap()))
+            .addGroup(pnlConfigLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jSplitPane1.setLeftComponent(pnlConfig);
@@ -364,7 +394,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
                 .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblFile)
                     .addComponent(textFieldFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblChecker)
                 .addContainerGap())
         );
@@ -383,11 +413,11 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mainPanelLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 813, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 813, Short.MAX_VALUE)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCancel)))
@@ -395,14 +425,14 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mainPanelLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 403, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 446, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
                     .addComponent(btnSave))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         setComponent(mainPanel);
@@ -430,13 +460,14 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             }
         });
     }//GEN-LAST:event_textFieldNameKeyTyped
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnChoosePath;
     private javax.swing.JButton btnSave;
+    private javax.swing.JTextPane descriptionTextPane;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JLabel lblChecker;
     private javax.swing.JLabel lblFile;
@@ -456,5 +487,52 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     // End of variables declaration//GEN-END:variables
     private File location = new File(System.getProperty("user.dir"));
     private ResourceMap resourceMap;
-    JStatusBar statusBar = new JStatusBar();
+    private JStatusBar statusBar = new JStatusBar();
+
+    private enum TEMPLATE {
+
+        /* enum */
+        MANGA_2D_OPENDAP,
+        MANGA_3D_OPENDAP,
+        MENOR_3D_OPENDAP,
+        MARS2D,
+        MARS3D,
+        ROMS2D,
+        ROMS3D,
+        OPA3D_NEMO,
+        GENERIC;
+        /* variables */
+        private String longName;
+        private String description;
+        private String filename;
+        private ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(NewConfigView.class);
+
+        TEMPLATE() {
+            longName = resourceMap.getString(name() + ".title");
+            description = resourceMap.getString(name() + ".description");
+            filename = resourceMap.getString(name() + ".xml");
+        }
+
+        @Override
+        public String toString() {
+            return longName;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public static TEMPLATE getTemplate(String name) {
+            for (TEMPLATE template : TEMPLATE.values()) {
+                if (template.toString().matches(name)) {
+                    return template;
+                }
+            }
+            return TEMPLATE.GENERIC;
+        }
+    }
 }
