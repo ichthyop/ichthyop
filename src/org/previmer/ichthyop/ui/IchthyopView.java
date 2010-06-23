@@ -51,6 +51,8 @@ import javax.swing.text.NumberFormatter;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.ui.logging.LogLevel;
 import org.previmer.ichthyop.ui.logging.SystemOutHandler;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
@@ -542,8 +544,11 @@ public class IchthyopView extends FrameView
 
     private class SimulationPreviewTask extends SFTask {
 
+        private boolean warning;
+
         SimulationPreviewTask(Application instance, boolean isEnabled) {
             super(instance);
+            warning = false;
         }
 
         @Override
@@ -551,13 +556,30 @@ public class IchthyopView extends FrameView
             if (!isSetup) {
                 setMessage(resourceMap.getString("previewSimulation.msg.setup.start"));
                 getSimulationManager().setup();
+                /* After the setup, need to initialize the zones */
+                for (TypeZone typeZone : TypeZone.values()) {
+                    if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
+                        for (Zone zone : getSimulationManager().getZoneManager().getZones(typeZone)) {
+                            try {
+                                zone.init();
+                            } catch (Exception ex) {
+                                warning = true;
+                                getLogger().warning(ex.toString() + ". Please, fix it before running the simulation.");
+                            }
+                        }
+                    }
+                }
             }
             return null;
         }
 
         protected void onSuccess(Object obj) {
             isSetup = true;
-            setMessage(resourceMap.getString("previewSimulation.msg.setup.ok"), false, LogLevel.COMPLETE);
+            if (!warning) {
+                setMessage(resourceMap.getString("previewSimulation.msg.setup.ok"), false, LogLevel.COMPLETE);
+            } else {
+                setMessage(resourceMap.getString("previewSimulation.msg.setup.warning"), false, LogLevel.WARNING);
+            }
             showSimulationPreview();
         }
 
@@ -565,6 +587,7 @@ public class IchthyopView extends FrameView
         void onFailure(Throwable throwable) {
             setMessage(resourceMap.getString("previewSimulation.msg.setup.failed"), false, Level.SEVERE);
             btnPreview.setSelected(false);
+            isSetup = false;
         }
     }
 
@@ -979,6 +1002,7 @@ public class IchthyopView extends FrameView
             } else if (!isInit) {
                 setMessage(resourceMap.getString("simulationRun.msg.init.failed"), false, Level.SEVERE);
             }
+            isSetup = isInit = false;
             btnSimulationRun.getAction().setEnabled(true);
             finished();
         }

@@ -10,18 +10,13 @@ import java.util.ArrayList;
 
 /** import Swing */
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JPanel;
 
 /** local import */
 import org.previmer.ichthyop.TypeZone;
-
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.ISimulationManager;
-import org.previmer.ichthyop.event.InitializeEvent;
-import org.previmer.ichthyop.event.InitializeListener;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -159,18 +154,6 @@ public class SimulationUI extends JPanel {
         Graphics2D graphic = background.createGraphics();
         graphic.setColor(new Color(223, 212, 200));
         graphic.fillRect(0, 0, w, h);
-        // If zones should drawn that is time to initialize them
-        for (TypeZone typeZone : TypeZone.values()) {
-            if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
-                for (Zone zone : getSimulationManager().getZoneManager().getZones(typeZone)) {
-                    try {
-                        zone.init();
-                    } catch (Exception ex) {
-                        SimulationManager.getLogger().log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        }
 
         CellUI cell = new CellUI();
         for (int i = getSimulationManager().getDataset().get_nx() - 1; i-- > 0;) {
