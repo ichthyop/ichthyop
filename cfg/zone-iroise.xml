@@ -40,7 +40,7 @@
   </zone>
   <zone>
     <key>Release offshore</key>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <type>release</type>
     <polygon>
       <point>
@@ -75,6 +75,44 @@
       <lower_depth>11.0</lower_depth>
     </thickness>
     <color>[r=255,g=102,b=102]</color>
+  </zone>
+  <zone>
+    <key>Rade</key>
+    <enabled>false</enabled>
+    <type>release</type>
+    <polygon>
+      <point>
+        <index>0</index>
+        <lon>-4.8</lon>
+        <lat>48.2</lat>
+      </point>
+      <point>
+        <index>1</index>
+        <lon>-4.6</lon>
+        <lat>48.2</lat>
+      </point>
+      <point>
+        <index>2</index>
+        <lon>-4.6</lon>
+        <lat>48.0</lat>
+      </point>
+      <point>
+        <index>3</index>
+        <lon>-4.8</lon>
+        <lat>48.0</lat>
+      </point>
+    </polygon>
+    <bathy_mask>
+      <enabled>false</enabled>
+      <line_inshore>0.0</line_inshore>
+      <line_offshore>12000.0</line_offshore>
+    </bathy_mask>
+    <thickness>
+      <enabled>true</enabled>
+      <upper_depth>0.0</upper_depth>
+      <lower_depth>10.0</lower_depth>
+    </thickness>
+    <color>[r=0,g=204,b=153]</color>
   </zone>
   <zone>
     <key>Recruitment zone</key>

@@ -68,7 +68,7 @@
       <parameter>
         <key>record_frequency</key>
         <long_name>Record frequency</long_name>
-        <value>12</value>
+        <value>6</value>
         <format>integer</format>
         <description>Set the record frequency as a number of computational time-steps</description>
       </parameter>
@@ -116,7 +116,7 @@
       <parameter>
         <key>south-east-corner.lat</key>
         <long_name>Latitude of Southeast corner</long_name>
-        <value>45.0</value>
+        <value>47.0</value>
         <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
         <format>float</format>
         <default>0.0</default>
@@ -448,7 +448,7 @@
   <block type="action">
     <key>action.buoyancy</key>
     <tree_path>Advanced/Transport/Buoyancy</tree_path>
-    <enabled>true</enabled>
+    <enabled>false</enabled>
     <parameters>
       <parameter type="serial">
         <key>egg_density</key>

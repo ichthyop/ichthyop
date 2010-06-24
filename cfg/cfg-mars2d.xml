@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <icstructure>
+  <long_name>Configuration MARS3D Pre-set parameters</long_name>
+  <description>Ici je tape ma description.
+Un de mes premiers fichiers de configuration où les paramètres sont présentés de la façon la plus simple possible pour l'utilisateur.</description>
   <block type="option">
     <tree_path>Main/Time</tree_path>
     <key>app.time</key>
@@ -8,22 +11,15 @@
       <parameter type="serial">
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
-        <value>year 2010 month 05 day 13 at 10:00</value>
+        <value>year 2008 month 01 day 07 at 16:00</value>
         <format>date</format>
         <tree_path>Tome/General time options</tree_path>
         <description>Set the date of beginning of simulation. Expressed in seconds ellapsed since the origin of time.</description>
       </parameter>
       <parameter type="serial">
-        <key>time_step</key>
-        <long_name>Time step</long_name>
-        <value>600</value>
-        <format>integer</format>
-        <description>The computational time step (dt) expressed in seconds.</description>
-      </parameter>
-      <parameter type="serial">
         <key>transport_duration</key>
         <long_name>Transport duration</long_name>
-        <value>0000 day(s) 12 hour(s) 00 minute(s)</value>
+        <value>0001 day(s) 00 hour(s) 00 minute(s)</value>
         <format>duration</format>
         <description>Set the duration [second] of particle transport.</description>
       </parameter>
@@ -36,6 +32,13 @@
         <accepted>gregorian</accepted>
         <tree_path>Tome/General time options</tree_path>
         <description>Choose the type of calendar. Climato: 360 days per year. Gregorian: the usual calendar.</description>
+      </parameter>
+      <parameter type="serial">
+        <key>time_step</key>
+        <long_name>Time step</long_name>
+        <value>600</value>
+        <format>integer</format>
+        <description>The computational time step (dt) expressed in seconds.</description>
       </parameter>
       <parameter hidden="true">
         <key>time_arrow</key>
@@ -54,85 +57,32 @@
       </parameter>
     </parameters>
   </block>
-  <block type="option">
-    <key>app.output</key>
-    <tree_path>Main/Output</tree_path>
-    <parameters>
-      <parameter>
-        <key>output_path</key>
-        <long_name>Output path</long_name>
-        <value>output/</value>
-        <format>path</format>
-        <description>Select the folder where the simulation output files should be saved.</description>
-      </parameter>
-      <parameter>
-        <key>record_frequency</key>
-        <long_name>Record frequency</long_name>
-        <value>3</value>
-        <format>integer</format>
-        <description>Set the record frequency as a number of computational time-steps</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>file_prefix</key>
-        <long_name>Output filename prefix</long_name>
-        <value>irsn-manga3d-opendap</value>
-        <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc</description>
-      </parameter>
-    </parameters>
-  </block>
   <block type="dataset">
-    <key>dataset.mars_3d_opendap</key>
-    <tree_path>Main/MARS 3D OpenDAP</tree_path>
+    <key>dataset.mars_2d</key>
+    <tree_path>Main/MARS 2D</tree_path>
     <parameters>
-      <parameter>
-        <key>opendap_url</key>
-        <long_name>OpenDAP URL</long_name>
-        <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
-        <description>Folder containing the MARS NetCDF files.</description>
-      </parameter>
       <parameter>
         <key>shrink_domain</key>
-        <long_name>Shrink simulated domain</long_name>
-        <value>true</value>
-        <format>boolean</format>
-        <description>Shrink the size of the domain for running the simulation.</description>
+        <long_name>Resize domain</long_name>
+        <value>false</value>
       </parameter>
       <parameter>
-        <key>north-west-corner.lat</key>
-        <long_name>Latitude of Northwest corner</long_name>
-        <value>50.0</value>
-        <description>Set the latitude of Northwest corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
+        <key>file_filter</key>
+        <long_name>File filter</long_name>
+        <value>champs2D*.nc</value>
+        <description>Filename filter (accepted metacharacters * and ?)</description>
       </parameter>
       <parameter>
-        <key>north-west-corner.lon</key>
-        <long_name>Longitude of Northwest corner</long_name>
-        <value>-8.0</value>
-        <description>Set the longitude of Northwest corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
-      </parameter>
-      <parameter>
-        <key>south-east-corner.lat</key>
-        <long_name>Latitude of Southeast corner</long_name>
-        <value>47.0</value>
-        <description>Set the latitude of Southeast corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
-      </parameter>
-      <parameter>
-        <key>south-east-corner.lon</key>
-        <long_name>Longitude of Southeast corner</long_name>
-        <value>0.0</value>
-        <description>Set the longitude of Southeast corner for resizing the simulated domain.</description>
-        <format>float</format>
-        <default>0.0</default>
+        <key>input_path</key>
+        <long_name>Input path</long_name>
+        <value>input/</value>
+        <format>path</format>
+        <description>Folder containing the MARS NetCDF files.</description>
       </parameter>
       <parameter hidden="true">
         <key>class_name</key>
         <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.dataset.Mars3dOpendapDataset</value>
+        <value>org.previmer.ichthyop.dataset.Mars2dDataset</value>
         <format>class</format>
         <description>This parameter should not be modified unless you know exactly what you are doing.</description>
       </parameter>
@@ -155,15 +105,9 @@
         <description>Set the name of the corresponding NetCDF dimension.</description>
       </parameter>
       <parameter hidden="true">
-        <key>field_dim_z</key>
-        <long_name>Dimension in the Z-direction</long_name>
-        <value>level</value>
-        <description>Set the name of the corresponding NetCDF dimension.</description>
-      </parameter>
-      <parameter hidden="true">
         <key>field_var_bathy</key>
         <long_name>Bathymetry at RHO-points</long_name>
-        <value>H0</value>
+        <value>h0</value>
         <description>Set the name of the corresponding NetCDF variable.</description>
       </parameter>
       <parameter hidden="true">
@@ -179,23 +123,6 @@
         <description>Set the name of the corresponding NetCDF variable.</description>
       </parameter>
       <parameter hidden="true">
-        <key>field_var_salt</key>
-        <long_name>Averaged salinity</long_name>
-        <value>SAL</value>
-        <description>Set the name of the corresponding NetCDF variable.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>field_var_sigma</key>
-        <long_name>Ocean sigma coordinate</long_name>
-        <value>level</value>
-        <description>Set the name of the corresponding NetCDF variable.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>field_var_temp</key>
-        <long_name>Averaged potential temperature</long_name>
-        <value>TEMP</value>
-      </parameter>
-      <parameter hidden="true">
         <key>field_var_time</key>
         <long_name>Averaged time since initialization</long_name>
         <value>time</value>
@@ -204,20 +131,47 @@
       <parameter hidden="true">
         <key>field_var_u</key>
         <long_name>U-momentum component</long_name>
-        <value>UZ</value>
+        <value>uz</value>
         <description>Set the name of the corresponding NetCDF variable.</description>
       </parameter>
       <parameter hidden="true">
         <key>field_var_v</key>
         <long_name>V-momentum component</long_name>
-        <value>VZ</value>
+        <value>vz</value>
         <description>Set the name of the corresponding NetCDF variable.</description>
       </parameter>
+    </parameters>
+  </block>
+  <block type="option">
+    <key>app.output</key>
+    <tree_path>Main/Output</tree_path>
+    <parameters>
+      <parameter>
+        <key>file_prefix</key>
+        <long_name>Output filename</long_name>
+        <value>mars2d</value>
+        <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc</description>
+      </parameter>
+      <parameter>
+        <key>output_path</key>
+        <long_name>Output path</long_name>
+        <value>output/</value>
+        <format>path</format>
+        <description>Select the folder where the simulation output files should be saved.</description>
+      </parameter>
+      <parameter>
+        <key>record_frequency</key>
+        <long_name>Record frequency</long_name>
+        <value>6</value>
+        <format>integer</format>
+        <description>Set the record frequency as a number of computational time-steps</description>
+      </parameter>
       <parameter hidden="true">
-        <key>field_var_zeta</key>
-        <long_name>Free-surface elevation</long_name>
-        <value>XE</value>
-        <description>Set the name of the corresponding NetCDF variable.</description>
+        <key>trackers</key>
+        <long_name>Variable tracking</long_name>
+        <format>list</format>
+        <value />
+        <description>Name of some extra variables you wish to track in the NetCDF output file. It must exactly match the name of the corresponding variable in the NetCDF input file. By default, ichthyop records time, longitude, latitude, depth and mortality.</description>
       </parameter>
     </parameters>
   </block>
@@ -229,12 +183,12 @@
       <parameter>
         <key>number_particles</key>
         <long_name>Number of particles</long_name>
-        <value>1000</value>
+        <value>10</value>
       </parameter>
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>cfg/zone-iroise.xml</value>
+        <value>/home/pverley/ichthyop/dev/nb/iv3/cfg/zone-iroise.xml</value>
         <format>zonefile</format>
       </parameter>
       <parameter hidden="true">
@@ -375,7 +329,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>/home/pverley/ichthyop/dev/nb/iv3/cfg/zone-mars3d.xml</value>
+        <value></value>
         <format>zonefile</format>
       </parameter>
       <parameter hidden="true">
@@ -471,7 +425,7 @@
       <parameter type="serial">
         <key>egg_density</key>
         <long_name>Egg density</long_name>
-        <value>1.025</value>
+        <value>1.5</value>
         <format>float</format>
         <default>1.025</default>
         <description>Set the egg density [g/cm3], a long_name parameter to calculate the egg buoyancy.</description>
@@ -479,14 +433,14 @@
       <parameter>
         <key>salinity_field</key>
         <long_name>Salinity variable name</long_name>
-        <value>SAL</value>
+        <value />
         <default>salt</default>
         <description>The name of the salinity field in the dataset.</description>
       </parameter>
       <parameter>
         <key>temperature_field</key>
         <long_name>Temperature variable name</long_name>
-        <value>TEMP</value>
+        <value />
         <default>temp</default>
         <description>The name of the temperature field in the dataset.</description>
       </parameter>
@@ -524,20 +478,6 @@
         <accepted>euler</accepted>
         <accepted>rk4</accepted>
         <description>Use a forward Euler scheme (euler) or a Runge-Kutta 4th order scheme (rk4)</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>horizontal</key>
-        <long_name>Horizontal advection</long_name>
-        <value>true</value>
-        <format>boolean</format>
-        <description>Determine whether horizontal advection is enabled</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>vertical</key>
-        <long_name>Vertical advection</long_name>
-        <value>true</value>
-        <format>boolean</format>
-        <description>Determine whether vertical advection is enabled</description>
       </parameter>
       <parameter hidden="true">
         <key>class_name</key>
@@ -595,6 +535,38 @@
     </parameters>
   </block>
   <block type="action">
+    <key>action.vdisp</key>
+    <tree_path>Advanced/Transport/Vertical dispersion</tree_path>
+    <enabled>false</enabled>
+    <parameters>
+      <parameter>
+        <key>kv_field</key>
+        <long_name>Vertical turbulent diffusion</long_name>
+        <value>kv</value>
+        <description>The name of the NetCDF variable corresponding to the Vertical turbulent diffusion coefficient.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.previmer.ichthyop.action.VDispAction</value>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>priority</key>
+        <long_name>priority</long_name>
+        <description>This parameter should not be modified unless you know exactly what you are doing.</description>
+        <value>high</value>
+        <format>combo</format>
+        <accepted>lowest</accepted>
+        <accepted>low</accepted>
+        <accepted>normal</accepted>
+        <accepted>high</accepted>
+        <accepted>highest</accepted>
+      </parameter>
+    </parameters>
+  </block>
+  <block type="action">
     <key>action.wind</key>
     <tree_path>Advanced/Transport/Wind</tree_path>
     <enabled>false</enabled>
@@ -602,7 +574,7 @@
       <parameter>
         <key>wind_file</key>
         <long_name>File of wind scenario</long_name>
-        <value>cfg/wind-manga.txt</value>
+        <value>cfg/windaction.txt</value>
         <format>textfile</format>
       </parameter>
       <parameter hidden="true">
@@ -633,7 +605,7 @@
       <parameter>
         <key>txtfile</key>
         <long_name>Drifter file</long_name>
-        <value>cfg/drifter_manga.txt</value>
+        <value>cfg/drifter_example.txt</value>
         <format>textfile</format>
       </parameter>
       <parameter hidden="true">
@@ -652,7 +624,7 @@
       <parameter>
         <key>ncfile</key>
         <long_name>NetCDF file</long_name>
-        <value>/home/pverley/ichthyop/dev/nb/iv3/output/iroise3d_ichthyop-run201006141813.nc</value>
+        <value></value>
         <format>file</format>
       </parameter>
       <parameter hidden="true">
@@ -695,7 +667,7 @@
       <parameter>
         <key>zone_file</key>
         <long_name>Zone file</long_name>
-        <value>/home/pverley/ichthyop/dev/nb/iv3/cfg/zone-mars3d.xml</value>
+        <value></value>
         <format>zonefile</format>
       </parameter>
       <parameter hidden="true">
@@ -713,7 +685,7 @@
       <parameter>
         <key>events</key>
         <long_name>Release event</long_name>
-        <value>"year 2010 month 05 day 13 at 10:00" "year 2010 month 05 day 13 at 10:00"</value>
+        <value>year 2008 month 01 day 07 at 06:00</value>
         <format>list</format>
       </parameter>
       <parameter>
