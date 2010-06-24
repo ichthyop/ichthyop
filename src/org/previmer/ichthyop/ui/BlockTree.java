@@ -5,6 +5,7 @@
 package org.previmer.ichthyop.ui;
 
 import java.awt.Component;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -125,7 +126,7 @@ public class BlockTree extends JTree {
 
     }
 
-    public void createModel() {
+    public void createModel() throws IOException {
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(getSimulationManager().getConfigurationFile().getName());
         setModel(new DefaultTreeModel(root));

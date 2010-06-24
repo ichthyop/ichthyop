@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.previmer.ichthyop.arch;
 
 import org.previmer.ichthyop.io.BlockType;
@@ -21,7 +20,7 @@ import java.util.List;
  */
 public interface IParameterManager {
 
-    public void setConfigurationFile(File file);
+    public void setConfigurationFile(File file) throws Exception;
 
     public String getParameter(String blockName, String key);
 
@@ -40,6 +39,13 @@ public interface IParameterManager {
 
     public void save() throws IOException, FileNotFoundException;
 
-    public Collection<XBlock> readBlocks();
+    public Collection<XBlock> readBlocks() throws IOException;
 
+    public String getConfigurationTitle();
+
+    public void setConfigurationTitle(String title);
+
+    public String getConfigurationDescription();
+
+    public void setConfigurationDescription(String description);
 }

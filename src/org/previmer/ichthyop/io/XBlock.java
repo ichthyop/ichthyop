@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.io;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,9 +35,12 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     private List<String> sortedKey;
     private int nbHiddenParameters;
 
-    public XBlock(Element element) {
+    public XBlock(Element element) throws IOException {
         super(BLOCK);
         this.block_type = getType(element);
+        if (null == block_type) {
+            throw new IllegalArgumentException("Unknow type for block " + element.getChildText(TREEPATH));
+        }
         this.setAttribute(TYPE, block_type.toString());
         nbHiddenParameters = 0;
         if (element != null) {

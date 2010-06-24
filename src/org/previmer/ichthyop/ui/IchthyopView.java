@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.beans.PropertyChangeEvent;
+import java.lang.reflect.InvocationTargetException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -693,7 +694,7 @@ public class IchthyopView extends FrameView
         getLogger().info(getResourceMap().getString("closeConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().toString());
         try {
             getSimulationManager().setConfigurationFile(null);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
         }
         lblCfgFile.setText(getResourceMap().getString("lblCfgFile.text"));
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
@@ -767,8 +768,15 @@ public class IchthyopView extends FrameView
     public Task loadConfigurationFile(File file) {
         try {
             getSimulationManager().setConfigurationFile(file);
-        } catch (IOException ex) {
-            return new FailedTask(getApplication(), ex);
+        } catch (Exception e) {
+            try {
+                String msg = resourceMap.getString("openConfigurationFile.msg.error") + " ==> " + e.getMessage();
+                Exception eclone = e.getClass().getConstructor(String.class).newInstance(msg);
+                eclone.setStackTrace(e.getStackTrace());
+                return new FailedTask(getApplication(), eclone);
+            } catch (Exception ex) {
+                return new FailedTask(getApplication(), e);
+            }
         }
         getLogger().info(getResourceMap().getString("openConfigurationFile.msg.opened") + " " + file.toString());
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());

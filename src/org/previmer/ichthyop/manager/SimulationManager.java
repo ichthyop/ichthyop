@@ -96,7 +96,7 @@ public class SimulationManager implements ISimulationManager {
         return logger;
     }
 
-    public void setConfigurationFile(File file) throws IOException {
+    public void setConfigurationFile(File file) throws Exception {
 
         cfgFile = null;
         nb_simulations = 1;
@@ -282,24 +282,24 @@ public class SimulationManager implements ISimulationManager {
      */
     private void mobiliseManagers() {
         /* the very first one, since most of the other managers will need it
-         later on */
+        later on */
         getDatasetManager();
-        
+
         /* Time manager must come after the release manager because the 
-         calculation of the simulation duration required the release schedule */
+        calculation of the simulation duration required the release schedule */
         getReleaseManager();
         getTimeManager();
 
         /* It'd better come after TimeManager in case some actions need to
-         access some time information */
+        access some time information */
         getActionManager();
 
         /* Zone manager must be called  after the action manager and the
-         release manager */
+        release manager */
         getZoneManager();
 
         /* the very last one, because it sums up all the setup info in order
-         to record it in the NetCDF output file */
+        to record it in the NetCDF output file */
         getOutputManager();
     }
 

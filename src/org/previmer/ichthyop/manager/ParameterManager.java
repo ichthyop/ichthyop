@@ -37,8 +37,25 @@ public class ParameterManager extends AbstractManager implements IParameterManag
         return parameterManager;
     }
 
-    public void setConfigurationFile(File file) {
+    public void setConfigurationFile(File file) throws Exception {
         cfgFile = new ConfigurationFile(file);
+        cfgFile.load();
+    }
+
+    public String getConfigurationDescription() {
+        return cfgFile.getDescription();
+    }
+
+    public void setConfigurationDescription(String description) {
+        cfgFile.setDescription(description);
+    }
+
+    public String getConfigurationTitle() {
+        return cfgFile.getLongName();
+    }
+
+    public void setConfigurationTitle(String longName) {
+        cfgFile.setLongName(longName);
     }
 
     public List<XParameter> getParameters(ParamType paramType) {
@@ -67,7 +84,7 @@ public class ParameterManager extends AbstractManager implements IParameterManag
         return cfgFile.getBlocks(type);
     }
 
-    public Collection<XBlock> readBlocks() {
+    public Collection<XBlock> readBlocks() throws IOException {
         return cfgFile.readBlocks();
     }
 
@@ -96,22 +113,51 @@ public class ParameterManager extends AbstractManager implements IParameterManag
         private File file;
         private Document structure;
         private HashMap<String, XBlock> map;
+        public final static String DESCRIPTION = "description";
+        public final static String LONG_NAME = "long_name";
 
         ConfigurationFile(File file) {
             this.file = file;
-            load();
         }
 
-        void load() {
+        void load() throws Exception {
 
             SAXBuilder sxb = new SAXBuilder();
-            try {
-                Element racine = sxb.build(file).getRootElement();
-                racine.detach();
-                structure = new Document(racine);
-                map = createMap();
-            } catch (Exception e) {
-                getLogger().log(Level.SEVERE, null, e);
+            Element racine = sxb.build(file).getRootElement();
+            racine.detach();
+            structure = new Document(racine);
+            map = createMap();
+        }
+
+        private String getDescription() {
+            if (null != structure.getRootElement().getChild(DESCRIPTION)) {
+                return structure.getRootElement().getChildTextNormalize(DESCRIPTION);
+            } else {
+                return null;
+            }
+        }
+
+        private void setDescription(String description) {
+            if (null == structure.getRootElement().getChild(DESCRIPTION)) {
+                structure.getRootElement().addContent(new Element(DESCRIPTION));
+            }
+            structure.getRootElement().getChild(DESCRIPTION).setText(description);
+        }
+
+        private void setLongName(String longName) {
+            if (null == structure.getRootElement().getChild(LONG_NAME)) {
+                structure.getRootElement().addContent(new Element(LONG_NAME));
+            }
+            structure.getRootElement().getChild(LONG_NAME).setText(longName);
+        }
+
+        private String getLongName() {
+            if (null != structure.getRootElement().getChild(LONG_NAME)) {
+                return structure.getRootElement().getChildTextNormalize(LONG_NAME);
+            } else {
+                String filename = file.getName();
+                filename = filename.substring(0, filename.lastIndexOf("."));
+                return filename;
             }
         }
 
@@ -158,7 +204,7 @@ public class ParameterManager extends AbstractManager implements IParameterManag
             return map.get(new BlockId(type, key).toString());
         }
 
-        private List<XBlock> readBlocks() {
+        private List<XBlock> readBlocks() throws IOException {
             List<Element> list = structure.getRootElement().getChildren(XBlock.BLOCK);
             List<XBlock> listBlock = new ArrayList(list.size());
             for (Element elt : list) {
@@ -190,7 +236,7 @@ public class ParameterManager extends AbstractManager implements IParameterManag
             return list;
         }
 
-        private HashMap<String, XBlock> createMap() {
+        private HashMap<String, XBlock> createMap() throws Exception {
             HashMap<String, XBlock> lmap = new HashMap();
             for (XBlock xblock : readBlocks()) {
                 lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);

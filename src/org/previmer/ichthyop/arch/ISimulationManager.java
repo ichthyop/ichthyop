@@ -44,7 +44,7 @@ public interface ISimulationManager extends Runnable {
 
     public void removeInitializeListener(InitializeListener listener);
 
-    public void setConfigurationFile(File file) throws IOException;
+    public void setConfigurationFile(File file) throws Exception;
 
     public File getConfigurationFile();
 
