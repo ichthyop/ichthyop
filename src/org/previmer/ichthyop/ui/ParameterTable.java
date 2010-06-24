@@ -151,6 +151,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
     }
 
     public void setAllRowsVisible(final boolean visible) {
+        if (null != getCellEditor()) {
+            getCellEditor().stopCellEditing();
+        }
         TableRowSorter sorter = new TableRowSorter<ParameterTableModel>(model);
         sorter.setRowFilter(new RowFilter() {
 

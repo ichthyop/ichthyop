@@ -139,12 +139,14 @@ public class JMultiCellEditorsTable extends JTable {
     public TableCellEditor getCellEditor(int row, int col) {
 
         TableCellEditor tmpEditor = null;
+        int modelRow = convertRowIndexToModel(row);
         if (rm != null) {
-            tmpEditor = rm.getEditor(row);
+            tmpEditor = rm.getEditor(modelRow);
         }
         if (tmpEditor != null) {
             return tmpEditor;
         }
+        // In JTable getCellEditor only reads column number
         return super.getCellEditor(row, col);
     }
 
