@@ -972,8 +972,8 @@ public class IchthyopView extends FrameView
 
     public class SimulationRunTask extends SFTask {
 
-        JLabel lblProgress;
         private boolean isInit;
+        private String title;
 
         SimulationRunTask(Application instance) {
             super(instance);
@@ -986,6 +986,7 @@ public class IchthyopView extends FrameView
             getSimulationManager().resetId();
             isSetup = false;
             isInit = false;
+            title = getFrame().getTitle();
         }
 
         @Override
@@ -1042,6 +1043,12 @@ public class IchthyopView extends FrameView
                 btnSimulationRun.getAction().setEnabled(true);
             }
             pnlProgress.printProgress();
+            StringBuffer sb = new StringBuffer();
+            sb.append(getResourceMap().getString("Application.title"));
+            sb.append(" - ");
+            sb.append(getProgress());
+            sb.append("%");
+            getFrame().setTitle(sb.toString());
         }
 
         @Override
@@ -1061,6 +1068,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void finished() {
+            getFrame().setTitle(title);
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
             setMenuEnabled(true);
