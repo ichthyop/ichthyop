@@ -34,7 +34,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -43,7 +42,6 @@ import javax.swing.JTextField;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -170,6 +168,22 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
             fileChooser.setSelectedFile(new File(path));
             int answer = fileChooser.showOpenDialog(panel);
             if (answer == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                if (!file.isFile()) {
+                    String msg = file.getAbsolutePath() + " does not exist. Create it ?";
+                    int create = JOptionPane.showConfirmDialog(panel, msg, "Create file ?", JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch (create) {
+                        case JOptionPane.YES_OPTION:
+                            saveAndEditNewFile(file);
+                            break;
+                        case JOptionPane.NO_OPTION:
+                            actionPerformed(new ActionEvent(new JButton(), 0, EDIT));
+                            return;
+                        case JOptionPane.CANCEL_OPTION:
+                            fireEditingStopped();
+                            return;
+                    }
+                }
                 textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
                 fileEditor.editFile(textField.getText());
                 dialog.setVisible(true);
@@ -203,19 +217,23 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
                             return;
                     }
                 }
-                /* create the template */
-                try {
-                    IOTools.copyFile(Template.getTemplate(template), file);
-                } catch (Exception ex) {
-                }
-                /* edit the file */
-                textField.setText(file.getAbsolutePath());
-                fileEditor.editFile(textField.getText());
-                dialog.setVisible(true);
+                saveAndEditNewFile(file);
             } else {
                 fireEditingCanceled();
             }
         }
+    }
+
+    private void saveAndEditNewFile(File file) {
+        /* create the template */
+        try {
+            IOTools.copyFile(Template.getTemplate(template), file);
+        } catch (Exception ex) {
+        }
+        /* edit the file */
+        textField.setText(file.getAbsolutePath());
+        fileEditor.editFile(textField.getText());
+        dialog.setVisible(true);
     }
 
     public Object getCellEditorValue() {

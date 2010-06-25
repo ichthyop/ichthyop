@@ -145,8 +145,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     break;
                 case TEXTFILE:
                     /* for TextFileEditor, the default value can be set as 
-                     the name of the template file
-                     in org.previmer.ichthyop.templates */
+                    the name of the template file
+                    in org.previmer.ichthyop.templates */
                     editorModel.addEditorForRow(row, new TextFileEditor(xparam.getDefault()));
                     break;
                 case ZONEFILE:
@@ -156,10 +156,14 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
     }
 
-    public void setAllRowsVisible(final boolean visible) {
+    public void stopEditing() {
         if (null != getCellEditor()) {
             getCellEditor().stopCellEditing();
         }
+    }
+
+    public void setAllRowsVisible(final boolean visible) {
+        stopEditing();
         TableRowSorter sorter = new TableRowSorter<ParameterTableModel>(model);
         sorter.setRowFilter(new RowFilter() {
 
