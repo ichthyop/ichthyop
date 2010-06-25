@@ -15,7 +15,7 @@ public interface IReleaseProcess {
 
     public void loadParameters() throws Exception;
 
-    public void release(ReleaseEvent event) throws Exception;
+    public int release(ReleaseEvent event) throws Exception;
 
     public int getNbParticles();
 

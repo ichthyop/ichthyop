@@ -44,7 +44,7 @@ public class PatchyRelease extends AbstractReleaseProcess {
     }
 
     @Override
-    public void release(ReleaseEvent event) throws Exception {
+    public int release(ReleaseEvent event) throws Exception {
 
         int indexEvent = event.getSource().getIndexEvent();
         nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
@@ -93,15 +93,7 @@ public class PatchyRelease extends AbstractReleaseProcess {
                 index++;
             }
         }
-        StringBuffer sb = new StringBuffer();
-        sb.append("Release event (");
-        sb.append(getClass().getSimpleName());
-        sb.append(") time = ");
-        sb.append(event.getSource().getTime());
-        sb.append(" seconds. Released ");
-        sb.append(index);
-        sb.append(" particles.");
-        getLogger().info(sb.toString());
+        return index;
     }
 
     public int getNbParticles() {

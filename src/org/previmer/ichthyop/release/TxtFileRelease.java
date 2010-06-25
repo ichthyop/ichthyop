@@ -48,7 +48,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     }
 
     @Override
-    public void release(ReleaseEvent event) throws IOException {
+    public int release(ReleaseEvent event) throws IOException {
 
         int index = 0;
         String[] strCoord;
@@ -84,15 +84,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         } catch (java.io.IOException e) {
             throw new IOException("Problem reading drifter file " + textFile);
         }
-        StringBuffer sb = new StringBuffer();
-        sb.append("Release event (");
-        sb.append(getClass().getSimpleName());
-        sb.append(") time = ");
-        sb.append(event.getSource().getTime());
-        sb.append(" seconds. Released ");
-        sb.append(index);
-        sb.append(" particles.");
-        getLogger().info(sb.toString());
+        return index;
     }
 
     public int getNbParticles() {

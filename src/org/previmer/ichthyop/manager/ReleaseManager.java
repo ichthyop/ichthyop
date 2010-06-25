@@ -85,7 +85,16 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     }
 
     public void releaseTriggered(ReleaseEvent event) throws Exception {
-        getReleaseProcess().release(event);
+        int nbReleased = getReleaseProcess().release(event);
+        StringBuffer sb = new StringBuffer();
+        sb.append("Release event (");
+        sb.append(getClass().getSimpleName());
+        sb.append(") time = ");
+        sb.append((long) event.getSource().getTime());
+        sb.append(" seconds. Released ");
+        sb.append(nbReleased);
+        sb.append(" particles.");
+        getLogger().info(sb.toString());
     }
 
     public int getNbParticles() {

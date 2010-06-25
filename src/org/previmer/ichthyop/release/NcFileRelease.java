@@ -42,7 +42,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
     }
 
     @Override
-    public void release(ReleaseEvent event) throws Exception {
+    public int release(ReleaseEvent event) throws Exception {
 
         double time = event.getSource().getTime();
         int index = 0;
@@ -69,7 +69,6 @@ public class NcFileRelease extends AbstractReleaseProcess {
             time_rank0 = time_rank1;
         }
         rank--;
-        System.out.println(rank + " " + time);
 
         double x = 0.f;
         if (time != time_rank0) {
@@ -121,6 +120,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
         depthArr = null;
         //deathArr = null;
         nc.close();
+        return index;
     }
 
     public int getNbParticles() {
