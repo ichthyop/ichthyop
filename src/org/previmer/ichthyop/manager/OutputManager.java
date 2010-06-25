@@ -344,7 +344,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
                     continue;
                 }
                 /* tracker is only added to the list if addition in the
-                 NetCDF output file succedeed */
+                NetCDF output file succedeed */
                 trackers.add(tracker);
             }
         }
@@ -457,7 +457,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
         /* */
         requestedTrackers = new ArrayList();
-        
+
         /* add application trackers lon lat depth time */
         addAppTrackers();
 
@@ -469,7 +469,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
         /* add definition of the simulated area */
         addRegion();
-        
+
         getLogger().info("Output manager setup [OK]");
     }
 

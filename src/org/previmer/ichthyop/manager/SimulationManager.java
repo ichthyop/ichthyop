@@ -180,6 +180,10 @@ public class SimulationManager implements ISimulationManager {
      */
     public boolean hasNextSimulation() {
 
+        if (flagStop) {
+            return false;
+        }
+
         for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
             if (xparam.hasNext()) {
                 xparam.increment();
@@ -345,7 +349,7 @@ public class SimulationManager implements ISimulationManager {
     }
 
     public void stop() {
-        getTimeManager().lastStepTriggered();
+        //getTimeManager().lastStepTriggered();
         flagStop = true;
     }
 

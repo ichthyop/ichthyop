@@ -379,17 +379,17 @@ public class IchthyopView extends FrameView
     public void openNetCDF() {
 
         getLogger().info(getResourceMap().getString("openNcMapping.msg.opened") + " " + outputFile.getAbsolutePath());
-            lblNC.setText(outputFile.getName());
-            lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
-            wmsMapper.setFile(outputFile);
-            wmsMapper.setVisible(true);
-            lblMapping.setVisible(false);
-            btnMapping.getAction().setEnabled(true);
-            btnCloseNC.getAction().setEnabled(true);
-            btnExportToKMZ.getAction().setEnabled(true);
-            setMainTitle();
-            setColorbarPanelEnabled(true);
-            cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getVariableList()));
+        lblNC.setText(outputFile.getName());
+        lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
+        wmsMapper.setFile(outputFile);
+        wmsMapper.setVisible(true);
+        lblMapping.setVisible(false);
+        btnMapping.getAction().setEnabled(true);
+        btnCloseNC.getAction().setEnabled(true);
+        btnExportToKMZ.getAction().setEnabled(true);
+        setMainTitle();
+        setColorbarPanelEnabled(true);
+        cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getVariableList()));
     }
 
     public void closeFolderAnimation() {
@@ -954,6 +954,7 @@ public class IchthyopView extends FrameView
             closeFolderAnimation();
             return simulActionTask = new SimulationRunTask(getApplication());
         } else {
+            getSimulationManager().stop();
             simulActionTask.cancel(true);
             return null;
         }
@@ -973,14 +974,12 @@ public class IchthyopView extends FrameView
     public class SimulationRunTask extends SFTask {
 
         JLabel lblProgress;
-        private boolean bln;
         private boolean isInit;
 
         SimulationRunTask(Application instance) {
             super(instance);
             setMessage(resourceMap.getString("simulationRun.msg.started"));
             setMenuEnabled(false);
-            bln = false;
             pnlProgress.setupProgress();
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.stop"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.stop"));
@@ -1009,11 +1008,23 @@ public class IchthyopView extends FrameView
                 getSimulationManager().getTimeManager().firstStepTriggered();
                 getSimulationManager().resetTimerCurrent();
                 do {
+                    if (getSimulationManager().isStopped()) {
+                        break;
+                    }
+                    /* step simulation */
                     getSimulationManager().getSimulation().step();
+                    /* Print message progress */
+                    StringBuffer msg = new StringBuffer();
+                    msg.append(getSimulationManager().getTimeManager().stepToString());
+                    msg.append(" - ");
+                    msg.append(resourceMap.getString("simulationRun.msg.time"));
+                    msg.append(" ");
+                    msg.append(getSimulationManager().getTimeManager().timeToString());
+                    setMessage(msg.toString());
                     setProgress(getSimulationManager().progressCurrent());
                     publish(getSimulationManager().progressCurrent());
-                } while (!getSimulationManager().isStopped() && getSimulationManager().getTimeManager().hasNextStep());
-            } while (!getSimulationManager().isStopped() && getSimulationManager().hasNextSimulation());
+                } while (getSimulationManager().getTimeManager().hasNextStep());
+            } while (getSimulationManager().hasNextSimulation());
             return null;
         }
 
@@ -1028,26 +1039,14 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void process(List values) {
-            if (!bln) {
+            if (getProgress() > 0) {
                 btnSimulationRun.getAction().setEnabled(true);
-                bln = true;
             }
             pnlProgress.printProgress();
-            if (getSimulationManager().isStopped()) {
-                return;
-            }
-            StringBuffer msg = new StringBuffer();
-            msg.append(getSimulationManager().getTimeManager().stepToString());
-            msg.append(" - ");
-            msg.append(resourceMap.getString("simulationRun.msg.time"));
-            msg.append(" ");
-            msg.append(getSimulationManager().getTimeManager().timeToString());
-            setMessage(msg.toString());
         }
 
         @Override
         protected void cancelled() {
-            getSimulationManager().stop();
             setMessage(resourceMap.getString("simulationRun.msg.interrupted"));
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
             lblNC.setText(outputFile.getName());
