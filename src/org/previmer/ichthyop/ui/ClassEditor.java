@@ -29,7 +29,7 @@ public class ClassEditor extends DefaultCellEditor {
 
     JComboBox cbBox;
 
-    public ClassEditor() {
+    public ClassEditor() throws Exception {
         super(new JComboBox());
         cbBox = (JComboBox) getComponent();
         try {
@@ -57,7 +57,7 @@ public class ClassEditor extends DefaultCellEditor {
      * @param packageName Le nom du package à lister
      * @return La liste des classes
      */
-    public List<Class> getClasses(String pckgname) throws ClassNotFoundException, IOException {
+    public List<Class> getClasses(String pckgname) throws Exception {
         // Création de la liste qui sera retournée
         ArrayList<Class> classes = new ArrayList<Class>();
 
@@ -87,7 +87,7 @@ public class ClassEditor extends DefaultCellEditor {
      * @param packageName Le nom du package
      * @return La liste des classes
      */
-    private Collection<Class> scanDirectory(String directory, String packageName) throws ClassNotFoundException {
+    private Collection<Class> scanDirectory(String directory, String packageName) throws Exception {
         ArrayList<Class> classes = new ArrayList<Class>();
 
         // On génère le chemin absolu du package
@@ -129,7 +129,7 @@ public class ClassEditor extends DefaultCellEditor {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private Collection<Class> scanJar(String jar, String packageName) throws IOException, ClassNotFoundException {
+    private Collection<Class> scanJar(String jar, String packageName) throws Exception {
         ArrayList<Class> classes = new ArrayList<Class>();
 
         JarFile jfile = new JarFile(jar);

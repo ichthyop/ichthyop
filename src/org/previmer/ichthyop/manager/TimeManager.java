@@ -93,10 +93,10 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     }
 
     private void loadParameters() throws Exception {
-
+        
         /* time step */
         dt = Integer.valueOf(getParameter("app.time", "time_step"));
-
+        
         /* time direction */
         boolean isForward = getParameter("app.time", "time_arrow").matches(TimeDirection.FORWARD.toString());
         if (!isForward) {
@@ -310,8 +310,8 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         //Logger.getAnonymousLogger().info("-----< " + timeManager.timeToString() + " >-----");
 
         NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(NextStepListener.class);
-        
-        for (int i = 0; i < listenerList.length; i++) {
+
+        for (int i = listenerList.length; i-- > 0;) {
             NextStepListener listener = listenerList[i];
             listener.nextStepTriggered(new NextStepEvent(this));
         }

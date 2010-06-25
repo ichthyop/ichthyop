@@ -16,6 +16,7 @@
  */
 package org.previmer.ichthyop.release;
 
+import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
@@ -29,6 +30,7 @@ public class StainRelease extends AbstractReleaseProcess {
     private int nb_particles, nbReleasedNow;
     private double lon_stain, lat_stain, depth_stain;
     private double radius_stain;
+    private double thickness_stain;
     private int nbReleaseEvents;
     private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
@@ -44,6 +46,7 @@ public class StainRelease extends AbstractReleaseProcess {
         lon_stain = Double.valueOf(getParameter("lon_stain"));
         lat_stain = Double.valueOf(getParameter("lat_stain"));
         if (is3D) {
+            thickness_stain = Float.valueOf(getParameter("thickness_stain"));
             depth_stain = Float.valueOf(getParameter("depth_stain"));
         }
     }
@@ -59,21 +62,52 @@ public class StainRelease extends AbstractReleaseProcess {
 
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nbReleasedNow; p++) {
-            double lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
-            double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * lat_stain / 180.d);
-            double lon = lon_stain + 2 * radius_stain * (Math.random() - 0.5d) / one_deg_longitude_meter;
+            GeoPosition point = getGeoPosition();
             double depth = Double.NaN;
             if (is3D) {
-                depth = depth_stain + 2 * radius_stain * (Math.random() - 0.5d);
+                depth = depth_stain + thickness_stain * (Math.random() - 0.5d);
             }
-            IBasicParticle particlePatch = ParticleFactory.createParticle(index, lon, lat, depth);
+            if (depth > 0) {
+                depth *= -1.d;
+            }
+            IBasicParticle particlePatch = ParticleFactory.createParticle(index, point.getLongitude(), point.getLatitude(), depth);
             getSimulationManager().getSimulation().getPopulation().add(particlePatch);
             index++;
         }
         return index;
     }
 
+    private GeoPosition getGeoPosition() {
+
+        double lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+        double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * lat_stain / 180.d);
+        double lon = lon_stain + 2 * radius_stain * (Math.random() - 0.5d) / one_deg_longitude_meter;
+        if (geodesicDistance(lat, lon, lat_stain, lon_stain) > radius_stain) {
+            return getGeoPosition();
+        } else {
+            return new GeoPosition(lat, lon);
+        }
+    }
+
     public int getNbParticles() {
         return nb_particles;
+    }
+
+    private static double geodesicDistance(double lat1, double lon1, double lat2,
+            double lon2) {
+        double d = 0.d;
+        lat1 = Math.PI * lat1 / 180.d;
+        lat2 = Math.PI * lat2 / 180.d;
+        lon1 = Math.PI * lon1 / 180.d;
+        lon2 = Math.PI * lon2 / 180.d;
+
+
+        d = 2 * 6367000.d
+                * Math.asin(Math.sqrt(
+                Math.pow(Math.sin((lat2 - lat1) / 2), 2)
+                + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)));
+
+        return d;
+
     }
 }
