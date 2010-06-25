@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.release;
 
+import java.text.ParseException;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.arch.IBasicParticle;
@@ -13,7 +14,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,11 +25,13 @@ import java.util.logging.Logger;
 public class TxtFileRelease extends AbstractReleaseProcess {
 
     private File textFile;
+    private boolean is3D;
 
     @Override
     public void loadParameters() throws IOException {
-        
+
         textFile = getFile(getParameter("txtfile"));
+        is3D = getSimulationManager().getDataset().is3D();
     }
 
     private File getFile(String filename) throws IOException {
@@ -54,35 +56,42 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.getDefault());
-        try {
-            BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
-            String line;
-            while ((line = bfIn.readLine()) != null) {
-                if (!line.startsWith("#") & !(line.length() < 1)) {
-                    strCoord = line.split(" ");
-                    coord = new double[strCoord.length];
-                    for (int i = 0; i < strCoord.length; i++) {
-                        try {
-                            coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
-                        } catch (ParseException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                    IBasicParticle particle = coord.length > 2
-                            ? ParticleFactory.createParticle(index, coord[0], coord[1], -coord[2])
-                            : ParticleFactory.createParticle(index, coord[0], coord[1]);
 
-                    if (getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {
-                        //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
-                        getSimulationManager().getSimulation().getPopulation().add(particle);
-                        index++;
-                    } else {
-                        throw new IOException("Drifter at line " + (index + 1) + "is not in water");
+        BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
+        String line;
+        while ((line = bfIn.readLine()) != null) {
+            if (!line.startsWith("#") & !(line.length() < 1)) {
+                strCoord = line.trim().split(" ");
+                coord = new double[strCoord.length];
+                for (int i = 0; i < strCoord.length; i++) {
+                    try {
+                        coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
+                    } catch (ParseException ex) {
+                        IOException ioex = new IOException("Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
+                        ioex.setStackTrace(ex.getStackTrace());
+                        throw ioex;
                     }
                 }
+                IBasicParticle particle;
+                if (is3D) {
+                    double depth = coord.length > 2
+                            ? coord[2]
+                            : 0.d;
+                    if (depth > 0) {
+                        depth *= -1;
+                    }
+                    particle = ParticleFactory.createParticle(index, coord[0], coord[1], depth);
+                } else {
+                    particle = ParticleFactory.createParticle(index, coord[0], coord[1]);
+                }
+                if (getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {
+                    //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
+                    getSimulationManager().getSimulation().getPopulation().add(particle);
+                    index++;
+                } else {
+                    throw new IOException("Drifter at line " + (index + 1) + "is not in water");
+                }
             }
-        } catch (java.io.IOException e) {
-            throw new IOException("Problem reading drifter file " + textFile);
         }
         return index;
     }

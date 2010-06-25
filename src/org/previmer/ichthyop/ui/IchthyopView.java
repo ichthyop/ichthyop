@@ -1039,6 +1039,9 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void process(List values) {
+            if (getSimulationManager().isStopped()) {
+                return;
+            }
             if (getProgress() > 0) {
                 btnSimulationRun.getAction().setEnabled(true);
             }
