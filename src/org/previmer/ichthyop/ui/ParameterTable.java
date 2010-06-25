@@ -135,7 +135,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.DIRECTORIES_ONLY));
                     break;
                 case CLASS:
-                    editorModel.addEditorForRow(row, new ClassEditor());
+                    try {
+                        editorModel.addEditorForRow(row, new ClassEditor());
+                    } catch (Exception ex) {
+                    }
                     break;
                 case LIST:
                     editorModel.addEditorForRow(row, new ListEditor());
