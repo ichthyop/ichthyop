@@ -304,6 +304,7 @@ public class IchthyopView extends FrameView
         protected void finished() {
             wmsMapper.setZoomButtonsVisible(true);
             wmsMapper.setZoomSliderVisible(true);
+            wmsMapper.drawBackground();
             btnMapping.getAction().setEnabled(true);
             btnExportToKMZ.getAction().setEnabled(true);
             btnCancelMapping.getAction().setEnabled(false);
@@ -315,9 +316,7 @@ public class IchthyopView extends FrameView
         @Override
         void onSuccess(Object result) {
             StringBuffer sb = new StringBuffer();
-            sb.append(resourceMap.getString("createMaps.msg.prefix"));
-            sb.append(" ");
-            sb.append(resourceMap.getString("createMaps.msg.succeeded"));
+            sb.append(resourceMap.getString("mapping.text"));
             sb.append(" ");
             sb.append(index);
             sb.append(" ");
@@ -1049,10 +1048,7 @@ public class IchthyopView extends FrameView
         protected void cancelled() {
             setMessage(resourceMap.getString("simulationRun.msg.interrupted"));
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
-            lblNC.setText(outputFile.getName());
-            lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
-            setMessage(resourceMap.getString("openNcMapping.msg.opened") + " " + outputFile.getAbsolutePath());
-            wmsMapper.setFile(outputFile);
+            openNetCDF();
         }
 
         public void onSuccess(Object obj) {
