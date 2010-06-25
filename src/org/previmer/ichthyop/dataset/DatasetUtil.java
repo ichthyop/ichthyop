@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.previmer.ichthyop.dataset;
 
 /**
@@ -45,20 +44,19 @@ public class DatasetUtil {
      * @param lon2 double, the longitude of the second point
      * @return a double, the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
      */
-    public static double geodesicDistance(double lat1, double lon1, double lat2,
-            double lon2) {
-        //--------------------------------------------------------------
-        // Return the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
-        double d = 6367000.d * Math.sqrt(2.d
-                - 2.d
-                * Math.cos(Math.PI * lat1 / 180.d)
-                * Math.cos(Math.PI * lat2 / 180.d)
-                * Math.cos(Math.PI * (lon1 - lon2)
-                / 180.d)
-                - 2.d
-                * Math.sin(Math.PI * lat1 / 180.d)
-                * Math.sin(Math.PI * lat2 / 180.d));
-        return (d);
+    public static double geodesicDistance(double lat1, double lon1, double lat2, double lon2) {
+
+        double d = 0.d;
+        double lat1_rad = Math.PI * lat1 / 180.d;
+        double lat2_rad = Math.PI * lat2 / 180.d;
+        double lon1_rad = Math.PI * lon1 / 180.d;
+        double lon2_rad = Math.PI * lon2 / 180.d;
+
+        d = 2 * 6367000.d
+                * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
+                + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
+
+        return d;
     }
 
     /**
@@ -85,5 +83,4 @@ public class DatasetUtil {
 
         return (X[k + 1] - 2.d * X[k] + X[k - 1]);
     }
-
 }

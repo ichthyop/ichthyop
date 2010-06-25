@@ -18,6 +18,7 @@ package org.previmer.ichthyop.release;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 
@@ -82,7 +83,7 @@ public class StainRelease extends AbstractReleaseProcess {
         double lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
         double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * lat_stain / 180.d);
         double lon = lon_stain + 2 * radius_stain * (Math.random() - 0.5d) / one_deg_longitude_meter;
-        if (geodesicDistance(lat, lon, lat_stain, lon_stain) > radius_stain) {
+        if (DatasetUtil.geodesicDistance(lat, lon, lat_stain, lon_stain) > radius_stain) {
             return getGeoPosition();
         } else {
             return new GeoPosition(lat, lon);
@@ -91,23 +92,5 @@ public class StainRelease extends AbstractReleaseProcess {
 
     public int getNbParticles() {
         return nb_particles;
-    }
-
-    private static double geodesicDistance(double lat1, double lon1, double lat2,
-            double lon2) {
-        double d = 0.d;
-        lat1 = Math.PI * lat1 / 180.d;
-        lat2 = Math.PI * lat2 / 180.d;
-        lon1 = Math.PI * lon1 / 180.d;
-        lon2 = Math.PI * lon2 / 180.d;
-
-
-        d = 2 * 6367000.d
-                * Math.asin(Math.sqrt(
-                Math.pow(Math.sin((lat2 - lat1) / 2), 2)
-                + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon2 - lon1) / 2), 2)));
-
-        return d;
-
     }
 }
