@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.beans.PropertyChangeEvent;
-import java.lang.reflect.InvocationTargetException;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -183,10 +182,7 @@ public class IchthyopView extends FrameView
             sb.append(" ");
             sb.append(resourceMap.getString("deleteMaps.msg.deleted"));
             getLogger().log(Level.INFO, sb.toString());
-            lblFolder.setText(getResourceMap().getString("lblFolder.text"));
-            outputFolder = null;
-            replayPanel.setFolder(null);
-            setAnimationToolsEnabled(false);
+            closeFolderAnimation();
         }
     }
 
@@ -361,7 +357,28 @@ public class IchthyopView extends FrameView
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             outputFile = chooser.getSelectedFile();
-            getLogger().info(getResourceMap().getString("openNcMapping.msg.opened") + " " + outputFile.getAbsolutePath());
+            openNetCDF();
+        }
+    }
+
+    @Action
+    public void closeNetCDF() {
+
+        getLogger().info(getResourceMap().getString("closeNetCDF.msg.closed") + " " + outputFile.getAbsolutePath());
+        outputFile = null;
+        lblNC.setText(getResourceMap().getString("lblNC.text"));
+        lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
+        wmsMapper.setFile(null);
+        btnMapping.getAction().setEnabled(false);
+        btnExportToKMZ.getAction().setEnabled(false);
+        btnCloseNC.getAction().setEnabled(false);
+        cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
+        setColorbarPanelEnabled(false);
+    }
+
+    public void openNetCDF() {
+
+        getLogger().info(getResourceMap().getString("openNcMapping.msg.opened") + " " + outputFile.getAbsolutePath());
             lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
             wmsMapper.setFile(outputFile);
@@ -373,21 +390,13 @@ public class IchthyopView extends FrameView
             setMainTitle();
             setColorbarPanelEnabled(true);
             cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getVariableList()));
-        }
     }
 
-    @Action
-    public void closeNetCDF() {
-        getLogger().info(getResourceMap().getString("closeNetCDF.msg.closed") + " " + outputFile.getAbsolutePath());
-        outputFile = null;
-        lblNC.setText(getResourceMap().getString("lblNC.text"));
-        lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
-        wmsMapper.setFile(null);
-        btnMapping.getAction().setEnabled(false);
-        btnExportToKMZ.getAction().setEnabled(false);
-        btnCloseNC.getAction().setEnabled(false);
-        cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
-        setColorbarPanelEnabled(false);
+    public void closeFolderAnimation() {
+        lblFolder.setText(getResourceMap().getString("lblFolder.text"));
+        outputFolder = null;
+        replayPanel.setFolder(null);
+        setAnimationToolsEnabled(false);
     }
 
     @Action
@@ -938,6 +947,11 @@ public class IchthyopView extends FrameView
     @Action
     public Task simulationRun() {
         if (!isRunning) {
+            if (btnPreview.isSelected()) {
+                btnPreview.doClick();
+            }
+            btnCloseNC.doClick();
+            closeFolderAnimation();
             return simulActionTask = new SimulationRunTask(getApplication());
         } else {
             simulActionTask.cancel(true);
@@ -950,6 +964,10 @@ public class IchthyopView extends FrameView
         newMenuItem.getAction().setEnabled(enabled);
         saveAsMenuItem.getAction().setEnabled(enabled);
         closeMenuItem.getAction().setEnabled(enabled);
+        previewMenuItem.getAction().setEnabled(enabled);
+        simulationMenuItem.getAction().setEnabled(enabled);
+        openNCMenuItem.getAction().setEnabled(enabled);
+        openAnimationMenuItem.getAction().setEnabled(enabled);
     }
 
     public class SimulationRunTask extends SFTask {
@@ -967,11 +985,6 @@ public class IchthyopView extends FrameView
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.stop"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.stop"));
             isRunning = true;
-            btnSimulationRun.getAction().setEnabled(false);
-            if (btnPreview.isSelected()) {
-                btnPreview.doClick();
-            }
-            btnPreview.getAction().setEnabled(false);
             getSimulationManager().resetId();
             isSetup = false;
             isInit = false;
@@ -1011,8 +1024,6 @@ public class IchthyopView extends FrameView
                 setMessage(resourceMap.getString("simulationRun.msg.init.failed"), false, Level.SEVERE);
             }
             isSetup = isInit = false;
-            btnSimulationRun.getAction().setEnabled(true);
-            finished();
         }
 
         @Override
@@ -1038,15 +1049,17 @@ public class IchthyopView extends FrameView
         protected void cancelled() {
             getSimulationManager().stop();
             setMessage(resourceMap.getString("simulationRun.msg.interrupted"));
-        }
-
-        public void onSuccess(Object obj) {
-            setMessage(resourceMap.getString("simulationRun.msg.completed"), false, LogLevel.COMPLETE);
             outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
             lblNC.setText(outputFile.getName());
             lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
             setMessage(resourceMap.getString("openNcMapping.msg.opened") + " " + outputFile.getAbsolutePath());
             wmsMapper.setFile(outputFile);
+        }
+
+        public void onSuccess(Object obj) {
+            setMessage(resourceMap.getString("simulationRun.msg.completed"), false, LogLevel.COMPLETE);
+            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
+            openNetCDF();
             taskPaneSimulation.setCollapsed(true);
             taskPaneMapping.setCollapsed(false);
         }
@@ -1392,7 +1405,7 @@ public class IchthyopView extends FrameView
         jSeparator1 = new javax.swing.JSeparator();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
         simulationMenu = new javax.swing.JMenu();
-        simulactionMenuItem = new javax.swing.JMenuItem();
+        simulationMenuItem = new javax.swing.JMenuItem();
         previewMenuItem = new javax.swing.JMenuItem();
         mappingMenu = new javax.swing.JMenu();
         mapMenuItem = new javax.swing.JMenuItem();
@@ -1407,7 +1420,7 @@ public class IchthyopView extends FrameView
         jSeparator15 = new javax.swing.JPopupMenu.Separator();
         openAnimationMenuItem = new javax.swing.JMenuItem();
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
-        exportMenuItem = new javax.swing.JMenuItem();
+        saveasMapsMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
@@ -2165,9 +2178,9 @@ public class IchthyopView extends FrameView
         simulationMenu.setText(resourceMap.getString("simulationMenu.text")); // NOI18N
         simulationMenu.setName("simulationMenu"); // NOI18N
 
-        simulactionMenuItem.setAction(actionMap.get("simulationRun")); // NOI18N
-        simulactionMenuItem.setName("simulactionMenuItem"); // NOI18N
-        simulationMenu.add(simulactionMenuItem);
+        simulationMenuItem.setAction(actionMap.get("simulationRun")); // NOI18N
+        simulationMenuItem.setName("simulationMenuItem"); // NOI18N
+        simulationMenu.add(simulationMenuItem);
 
         previewMenuItem.setAction(actionMap.get("previewSimulation")); // NOI18N
         previewMenuItem.setName("previewMenuItem"); // NOI18N
@@ -2224,9 +2237,9 @@ public class IchthyopView extends FrameView
         jSeparator14.setName("jSeparator14"); // NOI18N
         animationMenu.add(jSeparator14);
 
-        exportMenuItem.setAction(actionMap.get("exportMaps")); // NOI18N
-        exportMenuItem.setName("exportMenuItem"); // NOI18N
-        animationMenu.add(exportMenuItem);
+        saveasMapsMenuItem.setAction(actionMap.get("saveasMaps")); // NOI18N
+        saveasMapsMenuItem.setName("saveasMapsMenuItem"); // NOI18N
+        animationMenu.add(saveasMapsMenuItem);
 
         deleteMenuItem.setAction(actionMap.get("deleteMaps")); // NOI18N
         deleteMenuItem.setName("deleteMenuItem"); // NOI18N
@@ -2388,24 +2401,6 @@ public class IchthyopView extends FrameView
                 taskPaneSimulation.setCollapsed(true);
                 taskPaneAnimation.setCollapsed(true);
                 taskPaneConfiguration.setCollapsed(true);
-                if (null != wmsMapper.getFile() && wmsMapper.getFile().isFile()) {
-                    wmsMapper.drawBackground();
-                    wmsMapper.setVisible(true);
-                    lblMapping.setVisible(false);
-                    btnMapping.getAction().setEnabled(true);
-                    btnExportToKMZ.getAction().setEnabled(true);
-                    btnCloseNC.getAction().setEnabled(true);
-                    setColorbarPanelEnabled(true);
-                    cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getVariableList()));
-                } else {
-                    wmsMapper.setVisible(false);
-                    lblMapping.setVisible(true);
-                    btnMapping.getAction().setEnabled(false);
-                    btnExportToKMZ.getAction().setEnabled(false);
-                    btnCloseNC.getAction().setEnabled(false);
-                    setColorbarPanelEnabled(false);
-                    cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
-                }
             } else {
                 wmsMapper.setVisible(false);
                 lblMapping.setVisible(false);
@@ -2503,7 +2498,6 @@ public class IchthyopView extends FrameView
     private javax.swing.JCheckBox ckBoxReverseTime;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
-    private javax.swing.JMenuItem exportMenuItem;
     private javax.swing.JMenuItem exportToKMZMenuItem;
     private org.previmer.ichthyop.ui.GradientPanel gradientPanel;
     private org.jdesktop.swingx.JXHyperlink hyperLinkLogo;
@@ -2547,9 +2541,10 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenuItem previewMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
+    private javax.swing.JMenuItem saveasMapsMenuItem;
     private javax.swing.JScrollPane scrollPaneSimulationUI;
-    private javax.swing.JMenuItem simulactionMenuItem;
     private javax.swing.JMenu simulationMenu;
+    private javax.swing.JMenuItem simulationMenuItem;
     private javax.swing.JSlider sliderTime;
     private javax.swing.JSplitPane splitPane;
     private javax.swing.JMenuItem startBWMenuItem;

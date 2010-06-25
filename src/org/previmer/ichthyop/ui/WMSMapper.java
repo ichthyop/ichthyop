@@ -20,7 +20,6 @@ import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -214,6 +213,10 @@ public class WMSMapper extends JXMapKit {
     }
 
     public void setFile(File ncfile) {
+
+        region = null;
+        zones = null;
+
         if (ncfile != null && ncfile.isFile()) {
             try {
                 nc = NetcdfDataset.openFile(ncfile.getAbsolutePath(), null);
@@ -223,16 +226,16 @@ public class WMSMapper extends JXMapKit {
                 cp.setCacheable(false);
                 getMainMap().setOverlayPainter(cp);
             } catch (IOException ex) {
-                Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+                SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             }
         } else {
+            nc = null;
             defaultLat = 48.38;
             defaultLon = -4.62;
             defaultZoom = 10;
             setAddressLocation(new GeoPosition(defaultLat, defaultLon));
             setZoom(defaultZoom);
             getMainMap().setOverlayPainter(null);
-            region = null;
         }
 
     }

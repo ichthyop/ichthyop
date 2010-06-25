@@ -1201,12 +1201,12 @@
             <Property name="name" type="java.lang.String" value="simulationMenu" noResource="true"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="simulactionMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="simulationMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                   <action class="org.previmer.ichthyop.ui.IchthyopBMNGView" id="simulationRun" methodName="simulationRun"/>
                 </Property>
-                <Property name="name" type="java.lang.String" value="simulactionMenuItem" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="simulationMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="previewMenuItem">
@@ -1312,12 +1312,12 @@
                 <Property name="name" type="java.lang.String" value="jSeparator14" noResource="true"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="exportMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="saveasMapsMenuItem">
               <Properties>
                 <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="exportMaps" methodName="exportMaps"/>
+                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="saveasMaps" methodName="saveasMaps"/>
                 </Property>
-                <Property name="name" type="java.lang.String" value="exportMenuItem" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="saveasMapsMenuItem" noResource="true"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="deleteMenuItem">
