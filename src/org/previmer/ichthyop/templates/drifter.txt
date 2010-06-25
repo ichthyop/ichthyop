@@ -1,0 +1,45 @@
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Ichthyop - Drifter initial coordinates
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# (Character '#' at the begining of a line means "comment", the line is not interprated by the application)#
+
+#
+## Howto ? ##
+#
+
+# one line = one drifter
+#
+# 3D simulation #
+# position of the drifter is defined by three coordinates:
+# longitude latitude depth
+# eg: -4.62 48.38 -10
+#  Use 'dot' (and no 'coma') for decimal numbers
+#  longitude unit [East degree]
+#  latitude unit [North degree]
+#  depth unit [meter], depth > 0 will be interpreted in the application as (-1 * depth)
+#  if depth is not defined, application assumes that depth = 0
+#  coordinates are separated by a space
+
+# 2D simulation #
+# position of the drifter is defined by two coordinates:
+# longitude latitude
+# eg: -4.62 48.38
+# same norm for longitude and latitude than 3D simulation.
+
+#
+# TIP #
+#
+
+# You can use drifter file for 3D simulation with 2D simulation.
+# Indeed the application will ignore the depth for 2D simulation.
+
+#
+## Example ##
+#
+
+-4.62 48.38 -10
+-4.62 48.38 -10.5
+-4.72 48.38 -20
+-4.62 47.38 -10
+

@@ -34,12 +34,16 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.jdesktop.application.ResourceMap;
+import org.previmer.ichthyop.Template;
+import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -55,10 +59,15 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
     private JPanel panel;
     private JOptionPane optionPane;
     private JFileChooser fileChooser;
+    private String template;
 
     public TextFileEditor() {
+        this(null);
+    }
 
+    public TextFileEditor(String template) {
 
+        this.template = template;
         //Set up the dialog that the button brings up.
         fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -156,7 +165,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
                 ? System.getProperty("user.dir")
                 : textField.getText();
         path = new File(path).getAbsolutePath();
-        
+
         if (e.getActionCommand().matches(EDIT)) {
             fileChooser.setSelectedFile(new File(path));
             int answer = fileChooser.showOpenDialog(panel);
@@ -194,6 +203,12 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
                             return;
                     }
                 }
+                /* create the template */
+                try {
+                    IOTools.copyFile(Template.getTemplate(template), file);
+                } catch (Exception ex) {
+                }
+                /* edit the file */
                 textField.setText(file.getAbsolutePath());
                 fileEditor.editFile(textField.getText());
                 dialog.setVisible(true);

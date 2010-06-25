@@ -107,11 +107,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
         setDefaultRenderer(Object.class, new ParamTableCellRenderer());
 
         for (int row = 0; row < model.getRowCount(); row++) {
-            XParameter param = block.getXParameter(getParameterKey(row));
+            XParameter xparam = block.getXParameter(getParameterKey(row));
             Object value = model.getValueAt(row, 1);
-            switch (param.getFormat()) {
+            switch (xparam.getFormat()) {
                 case COMBO:
-                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(param.getAcceptedValues())));
+                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(xparam.getAcceptedValues())));
                     break;
                 case INTEGER:
                     editorModel.addEditorForRow(row, new IntegerEditor());
@@ -144,7 +144,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new ListEditor());
                     break;
                 case TEXTFILE:
-                    editorModel.addEditorForRow(row, new TextFileEditor());
+                    /* for TextFileEditor, the default value can be set as 
+                     the name of the template file
+                     in org.previmer.ichthyop.templates */
+                    editorModel.addEditorForRow(row, new TextFileEditor(xparam.getDefault()));
                     break;
                 case ZONEFILE:
                     editorModel.addEditorForRow(row, new ZoneEditor());

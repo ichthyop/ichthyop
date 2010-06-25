@@ -26,6 +26,7 @@ import javax.swing.tree.DefaultTreeModel;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
+import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
@@ -83,10 +84,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     }
 
     private File getFileTemplate(String filename) throws Exception {
-        Class ioClass = IOTools.class;
-        String path = "templates/" + filename;
-        URL url = ioClass.getResource(path);
-        File src = new File(url.toURI());
+        File src = Template.getTemplate(filename);
         File dst = new File(textFieldFile.getText());
         if (dst.exists()) {
             int answer = JOptionPane.showConfirmDialog(getFrame(), resourceMap.getString("save.dialog.overwrite"), resourceMap.getString("save.dialog.title"), JOptionPane.YES_NO_OPTION);
