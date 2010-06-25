@@ -2400,6 +2400,8 @@ public class IchthyopView extends FrameView
                 taskPaneSimulation.setCollapsed(true);
                 taskPaneAnimation.setCollapsed(true);
                 taskPaneConfiguration.setCollapsed(true);
+                wmsMapper.setVisible(null != wmsMapper.getFile());
+                lblMapping.setVisible(true);
             } else {
                 wmsMapper.setVisible(false);
                 lblMapping.setVisible(false);
