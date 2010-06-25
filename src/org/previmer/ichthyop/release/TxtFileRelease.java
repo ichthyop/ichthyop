@@ -9,6 +9,7 @@ import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -23,17 +24,24 @@ import java.util.logging.Logger;
  */
 public class TxtFileRelease extends AbstractReleaseProcess {
 
-    private String pathname;
+    private File textFile;
 
     @Override
-    public void loadParameters() {
-        pathname = getParameter("txtfile");
+    public void loadParameters() throws IOException {
+        
+        textFile = getFile(getParameter("txtfile"));
     }
 
-    private File getFile(String pathname) throws IOException {
+    private File getFile(String filename) throws IOException {
+
+        File folder = new File(System.getProperty("user.dir"));
+        String pathname = new File(folder.toURI().resolve(filename)).getAbsolutePath();
 
         File file = new File(pathname);
-        if (!file.exists() || !file.canRead()) {
+        if (!file.isFile()) {
+            throw new FileNotFoundException("Drifter file " + filename + " not found.");
+        }
+        if (!file.canRead()) {
             throw new IOException("Drifter file " + file + " cannot be read");
         }
         return file;
@@ -42,14 +50,12 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     @Override
     public void release(ReleaseEvent event) throws IOException {
 
-        File fDrifter = getFile(pathname);
-
         int index = 0;
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.getDefault());
         try {
-            BufferedReader bfIn = new BufferedReader(new FileReader(fDrifter));
+            BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
             String line;
             while ((line = bfIn.readLine()) != null) {
                 if (!line.startsWith("#") & !(line.length() < 1)) {
@@ -76,7 +82,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                 }
             }
         } catch (java.io.IOException e) {
-            throw new IOException("Problem reading drifter file " + fDrifter);
+            throw new IOException("Problem reading drifter file " + textFile);
         }
         StringBuffer sb = new StringBuffer();
         sb.append("Release event (");
@@ -92,7 +98,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     public int getNbParticles() {
         int nbParticles = 0;
         try {
-            BufferedReader bfIn = new BufferedReader(new FileReader(getFile(pathname)));
+            BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
             String line;
             while ((line = bfIn.readLine()) != null) {
                 if (!line.startsWith("#") & !(line.length() < 1)) {

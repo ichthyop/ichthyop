@@ -5,6 +5,7 @@
 package org.previmer.ichthyop.manager;
 
 import java.awt.geom.Point2D;
+import java.io.File;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.NextStepEvent;
@@ -80,7 +81,30 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     public String getFileLocation() {
-        return getParameter("output_path") + getParameter("file_prefix") + "_" + getSimulationManager().getId() + ".nc";
+        return ncOut.getLocation();
+    }
+
+    private String makeFileLocation() throws IOException {
+        File file = new File(System.getProperty("user.dir"));
+        String filename = new File(file.toURI().resolve(getParameter("output_path"))).getAbsolutePath();
+        if (!filename.endsWith(File.separator)) {
+            filename += File.separator;
+        }
+        if (!getParameter("file_prefix").isEmpty()) {
+            filename += getParameter("file_prefix") + "_";
+        }
+        filename += getSimulationManager().getId() + ".nc";
+        file = new File(filename + ".tmp");
+        try {
+            IOTools.makeDirectories(file.getAbsolutePath());
+            file.createNewFile();
+            file.delete();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("{Ouput} Failed to create NetCDF file " + filename + " ==> " + ex.getMessage());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        return filename;
     }
 
     /**
@@ -446,7 +470,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
         /* Create the NetCDF writeable object */
         ncOut = NetcdfFileWriteable.createNew("");
-        ncOut.setLocation(getFileLocation());
+        ncOut.setLocation(makeFileLocation());
 
         /* Get record frequency */
         record_frequency = Integer.valueOf(getParameter("record_frequency"));

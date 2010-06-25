@@ -6,6 +6,8 @@ package org.previmer.ichthyop.action;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Properties;
@@ -27,15 +29,23 @@ public class WindAction extends AbstractAction {
         windprop = new Properties();
         scenarios = new HashMap();
 
-        File file = new File(getParameter("wind_file"));
-        if (file.isFile()) {
-            windprop.load(new FileInputStream(file));
-            int rank = 0;
-            while (null != getProperty("wind.intensity", rank)) {
-                scenarios.put(rank, new WindScenario(rank));
-                rank++;
-            }
+        File folder = new File(System.getProperty("user.dir"));
+        String filename = new File(folder.toURI().resolve(getParameter("wind_file"))).getAbsolutePath();
+        File file = new File(filename);
+        if (!file.isFile()) {
+            throw new FileNotFoundException("Wind file " + filename + " not found.");
         }
+        if (!file.canRead()) {
+            throw new IOException("Wind file " + filename + " cannot be read.");
+        }
+
+        windprop.load(new FileInputStream(file));
+        int rank = 0;
+        while (null != getProperty("wind.intensity", rank)) {
+            scenarios.put(rank, new WindScenario(rank));
+            rank++;
+        }
+
     }
 
     public void execute(IBasicParticle particle) {

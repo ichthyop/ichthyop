@@ -4,6 +4,8 @@
  */
 package org.previmer.ichthyop.release;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
@@ -21,11 +23,22 @@ import ucar.nc2.dataset.NetcdfDataset;
  */
 public class NcFileRelease extends AbstractReleaseProcess {
 
-    private String pathname;
+    private String filename;
 
     @Override
-    public void loadParameters() {
-        pathname = getParameter("ncfile");
+    public void loadParameters() throws IOException {
+        filename = getParameter("ncfile");
+        /* make sure file exits and can be read */
+        File folder = new File(System.getProperty("user.dir"));
+        String pathname = new File(folder.toURI().resolve(filename)).getAbsolutePath();
+
+        File file = new File(pathname);
+        if (!file.isFile()) {
+            throw new FileNotFoundException("NetCDF file " + filename + " not found.");
+        }
+        if (!file.canRead()) {
+            throw new IOException("NetCDF file " + file + " cannot be read");
+        }
     }
 
     @Override
@@ -34,7 +47,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
         double time = event.getSource().getTime();
         int index = 0;
 
-        NetcdfFile nc = NetcdfDataset.openFile(pathname, null);
+        NetcdfFile nc = NetcdfDataset.openFile(filename, null);
         ArrayDouble.D1 timeArr = (ArrayDouble.D1) nc.findVariable("time").read();
         int rank = 0;
         int length = timeArr.getShape()[0];
@@ -113,7 +126,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
     public int getNbParticles() {
 
         try {
-            return NetcdfDataset.open(pathname).findDimension("drifter").getLength();
+            return NetcdfDataset.open(filename).findDimension("drifter").getLength();
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, null, ex);
         }
