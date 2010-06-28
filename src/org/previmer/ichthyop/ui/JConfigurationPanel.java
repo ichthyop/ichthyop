@@ -475,6 +475,11 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         lblDescription.setName("lblDescription"); // NOI18N
 
         textFieldTitle.setName("textFieldTitle"); // NOI18N
+        textFieldTitle.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textFieldTitleKeyTyped(evt);
+            }
+        });
 
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
@@ -483,6 +488,11 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         textAreaDescription.setRows(5);
         textAreaDescription.setWrapStyleWord(true);
         textAreaDescription.setName("textAreaDescription"); // NOI18N
+        textAreaDescription.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textFieldTitleKeyTyped(evt);
+            }
+        });
         jScrollPane2.setViewportView(textAreaDescription);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -795,6 +805,12 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             .addComponent(splitPaneCfg, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void textFieldTitleKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldTitleKeyTyped
+        // TODO add your handling code here:
+        firePropertyChange("configurationFile", null, null);
+    }//GEN-LAST:event_textFieldTitleKeyTyped
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel blockEditor;
     private org.previmer.ichthyop.ui.BlockTree blockTree;
