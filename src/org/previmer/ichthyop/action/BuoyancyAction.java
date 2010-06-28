@@ -43,11 +43,11 @@ public class BuoyancyAction extends AbstractAction {
      * Buoyuancy scheme only operates during the egg stage. But when the growth
      * of the particle is not simulated, it operates up to this age limit [day].
      */
-    public static long age_lim_buoy;
+    public static long maximumAge;
     /**
      * Egg density [g/cm3], a key parameter to calculate the egg buoyancy.
      */
-    private static float eggDensity;
+    private static float particleDensity;
     /**
      * Sea water density at particle location.
      */
@@ -56,21 +56,29 @@ public class BuoyancyAction extends AbstractAction {
     private String temperature_field;
 
     public void loadParameters() throws Exception {
-        eggDensity = Float.valueOf(getParameter("egg_density"));
+        particleDensity = Float.valueOf(getParameter("particle_density"));
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
+        try {
+            maximumAge = (long) (Float.valueOf(getParameter("age_max")) * 24.f * 3600.f);
+        } catch (Exception ex) {
+            maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
+            getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> let's take maximum age = transport duration.");
+        }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
     }
 
     public void execute(IBasicParticle particle) {
 
-        double time = getSimulationManager().getTimeManager().getTime();
-        double dt = getSimulationManager().getTimeManager().get_dt();
-        double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
-        double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
-        double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
-        particle.increment(new double[]{0.d, 0.d, dz});
+        if (particle.getAge() < maximumAge) {
+            double time = getSimulationManager().getTimeManager().getTime();
+            double dt = getSimulationManager().getTimeManager().get_dt();
+            double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
+            double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
+            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
+            particle.increment(new double[]{0.d, 0.d, dz});
+        }
     }
 
     /**
@@ -110,7 +118,7 @@ public class BuoyancyAction extends AbstractAction {
         waterDensity = waterDensity(sal, tp);
 
         return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
-                * (waterDensity - eggDensity)) / 100.0f) * dt);
+                * (waterDensity - particleDensity)) / 100.0f) * dt);
     }
 
     /**
