@@ -473,6 +473,7 @@ public abstract class Dataset {
         strEtaDim = Configuration.getStrEtaDim();
         strZDim = Configuration.getStrZDim();
         strTimeDim = Configuration.getStrTimeDim();
+        System.out.println("strTimeDim: " + Configuration.getStrTimeDim());
         strLon = Configuration.getStrLon();
         strLat = Configuration.getStrLat();
         strBathy = Configuration.getStrBathy();
@@ -1788,10 +1789,7 @@ public abstract class Dataset {
 
         try {
             if (ncIn == null ||
-                (new File(ncIn.getLocation()).compareTo(new File(filename)) !=
-                 0)) {
-                MainFrame.getStatusBar().setMessage(Resources.MSG_OPEN +
-                        filename);
+                (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
                 ncIn = NetcdfDataset.openFile(filename, null);
                 nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             }
