@@ -126,7 +126,7 @@ public class TextFileEditorPanel extends javax.swing.JPanel {
         });
 
         txtFieldFile.setEditable(false);
-        txtFieldFile.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
+        txtFieldFile.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
         txtFieldFile.setText("file name");
         txtFieldFile.setName("txtFieldFile"); // NOI18N
 
@@ -137,9 +137,9 @@ public class TextFileEditorPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
                     .addComponent(btnSave)
-                    .addComponent(txtFieldFile, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
+                    .addComponent(txtFieldFile, javax.swing.GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -148,7 +148,7 @@ public class TextFileEditorPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(txtFieldFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSave)
                 .addContainerGap())

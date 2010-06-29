@@ -87,7 +87,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         File src = Template.getTemplate(filename);
         File dst = new File(textFieldFile.getText());
         if (dst.exists()) {
-            int answer = JOptionPane.showConfirmDialog(getFrame(), resourceMap.getString("save.dialog.overwrite"), resourceMap.getString("save.dialog.title"), JOptionPane.YES_NO_OPTION);
+            int answer = JOptionPane.showConfirmDialog(getFrame(), dst.getAbsolutePath() + " " + resourceMap.getString("save.dialog.overwrite"), resourceMap.getString("save.dialog.title"), JOptionPane.YES_NO_OPTION);
             if (answer != JOptionPane.YES_OPTION) {
                 return null;
             }
