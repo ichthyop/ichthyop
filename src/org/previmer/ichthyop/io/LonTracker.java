@@ -9,6 +9,8 @@ import java.util.Iterator;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
+import ucar.ma2.IndexIterator;
 
 /**
  *
@@ -42,6 +44,10 @@ public class LonTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayFloat.D2(1, dimensions().get(1).getLength());
+        ArrayFloat.D2 array = new ArrayFloat.D2(1, dimensions().get(1).getLength());
+        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
+            array.set(0, i, Float.NaN);
+        }
+        return array;
     }
 }

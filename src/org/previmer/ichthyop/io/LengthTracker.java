@@ -58,7 +58,11 @@ public class LengthTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayFloat.D2(1, dimensions().get(1).getLength());
+        ArrayFloat.D2 array = new ArrayFloat.D2(1, dimensions().get(1).getLength());
+        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
+            array.set(0, i, Float.NaN);
+        }
+        return array;
     }
 
 }

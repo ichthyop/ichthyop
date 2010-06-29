@@ -56,7 +56,11 @@ public class MortalityTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayInt.D2(1, dimensions().get(1).getLength());
+        ArrayInt.D2 array = new ArrayInt.D2(1, dimensions().get(1).getLength());
+        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
+            array.set(0, i, -99);
+        }
+        return array;
     }
 
     @Override
