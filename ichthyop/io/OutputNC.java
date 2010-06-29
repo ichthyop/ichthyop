@@ -220,30 +220,63 @@ public class OutputNC {
                     Configuration.getRecruitmentZones().size());
         }
 
+        /* Create NetCDF fields */
+        NCField LONGITUDE = new NCField("lon", "particle longitude", "degree east", DataType.FLOAT);
+
+        NCField LATITUDE = new NCField("lat", "particle latitude", "degree north", DataType.FLOAT);
+        NCField DEPTH = new NCField("depth", "particle depth", "meter", DataType.FLOAT);
+        NCField TIME = new NCField("time", "time in second since origin", "second",
+                Configuration.getTimeOrigin(), Configuration.getCalendar(),
+                DataType.DOUBLE, new Dimension[]{time});
+        NCField DEATH = new NCField("death", "cause of death",
+                "error = -1, alive = 0, out = 1, cold = 2, cold larve = 3, beached = 4, old = 5",
+                DataType.INT);
+
+
         // Add variables
-        addVar2NcOut(Field.TIME);
-        addVar2NcOut(Field.LONGITUDE);
-        addVar2NcOut(Field.LATITUDE);
-        addVar2NcOut(Field.DEPTH);
-        addVar2NcOut(Field.DEATH);
+        addVar2NcOut(TIME);
+        addVar2NcOut(LONGITUDE);
+        addVar2NcOut(LATITUDE);
+        addVar2NcOut(DEPTH);
+        addVar2NcOut(DEATH);
         if (Configuration.is3D()) {
-            addVar2NcOut(Field.TEMPERATURE);
-            addVar2NcOut(Field.SALINITY);
+            NCField TEMPERATURE = new NCField("temp", "water temperature at particle location", "celsius",
+                    DataType.FLOAT);
+            NCField SALINITY = new NCField("salt", "water salinity at particle location", "psu",
+                    DataType.FLOAT);
+            addVar2NcOut(TEMPERATURE);
+            addVar2NcOut(SALINITY);
         }
         if (Configuration.isGrowth()) {
-            addVar2NcOut(Field.LENGTH);
+            NCField LENGTH = new NCField("length", "particle length", "millimeter", DataType.FLOAT);
+            addVar2NcOut(LENGTH);
             if (Configuration.isPlankton()) {
-                addVar2NcOut(Field.LARGE_PHYTO);
-                addVar2NcOut(Field.LARGE_ZOO);
-                addVar2NcOut(Field.SMALL_ZOO);
+                NCField LARGE_PHYTO = new NCField("largePhyto",
+                        "concentration in large phytoplankton at particule location ",
+                        "mMol N m-3", DataType.FLOAT);
+                NCField LARGE_ZOO = new NCField("largeZoo",
+                        "concentration in large zooplankton at particule location ",
+                        "mMol N m-3", DataType.FLOAT);
+                NCField SMALL_ZOO = new NCField("smallZoo",
+                        "concentration in small zooplankton at particule location ",
+                        "mMol N m-3", DataType.FLOAT);
+                addVar2NcOut(LARGE_PHYTO);
+                addVar2NcOut(LARGE_ZOO);
+                addVar2NcOut(SMALL_ZOO);
             }
         }
         if (Configuration.getTypeRelease() == Constant.RELEASE_ZONE) {
-            addVar2NcOut(Field.RELEASE_ZONE);
+            NCField RELEASE_ZONE = new NCField("release_zone", "release zone number at particle location",
+                "release zone > 0, out zone = 0", null, null, DataType.INT, new Dimension[]{drifter});
+            addVar2NcOut(RELEASE_ZONE);
         }
         if (Configuration.getTypeRecruitment() != Constant.NONE) {
-            addVar2NcOut(Field.RECRUITED);
-            addVar2NcOut(Field.RECRUITMENT_ZONE);
+            NCField RECRUITMENT_ZONE = new NCField("recruitment_zone", "recruitment zone number at particle location",
+                "recruitment zone > 0, out zone = 0", DataType.INT);
+        NCField RECRUITED = new NCField("recruited", "status of recruitment", "boolean", null, null,
+                DataType.INT, new Dimension[]{time, drifter, zone});
+            addVar2NcOut(RECRUITED);
+            addVar2NcOut(RECRUITMENT_ZONE);
         }
 
         // Add global attributes
@@ -371,7 +404,7 @@ public class OutputNC {
      *
      * @param field a Field, the variable to be added in the file.
      */
-    private static void addVar2NcOut(Field field) {
+    private static void addVar2NcOut(NCField field) {
 
         ncOut.addVariable(field.short_name(), field.type(), field.dimensions());
         ncOut.addVariableAttribute(field.short_name(), "long_name",
@@ -395,10 +428,10 @@ public class OutputNC {
      * @param array the Array that will be written; must be same type and
      * rank as Field
      */
-    public static void write2NcOut(Field field, int[] origin, Array array) {
+    public static void write2NcOut(String variableName, int[] origin, Array array) {
 
         try {
-            ncOut.write(field.short_name(), origin, array);
+            ncOut.write(variableName, origin, array);
         } catch (InvalidRangeException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
@@ -414,10 +447,10 @@ public class OutputNC {
      * @param array the Array that will be written; must be same type and
      * rank as Field
      */
-    public static void write2NcOut(Field field, Array array) {
+    public static void write2NcOut(String variableName, Array array) {
 
         try {
-            ncOut.write(field.short_name(), array);
+            ncOut.write(variableName, array);
         } catch (InvalidRangeException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
@@ -532,24 +565,24 @@ public class OutputNC {
         }
         arrTime.set(0, time);
 
-        write2NcOut(Field.LONGITUDE, origin, arrLon);
-        write2NcOut(Field.LATITUDE, origin, arrLat);
-        write2NcOut(Field.DEPTH, origin, arrDepth);
-        write2NcOut(Field.TIME, origin_time, arrTime);
-        write2NcOut(Field.DEATH, origin, arrDeath);
+        write2NcOut("lon", origin, arrLon);
+        write2NcOut("lat", origin, arrLat);
+        write2NcOut("depth", origin, arrDepth);
+        write2NcOut("time", origin_time, arrTime);
+        write2NcOut("death", origin, arrDeath);
         if (FLAG_3D) {
-            write2NcOut(Field.TEMPERATURE, origin, arrTp);
-            write2NcOut(Field.SALINITY, origin, arrSal);
+            write2NcOut("temp", origin, arrTp);
+            write2NcOut("salt", origin, arrSal);
         }
         if (FLAG_GROWTH) {
-            write2NcOut(Field.LENGTH, origin, arrLength);
+            write2NcOut("length", origin, arrLength);
         }
         if (FLAG_RECRUITMENT) {
-            write2NcOut(Field.RECRUITED, origin_recruited, arrRecruit);
-            write2NcOut(Field.RECRUITMENT_ZONE, origin, arrRecruitZone);
+            write2NcOut("recruited", origin_recruited, arrRecruit);
+            write2NcOut("recruitment_zone", origin, arrRecruitZone);
         }
         if (FLAG_RELEASED_ZONE) {
-            write2NcOut(Field.RELEASE_ZONE, arrReleaseZone);
+            write2NcOut("release_zone", arrReleaseZone);
         }
 
         i_record++;
@@ -572,40 +605,9 @@ public class OutputNC {
      * <p>Copyright: Copyright (c) 2007 - Free software under GNU GPL</p>
      * @author P.Verley
      */
-    public enum Field {
 
-        LONGITUDE("lon", "particle longitude", "degree east", DataType.FLOAT),
-        LATITUDE("lat", "particle latitude", "degree north", DataType.FLOAT),
-        DEPTH("depth", "particle depth", "meter", DataType.FLOAT),
-        XGRID("xgrid", "coordinate in x", "scalar", DataType.DOUBLE),
-        YGRID("ygrid", "coordinate in y", "scalar", DataType.DOUBLE),
-        ZGRID("zgrid", "coordinate in z", "scalar", DataType.DOUBLE),
-        TIME("time", "time in second since origin", "second",
-        Configuration.getTimeOrigin(), Configuration.getCalendar(),
-        DataType.DOUBLE, new Dimension[]{time}),
-        TEMPERATURE("temp", "water temperature at particle location", "celsius",
-        DataType.FLOAT),
-        SALINITY("salt", "water salinity at particle location", "psu",
-        DataType.FLOAT),
-        LENGTH("length", "particle length", "millimeter", DataType.FLOAT),
-        RELEASE_ZONE("release_zone", "release zone number at particle location",
-        "release zone > 0, out zone = 0", null, null, DataType.INT, new Dimension[]{drifter}),
-        RECRUITMENT_ZONE("recruitment_zone", "recruitment zone number at particle location",
-        "recruitment zone > 0, out zone = 0", DataType.INT),
-        RECRUITED("recruited", "status of recruitment", "boolean", null, null,
-        DataType.INT, new Dimension[]{time, drifter, zone}),
-        DEATH("death", "cause of death",
-        "error = -1, alive = 0, out = 1, cold = 2, cold larve = 3, beached = 4, old = 5",
-        DataType.INT),
-        LARGE_PHYTO("largePhyto",
-        "concentration in large phytoplankton at particule location ",
-        "mMol N m-3", DataType.FLOAT),
-        LARGE_ZOO("largeZoo",
-        "concentration in large zooplankton at particule location ",
-        "mMol N m-3", DataType.FLOAT),
-        SMALL_ZOO("smallZoo",
-        "concentration in small zooplankton at particule location ",
-        "mMol N m-3", DataType.FLOAT);
+    public static class NCField {
+
         /**
          * Variable name
          */
@@ -647,7 +649,7 @@ public class OutputNC {
          * @param unit  a String, the variable unit
          * @param type a DataType, the variable data type
          */
-        Field(String name, String description, String unit, DataType type) {
+        NCField(String name, String description, String unit, DataType type) {
             this(name, description, unit, null, null, type, new Dimension[]{time, drifter});
         }
 
@@ -662,7 +664,7 @@ public class OutputNC {
          * @param attribute1 a String for the first additional attribute
          * @param attribute2 a String for the second additional attribute
          */
-        Field(String name, String description, String unit, String attribute1,
+        NCField(String name, String description, String unit, String attribute1,
                 String attribute2, DataType type, Dimension[] dimensions) {
 
             this.short_name = name;
@@ -736,7 +738,6 @@ public class OutputNC {
         public List<Dimension> dimensions() {
             return dimensions;
         }
-        //----------- End of enum
     }
     //---------- End of class
 }
