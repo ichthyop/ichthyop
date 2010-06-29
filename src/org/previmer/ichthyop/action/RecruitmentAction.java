@@ -31,7 +31,6 @@ public class RecruitmentAction extends AbstractAction {
      * current zone.
      */
     private int timeInZone;
-    private int dt;
     private float ageMinAtRecruitment;
     private float lengthMinAtRecruitment;
     private boolean isAgeCriterion;
@@ -40,8 +39,12 @@ public class RecruitmentAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         timeInZone = 0;
-        durationMinInRecruitArea = Integer.valueOf(getParameter("duration_min"));
-        isAgeCriterion = getParameter("criterion").matches("age_criterion");
+        durationMinInRecruitArea = (int) (Float.valueOf(getParameter("duration_min")) * 24.f * 3600.f);
+        isAgeCriterion = getParameter("criterion").matches(Criterion.AGE.toString());
+        boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        if (!isGrowth && !isAgeCriterion) {
+            throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
+        }
         if (isAgeCriterion) {
             ageMinAtRecruitment = Float.valueOf(getParameter("limit_age"));
         } else {
@@ -67,7 +70,7 @@ public class RecruitmentAction extends AbstractAction {
 
             if (satisfyRecruitmentCriterion(particle)) {
                 timeInZone = (rParticle.getNumRecruitmentZone() == numCurrentZone)
-                        ? timeInZone + dt
+                        ? timeInZone + getSimulationManager().getTimeManager().get_dt()
                         : 0;
                 rParticle.setNumRecruitmentZone(numCurrentZone);
                 rParticle.setNewRecruited(timeInZone >= durationMinInRecruitArea);
@@ -86,5 +89,21 @@ public class RecruitmentAction extends AbstractAction {
 
     public boolean isStopMoving() {
         return stopMovingOnceRecruited;
+    }
+
+    public enum Criterion {
+
+        LENGTH("Length criterion"),
+        AGE("Age criterion");
+        private String name;
+
+        Criterion(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 }
