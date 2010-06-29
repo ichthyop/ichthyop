@@ -25,7 +25,7 @@ public class LethalTempAction extends AbstractAction {
         FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
         temperature_field = getParameter("temperature_field");
         if (!FLAG_GROWTH) {
-            lethal_tp = Float.valueOf(getParameter("lethal_temperature"));
+            lethal_tp = Float.valueOf(getParameter("lethal_temperature_egg"));
         } else {
             lethalTpEgg = Float.valueOf(getParameter("lethal_temperature_egg"));
             lethalTpLarva = Float.valueOf(getParameter("lethal_temperature_larva"));
