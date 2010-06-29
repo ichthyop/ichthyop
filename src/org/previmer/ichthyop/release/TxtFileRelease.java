@@ -15,8 +15,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -26,12 +24,14 @@ public class TxtFileRelease extends AbstractReleaseProcess {
 
     private File textFile;
     private boolean is3D;
+    private int nbParticles;
 
     @Override
     public void loadParameters() throws IOException {
 
         textFile = getFile(getParameter("txtfile"));
         is3D = getSimulationManager().getDataset().is3D();
+        nbParticles = readNbParticles();
     }
 
     private File getFile(String filename) throws IOException {
@@ -96,20 +96,20 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         return index;
     }
 
-    public int getNbParticles() {
-        int nbParticles = 0;
-        try {
-            BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
-            String line;
-            while ((line = bfIn.readLine()) != null) {
-                if (!line.startsWith("#") & !(line.length() < 1)) {
-                    nbParticles++;
-                }
+    private int readNbParticles() throws IOException {
+        
+        int index = 0;
+        BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
+        String line;
+        while ((line = bfIn.readLine()) != null) {
+            if (!line.startsWith("#") & !(line.length() < 1)) {
+                index++;
             }
-
-        } catch (IOException ex) {
-            Logger.getLogger(TxtFileRelease.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return index;
+    }
+
+    public int getNbParticles() {
         return nbParticles;
     }
 }

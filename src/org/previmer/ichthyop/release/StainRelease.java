@@ -28,11 +28,10 @@ import org.previmer.ichthyop.particle.ParticleFactory;
  */
 public class StainRelease extends AbstractReleaseProcess {
 
-    private int nb_particles, nbReleasedNow;
+    private int nb_particles;
     private double lon_stain, lat_stain, depth_stain;
     private double radius_stain;
     private double thickness_stain;
-    private int nbReleaseEvents;
     private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
@@ -54,15 +53,8 @@ public class StainRelease extends AbstractReleaseProcess {
 
     public int release(ReleaseEvent event) throws Exception {
 
-        int indexEvent = event.getSource().getIndexEvent();
-        nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
-
-        nbReleasedNow = nb_particles / nbReleaseEvents;
-        int mod = nb_particles % nbReleaseEvents;
-        nbReleasedNow += (indexEvent < mod) ? 1 : 0;
-
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
-        for (int p = 0; p < nbReleasedNow; p++) {
+        for (int p = 0; p < nb_particles; p++) {
             GeoPosition point = getGeoPosition();
             double depth = Double.NaN;
             if (is3D) {

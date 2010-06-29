@@ -98,7 +98,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     }
 
     public int getNbParticles() {
-        return getReleaseProcess().getNbParticles();
+        return getNbReleaseEvents() * getReleaseProcess().getNbParticles();
     }
 
     public void nextStepTriggered(NextStepEvent event) throws Exception {
@@ -235,8 +235,13 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         return timeEvent.length;
     }
 
+    /**
+     * Release duration is defined as time elapsed between the begining of the
+     * simulation and the last release event.
+     * @return a long, the release duration in seconds.
+     */
     public long getReleaseDuration() {
-        return timeEvent[getNbReleaseEvents() - 1] - timeEvent[0];
+        return timeEvent[getNbReleaseEvents() - 1] - getSimulationManager().getTimeManager().get_tO();
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {
@@ -244,6 +249,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
         indexEvent = 0;
         isAllReleased = false;
         releaseProcess = null;
+        timeEvent = new long[getReleaseEvents().length];
         instantiateReleaseProcess();
         getLogger().info("Release manager setup [OK]");
     }

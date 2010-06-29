@@ -19,8 +19,7 @@ public class PatchyRelease extends AbstractReleaseProcess {
     private int nb_patches;
     private int nb_agregated;
     private double radius_patch, thickness_patch;
-    private int nbPatchesNow, nbReleaseZones;
-    private int nbReleaseEvents;
+    private int nbReleaseZones;
     private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
@@ -47,11 +46,6 @@ public class PatchyRelease extends AbstractReleaseProcess {
     public int release(ReleaseEvent event) throws Exception {
 
         int indexEvent = event.getSource().getIndexEvent();
-        nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
-
-        nbPatchesNow = nb_patches / nbReleaseEvents;
-        int mod = nb_patches % nbReleaseEvents;
-        nbPatchesNow += (indexEvent < mod) ? 1 : 0;
 
         double xmin, xmax, ymin, ymax;
         double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
@@ -75,7 +69,7 @@ public class PatchyRelease extends AbstractReleaseProcess {
         }
 
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
-        for (int p = 0; p < nbPatchesNow; p++) {
+        for (int p = 0; p < nb_patches; p++) {
             /** Instantiate a new Particle */
             IBasicParticle particle = ParticleFactory.createParticle(index, xmin, xmax, ymin, ymax, upDepth, lowDepth);
             getSimulationManager().getSimulation().getPopulation().add(particle);

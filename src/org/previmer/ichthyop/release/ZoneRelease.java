@@ -15,13 +15,13 @@ import org.previmer.ichthyop.arch.IBasicParticle;
  */
 public class ZoneRelease extends AbstractReleaseProcess {
 
-    private int nbReleasedNow, nbReleaseZones, nbTotalToRelease;
+    private int nbReleaseZones, nbParticles;
     private boolean is3D;
 
     public void loadParameters() throws Exception {
         
         /* Get number of particles to release */
-        nbTotalToRelease = Integer.valueOf(getParameter("number_particles"));
+        nbParticles = Integer.valueOf(getParameter("number_particles"));
 
         /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
@@ -34,13 +34,6 @@ public class ZoneRelease extends AbstractReleaseProcess {
     }
 
     public int release(ReleaseEvent event) throws Exception {
-
-        int nbReleaseEvents = getSimulationManager().getReleaseManager().getNbReleaseEvents();
-        int indexEvent = event.getSource().getIndexEvent();
-
-        nbReleasedNow = nbTotalToRelease / nbReleaseEvents;
-        int mod = nbTotalToRelease % nbReleaseEvents;
-        nbReleasedNow += (indexEvent < mod) ? 1 : 0;
 
         double xmin, xmax, ymin, ymax;
         double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
@@ -64,7 +57,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
         }
 
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
-        for (int p = 0; p < nbReleasedNow; p++) {
+        for (int p = 0; p < nbParticles; p++) {
             /** Instantiate a new Particle */
             IBasicParticle particle = ParticleFactory.createParticle(index, xmin, xmax, ymin, ymax, upDepth, lowDepth);
             getSimulationManager().getSimulation().getPopulation().add(particle);
@@ -75,6 +68,6 @@ public class ZoneRelease extends AbstractReleaseProcess {
     }
 
     public int getNbParticles() {
-        return nbTotalToRelease;
+        return nbParticles;
     }
 }
