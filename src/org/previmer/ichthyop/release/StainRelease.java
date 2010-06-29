@@ -21,6 +21,8 @@ import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
+import org.previmer.ichthyop.ui.LonLatConverter;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
 /**
  *
@@ -43,8 +45,8 @@ public class StainRelease extends AbstractReleaseProcess {
         /* retrieve stain parameters */
         nb_particles = Integer.valueOf(getParameter("number_particles"));
         radius_stain = Float.valueOf(getParameter("radius_stain"));
-        lon_stain = Double.valueOf(getParameter("lon_stain"));
-        lat_stain = Double.valueOf(getParameter("lat_stain"));
+        lon_stain = Double.valueOf(LonLatConverter.convert(getParameter("lon_stain"), LonLatFormat.DecimalDeg));
+        lat_stain = Double.valueOf(LonLatConverter.convert(getParameter("lat_stain"), LonLatFormat.DecimalDeg));
         if (is3D) {
             thickness_stain = Float.valueOf(getParameter("thickness_stain"));
             depth_stain = Float.valueOf(getParameter("depth_stain"));
