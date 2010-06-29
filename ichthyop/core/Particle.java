@@ -216,6 +216,49 @@ public class Particle extends RhoPoint implements IParticle {
         init();
     }
 
+    public Particle(int index,
+            double xmin, double xmax, double ymin, double ymax,
+            double zMin, double zMax) {
+
+        /** Constructs a new 3D RhoPoint */
+        super(true);
+
+        living = true;
+        boolean outZone = true;
+        double x = 0, y = 0, z = 0;
+        int counter = 0;
+        this.index = index;
+
+        /** Attempts of random release */
+        while (outZone) {
+
+            setXY(
+                    x = xmin + Math.random() * (xmax - xmin),
+                    y = ymin + Math.random() * (ymax - ymin));
+
+            numReleaseZone = getNumZone(Constant.RELEASE);
+            outZone = !Dataset.isInWater(this) || (numReleaseZone == -1) || isOnEdge(Dataset.get_nx(),
+                    Dataset.get_ny());
+
+            if (!outZone) {
+                z = zMin + Math.random() * (zMax - zMin);
+            }
+
+            if (counter++ > DROP_MAX) {
+                throw new NullPointerException(
+                        "Unable to release particle. Check out the zone definitions.");
+            }
+
+        }
+        /** Sets on vertical axes for 3D simulation only */
+        setXY(x, y);
+        setZ(z);
+
+        /** initialises */
+        grid2Geog();
+        init();
+    }
+
     /**
      * Constructs a particle for three-dimensions simulation and releases at
      * grid point (x, y) and at the specified depth. Used for patchy initial

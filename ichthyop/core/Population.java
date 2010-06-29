@@ -53,40 +53,31 @@ import ucar.nc2.dataset.NetcdfDataset;
  */
 public class Population extends HashSet {
 
-
 ////////////////
 // Debug purpose
 ////////////////
-
     private final static boolean DEBUG_PULSATION = false;
     private final static boolean DEBUG_PATCHINESS = false;
     private final static boolean DEBUG_RELEASE_ZONE = false;
     private final static boolean DEBUG_RELEASE_TXT = false;
     private final static boolean DEBUG_RELEASE_NC = false;
-
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
     /** Stores time of the release events */
     private long[] timeEvent;
-
     /** Index of the current release event */
     private int indexEvent;
-
     /** Set to true once all released events happened */
     private boolean isAllReleased;
-
     /** Number of particles currently alive */
     private int nbAlive;
-
     /** Index of the last particle added to the collection */
     private int index;
 
 ///////////////
 // Constructors
 ///////////////
-
     /**
      * Constructs a new, empty set; the backing <tt>HashSet</tt> instance has
      * default initial capacity the number of particles
@@ -98,7 +89,6 @@ public class Population extends HashSet {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
     /**
      * Initializes the variables and calls the method to determine the release
      * schedule.
@@ -170,36 +160,34 @@ public class Population extends HashSet {
      */
     private void schedule() {
 
-        timeEvent = new long[
-                    (Configuration.getTypeRelease() == Constant.RELEASE_ZONE)
-                    ? Simulation.getNbReleaseEvents()
-                    : 1];
+        timeEvent = new long[(Configuration.getTypeRelease() == Constant.RELEASE_ZONE)
+                ? Simulation.getNbReleaseEvents()
+                : 1];
         for (int i = 0; i < Simulation.getNbReleaseEvents(); i++) {
-            timeEvent[i] = Simulation.get_t0() +
-                           (long) (i * Simulation.getReleaseDt());
+            timeEvent[i] = Simulation.get_t0()
+                    + (long) (i * Simulation.getReleaseDt());
         }
 
         if (DEBUG_PULSATION) {
-            Calendar calendar = Configuration.getTypeCalendar() ==
-                                Constant.CLIMATO
-                                ? new ClimatoCalendar()
-                                :
-                                new Calendar1900(Configuration.getTimeOrigin(
-                                        Calendar.YEAR),
-                                                 Configuration.getTimeOrigin(
+            Calendar calendar = Configuration.getTypeCalendar()
+                    == Constant.CLIMATO
+                    ? new ClimatoCalendar()
+                    : new Calendar1900(Configuration.getTimeOrigin(
+                    Calendar.YEAR),
+                    Configuration.getTimeOrigin(
                     Calendar.MONTH),
-                                                 Configuration.getTimeOrigin(
+                    Configuration.getTimeOrigin(
                     Calendar.DAY_OF_MONTH));
             SimpleDateFormat dateformat = new SimpleDateFormat(
                     "yyyy/MM/dd HH:mm");
             System.out.println(
                     "  ++++Debug Population - Schedule of release events");
-            System.out.println("  ++++Number of release events: " +
-                               Simulation.getNbReleaseEvents());
+            System.out.println("  ++++Number of release events: "
+                    + Simulation.getNbReleaseEvents());
             for (int i = 0; i < timeEvent.length; i++) {
                 calendar.setTimeInMillis(timeEvent[i] * 1000L);
-                System.out.println("  ++++Event " + (i + 1) + " at " +
-                                   dateformat.format(calendar.getTime()));
+                System.out.println("  ++++Event " + (i + 1) + " at "
+                        + dateformat.format(calendar.getTime()));
             }
             System.out.println(
                     "  ++++End debug Population - Schedule of release events");
@@ -223,20 +211,178 @@ public class Population extends HashSet {
     private void release(long time) throws IOException, NullPointerException {
 
         switch (Configuration.getTypeRelease()) {
-        case Constant.RELEASE_ZONE:
-            releaseZone(time);
-            break;
-        case Constant.RELEASE_TXTFILE:
-            releaseTxtFile(Configuration.getDrifterFile(), time);
-            break;
-        case Constant.RELEASE_NCFILE:
-            releaseNcFile(Configuration.getDrifterFile(), time);
-            break;
+            case Constant.RELEASE_ZONE:
+                releaseZone(time);
+                //releaseBottom(time);
+                break;
+            case Constant.RELEASE_TXTFILE:
+                releaseTxtFile(Configuration.getDrifterFile(), time);
+                break;
+            case Constant.RELEASE_NCFILE:
+                releaseNcFile(Configuration.getDrifterFile(), time);
+                break;
+        }
+    }
+
+    private synchronized void releaseBottom(long time) throws
+            NullPointerException {
+
+        /** Local variable declaration */
+        int nbReleasedNow, nbReleased, nbReleaseZones, nbAgregatedIndiv,
+                nbInPatch = 0, i_part;
+        double radius_patch = 0.d, thickness_patch = 0.d;
+        double radius_grid, r, teta;
+        double xmin, xmax, ymin, ymax;
+        double depthMin = 0.d, depthMax = 0.d;
+        Zone zone;
+        Particle particle, particlePatch;
+        boolean bln3D = Configuration.is3D();
+
+        /** Initilization of the parameters */
+        nbReleaseZones = Configuration.getReleaseZones().size();
+        if (nbReleaseZones == 0) {
+            throw new NullPointerException("No release zone defined.");
+        }
+
+        nbReleasedNow = Configuration.isPulsation()
+                ? Configuration.getNbParticles()
+                / Simulation.getNbReleaseEvents()
+                : Configuration.getNbParticles();
+        int mod = Configuration.getNbParticles()
+                % Simulation.getNbReleaseEvents();
+        nbReleasedNow += (indexEvent < mod) ? 1 : 0;
+
+        nbReleased = nbReleasedNow;
+        if (Configuration.isPatchiness()) {
+            nbInPatch = Math.max(0,
+                    nbReleasedNow / Configuration.getNbPatches()
+                    - 1);
+            nbReleased = Configuration.getNbPatches();
+            radius_patch = Simulation.getRadiusPatchi();
+            thickness_patch = Simulation.getThickPatchi();
+        }
+
+        /** Determines the range in depth */
+        if (bln3D) {
+            depthMin = Simulation.getDepthReleaseMin();
+            depthMax = Simulation.getDepthReleaseMax();
+            if (Configuration.isMigration()
+                    && Configuration.getMigrationAgeLimit() == 0) {
+                depthMin = depthMax = (DVMPattern.isDaytime(time))
+                        ? Simulation.getDepthDay()
+                        : Simulation.getDepthNight();
+            }
+        }
+
+        /** Reduces the release area function of the user-defined zones */
+        xmin = Double.MAX_VALUE;
+        ymin = Double.MAX_VALUE;
+        xmax = 0.d;
+        ymax = 0.d;
+        for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
+            zone = (Zone) Configuration.getReleaseZones().get(i_zone);
+            xmin = Math.min(xmin, zone.getXmin());
+            xmax = Math.max(xmax, zone.getXmax());
+            ymin = Math.min(ymin, zone.getYmin());
+            ymax = Math.max(ymax, zone.getYmax());
+        }
+
+        if (Dataset.DEBUG_VDISP) {
+            depthMin = depthMax = 0.5d
+                    * Dataset.getDepth((int) xmin, (int) ymin, 0);
+
+        }
+
+        /** Release process */
+        while (!isAllReleased && timeEvent[indexEvent] >= time
+                && timeEvent[indexEvent] < (time + Configuration.get_dt())) {
+
+            if (DEBUG_PATCHINESS && Configuration.isPatchiness()) {
+                System.out.println("  ++++Debug Population - Patchiness");
+                System.out.println("  ++++Release event " + (indexEvent + 1)
+                        + "/"
+                        + timeEvent.length);
+                System.out.println("  ++++Number patches: "
+                        + Configuration.getNbPatches()
+                        + "  radius: " + radius_patch
+                        + " thickness: " + thickness_patch
+                        + " number particles per patch: "
+                        + (nbInPatch + 1));
+            }
+
+            i_part = 0;
+            /** Loop on the number of particle to be released */
+            for (int p = 0; p < nbReleased; p++) {
+                /** Instantiate a new Particle */
+                particle = new Particle(index,
+                        xmin, xmax, ymin, ymax,
+                        0, 1);
+                add(particle);
+                nbAlive++;
+                index++;
+                /** Make a patch of Particles */
+                if (Configuration.isPatchiness()) {
+                    nbAgregatedIndiv = nbInPatch
+                            + (i_part
+                            < (nbReleasedNow
+                            % Configuration.getNbPatches())
+                            ? 1 : 0);
+                    radius_grid = Particle.data.adimensionalize(
+                            radius_patch, particle.getX(), particle.getY());
+                    for (int f = 0; f < nbAgregatedIndiv; f++) {
+                        r = radius_grid * Math.random();
+                        teta = 2.0f * Math.PI * Math.random();
+                        double depth = 0.d;
+                        if (bln3D) {
+                            depth = particle.getDepth()
+                                    + thickness_patch * (Math.random() - 0.5f);
+                        }
+                        particlePatch = new Particle(index,
+                                bln3D,
+                                particle.getNumZoneInit(),
+                                particle.getX() + r * Math.cos(teta),
+                                particle.getY() + r * Math.sin(teta),
+                                depth);
+                        add(particlePatch);
+                        nbAlive++;
+                        index++;
+                    }
+
+                    if (DEBUG_PATCHINESS) {
+                        System.out.println("  ++++Patch " + i_part
+                                + " number particles: "
+                                + (nbAgregatedIndiv + 1));
+                    }
+                }
+                i_part++;
+            }
+
+            if (DEBUG_PATCHINESS && Configuration.isPatchiness()) {
+                System.out.println("  ++++Total released at this time: "
+                        + nbAlive);
+                System.out.println("  ++++End debug Population - Patchiness");
+            }
+
+            if (DEBUG_PULSATION) {
+                System.out.println("  ++++Debug Population - Pulsation");
+                System.out.println("  ++++Release event " + (indexEvent + 1)
+                        + "/" + timeEvent.length);
+                System.out.println("  ++++Number to be released now: "
+                        + nbReleasedNow);
+                System.out.println("  ++++Total released at this time: "
+                        + index + "/"
+                        + Configuration.getNbParticles());
+                System.out.println("  ++++End debug Population - Pulsation");
+            }
+
+            indexEvent++;
+            System.out.println("Release event " + indexEvent + " [done]");
+            isAllReleased = indexEvent >= timeEvent.length;
         }
     }
 
     /**
-     Random releases particles within pre-defined geographical zones.
+    Random releases particles within pre-defined geographical zones.
      * The implementation handles several cases:
      * <ul>
      * <li> single release at the begining of the simulation.
@@ -270,18 +416,18 @@ public class Population extends HashSet {
         }
 
         nbReleasedNow = Configuration.isPulsation()
-                        ? Configuration.getNbParticles() /
-                        Simulation.getNbReleaseEvents()
-                        : Configuration.getNbParticles();
-        int mod = Configuration.getNbParticles() %
-                  Simulation.getNbReleaseEvents();
+                ? Configuration.getNbParticles()
+                / Simulation.getNbReleaseEvents()
+                : Configuration.getNbParticles();
+        int mod = Configuration.getNbParticles()
+                % Simulation.getNbReleaseEvents();
         nbReleasedNow += (indexEvent < mod) ? 1 : 0;
 
         nbReleased = nbReleasedNow;
         if (Configuration.isPatchiness()) {
             nbInPatch = Math.max(0,
-                                 nbReleasedNow / Configuration.getNbPatches() -
-                                 1);
+                    nbReleasedNow / Configuration.getNbPatches()
+                    - 1);
             nbReleased = Configuration.getNbPatches();
             radius_patch = Simulation.getRadiusPatchi();
             thickness_patch = Simulation.getThickPatchi();
@@ -292,10 +438,10 @@ public class Population extends HashSet {
             depthMin = Simulation.getDepthReleaseMin();
             depthMax = Simulation.getDepthReleaseMax();
             if (Configuration.isMigration()
-                && Configuration.getMigrationAgeLimit() == 0) {
+                    && Configuration.getMigrationAgeLimit() == 0) {
                 depthMin = depthMax = (DVMPattern.isDaytime(time))
-                                      ? Simulation.getDepthDay()
-                                      : Simulation.getDepthNight();
+                        ? Simulation.getDepthDay()
+                        : Simulation.getDepthNight();
             }
         }
 
@@ -313,26 +459,26 @@ public class Population extends HashSet {
         }
 
         if (Dataset.DEBUG_VDISP) {
-            depthMin = depthMax = 0.5d *
-                                  Dataset.getDepth((int) xmin, (int) ymin, 0);
+            depthMin = depthMax = 0.5d
+                    * Dataset.getDepth((int) xmin, (int) ymin, 0);
 
         }
 
         /** Release process */
-        while (!isAllReleased && timeEvent[indexEvent] >= time &&
-               timeEvent[indexEvent] < (time + Configuration.get_dt())) {
+        while (!isAllReleased && timeEvent[indexEvent] >= time
+                && timeEvent[indexEvent] < (time + Configuration.get_dt())) {
 
             if (DEBUG_PATCHINESS && Configuration.isPatchiness()) {
                 System.out.println("  ++++Debug Population - Patchiness");
-                System.out.println("  ++++Release event " + (indexEvent + 1) +
-                                   "/" +
-                                   timeEvent.length);
-                System.out.println("  ++++Number patches: " +
-                                   Configuration.getNbPatches()
-                                   + "  radius: " + radius_patch +
-                                   " thickness: " + thickness_patch
-                                   + " number particles per patch: "
-                                   + (nbInPatch + 1));
+                System.out.println("  ++++Release event " + (indexEvent + 1)
+                        + "/"
+                        + timeEvent.length);
+                System.out.println("  ++++Number patches: "
+                        + Configuration.getNbPatches()
+                        + "  radius: " + radius_patch
+                        + " thickness: " + thickness_patch
+                        + " number particles per patch: "
+                        + (nbInPatch + 1));
             }
 
             i_part = 0;
@@ -340,19 +486,19 @@ public class Population extends HashSet {
             for (int p = 0; p < nbReleased; p++) {
                 /** Instantiate a new Particle */
                 particle = new Particle(index,
-                                        bln3D,
-                                        xmin, xmax, ymin, ymax,
-                                        depthMin, depthMax);
+                        bln3D,
+                        xmin, xmax, ymin, ymax,
+                        depthMin, depthMax);
                 add(particle);
                 nbAlive++;
                 index++;
                 /** Make a patch of Particles */
                 if (Configuration.isPatchiness()) {
-                    nbAgregatedIndiv = nbInPatch +
-                                       (i_part <
-                                        (nbReleasedNow %
-                                         Configuration.getNbPatches()) ?
-                                        1 : 0);
+                    nbAgregatedIndiv = nbInPatch
+                            + (i_part
+                            < (nbReleasedNow
+                            % Configuration.getNbPatches())
+                            ? 1 : 0);
                     radius_grid = Particle.data.adimensionalize(
                             radius_patch, particle.getX(), particle.getY());
                     for (int f = 0; f < nbAgregatedIndiv; f++) {
@@ -360,8 +506,8 @@ public class Population extends HashSet {
                         teta = 2.0f * Math.PI * Math.random();
                         double depth = 0.d;
                         if (bln3D) {
-                            depth = particle.getDepth() +
-                                    thickness_patch * (Math.random() - 0.5f);
+                            depth = particle.getDepth()
+                                    + thickness_patch * (Math.random() - 0.5f);
                         }
                         particlePatch = new Particle(index,
                                 bln3D,
@@ -375,29 +521,29 @@ public class Population extends HashSet {
                     }
 
                     if (DEBUG_PATCHINESS) {
-                        System.out.println("  ++++Patch " + i_part +
-                                           " number particles: " +
-                                           (nbAgregatedIndiv + 1));
+                        System.out.println("  ++++Patch " + i_part
+                                + " number particles: "
+                                + (nbAgregatedIndiv + 1));
                     }
                 }
                 i_part++;
             }
 
             if (DEBUG_PATCHINESS && Configuration.isPatchiness()) {
-                System.out.println("  ++++Total released at this time: " +
-                                   nbAlive);
+                System.out.println("  ++++Total released at this time: "
+                        + nbAlive);
                 System.out.println("  ++++End debug Population - Patchiness");
             }
 
             if (DEBUG_PULSATION) {
                 System.out.println("  ++++Debug Population - Pulsation");
-                System.out.println("  ++++Release event " + (indexEvent + 1) +
-                                   "/" + timeEvent.length);
-                System.out.println("  ++++Number to be released now: " +
-                                   nbReleasedNow);
-                System.out.println("  ++++Total released at this time: " +
-                                   index + "/" +
-                                   Configuration.getNbParticles());
+                System.out.println("  ++++Release event " + (indexEvent + 1)
+                        + "/" + timeEvent.length);
+                System.out.println("  ++++Number to be released now: "
+                        + nbReleasedNow);
+                System.out.println("  ++++Total released at this time: "
+                        + index + "/"
+                        + Configuration.getNbParticles());
                 System.out.println("  ++++End debug Population - Pulsation");
             }
 
@@ -445,8 +591,8 @@ public class Population extends HashSet {
 
         File fDrifter = new File(pathname);
         if (!fDrifter.exists() || !fDrifter.canRead()) {
-            throw new IOException("Drifter file " + fDrifter +
-                                  " cannot be read");
+            throw new IOException("Drifter file " + fDrifter
+                    + " cannot be read");
         }
 
         String[] strCoord;
@@ -465,7 +611,7 @@ public class Population extends HashSet {
                     for (int i = 0; i < strCoord.length; i++) {
                         try {
                             coord[i] = nbFormat.parse(strCoord[i].trim()).
-                                       doubleValue();
+                                    doubleValue();
                         } catch (ParseException ex) {
                             ex.printStackTrace();
                         }
@@ -473,16 +619,16 @@ public class Population extends HashSet {
                     if (bln3D) {
                         depth = -coord[2];
                         if (Configuration.isMigration()
-                            && Configuration.getMigrationAgeLimit() == 0) {
+                                && Configuration.getMigrationAgeLimit() == 0) {
                             depth = (DVMPattern.isDaytime(time))
                                     ? -1.f * Simulation.getDepthDay()
                                     : -1.f * Simulation.getDepthNight();
                         }
                     }
                     particle = new Particle(index,
-                                            bln3D,
-                                            coord[0], coord[1], depth,
-                                            true);
+                            bln3D,
+                            coord[0], coord[1], depth,
+                            true);
                     if (Dataset.isInWater(particle)) {
                         add(particle);
                         index++;
@@ -509,9 +655,9 @@ public class Population extends HashSet {
                 IParticle p = iter.next();
                 i++;
                 System.out.println("  ++++Particle " + i + "/" + size()
-                                   + " lon: " + (float) p.getLon()
-                                   + " lat: " + (float) p.getLat()
-                                   + " depth: " + (float) p.getDepth());
+                        + " lon: " + (float) p.getLon()
+                        + " lat: " + (float) p.getLat()
+                        + " depth: " + (float) p.getDepth());
             }
             System.out.println("  ++++End debug release from text file");
         }
@@ -539,7 +685,7 @@ public class Population extends HashSet {
         try {
             NetcdfFile nc = NetcdfDataset.openFile(pathname, null);
             ArrayDouble.D1 timeArr = (ArrayDouble.D1) nc.findVariable("time").
-                                     read();
+                    read();
             int rank = 0;
             int length = timeArr.getShape()[0];
 
@@ -549,8 +695,8 @@ public class Population extends HashSet {
                 rank++;
                 time_rank1 = timeArr.get(rank);
                 if ((time >= time_rank0 && time < time_rank1)
-                   || (time <= time_rank0 && time > time_rank1)) {
-                   break;
+                        || (time <= time_rank0 && time > time_rank1)) {
+                    break;
                 }
                 if (time == time_rank1) {
                     rank++;
@@ -564,17 +710,14 @@ public class Population extends HashSet {
             double x = 0.f;
             if (time != time_rank0) {
                 x = (time - timeArr.get(rank))
-                    / (timeArr.get(rank + 1) - timeArr.get(rank));
+                        / (timeArr.get(rank + 1) - timeArr.get(rank));
             }
 
-            ArrayFloat.D2
-                    lonArr = (ArrayFloat.D2) nc.findVariable("lon").read(),
-                             latArr = (ArrayFloat.D2) nc.findVariable("lat").
-                                      read(),
-                                      depthArr = (ArrayFloat.D2) nc.
-                                                 findVariable("depth").read();
-            ArrayInt.D2
-                    deathArr = (ArrayInt.D2) nc.findVariable("death").read();
+            ArrayFloat.D2 lonArr = (ArrayFloat.D2) nc.findVariable("lon").read(),
+                    latArr = (ArrayFloat.D2) nc.findVariable("lat").
+                    read(),
+                    depthArr = (ArrayFloat.D2) nc.findVariable("depth").read();
+            ArrayInt.D2 deathArr = (ArrayInt.D2) nc.findVariable("death").read();
             double lon, lat, depth = 0.d;
             Particle particle;
             boolean bln3D = Configuration.is3D();
@@ -583,11 +726,11 @@ public class Population extends HashSet {
             boolean migration = false;
             double constantDepth = 0.d;
             if (Configuration.isMigration()
-                && Configuration.getMigrationAgeLimit() == 0) {
+                    && Configuration.getMigrationAgeLimit() == 0) {
                 migration = true;
                 constantDepth = (DVMPattern.isDaytime(time))
-                                ? -1.f * Simulation.getDepthDay()
-                                : -1.f * Simulation.getDepthNight();
+                        ? -1.f * Simulation.getDepthDay()
+                        : -1.f * Simulation.getDepthNight();
             }
 
             boolean living;
@@ -599,11 +742,11 @@ public class Population extends HashSet {
                     depth = depthArr.get(rank, i);
                 } else {
                     lon = x * lonArr.get(rank + 1, i)
-                          + (1 - x) * lonArr.get(rank, i);
-                    lat = x * latArr.get(rank + 1, i) +
-                          (1 - x) * latArr.get(rank, i);
-                    depth = x * depthArr.get(rank + 1, i) +
-                            (1 - x) * depthArr.get(rank, i);
+                            + (1 - x) * lonArr.get(rank, i);
+                    lat = x * latArr.get(rank + 1, i)
+                            + (1 - x) * latArr.get(rank, i);
+                    depth = x * depthArr.get(rank + 1, i)
+                            + (1 - x) * depthArr.get(rank, i);
                 }
 
                 if (migration) {
@@ -612,11 +755,13 @@ public class Population extends HashSet {
 
                 living = (deathArr.get(rank, i) == Constant.DEAD_NOT);
                 particle = new Particle(i,
-                                        bln3D,
-                                        lon, lat, depth,
-                                        living);
+                        bln3D,
+                        lon, lat, depth,
+                        living);
                 add(particle);
-                if (living) nbAlive++;
+                if (living) {
+                    nbAlive++;
+                }
             }
 
             lonArr = null;
@@ -626,16 +771,15 @@ public class Population extends HashSet {
             nc.close();
         } catch (IOException e) {
             throw new IOException("Problem opening file " + pathname + " : "
-                                  + e.getMessage());
+                    + e.getMessage());
         } catch (NullPointerException e) {
             throw new IOException("Problem reading variables in file "
-                                  + pathname + " : " + e.getMessage());
+                    + pathname + " : " + e.getMessage());
         } catch (ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
             throw new IOException("Time value " + (long) time
-                                  +
-                                  " not contained within Ichthyop output file "
-                                  + pathname);
+                    + " not contained within Ichthyop output file "
+                    + pathname);
         }
         isAllReleased = true;
     }
@@ -648,6 +792,5 @@ public class Population extends HashSet {
     public int getNbAlive() {
         return nbAlive;
     }
-
     //------- End of class
 }
