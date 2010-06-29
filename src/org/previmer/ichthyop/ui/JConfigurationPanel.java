@@ -11,11 +11,14 @@
 package org.previmer.ichthyop.ui;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -41,11 +44,23 @@ import org.previmer.ichthyop.manager.SimulationManager;
  *
  * @author pverley
  */
-public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelectionListener, TableModelListener, ListSelectionListener {
+public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelectionListener, TableModelListener, ListSelectionListener, ActionListener {
 
     /** Creates new form JConfigurationPanel */
     public JConfigurationPanel() {
         initComponents();
+        addActionListeners();
+    }
+
+    private void addActionListeners() {
+        btnUpper.addActionListener(this);
+        btnLower.addActionListener(this);
+        ckBoxBlock.addActionListener(this);
+        btnRedo.addActionListener(this);
+        btnUndo.addActionListener(this);
+        btnAddValue.addActionListener(this);
+        btnRemoveValue.addActionListener(this);
+        ckBoxHiddenParameter.addActionListener(this);
     }
 
     @Action
@@ -168,6 +183,15 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     public void valueChanged(TreeSelectionEvent e) {
         Application.getInstance().getContext().getTaskService().execute(new ShowConfigEditorsTask());
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                getTable().stopEditing();
+            }
+        });
     }
 
     private class ShowConfigEditorsTask extends Task {
