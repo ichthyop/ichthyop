@@ -14,6 +14,7 @@ public enum ParameterFormat {
     TEXT("value not set yet"),
     DATE("year 2000 month 01 day 01 at 00:00"),
     DURATION("0000 day(s) 01 hour(s) 00 minute(s)"),
+    HOUR("12:00"),
     FLOAT("0.0"),
     INTEGER("0"),
     COMBO("value not set yet"),

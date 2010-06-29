@@ -7,7 +7,6 @@ package org.previmer.ichthyop.particle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IParameterManager;
-import org.previmer.ichthyop.arch.IPropertyManager;
 
 /**
  *
@@ -15,22 +14,10 @@ import org.previmer.ichthyop.arch.IPropertyManager;
  */
 public class GrowingParticleLayer extends ParticleLayer implements IGrowingParticle {
 
+    /**
+     * Particle length [millimeter]
+     */
     double length;
-    /**
-     * Characterized the egg stage. In this model, an egg is particle with a
-     * length smaller to the hatch-length defined below.
-     */
-    private static int EGG;
-    /**
-     * Characterized the "yolk sac" stage. A yolk sac larva has a length ranging
-     * from the hatch-length and the yolk-to-feeding-length defined below.
-     */
-    private static int YOLK_SAC_LARVA;
-    /**
-     * Characterized the "feeding larva" stage. A feeding larva has a length
-     * bigger than the yolk-to-feeding-length defined below.
-     */
-    private static int FEEDING_LARVA;
     /**
      * Initial length [millimeter] for the particles.
      */
@@ -52,13 +39,8 @@ public class GrowingParticleLayer extends ParticleLayer implements IGrowingParti
         loadParameters();
         length = length_init;
     }
-    
+
     private void loadParameters() {
-        
-        IPropertyManager propertyManager = getSimulationManager().getPropertyManager(GrowingParticleLayer.class);
-        EGG = Integer.valueOf(propertyManager.getProperty("stage.egg.code"));
-        YOLK_SAC_LARVA = Integer.valueOf(propertyManager.getProperty("stage.yolk-sac-larva.code"));
-        FEEDING_LARVA = Integer.valueOf(propertyManager.getProperty("stage.feeding-larva.code"));
 
         IParameterManager parameterManager = getSimulationManager().getParameterManager();
         length_init = Float.valueOf(parameterManager.getParameter("app.particle_length", "initial_length"));
@@ -74,15 +56,15 @@ public class GrowingParticleLayer extends ParticleLayer implements IGrowingParti
         this.length = length;
     }
 
-    public int getStage() {
+    public Stage getStage() {
         /** Yolk-Sac Larvae */
         if (length >= hatch_length & length < yolk_to_feeding_length) {
-            return YOLK_SAC_LARVA;
+            return Stage.YOLK_SAC_LARVA;
         } /** Feeding Larvae */
         else if (length >= yolk_to_feeding_length) {
-            return FEEDING_LARVA;
+            return Stage.FEEDING_LARVA;
         }
         /** eggs */
-        return EGG;
+        return Stage.EGG;
     }
 }

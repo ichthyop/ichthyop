@@ -4,9 +4,12 @@
  */
 package org.previmer.ichthyop.action;
 
+import java.text.SimpleDateFormat;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import java.util.Calendar;
+import java.util.Date;
+import org.previmer.ichthyop.arch.IGrowingParticle.Stage;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 
 /**
@@ -17,28 +20,26 @@ public class MigrationAction extends AbstractAction {
 
     private float depthDay;
     private float depthNight;
-    private int sunrise;
-    private int sunset;
+    private Date sunrise;
+    private Date sunset;
     private Calendar calendar;
     private boolean isodepth;
-    private boolean isAgeLimitation;
-    private float limitAge;
-    private double limitLength;
+    private long minimumAge;
+    private boolean isGrowth;
 
     public void loadParameters() throws Exception {
 
-        calendar = getSimulationManager().getTimeManager().getCalendar();
-        isAgeLimitation = getParameter("criterion").matches(Criterion.AGE.getName());
-        if (isAgeLimitation) {
-            limitAge = Float.valueOf(getParameter("limit_age"));
-        } else {
-            limitLength = Float.valueOf(getParameter("limit_length"));
+        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
+        if (!isGrowth) {
+            minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
         }
         depthDay = Float.valueOf(getParameter("daytime_depth"));
         depthNight = Float.valueOf(getParameter("nighttime_depth"));
-        sunset = Integer.valueOf(getParameter("sunset"));
-        sunrise = Integer.valueOf(getParameter("sunrise"));
-
+        SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
+        hourFormat.setCalendar(calendar);
+        sunset = hourFormat.parse(getParameter("sunset"));
+        sunrise = hourFormat.parse(getParameter("sunrise"));
         isodepth = (depthDay == depthNight);
     }
 
@@ -46,10 +47,10 @@ public class MigrationAction extends AbstractAction {
 
         /** Ensures larva stage */
         boolean isSatisfiedCriterion = false;
-        if (isAgeLimitation) {
-            isSatisfiedCriterion = particle.getAge() > limitAge;
+        if (!isGrowth) {
+            isSatisfiedCriterion = particle.getAge() > minimumAge;
         } else {
-            isSatisfiedCriterion = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength() > limitLength;
+            isSatisfiedCriterion = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getStage() != Stage.EGG;
         }
 
         if (isSatisfiedCriterion) {
@@ -83,13 +84,21 @@ public class MigrationAction extends AbstractAction {
 
         double bottom = getSimulationManager().getDataset().z2depth(x, y, 0);
         calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        long timeDay = getSecondsOfDay(calendar);
+        calendar.setTime(sunrise);
+        long timeSunrise = getSecondsOfDay(calendar);
+        calendar.setTime(sunset);
+        long timeSunset = getSecondsOfDay(calendar);
 
-        if (hour >= sunrise && hour < sunset) {
+        if (timeDay >= timeSunrise && timeDay < timeSunset) {
             return Math.max(bottom, depthDay);
         } else {
             return Math.max(bottom, depthNight);
         }
+    }
+
+    private long getSecondsOfDay(Calendar calendar) {
+        return calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60;
     }
 
     enum Criterion {

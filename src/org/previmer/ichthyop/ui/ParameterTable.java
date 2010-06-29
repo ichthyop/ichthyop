@@ -125,6 +125,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 case DURATION:
                     editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION, value));
                     break;
+                case HOUR:
+                    editorModel.addEditorForRow(row, new HourEditor(value));
+                    break;
                 case DATE:
                     editorModel.addEditorForRow(row, new DateEditor(DateEditor.DATE, value));
                     break;
