@@ -5,6 +5,9 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IGrowingParticle;
+import org.previmer.ichthyop.arch.IGrowingParticle.Stage;
+import org.previmer.ichthyop.particle.GrowingParticleLayer;
 
 /**
  *
@@ -54,16 +57,20 @@ public class BuoyancyAction extends AbstractAction {
     private static double waterDensity;
     private String salinity_field;
     private String temperature_field;
+    private boolean isGrowth;
 
     public void loadParameters() throws Exception {
         particleDensity = Float.valueOf(getParameter("particle_density"));
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
-        try {
-            maximumAge = (long) (Float.valueOf(getParameter("age_max")) * 24.f * 3600.f);
-        } catch (Exception ex) {
-            maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
-            getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> let's take maximum age = transport duration.");
+        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        if (!isGrowth) {
+            try {
+                maximumAge = (long) (Float.valueOf(getParameter("age_max")) * 24.f * 3600.f);
+            } catch (Exception ex) {
+                maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
+                getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
+            }
         }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
@@ -71,7 +78,14 @@ public class BuoyancyAction extends AbstractAction {
 
     public void execute(IBasicParticle particle) {
 
-        if (particle.getAge() < maximumAge) {
+        boolean canApplyBuoyancy = false;
+        if (isGrowth) {
+            canApplyBuoyancy = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
+        } else {
+            canApplyBuoyancy = particle.getAge() < maximumAge;
+        }
+
+        if (canApplyBuoyancy) {
             double time = getSimulationManager().getTimeManager().getTime();
             double dt = getSimulationManager().getTimeManager().get_dt();
             double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
