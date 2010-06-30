@@ -62,10 +62,6 @@ public class NemoDataset extends AbstractDataset {
      */
     static float[][] latRho;
     /**
-     * Bathymetry
-     */
-    static float[][] hRho;
-    /**
      * Mask: water = 1, cost = 0
      *
      * pverley pour chourdin: attention ici le masque devient 3D
@@ -107,7 +103,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    static float[] z_rho_cst;
+    static float[] gdepT;
     /**
      * Depth at w point at current time.
      * Takes account of free surface elevation.
@@ -121,7 +117,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    static float[] z_w_cst;
+    static float[] gdepW;
     /**
      * Geographical boundary of the domain
      */
@@ -245,7 +241,7 @@ public class NemoDataset extends AbstractDataset {
         NetcdfFile nc;
         try {
             nc = NetcdfDataset.openFile(listTFiles.get(0), null);
-            System.out.println("read lon lat mask " + nc.getLocation());
+            //System.out.println("read lon lat mask " + nc.getLocation());
             //fichier *byte*mask*
             lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
                     copyToNDJavaArray();
@@ -259,15 +255,12 @@ public class NemoDataset extends AbstractDataset {
                 nc.close();
                 nc = NetcdfDataset.openFile(file_zgr, null);
             }
-            System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
+            //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
             //fichier *mesh*z*
-            hRho = (float[][]) nc.findVariable(strBathy).read(new int[]{0, 0,
-                        jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-                    copyToNDJavaArray();
-            z_rho_cst = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
+            gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
                         0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().
                     copyTo1DJavaArray();
-            z_w_cst = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
+            gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
                         0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
                     copyTo1DJavaArray();
             e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, 0,
@@ -277,7 +270,7 @@ public class NemoDataset extends AbstractDataset {
                 nc.close();
                 nc = NetcdfDataset.openFile(file_hgr, null);
             }
-            System.out.println("read e1t e2t " + nc.getLocation());
+            //System.out.println("read e1t e2t " + nc.getLocation());
             // fichier *mesh*h*
             e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0, 0,
                         jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
@@ -423,8 +416,8 @@ public class NemoDataset extends AbstractDataset {
                     x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii]
                             + x_euler * w_tp1[k + kk][j + jj][i + ii];
                     dw += 2.d * x * co
-                            / (z_w_cst[Math.min(k + kk + 1, nz)]
-                            - z_w_cst[Math.max(k + kk - 1, 0)]);
+                            / (gdepW[Math.min(k + kk + 1, nz)]
+                            - gdepW[Math.max(k + kk - 1, 0)]);
                 }
             }
         }
@@ -831,10 +824,6 @@ public class NemoDataset extends AbstractDataset {
                 if (latRho[j][i] <= latMin) {
                     latMin = latRho[j][i];
                 }
-
-                if (hRho[j][i] >= depthMax) {
-                    depthMax = hRho[j][i];
-                }
             }
         }
 
@@ -928,7 +917,7 @@ public class NemoDataset extends AbstractDataset {
      */
     public double getDepth(int k) {
 
-        return -1.d * z_rho_cst[k];
+        return -1.d * gdepT[k];
     }
 
     /**
@@ -1010,20 +999,20 @@ public class NemoDataset extends AbstractDataset {
         double zRho = 0.d;
         for (int k = nz - 1; k > 0; k--) {
             //System.out.println("t1 " + z_w[k] + " " + (float)depth + " " + z_rho[k]);
-            if (depth <= z_w_cst[k] && depth > z_rho_cst[k]) {
+            if (depth <= gdepW[k] && depth > gdepT[k]) {
                 zRho = k + 0.d
                         - 0.5d
-                        * Math.abs((z_rho_cst[k] - depth)
-                        / (z_rho_cst[k] - z_w_cst[k]));
+                        * Math.abs((gdepT[k] - depth)
+                        / (gdepT[k] - gdepW[k]));
                 //System.out.println("t1 zGeo2Grid z = " + zRho);
                 return zRho;
             }
             //System.out.println("t2 " + z_rho[k] + " " + (float)depth + " " + z_w[k + 1]);
-            if (depth <= z_rho_cst[k] && depth > z_w_cst[k + 1]) {
+            if (depth <= gdepT[k] && depth > gdepW[k + 1]) {
                 zRho = k + 0.d
                         + 0.5d
-                        * Math.abs((z_rho_cst[k] - depth)
-                        / (z_w_cst[k + 1] - z_rho_cst[k]));
+                        * Math.abs((gdepT[k] - depth)
+                        / (gdepW[k + 1] - gdepT[k]));
                 //System.out.println("t2 zGeo2Grid z = " + zRho);
                 return zRho;
             }
@@ -1052,11 +1041,11 @@ public class NemoDataset extends AbstractDataset {
         dz = z - k;
 
         if (dz < 0) { // >= ?
-            depth = z_rho_cst[k]
-                    + 2 * Math.abs(dz * (z_rho_cst[k] - z_w_cst[k]));
+            depth = gdepT[k]
+                    + 2 * Math.abs(dz * (gdepT[k] - gdepW[k]));
         } else {
-            depth = z_rho_cst[k]
-                    - 2 * Math.abs(dz * (z_rho_cst[k] - z_w_cst[k + 1]));
+            depth = gdepT[k]
+                    - 2 * Math.abs(dz * (gdepT[k] - gdepW[k + 1]));
         }
         return -depth;
     }
@@ -1400,7 +1389,7 @@ public class NemoDataset extends AbstractDataset {
         listUFiles = getInputList(path, getParameter("gridu_pattern"));
         listVFiles = getInputList(path, getParameter("gridv_pattern"));
         listTFiles = getInputList(path, getParameter("gridt_pattern"));
-        listWFiles = getInputList(path, getParameter("gridw_pattern"));
+        //listWFiles = getInputList(path, getParameter("gridw_pattern"));
     }
 
     private String checkExistenceAndUnicity(File file, String pattern) throws IOException {
@@ -1427,7 +1416,7 @@ public class NemoDataset extends AbstractDataset {
         getLogger().info("Opening NEMO dataset");
         ncU = NetcdfDataset.openFile(listUFiles.get(index), null);
         ncV = NetcdfDataset.openFile(listVFiles.get(index), null);
-        ncW = NetcdfDataset.openFile(listWFiles.get(index), null);
+        //ncW = NetcdfDataset.openFile(listWFiles.get(index), null);
         ncT = NetcdfDataset.openFile(listTFiles.get(index), null);
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
     }
