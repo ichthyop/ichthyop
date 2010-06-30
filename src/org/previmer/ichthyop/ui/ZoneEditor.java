@@ -44,7 +44,6 @@ import javax.swing.JTextField;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -159,10 +158,9 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
      * the dialog's OK button.
      */
     public void actionPerformed(ActionEvent e) {
-        String path = textField.getText().isEmpty()
-                ? System.getProperty("user.dir")
-                : textField.getText();
-        path = new File(path).getAbsolutePath();
+
+        String path = IOTools.resolveFile(textField.getText());
+        
         if (e.getActionCommand().matches(EDIT)) {
             fileChooser.setSelectedFile(new File(path));
             int answer = fileChooser.showOpenDialog(panel);
@@ -197,12 +195,14 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
             File f = new File(path);
             if (f.isFile()) {
                 f = f.getParentFile();
+                String filename = f.getAbsolutePath();
+                if (!filename.endsWith(File.separator)) {
+                    filename += File.separator + "NewZoneFile.xml";
+                }
+                fileChooser.setSelectedFile(new File(filename));
+            } else {
+                fileChooser.setSelectedFile(f);
             }
-            String filename = f.getAbsolutePath();
-            if (!filename.endsWith(File.separator)) {
-                filename += File.separator + "NewZoneFile.xml";
-            }
-            fileChooser.setSelectedFile(new File(filename));
             int answer = fileChooser.showSaveDialog(panel);
             if (answer == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();

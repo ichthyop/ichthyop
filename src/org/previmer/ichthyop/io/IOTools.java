@@ -29,6 +29,20 @@ import java.util.logging.Logger;
  */
 public class IOTools {
 
+    public static String resolvePath(String path) {
+        String pathname = resolveFile(path);
+        if (!pathname.endsWith(File.separator)) {
+            pathname += File.separator;
+        }
+        return pathname;
+    }
+
+    public static String resolveFile(String filename) {
+        File file = new File(System.getProperty("user.dir"));
+        String pathname = new File(file.toURI().resolve(filename)).getAbsolutePath();
+        return pathname;
+    }
+
     public static boolean makeDirectories(String file) {
         String path = file.substring(0, file.lastIndexOf(File.separator));
         return new File(path).mkdirs();
@@ -47,7 +61,7 @@ public class IOTools {
         fis.close();
         fos.close();
     }
-    
+
     public static String cleanFilePath(String filePath) {
         String fpath = filePath.replace('/', File.separatorChar);
         return fpath;
@@ -115,7 +129,7 @@ public class IOTools {
         dft.setMinimumFractionDigits(1);
         return dft.format(length) + " " + unit;
     }
-    
+
     public static List<File> listFiles(File folder) {
         List<File> listf = new ArrayList();
         File[] list = folder.listFiles();
@@ -130,7 +144,7 @@ public class IOTools {
         }
         return listf;
     }
-    
+
     public static List<File> relativize(List<File> list, URI againstURI) {
         List<File> listrel = new ArrayList(list.size());
         for (File f : list) {
@@ -138,7 +152,7 @@ public class IOTools {
         }
         return listrel;
     }
-    
+
     public static void cleanDirectory(File directory) {
 
         for (File file : directory.listFiles()) {
@@ -149,7 +163,7 @@ public class IOTools {
         }
         directory.deleteOnExit();
     }
-    
+
     public static void browse(URI uri) throws IOException {
 
         // On tente d'abord avec la classe Desktop

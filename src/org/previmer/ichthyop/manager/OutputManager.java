@@ -85,8 +85,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     private String makeFileLocation() throws IOException {
-        File file = new File(System.getProperty("user.dir"));
-        String filename = new File(file.toURI().resolve(getParameter("output_path"))).getAbsolutePath();
+        
+        String filename = IOTools.resolvePath(getParameter("output_path"));
         if (!filename.endsWith(File.separator)) {
             filename += File.separator;
         }
@@ -94,7 +94,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             filename += getParameter("file_prefix") + "_";
         }
         filename += getSimulationManager().getId() + ".nc";
-        file = new File(filename + ".tmp");
+        File file = new File(filename + ".tmp");
         try {
             IOTools.makeDirectories(file.getAbsolutePath());
             file.createNewFile();

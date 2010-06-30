@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.previmer.ichthyop.io.IOTools;
 
 public class FileEditor extends AbstractCellEditor
         implements TableCellEditor, ActionListener {
@@ -62,11 +63,8 @@ public class FileEditor extends AbstractCellEditor
     public void actionPerformed(ActionEvent e) {
         //The user has clicked the cell, so
         //bring up the dialog.
-        String path = textField.getText().isEmpty()
-                ? System.getProperty("user.dir")
-                : textField.getText();
-        File folder = new File(path);
-        fileChooser.setSelectedFile(new File(folder.getAbsolutePath()));
+        String path = IOTools.resolveFile(textField.getText());
+        fileChooser.setSelectedFile(new File(path));
         int answer = fileChooser.showOpenDialog(panel);
         if (answer == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();

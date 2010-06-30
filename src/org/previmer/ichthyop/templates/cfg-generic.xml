@@ -1364,6 +1364,7 @@
                 <long_name>Wind scenario file</long_name>
                 <value>cfg/my_wind-scenario.txt</value>
                 <format>textfile</format>
+                <default>wind.txt</default>
                 <description>Select an existing wind scenario (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/wind_scenario1.xml' or '../wind_scenario2.xml' etc.).</description>
             </parameter>
             <parameter hidden="true">
