@@ -93,10 +93,10 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     }
 
     private void loadParameters() throws Exception {
-        
+
         /* time step */
         dt = Integer.valueOf(getParameter("app.time", "time_step"));
-        
+
         /* time direction */
         boolean isForward = getParameter("app.time", "time_arrow").matches(TimeDirection.FORWARD.toString());
         if (!isForward) {
@@ -367,12 +367,17 @@ public class TimeManager extends AbstractManager implements ITimeManager {
 
     public enum TypeCalendar {
 
-        CLIMATO,
-        GREGORIAN;
+        CLIMATO("Climatology calendar"),
+        GREGORIAN("Gregorian calendar");
+        private String name;
+
+        TypeCalendar(String name) {
+            this.name = name;
+        }
 
         @Override
         public String toString() {
-            return name().toLowerCase();
+            return name;
         }
     }
 }

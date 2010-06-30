@@ -12,7 +12,7 @@
                 <long_name>Beginning of simulation</long_name>
                 <value>year 2008 month 01 day 07 at 16:00</value>
                 <format>date</format>
-                <description>Set the date of beginning of simulation. Expressed in seconds ellapsed since the origin of time.</description>
+                <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
             <parameter type="serial">
                 <key>transport_duration</key>
@@ -23,7 +23,7 @@
             </parameter>
             <parameter type="serial">
                 <key>time_step</key>
-                <long_name>Time step</long_name>
+                <long_name>Time step [second]</long_name>
                 <value>600</value>
                 <format>integer</format>
                 <description>The computational time step (dt) expressed in seconds. Take great care for setting this parameter. Simulation must not break the CFL criterion: (U * dt) / dX inferior to 1 with U the velocity and dX the move. An acceptable estimation could be dt = 0.7 * dGrid / Umax with dGrid the average length of the grid cells and Umax the order of magnitude of the fastest current velocities in the hydrodynamic model.</description>
@@ -31,17 +31,17 @@
             <parameter>
                 <key>calendar_type</key>
                 <long_name>Type of calendar</long_name>
-                <value>gregorian</value>
+                <value>Gregorian calendar</value>
                 <format>combo</format>
-                <accepted>climato</accepted>
-                <accepted>gregorian</accepted>
-                <description>Choose the type of calendar for converting the time variable of the hydrodynamic model (expressed in seconds) into human readble time format. Climato: 360 days per year. Gregorian: the usual calendar. If you do not know, do not panic ! It is a "cosmetic" parameter that does not affect the run of the simulation. It only controls the display of time on screen.</description>
+                <accepted>Climatology calendar</accepted>
+                <accepted>Gregorian calendar</accepted>
+                <description>Choose the type of calendar for converting the time variable of the hydrodynamic model (expressed in seconds) into human readble time format. Climatology calendar: 360 days per year. Gregorian calendar: the usual calendar. If you do not know, just skip it ! It is a "cosmetic" parameter that does not affect the run of the simulation. It only controls the display of time on screen.</description>
             </parameter>
             <parameter>
                 <key>time_origin</key>
                 <long_name>Origin of time</long_name>
                 <value>1900/01/01 00:00</value>
-                <description>This parameter comes with Gregorian type of calendar only. For hydrodynamic models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may want to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the hydrodynamic NetCDF output files.</description>
+                <description>This parameter comes with Gregorian type of calendar only. For hydrodynamic models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>time_arrow</key>
@@ -63,52 +63,52 @@
                 <key>file_prefix</key>
                 <long_name>Prefix of the NetCDF output file</long_name>
                 <value>your-prefix</value>
-                <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc</description>
+                <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc, with YYYYMMDDHHmm the current time when running the simulation.</description>
             </parameter>
             <parameter>
                 <key>output_path</key>
                 <long_name>Output path</long_name>
                 <value>output</value>
                 <format>path</format>
-                <description>Select the folder where the simulation NetCDF output file should be saved. Relative paths 'output' or 'output/' or './output' or './output/' are supported. They will be interpretated as /path_from_where_you_run_ichthyop/ouput/ If ouput folder does not exist, application will atempt to create it.</description>
+                <description>Select the folder where the simulation NetCDF output file should be saved. For instance, relative paths 'output' or 'output/' or './output' or './output/' are supported and equivalent. They will be interpretated as /path_from_where_you_run_ichthyop/ouput/ If ouput folder does not exist, application will attempt to create it.</description>
             </parameter>
             <parameter>
                 <key>record_frequency</key>
                 <long_name>Record frequency</long_name>
                 <value>1</value>
                 <format>integer</format>
-                <description>Lagrangian model runs with its own computational time-step, set in the 'time option block'. You may not need to record every step in the NetCDF output file. Set the record frequency as a number of computational time-steps. For instance, let's take dt = 1800s and record frequency = 6. Particle positions will be recorded every 3 hours (1800 * 6 = 10800s = 3h)</description>
+                <description>Lagrangian model runs with its own computational time-step, set in the 'time option block'. You may not need to record every step of the simulation in the NetCDF output file. Set the record frequency as a number of computational time-steps. For instance, let's take dt = 1800s and record frequency = 6. Particle positions will be recorded every 3 hours (1800 * 6 = 10800s = 3h) in the NetCDF output file.</description>
             </parameter>
             <parameter>
                 <key>trackers</key>
                 <long_name>Variable tracking</long_name>
                 <format>list</format>
                 <value />
-                <description>Name of some extra variables you wish to track in the NetCDF output file. It must exactly match the name of the corresponding variable in the hydrodynamic NetCDF input file. By default, ichthyop records time, longitude, latitude, depth and mortality. For instance, if you wish to track temperature and salinity at particle location, you should type the names of temperature and salinity variables as they are defined in the model ouput files.</description>
+                <description>Name of some extra variables you wish to track during the simulation. It must exactly match the name of the corresponding variable in the hydrodynamic dataset. By default, the application records time, longitude, latitude, depth and mortality. For instance, if you wish to track temperature and salinity at particle location, you should type here the names of temperature and salinity variables as they are declared in the hydrodynamic dataset. E.g: "TEMP" "SALT"</description>
             </parameter>
         </parameters>
     </block>
     <block type="action">
         <key>action.advection</key>
-        <description>Options that control the advection process</description>
+        <description>Options that control the advection process.</description>
         <tree_path>Transport/Advection</tree_path>
         <enabled>true</enabled>
         <parameters>
             <parameter>
                 <key>scheme</key>
                 <long_name>Numerical scheme</long_name>
-                <value>euler</value>
+                <value>Forward Euler</value>
                 <format>combo</format>
-                <accepted>euler</accepted>
-                <accepted>rk4</accepted>
-                <description>Use a forward Euler scheme (euler) or a Runge-Kutta 4th order scheme (rk4)</description>
+                <accepted>Forward Euler</accepted>
+                <accepted>Runge Kutta 4</accepted>
+                <description>Use a Forward Euler scheme or a Runge-Kutta 4th order scheme.</description>
             </parameter>
             <parameter>
                 <key>horizontal</key>
                 <long_name>Horizontal advection</long_name>
                 <value>true</value>
                 <format>boolean</format>
-                <description>Determine whether horizontal advection is enabled</description>
+                <description>Determine whether horizontal advection is enabled.</description>
             </parameter>
             <parameter>
                 <key>vertical</key>
@@ -127,7 +127,7 @@
             <parameter hidden="true">
                 <long_name>priority</long_name>
                 <key>priority</key>
-                <description>Level of priority of the action (comparatively to other actions). Each time step, high priority action will be called by the application before than a low priority action. Action with same level of priority will be called with no specific order.</description>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
                 <value>high</value>
                 <format>combo</format>
                 <accepted>lowest</accepted>
@@ -140,15 +140,15 @@
     </block>
     <block type="action">
         <key>action.hdisp</key>
-        <description>Block of options that control the horizontal dispersion process. Reference: Monin and Ozmidov 1981</description>
-        <tree_path>Advanced/Transport/Horizontal dispersion</tree_path>
+        <description>Block of options that control the horizontal dispersion process. Horizontal dispersion has been implemented following Peliz et al. (2007)</description>
+        <tree_path>Transport/Horizontal dispersion</tree_path>
         <enabled>false</enabled>
         <parameters>
             <parameter type="serial">
                 <key>epsilon</key>
-                <long_name>Dissipation rate</long_name>
+                <long_name>Dissipation rate [meter2/second3]</long_name>
                 <value>1e-9</value>
-                <description>Lagrangian horizontal dispersion has been implemented according to Monin and Ozmidov 1981. They defined a lagrangian horizontal diffusion coefficient Kh = pow(epsilon, 1/3) * pow(l, 4/3) with epsilon the turbulent dissipation rate and l the lenght of the grid cell (determined by the application). Epsilon suggested value is 1e-9. Make sure you have read and understood Monin and Ozmidov's paper before changing this value.</description>
+                <description>In the horizontal dispersion model, Peliz defined a lagrangian horizontal diffusion coefficient Kh = pow(epsilon, 1/3) * pow(l, 4/3), following Monin and Ozmidov 1981, with epsilon the turbulent dissipation rate [meter2/second3] and l the lenght of the grid cell (l is determined by the application). Monin and Ozmidov suggested epsilon = 1e-9. Make sure you have read and understood Monin and Ozmidov's paper before changing this value.</description>
                 <format>float</format>
                 <default>1e-9</default>
             </parameter>
@@ -169,7 +169,7 @@
                 <accepted>normal</accepted>
                 <accepted>high</accepted>
                 <accepted>highest</accepted>
-                <description>Level of priority of the action (comparatively to other actions). Each time step, high priority action will be called by the application before than a low priority action. Action with same level of priority will be called with no specific order.</description>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
             </parameter>
         </parameters>
     </block>
@@ -181,7 +181,7 @@
         <parameters>
             <parameter type="serial">
                 <key>particle_density</key>
-                <long_name>Particle density</long_name>
+                <long_name>Particle density [g/cm3]</long_name>
                 <value>1.025</value>
                 <format>float</format>
                 <default>1.025</default>
@@ -189,11 +189,11 @@
             </parameter>
             <parameter>
                 <key>age_max</key>
-                <long_name>Maximum age</long_name>
+                <long_name>Maximum age [day]</long_name>
                 <value>3.0</value>
                 <format>float</format>
                 <default>3.0</default>
-                <description>Maximum age [number of days] for adding buoyancy effect to the particle.</description>
+                <description>Maximum age [day] for adding buoyancy effect to the particle. If the growth process is activated (see  Biology/Growth), this parameter is ignored by the application and the buoyancy only operates during the egg stage.</description>
             </parameter>
             <parameter>
                 <key>salinity_field</key>
@@ -226,7 +226,7 @@
                 <accepted>normal</accepted>
                 <accepted>high</accepted>
                 <accepted>highest</accepted>
-                <description>Level of priority of the action (comparatively to other actions). Each time step, high priority action will be called by the application before than a low priority action. Action with same level of priority will be called with no specific order.</description>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
             </parameter>
         </parameters>
     </block>
@@ -238,29 +238,29 @@
         <parameters>
             <parameter>
                 <key>daytime_depth</key>
-                <long_name>Depth at daytime</long_name>
+                <long_name>Depth at daytime [meter]</long_name>
                 <value>-10</value>
                 <format>float</format>
                 <description>Set the depth [meter] of the particle during daytime. Daytime period starts at sunrise and ends at sunset. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
             </parameter>
             <parameter>
                 <key>nighttime_depth</key>
-                <long_name>Depth at nighttime</long_name>
+                <long_name>Depth at nighttime [meter]</long_name>
                 <value>-10</value>
                 <format>float</format>
-                <description>Set the depth [meter] of the particle during daytime. Daytime period starts at sunrise and ends at sunset. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
+                <description>Set the depth [meter] of the particle during nighttime. Nighttime. period starts at sunset and ends at sunrise. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
             </parameter>
             <parameter>
                 <key>sunrise</key>
-                <long_name>Hour of sunrise</long_name>
+                <long_name>Hour of sunrise [HH:mm]</long_name>
                 <value>07:00</value>
                 <format>hour</format>
                 <default>07:00</default>
-                <description>Hour of sunrise HH:mm, 24 hours format. Make sure that sunrise occurs earlier than sunset.</description>
+                <description>Hour of sunrise [HH:mm], 24 hours format. Make sure that sunrise occurs earlier than sunset.</description>
             </parameter>
             <parameter>
                 <key>sunset</key>
-                <long_name>Hour of sunset</long_name>
+                <long_name>Hour of sunset [HH:mm]</long_name>
                 <value>19:00</value>
                 <default>19:00</default>
                 <format>hour</format>
@@ -268,10 +268,10 @@
             </parameter>
             <parameter>
                 <key>age_min</key>
-                <long_name>Minimum age</long_name>
+                <long_name>Minimum age [day]</long_name>
                 <value>3.5</value>
                 <format>float</format>
-                <description>If the growth procedure is activated (See biology section) then the DVM operates during the larvae stages (yolk-sac and feeding larva) and this parameter is ignored by the application. If not migration only operates after this minimum age [days].</description>
+                <description>If the growth procedure is activated (See biology section) then the DVM operates during the larvae stages (yolk-sac and feeding larva) and this parameter is ignored by the application. If not migration only operates after this minimum age [day].</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -290,7 +290,41 @@
                 <accepted>normal</accepted>
                 <accepted>high</accepted>
                 <accepted>highest</accepted>
-                <description>Level of priority of the action (comparatively to other actions). Each time step, high priority action will be called by the application before than a low priority action. Action with same level of priority will be called with no specific order.</description>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.wind</key>
+        <tree_path>Transport/Wind drift</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is not able yet to read any realistic wind datasets. You will have to build your own wind scenarii, providing parameters such as wind direction and intensity, windage, etc. in a separate textfile. For 2D simulations, every particle is exposed to surface wind. For 3D simulations, the application only applies wind drift to close-surface particles (technically, particles that reach the top grid level.)</description>
+        <parameters>
+            <parameter>
+                <key>wind_file</key>
+                <long_name>Wind scenario file</long_name>
+                <value>cfg/my_wind-scenario.txt</value>
+                <format>textfile</format>
+                <description>Select an existing wind scenario (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/wind_scenario1.xml' or '../wind_scenario2.xml' etc.).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.action.WindAction</value>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
             </parameter>
         </parameters>
     </block>
@@ -327,7 +361,7 @@
                 <long_name>Number of particles</long_name>
                 <value>100</value>
                 <format>integer</format>
-                <description>Number of particles released in the zones. The application randomly releases the particles within the zones in order to ensure a homogeneous distribution (constant "concentration" of particles among the zones). If several release events are defined (see section release schedule), this parameter becomes the number of particles releases in the zones per release event. It means the application totals number_particles_released_in_zones * number_release_events particles.</description>
+                <description>Number of particles released in the zones. The application randomly releases the particles within the zones in order to ensure a homogeneous distribution (= constant concentration of particles among the zones). The downside is that you do not control the number of particles released per zone. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
             </parameter>
             <parameter>
                 <key>zone_file</key>
@@ -335,7 +369,7 @@
                 <value>cfg/my_zones.xml</value>
                 <format>zonefile</format>
                 <default>zone.xml</default>
-                <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.).</description>
+                <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -347,9 +381,59 @@
         </parameters>
     </block>
     <block type="release">
+        <key>release.patches</key>
+        <tree_path>Release/Patches in zones</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options for releasing patches of particles within pre-defined geographical zones. It is equivalent to the zone release but instead of releasing single particles, it does release patches of particles. To make a patch, the application release a single particle and then aggregates some particles around the single particle. You can specify the number of patches, the number of particles within a patch and the radius and the thickness of the patches.</description>
+        <parameters>
+            <parameter>
+                <key>number_patches</key>
+                <long_name>Number of patches</long_name>
+                <value>10</value>
+                <format>integer</format>
+                <description>Number of patches released in the zones. The application randomly releases the patches within the zones in order to ensure a homogeneous distribution of patches among the zones. The downside is that you do not control the number of patches released per zone.</description>
+            </parameter>
+            <parameter>
+                <key>number_agregated</key>
+                <long_name>Number of particles per patch</long_name>
+                <value>100</value>
+                <format>integer</format>
+                <description>The number of aggregated particles in a patch.</description>
+            </parameter>
+            <parameter>
+                <key>radius_patch</key>
+                <long_name>Radius of the patch [meter]</long_name>
+                <value>2000.0</value>
+                <format>float</format>
+                <description>Radius of the patch [meter]. If you release large patches within small zones, it is very likely that patches will overlap.</description>
+            </parameter>
+            <parameter>
+                <key>thickness_patch</key>
+                <long_name>Thickness of the patch [meter]</long_name>
+                <value>2.0</value>
+                <format>float</format>
+                <description>Thickness of the patch [meter]. This parameter is ignored for 2D simulations.</description>
+            </parameter>
+            <parameter>
+                <key>zone_file</key>
+                <long_name>Zone file</long_name>
+                <value>cfg/my_zones.xml</value>
+                <format>zonefile</format>
+                <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone recruitment zone for instance).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.release.PatchyRelease</value>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="release">
         <key>release.txtfile</key>
-        <tree_path>Release/From text file</tree_path>
-        <description>Block of options for releasing particles with initial coordinates pre-defined in a textfile. The application reads the position of the particle in the text file and release them at time "Beginning of simulation". If the Release schedule is activated, the application will release all the drifters for every release event.</description>
+        <tree_path>Release/Drifters from text file</tree_path>
+        <description>Block of options for releasing particles with initial coordinates pre-defined in a textfile. The application reads the position of the particles in the text file and release them at time "Beginning of simulation". If the Release schedule is activated, the application will repeatedly release the whole bunch of drifters (for each release event).</description>
         <enabled>false</enabled>
         <parameters>
             <parameter>
@@ -371,7 +455,7 @@
     </block>
     <block type="release">
         <key>release.ncfile</key>
-        <tree_path>Release/From NetCDF file</tree_path>
+        <tree_path>Release/Restart mode</tree_path>
         <description>Block of options for releasing particles with initial coordinates read in an Ichthyop NetCDF output file. The application interpolates the position of the particle in the NetCDF file at time “Beginning of the simulation” or for every "Release event" if the release schedule is activated. It also reads the status of the particle. If the particle had already die, the application releases the particle but it is immediately disabled (not transported). Make sure the time “Beginning of simulation” (or the "Release events") is contained inside the NetCDF file, otherwise the application will crash.</description>
         <enabled>false</enabled>
         <parameters>
@@ -393,8 +477,8 @@
     </block>
     <block type="release">
         <key>release.stain</key>
-        <tree_path>Release/Stain</tree_path>
-        <description>Block of options for releasing a "stain" of particle aroung a given location.</description>
+        <tree_path>Release/Stain of particles</tree_path>
+        <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
         <enabled>false</enabled>
         <parameters>
             <parameter>
@@ -402,39 +486,39 @@
                 <long_name>Number of particles</long_name>
                 <value>1000</value>
                 <format>integer</format>
-                <description>Number of particles released in stain. If several release events are defined (see section release schedule), this parameter becomes the number of particles releases in the stain per release event. It means the application totals number_particles_released_in_zones * number_release_events particles.</description>
+                <description>Number of particles released in the stain. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the stain per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
             </parameter>
             <parameter>
                 <key>lon_stain</key>
-                <long_name>Longitude (East)</long_name>
+                <long_name>Longitude [East degree]</long_name>
                 <value>0.0</value>
                 <format>lonlat</format>
                 <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
             <parameter>
                 <key>lat_stain</key>
-                <long_name>Latitude (North)</long_name>
+                <long_name>Latitude [North degree]</long_name>
                 <value>0.0</value>
                 <format>lonlat</format>
-                <description>Latitude North degree] of the stain. You can change the coordinate format when editing the value.</description>
+                <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
             <parameter>
                 <key>depth_stain</key>
-                <long_name>Depth (meter)</long_name>
+                <long_name>Depth [meter]</long_name>
                 <value>-20.0</value>
                 <format>float</format>
                 <description>Depth [meter] of the stain. The parameter is ignored for 2D simulation. Positive depth is automatically converted by the application (depth = -depth)</description>
             </parameter>
             <parameter>
                 <key>radius_stain</key>
-                <long_name>Radius of the stain (meter)</long_name>
+                <long_name>Radius of the stain [meter]</long_name>
                 <value>10000.0</value>
                 <format>float</format>
-                <description>Radius [meter] of the stain. Particles are randomly released (homogeneous distribution) within the circle defined by this radius.</description>
+                <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
             </parameter>
             <parameter>
                 <key>thickness_stain</key>
-                <long_name>Thickness of the stain (meter)</long_name>
+                <long_name>Thickness of the stain [meter]</long_name>
                 <value>10.0</value>
                 <format>float</format>
                 <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
@@ -451,25 +535,25 @@
     <block type="option">
         <key>app.particle_length</key>
         <tree_path>Biology/Early-life stages</tree_path>
-        <description>Block of options for setting up particle's early-life stages. The pre-defined early life stages are egg, yolk-sac larva and feeding larva. Particles change stages at pre-defined length thresholds.</description>
+        <description>Block of options for setting up particle's early-life stages. The pre-defined early life stages are egg, yolk-sac larva and feeding larva. Particles change stages at pre-defined length thresholds that can be adjusted in this block.</description>
         <parameters>
             <parameter>
-                <key>hatch_length</key>
-                <long_name>Hatch length</long_name>
-                <value>2.8</value>
-                <format>float</format>
-                <description>Threshold length [millimeter] between egg and yolk-sac larva.</description>
-            </parameter>
-            <parameter>
                 <key>initial_length</key>
-                <long_name>Initial length</long_name>
+                <long_name>Initial length [millimeter]</long_name>
                 <value>0.025</value>
                 <format>float</format>
                 <description>Initial length [millimeter] of the egg.</description>
             </parameter>
             <parameter>
+                <key>hatch_length</key>
+                <long_name>Hatch length [millimeter]</long_name>
+                <value>2.8</value>
+                <format>float</format>
+                <description>Threshold length [millimeter] between egg and yolk-sac larva.</description>
+            </parameter>
+            <parameter>
                 <key>yolk2feeding_length</key>
-                <long_name>Yolk to feeding length</long_name>
+                <long_name>Yolk-sac to feeding larva threshold [millimeter]</long_name>
                 <value>4.5</value>
                 <format>float</format>
                 <description>Threshold length [millimeter] between yolk-sac larva and feeding larva.</description>
@@ -484,14 +568,14 @@
         <parameters>
             <parameter>
                 <key>lethal_temp_egg</key>
-                <long_name>Lethal temperature (egg)</long_name>
+                <long_name>Lethal temperature (egg) [Celsius degree]</long_name>
                 <value>14.0</value>
                 <format>float</format>
                 <description>Lower lethal water temperature [Celsius degree] for the particles. If the growth process is active, this parameter only affects particles at egg stage.</description>
             </parameter>
             <parameter>
                 <key>lethal_temp_larva</key>
-                <long_name>Lethal temperature (larva)</long_name>
+                <long_name>Lethal temperature (larva) [Celsius degree]</long_name>
                 <value>12.O</value>
                 <format>float</format>
                 <description>Lower lethal water temperature [Celsius degree] for particles at larva stage (yolk-sac and feeding larva). This parameter is ignored by the application when the growth process is idle.</description>
@@ -520,7 +604,7 @@
                 <accepted>normal</accepted>
                 <accepted>high</accepted>
                 <accepted>highest</accepted>
-                <description>Level of priority of the action (comparatively to other actions). Each time step, high priority action will be called by the application before than a low priority action. Action with same level of priority will be called with no specific order.</description>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
             </parameter>
         </parameters>
     </block>
@@ -546,10 +630,10 @@
             </parameter>
             <parameter>
                 <key>threshold_temp</key>
-                <long_name>Threshold temperature</long_name>
+                <long_name>Threshold temperature [Celsius degree]</long_name>
                 <value>10.0</value>
                 <format>float</format>
-                <description>Threshold temperature [Celsius degree] for the sea water. It ensures that the particles keep growing with a minimum rate, even though they are facing cold sea water.</description>
+                <description>Threshold temperature [Celsius degree] for the sea water. It ensures that the particles keep growing with a minimum rate, though they are facing colder sea water.</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -568,7 +652,7 @@
                 <accepted>normal</accepted>
                 <accepted>high</accepted>
                 <accepted>highest</accepted>
-                <description>Level of priority of the action (comparatively to other actions). Each time step, high priority action will be called by the application before than a low priority action. Action with same level of priority will be called with no specific order.</description>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
             </parameter>
         </parameters>
     </block>
@@ -586,28 +670,28 @@
                 <accepted>Age criterion</accepted>
                 <accepted>Length criterion</accepted>
                 <default>Age criterion</default>
-                <description>Select the type of criterion the application should use to check wheter a particle as been recruited or not. When the growth process is not activated, the criterion used for particles to be considered as recruited is necessarily a minimal age threshold. When growth is taken into account the criterion might also be a minimal length threshold. If you select the Length criterion though growth process is idle, application will crash.</description>
+                <description>Select the type of criterion the application should use to check wheter a particle has been recruited or not. When the growth process is idle, you must use the age based criterion (otherwise application will crash). When growth is taken into account the criterion might also be a minimal length threshold.</description>
             </parameter>
             <parameter>
                 <key>limit_age</key>
-                <long_name>Recruitment limit age</long_name>
+                <long_name>Recruitment limit age [day]</long_name>
                 <value>7.0</value>
                 <format>float</format>
-                <description>A particle must be "older" than the specified age [days] for potentially being recruited. This parameter is ignored if the recruitment criterion is based on the particle length.</description>
+                <description>A particle must be "older" than the specified age [day] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle length.</description>
             </parameter>
             <parameter>
                 <key>limit_length</key>
-                <long_name>Reruitment limit length</long_name>
+                <long_name>Recruitment limit length [millimeter]</long_name>
                 <value>6.0</value>
                 <format>float</format>
-                <description>A particle must be "bigger" than the specified length [millimeter] for potentially being recruited. This parameter is ignored if the recruitment criterion is based on the particle age. Only use this criterion if the growth model is activated.</description>
+                <description>A particle must be "bigger" than the specified length [millimeter] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle age. Only use this criterion if the growth model is activated.</description>
             </parameter>
             <parameter>
                 <key>duration_min</key>
-                <long_name>Minimal duration in recruitment zone</long_name>
+                <long_name>Minimal duration in recruitment zone [day]</long_name>
                 <value>0.0</value>
                 <format>float</format>
-                <description>Minimal duration [days] a particle has to spend in a recruitment area to be considered as recruited.</description>
+                <description>Minimal duration [day] a particle has to spend in a recruitment area to be considered as recruitable.</description>
             </parameter>
             <parameter>
                 <key>stop_moving</key>
@@ -615,6 +699,14 @@
                 <value>false</value>
                 <format>boolean</format>
                 <description>Force a particle to remain where it is as soon as it is recruited. If activated, the particle could not be recruited in any other recruitment area. On the contrary, a particle that does not stop moving when recruited can keep drifting and being recruited in others recruitment areas, as long as the recruitement conditions are fulfilled.</description>
+            </parameter>
+            <parameter>
+                <key>zone_file</key>
+                <long_name>Zone file</long_name>
+                <value>cfg/my_zones.xml</value>
+                <format>zonefile</format>
+                <default>zone.xml</default>
+                <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads recruitment zones from the file and ignores the other types of zone (release zone for instance).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -633,7 +725,7 @@
                 <accepted>normal</accepted>
                 <accepted>high</accepted>
                 <accepted>highest</accepted>
-                <description>Level of priority of the action (comparatively to other actions). Each time step, high priority action will be called by the application before than a low priority action. Action with same level of priority will be called with no specific order.</description>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
             </parameter>
         </parameters>
     </block>
