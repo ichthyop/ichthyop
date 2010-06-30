@@ -98,7 +98,7 @@
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
                 <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
-                <description>OpenDAP URL of the MARS dataset. You can check the validity of the given URL by typing it in the URL adress bar of you browser and appending a ".html" at the end of the URL. Preset URL is a Bay of Biscay model centered above the Iroise sea.</description>
+                <description>OpenDAP URL of the MARS dataset. You can check the validity of the given URL by typing it in the URL adress bar of your web browser and appending ".html" at the end of the URL. Preset URL is a Bay of Biscay model centered above the Iroise sea.</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -141,14 +141,14 @@
             </parameter>
             <parameter>
                 <key>field_dim_lat</key>
-                <long_name>Dimension in the LAT-direction</long_name>
+                <long_name>Dimension in the latitudinal direction</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_dim_lon</key>
-                <long_name>Dimension in the LON-direction</long_name>
+                <long_name>Dimension in the longitudinal direction</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
@@ -162,21 +162,21 @@
             </parameter>
             <parameter>
                 <key>field_var_bathy</key>
-                <long_name>Bathymetry at RHO-points</long_name>
+                <long_name>Bathymetry at Rho points</long_name>
                 <value>H0</value>
                 <default>H0</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lat</key>
-                <long_name>Latitude of RHO-points</long_name>
+                <long_name>Latitude of Rho points</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
-                <long_name>Longitude of RHO-points</long_name>
+                <long_name>Longitude of Rho points</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -190,14 +190,14 @@
             </parameter>
             <parameter>
                 <key>field_var_u</key>
-                <long_name>U-momentum component</long_name>
+                <long_name>Zonal velocity</long_name>
                 <value>U</value>
                 <default>U</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
-                <long_name>V-momentum component</long_name>
+                <long_name>Meridional velocity</long_name>
                 <value>V</value>
                 <default>V</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -264,21 +264,21 @@
             </parameter>
             <parameter>
                 <key>field_dim_lat</key>
-                <long_name>Dimension in the LAT-direction</long_name>
+                <long_name>Dimension in the latitudinal direction</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_dim_lon</key>
-                <long_name>Dimension in the LON-direction</long_name>
+                <long_name>Dimension in the longitudinal direction</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_dim_z</key>
-                <long_name>Dimension in the Z-direction</long_name>
+                <long_name>Dimension in the vertical direction</long_name>
                 <value>level</value>
                 <default>level</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
@@ -292,21 +292,21 @@
             </parameter>
             <parameter>
                 <key>field_var_bathy</key>
-                <long_name>Bathymetry at RHO-points</long_name>
+                <long_name>Bathymetry at Rho points</long_name>
                 <value>H0</value>
                 <default>H0</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lat</key>
-                <long_name>Latitude of RHO-points</long_name>
+                <long_name>Latitude of Rho points</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
-                <long_name>Longitude of RHO-points</long_name>
+                <long_name>Longitude of Rho points</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -327,14 +327,14 @@
             </parameter>
             <parameter>
                 <key>field_var_u</key>
-                <long_name>U-momentum component</long_name>
+                <long_name>Zonal velocity</long_name>
                 <value>UZ</value>
                 <default>UZ</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
-                <long_name>V-momentum component</long_name>
+                <long_name>Meridional velocity</long_name>
                 <value>VZ</value>
                 <default>VZ</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -372,7 +372,7 @@
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
-                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc.</description>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -415,14 +415,14 @@
             </parameter>
             <parameter>
                 <key>field_dim_lat</key>
-                <long_name>Dimension in the LAT-direction</long_name>
+                <long_name>Dimension in the latitudinal direction</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_dim_lon</key>
-                <long_name>Dimension in the LON-direction</long_name>
+                <long_name>Dimension in the longitudinal direction</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
@@ -436,21 +436,21 @@
             </parameter>
             <parameter>
                 <key>field_var_bathy</key>
-                <long_name>Bathymetry at RHO-points</long_name>
+                <long_name>Bathymetry at Rho points</long_name>
                 <value>H0</value>
                 <default>H0</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lat</key>
-                <long_name>Latitude of RHO-points</long_name>
+                <long_name>Latitude of Rho points</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
-                <long_name>Longitude of RHO-points</long_name>
+                <long_name>Longitude of Rho points</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -464,14 +464,14 @@
             </parameter>
             <parameter>
                 <key>field_var_u</key>
-                <long_name>U-momentum component</long_name>
+                <long_name>Zonal velocity</long_name>
                 <value>U</value>
                 <default>U</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
-                <long_name>V-momentum component</long_name>
+                <long_name>Meridional velocity</long_name>
                 <value>V</value>
                 <default>V</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -502,19 +502,19 @@
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
-                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc.</description>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>
-                <value>true</value>
+                <value>false</value>
                 <format>boolean</format>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
             </parameter>
             <parameter>
                 <key>north-west-corner.lat</key>
                 <long_name>Latitude of Northwest corner [North degree]</long_name>
-                <value>50.0</value>
+                <value>0.0</value>
                 <description>Set the latitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
                 <format>lonlat</format>
                 <default>0.0</default>
@@ -522,7 +522,7 @@
             <parameter>
                 <key>north-west-corner.lon</key>
                 <long_name>Longitude of Northwest corner [East degree]</long_name>
-                <value>-8.0</value>
+                <value>0.0</value>
                 <description>Set the longitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
                 <format>lonlat</format>
                 <default>0.0</default>
@@ -530,7 +530,7 @@
             <parameter>
                 <key>south-east-corner.lat</key>
                 <long_name>Latitude of Southeast corner [North degree]</long_name>
-                <value>47.0</value>
+                <value>0.0</value>
                 <description>Set the latitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
                 <format>lonlat</format>
                 <default>0.0</default>
@@ -545,21 +545,21 @@
             </parameter>
             <parameter>
                 <key>field_dim_lat</key>
-                <long_name>Dimension in the LAT-direction</long_name>
+                <long_name>Dimension in the latitudinal direction</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_dim_lon</key>
-                <long_name>Dimension in the LON-direction</long_name>
+                <long_name>Dimension in the longitudinal direction</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_dim_z</key>
-                <long_name>Dimension in the Z-direction</long_name>
+                <long_name>Dimension in the vertical direction</long_name>
                 <value>level</value>
                 <default>level</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
@@ -573,21 +573,21 @@
             </parameter>
             <parameter>
                 <key>field_var_bathy</key>
-                <long_name>Bathymetry at RHO-points</long_name>
+                <long_name>Bathymetry at Rho points</long_name>
                 <value>H0</value>
                 <default>H0</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lat</key>
-                <long_name>Latitude of RHO-points</long_name>
+                <long_name>Latitude of Rho points</long_name>
                 <value>latitude</value>
                 <default>latitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
-                <long_name>Longitude of RHO-points</long_name>
+                <long_name>Longitude of Rho points</long_name>
                 <value>longitude</value>
                 <default>longitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -608,14 +608,14 @@
             </parameter>
             <parameter>
                 <key>field_var_u</key>
-                <long_name>U-momentum component</long_name>
+                <long_name>Zonal velocity</long_name>
                 <value>UZ</value>
                 <default>UZ</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
-                <long_name>V-momentum component</long_name>
+                <long_name>Meridional velocity</long_name>
                 <value>VZ</value>
                 <default>VZ</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -638,7 +638,7 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_2d</key>
-        <tree_path>IO/Input/Roms 2D</tree_path>
+        <tree_path>IO/Input/ROMS 2D</tree_path>
         <enabled>false</enabled>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 2D simulation and local NetCDF files.</description>
         <parameters>
@@ -653,7 +653,7 @@
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
-                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc.</description>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -717,28 +717,28 @@
             </parameter>
             <parameter>
                 <key>field_var_bathy</key>
-                <long_name>Bathymetry at RHO-points</long_name>
+                <long_name>Bathymetry at Rho points</long_name>
                 <value>h</value>
                 <default>h</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lat</key>
-                <long_name>Latitude of RHO-points</long_name>
+                <long_name>Latitude of Rho points</long_name>
                 <value>lat_rho</value>
                 <default>lat_rho</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
-                <long_name>Longitude of RHO-points</long_name>
+                <long_name>Longitude of Rho points</long_name>
                 <value>lon_rho</value>
                 <default>lon_rho</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_mask</key>
-                <long_name>Mask on RHO-points</long_name>
+                <long_name>Mask on Rho points</long_name>
                 <value>mask_rho</value>
                 <default>mask_rho</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -789,7 +789,7 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_3d</key>
-        <tree_path>IO/Input/Roms 3D</tree_path>
+        <tree_path>IO/Input/ROMS 3D</tree_path>
         <enabled>false</enabled>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 3D simulation and local NetCDF files.</description>
         <parameters>
@@ -804,7 +804,7 @@
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
-                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc.</description>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -861,7 +861,7 @@
             </parameter>
             <parameter>
                 <key>field_dim_z</key>
-                <long_name>Dimension in the Z-direction</long_name>
+                <long_name>Dimension in the vertical direction</long_name>
                 <value>s_rho</value>
                 <default>s_rho</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
@@ -875,28 +875,28 @@
             </parameter>
             <parameter>
                 <key>field_var_bathy</key>
-                <long_name>Bathymetry at RHO-points</long_name>
+                <long_name>Bathymetry at Rho points</long_name>
                 <value>h</value>
                 <default>h</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lat</key>
-                <long_name>Latitude of RHO-points</long_name>
+                <long_name>Latitude of Rho points</long_name>
                 <value>lat_rho</value>
                 <default>lat_rho</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
-                <long_name>Longitude of RHO-points</long_name>
+                <long_name>Longitude of Rho points</long_name>
                 <value>lon_rho</value>
                 <default>lon_rho</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_mask</key>
-                <long_name>Mask on RHO-points</long_name>
+                <long_name>Mask on Rho points</long_name>
                 <value>mask_rho</value>
                 <default>mask_rho</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -926,19 +926,19 @@
                 <key>field_var_u</key>
                 <long_name>U-momentum component</long_name>
                 <value>u</value>
-                <default>ubar</default>
+                <default>u</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
                 <long_name>V-momentum component</long_name>
-                <value>vbar</value>
+                <value>v</value>
                 <default>v</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_csr</key>
-                <long_name>S-coordinate stretching curves at RHO-points</long_name>
+                <long_name>S-coordinate stretching curves at Rho points</long_name>
                 <value>Cs_r</value>
                 <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
             </parameter>
@@ -965,7 +965,7 @@
     </block>
     <block type="dataset">
         <key>dataset.nemo</key>
-        <tree_path>Main/NEMO 3D Dataset</tree_path>
+        <tree_path>IO/Input/OPA NEMO</tree_path>
         <enabled>false</enabled>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for OPA NEMO model, 3D simulation and local NetCDF files. It is assumed that the grid information is split in three distincts files: mask file (x, y, z dimensions and land-ocean mask), zgr file (depth T point, depth W point and e3t), hgr file (e1t, e2t, e1v and e2u variables). If theses fields are all recorded in a single file, it is not a problem, just type the same file pattern for the three files. The application expects to find lon and lat variables in "gridT" files, U and time variables and time dimension in "gridU" files and V variable in "gridV" files. Again, just provide the same file pattern for the three types of files if all the variables are recorded within the same file.</description>
         <parameters>
@@ -975,7 +975,7 @@
                 <value>input</value>
                 <format>path</format>
                 <default>input</default>
-                <description><description>Folder containing the NEMO NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders.</description></description>
+                <description>Folder containing the NEMO NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders.</description>
             </parameter>
             <parameter>
                 <key>byte_mask_pattern</key>
@@ -1000,7 +1000,7 @@
             </parameter>
             <parameter>
                 <key>field_dim_z</key>
-                <long_name>Dimension in the Z-direction</long_name>
+                <long_name>Dimension in the vertical direction</long_name>
                 <value>z</value>
                 <default>z</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
@@ -1017,18 +1017,18 @@
                 <long_name>gridT file pattern</long_name>
                 <value>*gridT*</value>
                 <default>*gridT*</default>
-                <description>Filename filter for identifying the "gridT" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this files variables longitude and latitude at T points. It is also assumed that all the additional tracked variables (see section Output/Variable tracking) will be found in these "gridT" files.</description>
+                <description>Filename filter for identifying the "gridT" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files variables longitude and latitude at T points. It is also assumed that all the additional tracked variables (see section Output/Variable tracking) will be found in these "gridT" files.</description>
             </parameter>
             <parameter>
                 <key>field_var_lat</key>
-                <long_name>Latitude of RHO-points</long_name>
+                <long_name>Latitude of Rho points</long_name>
                 <value>nav_lat</value>
                 <default>nav_lat</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
-                <long_name>Longitude of RHO-points</long_name>
+                <long_name>Longitude of Rho points</long_name>
                 <value>nav_lon</value>
                 <default>nav_lon</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
@@ -1073,7 +1073,7 @@
                 <long_name>ZGR file pattern</long_name>
                 <value>*zgr*.nc</value>
                 <default>*zgr*.nc</default>
-                <description>Filename filter for identifying the "ZGR" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file variables depth at T points, depth at W points variables and vertical scale factor at T points.</description>
+                <description>Filename filter for identifying the "ZGR" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the variables depth at T points, depth at W points and vertical scale factor at T points.</description>
             </parameter>
             <parameter>
                 <key>field_var_e3t</key>
