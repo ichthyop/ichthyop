@@ -82,7 +82,7 @@ public class Roms3dDataset extends RomsCommon {
     /**
      * Name of the Variable in NetCDF file
      */
-    String strCs_r, strCs_w, strSc_r, strSc_w, strPn, strPm, strHC;
+    String strCs_r, strCs_w, strPn, strPm, strHC;
 
     double getHc() throws IOException {
 
@@ -157,10 +157,8 @@ public class Roms3dDataset extends RomsCommon {
         /* load 3D parameters */
         strZDim = getParameter("field_dim_z");
         strZeta = getParameter("field_var_zeta");
-        strCs_r = getParameter("field_attrib_csr");
-        strCs_w = getParameter("field_attrib_csw");
-        strSc_r = getParameter("field_attrib_scr");
-        strSc_w = getParameter("field_attrib_scw");
+        strCs_r = getParameter("field_csr");
+        strCs_w = getParameter("field_csw");
         strHC = getParameter("field_hc");
     }
 
