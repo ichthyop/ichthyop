@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
+import org.previmer.ichthyop.ui.LonLatConverter;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
@@ -266,8 +268,12 @@ abstract class RomsCommon extends AbstractDataset {
 
         if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
             try {
-                float[] p1 = new float[]{Float.valueOf(getParameter("north-west-corner.lon")), Float.valueOf(getParameter("north-west-corner.lat"))};
-                float[] p2 = new float[]{Float.valueOf(getParameter("south-east-corner.lon")), Float.valueOf(getParameter("south-east-corner.lat"))};
+                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                float[] p1 = new float[]{lon1, lat1};
+                float[] p2 = new float[]{lon2, lat2};
                 range(p1, p2);
             } catch (Exception ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain", ex);
