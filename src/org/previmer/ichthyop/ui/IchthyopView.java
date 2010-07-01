@@ -427,12 +427,14 @@ public class IchthyopView extends FrameView
 
         @Override
         protected Object doInBackground() throws Exception {
-            nbPNG = folder.listFiles(new MetaFilenameFilter("*.png")).length;
-            if (nbPNG > 0) {
-                return null;
-            } else {
-                throw new NullPointerException(resourceMap.getString("openFolderAnimation.msg.failed") + " " + folder.getAbsolutePath());
+            try {
+                nbPNG = folder.listFiles(new MetaFilenameFilter("*.png")).length;
+                if (nbPNG > 0) {
+                    return null;
+                }
+            } catch (Exception ex) {
             }
+            throw new NullPointerException(resourceMap.getString("openFolderAnimation.msg.failed") + " " + folder.getAbsolutePath());
         }
 
         public void onSuccess(Object o) {
@@ -1008,21 +1010,20 @@ public class IchthyopView extends FrameView
                 getSimulationManager().getTimeManager().firstStepTriggered();
                 getSimulationManager().resetTimerCurrent();
                 do {
-                    if (getSimulationManager().isStopped()) {
-                        break;
+                    if (!getSimulationManager().isStopped()) {
+                        /* step simulation */
+                        getSimulationManager().getSimulation().step();
+                        /* Print message progress */
+                        StringBuffer msg = new StringBuffer();
+                        msg.append(getSimulationManager().getTimeManager().stepToString());
+                        msg.append(" - ");
+                        msg.append(resourceMap.getString("simulationRun.msg.time"));
+                        msg.append(" ");
+                        msg.append(getSimulationManager().getTimeManager().timeToString());
+                        setMessage(msg.toString());
+                        setProgress(getSimulationManager().progressCurrent());
+                        publish(getSimulationManager().progressCurrent());
                     }
-                    /* step simulation */
-                    getSimulationManager().getSimulation().step();
-                    /* Print message progress */
-                    StringBuffer msg = new StringBuffer();
-                    msg.append(getSimulationManager().getTimeManager().stepToString());
-                    msg.append(" - ");
-                    msg.append(resourceMap.getString("simulationRun.msg.time"));
-                    msg.append(" ");
-                    msg.append(getSimulationManager().getTimeManager().timeToString());
-                    setMessage(msg.toString());
-                    setProgress(getSimulationManager().progressCurrent());
-                    publish(getSimulationManager().progressCurrent());
                 } while (getSimulationManager().getTimeManager().hasNextStep());
             } while (getSimulationManager().hasNextSimulation());
             return null;
@@ -1057,20 +1058,18 @@ public class IchthyopView extends FrameView
         @Override
         protected void cancelled() {
             setMessage(resourceMap.getString("simulationRun.msg.interrupted"));
-            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
-            openNetCDF();
         }
 
         public void onSuccess(Object obj) {
             setMessage(resourceMap.getString("simulationRun.msg.completed"), false, LogLevel.COMPLETE);
-            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
-            openNetCDF();
             taskPaneSimulation.setCollapsed(true);
             taskPaneMapping.setCollapsed(false);
         }
 
         @Override
         protected void finished() {
+            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
+            openNetCDF();
             getFrame().setTitle(title);
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));

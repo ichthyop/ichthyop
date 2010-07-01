@@ -37,8 +37,7 @@ public abstract class SFTask<T, V> extends Task<T, V> {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
-        //SimulationManager.getLogger().log(Level.SEVERE, sw.toString());
-        SimulationManager.getLogger().log(Level.SEVERE, sw.toString(), throwable);
+        SimulationManager.getLogger().log(Level.SEVERE, throwable.getMessage(), throwable);
         super.setMessage(throwable.toString());
         firePropertyChange("reset", null, null);
         onFailure(throwable);

@@ -1466,7 +1466,7 @@
         <key>release.zone</key>
         <tree_path>Release/From zone</tree_path>
         <description>Block of options for releasing particles within pre-defined geographical zones.</description>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <parameters>
             <parameter>
                 <key>number_particles</key>
@@ -1604,7 +1604,7 @@
         <key>release.stain</key>
         <tree_path>Release/Stain of particles</tree_path>
         <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
         <parameters>
             <parameter>
                 <key>number_particles</key>
@@ -1617,7 +1617,7 @@
             <parameter>
                 <key>lon_stain</key>
                 <long_name>Longitude [East degree]</long_name>
-                <value>0.0</value>
+                <value>-5</value>
                 <default>0.0</default>
                 <format>lonlat</format>
                 <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
@@ -1625,7 +1625,7 @@
             <parameter>
                 <key>lat_stain</key>
                 <long_name>Latitude [North degree]</long_name>
-                <value>0.0</value>
+                <value>48</value>
                 <default>0.0</default>
                 <format>lonlat</format>
                 <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
