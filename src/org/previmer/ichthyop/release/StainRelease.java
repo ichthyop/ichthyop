@@ -85,6 +85,6 @@ public class StainRelease extends AbstractReleaseProcess {
     }
 
     public int getNbParticles() {
-        return nb_particles;
+        return Integer.valueOf(getParameter("number_particles"));
     }
 }

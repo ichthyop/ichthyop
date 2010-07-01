@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -38,12 +39,16 @@ public class IOTools {
     }
 
     public static String resolveFile(String filename) {
+        try {
         File file = new File(System.getProperty("user.dir"));
-        String pathname = new File(file.toURI().resolve(filename)).getAbsolutePath();
+        String pathname = new File(file.toURI().resolve(new File(filename).toURI())).getAbsolutePath();
         return pathname;
+        } catch(Exception e) {
+            return filename;
+        }
     }
 
-    public static boolean makeDirectories(String file) {
+    public static boolean makeDirectories(String file) throws SecurityException {
         String path = file.substring(0, file.lastIndexOf(File.separator));
         return new File(path).mkdirs();
     }

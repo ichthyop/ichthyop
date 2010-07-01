@@ -5,14 +5,11 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Toolkit;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import javax.swing.event.TreeSelectionEvent;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
 import java.io.File;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -28,7 +25,6 @@ import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.arch.ISimulationManager;
-import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -83,8 +79,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         }
     }
 
-    private File getFileTemplate(String filename) throws Exception {
-        File src = Template.getTemplate(filename);
+    private File getFileTemplate(String templateName) throws Exception {
         File dst = new File(textFieldFile.getText());
         if (dst.exists()) {
             int answer = JOptionPane.showConfirmDialog(getFrame(), dst.getAbsolutePath() + " " + resourceMap.getString("save.dialog.overwrite"), resourceMap.getString("save.dialog.title"), JOptionPane.YES_NO_OPTION);
@@ -92,8 +87,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
                 return null;
             }
         }
-        IOTools.makeDirectories(dst.getAbsolutePath());
-        IOTools.copyFile(src, dst);
+        Template.createTemplate(templateName, dst);
         return dst;
     }
 

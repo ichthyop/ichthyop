@@ -142,47 +142,44 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
 
     private void schedule() throws Exception {
 
-        boolean isEnabled = false;
-        try {
-            String isScheduleEnabled = getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled");
-            isEnabled = Boolean.valueOf(isScheduleEnabled);
-        } catch (NullPointerException ex) {
-            getLogger().log(Level.WARNING, ex.toString() + ". By default, particles will all be released at simulation initial time.");
-        }
-        if (isEnabled) {
-            String[] events = getReleaseEvents();
-            timeEvent = new long[events.length];
-            long t0 = get_t0();
-            String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
-            for (int i = 0; i < timeEvent.length; i++) {
-                try {
-                    timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i]);
-                    if (timeEvent[i] < t0) {
-                        throw new IndexOutOfBoundsException("Release event " + events[i] + " cannot occur prior to simulation initial time " + st0);
-                    }
-                } catch (ParseException ex) {
-                    StringBuffer sb = new StringBuffer();
-                    sb.append("Release schedule - error converting release time into seconds ==> ");
-                    sb.append(ex.toString());
-                    IOException ioex = new IOException(sb.toString());
-                    ioex.setStackTrace(ex.getStackTrace());
-                    throw ioex;
+        String[] events = getReleaseEvents();
+        timeEvent = new long[events.length];
+        long t0 = get_t0();
+        String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
+        for (int i = 0; i < timeEvent.length; i++) {
+            try {
+                timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i]);
+                if (timeEvent[i] < t0) {
+                    throw new IndexOutOfBoundsException("Release event " + events[i] + " cannot occur prior to simulation initial time " + st0);
                 }
+            } catch (ParseException ex) {
+                IOException ioex = new IOException("{Release schedule} Error converting release time into seconds ==> " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
             }
-        } else {
-            timeEvent = new long[]{get_t0()};
         }
     }
 
     private String[] getReleaseEvents() throws Exception {
-        String[] tokens = getSimulationManager().getParameterManager().getParameter("release.schedule", "events").split("\"");
-        List<String> events = new ArrayList();
-        for (String token : tokens) {
-            if (!token.trim().isEmpty()) {
-                events.add(token.trim());
+
+        try {
+            String isScheduleEnabled = getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled");
+            boolean isEnabled = Boolean.valueOf(isScheduleEnabled);
+            if (isEnabled) {
+                String[] tokens = getSimulationManager().getParameterManager().getParameter("release.schedule", "events").split("\"");
+                List<String> events = new ArrayList();
+                for (String token : tokens) {
+                    if (!token.trim().isEmpty()) {
+                        events.add(token.trim());
+                    }
+                }
+                return events.toArray(new String[events.size()]);
             }
+        } catch (Exception ex) {
+            getLogger().log(Level.WARNING, "Failed to read the release schedule. By default, particles will all be released at simulation initial time. " + ex.toString());
         }
-        return events.toArray(new String[events.size()]);
+        String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
+        return new String[]{st0};
     }
 
     /**

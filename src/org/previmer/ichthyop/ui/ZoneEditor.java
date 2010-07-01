@@ -36,6 +36,8 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -44,6 +46,7 @@ import javax.swing.JTextField;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -59,13 +62,13 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
     private JPanel panel;
     private JOptionPane optionPane;
     private JFileChooser fileChooser;
-    private File template;
+    private String template;
 
     public ZoneEditor() {
         this(null);
     }
 
-    public ZoneEditor(File template) {
+    public ZoneEditor(String template) {
 
         this.template = template;
 
@@ -165,82 +168,83 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
      */
     public void actionPerformed(ActionEvent e) {
 
-        String path = IOTools.resolveFile(textField.getText());
+        try {
+            String path = IOTools.resolveFile(textField.getText());
 
-        if (e.getActionCommand().matches(EDIT)) {
-            fileChooser.setSelectedFile(new File(path));
-            int answer = fileChooser.showOpenDialog(panel);
-            if (answer == JFileChooser.APPROVE_OPTION) {
-                File file = fileChooser.getSelectedFile();
-                if (!file.isFile()) {
-                    String msg = file.getAbsolutePath() + " does not exist. Create it ?";
-                    int create = JOptionPane.showConfirmDialog(panel, msg, "Create file ?", JOptionPane.YES_NO_CANCEL_OPTION);
-                    switch (create) {
-                        case JOptionPane.YES_OPTION:
-                            saveAndEditNewFile(file);
-                            break;
-                        case JOptionPane.NO_OPTION:
-                            actionPerformed(new ActionEvent(new JButton(), 0, EDIT));
-                            return;
-                        case JOptionPane.CANCEL_OPTION:
-                            fireEditingStopped();
-                            return;
+            if (e.getActionCommand().matches(EDIT)) {
+                fileChooser.setSelectedFile(new File(path));
+                int answer = fileChooser.showOpenDialog(panel);
+                if (answer == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    if (!file.isFile()) {
+                        String msg = file.getAbsolutePath() + " does not exist. Create it ?";
+                        int create = JOptionPane.showConfirmDialog(panel, msg, "Create file ?", JOptionPane.YES_NO_CANCEL_OPTION);
+                        switch (create) {
+                            case JOptionPane.YES_OPTION:
+                                saveAndEditNewFile(file);
+                                break;
+                            case JOptionPane.NO_OPTION:
+                                actionPerformed(new ActionEvent(new JButton(), 0, EDIT));
+                                return;
+                            case JOptionPane.CANCEL_OPTION:
+                                fireEditingStopped();
+                                return;
+                        }
                     }
-                }
-                textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                try {
-                    zoneEditor.loadZonesFromFile(fileChooser.getSelectedFile());
-                    dialog.setVisible(true);
-                } catch (Exception ex) {
-                    Logger.getLogger(ZoneEditor.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else {
-                fireEditingCanceled();
-            }
-        } else if (e.getActionCommand().matches(NEW)) {
-            File f = new File(path);
-            if (f.isFile()) {
-                f = f.getParentFile();
-                String filename = f.getAbsolutePath();
-                if (!filename.endsWith(File.separator)) {
-                    filename += File.separator + "NewZoneFile.xml";
-                }
-                fileChooser.setSelectedFile(new File(filename));
-            } else {
-                fileChooser.setSelectedFile(f);
-            }
-            int answer = fileChooser.showSaveDialog(panel);
-            if (answer == JFileChooser.APPROVE_OPTION) {
-                File file = fileChooser.getSelectedFile();
-                if (file.exists()) {
-                    String msg = file.getName() + " already exists. Overwrite it ?";
-                    int overwrite = JOptionPane.showConfirmDialog(panel, msg, "Overwrite file ?", JOptionPane.YES_NO_CANCEL_OPTION);
-                    switch (overwrite) {
-                        case JOptionPane.YES_OPTION:
-                            file.delete();
-                            break;
-                        case JOptionPane.NO_OPTION:
-                            actionPerformed(new ActionEvent(new JButton(), 0, NEW));
-                            return;
-                        case JOptionPane.CANCEL_OPTION:
-                            fireEditingStopped();
-                            return;
+                    textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                    try {
+                        zoneEditor.loadZonesFromFile(fileChooser.getSelectedFile());
+                        dialog.setVisible(true);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ZoneEditor.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                } else {
+                    fireEditingCanceled();
                 }
-                saveAndEditNewFile(file);
-            } else {
-                fireEditingCanceled();
+            } else if (e.getActionCommand().matches(NEW)) {
+                File f = new File(path);
+                if (f.isFile()) {
+                    f = f.getParentFile();
+                    String filename = f.getAbsolutePath();
+                    if (!filename.endsWith(File.separator)) {
+                        filename += File.separator + "NewZoneFile.xml";
+                    }
+                    fileChooser.setSelectedFile(new File(filename));
+                } else {
+                    fileChooser.setSelectedFile(f);
+                }
+                int answer = fileChooser.showSaveDialog(panel);
+                if (answer == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    if (file.exists()) {
+                        String msg = file.getName() + " already exists. Overwrite it ?";
+                        int overwrite = JOptionPane.showConfirmDialog(panel, msg, "Overwrite file ?", JOptionPane.YES_NO_CANCEL_OPTION);
+                        switch (overwrite) {
+                            case JOptionPane.YES_OPTION:
+                                file.delete();
+                                break;
+                            case JOptionPane.NO_OPTION:
+                                actionPerformed(new ActionEvent(new JButton(), 0, NEW));
+                                return;
+                            case JOptionPane.CANCEL_OPTION:
+                                fireEditingStopped();
+                                return;
+                        }
+                    }
+                    saveAndEditNewFile(file);
+                } else {
+                    fireEditingCanceled();
+                }
             }
+        } catch (Exception ex) {
+            SimulationManager.getLogger().log(Level.SEVERE, "Problem for editing or creating zone file ==> " + ex.getMessage(), ex);
         }
     }
 
-    private void saveAndEditNewFile(File file) {
+    private void saveAndEditNewFile(File file) throws IOException {
         /* create the template */
         if (null != template) {
-            try {
-                IOTools.copyFile(template, file);
-            } catch (Exception ex) {
-            }
+            Template.createTemplate(template, file);
         }
         /* edit the file */
         textField.setText(file.getAbsolutePath());

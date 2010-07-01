@@ -160,13 +160,12 @@ public class XParameter extends org.jdom.Element {
         }
     }
 
-    public File getTemplate() {
-        try {
-            return Template.getTemplate(getChildTextNormalize(TEMPLATE));
-        } catch (Exception ex) {
+    public String getTemplate() {
+        if (null != getChildTextNormalize(TEMPLATE)) {
+            return getChildTextNormalize(TEMPLATE);
+        } else {
             return null;
         }
-
     }
 
     public void setValue(String value, int index) {
