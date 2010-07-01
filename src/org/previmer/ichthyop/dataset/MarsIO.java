@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.io.IOTools;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
@@ -40,10 +41,12 @@ public class MarsIO extends SimulationManagerAccessor {
 
     static NetcdfFile openLocation(String rawPath, String fileMask) throws IOException {
 
-        if (!isDirectory(rawPath)) {
+        String path = IOTools.resolvePath(rawPath);
+
+        if (!isDirectory(path)) {
             throw new IOException(rawPath + " is not a valid directory.");
         }
-        listInputFiles = getInputList(rawPath, fileMask);
+        listInputFiles = getInputList(path, fileMask);
         return openFile(listInputFiles.get(0));
     }
 

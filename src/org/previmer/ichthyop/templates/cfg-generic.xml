@@ -630,7 +630,7 @@
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
-                <value>org.previmer.ichthyop.dataset.Mars2dOpendapDataset</value>
+                <value>org.previmer.ichthyop.dataset.Mars3dDataset</value>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>

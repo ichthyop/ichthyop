@@ -87,9 +87,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private String makeFileLocation() throws IOException {
         
         String filename = IOTools.resolvePath(getParameter("output_path"));
-        if (!filename.endsWith(File.separator)) {
-            filename += File.separator;
-        }
         if (!getParameter("file_prefix").isEmpty()) {
             filename += getParameter("file_prefix") + "_";
         }

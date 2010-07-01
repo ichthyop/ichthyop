@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
@@ -1375,9 +1376,8 @@ public class NemoDataset extends AbstractDataset {
      */
     private void sortInputFiles() throws IOException {
 
-        URI uriCurrent = new File("").toURI();
-        String path = uriCurrent.resolve(
-                URI.create(getParameter("input_path"))).getPath();
+        
+        String path = IOTools.resolvePath(getParameter("input_path"));
         File file = new File(path);
 
         file_mask = checkExistenceAndUnicity(file, getParameter("byte_mask_pattern"));

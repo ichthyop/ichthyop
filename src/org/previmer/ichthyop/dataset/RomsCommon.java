@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
@@ -201,8 +202,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     private void openLocation(String rawPath) throws IOException {
 
-        URI uriCurrent = new File("").toURI();
-        String path = uriCurrent.resolve(URI.create(rawPath)).getPath();
+        String path = IOTools.resolvePath(rawPath);
 
         if (isDirectory(path)) {
             listInputFiles = getInputList(path);
@@ -221,9 +221,9 @@ abstract class RomsCommon extends AbstractDataset {
 
     private String getGridFile(String rawFile) throws IOException {
 
-        File filename = new File(rawFile);
+        File filename = new File(IOTools.resolveFile(rawFile));
         if (!filename.exists()) {
-            throw new IOException("Grid file " + rawFile + " does not exist");
+            throw new IOException("Grid file " + filename + " does not exist");
         }
         return filename.toString();
     }
