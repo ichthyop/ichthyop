@@ -1,6 +1,7 @@
 package org.previmer.ichthyop.calendar;
 
 /** Import the abstract class Calendar */
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -73,27 +74,25 @@ public class Calendar1900 extends Calendar {
         setTimeInMillis(0);
     }
 
-    public Calendar1900(String time_origin) {
-        this(getTimeOrigin(time_origin, Calendar.YEAR),
-                getTimeOrigin(time_origin, Calendar.MONTH),
-                getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+    public Calendar1900(String origin, SimpleDateFormat dateFormat) throws ParseException {
+
+        Calendar cld = new Calendar1900();
+        dateFormat.setCalendar(cld);
+        cld.setTime(dateFormat.parse(origin));
+        epoch_fields = new int[FIELD_COUNT];
+        fields = new int[FIELD_COUNT];
+        setEpoch(YEAR, cld.get(Calendar.YEAR));
+        setEpoch(MONTH, cld.get(Calendar.MONTH));
+        setEpoch(DAY_OF_MONTH, cld.get(Calendar.DAY_OF_MONTH));
+        setEpoch(HOUR_OF_DAY, cld.get(Calendar.HOUR_OF_DAY));
+        setEpoch(MINUTE, cld.get(Calendar.MINUTE));
+        setEpoch(SECOND, 0);
+        setTimeInMillis(0);
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    public static int getTimeOrigin(String time_origin, int field) {
-        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        Calendar1900 cld = new Calendar1900();
-        dtFormat.setCalendar(cld);
-        cld.setTimeInMillis(0);
-        try {
-            cld.setTime(dtFormat.parse(time_origin));
-        } catch (Exception ex) {
-        }
-        return cld.get(field);
-    }
-
     /**
      * Sets the given epoch field (origin of time) to the given value.
      *

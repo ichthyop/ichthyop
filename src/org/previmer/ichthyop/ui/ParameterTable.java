@@ -51,6 +51,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import org.previmer.ichthyop.arch.ITimeManager;
 
 /**
  *
@@ -147,13 +148,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new ListEditor());
                     break;
                 case TEXTFILE:
-                    /* for TextFileEditor, the default value can be set as 
-                    the name of the template file
-                    in org.previmer.ichthyop.templates */
-                    editorModel.addEditorForRow(row, new TextFileEditor(xparam.getDefault()));
+                    editorModel.addEditorForRow(row, new TextFileEditor(xparam.getTemplate()));
                     break;
                 case ZONEFILE:
-                    editorModel.addEditorForRow(row, new ZoneEditor());
+                    editorModel.addEditorForRow(row, new ZoneEditor(xparam.getTemplate()));
                     break;
                 case LONLAT:
                     editorModel.addEditorForRow(row, new LonLatEditor());
@@ -232,13 +230,14 @@ public class ParameterTable extends JMultiCellEditorsTable {
             calendar = new ClimatoCalendar();
         } else {
             calendar = new Calendar1900();
-            if (null != model.block) {
-                if (null != block.getXParameter("time_origin")) {
-                    String time_origin = block.getXParameter("time_origin").getValue();
-                    calendar = new Calendar1900(getTimeOrigin(time_origin, Calendar.YEAR),
-                            getTimeOrigin(time_origin, Calendar.MONTH),
-                            getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+            try {
+                if (null != model.block) {
+                    if (null != block.getXParameter("time_origin")) {
+                        calendar = new Calendar1900(block.getXParameter("time_origin").getValue(), ITimeManager.INPUT_DATE_FORMAT);
+                    }
                 }
+            } catch (Exception ex) {
+                // does nothing. Use default time origin.
             }
         }
         for (int i = 0; i < getRowCount() - 1; i++) {
@@ -269,10 +268,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
             } catch (Exception ex) {
             }
         }
-    }
-
-    private int getTimeOrigin(String time_origin, int field) {
-        return Calendar1900.getTimeOrigin(time_origin, field);
     }
 
     public String getParameterKey(int row) {

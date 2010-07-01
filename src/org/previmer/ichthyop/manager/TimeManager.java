@@ -27,14 +27,6 @@ import javax.swing.event.EventListenerList;
 public class TimeManager extends AbstractManager implements ITimeManager {
 
 ///////////////////////////////
-// Declaration of the constants
-///////////////////////////////
-    private static final int ONE_SECOND = 1;
-    private static final int ONE_MINUTE = 60 * ONE_SECOND;
-    private static final int ONE_HOUR = 60 * ONE_MINUTE;
-    private static final long ONE_DAY = 24 * ONE_HOUR;
-    private static final long ONE_YEAR = 365 * ONE_DAY;
-///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     private final static TimeManager timeManager = new TimeManager();
@@ -74,13 +66,9 @@ public class TimeManager extends AbstractManager implements ITimeManager {
      * The simple date format parses and formats dates in human readable format.
      */
     private SimpleDateFormat outputDateFormat;
-    private SimpleDateFormat inputDateFormat = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-    private SimpleDateFormat inputDurationFormat = new SimpleDateFormat("DDDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    
     private EventListenerList listeners = new EventListenerList();
 
-///////////////
-// Constructors
-///////////////
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -114,10 +102,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         if (getParameter("app.time", "calendar_type").matches(TypeCalendar.CLIMATO.toString())) {
             calendar = new ClimatoCalendar();
         } else {
-            String time_origin = getParameter("app.time", "time_origin");
-            calendar = new Calendar1900(Calendar1900.getTimeOrigin(time_origin, Calendar.YEAR),
-                    Calendar1900.getTimeOrigin(time_origin, Calendar.MONTH),
-                    Calendar1900.getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+            calendar = new Calendar1900(getParameter("app.time", "time_origin"), INPUT_DATE_FORMAT);
         }
 
         /* initial time */
@@ -162,8 +147,8 @@ public class TimeManager extends AbstractManager implements ITimeManager {
 
     public long date2seconds(String date) throws ParseException {
         Calendar lcalendar = (Calendar) calendar.clone();
-        inputDateFormat.setCalendar(lcalendar);
-        lcalendar.setTime(inputDateFormat.parse(date));
+        INPUT_DATE_FORMAT.setCalendar(lcalendar);
+        lcalendar.setTime(INPUT_DATE_FORMAT.parse(date));
         return lcalendar.getTimeInMillis() / 1000L;
     }
 
@@ -346,11 +331,11 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     }
 
     public SimpleDateFormat getInputDurationFormat() {
-        return inputDurationFormat;
+        return INPUT_DURATION_FORMAT;
     }
 
     public SimpleDateFormat getInputDateFormat() {
-        return inputDateFormat;
+        return INPUT_DATE_FORMAT;
     }
     //---------- End of class
 

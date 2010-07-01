@@ -4,9 +4,14 @@
  */
 package org.previmer.ichthyop.io;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jdom.Element;
+import org.previmer.ichthyop.Template;
 
 /**
  *
@@ -24,7 +29,7 @@ public class XParameter extends org.jdom.Element {
     final public static String FORMAT = "format";
     final public static String ACCEPTED = "accepted";
     final public static String DEFAULT = "default";
-
+    final public static String TEMPLATE = "template";
     private int index;
     private final ParamType param_type;
     private List<Element> values;
@@ -153,6 +158,15 @@ public class XParameter extends org.jdom.Element {
         } else {
             return getFormat().getDefault();
         }
+    }
+
+    public File getTemplate() {
+        try {
+            return Template.getTemplate(getChildTextNormalize(TEMPLATE));
+        } catch (Exception ex) {
+            return null;
+        }
+
     }
 
     public void setValue(String value, int index) {

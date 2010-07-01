@@ -59,9 +59,15 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
     private JPanel panel;
     private JOptionPane optionPane;
     private JFileChooser fileChooser;
+    private File template;
 
     public ZoneEditor() {
+        this(null);
+    }
 
+    public ZoneEditor(File template) {
+
+        this.template = template;
 
         //Set up the dialog that the button brings up.
         fileChooser = new JFileChooser();
@@ -160,7 +166,7 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
     public void actionPerformed(ActionEvent e) {
 
         String path = IOTools.resolveFile(textField.getText());
-        
+
         if (e.getActionCommand().matches(EDIT)) {
             fileChooser.setSelectedFile(new File(path));
             int answer = fileChooser.showOpenDialog(panel);
@@ -230,9 +236,11 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
 
     private void saveAndEditNewFile(File file) {
         /* create the template */
-        try {
-            IOTools.copyFile(Template.getTemplate("zone.xml"), file);
-        } catch (Exception ex) {
+        if (null != template) {
+            try {
+                IOTools.copyFile(template, file);
+            } catch (Exception ex) {
+            }
         }
         /* edit the file */
         textField.setText(file.getAbsolutePath());

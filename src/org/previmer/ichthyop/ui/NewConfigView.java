@@ -92,6 +92,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
                 return null;
             }
         }
+        IOTools.makeDirectories(dst.getAbsolutePath());
         IOTools.copyFile(src, dst);
         return dst;
     }

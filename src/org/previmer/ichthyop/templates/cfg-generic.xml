@@ -35,12 +35,15 @@
                 <format>combo</format>
                 <accepted>Climatology calendar</accepted>
                 <accepted>Gregorian calendar</accepted>
+                <default>Gregorian calendar</default>
                 <description>Choose the type of calendar for converting the time variable of the hydrodynamic model (expressed in seconds) into human readble time format. Climatology calendar: 360 days per year. Gregorian calendar: the usual calendar. If you do not know, just skip it ! It is a "cosmetic" parameter that does not affect the run of the simulation. It only controls the display of time on screen.</description>
             </parameter>
             <parameter>
                 <key>time_origin</key>
                 <long_name>Origin of time</long_name>
-                <value>1900/01/01 00:00</value>
+                <value>year 1900 month 01 day 01 at 00:00</value>
+                <format>date</format>
+                <default>year 1900 month 01 day 01 at 00:00</default>
                 <description>This parameter comes with Gregorian type of calendar only. For hydrodynamic models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
@@ -50,6 +53,7 @@
                 <format>combo</format>
                 <accepted>backward</accepted>
                 <accepted>forward</accepted>
+                <default>forward</default>
                 <description>Run the simulation backward or forward in time. Ichthyop advection schemes are not 'centered in time' which raises some questions for backtracking. Please refer to the userguide for details.</description>
             </parameter>
         </parameters>
@@ -63,6 +67,7 @@
                 <key>file_prefix</key>
                 <long_name>Prefix of the NetCDF output file</long_name>
                 <value>your-prefix</value>
+                <default>my-simulation</default>
                 <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc, with YYYYMMDDHHmm the current time when running the simulation.</description>
             </parameter>
             <parameter>
@@ -70,13 +75,15 @@
                 <long_name>Output path</long_name>
                 <value>output</value>
                 <format>path</format>
+                <default>output</default>
                 <description>Select the folder where the simulation NetCDF output file should be saved. For instance, relative paths 'output' or 'output/' or './output' or './output/' are supported and equivalent. They will be interpretated as /path_from_where_you_run_ichthyop/ouput/ If ouput folder does not exist, application will attempt to create it.</description>
             </parameter>
             <parameter>
                 <key>record_frequency</key>
                 <long_name>Record frequency</long_name>
-                <value>1</value>
+                <value>4</value>
                 <format>integer</format>
+                <default>4</default>
                 <description>Lagrangian model runs with its own computational time-step, set in the 'time option block'. You may not need to record every step of the simulation in the NetCDF output file. Set the record frequency as a number of computational time-steps. For instance, let's take dt = 1800s and record frequency = 6. Particle positions will be recorded every 3 hours (1800 * 6 = 10800s = 3h) in the NetCDF output file.</description>
             </parameter>
             <parameter>
@@ -84,6 +91,7 @@
                 <long_name>Variable tracking</long_name>
                 <format>list</format>
                 <value />
+                <default />
                 <description>Name of some extra variables you wish to track during the simulation. It must exactly match the name of the corresponding variable in the hydrodynamic dataset. By default, the application records time, longitude, latitude, depth and mortality. For instance, if you wish to track temperature and salinity at particle location, you should type here the names of temperature and salinity variables as they are declared in the hydrodynamic dataset. E.g: "TEMP" "SALT"</description>
             </parameter>
         </parameters>
@@ -98,6 +106,7 @@
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
                 <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+                <default>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</default>
                 <description>OpenDAP URL of the MARS dataset. You can check the validity of the given URL by typing it in the URL adress bar of your web browser and appending ".html" at the end of the URL. Preset URL is a Bay of Biscay model centered above the Iroise sea.</description>
             </parameter>
             <parameter>
@@ -105,6 +114,7 @@
                 <long_name>Shrink simulated domain</long_name>
                 <value>true</value>
                 <format>boolean</format>
+                <default>false</default>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
             </parameter>
             <parameter>
@@ -207,6 +217,7 @@
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.Mars2dOpendapDataset</value>
                 <format>class</format>
+                <default>org.previmer.ichthyop.dataset.Mars2dOpendapDataset</default>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
         </parameters>
@@ -221,6 +232,7 @@
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
                 <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+                <default>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</default>
                 <description>OpenDAP URL of the MARS dataset. You can check the validity of the given URL by typing it in the URL adress bar of you browser and appending a ".html" at the end of the URL. Preset URL is a Bay of Biscay model centered above the Iroise sea.</description>
             </parameter>
             <parameter>
@@ -228,6 +240,7 @@
                 <long_name>Shrink simulated domain</long_name>
                 <value>true</value>
                 <format>boolean</format>
+                <default>false</default>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
             </parameter>
             <parameter>
@@ -350,6 +363,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.Mars3dOpendapDataset</value>
+                <default>org.previmer.ichthyop.dataset.Mars3dOpendapDataset</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
@@ -364,14 +378,16 @@
             <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
-                <value>input/</value>
+                <value>input</value>
                 <format>path</format>
+                <default>input</default>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
             </parameter>
             <parameter>
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
+                <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
@@ -379,6 +395,7 @@
                 <long_name>Shrink simulated domain</long_name>
                 <value>true</value>
                 <format>boolean</format>
+                <default>false</default>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
             </parameter>
             <parameter>
@@ -480,6 +497,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.Mars2dDataset</value>
+                <default>org.previmer.ichthyop.dataset.Mars2dDataset</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
@@ -494,7 +512,8 @@
             <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
-                <value>input/</value>
+                <value>input</value>
+                <default>input</default>
                 <format>path</format>
                 <description>Folder containing the MARS NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
             </parameter>
@@ -502,12 +521,14 @@
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
+                <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>
                 <value>false</value>
+                <default>false</default>
                 <format>boolean</format>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
             </parameter>
@@ -631,6 +652,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.Mars3dDataset</value>
+                <default>org.previmer.ichthyop.dataset.Mars3dDataset</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
@@ -645,7 +667,8 @@
             <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
-                <value>input/</value>
+                <value>input</value>
+                <default>input</default>
                 <format>path</format>
                 <description>Folder containing the ROMS NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
             </parameter>
@@ -653,12 +676,14 @@
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
+                <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>
                 <value>false</value>
+                <default>false</default>
                 <format>boolean</format>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
             </parameter>
@@ -782,6 +807,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.Roms2dDataset</value>
+                <default>org.previmer.ichthyop.dataset.Roms2dDataset</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
@@ -796,7 +822,8 @@
             <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
-                <value>input/</value>
+                <value>input</value>
+                <default>input</default>
                 <format>path</format>
                 <description>Folder containing the ROMS NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
             </parameter>
@@ -804,12 +831,14 @@
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
                 <value>*.nc</value>
+                <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>
                 <value>false</value>
+                <default>false</default>
                 <format>boolean</format>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
             </parameter>
@@ -940,24 +969,28 @@
                 <key>field_csr</key>
                 <long_name>S-coordinate stretching curves at Rho points</long_name>
                 <value>Cs_r</value>
+                <default>Cs_r</default>
                 <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
             </parameter>
             <parameter>
                 <key>field_csw</key>
                 <long_name>S-coordinate stretching curves at W-points</long_name>
                 <value>Cs_w</value>
+                <default>Cs_w</default>
                 <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
             </parameter>
             <parameter>
                 <key>field_hc</key>
                 <long_name>S-coordinate critical depth</long_name>
                 <value>hc</value>
+                <default>hc</default>
                 <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.Roms3dDataset</value>
+                <default>org.previmer.ichthyop.dataset.Roms3dDataset</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
@@ -1142,6 +1175,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.NemoDataset</value>
+                <default>org.previmer.ichthyop.dataset.NemoDataset</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
@@ -1157,6 +1191,7 @@
                 <key>scheme</key>
                 <long_name>Numerical scheme</long_name>
                 <value>Forward Euler</value>
+                <default>Forward Euler</default>
                 <format>combo</format>
                 <accepted>Forward Euler</accepted>
                 <accepted>Runge Kutta 4</accepted>
@@ -1166,6 +1201,7 @@
                 <key>horizontal</key>
                 <long_name>Horizontal advection</long_name>
                 <value>true</value>
+                <default>true</default>
                 <format>boolean</format>
                 <description>Determine whether horizontal advection is enabled.</description>
             </parameter>
@@ -1173,6 +1209,7 @@
                 <key>vertical</key>
                 <long_name>Vertical advection</long_name>
                 <value>true</value>
+                <default>true</default>
                 <format>boolean</format>
                 <description>Determine whether vertical advection is enabled. For 2D simulations, this parameter is ignored.</description>
             </parameter>
@@ -1180,6 +1217,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.AdvectionAction</value>
+                <default>org.previmer.ichthyop.action.AdvectionAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
@@ -1188,6 +1226,7 @@
                 <key>priority</key>
                 <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
                 <value>high</value>
+                <default>high</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
@@ -1215,6 +1254,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.HDispAction</value>
+                <default>org.previmer.ichthyop.action.HDispAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
@@ -1222,6 +1262,7 @@
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>normal</value>
+                <default>normal</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
@@ -1272,6 +1313,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.BuoyancyAction</value>
+                <default>org.previmer.ichthyop.action.BuoyancyAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
@@ -1279,6 +1321,7 @@
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>normal</value>
+                <default>normal</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
@@ -1298,7 +1341,8 @@
             <parameter>
                 <key>daytime_depth</key>
                 <long_name>Depth at daytime [meter]</long_name>
-                <value>-10</value>
+                <value>-30</value>
+                <default>-30</default>
                 <format>float</format>
                 <description>Set the depth [meter] of the particle during daytime. Daytime period starts at sunrise and ends at sunset. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
             </parameter>
@@ -1306,6 +1350,7 @@
                 <key>nighttime_depth</key>
                 <long_name>Depth at nighttime [meter]</long_name>
                 <value>-10</value>
+                <default>-10</default>
                 <format>float</format>
                 <description>Set the depth [meter] of the particle during nighttime. Nighttime. period starts at sunset and ends at sunrise. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
             </parameter>
@@ -1329,6 +1374,7 @@
                 <key>age_min</key>
                 <long_name>Minimum age [day]</long_name>
                 <value>3.5</value>
+                <default>3.5</default>
                 <format>float</format>
                 <description>If the growth procedure is activated (See biology section) then the DVM operates during the larvae stages (yolk-sac and feeding larva) and this parameter is ignored by the application. If not migration only operates after this minimum age [day].</description>
             </parameter>
@@ -1336,6 +1382,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.MigrationAction</value>
+                <default>org.previmer.ichthyop.action.MigrationAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
@@ -1343,6 +1390,7 @@
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>normal</value>
+                <default>normal</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
@@ -1363,8 +1411,9 @@
                 <key>wind_file</key>
                 <long_name>Wind scenario file</long_name>
                 <value>cfg/my_wind-scenario.txt</value>
+                <default>cfg/my_wind-scenario.txt</default>
                 <format>textfile</format>
-                <default>wind.txt</default>
+                <template>wind.txt</template>
                 <description>Select an existing wind scenario (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/wind_scenario1.xml' or '../wind_scenario2.xml' etc.).</description>
             </parameter>
             <parameter hidden="true">
@@ -1372,6 +1421,7 @@
                 <long_name>Java Class file</long_name>
                 <format>class</format>
                 <value>org.previmer.ichthyop.action.WindAction</value>
+                <default>org.previmer.ichthyop.action.WindAction</default>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
             <parameter hidden="true">
@@ -1379,6 +1429,7 @@
                 <long_name>priority</long_name>
                 <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
                 <value>normal</value>
+                <default>normal</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
@@ -1404,7 +1455,8 @@
             <parameter>
                 <key>events</key>
                 <long_name>Release event(s)</long_name>
-                <value>"year 2010 month 05 day 13 at 10:00" "year 2010 month 05 day 14 at 10:00"</value>
+                <value />
+                <default />
                 <format>list</format>
                 <description>Set the dates [year #### month ## day ## at HH:mm] of the release events. You can define as much events as necessary. Just make sure that: 1. the first release events does not occur before the beginning of the simulation, 2. events are defined in chronological order.</description>
             </parameter>
@@ -1420,6 +1472,7 @@
                 <key>number_particles</key>
                 <long_name>Number of particles</long_name>
                 <value>100</value>
+                <default>1000</default>
                 <format>integer</format>
                 <description>Number of particles released in the zones. The application randomly releases the particles within the zones in order to ensure a homogeneous distribution (= constant concentration of particles among the zones). The downside is that you do not control the number of particles released per zone. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
             </parameter>
@@ -1427,14 +1480,16 @@
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
                 <value>cfg/my_zones.xml</value>
+                <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
-                <default>zone.xml</default>
+                <template>zone.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.release.ZoneRelease</value>
+                <default>org.previmer.ichthyop.release.ZoneRelease</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this release process.</description>
             </parameter>
@@ -1450,6 +1505,7 @@
                 <key>number_patches</key>
                 <long_name>Number of patches</long_name>
                 <value>10</value>
+                <default>10</default>
                 <format>integer</format>
                 <description>Number of patches released in the zones. The application randomly releases the patches within the zones in order to ensure a homogeneous distribution of patches among the zones. The downside is that you do not control the number of patches released per zone.</description>
             </parameter>
@@ -1457,6 +1513,7 @@
                 <key>number_agregated</key>
                 <long_name>Number of particles per patch</long_name>
                 <value>100</value>
+                <default>100</default>
                 <format>integer</format>
                 <description>The number of aggregated particles in a patch.</description>
             </parameter>
@@ -1464,6 +1521,7 @@
                 <key>radius_patch</key>
                 <long_name>Radius of the patch [meter]</long_name>
                 <value>2000.0</value>
+                <default>5000.0</default>
                 <format>float</format>
                 <description>Radius of the patch [meter]. If you release large patches within small zones, it is very likely that patches will overlap.</description>
             </parameter>
@@ -1471,6 +1529,7 @@
                 <key>thickness_patch</key>
                 <long_name>Thickness of the patch [meter]</long_name>
                 <value>2.0</value>
+                <default>10.0</default>
                 <format>float</format>
                 <description>Thickness of the patch [meter]. This parameter is ignored for 2D simulations.</description>
             </parameter>
@@ -1478,7 +1537,9 @@
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
                 <value>cfg/my_zones.xml</value>
+                <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
+                <template>zone.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone recruitment zone for instance).</description>
             </parameter>
             <parameter hidden="true">
@@ -1486,6 +1547,7 @@
                 <long_name>Java Class file</long_name>
                 <format>class</format>
                 <value>org.previmer.ichthyop.release.PatchyRelease</value>
+                <default>org.previmer.ichthyop.release.PatchyRelease</default>
                 <description>The Java class called by the application to implement this release process.</description>
             </parameter>
         </parameters>
@@ -1500,8 +1562,9 @@
                 <key>txtfile</key>
                 <long_name>Drifter file</long_name>
                 <value>cfg/my_drifters.txt</value>
+                <default>cfg/my_drifters.txt</default>
                 <format>textfile</format>
-                <default>drifter.txt</default>
+                <template>drifter.txt</template>
                 <description>Select an existing drifter textfile (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/my_drifters1.xml' or '../my_drifters2.xml' etc.).</description>
             </parameter>
             <parameter hidden="true">
@@ -1509,6 +1572,7 @@
                 <long_name>Java Class file</long_name>
                 <format>class</format>
                 <value>org.previmer.ichthyop.release.TxtFileRelease</value>
+                <default>org.previmer.ichthyop.release.TxtFileRelease</default>
                 <description>The Java class called by the application to implement this release process.</description>
             </parameter>
         </parameters>
@@ -1522,7 +1586,8 @@
             <parameter>
                 <key>ncfile</key>
                 <long_name>NetCDF file</long_name>
-                <value></value>
+                <value />
+                <default />
                 <format>file</format>
                 <description>Select an existing Ichthyop NetCDF output file. Relative pathnames are supported (e.g 'output/ichthyop-run201006291600.nc' or '../ichthyop-run201006291601.nc' etc.).</description>
             </parameter>
@@ -1545,6 +1610,7 @@
                 <key>number_particles</key>
                 <long_name>Number of particles</long_name>
                 <value>1000</value>
+                <default>1000</default>
                 <format>integer</format>
                 <description>Number of particles released in the stain. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the stain per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
             </parameter>
@@ -1552,6 +1618,7 @@
                 <key>lon_stain</key>
                 <long_name>Longitude [East degree]</long_name>
                 <value>0.0</value>
+                <default>0.0</default>
                 <format>lonlat</format>
                 <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
@@ -1559,6 +1626,7 @@
                 <key>lat_stain</key>
                 <long_name>Latitude [North degree]</long_name>
                 <value>0.0</value>
+                <default>0.0</default>
                 <format>lonlat</format>
                 <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
@@ -1566,6 +1634,7 @@
                 <key>depth_stain</key>
                 <long_name>Depth [meter]</long_name>
                 <value>-20.0</value>
+                <default>-20.0</default>
                 <format>float</format>
                 <description>Depth [meter] of the stain. The parameter is ignored for 2D simulation. Positive depth is automatically converted by the application (depth = -depth)</description>
             </parameter>
@@ -1573,6 +1642,7 @@
                 <key>radius_stain</key>
                 <long_name>Radius of the stain [meter]</long_name>
                 <value>10000.0</value>
+                <default>10000.0</default>
                 <format>float</format>
                 <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
             </parameter>
@@ -1580,6 +1650,7 @@
                 <key>thickness_stain</key>
                 <long_name>Thickness of the stain [meter]</long_name>
                 <value>10.0</value>
+                <default>10.0</default>
                 <format>float</format>
                 <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
             </parameter>
@@ -1588,6 +1659,7 @@
                 <long_name>Java Class file</long_name>
                 <format>class</format>
                 <value>org.previmer.ichthyop.release.StainRelease</value>
+                <default>org.previmer.ichthyop.release.StainRelease</default>
                 <description>The Java class called by the application to implement this release process.</description>
             </parameter>
         </parameters>
@@ -1601,6 +1673,7 @@
                 <key>initial_length</key>
                 <long_name>Initial length [millimeter]</long_name>
                 <value>0.025</value>
+                <default>0.025</default>
                 <format>float</format>
                 <description>Initial length [millimeter] of the egg.</description>
             </parameter>
@@ -1608,6 +1681,7 @@
                 <key>hatch_length</key>
                 <long_name>Hatch length [millimeter]</long_name>
                 <value>2.8</value>
+                <default>2.8</default>
                 <format>float</format>
                 <description>Threshold length [millimeter] between egg and yolk-sac larva.</description>
             </parameter>
@@ -1615,6 +1689,7 @@
                 <key>yolk2feeding_length</key>
                 <long_name>Yolk-sac to feeding larva threshold [millimeter]</long_name>
                 <value>4.5</value>
+                <default>4.5</default>
                 <format>float</format>
                 <description>Threshold length [millimeter] between yolk-sac larva and feeding larva.</description>
             </parameter>
@@ -1630,6 +1705,7 @@
                 <key>lethal_temp_egg</key>
                 <long_name>Lethal temperature (egg) [Celsius degree]</long_name>
                 <value>14.0</value>
+                <default>14.0</default>
                 <format>float</format>
                 <description>Lower lethal water temperature [Celsius degree] for the particles. If the growth process is active, this parameter only affects particles at egg stage.</description>
             </parameter>
@@ -1637,6 +1713,7 @@
                 <key>lethal_temp_larva</key>
                 <long_name>Lethal temperature (larva) [Celsius degree]</long_name>
                 <value>12.O</value>
+                <default>12.0</default>
                 <format>float</format>
                 <description>Lower lethal water temperature [Celsius degree] for particles at larva stage (yolk-sac and feeding larva). This parameter is ignored by the application when the growth process is idle.</description>
             </parameter>
@@ -1651,6 +1728,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.LethalTempAction</value>
+                <default>org.previmer.ichthyop.action.LethalTempAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
@@ -1658,6 +1736,7 @@
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>low</value>
+                <default>low</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
@@ -1677,7 +1756,8 @@
             <parameter>
                 <key>coeff1</key>
                 <long_name>Growth coefficient 1</long_name>
-                <value>0.03</value>
+                <value>0.02</value>
+                <default>0.02</default>
                 <format>float</format>
                 <description>Value of the first coefficient of the growth function (detailed in the block description)</description>
             </parameter>
@@ -1685,6 +1765,7 @@
                 <key>coeff2</key>
                 <long_name>Growth coefficient 2</long_name>
                 <value>0.03</value>
+                <default>0.03</default>
                 <format>float</format>
                 <description>Value of the second coefficient of the growth function (detailed in the block description)</description>
             </parameter>
@@ -1692,6 +1773,7 @@
                 <key>threshold_temp</key>
                 <long_name>Threshold temperature [Celsius degree]</long_name>
                 <value>10.0</value>
+                <default>10.0</default>
                 <format>float</format>
                 <description>Threshold temperature [Celsius degree] for the sea water. It ensures that the particles keep growing with a minimum rate, though they are facing colder sea water.</description>
             </parameter>
@@ -1699,6 +1781,7 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.LinearGrowthAction</value>
+                <default>org.previmer.ichthyop.action.LinearGrowthAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
@@ -1706,6 +1789,7 @@
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>low</value>
+                <default>low</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
@@ -1726,6 +1810,7 @@
                 <key>criterion</key>
                 <long_name>Recruitment criterion</long_name>
                 <value>Age criterion</value>
+                <default>Age criterion</default>
                 <format>combo</format>
                 <accepted>Age criterion</accepted>
                 <accepted>Length criterion</accepted>
@@ -1736,6 +1821,7 @@
                 <key>limit_age</key>
                 <long_name>Recruitment limit age [day]</long_name>
                 <value>7.0</value>
+                <default>7.0</default>
                 <format>float</format>
                 <description>A particle must be "older" than the specified age [day] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle length.</description>
             </parameter>
@@ -1743,6 +1829,7 @@
                 <key>limit_length</key>
                 <long_name>Recruitment limit length [millimeter]</long_name>
                 <value>6.0</value>
+                <default>6.0</default>
                 <format>float</format>
                 <description>A particle must be "bigger" than the specified length [millimeter] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle age. Only use this criterion if the growth model is activated.</description>
             </parameter>
@@ -1750,6 +1837,7 @@
                 <key>duration_min</key>
                 <long_name>Minimal duration in recruitment zone [day]</long_name>
                 <value>0.0</value>
+                <default>0.0</default>
                 <format>float</format>
                 <description>Minimal duration [day] a particle has to spend in a recruitment area to be considered as recruitable.</description>
             </parameter>
@@ -1757,6 +1845,7 @@
                 <key>stop_moving</key>
                 <long_name>Stop moving when recruited</long_name>
                 <value>false</value>
+                <default>false</default>
                 <format>boolean</format>
                 <description>Force a particle to remain where it is as soon as it is recruited. If activated, the particle could not be recruited in any other recruitment area. On the contrary, a particle that does not stop moving when recruited can keep drifting and being recruited in others recruitment areas, as long as the recruitement conditions are fulfilled.</description>
             </parameter>
@@ -1764,14 +1853,16 @@
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
                 <value>cfg/my_zones.xml</value>
+                <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
-                <default>zone.xml</default>
+                <template>zone.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads recruitment zones from the file and ignores the other types of zone (release zone for instance).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.RecruitmentAction</value>
+                <default>org.previmer.ichthyop.action.RecruitmentAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
@@ -1779,6 +1870,7 @@
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>highest</value>
+                <default>highest</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>

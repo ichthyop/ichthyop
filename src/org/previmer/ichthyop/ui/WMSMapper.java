@@ -12,6 +12,7 @@ import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
 import de.micromata.opengis.kml.v_2_2_0.Style;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdesktop.swingx.JXMapKit;
@@ -48,6 +49,7 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
@@ -179,10 +181,11 @@ public class WMSMapper extends JXMapKit {
         if (vtime.findAttribute("calendar").getStringValue().matches("climato")) {
             calendar = new ClimatoCalendar();
         } else {
-            String time_origin = vtime.findAttribute("origin").getStringValue();
-            calendar = new Calendar1900(Calendar1900.getTimeOrigin(time_origin, Calendar.YEAR),
-                    Calendar1900.getTimeOrigin(time_origin, Calendar.MONTH),
-                    Calendar1900.getTimeOrigin(time_origin, Calendar.DAY_OF_MONTH));
+            try {
+                calendar = new Calendar1900(vtime.findAttribute("origin").getStringValue(), ITimeManager.INPUT_DATE_FORMAT);
+            } catch (ParseException ex) {
+                calendar = new Calendar1900();
+            }
         }
 
         time = new double[nbSteps];

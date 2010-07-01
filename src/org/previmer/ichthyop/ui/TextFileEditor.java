@@ -40,7 +40,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.jdesktop.application.ResourceMap;
-import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.io.IOTools;
 
 /**
@@ -57,13 +56,13 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
     private JPanel panel;
     private JOptionPane optionPane;
     private JFileChooser fileChooser;
-    private String template;
+    private File template;
 
     public TextFileEditor() {
         this(null);
     }
 
-    public TextFileEditor(String template) {
+    public TextFileEditor(File template) {
 
         this.template = template;
         //Set up the dialog that the button brings up.
@@ -225,9 +224,11 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
 
     private void saveAndEditNewFile(File file) {
         /* create the template */
-        try {
-            IOTools.copyFile(Template.getTemplate(template), file);
-        } catch (Exception ex) {
+        if (null != template) {
+            try {
+                IOTools.copyFile(template, file);
+            } catch (Exception ex) {
+            }
         }
         /* edit the file */
         textField.setText(file.getAbsolutePath());
