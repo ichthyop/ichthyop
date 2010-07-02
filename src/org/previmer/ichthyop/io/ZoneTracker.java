@@ -22,21 +22,22 @@ import java.util.List;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IRecruitableParticle;
-import org.previmer.ichthyop.particle.RecruitableParticleLayer;
+import org.previmer.ichthyop.arch.IZoneParticle;
+import org.previmer.ichthyop.particle.ZoneParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
 
 /**
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
-public class RecruitmentTracker extends AbstractTracker {
+public class ZoneTracker extends AbstractTracker {
 
-    public RecruitmentTracker() {
+    public ZoneTracker() {
         super(DataType.INT);
     }
 
@@ -44,7 +45,7 @@ public class RecruitmentTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addZoneDimension(TypeZone.RECRUITMENT);
+        addCustomDimension(new Dimension("type_zone", TypeZone.values().length));
     }
 
     @Override
@@ -54,18 +55,15 @@ public class RecruitmentTracker extends AbstractTracker {
 
     public void track() {
         IBasicParticle particle;
-        IRecruitableParticle rparticle;
+        IZoneParticle zparticle;
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            rparticle = (IRecruitableParticle) particle.getLayer(RecruitableParticleLayer.class);
+            zparticle = (IZoneParticle) particle.getLayer(ZoneParticleLayer.class);
             Index index = getArray().getIndex();
-            for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
-                index.set(0, particle.getIndex(), zone.getIndex());
-                int recruited = rparticle.isRecruited(zone.getIndex())
-                        ? 1
-                        : 0;
-                getArray().setInt(index, recruited);
+            for (TypeZone type : TypeZone.values()) {
+                index.set(0, particle.getIndex(), type.getCode());
+                getArray().setInt(index, zparticle.getNumZone(type));
             }
         }
     }
@@ -76,8 +74,16 @@ public class RecruitmentTracker extends AbstractTracker {
         for (Attribute attr : super.attributes()) {
             listAttributes.add(attr);
         }
-        for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
-            listAttributes.add(new Attribute("recruitment zone " + zone.getIndex(), zone.getKey()));
+        for (TypeZone type : TypeZone.values()) {
+            listAttributes.add(new Attribute("type_zone " + type.getCode(), type.toString()));
+            List<Zone> zones = getSimulationManager().getZoneManager().getZones(type);
+            if (null != zones) {
+                for (Zone zone : zones) {
+                    listAttributes.add(new Attribute(type.toString() + "_zone " + zone.getIndex(), zone.getKey()));
+                }
+            } else {
+                listAttributes.add(new Attribute(type.toString() + "_zone", "none for this run"));
+            }
         }
         return listAttributes.toArray(new Attribute[listAttributes.size()]);
     }

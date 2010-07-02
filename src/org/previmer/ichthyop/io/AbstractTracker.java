@@ -22,7 +22,6 @@ import ucar.nc2.Dimension;
  */
 public abstract class AbstractTracker extends SimulationManagerAccessor implements ITracker {
 
-    private String trackerKey;
     private ArrayList<Dimension> dimensions = new ArrayList();
     final private DataType type;
     private PropertyManager propertyManager = PropertyManager.getInstance(getClass());
@@ -34,7 +33,6 @@ public abstract class AbstractTracker extends SimulationManagerAccessor implemen
     abstract Array createArray();
 
     public AbstractTracker(DataType type) {
-        trackerKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
         this.type = type;
         setDimensions();
         array = createArray();
@@ -44,25 +42,31 @@ public abstract class AbstractTracker extends SimulationManagerAccessor implemen
         return array;
     }
 
-    public void addDimension(Dimension dim) {
-
-        dimensions.add(dimFactory.addDimension(dim));
+    public void addCustomDimension(Dimension dim) {
+        addDimension(dimFactory.createDimension(dim));
     }
 
     public void addTimeDimension() {
-        dimensions.add(dimFactory.getTimeDimension());
+        addDimension(dimFactory.getTimeDimension());
+
     }
 
     public void addDrifterDimension() {
-        dimensions.add(dimFactory.getDrifterDimension());
+        addDimension(dimFactory.getDrifterDimension());
     }
 
     public void addZoneDimension(TypeZone type) {
-        dimensions.add(dimFactory.getZoneDimension(type));
+        addDimension(dimFactory.getZoneDimension(type));
     }
 
     public List<Dimension> dimensions() {
         return dimensions;
+    }
+
+    private void addDimension(Dimension dimension) {
+        if (!dimensions.contains(dimension)) {
+            dimensions.add(dimension);
+        }
     }
 
     public int[] origin(int index_record) {

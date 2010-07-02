@@ -8,6 +8,7 @@ import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.ZoneTracker;
 
 /**
  *
@@ -31,6 +32,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
+        getSimulationManager().getOutputManager().addTracker(ZoneTracker.class);
     }
 
     public int release(ReleaseEvent event) throws Exception {

@@ -17,8 +17,11 @@ import org.previmer.ichthyop.manager.SimulationManager;
  */
 public abstract class SFTask<T, V> extends Task<T, V> {
 
+    private boolean isFailed;
+
     SFTask(Application instance) {
         super(instance);
+        isFailed = false;
     }
 
     abstract void onSuccess(T result);
@@ -31,8 +34,13 @@ public abstract class SFTask<T, V> extends Task<T, V> {
         onSuccess(result);
     }
 
+    public boolean isFailed() {
+        return isFailed;
+    }
+
     @Override
     protected void failed(Throwable throwable) {
+        isFailed = true;
         firePropertyChange("failed", null, null);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

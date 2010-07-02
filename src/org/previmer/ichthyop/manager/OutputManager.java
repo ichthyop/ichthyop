@@ -292,7 +292,9 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             requestedTrackers.clear();
             isSetup = false;
         }
-        requestedTrackers.add(trackerClass);
+        if (!requestedTrackers.contains(trackerClass)) {
+            requestedTrackers.add(trackerClass);
+        }
     }
 
     private void addAppTrackers() throws Exception {
@@ -562,18 +564,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         private Hashtable<TypeZone, Dimension> zoneDimension;
         private Hashtable<String, Dimension> dimensions;
 
-        private void fillHashtable() {
-            dimensions.put(time.getName(), time);
-            dimensions.put(drifter.getName(), drifter);
-            for (Dimension dim : zoneDimension.values()) {
-                dimensions.put(dim.getName(), dim);
-            }
-        }
-
-        public Dimension addDimension(Dimension dim) {
-            if (dimensions.isEmpty()) {
-                fillHashtable();
-            }
+        public Dimension createDimension(Dimension dim) {
             if (dimensions.containsKey(dim.getName())) {
                 if (dim.getLength() != dimensions.get(dim.getName()).getLength()) {
                     throw new IllegalArgumentException("Dimension (" + dim.getName() + ") has already been defined with a different length.");
@@ -590,6 +581,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         public Dimension getTimeDimension() {
             if (null == time) {
                 time = ncOut.addUnlimitedDimension("time");
+                dimensions.put(time.getName(), time);
             }
             return time;
         }
@@ -597,6 +589,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         public Dimension getDrifterDimension() {
             if (null == drifter) {
                 drifter = ncOut.addDimension("drifter", getSimulationManager().getReleaseManager().getNbParticles());
+                dimensions.put(drifter.getName(), drifter);
             }
             return drifter;
         }
@@ -607,7 +600,9 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             }
             if (null == zoneDimension.get(type)) {
                 String name = type.toString() + "_zone";
-                zoneDimension.put(type, ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size()));
+                Dimension zoneDim = ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size());
+                zoneDimension.put(type, zoneDim);
+                dimensions.put(zoneDim.getName(), zoneDim);
             }
             return zoneDimension.get(type);
         }
@@ -616,6 +611,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             time = null;
             drifter = null;
             zoneDimension = null;
+            dimensions = new Hashtable();
         }
     }
 }

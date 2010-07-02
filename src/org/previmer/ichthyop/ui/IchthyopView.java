@@ -1068,8 +1068,10 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void finished() {
-            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
-            openNetCDF();
+            if (!isFailed()) {
+                outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
+                openNetCDF();
+            }
             getFrame().setTitle(title);
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
