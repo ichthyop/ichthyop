@@ -9,10 +9,8 @@ import org.previmer.ichthyop.util.NCComparator;
 import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.logging.Level;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
@@ -166,10 +164,6 @@ public class NemoDataset extends AbstractDataset {
     /**
      *
      */
-    private HashMap<String, RequiredVariable> requiredVariables;
-    /**
-     *
-     */
     static float[][][] e3t;
     static double[][] e1t, e2t, e1v, e2u;
     static String stre1t, stre2t, stre3t, stre1v, stre2u;
@@ -183,50 +177,6 @@ public class NemoDataset extends AbstractDataset {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    public Number get(String variableName, double[] pGrid, double time) {
-        return requiredVariables.get(variableName).get(pGrid, time);
-    }
-
-    public void requireVariable(String name, Class requiredBy) {
-        if (!requiredVariables.containsKey(name)) {
-            requiredVariables.put(name, new RequiredVariable(name, requiredBy));
-        }
-    }
-
-    public void removeRequiredVariable(String name, Class requiredBy) {
-    }
-
-    public void clearRequiredVariables() {
-        if (requiredVariables != null) {
-            requiredVariables.clear();
-        } else {
-            requiredVariables = new HashMap();
-        }
-    }
-
-    public void checkRequiredVariable() {
-        for (RequiredVariable variable : requiredVariables.values()) {
-            try {
-                variable.checked(ncT);
-            } catch (Exception ex) {
-                requiredVariables.remove(variable.getName());
-                StringBuffer msg = new StringBuffer();
-                msg.append("Failed to read dataset variable ");
-                msg.append(variable.getName());
-                msg.append(" ==> ");
-                msg.append(ex.toString());
-                msg.append("\n");
-                msg.append("Required by classes ");
-                for (Class aClass : variable.getRequiredBy()) {
-                    msg.append(aClass.getCanonicalName());
-                    msg.append(", ");
-                }
-                msg.append("\n");
-                msg.append("Watch out, these classes might not work correctly.");
-                getLogger().log(Level.WARNING, msg.toString(), ex);
-            }
-        }
-    }
 
     public boolean is3D() {
         return true;
@@ -855,7 +805,7 @@ public class NemoDataset extends AbstractDataset {
         time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         long t0 = getSimulationManager().getTimeManager().get_tO();
         open(indexFile = getIndexFile(t0));
-        checkRequiredVariable();
+        checkRequiredVariable(ncT);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
     }

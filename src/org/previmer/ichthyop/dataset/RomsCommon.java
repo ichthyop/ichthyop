@@ -20,10 +20,8 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.logging.Level;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
@@ -120,69 +118,8 @@ abstract class RomsCommon extends AbstractDataset {
      * Geographical boundary of the domain
      */
     private double latMin, lonMin, latMax, lonMax, depthMax;
-    /*
-     *
-     */
-    HashMap<String, RequiredVariable> requiredVariables;
 
     abstract void setAllFieldsTp1AtTime (int rank) throws IOException;
-
-    public Number get(String variableName, double[] pGrid, double time) {
-        return requiredVariables.get(variableName).get(pGrid, time);
-    }
-
-    public void requireVariable(String name, Class requiredBy) {
-        if (!requiredVariables.containsKey(name)) {
-            requiredVariables.put(name, new RequiredVariable(name, requiredBy));
-        } else {
-            requiredVariables.get(name).addRequiredBy(requiredBy);
-        }
-    }
-
-    public void clearRequiredVariables() {
-        if (requiredVariables != null) {
-            requiredVariables.clear();
-        } else {
-            requiredVariables = new HashMap();
-        }
-    }
-
-    public void removeRequiredVariable(String name, Class requiredBy) {
-        RequiredVariable var = requiredVariables.get(name);
-        if (null != var) {
-            if (var.getRequiredBy().size() > 1) {
-                /* just remove the reference but dont remove the
-                variable because other classes might need it */
-                var.getRequiredBy().remove(requiredBy);
-            } else if (var.getRequiredBy().get(0).equals(requiredBy)) {
-                requiredVariables.remove(name);
-            }
-        }
-    }
-
-    public void checkRequiredVariable() {
-        for (RequiredVariable variable : requiredVariables.values()) {
-            try {
-                variable.checked(ncIn);
-            } catch (Exception ex) {
-                requiredVariables.remove(variable.getName());
-                StringBuffer msg = new StringBuffer();
-                msg.append("Failed to read dataset variable ");
-                msg.append(variable.getName());
-                msg.append(" ==> ");
-                msg.append(ex.toString());
-                msg.append("\n");
-                msg.append("Required by classes ");
-                for (Class aClass : variable.getRequiredBy()) {
-                    msg.append(aClass.getCanonicalName());
-                    msg.append(", ");
-                }
-                msg.append("\n");
-                msg.append("Watch out, these classes might not work correctly.");
-                getLogger().log(Level.WARNING, msg.toString(), ex);
-            }
-        }
-    }
 
     void loadParameters() {
 
@@ -296,7 +233,7 @@ abstract class RomsCommon extends AbstractDataset {
 
         long t0 = getSimulationManager().getTimeManager().get_tO();
         open(getFile(t0));
-        checkRequiredVariable();
+        checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
     }

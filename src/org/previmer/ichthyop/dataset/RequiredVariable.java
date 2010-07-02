@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 import ucar.ma2.Array;
-import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -65,6 +65,10 @@ public class RequiredVariable {
         return requiredByList;
     }
 
+    private ISimulationManager getSimulationManager() {
+        return SimulationManager.getInstance();
+    }
+
     public boolean checked(NetcdfFile nc) throws NumberFormatException, NullPointerException {
         Variable variable = nc.findVariable(name);
         if (variable != null) {
@@ -72,6 +76,19 @@ public class RequiredVariable {
                 throw new NumberFormatException("Variable " + name + " is not a numeric variable");
             }
             isUnlimited = variable.isUnlimited();
+            boolean is3D = getSimulationManager().getDataset().is3D();
+
+            switch (variable.getShape().length) {
+                case 4:
+                    if (!is3D) {
+                        throw new UnsupportedOperationException("2D simulation cannot deal with 3D variable " + name);
+                    }
+                case 3:
+                    if (!isUnlimited && !is3D) {
+                        throw new UnsupportedOperationException("2D simulation cannot deal with 3D variable " + name);
+                    }
+                    break;
+            }
             return true;
         } else {
             throw new NullPointerException("Variable " + name + " not found.");

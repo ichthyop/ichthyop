@@ -1777,6 +1777,13 @@
                 <format>float</format>
                 <description>Threshold temperature [Celsius degree] for the sea water. It ensures that the particles keep growing with a minimum rate, though they are facing colder sea water.</description>
             </parameter>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
