@@ -67,7 +67,7 @@ public class RecruitmentTracker extends AbstractTracker {
                 int recruited = rparticle.isRecruited(zone.getIndex())
                         ? 1
                         : 0;
-                getArray().setInt(Index.scalarIndex, recruited);
+                getArray().setInt(index, recruited);
             }
         }
     }

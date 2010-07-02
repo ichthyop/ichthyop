@@ -1801,7 +1801,7 @@
         </parameters>
     </block>
     <block type="action">
-        <key>action.recruit</key>
+        <key>action.recruitment</key>
         <tree_path>Biology/Recruitment</tree_path>
         <enabled>false</enabled>
         <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area.</description>

@@ -81,7 +81,7 @@ public class RecruitmentAction extends AbstractAction {
 
     private boolean satisfyRecruitmentCriterion(IBasicParticle particle) {
         if (isAgeCriterion) {
-            return (float) (particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
+            return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
             return (((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
         }

@@ -55,6 +55,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private List<GeoPosition> region;
     private List<List<GeoPosition>> zoneEdges;
     private Dimension latlonDim;
+    private boolean isSetup = false;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -85,7 +86,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     private String makeFileLocation() throws IOException {
-        
+
         String filename = IOTools.resolvePath(getParameter("output_path"));
         if (!getParameter("file_prefix").isEmpty()) {
             filename += getParameter("file_prefix") + "_";
@@ -284,6 +285,13 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     public void addTracker(Class trackerClass) {
+        if (null == requestedTrackers) {
+            requestedTrackers = new ArrayList();
+        }
+        if (isSetup) {
+            requestedTrackers.clear();
+            isSetup = false;
+        }
         requestedTrackers.add(trackerClass);
     }
 
@@ -460,6 +468,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     public void lastStepOccurred(LastStepEvent e) {
         writeToNetCDF(i_record);
+        requestedTrackers.clear();
         close();
     }
 
@@ -476,9 +485,6 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
 
-        /* */
-        requestedTrackers = new ArrayList();
-
         /* add application trackers lon lat depth time */
         addAppTrackers();
 
@@ -490,6 +496,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
         /* add definition of the simulated area */
         addRegion();
+
+        isSetup = true;
 
         getLogger().info("Output manager setup [OK]");
     }

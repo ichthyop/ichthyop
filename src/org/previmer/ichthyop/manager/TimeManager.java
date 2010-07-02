@@ -19,6 +19,7 @@ import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.event.EventListenerList;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  *
@@ -135,12 +136,12 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         nbFormat.setGroupingUsed(false);
 
         seconds = nbFormat.parse(duration.substring(duration.indexOf("hour") + 8, duration.indexOf("minute"))).longValue()
-                * ONE_MINUTE
+                * Constant.ONE_MINUTE
                 + nbFormat.parse(duration.substring(duration.indexOf("day") + 7,
                 duration.indexOf("hour")).trim()).longValue()
-                * ONE_HOUR
+                * Constant.ONE_HOUR
                 + nbFormat.parse(duration.substring(0, duration.indexOf("day")).trim()).longValue()
-                * ONE_DAY;
+                * Constant.ONE_DAY;
         //System.out.println("seconds " + seconds);
         return seconds;
     }
