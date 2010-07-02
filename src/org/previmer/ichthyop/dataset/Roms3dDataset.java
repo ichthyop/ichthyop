@@ -19,72 +19,72 @@ public class Roms3dDataset extends RomsCommon {
     /**
      * Vertical grid dimension
      */
-    static int nz;
+    private int nz;
     /**
      * Ocean free surface elevetation at current time
      */
-    static float[][] zeta_tp0;
+    private float[][] zeta_tp0;
     /**
      * /**
      * Ocean free surface elevetation at time t + dt
      */
-    static float[][] zeta_tp1;
+    private float[][] zeta_tp1;
     /**
      * Zonal component of the velocity field at current time
      */
-    static float[][][] u_tp0;
+    private float[][][] u_tp0;
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    static float[][][] u_tp1;
+    private float[][][] u_tp1;
     /**
      * Meridional component of the velocity field at current time
      */
-    static float[][][] v_tp0;
+    private float[][][] v_tp0;
     /**
      *  Meridional component of the velocity field at time t + dt
      */
-    static float[][][] v_tp1;
+    private float[][][] v_tp1;
     /**
      * Vertical component of the velocity field at current time
      */
-    static float[][][] w_tp0;
+    private float[][][] w_tp0;
     /**
      * Vertical component of the velocity field at time t + dt
      */
-    static float[][][] w_tp1;
+    private float[][][] w_tp1;
     /**
      * Depth at rho point
      */
-    static double[][][] z_rho_cst;
+    private double[][][] z_rho_cst;
     /**
      * Depth at w point at current time.
      * Takes account of free surface elevation.
      */
-    static double[][][] z_w_tp0;
+    private double[][][] z_w_tp0;
     /**
      * Depth at w point at time t + dt
      * Takes account of free surface elevation.
      */
-    static double[][][] z_w_tp1;
+    private double[][][] z_w_tp1;
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    static double[][][] z_w_cst;
+    private double[][][] z_w_cst;
     /**
      * Name of the Dimension in NetCDF file
      */
-    static String strZDim;
+    private String strZDim;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strZeta;
+    private String strZeta;
     /**
      * Name of the Variable in NetCDF file
      */
-    String strCs_r, strCs_w, strPn, strPm, strHC;
+    private String strCs_r, strCs_w, strHC;
 
-    double getHc() throws IOException {
+    private double getHc() throws IOException {
 
         if (null != ncIn.findGlobalAttribute(strHC)) {
             /* supposedly UCLA */
@@ -98,7 +98,7 @@ public class Roms3dDataset extends RomsCommon {
         }
     }
 
-    double[] getCs_r() throws IOException {
+    private double[] getCs_r() throws IOException {
         if (null != ncIn.findGlobalAttribute(strCs_r)) {
             /* supposedly UCLA */
             Attribute attrib_cs_r = ncIn.findGlobalAttribute(strCs_r);
@@ -121,7 +121,7 @@ public class Roms3dDataset extends RomsCommon {
         }
     }
 
-    double[] getCs_w() throws IOException {
+    private double[] getCs_w() throws IOException {
         if (null != ncIn.findGlobalAttribute(strCs_w)) {
             /* supposedly UCLA */
             Attribute attrib_cs_w = ncIn.findGlobalAttribute(strCs_w);
@@ -144,6 +144,17 @@ public class Roms3dDataset extends RomsCommon {
         }
     }
 
+    private VertCoordType getVertCoordType() {
+
+        if (null != ncIn.findGlobalAttribute("VertCoordType")) {
+            String strCoordType = ncIn.findGlobalAttribute(strCs_w).getStringValue();
+            if (strCoordType.toLowerCase().matches(VertCoordType.OLD.name().toLowerCase())) {
+                return VertCoordType.NEW;
+            }
+        }
+        return VertCoordType.OLD;
+    }
+
     public boolean is3D() {
         return true;
     }
@@ -160,6 +171,7 @@ public class Roms3dDataset extends RomsCommon {
         strCs_r = getParameter("field_csr");
         strCs_w = getParameter("field_csw");
         strHC = getParameter("field_hc");
+
     }
 
     /**
@@ -197,7 +209,7 @@ public class Roms3dDataset extends RomsCommon {
      * Computes the depth at sigma levels disregarding the free
      * surface elevation.
      */
-    void getCstSigLevels() throws IOException {
+    private void getCstSigLevels() throws IOException {
 
         double hc;
         double[] sc_r = new double[nz];
@@ -225,27 +237,41 @@ public class Roms3dDataset extends RomsCommon {
         double[][][] z_r_tmp = new double[nz][ny][nx];
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
 
-        for (int i = nx; i-- > 0;) {
-            for (int j = ny; j-- > 0;) {
-                z_w_tmp[0][j][i] = -hRho[j][i];
-                for (int k = nz; k-- > 0;) {
-                    z_r_tmp[k][j][i] = hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i];
-                    z_w_tmp[k + 1][j][i] = hc * (sc_w[k + 1] - Cs_w[k + 1]) + Cs_w[k + 1] * hRho[j][i];
+        /* 2010 June: Recent UCLA Roms version (but not AGRIF yet)
+         * uses new formulation for computing the unperturbated depth.
+         * It is specified in a ":VertCoordType" global attribute that takes
+         * mainly two values : OLD / NEW
+         * OLD: usual calculation ==> z_unperturbated = hc * (sc - Cs) + Cs * h
+         * NEW: z_unperturbated = h * (sc * hc + Cs * h) / (h + hc)
+         * https://www.myroms.org/forum/viewtopic.php?p=1664#p1664
+         */
+        switch (getVertCoordType()) {
+            // OLD: z_unperturbated = hc * (sc - Cs) + Cs * h
+            case OLD:
+                for (int i = nx; i-- > 0;) {
+                    for (int j = ny; j-- > 0;) {
+                        z_w_tmp[0][j][i] = -hRho[j][i];
+                        for (int k = nz; k-- > 0;) {
+                            z_r_tmp[k][j][i] = hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i];
+                            z_w_tmp[k + 1][j][i] = hc * (sc_w[k + 1] - Cs_w[k + 1]) + Cs_w[k + 1] * hRho[j][i];
+                        }
+                        z_w_tmp[nz][j][i] = 0.d;
+                    }
                 }
-                z_w_tmp[nz][j][i] = 0.d;
-            }
+                break;
+            // NEW: z_unperturbated = h * (sc * hc + Cs * h) / (h + hc)
+            case NEW:
+                for (int i = nx; i-- > 0;) {
+                    for (int j = ny; j-- > 0;) {
+                        z_w_tmp[0][j][i] = -hRho[j][i];
+                        for (int k = nz; k-- > 0;) {
+                            z_r_tmp[k][j][i] = hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]);
+                            z_w_tmp[k + 1][j][i] = hRho[j][i] * (sc_w[k + 1] * hc + Cs_w[k + 1] * hRho[j][i]) / (hc + hRho[j][i]);
+                        }
+                        break;
+                    }
+                }
         }
-        /* :VertCoordType = "NEW" see https://www.myroms.org/forum/viewtopic.php?p=1664#p1664
-         for (int i = nx; i-- > 0;) {
-            for (int j = ny; j-- > 0;) {
-                z_w_tmp[0][j][i] = -hRho[j][i];
-                for (int k = nz; k-- > 0;) {
-                    z_r_tmp[k][j][i] = hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]);
-                    z_w_tmp[k + 1][j][i] = hRho[j][i] * (sc_w[k + 1] * hc + Cs_w[k + 1] * hRho[j][i]) / (hc + hRho[j][i]);
-                }
-                z_w_tmp[nz][j][i] = 0.d;
-            }
-        }*/
 
         z_rho_cst = z_r_tmp;
         z_w_cst = z_w_tmp;
@@ -546,7 +572,7 @@ public class Roms3dDataset extends RomsCommon {
         w_tp1 = computeW();
     }
 
-    float[][][] computeW() {
+    private float[][][] computeW() {
 
         //System.out.println("Compute vertical velocity");
         double[][][] Huon = new double[nz][ny][nx];
@@ -642,7 +668,7 @@ public class Roms3dDataset extends RomsCommon {
 
     }
 
-    static double[][][] getSigLevels() {
+    private double[][][] getSigLevels() {
 
         //-----------------------------------------------------
         // Daily recalculation of z_w and z_r with zeta
@@ -665,5 +691,11 @@ public class Roms3dDataset extends RomsCommon {
         }
         z_w_cst_tmp = null;
         return z_w_tmp;
+    }
+
+    private enum VertCoordType {
+
+        NEW,
+        OLD;
     }
 }
