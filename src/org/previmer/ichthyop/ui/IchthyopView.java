@@ -1048,10 +1048,10 @@ public class IchthyopView extends FrameView
             }
             pnlProgress.printProgress();
             StringBuffer sb = new StringBuffer();
-            sb.append(getResourceMap().getString("Application.title"));
-            sb.append(" - ");
+            sb.append("(");
             sb.append(getProgress());
-            sb.append("%");
+            sb.append("%) ");
+            sb.append(getResourceMap().getString("Application.title"));
             getFrame().setTitle(sb.toString());
         }
 
@@ -1093,6 +1093,14 @@ public class IchthyopView extends FrameView
         }
 
         savePreference(animationSpeed, animationSpeed.getValue());
+        savePreference(spinnerParticleSize, spinnerParticleSize.getValue());
+        savePreference(btnParticleColor, btnParticleColor.getForeground());
+        savePreference(btnColorMin, btnColorMin.getForeground());
+        savePreference(btnColorMed, btnColorMed.getForeground());
+        savePreference(btnColorMax, btnColorMax.getForeground());
+        savePreference(txtFieldMin, txtFieldMin.getValue());
+        savePreference(txtFieldMed, txtFieldMed.getValue());
+        savePreference(txtFieldMax, txtFieldMax.getValue());
     }
 
     private void savePreference(Component bean, Object property) {
@@ -1128,6 +1136,38 @@ public class IchthyopView extends FrameView
         property = restorePreference(animationSpeed);
         if (property != null) {
             animationSpeed.setValue(property);
+        }
+        property = restorePreference(spinnerParticleSize);
+        if (property != null) {
+            spinnerParticleSize.setValue(property);
+        }
+        property = restorePreference(btnParticleColor);
+        if (property != null) {
+            btnParticleColor.setForeground((Color) property);
+        }
+        property = restorePreference(btnColorMin);
+        if (property != null) {
+            btnColorMin.setForeground((Color) property);
+        }
+        property = restorePreference(btnColorMed);
+        if (property != null) {
+            btnColorMed.setForeground((Color) property);
+        }
+        property = restorePreference(btnColorMax);
+        if (property != null) {
+            btnColorMax.setForeground((Color) property);
+        }
+        property = restorePreference(txtFieldMin);
+        if (property != null) {
+            txtFieldMin.setValue(property);
+        }
+        property = restorePreference(txtFieldMed);
+        if (property != null) {
+            txtFieldMed.setValue(property);
+        }
+        property = restorePreference(txtFieldMax);
+        if (property != null) {
+            txtFieldMax.setValue(property);
         }
 
         getFrame().setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -1258,10 +1298,12 @@ public class IchthyopView extends FrameView
     public void applyColorbarSettings() {
         String vname = (String) cbBoxVariable.getSelectedItem();
         float vmin = Float.valueOf(txtFieldMin.getText());
+        float vmed = Float.valueOf(txtFieldMed.getText());
         float vmax = Float.valueOf(txtFieldMax.getText());
         Color cmin = btnColorMin.getForeground();
+        Color cmed = btnColorMed.getForeground();
         Color cmax = btnColorMax.getForeground();
-        wmsMapper.setColorbar(vname, vmin, vmax, cmin, cmax);
+        wmsMapper.setColorbar(vname, vmin, vmed, vmax, cmin, cmed, cmax);
         if (!vname.toLowerCase().contains("none")) {
             getLogger().info(getResourceMap().getString("applyColorbarSettings.msg.applied"));
         }
@@ -1296,6 +1338,7 @@ public class IchthyopView extends FrameView
         void onSuccess(float[] result) {
             if (null != result) {
                 txtFieldMin.setValue(result[0]);
+                txtFieldMed.setValue(0.5f * (result[0] + result[1]));
                 txtFieldMax.setValue(result[1]);
                 setMessage(resourceMap.getString("autoRangeColorbar.msg.suggested") + " [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]", false, LogLevel.COMPLETE);
             }
@@ -1313,14 +1356,17 @@ public class IchthyopView extends FrameView
     }
 
     private void setColorbarPanelEnabled(boolean enabled) {
-        btnColor.setEnabled(enabled);
+        btnParticleColor.setEnabled(enabled);
         cbBoxVariable.setEnabled(enabled);
         txtFieldMin.setEnabled(enabled);
+        txtFieldMed.setEnabled(enabled);
         txtFieldMax.setEnabled(enabled);
         btnColorMin.setEnabled(enabled);
+        btnColorMed.setEnabled(enabled);
         btnColorMax.setEnabled(enabled);
         btnAutoRange.getAction().setEnabled(enabled);
         btnApplyColorbar.getAction().setEnabled(enabled);
+        spinnerParticleSize.setEnabled(enabled);
     }
 
     /** This method is called from within the constructor to
@@ -1373,8 +1419,13 @@ public class IchthyopView extends FrameView
         btnColorMin = new javax.swing.JButton();
         btnColorMax = new javax.swing.JButton();
         txtFieldMin = new javax.swing.JFormattedTextField();
+        lblMed = new javax.swing.JLabel();
+        txtFieldMed = new javax.swing.JFormattedTextField();
+        btnColorMed = new javax.swing.JButton();
         lblColor = new javax.swing.JLabel();
-        btnColor = new javax.swing.JButton();
+        btnParticleColor = new javax.swing.JButton();
+        lblColor1 = new javax.swing.JLabel();
+        spinnerParticleSize = new javax.swing.JSpinner();
         taskPaneAnimation = new org.jdesktop.swingx.JXTaskPane();
         pnlAnimation = new javax.swing.JPanel();
         lblFramePerSecond = new javax.swing.JLabel();
@@ -1715,6 +1766,24 @@ public class IchthyopView extends FrameView
         txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
         txtFieldMin.setValue(new Float(0.f));
 
+        lblMed.setText(resourceMap.getString("lblMed.text")); // NOI18N
+        lblMed.setName("lblMed"); // NOI18N
+
+        txtFieldMed.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
+        txtFieldMed.setName("txtFieldMed"); // NOI18N
+        txtFieldMed.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
+        txtFieldMed.setValue(new Float(50.f));
+
+        btnColorMed.setForeground(resourceMap.getColor("btnColorMed.foreground")); // NOI18N
+        btnColorMed.setIcon(resourceMap.getIcon("btnColorMed.icon")); // NOI18N
+        btnColorMed.setText(resourceMap.getString("btnColorMed.text")); // NOI18N
+        btnColorMed.setName("btnColorMed"); // NOI18N
+        btnColorMed.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnColorMedActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlColorBarLayout = new javax.swing.GroupLayout(pnlColorBar);
         pnlColorBar.setLayout(pnlColorBarLayout);
         pnlColorBarLayout.setHorizontalGroup(
@@ -1727,21 +1796,28 @@ public class IchthyopView extends FrameView
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cbBoxVariable, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(pnlColorBarLayout.createSequentialGroup()
-                        .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblMin)
-                            .addComponent(lblMax))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtFieldMax)
-                            .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnColorMax)
-                            .addComponent(btnColorMin)))
-                    .addGroup(pnlColorBarLayout.createSequentialGroup()
                         .addComponent(btnAutoRange)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnApplyColorbar)))
+                        .addComponent(btnApplyColorbar))
+                    .addGroup(pnlColorBarLayout.createSequentialGroup()
+                        .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblMin)
+                                    .addComponent(lblMax))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtFieldMax)
+                                    .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtFieldMed, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                .addComponent(lblMed)
+                                .addGap(148, 148, 148)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnColorMed)
+                            .addComponent(btnColorMax)
+                            .addComponent(btnColorMin))))
                 .addContainerGap(49, Short.MAX_VALUE))
         );
         pnlColorBarLayout.setVerticalGroup(
@@ -1757,6 +1833,11 @@ public class IchthyopView extends FrameView
                     .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblMed)
+                    .addComponent(txtFieldMed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnColorMed))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtFieldMax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblMax)
                     .addComponent(btnColorMax))
@@ -1770,13 +1851,24 @@ public class IchthyopView extends FrameView
         lblColor.setText(resourceMap.getString("lblColor.text")); // NOI18N
         lblColor.setName("lblColor"); // NOI18N
 
-        btnColor.setForeground(resourceMap.getColor("btnColor.foreground")); // NOI18N
-        btnColor.setIcon(resourceMap.getIcon("btnColor.icon")); // NOI18N
-        btnColor.setText(resourceMap.getString("btnColor.text")); // NOI18N
-        btnColor.setName("btnColor"); // NOI18N
-        btnColor.addActionListener(new java.awt.event.ActionListener() {
+        btnParticleColor.setForeground(resourceMap.getColor("btnParticleColor.foreground")); // NOI18N
+        btnParticleColor.setIcon(resourceMap.getIcon("btnParticleColor.icon")); // NOI18N
+        btnParticleColor.setText(resourceMap.getString("btnParticleColor.text")); // NOI18N
+        btnParticleColor.setName("btnParticleColor"); // NOI18N
+        btnParticleColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnColorActionPerformed(evt);
+                btnParticleColorActionPerformed(evt);
+            }
+        });
+
+        lblColor1.setText(resourceMap.getString("lblColor1.text")); // NOI18N
+        lblColor1.setName("lblColor1"); // NOI18N
+
+        spinnerParticleSize.setModel(new javax.swing.SpinnerNumberModel(1, 1, 10, 1));
+        spinnerParticleSize.setName("spinnerParticleSize"); // NOI18N
+        spinnerParticleSize.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spinnerParticleSizeStateChanged(evt);
             }
         });
 
@@ -1791,7 +1883,11 @@ public class IchthyopView extends FrameView
                     .addGroup(pnlColorLayout.createSequentialGroup()
                         .addComponent(lblColor)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnColor)))
+                        .addComponent(btnParticleColor)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblColor1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(spinnerParticleSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         pnlColorLayout.setVerticalGroup(
@@ -1799,10 +1895,12 @@ public class IchthyopView extends FrameView
             .addGroup(pnlColorLayout.createSequentialGroup()
                 .addGroup(pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblColor)
-                    .addComponent(btnColor))
+                    .addComponent(btnParticleColor)
+                    .addComponent(lblColor1)
+                    .addComponent(spinnerParticleSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlColorBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout pnlMappingLayout = new javax.swing.GroupLayout(pnlMapping);
@@ -2456,19 +2554,44 @@ public class IchthyopView extends FrameView
         });
     }//GEN-LAST:event_btnColorMaxActionPerformed
 
-    private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
+    private void btnParticleColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnParticleColorActionPerformed
         // TODO add your handling code here:
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
                 btn.setForeground(chooseColor(btn, btn.getForeground()));
-                wmsMapper.setColorbar(null, 0, 0, null, null);
+                wmsMapper.setColorbar(null, 0, 0, 0, null, null, null);
                 wmsMapper.setDefaultColor(btn.getForeground());
             }
         });
         getLogger().info(resourceMap.getString("btnColor.msg.apply"));
-    }//GEN-LAST:event_btnColorActionPerformed
+    }//GEN-LAST:event_btnParticleColorActionPerformed
+
+    private void btnColorMedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMedActionPerformed
+        // TODO add your handling code here:
+        final JButton btn = (JButton) evt.getSource();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                btn.setForeground(chooseColor(btn, btn.getForeground()));
+            }
+        });
+    }//GEN-LAST:event_btnColorMedActionPerformed
+
+    private void spinnerParticleSizeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerParticleSizeStateChanged
+        // TODO add your handling code here:
+        JSpinner source = (JSpinner) evt.getSource();
+        final int pixel = (Integer) source.getValue();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                wmsMapper.setParticlePixel(pixel);
+            }
+        });
+
+    }//GEN-LAST:event_spinnerParticleSizeStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
@@ -2481,8 +2604,8 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnCancelMapping;
     private javax.swing.JButton btnCloseCfgFile;
     private javax.swing.JButton btnCloseNC;
-    private javax.swing.JButton btnColor;
     private javax.swing.JButton btnColorMax;
+    private javax.swing.JButton btnColorMed;
     private javax.swing.JButton btnColorMin;
     private javax.swing.JButton btnDeleteMaps;
     private javax.swing.JButton btnExit;
@@ -2495,6 +2618,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnOpenAnimation;
     private javax.swing.JButton btnOpenCfgFile;
     private javax.swing.JButton btnOpenNC;
+    private javax.swing.JButton btnParticleColor;
     private javax.swing.JToggleButton btnPreview;
     private javax.swing.JButton btnPrevious;
     private javax.swing.JButton btnSaveAsCfgFile;
@@ -2520,9 +2644,11 @@ public class IchthyopView extends FrameView
     private javax.swing.JLabel lblAnimationSpeed;
     private javax.swing.JLabel lblCfgFile;
     private javax.swing.JLabel lblColor;
+    private javax.swing.JLabel lblColor1;
     private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblMax;
+    private javax.swing.JLabel lblMed;
     private javax.swing.JLabel lblMin;
     private javax.swing.JLabel lblNC;
     private javax.swing.JLabel lblTime;
@@ -2555,6 +2681,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenu simulationMenu;
     private javax.swing.JMenuItem simulationMenuItem;
     private javax.swing.JSlider sliderTime;
+    private javax.swing.JSpinner spinnerParticleSize;
     private javax.swing.JSplitPane splitPane;
     private javax.swing.JMenuItem startBWMenuItem;
     private javax.swing.JMenuItem startFWMenuItem;
@@ -2569,6 +2696,7 @@ public class IchthyopView extends FrameView
     private org.jdesktop.swingx.JXTitledPanel titledPanelMain;
     private org.jdesktop.swingx.JXTitledPanel titledPanelSteps;
     private javax.swing.JFormattedTextField txtFieldMax;
+    private javax.swing.JFormattedTextField txtFieldMed;
     private javax.swing.JFormattedTextField txtFieldMin;
     // End of variables declaration//GEN-END:variables
     private JDialog aboutBox;

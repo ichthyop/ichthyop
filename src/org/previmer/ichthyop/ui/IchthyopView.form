@@ -508,7 +508,11 @@
                                                       <Group type="102" alignment="0" attributes="0">
                                                           <Component id="lblColor" min="-2" max="-2" attributes="0"/>
                                                           <EmptySpace max="-2" attributes="0"/>
-                                                          <Component id="btnColor" min="-2" max="-2" attributes="0"/>
+                                                          <Component id="btnParticleColor" min="-2" max="-2" attributes="0"/>
+                                                          <EmptySpace max="-2" attributes="0"/>
+                                                          <Component id="lblColor1" min="-2" max="-2" attributes="0"/>
+                                                          <EmptySpace max="-2" attributes="0"/>
+                                                          <Component id="spinnerParticleSize" min="-2" max="-2" attributes="0"/>
                                                       </Group>
                                                   </Group>
                                                   <EmptySpace max="-2" attributes="0"/>
@@ -520,11 +524,13 @@
                                               <Group type="102" attributes="0">
                                                   <Group type="103" groupAlignment="3" attributes="0">
                                                       <Component id="lblColor" alignment="3" min="-2" max="-2" attributes="0"/>
-                                                      <Component id="btnColor" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="btnParticleColor" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="lblColor1" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                      <Component id="spinnerParticleSize" alignment="3" min="-2" max="-2" attributes="0"/>
                                                   </Group>
                                                   <EmptySpace max="-2" attributes="0"/>
                                                   <Component id="pnlColorBar" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
+                                                  <EmptySpace max="32767" attributes="0"/>
                                               </Group>
                                           </Group>
                                         </DimensionLayout>
@@ -546,7 +552,7 @@
                                           <Layout>
                                             <DimensionLayout dim="0">
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Group type="102" alignment="0" attributes="0">
+                                                  <Group type="102" attributes="0">
                                                       <EmptySpace max="-2" attributes="0"/>
                                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                                           <Group type="102" alignment="0" attributes="1">
@@ -555,25 +561,35 @@
                                                               <Component id="cbBoxVariable" max="32767" attributes="0"/>
                                                           </Group>
                                                           <Group type="102" alignment="0" attributes="0">
-                                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                                  <Component id="lblMin" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                                  <Component id="lblMax" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                              </Group>
-                                                              <EmptySpace max="32767" attributes="0"/>
-                                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                                  <Component id="txtFieldMax" alignment="0" max="32767" attributes="1"/>
-                                                                  <Component id="txtFieldMin" alignment="0" min="-2" pref="122" max="-2" attributes="1"/>
-                                                              </Group>
-                                                              <EmptySpace max="-2" attributes="0"/>
-                                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                                  <Component id="btnColorMax" min="-2" max="-2" attributes="0"/>
-                                                                  <Component id="btnColorMin" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                              </Group>
-                                                          </Group>
-                                                          <Group type="102" alignment="0" attributes="0">
                                                               <Component id="btnAutoRange" min="-2" max="-2" attributes="0"/>
                                                               <EmptySpace max="-2" attributes="0"/>
                                                               <Component id="btnApplyColorbar" min="-2" max="-2" attributes="0"/>
+                                                          </Group>
+                                                          <Group type="102" attributes="0">
+                                                              <Group type="103" groupAlignment="0" attributes="0">
+                                                                  <Group type="102" alignment="0" attributes="0">
+                                                                      <Group type="103" groupAlignment="0" attributes="0">
+                                                                          <Component id="lblMin" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                                          <Component id="lblMax" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                                      </Group>
+                                                                      <EmptySpace max="32767" attributes="0"/>
+                                                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                                                          <Component id="txtFieldMax" alignment="0" max="32767" attributes="1"/>
+                                                                          <Component id="txtFieldMin" alignment="0" min="-2" pref="122" max="-2" attributes="1"/>
+                                                                          <Component id="txtFieldMed" alignment="0" min="-2" pref="122" max="-2" attributes="1"/>
+                                                                      </Group>
+                                                                  </Group>
+                                                                  <Group type="102" alignment="0" attributes="0">
+                                                                      <Component id="lblMed" min="-2" max="-2" attributes="0"/>
+                                                                      <EmptySpace min="-2" pref="148" max="-2" attributes="0"/>
+                                                                  </Group>
+                                                              </Group>
+                                                              <EmptySpace max="-2" attributes="0"/>
+                                                              <Group type="103" groupAlignment="0" attributes="0">
+                                                                  <Component id="btnColorMed" min="-2" max="-2" attributes="0"/>
+                                                                  <Component id="btnColorMax" min="-2" max="-2" attributes="0"/>
+                                                                  <Component id="btnColorMin" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                              </Group>
                                                           </Group>
                                                       </Group>
                                                       <EmptySpace pref="49" max="32767" attributes="0"/>
@@ -592,6 +608,12 @@
                                                           <Component id="lblMin" alignment="3" min="-2" max="-2" attributes="0"/>
                                                           <Component id="btnColorMin" alignment="3" min="-2" max="-2" attributes="0"/>
                                                           <Component id="txtFieldMin" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                      </Group>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Group type="103" groupAlignment="3" attributes="0">
+                                                          <Component id="lblMed" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                          <Component id="txtFieldMed" alignment="3" min="-2" max="-2" attributes="0"/>
+                                                          <Component id="btnColorMed" alignment="3" min="-2" max="-2" attributes="0"/>
                                                       </Group>
                                                       <EmptySpace max="-2" attributes="0"/>
                                                       <Group type="103" groupAlignment="3" attributes="0">
@@ -698,6 +720,34 @@
                                                 <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));&#xa;txtFieldMin.setValue(new Float(0.f));"/>
                                               </AuxValues>
                                             </Component>
+                                            <Component class="javax.swing.JLabel" name="lblMed">
+                                              <Properties>
+                                                <Property name="text" type="java.lang.String" resourceKey="lblMed.text"/>
+                                                <Property name="name" type="java.lang.String" value="lblMed" noResource="true"/>
+                                              </Properties>
+                                            </Component>
+                                            <Component class="javax.swing.JFormattedTextField" name="txtFieldMed">
+                                              <Properties>
+                                                <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
+                                                  <Format subtype="0" type="0"/>
+                                                </Property>
+                                                <Property name="name" type="java.lang.String" value="txtFieldMed" noResource="true"/>
+                                              </Properties>
+                                              <AuxValues>
+                                                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="txtFieldMed.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));&#xa;txtFieldMed.setValue(new Float(50.f));"/>
+                                              </AuxValues>
+                                            </Component>
+                                            <Component class="javax.swing.JButton" name="btnColorMed">
+                                              <Properties>
+                                                <Property name="foreground" type="java.awt.Color" resourceKey="btnColorMed.foreground"/>
+                                                <Property name="icon" type="javax.swing.Icon" resourceKey="btnColorMed.icon"/>
+                                                <Property name="text" type="java.lang.String" resourceKey="btnColorMed.text"/>
+                                                <Property name="name" type="java.lang.String" value="btnColorMed" noResource="true"/>
+                                              </Properties>
+                                              <Events>
+                                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnColorMedActionPerformed"/>
+                                              </Events>
+                                            </Component>
                                           </SubComponents>
                                         </Container>
                                         <Component class="javax.swing.JLabel" name="lblColor">
@@ -706,15 +756,32 @@
                                             <Property name="name" type="java.lang.String" value="lblColor" noResource="true"/>
                                           </Properties>
                                         </Component>
-                                        <Component class="javax.swing.JButton" name="btnColor">
+                                        <Component class="javax.swing.JButton" name="btnParticleColor">
                                           <Properties>
-                                            <Property name="foreground" type="java.awt.Color" resourceKey="btnColor.foreground"/>
-                                            <Property name="icon" type="javax.swing.Icon" resourceKey="btnColor.icon"/>
-                                            <Property name="text" type="java.lang.String" resourceKey="btnColor.text"/>
-                                            <Property name="name" type="java.lang.String" value="btnColor" noResource="true"/>
+                                            <Property name="foreground" type="java.awt.Color" resourceKey="btnParticleColor.foreground"/>
+                                            <Property name="icon" type="javax.swing.Icon" resourceKey="btnParticleColor.icon"/>
+                                            <Property name="text" type="java.lang.String" resourceKey="btnParticleColor.text"/>
+                                            <Property name="name" type="java.lang.String" value="btnParticleColor" noResource="true"/>
                                           </Properties>
                                           <Events>
-                                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnColorActionPerformed"/>
+                                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnParticleColorActionPerformed"/>
+                                          </Events>
+                                        </Component>
+                                        <Component class="javax.swing.JLabel" name="lblColor1">
+                                          <Properties>
+                                            <Property name="text" type="java.lang.String" resourceKey="lblColor1.text"/>
+                                            <Property name="name" type="java.lang.String" value="lblColor1" noResource="true"/>
+                                          </Properties>
+                                        </Component>
+                                        <Component class="javax.swing.JSpinner" name="spinnerParticleSize">
+                                          <Properties>
+                                            <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                                              <SpinnerModel initial="1" maximum="10" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                                            </Property>
+                                            <Property name="name" type="java.lang.String" value="spinnerParticleSize" noResource="true"/>
+                                          </Properties>
+                                          <Events>
+                                            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="spinnerParticleSizeStateChanged"/>
                                           </Events>
                                         </Component>
                                       </SubComponents>

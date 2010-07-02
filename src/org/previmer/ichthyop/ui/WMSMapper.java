@@ -53,14 +53,15 @@ import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.calendar.Calendar1900;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
+import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayFloat.D1;
 import ucar.ma2.ArrayFloat.D2;
-import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
@@ -90,15 +91,21 @@ public class WMSMapper extends JXMapKit {
     private int nbSteps;
     private List<String> colors;
     private Color defaultColor = Color.WHITE;
+    private int particlePixel = 1;
     /**
      * Lightest color of the color range.
      */
-    private Color colormin = Color.YELLOW;
+    private Color colormin = Color.BLUE;
+    /**
+     * Intermediate color of the color range.
+     */
+    private Color colormed = Color.YELLOW;
     /**
      * Darkest color of the color range.
      */
     private Color colormax = Color.RED;
     private float valmin = 0;
+    private float valmed = 50;
     private float valmax = 100;
     private Painter colorbarPainter;
 
@@ -210,7 +217,11 @@ public class WMSMapper extends JXMapKit {
 
     public void drawBackground() {
         CompoundPainter cp = new CompoundPainter();
-        cp.setPainters(getBgPainter());
+        if (null != colorbarPainter) {
+            cp.setPainters(getBgPainter(), colorbarPainter);
+        } else {
+            cp.setPainters(getBgPainter());
+        }
         cp.setCacheable(false);
         getMainMap().setOverlayPainter(cp);
     }
@@ -248,10 +259,11 @@ public class WMSMapper extends JXMapKit {
         list.add(new String("None"));
         for (Variable variable : nc.getVariables()) {
             String name = variable.getName();
-            boolean excluded = name.matches("time")
-                    || name.contains("edge")
-                    || name.startsWith("zone")
-                    || !variable.getDataType().equals(DataType.FLOAT);
+            List<Dimension> dimensions = variable.getDimensions();
+            boolean excluded = (dimensions.size() != 2);
+            if (!excluded) {
+                excluded = !(dimensions.get(0).getName().matches("time") && dimensions.get(1).getName().matches("drifter"));
+            }
             if (!excluded) {
                 list.add(variable.getName());
             }
@@ -262,8 +274,8 @@ public class WMSMapper extends JXMapKit {
 
     public float[] getRange(String variable) throws IOException {
 
-        ArrayFloat.D2 array = (D2) nc.findVariable(variable).read();
-        float[] dataset = (float[]) array.copyTo1DJavaArray();
+        Array array = nc.findVariable(variable).read();
+        float[] dataset = (float[]) array.get1DJavaArray(Float.class);
         double mean = getMean(dataset);
         double stdDeviation = getStandardDeviation(dataset, mean);
         float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
@@ -464,11 +476,11 @@ public class WMSMapper extends JXMapKit {
 
         //create a polygon
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
-        Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), 1, 1);
+        Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), particlePixel, particlePixel);
 
         //do the drawing
         g.setColor(getColor(particle.getColorValue()));
-        g.draw(ellipse);
+        g.fill(ellipse);
     }
 
     /**
@@ -484,28 +496,44 @@ public class WMSMapper extends JXMapKit {
             return defaultColor;
         }
 
-        float xval = Math.abs(bound((valmax - value) / (valmax - valmin)));
-        return (new Color(((int) (xval * colormin.getRed()
-                + (1 - xval) * colormax.getRed())),
-                ((int) (xval * colormin.getGreen()
-                + (1 - xval) * colormax.getGreen())),
-                ((int) (xval * colormin.getBlue()
-                + (1 - xval) * colormax.getBlue()))));
+        if (value <= valmed) {
+            float xval = Math.abs(bound((valmed - value) / (valmed - valmin)));
+            return (new Color(((int) (xval * colormin.getRed()
+                    + (1 - xval) * colormed.getRed())),
+                    ((int) (xval * colormin.getGreen()
+                    + (1 - xval) * colormed.getGreen())),
+                    ((int) (xval * colormin.getBlue()
+                    + (1 - xval) * colormed.getBlue()))));
+        } else {
+            float xval = Math.abs(bound((valmax - value) / (valmax - valmed)));
+            return (new Color(((int) (xval * colormed.getRed()
+                    + (1 - xval) * colormax.getRed())),
+                    ((int) (xval * colormed.getGreen()
+                    + (1 - xval) * colormax.getGreen())),
+                    ((int) (xval * colormed.getBlue()
+                    + (1 - xval) * colormax.getBlue()))));
+        }
+    }
+
+    public void setParticlePixel(int pixel) {
+        this.particlePixel = pixel;
     }
 
     public void setDefaultColor(Color color) {
         defaultColor = color;
     }
 
-    public void setColorbar(String variable, float valmin, float valmax, Color colormin, Color colormax) {
+    public void setColorbar(String variable, float valmin, float valmed, float valmax, Color colormin, Color colormed, Color colormax) {
 
         CompoundPainter cp = new CompoundPainter();
         if (null != variable && !variable.toLowerCase().contains("none")) {
             pcolorVariable = nc.findVariable(variable);
             if (null != pcolorVariable) {
                 this.valmin = valmin;
+                this.valmed = valmed;
                 this.valmax = valmax;
                 this.colormin = colormin;
+                this.colormed = colormed;
                 this.colormax = colormax;
                 colorbarPainter = getColorbarPainter();
                 cp.setPainters(bgPainter, colorbarPainter);
@@ -573,16 +601,36 @@ public class WMSMapper extends JXMapKit {
 
                 int wbar = 300;
                 int hbar = 20;
-                int xbar = (w - wbar) - hbar / 2;
+                int xbar = (w - wbar) - hbar;
                 int ybar = h - 3 * hbar / 2;
+                float x = Math.abs((valmed - valmin) / (valmax - valmin));
+                float offset = 0.f;
 
-                RoundRectangle2D bar = new RoundRectangle2D.Double(0.0, 0.0, wbar, hbar, hbar, hbar);
+                Rectangle2D bar = new Rectangle2D.Double(0.0, 0.0, x * wbar, hbar);
                 g.translate(xbar, ybar);
                 g.setColor(Color.BLACK);
                 g.draw(bar);
 
+                Ellipse2D corner = new Ellipse2D.Double(-0.5f * hbar, 0.f, hbar, hbar);
+                g.draw(corner);
+                g.setColor(colormin);
+                g.fill(corner);
+
                 Paint paint = g.getPaint();
-                GradientPaint painter = new GradientPaint(0, 0, colormin, wbar, hbar, colormax);
+                GradientPaint painter = new GradientPaint(0, 0, colormin, (x + offset) * wbar, hbar, colormed);
+                g.setPaint(painter);
+                g.fill(bar);
+
+                bar = new Rectangle2D.Double(x * wbar, 0.0, (1 - x) * wbar, hbar);
+                g.setColor(Color.BLACK);
+                g.draw(bar);
+
+                corner = new Ellipse2D.Double(wbar - 0.5 * hbar, 0.0, hbar, hbar);
+                g.draw(corner);
+                g.setColor(colormax);
+                g.fill(corner);
+
+                painter = new GradientPaint((x - offset) * wbar, 0, colormed, wbar, hbar, colormax);
                 g.setPaint(painter);
                 g.fill(bar);
 
@@ -677,16 +725,16 @@ public class WMSMapper extends JXMapKit {
         try {
             ArrayFloat.D1 arrLon = (D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce();
             ArrayFloat.D1 arrLat = (D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce();
-            ArrayFloat.D1 arrColorVariable = null;
+            Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                arrColorVariable = (D1) pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
+                arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
             }
             int length = arrLon.getShape()[0];
             for (int i = 0; i < length - 1; i++) {
                 float lon = arrLon.get(i);
                 if (!Float.isNaN(lon)) {
                     if (null != arrColorVariable) {
-                        list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.get(i)));
+                        list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
                     } else {
                         list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
                     }
