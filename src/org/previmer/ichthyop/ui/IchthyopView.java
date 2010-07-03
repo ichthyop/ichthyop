@@ -259,6 +259,9 @@ public class IchthyopView extends FrameView
 
         CreateMapTask(Application instance) {
             super(instance);
+            applyColorbarSettings();
+            wmsMapper.setDefaultColor(btnParticleColor.getForeground());
+            wmsMapper.setParticlePixel((Integer) spinnerParticleSize.getValue());
             wmsMapper.setZoomButtonsVisible(false);
             wmsMapper.setZoomSliderVisible(false);
             btnMapping.getAction().setEnabled(false);

@@ -64,10 +64,13 @@ public class TimeManager extends AbstractManager implements ITimeManager {
      */
     private Calendar calendar;
     /**
+     * Determine whether particle should keep drifting when age exceeds transport duration
+     */
+    private boolean keepDrifting;
+    /**
      * The simple date format parses and formats dates in human readable format.
      */
     private SimpleDateFormat outputDateFormat;
-    
     private EventListenerList listeners = new EventListenerList();
 
 ////////////////////////////
@@ -84,31 +87,35 @@ public class TimeManager extends AbstractManager implements ITimeManager {
     private void loadParameters() throws Exception {
 
         /* time step */
-        dt = Integer.valueOf(getParameter("app.time", "time_step"));
+        dt = Integer.valueOf(getParameter("time_step"));
 
         /* time direction */
-        boolean isForward = getParameter("app.time", "time_arrow").matches(TimeDirection.FORWARD.toString());
+        boolean isForward = getParameter("time_arrow").matches(TimeDirection.FORWARD.toString());
         if (!isForward) {
             dt *= -1;
         }
 
         /* transport duration */
         try {
-            transportDuration = duration2seconds(getParameter("app.time", "transport_duration"));
+            transportDuration = duration2seconds(getParameter("transport_duration"));
         } catch (ParseException ex) {
             IOException pex = new IOException("Error converting transport duration into seconds ==> " + ex.toString());
             pex.setStackTrace(ex.getStackTrace());
             throw pex;
         }
-        if (getParameter("app.time", "calendar_type").matches(TypeCalendar.CLIMATO.toString())) {
+
+        /* keep drifting ?*/
+        keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
+
+        if (getParameter("calendar_type").matches(TypeCalendar.CLIMATO.toString())) {
             calendar = new ClimatoCalendar();
         } else {
-            calendar = new Calendar1900(getParameter("app.time", "time_origin"), INPUT_DATE_FORMAT);
+            calendar = new Calendar1900(getParameter("time_origin"), INPUT_DATE_FORMAT);
         }
 
         /* initial time */
         try {
-            t0 = date2seconds(getParameter("app.time", "initial_time"));
+            t0 = date2seconds(getParameter("initial_time"));
         } catch (ParseException ex) {
             IOException pex = new IOException("Error converting initial time into seconds ==> " + ex.toString());
             pex.setStackTrace(ex.getStackTrace());
@@ -122,6 +129,10 @@ public class TimeManager extends AbstractManager implements ITimeManager {
                 ? "yyyy/MM/dd HH:mm:ss"
                 : "yy/MM/dd HH:mm:ss");
         outputDateFormat.setCalendar(calendar);
+    }
+
+    public boolean keepDrifting() {
+        return keepDrifting;
     }
 
     /**
@@ -153,8 +164,8 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         return lcalendar.getTimeInMillis() / 1000L;
     }
 
-    private String getParameter(String blockName, String key) {
-        return getSimulationManager().getParameterManager().getParameter(blockName, key);
+    private String getParameter(String key) {
+        return getSimulationManager().getParameterManager().getParameter("app.time", key);
     }
 
     /**

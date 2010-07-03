@@ -84,23 +84,23 @@
     <polygon>
       <point>
         <index>0</index>
-        <lon>-5.0</lon>
-        <lat>48.2</lat>
+        <lon>-5.3</lon>
+        <lat>48.4</lat>
       </point>
       <point>
         <index>1</index>
-        <lon>-4.8</lon>
-        <lat>48.2</lat>
+        <lon>-4.7</lon>
+        <lat>48.4</lat>
       </point>
       <point>
         <index>2</index>
-        <lon>-4.8</lon>
-        <lat>48.0</lat>
+        <lon>-4.7</lon>
+        <lat>47.8</lat>
       </point>
       <point>
         <index>3</index>
-        <lon>-5.0</lon>
-        <lat>48.0</lat>
+        <lon>-5.3</lon>
+        <lat>47.8</lat>
       </point>
     </polygon>
     <bathy_mask>

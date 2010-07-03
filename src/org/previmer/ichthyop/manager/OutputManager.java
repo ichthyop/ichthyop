@@ -322,19 +322,21 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             trackers.add(new DepthTracker());
         }
         /* Add trackers requested by external actions */
-        for (Class trackerClass : predefinedTrackers) {
-            try {
-                ITracker tracker = (ITracker) trackerClass.newInstance();
-                trackers.add(tracker);
-            } catch (Exception ex) {
-                StringBuffer msg = new StringBuffer();
-                msg.append("Error instanciating application tracker \"");
-                msg.append(trackerClass.getCanonicalName());
-                msg.append("\" == >");
-                msg.append(ex.toString());
-                IOException ioex = new IOException(msg.toString());
-                ioex.setStackTrace(ex.getStackTrace());
-                throw ioex;
+        if (null != predefinedTrackers) {
+            for (Class trackerClass : predefinedTrackers) {
+                try {
+                    ITracker tracker = (ITracker) trackerClass.newInstance();
+                    trackers.add(tracker);
+                } catch (Exception ex) {
+                    StringBuffer msg = new StringBuffer();
+                    msg.append("Error instanciating application tracker \"");
+                    msg.append(trackerClass.getCanonicalName());
+                    msg.append("\" == >");
+                    msg.append(ex.toString());
+                    IOException ioex = new IOException(msg.toString());
+                    ioex.setStackTrace(ex.getStackTrace());
+                    throw ioex;
+                }
             }
         }
         for (ITracker tracker : trackers) {
@@ -484,7 +486,12 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     public void lastStepOccurred(LastStepEvent e) {
         writeToNetCDF(i_record);
-        predefinedTrackers.clear();
+        if (null != predefinedTrackers) {
+            predefinedTrackers.clear();
+        }
+        if (null != customTrackers) {
+            customTrackers.clear();
+        }
         close();
     }
 

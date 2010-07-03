@@ -545,6 +545,7 @@ public class WMSMapper extends JXMapKit {
                 cp.setPainters(bgPainter);
             }
         } else {
+            pcolorVariable = null;
             colorbarPainter = null;
             cp.setPainters(bgPainter);
         }

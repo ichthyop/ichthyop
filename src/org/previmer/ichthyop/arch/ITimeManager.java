@@ -60,4 +60,6 @@ public interface ITimeManager {
     public SimpleDateFormat getInputDurationFormat();
 
     public SimpleDateFormat getInputDateFormat();
+
+    public boolean keepDrifting();
 }

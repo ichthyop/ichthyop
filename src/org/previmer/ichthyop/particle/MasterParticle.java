@@ -103,7 +103,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
 
     public void step() {
 
-        if (getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
+        if (!getSimulationManager().getTimeManager().keepDrifting() && getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
             kill(ParticleMortality.OLD);
             return;
         }

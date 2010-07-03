@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <icstructure>
     <long_name>Generic Ichthyop configuration file</long_name>
-    <description>The file has not any pre-defined dataset or release block.</description>
+    <description>The file has few pre-defined parameters.</description>
     <block type="option">
         <tree_path>Time/General time options</tree_path>
         <key>app.time</key>
@@ -20,6 +20,14 @@
                 <value>0001 day(s) 00 hour(s) 00 minute(s)</value>
                 <format>duration</format>
                 <description>Set the duration of particle transport. Format: #### day(s) ## hour(s) ## minute(s)</description>
+            </parameter>
+            <parameter>
+                <key>keep_drifting</key>
+                <long_name>Particle keep drifting</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>Determine whether a particle should be deactivated or on the contrary should keep drifting once its age exceeds transport duration. This parameter only operates with several release events (see section release schedule) when the simulation duration is upper than the transport duration.</description>
             </parameter>
             <parameter type="serial">
                 <key>time_step</key>
@@ -1405,7 +1413,7 @@
         <key>action.wind</key>
         <tree_path>Transport/Wind drift</tree_path>
         <enabled>false</enabled>
-        <description>Block of options to implement particle drift due to sea surface wind. The application is not able yet to read any realistic wind datasets. You will have to build your own wind scenarii, providing parameters such as wind direction and intensity, windage, etc. in a separate textfile. For 2D simulations, every particle is exposed to surface wind. For 3D simulations, the application only applies wind drift to close-surface particles (technically, particles that reach the top grid level.)</description>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is not able yet to read any realistic wind datasets. You will have to build your own wind scenarii, providing parameters such as wind direction and intensity, windage, etc. in a separate textfile. For 2D simulations, every particle is exposed to surface wind. For 3D simulations, the application only applies wind drift to close-surface particles (technically, particles that reach the top grid level). First time you enable the wind action, do not forget to create a new wind file (the filename is preset but the file may not exist yet on your disk).</description>
         <parameters>
             <parameter>
                 <key>wind_file</key>
@@ -1441,7 +1449,7 @@
     </block>
     <block type="option">
         <key>release.schedule</key>
-        <description>Block of options to control multi-release events. In most cases, you do not need to define any release schedule, and all the particles are released at the beginning of the simulation (defined in the time section). This option affects the duration of the simulation. Simulation duration is calculated as follow: duration between initial_time and last_release_event plus transport_duration. This ensures that the transport duration is the same for all released particles. Technically, a particle whose age exceeds the duration of transport is “deactivated” and its variables remain constant until the end of the simulation.</description>
+        <description>Block of options to control multi-release events. In most cases, you do not need to define any release schedule, and all the particles are released at the beginning of the simulation (defined in the time section). This option affects the duration of the simulation. Simulation duration is calculated as follow: duration between initial_time and last_release_event plus transport_duration. This ensures that the last released particle will at least be transported for transport_duration. A particle whose age exceeds the duration of transport can as well keep drifting or being “killed” with death cause "old", depending on the value of time section parameter keep_drifting"</description>
         <tree_path>Release/Schedule</tree_path>
         <parameters>
             <parameter>
@@ -1465,7 +1473,7 @@
     <block type="release">
         <key>release.zone</key>
         <tree_path>Release/From zone</tree_path>
-        <description>Block of options for releasing particles within pre-defined geographical zones. This release mode adds a "zone" variable in the NetCDF output file.</description>
+        <description>Block of options for releasing particles within pre-defined geographical zones. This release mode adds a "zone" variable in the NetCDF output file. First time you enable the zone release, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
         <enabled>false</enabled>
         <parameters>
             <parameter>
@@ -1507,7 +1515,7 @@
         <key>release.patches</key>
         <tree_path>Release/Patches in zones</tree_path>
         <enabled>false</enabled>
-        <description>Block of options for releasing patches of particles within pre-defined geographical zones. It is equivalent to the zone release but instead of releasing single particles, it does release patches of particles. To make a patch, the application release a single particle and then aggregates some particles around the single particle. You can specify the number of patches, the number of particles within a patch and the radius and the thickness of the patches.</description>
+        <description>Block of options for releasing patches of particles within pre-defined geographical zones. It is equivalent to the zone release but instead of releasing single particles, it does release patches of particles. To make a patch, the application release a single particle and then aggregates some particles around the single particle. You can specify the number of patches, the number of particles within a patch and the radius and the thickness of the patches. First time you enable the patches release, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
         <parameters>
             <parameter>
                 <key>number_patches</key>
@@ -1851,7 +1859,7 @@
         <key>action.recruitment</key>
         <tree_path>Biology/Recruitment</tree_path>
         <enabled>false</enabled>
-        <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area.</description>
+        <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
         <parameters>
             <parameter>
                 <key>criterion</key>
