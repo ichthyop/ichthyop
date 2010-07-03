@@ -381,7 +381,7 @@ public class IchthyopView extends FrameView
         lblNC.setText(outputFile.getName());
         lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
         wmsMapper.setFile(outputFile);
-        wmsMapper.setVisible(true);
+        wmsMapper.setVisible(!taskPaneMapping.isCollapsed());
         lblMapping.setVisible(false);
         btnMapping.getAction().setEnabled(true);
         btnCloseNC.getAction().setEnabled(true);

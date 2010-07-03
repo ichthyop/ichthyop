@@ -32,7 +32,7 @@ import org.previmer.ichthyop.io.LatTracker;
 import org.previmer.ichthyop.io.LonTracker;
 import org.previmer.ichthyop.io.MortalityTracker;
 import org.previmer.ichthyop.io.TimeTracker;
-import org.previmer.ichthyop.io.UserDefinedTracker;
+import org.previmer.ichthyop.io.CustomTracker;
 import org.previmer.ichthyop.io.XParameter;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
@@ -55,7 +55,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private List<GeoPosition> region;
     private List<List<GeoPosition>> zoneEdges;
     private Dimension latlonDim;
-    private boolean isSetup = false;
+    private boolean clearPredefinedTrackerList = false;
+    private boolean clearCustomTrackerList = false;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -64,7 +65,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
      *
      */
     private List<ITracker> trackers;
-    private List<Class> requestedTrackers;
+    private List<Class> predefinedTrackers;
+    private List<String> customTrackers;
 
     public static OutputManager getInstance() {
         return outputManager;
@@ -284,20 +286,33 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         return lregion;
     }
 
-    public void addTracker(Class trackerClass) {
-        if (null == requestedTrackers) {
-            requestedTrackers = new ArrayList();
+    public void addPredefinedTracker(Class trackerClass) {
+        if (null == predefinedTrackers) {
+            predefinedTrackers = new ArrayList();
         }
-        if (isSetup) {
-            requestedTrackers.clear();
-            isSetup = false;
+        if (clearPredefinedTrackerList) {
+            predefinedTrackers.clear();
+            clearPredefinedTrackerList = false;
         }
-        if (!requestedTrackers.contains(trackerClass)) {
-            requestedTrackers.add(trackerClass);
+        if (!predefinedTrackers.contains(trackerClass)) {
+            predefinedTrackers.add(trackerClass);
         }
     }
 
-    private void addAppTrackers() throws Exception {
+    public void addCustomTracker(String variableName) {
+        if (null == customTrackers) {
+            customTrackers = new ArrayList();
+        }
+        if (clearCustomTrackerList) {
+            customTrackers.clear();
+            clearCustomTrackerList = false;
+        }
+        if (!customTrackers.contains(variableName)) {
+            customTrackers.add(variableName);
+        }
+    }
+
+    private void addPredefinedTrackers() throws Exception {
         trackers = new ArrayList();
         trackers.add(new TimeTracker());
         trackers.add(new LonTracker());
@@ -307,7 +322,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             trackers.add(new DepthTracker());
         }
         /* Add trackers requested by external actions */
-        for (Class trackerClass : requestedTrackers) {
+        for (Class trackerClass : predefinedTrackers) {
             try {
                 ITracker tracker = (ITracker) trackerClass.newInstance();
                 trackers.add(tracker);
@@ -338,34 +353,33 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         }
     }
 
-    private String[] getVarToTrack() throws Exception {
-        String[] tokens = getParameter("trackers").split("\"");
-        List<String> variables = new ArrayList();
-        for (String token : tokens) {
-            if (!token.trim().isEmpty()) {
-                variables.add(token.trim());
+    private List<String> getUserTrackers() throws Exception {
+        String userTrackers = getParameter("trackers");
+        try {
+            String[] tokens = userTrackers.split("\"");
+            List<String> variables = new ArrayList();
+            for (String token : tokens) {
+                if (!token.trim().isEmpty()) {
+                    variables.add(token.trim());
+                }
             }
+            return variables;
+        } catch (Exception ex) {
+            return null;
         }
-        return variables.toArray(new String[variables.size()]);
     }
 
-    private void addUserTrackers() {
-        String[] variables = null;
-        try {
-            variables = getVarToTrack();
-        } catch (Exception ex) {
-            // ignored, no user def tracker.
-        }
+    private void addCustomTrackers(List<String> variables) {
 
         if (null != variables) {
             for (String variable : variables) {
-                ITracker tracker = new UserDefinedTracker(variable);
+                ITracker tracker = new CustomTracker(variable);
                 try {
                     addVar2NcOut(tracker);
                 } catch (Exception ex) {
                     getSimulationManager().getDataset().removeRequiredVariable(variable, tracker.getClass());
                     StringBuffer msg = new StringBuffer();
-                    msg.append("Error adding user defined tracker \"");
+                    msg.append("Error adding custom tracker \"");
                     msg.append(tracker.short_name());
                     msg.append("\" in the NetCDF output file == >");
                     msg.append(ex.toString());
@@ -470,7 +484,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     public void lastStepOccurred(LastStepEvent e) {
         writeToNetCDF(i_record);
-        requestedTrackers.clear();
+        predefinedTrackers.clear();
         close();
     }
 
@@ -488,10 +502,13 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         getDimensionFactory().resetDimensions();
 
         /* add application trackers lon lat depth time */
-        addAppTrackers();
+        addPredefinedTrackers();
+
+        /* add custom trackers */
+        addCustomTrackers(customTrackers);
 
         /* add user defined trackers */
-        addUserTrackers();
+        addCustomTrackers(getUserTrackers());
 
         /* add gloabal attributes */
         addGlobalAttributes();
@@ -499,7 +516,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         /* add definition of the simulated area */
         addRegion();
 
-        isSetup = true;
+        clearPredefinedTrackerList = true;
+        clearCustomTrackerList = true;
 
         getLogger().info("Output manager setup [OK]");
     }

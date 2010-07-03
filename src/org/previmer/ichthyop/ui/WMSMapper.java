@@ -257,6 +257,7 @@ public class WMSMapper extends JXMapKit {
     public String[] getVariableList() {
         List<String> list = new ArrayList();
         list.add(new String("None"));
+        list.add(new String("time"));
         for (Variable variable : nc.getVariables()) {
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
@@ -266,8 +267,6 @@ public class WMSMapper extends JXMapKit {
             if (!excluded) {
                 list.add(variable.getName());
             }
-            list.add("time");
-
         }
         return list.toArray(new String[list.size()]);
     }

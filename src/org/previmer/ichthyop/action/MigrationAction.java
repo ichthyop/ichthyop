@@ -29,6 +29,10 @@ public class MigrationAction extends AbstractAction {
 
     public void loadParameters() throws Exception {
 
+        if (!getSimulationManager().getDataset().is3D()) {
+            throw new UnsupportedOperationException("{Migration} Vertical migration cannot operate in 2D simulation. Please deactivate the block or run a 3D simulation.");
+        }
+
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
         if (!isGrowth) {

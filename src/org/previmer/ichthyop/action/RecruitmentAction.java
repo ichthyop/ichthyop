@@ -53,8 +53,24 @@ public class RecruitmentAction extends AbstractAction {
         }
         stopMovingOnceRecruited = Boolean.valueOf(getParameter("stop_moving"));
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RECRUITMENT);
-        getSimulationManager().getOutputManager().addTracker(RecruitmentTracker.class);
-        getSimulationManager().getOutputManager().addTracker(ZoneTracker.class);
+        boolean addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("recruited_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("zone_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
+        }
     }
 
     public void execute(IBasicParticle particle) {

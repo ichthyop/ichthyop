@@ -32,7 +32,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
-        getSimulationManager().getOutputManager().addTracker(ZoneTracker.class);
+        getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
     }
 
     public int release(ReleaseEvent event) throws Exception {

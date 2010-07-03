@@ -92,7 +92,7 @@
                 <format>list</format>
                 <value />
                 <default />
-                <description>Name of some extra variables you wish to track during the simulation. It must exactly match the name of the corresponding variable in the hydrodynamic dataset. By default, the application records time, longitude, latitude, depth and mortality. For instance, if you wish to track temperature and salinity at particle location, you should type here the names of temperature and salinity variables as they are declared in the hydrodynamic dataset. E.g: "TEMP" "SALT"</description>
+                <description>Name of some extra variables you wish to track during the simulation. It must exactly match the name of the corresponding variable in the hydrodynamic dataset. By default, the application records time, longitude, latitude, depth and mortality. For instance, if you wish to track temperature and salinity at particle location, you should type here the names of temperature and salinity variables as they are declared in the hydrodynamic dataset. E.g: "TEMP" "SALT". Some actions will also automatically tracks some additional variables: for instance Linear growth process will track particle length and particle biological stage ((as long as it is enabled, for sure). It will always be explicitly reminded in the description of each action.</description>
             </parameter>
         </parameters>
     </block>
@@ -1334,7 +1334,7 @@
     </block>
     <block type="action">
         <key>action.migration</key>
-        <description>Block of options to control the Diel Vertical Migration (DVM) process of larvae. We impose deterministic pattern in which organisms reside at different depths at daytime and night-time. User can choose the daytime depth and the night-time depth, in meters. If the growth procedure is activated then the DVM operates during the larvae stages (yolk-sac and feeding larva). If not it operates after a “minimum age”. Setting the daytime depth equal to the night-time depth, the pattern forces the motion of particles at a constant depth.</description>
+        <description>Block of options to control the Diel Vertical Migration (DVM) process of larvae. Only operate for 3D simulation. We impose deterministic pattern in which organisms reside at different depths at daytime and night-time. User can choose the daytime depth and the night-time depth, in meters. If the growth procedure is activated then the DVM operates during the larvae stages (yolk-sac and feeding larva). If not it operates after a “minimum age”. Setting the daytime depth equal to the night-time depth, the pattern forces the motion of particles at a constant depth.</description>
         <tree_path>Transport/Vertical migration</tree_path>
         <enabled>false</enabled>
         <parameters>
@@ -1465,7 +1465,7 @@
     <block type="release">
         <key>release.zone</key>
         <tree_path>Release/From zone</tree_path>
-        <description>Block of options for releasing particles within pre-defined geographical zones.</description>
+        <description>Block of options for releasing particles within pre-defined geographical zones. This release mode adds a "zone" variable in the NetCDF output file.</description>
         <enabled>false</enabled>
         <parameters>
             <parameter>
@@ -1484,6 +1484,14 @@
                 <format>zonefile</format>
                 <template>zone.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>zone_tracker</key>
+                <long_name>Track zones</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "zone" variable in the NetCDF output file. Setting to false does not guarantee the "zone" variable will not be recorded in the NetCDF output file because it migt be required by another module (Recruitment for instance).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -1541,6 +1549,14 @@
                 <format>zonefile</format>
                 <template>zone.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone recruitment zone for instance).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>zone_tracker</key>
+                <long_name>Track zones</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "zone" variable in the NetCDF output file. Setting to false does not guarantee the "zone" variable will not be recorded in the NetCDF output file because it migt be required by another module (Recruitment for instance).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -1702,7 +1718,7 @@
         <description>Block of option for setting up the lower lethal water temperature for the particles. The tool distinguishes between eggs and larvae lethal temperatures when the growth process is activated.</description>
         <parameters>
             <parameter>
-                <key>lethal_temp_egg</key>
+                <key>lethal_temperature_egg</key>
                 <long_name>Lethal temperature (egg) [Celsius degree]</long_name>
                 <value>14.0</value>
                 <default>14.0</default>
@@ -1710,7 +1726,7 @@
                 <description>Lower lethal water temperature [Celsius degree] for the particles. If the growth process is active, this parameter only affects particles at egg stage.</description>
             </parameter>
             <parameter>
-                <key>lethal_temp_larva</key>
+                <key>lethal_temperature_larva</key>
                 <long_name>Lethal temperature (larva) [Celsius degree]</long_name>
                 <value>12.O</value>
                 <default>12.0</default>
@@ -1723,6 +1739,14 @@
                 <value>temp</value>
                 <default>temp</default>
                 <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>temp_tracker</key>
+                <long_name>Track temperature</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a temperature variable in the NetCDF output file. Setting to false does not guarantee the temperature variable will not be recorded in the NetCDF output file because it migt be required by another module.</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -1783,6 +1807,22 @@
                 <value>temp</value>
                 <default>temp</default>
                 <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>length_tracker</key>
+                <long_name>Track particle length</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "length" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>stage_tracker</key>
+                <long_name>Track particle biological stage</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "stage" variable in the NetCDF output file.</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -1864,6 +1904,22 @@
                 <format>zonefile</format>
                 <template>zone.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads recruitment zones from the file and ignores the other types of zone (release zone for instance).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>recruited_tracker</key>
+                <long_name>Track recruitment status</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "recruited" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>zone_tracker</key>
+                <long_name>Track zones</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "zone" variable in the NetCDF output file. Setting to false does not guarantee the "zone" variable will not be recorded in the NetCDF output file because it migt be required by another module (Zone release for instance).</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>

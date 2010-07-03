@@ -20,12 +20,12 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public class UserDefinedTracker extends SimulationManagerAccessor implements ITracker {
+public class CustomTracker extends SimulationManagerAccessor implements ITracker {
 
     private String variableName;
     private ArrayFloat.D2 array;
 
-    public UserDefinedTracker(String variableName) {
+    public CustomTracker(String variableName) {
         this.variableName = variableName;
         array = new ArrayFloat.D2(1, getSimulationManager().getOutputManager().getDimensionFactory().getDrifterDimension().getLength());
         getSimulationManager().getDataset().requireVariable(variableName, getClass());

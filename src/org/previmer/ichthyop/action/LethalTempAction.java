@@ -31,6 +31,15 @@ public class LethalTempAction extends AbstractAction {
             lethalTpLarva = Float.valueOf(getParameter("lethal_temperature_larva"));
         }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        boolean addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("temp_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addCustomTracker(temperature_field);
+        }
     }
 
     public void execute(IBasicParticle particle) {

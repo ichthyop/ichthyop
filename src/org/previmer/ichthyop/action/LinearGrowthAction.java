@@ -31,8 +31,24 @@ public class LinearGrowthAction extends AbstractAction {
         coeff2 = Float.valueOf(getParameter("coeff2"));
         temperature_field = getParameter("temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        getSimulationManager().getOutputManager().addTracker(LengthTracker.class);
-        getSimulationManager().getOutputManager().addTracker(StageTracker.class);
+        boolean addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("length_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("stage_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
+        }
     }
 
     public void execute(IBasicParticle particle) {
