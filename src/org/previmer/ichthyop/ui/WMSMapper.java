@@ -258,7 +258,6 @@ public class WMSMapper extends JXMapKit {
         List<String> list = new ArrayList();
         list.add(new String("None"));
         for (Variable variable : nc.getVariables()) {
-            String name = variable.getName();
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
             if (!excluded) {
@@ -267,6 +266,7 @@ public class WMSMapper extends JXMapKit {
             if (!excluded) {
                 list.add(variable.getName());
             }
+            list.add("time");
 
         }
         return list.toArray(new String[list.size()]);
@@ -276,11 +276,15 @@ public class WMSMapper extends JXMapKit {
 
         Array array = nc.findVariable(variable).read();
         float[] dataset = (float[]) array.get1DJavaArray(Float.class);
-        double mean = getMean(dataset);
-        double stdDeviation = getStandardDeviation(dataset, mean);
-        float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
-        float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
-        return new float[]{lower, upper};
+        if (variable.matches("time")) {
+            return new float[]{dataset[0], dataset[dataset.length - 1]};
+        } else {
+            double mean = getMean(dataset);
+            double stdDeviation = getStandardDeviation(dataset, mean);
+            float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
+            float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
+            return new float[]{lower, upper};
+        }
     }
 
     private double getMin(float[] dataset) {
@@ -727,14 +731,22 @@ public class WMSMapper extends JXMapKit {
             ArrayFloat.D1 arrLat = (D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce();
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
+                if (pcolorVariable.getName().matches("time")) {
+                    arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
+                } else {
+                    arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
+                }
             }
             int length = arrLon.getShape()[0];
             for (int i = 0; i < length - 1; i++) {
                 float lon = arrLon.get(i);
                 if (!Float.isNaN(lon)) {
                     if (null != arrColorVariable) {
-                        list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
+                        if (arrColorVariable.getSize() < 2) {
+                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
+                        } else {
+                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
+                        }
                     } else {
                         list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
                     }
