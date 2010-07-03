@@ -44,7 +44,7 @@ public class MarsIO extends SimulationManagerAccessor {
         String path = IOTools.resolvePath(rawPath);
 
         if (!isDirectory(path)) {
-            throw new IOException(rawPath + " is not a valid directory.");
+            throw new IOException("{Dataset} " + rawPath + " is not a valid directory.");
         }
         listInputFiles = getInputList(path, fileMask);
         return openFile(listInputFiles.get(0));
@@ -57,7 +57,7 @@ public class MarsIO extends SimulationManagerAccessor {
         File inputPath = new File(path);
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
         if (listFile.length == 0) {
-            throw new IOException(path + " contains no file matching mask " + fileMask);
+            throw new IOException("{Dataset} " + path + " contains no file matching mask " + fileMask);
         }
         list = new ArrayList<String>(listFile.length);
         for (File file : listFile) {
@@ -73,7 +73,7 @@ public class MarsIO extends SimulationManagerAccessor {
 
         File f = new File(location);
         if (!f.isDirectory()) {
-            throw new IOException(location + " is not a valid directory.");
+            throw new IOException("{Dataset} " + location + " is not a valid directory.");
         }
         return f.isDirectory();
     }
@@ -98,7 +98,7 @@ public class MarsIO extends SimulationManagerAccessor {
             return listInputFiles.get(indexLast);
         }
         StringBuffer msg = new StringBuffer();
-        msg.append("Time value ");
+        msg.append("{Dataset} Time value ");
         msg.append(getSimulationManager().getTimeManager().timeToString());
         msg.append(" (");
         msg.append(time);
@@ -130,9 +130,9 @@ public class MarsIO extends SimulationManagerAccessor {
             return (time > time_r0 && time <= time_rf);
             }*/
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
+            throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
+            throw new IOException("{Dataset} Unable to read " + strTime
                     + " variable in file " + filename + " : " + e.getCause());
         }
         //return false;
@@ -159,9 +159,9 @@ public class MarsIO extends SimulationManagerAccessor {
                 return true;
             }
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
+            throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
+            throw new IOException("{Dataset} Unable to read " + strTime
                     + " variable in file " + filename + " : " + e.getCause());
         }
         return false;
@@ -172,7 +172,7 @@ public class MarsIO extends SimulationManagerAccessor {
         int index = indexFile - (1 - time_arrow) / 2;
         boolean noNext = (listInputFiles.size() == 1) || (index < 0) || (index >= listInputFiles.size() - 1);
         if (noNext) {
-            throw new IOException("Unable to find any file following " + listInputFiles.get(indexFile));
+            throw new IOException("{Dataset} Unable to find any file following " + listInputFiles.get(indexFile));
         }
         indexFile += time_arrow;
         return listInputFiles.get(indexFile);
@@ -182,10 +182,10 @@ public class MarsIO extends SimulationManagerAccessor {
         NetcdfFile nc;
         try {
             nc = NetcdfDataset.openFile(filename, null);
-            getLogger().info("Open dataset " + filename);
+            getLogger().info("{Dataset} Open " + filename);
             return nc;
         } catch (Exception e) {
-            IOException ioex = new IOException("Problem opening dataset " + filename + " - " + e.toString());
+            IOException ioex = new IOException("{Dataset} Problem opening dataset " + filename + " - " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
@@ -200,10 +200,10 @@ public class MarsIO extends SimulationManagerAccessor {
         NetcdfFile ncIn;
         try {
             ncIn = NetcdfDataset.openFile(opendapURL, null);
-            getLogger().info("Open remote dataset " + opendapURL);
+            getLogger().info("{Dataset} Open remote " + opendapURL);
             return ncIn;
         } catch (Exception e) {
-            IOException ioex = new IOException("Problem opening dataset " + opendapURL + " ==> " + e.toString());
+            IOException ioex = new IOException("{Dataset} Problem opening " + opendapURL + " ==> " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
@@ -216,7 +216,7 @@ public class MarsIO extends SimulationManagerAccessor {
         try {
             timeArr = nc.findVariable(strTime).read();
         } catch (Exception ex) {
-            IOException ioex = new IOException("Failed to read dataset time variable. " + ex.toString());
+            IOException ioex = new IOException("{Dataset} Failed to read time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
@@ -225,7 +225,7 @@ public class MarsIO extends SimulationManagerAccessor {
         long timeN = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1)));
         if (time < time0 || time > timeN) {
             StringBuffer msg = new StringBuffer();
-            msg.append("Time value ");
+            msg.append("{Dataset} Time value ");
             msg.append(getSimulationManager().getTimeManager().timeToString());
             msg.append(" (");
             msg.append(time);

@@ -22,7 +22,7 @@ public class Mars2dDataset extends Mars2dCommon {
     }
 
     void setOnFirstTime() throws Exception {
-        
+
         long t0 = getSimulationManager().getTimeManager().get_tO();
         ncIn = MarsIO.openFile(MarsIO.getFile(t0));
         readTimeLength();
@@ -42,17 +42,12 @@ public class Mars2dDataset extends Mars2dCommon {
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         rank += time_arrow;
-        try {
-            if (rank > (nbTimeRecords - 1) || rank < 0) {
-                ncIn = MarsIO.openFile(MarsIO.getNextFile(time_arrow));
-                nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-                rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
-            }
-            setAllFieldsTp1AtTime(rank);
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
+        if (rank > (nbTimeRecords - 1) || rank < 0) {
+            ncIn = MarsIO.openFile(MarsIO.getNextFile(time_arrow));
+            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
+        setAllFieldsTp1AtTime(rank);
+
     }
 }

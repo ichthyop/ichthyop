@@ -45,15 +45,9 @@ public class Mars3dOpendapDataset extends Mars3dCommon {
             z_w_tp0 = z_w_tp1;
         }
         rank += time_arrow;
-        try {
-            if (rank > (nbTimeRecords - 1) || rank < 0) {
-                throw new IndexOutOfBoundsException(ErrorMessage.TIME_OUTOF_BOUND.message());
-            }
-            setAllFieldsTp1AtTime(rank);
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
+        if (rank > (nbTimeRecords - 1) || rank < 0) {
+            throw new IndexOutOfBoundsException(ErrorMessage.TIME_OUTOF_BOUND.message());
         }
+        setAllFieldsTp1AtTime(rank);
     }
 }

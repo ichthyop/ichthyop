@@ -32,7 +32,7 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
         time_tp1 = t0;
     }
 
-    public void nextStepTriggered(NextStepEvent e) {
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
@@ -44,15 +44,9 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         rank += time_arrow;
-        try {
-            if (rank > (nbTimeRecords - 1) || rank < 0) {
-                throw new IndexOutOfBoundsException(ErrorMessage.TIME_OUTOF_BOUND.message());
-            }
-            setAllFieldsTp1AtTime(rank);
-        } catch (InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, ErrorMessage.NEXT_STEP.message(), ex);
+        if (rank > (nbTimeRecords - 1) || rank < 0) {
+            throw new IndexOutOfBoundsException(ErrorMessage.TIME_OUTOF_BOUND.message());
         }
+        setAllFieldsTp1AtTime(rank);
     }
 }

@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.previmer.ichthyop.dataset;
 
 import java.util.HashMap;
@@ -35,7 +34,10 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     }
 
     public Number get(String variableName, double[] pGrid, double time) {
-        return requiredVariables.get(variableName).get(pGrid, time);
+        if (null != requiredVariables.get(variableName)) {
+            return requiredVariables.get(variableName).get(pGrid, time);
+        }
+        return Float.NaN;
     }
 
     public void requireVariable(String name, Class requiredBy) {
