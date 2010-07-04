@@ -28,6 +28,8 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Ellipse2D;
@@ -115,6 +117,7 @@ public class WMSMapper extends JXMapKit {
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
         setTileFactory(tileFactory);
+        //getMainMap().addMouseMotionListener(new LonLatTracker());
     }
 
     public void setWMS(String wmsURL) {
@@ -1015,6 +1018,33 @@ public class WMSMapper extends JXMapKit {
             int blue = Integer.valueOf(rgb[2].substring(rgb[2].indexOf("=") + 1));
             return new Color(red, green, blue);
 
+        }
+    }
+
+    private class LonLatTracker extends MouseMotionAdapter {
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            java.awt.Dimension dim = getMainMap().getTileFactory().getMapSize(getMainMap().getZoom());
+            int tileSize = getMainMap().getTileFactory().getTileSize(getMainMap().getZoom());
+            float wMap = dim.width ;
+            float hMap = dim.height;
+            Rectangle view = getMainMap().getViewportBounds();
+            float x0Map = view.x;
+            float y0Map = view.y;
+            float hPnl = view.height;
+            float wPnl = view.width;
+            float xPnl = e.getX();
+            float yPnl = e.getY();
+
+            float xMap = x0Map + (xPnl / wPnl) * wMap;
+            float yMap = y0Map + (yPnl / hPnl) * hMap;
+            Point2D pt = new Point2D.Float(xMap, yMap);
+
+            System.out.println(x0Map + " " + y0Map + " - " + pt);
+
+            GeoPosition gp = getMainMap().getTileFactory().pixelToGeo(pt, getMainMap().getZoom());
+            System.out.println("MouseEvent " + e.getPoint() + " " + gp);
         }
     }
 }

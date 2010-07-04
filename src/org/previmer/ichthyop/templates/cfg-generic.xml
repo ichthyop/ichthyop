@@ -10,14 +10,14 @@
             <parameter type="serial">
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
-                <value>year 2008 month 01 day 07 at 16:00</value>
+                <value>year 2010 month 05 day 13 at 10:00</value>
                 <format>date</format>
                 <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
             <parameter type="serial">
                 <key>transport_duration</key>
                 <long_name>Transport duration</long_name>
-                <value>0001 day(s) 00 hour(s) 00 minute(s)</value>
+                <value>0000 day(s) 12 hour(s) 00 minute(s)</value>
                 <format>duration</format>
                 <description>Set the duration of particle transport. Format: #### day(s) ## hour(s) ## minute(s)</description>
             </parameter>
@@ -89,7 +89,7 @@
             <parameter>
                 <key>record_frequency</key>
                 <long_name>Record frequency</long_name>
-                <value>4</value>
+                <value>2</value>
                 <format>integer</format>
                 <default>4</default>
                 <description>Lagrangian model runs with its own computational time-step, set in the 'time option block'. You may not need to record every step of the simulation in the NetCDF output file. Set the record frequency as a number of computational time-steps. For instance, let's take dt = 1800s and record frequency = 6. Particle positions will be recorded every 3 hours (1800 * 6 = 10800s = 3h) in the NetCDF output file.</description>
@@ -394,14 +394,14 @@
             <parameter>
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
-                <value>*.nc</value>
+                <value>*iroise*.nc</value>
                 <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>
-                <value>true</value>
+                <value>false</value>
                 <format>boolean</format>
                 <default>false</default>
                 <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
@@ -409,7 +409,7 @@
             <parameter>
                 <key>north-west-corner.lat</key>
                 <long_name>Latitude of Northwest corner [North degree]</long_name>
-                <value>50.0</value>
+                <value>0.0</value>
                 <description>Set the latitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
                 <format>lonlat</format>
                 <default>0.0</default>
@@ -417,7 +417,7 @@
             <parameter>
                 <key>north-west-corner.lon</key>
                 <long_name>Longitude of Northwest corner [East degree]</long_name>
-                <value>-8.0</value>
+                <value>0.0</value>
                 <description>Set the longitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
                 <format>lonlat</format>
                 <default>0.0</default>
@@ -425,7 +425,7 @@
             <parameter>
                 <key>south-east-corner.lat</key>
                 <long_name>Latitude of Southeast corner [North degree]</long_name>
-                <value>47.0</value>
+                <value>0.0</value>
                 <description>Set the latitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
                 <format>lonlat</format>
                 <default>0.0</default>
@@ -462,7 +462,7 @@
             <parameter>
                 <key>field_var_bathy</key>
                 <long_name>Bathymetry at Rho points</long_name>
-                <value>H0</value>
+                <value>h0</value>
                 <default>H0</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
@@ -490,14 +490,14 @@
             <parameter>
                 <key>field_var_u</key>
                 <long_name>Zonal velocity</long_name>
-                <value>U</value>
+                <value>u</value>
                 <default>U</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
                 <long_name>Meridional velocity</long_name>
-                <value>V</value>
+                <value>v</value>
                 <default>V</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
@@ -528,7 +528,7 @@
             <parameter>
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
-                <value>*.nc</value>
+                <value>*iroise*.nc</value>
                 <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
@@ -603,7 +603,7 @@
             <parameter>
                 <key>field_var_bathy</key>
                 <long_name>Bathymetry at Rho points</long_name>
-                <value>H0</value>
+                <value>h0</value>
                 <default>H0</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
@@ -638,21 +638,21 @@
             <parameter>
                 <key>field_var_u</key>
                 <long_name>Zonal velocity</long_name>
-                <value>UZ</value>
+                <value>uz</value>
                 <default>UZ</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
                 <long_name>Meridional velocity</long_name>
-                <value>VZ</value>
+                <value>vz</value>
                 <default>VZ</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_zeta</key>
                 <long_name>Free-surface elevation</long_name>
-                <value>XE</value>
+                <value>xe</value>
                 <default>XE</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
@@ -1490,7 +1490,7 @@
                 <value>cfg/my_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
-                <template>zone.xml</template>
+                <template>zone-iroise.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
             </parameter>
             <parameter hidden="true">
@@ -1588,7 +1588,7 @@
                 <value>cfg/my_drifters.txt</value>
                 <default>cfg/my_drifters.txt</default>
                 <format>textfile</format>
-                <template>drifter.txt</template>
+                <template>drifter-iroise.txt</template>
                 <description>Select an existing drifter textfile (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/my_drifters1.xml' or '../my_drifters2.xml' etc.).</description>
             </parameter>
             <parameter hidden="true">
@@ -1626,7 +1626,7 @@
     </block>
     <block type="release">
         <key>release.stain</key>
-        <tree_path>Release/Stain of particles</tree_path>
+        <tree_path>Main/Release stain</tree_path>
         <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
         <enabled>true</enabled>
         <parameters>
@@ -1641,16 +1641,16 @@
             <parameter>
                 <key>lon_stain</key>
                 <long_name>Longitude [East degree]</long_name>
-                <value>-5.3</value>
-                <default>0.0</default>
+                <value>-5.5</value>
+                <default>-5.5</default>
                 <format>lonlat</format>
                 <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
             <parameter>
                 <key>lat_stain</key>
                 <long_name>Latitude [North degree]</long_name>
-                <value>48.1</value>
-                <default>0.0</default>
+                <value>48.4</value>
+                <default>48.4</default>
                 <format>lonlat</format>
                 <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
@@ -1665,8 +1665,8 @@
             <parameter>
                 <key>radius_stain</key>
                 <long_name>Radius of the stain [meter]</long_name>
-                <value>10000.0</value>
-                <default>10000.0</default>
+                <value>2000.0</value>
+                <default>2000.0</default>
                 <format>float</format>
                 <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
             </parameter>
@@ -1910,7 +1910,7 @@
                 <value>cfg/my_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
-                <template>zone.xml</template>
+                <template>zone-iroise.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads recruitment zones from the file and ignores the other types of zone (release zone for instance).</description>
             </parameter>
             <parameter hidden="true">

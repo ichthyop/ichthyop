@@ -1,106 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zones>
   <zone>
-    <key>Release close cost</key>
+    <key>Iroise release 1</key>
     <type>release</type>
     <enabled>true</enabled>
     <color>[r=255,g=0,b=255]</color>
     <polygon>
       <point>
         <index>0</index>
-        <lon>-5.0</lon>
-        <lat>48.2</lat>
+        <lon>-5.6</lon>
+        <lat>48.5</lat>
       </point>
       <point>
         <index>1</index>
-        <lon>-4.8</lon>
-        <lat>48.2</lat>
+        <lon>-5.4</lon>
+        <lat>48.5</lat>
       </point>
       <point>
         <index>2</index>
-        <lon>-4.8</lon>
-        <lat>48.0</lat>
+        <lon>-5.4</lon>
+        <lat>48.3</lat>
       </point>
       <point>
         <index>3</index>
-        <lon>-5.0</lon>
-        <lat>48.0</lat>
-      </point>
-    </polygon>
-    <bathy_mask>
-      <enabled>false</enabled>
-      <line_inshore>0.0</line_inshore>
-      <line_offshore>12000.0</line_offshore>
-    </bathy_mask>
-    <thickness>
-      <enabled>false</enabled>
-      <lower_depth>15.0</lower_depth>
-      <upper_depth>0.0</upper_depth>
-    </thickness>
-  </zone>
-  <zone>
-    <key>Release offshore</key>
-    <enabled>false</enabled>
-    <type>release</type>
-    <polygon>
-      <point>
-        <index>0</index>
-        <lon>-6.0</lon>
-        <lat>48.2</lat>
-      </point>
-      <point>
-        <index>1</index>
-        <lon>-5.8</lon>
-        <lat>48.2</lat>
-      </point>
-      <point>
-        <index>2</index>
-        <lon>-5.8</lon>
-        <lat>48.0</lat>
-      </point>
-      <point>
-        <index>3</index>
-        <lon>-6.0</lon>
-        <lat>48.0</lat>
-      </point>
-    </polygon>
-    <bathy_mask>
-      <enabled>false</enabled>
-      <line_inshore>0.0</line_inshore>
-      <line_offshore>12000.0</line_offshore>
-    </bathy_mask>
-    <thickness>
-      <enabled>false</enabled>
-      <upper_depth>9.0</upper_depth>
-      <lower_depth>11.0</lower_depth>
-    </thickness>
-    <color>[r=255,g=102,b=102]</color>
-  </zone>
-  <zone>
-    <key>Recruitment zone</key>
-    <type>recruitment</type>
-    <enabled>false</enabled>
-    <color>[r=102,g=255,b=102]</color>
-    <polygon>
-      <point>
-        <index>0</index>
-        <lon>-5.3</lon>
-        <lat>48.4</lat>
-      </point>
-      <point>
-        <index>1</index>
-        <lon>-4.7</lon>
-        <lat>48.4</lat>
-      </point>
-      <point>
-        <index>2</index>
-        <lon>-4.7</lon>
-        <lat>47.8</lat>
-      </point>
-      <point>
-        <index>3</index>
-        <lon>-5.3</lon>
-        <lat>47.8</lat>
+        <lon>-5.6</lon>
+        <lat>48.3</lat>
       </point>
     </polygon>
     <bathy_mask>
@@ -110,6 +34,44 @@
     </bathy_mask>
     <thickness>
       <enabled>true</enabled>
+      <lower_depth>15.0</lower_depth>
+      <upper_depth>0.0</upper_depth>
+    </thickness>
+  </zone>
+  <zone>
+    <key>Iroise recruitment 1</key>
+    <type>recruitment</type>
+    <enabled>true</enabled>
+    <color>[r=102,g=255,b=102]</color>
+    <polygon>
+      <point>
+        <index>0</index>
+        <lon>-5.63</lon>
+        <lat>48.6</lat>
+      </point>
+      <point>
+        <index>1</index>
+        <lon>-5.35</lon>
+        <lat>48.6</lat>
+      </point>
+      <point>
+        <index>2</index>
+        <lon>-5.35</lon>
+        <lat>48.29</lat>
+      </point>
+      <point>
+        <index>3</index>
+        <lon>-5.63</lon>
+        <lat>48.29</lat>
+      </point>
+    </polygon>
+    <bathy_mask>
+      <enabled>false</enabled>
+      <line_inshore>0.0</line_inshore>
+      <line_offshore>12000.0</line_offshore>
+    </bathy_mask>
+    <thickness>
+      <enabled>false</enabled>
       <lower_depth>15.0</lower_depth>
       <upper_depth>0.0</upper_depth>
     </thickness>
