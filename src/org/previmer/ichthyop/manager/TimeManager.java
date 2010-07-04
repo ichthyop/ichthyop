@@ -179,12 +179,12 @@ public class TimeManager extends AbstractManager implements ITimeManager {
 
         time += dt;
         calendar.setTimeInMillis(time * 1000L);
-        if (!getSimulationManager().isStopped() && Math.abs(time - t0) < simuDuration) {
+        if (Math.abs(time - t0) < simuDuration) {
             fireNextStepTriggered();
             i_step++;
             return true;
         }
-        fireLastStepTriggered();
+        lastStepTriggered();
         return false;
     }
 
@@ -310,7 +310,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
 
         for (int i = listenerList.length; i-- > 0;) {
             NextStepListener listener = listenerList[i];
-            listener.nextStepTriggered(new NextStepEvent(this));
+            listener.nextStepTriggered(new NextStepEvent(this, getSimulationManager().isStopped()));
         }
     }
 
@@ -323,7 +323,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         LastStepListener[] listenerList = (LastStepListener[]) listeners.getListeners(LastStepListener.class);
 
         for (LastStepListener listener : listenerList) {
-            listener.lastStepOccurred(new LastStepEvent(this));
+            listener.lastStepOccurred(new LastStepEvent(this, getSimulationManager().isStopped()));
         }
     }
 

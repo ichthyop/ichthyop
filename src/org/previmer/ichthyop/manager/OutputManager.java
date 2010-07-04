@@ -399,6 +399,9 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
 
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
+        if (e.isInterrupted()) {
+            return;
+        }
         ITimeManager timeManager = e.getSource();
         if (((timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
             writeToNetCDF(i_record++);
@@ -485,14 +488,16 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     public void lastStepOccurred(LastStepEvent e) {
-        writeToNetCDF(i_record);
+        if (!e.isInterrupted()) {
+            writeToNetCDF(i_record);
+        }
+        close();
         if (null != predefinedTrackers) {
             predefinedTrackers.clear();
         }
         if (null != customTrackers) {
             customTrackers.clear();
         }
-        close();
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {

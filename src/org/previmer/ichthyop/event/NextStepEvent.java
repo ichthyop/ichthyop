@@ -14,13 +14,20 @@ import java.util.EventObject;
  */
 public class NextStepEvent extends EventObject {
 
-    public NextStepEvent(Object source) {
+    private boolean interrupted;
+
+    public NextStepEvent(Object source, boolean interrupted) {
         super(source);
+        this.interrupted = interrupted;
     }
 
     @Override
     public ITimeManager getSource() {
         return (ITimeManager) source;
+    }
+
+    public boolean isInterrupted() {
+        return interrupted;
     }
 
 }

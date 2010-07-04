@@ -13,8 +13,15 @@ import java.util.EventObject;
  */
 public class LastStepEvent extends EventObject {
 
-    public LastStepEvent(Object source) {
+    private boolean interrupted;
+
+    public LastStepEvent(Object source, boolean interrupted) {
         super(source);
+        this.interrupted = interrupted;
+    }
+
+    public boolean isInterrupted() {
+        return interrupted;
     }
 
 }

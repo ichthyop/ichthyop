@@ -193,6 +193,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         header.addElement(getResourceMap().getString("tableZone.latitude"));
         model.setDataVector(vector, header);
         tablePolygon.setModel(model);
+        tablePolygon.getColumnModel().getColumn(0).setCellEditor(new StringCellEditor());
+        tablePolygon.getColumnModel().getColumn(1).setCellEditor(new StringCellEditor());
         LonLatFormat format = LonLatConverter.getFormat(zone.getPolygon().get(0).getLat());
         switch (format) {
             case DegMinSec:

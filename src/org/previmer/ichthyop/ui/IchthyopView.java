@@ -958,7 +958,6 @@ public class IchthyopView extends FrameView
             closeFolderAnimation();
             return simulActionTask = new SimulationRunTask(getApplication());
         } else {
-            getSimulationManager().stop();
             simulActionTask.cancel(true);
             return null;
         }
@@ -1013,20 +1012,23 @@ public class IchthyopView extends FrameView
                 getSimulationManager().getTimeManager().firstStepTriggered();
                 getSimulationManager().resetTimerCurrent();
                 do {
-                    if (!getSimulationManager().isStopped()) {
-                        /* step simulation */
-                        getSimulationManager().getSimulation().step();
-                        /* Print message progress */
-                        StringBuffer msg = new StringBuffer();
-                        msg.append(getSimulationManager().getTimeManager().stepToString());
-                        msg.append(" - ");
-                        msg.append(resourceMap.getString("simulationRun.msg.time"));
-                        msg.append(" ");
-                        msg.append(getSimulationManager().getTimeManager().timeToString());
-                        setMessage(msg.toString());
-                        setProgress(getSimulationManager().progressCurrent());
-                        publish(getSimulationManager().progressCurrent());
+                    /* check whether the simulation has been interrupted by user */
+                    if (getSimulationManager().isStopped()) {
+                        break;
                     }
+                    /* step simulation */
+                    getSimulationManager().getSimulation().step();
+                    /* Print message progress */
+                    StringBuffer msg = new StringBuffer();
+                    msg.append(getSimulationManager().getTimeManager().stepToString());
+                    msg.append(" - ");
+                    msg.append(resourceMap.getString("simulationRun.msg.time"));
+                    msg.append(" ");
+                    msg.append(getSimulationManager().getTimeManager().timeToString());
+                    setMessage(msg.toString());
+                    setProgress(getSimulationManager().progressCurrent());
+                    publish(getSimulationManager().progressCurrent());
+
                 } while (getSimulationManager().getTimeManager().hasNextStep());
             } while (getSimulationManager().hasNextSimulation());
             return null;
@@ -1060,6 +1062,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected void cancelled() {
+            getSimulationManager().stop();
             setMessage(resourceMap.getString("simulationRun.msg.interrupted"));
         }
 
@@ -2594,7 +2597,6 @@ public class IchthyopView extends FrameView
         });
 
     }//GEN-LAST:event_spinnerParticleSizeStateChanged
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
