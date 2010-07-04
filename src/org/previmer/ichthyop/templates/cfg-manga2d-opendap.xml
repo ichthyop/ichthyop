@@ -384,14 +384,14 @@
     </block>
     <block type="release">
         <key>release.zone</key>
-        <tree_path>Advanced/Release/From zone</tree_path>
+        <tree_path>Advanced/Release/From zones</tree_path>
         <description>Block of options for releasing particles within pre-defined geographical zones. This release mode adds a "zone" variable in the NetCDF output file. First time you enable the zone release, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
         <enabled>false</enabled>
         <parameters>
             <parameter>
                 <key>number_particles</key>
                 <long_name>Number of particles</long_name>
-                <value>100</value>
+                <value>1000</value>
                 <default>1000</default>
                 <format>integer</format>
                 <description>Number of particles released in the zones. The application randomly releases the particles within the zones in order to ensure a homogeneous distribution (= constant concentration of particles among the zones). The downside is that you do not control the number of particles released per zone. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
@@ -553,16 +553,16 @@
             <parameter>
                 <key>lon_stain</key>
                 <long_name>Longitude [East degree]</long_name>
-                <value>-5</value>
-                <default>0.0</default>
+                <value>-5.3</value>
+                <default>5.3</default>
                 <format>lonlat</format>
                 <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
             <parameter>
                 <key>lat_stain</key>
                 <long_name>Latitude [North degree]</long_name>
-                <value>48</value>
-                <default>0.0</default>
+                <value>48.1</value>
+                <default>48.1</default>
                 <format>lonlat</format>
                 <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
