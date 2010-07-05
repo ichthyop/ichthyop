@@ -23,6 +23,7 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriteable;
 import ichthyop.util.Constant;
+import java.io.File;
 
 /**
  * The output manager; creates NetCDF output files, one per simulation.
@@ -180,8 +181,7 @@ public class OutputNC {
 
         /** Ensures ouput path not null. Throws an exception otherwise */
         if (Configuration.getDirectorOut() == null) {
-            throw new IOException("Ouput path incorrect "
-                    + Configuration.getDirectorOut());
+            throw new IOException("Ouput path incorrect " + Configuration.getDirectorOut());
         }
 
         // Determines output file name
@@ -212,7 +212,10 @@ public class OutputNC {
         }
 
         // Create new netcdf file and add dimensions.
-        ncOut = NetcdfFileWriteable.createNew(strNcOut, false);
+        /* Suggested by D.Kaplan: Create a temporary *.nc.part file that file
+         * renamed into *.nc when the record is over
+         */
+        ncOut = NetcdfFileWriteable.createNew(strNcOut + ".part", false);
         drifter = ncOut.addDimension("drifter", Configuration.getNbParticles());
         time = ncOut.addUnlimitedDimension("time");
         if (Configuration.getTypeRecruitment() != Constant.NONE) {
@@ -267,14 +270,14 @@ public class OutputNC {
         }
         if (Configuration.getTypeRelease() == Constant.RELEASE_ZONE) {
             NCField RELEASE_ZONE = new NCField("release_zone", "release zone number at particle location",
-                "release zone > 0, out zone = 0", null, null, DataType.INT, new Dimension[]{drifter});
+                    "release zone > 0, out zone = 0", null, null, DataType.INT, new Dimension[]{drifter});
             addVar2NcOut(RELEASE_ZONE);
         }
         if (Configuration.getTypeRecruitment() != Constant.NONE) {
             NCField RECRUITMENT_ZONE = new NCField("recruitment_zone", "recruitment zone number at particle location",
-                "recruitment zone > 0, out zone = 0", DataType.INT);
-        NCField RECRUITED = new NCField("recruited", "status of recruitment", "boolean", null, null,
-                DataType.INT, new Dimension[]{time, drifter, zone});
+                    "recruitment zone > 0, out zone = 0", DataType.INT);
+            NCField RECRUITED = new NCField("recruited", "status of recruitment", "boolean", null, null,
+                    DataType.INT, new Dimension[]{time, drifter, zone});
             addVar2NcOut(RECRUITED);
             addVar2NcOut(RECRUITMENT_ZONE);
         }
@@ -464,6 +467,12 @@ public class OutputNC {
     public static void close() {
         try {
             ncOut.close();
+            // now rename to base filename
+            String strFilePart = ncOut.getLocation();
+            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+            File filePart = new File(strFilePart);
+            File fileBase = new File(strFileBase);
+            filePart.renameTo(fileBase);
         } catch (java.io.IOException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
@@ -605,7 +614,6 @@ public class OutputNC {
      * <p>Copyright: Copyright (c) 2007 - Free software under GNU GPL</p>
      * @author P.Verley
      */
-
     public static class NCField {
 
         /**
