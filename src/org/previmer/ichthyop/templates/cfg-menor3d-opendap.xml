@@ -474,7 +474,7 @@
             <parameter>
                 <key>wind_file</key>
                 <long_name>Wind scenario file</long_name>
-                <value>cfg/my_wind-scenario.txt</value>
+                <value>cfg/medsea_wind-scenario.txt</value>
                 <default>cfg/my_wind-scenario.txt</default>
                 <format>textfile</format>
                 <template>wind-iroise.txt</template>
@@ -543,7 +543,7 @@
             <parameter>
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
-                <value>cfg/my_zones.xml</value>
+                <value>cfg/medsea_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
                 <template>zone-medsea.xml</template>
@@ -608,7 +608,7 @@
             <parameter>
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
-                <value>cfg/my_zones.xml</value>
+                <value>cfg/medsea_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
                 <template>zone-medsea.xml</template>
@@ -641,7 +641,7 @@
             <parameter>
                 <key>txtfile</key>
                 <long_name>Drifter file</long_name>
-                <value>cfg/my_drifters.txt</value>
+                <value>cfg/medsea_drifters.txt</value>
                 <default>cfg/my_drifters.txt</default>
                 <format>textfile</format>
                 <template>drifter-medsea.txt</template>
@@ -963,7 +963,7 @@
             <parameter>
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
-                <value>cfg/my_zones.xml</value>
+                <value>cfg/medsea_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
                 <template>zone-medsea.xml</template>

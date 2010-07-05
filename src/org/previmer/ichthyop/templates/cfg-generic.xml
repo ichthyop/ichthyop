@@ -960,6 +960,13 @@
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
+                <key>field_var_zeta</key>
+                <long_name>Averaged free-surface</long_name>
+                <value>zeta</value>
+                <default>zeta</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
                 <key>field_var_u</key>
                 <long_name>U-momentum component</long_name>
                 <value>u</value>
@@ -1421,7 +1428,7 @@
                 <value>cfg/my_wind-scenario.txt</value>
                 <default>cfg/my_wind-scenario.txt</default>
                 <format>textfile</format>
-                <template>wind.txt</template>
+                <template>wind-iroise.txt</template>
                 <description>Select an existing wind scenario (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/wind_scenario1.xml' or '../wind_scenario2.xml' etc.).</description>
             </parameter>
             <parameter hidden="true">
@@ -1555,7 +1562,7 @@
                 <value>cfg/my_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
-                <template>zone.xml</template>
+                <template>zone-iroise.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone recruitment zone for instance).</description>
             </parameter>
             <parameter hidden="true">
@@ -1626,7 +1633,7 @@
     </block>
     <block type="release">
         <key>release.stain</key>
-        <tree_path>Main/Release stain</tree_path>
+        <tree_path>Release/Release stain</tree_path>
         <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
         <enabled>true</enabled>
         <parameters>

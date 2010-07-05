@@ -487,7 +487,7 @@
             <parameter>
                 <key>wind_file</key>
                 <long_name>Wind scenario file</long_name>
-                <value>cfg/my_wind-scenario.txt</value>
+                <value>cfg/iroise_wind-scenario.txt</value>
                 <default>cfg/my_wind-scenario.txt</default>
                 <format>textfile</format>
                 <template>wind-iroise.txt</template>
@@ -556,7 +556,7 @@
             <parameter>
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
-                <value>cfg/my_zones.xml</value>
+                <value>cfg/iroise_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
                 <template>zone-iroise.xml</template>
@@ -621,10 +621,10 @@
             <parameter>
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
-                <value>cfg/my_zones.xml</value>
+                <value>cfg/iroise_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
-                <template>zone-medsea.xml</template>
+                <template>zone-iroise.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone recruitment zone for instance).</description>
             </parameter>
             <parameter hidden="true">
@@ -654,7 +654,7 @@
             <parameter>
                 <key>txtfile</key>
                 <long_name>Drifter file</long_name>
-                <value>cfg/my_drifters.txt</value>
+                <value>cfg/iroise_drifters.txt</value>
                 <default>cfg/my_drifters.txt</default>
                 <format>textfile</format>
                 <template>drifter-iroise.txt</template>
@@ -976,7 +976,7 @@
             <parameter>
                 <key>zone_file</key>
                 <long_name>Zone file</long_name>
-                <value>cfg/my_zones.xml</value>
+                <value>cfg/iroise_zones.xml</value>
                 <default>cfg/my_zones.xml</default>
                 <format>zonefile</format>
                 <template>zone-iroise.xml</template>
