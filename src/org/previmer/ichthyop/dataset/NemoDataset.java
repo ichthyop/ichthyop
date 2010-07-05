@@ -886,7 +886,11 @@ public class NemoDataset extends AbstractDataset {
     }
 
     public boolean isInWater(int i, int j) {
-        return isInWater(i, j, nz - 1);
+        try {
+            return isInWater(i, j, nz - 1);
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return false;
+        }
     }
 
     /**

@@ -119,7 +119,7 @@ abstract class RomsCommon extends AbstractDataset {
      */
     private double latMin, lonMin, latMax, lonMax, depthMax;
 
-    abstract void setAllFieldsTp1AtTime (int rank) throws IOException;
+    abstract void setAllFieldsTp1AtTime(int rank) throws IOException;
 
     void loadParameters() {
 
@@ -572,11 +572,7 @@ abstract class RomsCommon extends AbstractDataset {
     }
 
     public boolean isInWater(double[] pGrid) {
-        try {
-            return (maskRho[(int) Math.round(pGrid[1])][(int) Math.round(pGrid[0])] > 0);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
-        }
+        return isInWater((int) Math.round(pGrid[1]), (int) Math.round(pGrid[0]));
     }
 
     public boolean isOnEdge(double[] pGrid) {
@@ -681,7 +677,11 @@ abstract class RomsCommon extends AbstractDataset {
     }
 
     public boolean isInWater(int i, int j) {
-        return (maskRho[j][i] > 0);
+        try {
+            return (maskRho[j][i] > 0);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
     }
 
     public boolean isCloseToCost(double[] pGrid) {

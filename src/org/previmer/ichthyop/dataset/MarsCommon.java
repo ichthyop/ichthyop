@@ -167,18 +167,19 @@ public abstract class MarsCommon extends AbstractDataset {
         dxu = new double[ny];
         try {
             arrLon = ncIn.findVariable(strLon).read(new int[]{ipo}, new int[]{nx});
-            } catch (Exception ex) {
+        } catch (Exception ex) {
             IOException ioex = new IOException("{Dataset} Error reading longitude variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
             arrLat = ncIn.findVariable(strLat).read(new int[]{jpo}, new int[]{ny});
-            } catch (Exception ex) {
+        } catch (Exception ex) {
             IOException ioex = new IOException("{Dataset} Error reading latitude variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
-        } try{
+        }
+        try {
             arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
         } catch (Exception ex) {
             IOException ioex = new IOException("{Dataset} Error reading bathymetry variable. " + ex.toString());
@@ -262,11 +263,7 @@ public abstract class MarsCommon extends AbstractDataset {
     }
 
     public boolean isInWater(double[] pGrid) {
-        try {
-            return (maskRho[(int) Math.round(pGrid[1])][(int) Math.round(pGrid[0])] > 0);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
-        }
+        return isInWater((int) Math.round(pGrid[1]), (int) Math.round(pGrid[0]));
     }
 
     public boolean isOnEdge(double[] pGrid) {
@@ -441,7 +438,11 @@ public abstract class MarsCommon extends AbstractDataset {
     }
 
     public boolean isInWater(int i, int j) {
-        return (maskRho[j][i] > 0);
+        try {
+            return (maskRho[j][i] > 0);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
     }
 
     public boolean isCloseToCost(double[] pGrid) {

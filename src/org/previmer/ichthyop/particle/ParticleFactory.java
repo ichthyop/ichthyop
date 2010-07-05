@@ -28,6 +28,9 @@ public class ParticleFactory {
                 particle.make2D();
             }
             particle.geo2Grid();
+            if (!particle.isInWater() || particle.isOnEdge()) {
+                particle.kill(ParticleMortality.OUT_OF_DOMAIN);
+            }
         } else {
             particle.kill(mortality);
         }

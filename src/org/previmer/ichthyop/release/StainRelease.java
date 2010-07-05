@@ -16,6 +16,7 @@
  */
 package org.previmer.ichthyop.release;
 
+import java.io.IOException;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
@@ -54,6 +55,11 @@ public class StainRelease extends AbstractReleaseProcess {
     }
 
     public int release(ReleaseEvent event) throws Exception {
+
+        boolean isStainInWater = getSimulationManager().getDataset().isInWater(getSimulationManager().getDataset().lonlat2xy(lon_stain, lat_stain));
+        if (!isStainInWater) {
+            throw new IOException("{Release stain} Center of the stain [lon: " + lon_stain + "; lat: " + lat_stain + "] is not in water or out of the domain. Fixed that in section Release stain.");
+        }
 
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nb_particles; p++) {
