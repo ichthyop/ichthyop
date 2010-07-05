@@ -10,6 +10,9 @@ import org.jdesktop.application.Action;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -117,6 +120,9 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             textFieldTemplate.setText(strTemplate);
             btnSave.getAction().setEnabled(verifyName(textFieldName.getText()));
             descriptionTextPane.setText(TEMPLATE.getTemplate(strTemplate).getDescription());
+            textFieldName.setText(TEMPLATE.getTemplate(strTemplate).getCfgName());
+            textFieldFile.setText(getFilename(textFieldPath.getText(), textFieldName.getText()));
+
         } else {
             descriptionTextPane.setText("");
         }
@@ -507,12 +513,14 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         private String longName;
         private String description;
         private String filename;
+        private String cfgname;
         private ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(NewConfigView.class);
 
         TEMPLATE() {
             longName = resourceMap.getString(name() + ".title");
             description = resourceMap.getString(name() + ".description");
             filename = resourceMap.getString(name() + ".xml");
+            cfgname = resourceMap.getString(name() + ".cfg");
         }
 
         @Override
@@ -526,6 +534,28 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         public String getFilename() {
             return filename;
+        }
+
+        public String getCfgName() {
+            SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy'_'MM'_'dd");
+            Calendar calendar = new GregorianCalendar();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            dtFormat.setCalendar(calendar);
+            StringBuffer sb = new StringBuffer();
+            sb.append(dtFormat.format(calendar.getTime()));
+            sb.append("_");
+            String username = System.getProperty("user.name");
+            if (null != username && !username.isEmpty()) {
+                sb.append(username);
+                sb.append("_config");
+                
+                
+            } else {
+                sb.append("my_config");
+            }
+            sb.append("_");
+            sb.append(cfgname);
+            return sb.toString();
         }
 
         public static TEMPLATE getTemplate(String name) {
