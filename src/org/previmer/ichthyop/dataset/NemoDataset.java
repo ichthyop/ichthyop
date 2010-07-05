@@ -160,7 +160,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strLon, strLat, strMask, strBathy;
+    static String strLon, strLat, strMask;
     /**
      *
      */
@@ -177,7 +177,6 @@ public class NemoDataset extends AbstractDataset {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
     public boolean is3D() {
         return true;
     }
@@ -654,7 +653,6 @@ public class NemoDataset extends AbstractDataset {
         strTimeDim = getParameter("field_dim_time");
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
-        strBathy = getParameter("field_var_bathy");
         strMask = getParameter("field_var_mask");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
@@ -913,7 +911,7 @@ public class NemoDataset extends AbstractDataset {
      *         <code>false</code> otherwise.
      */
     public boolean isCloseToCost(double[] pGrid) {
-        
+
         int i, j, k, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
@@ -948,6 +946,13 @@ public class NemoDataset extends AbstractDataset {
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double zRho = 0.d;
+        
+        /* case particle is going straight up to surface, due to strong
+         * buoyancy for instance.
+         */
+        if (depth > gdepW[nz - 1]) {
+            return (nz - 1);
+        }
         for (int k = nz - 1; k > 0; k--) {
             //System.out.println("t1 " + z_w[k] + " " + (float)depth + " " + z_rho[k]);
             if (depth <= gdepW[k] && depth > gdepT[k]) {
@@ -1326,7 +1331,7 @@ public class NemoDataset extends AbstractDataset {
      */
     private void sortInputFiles() throws IOException {
 
-        
+
         String path = IOTools.resolvePath(getParameter("input_path"));
         File file = new File(path);
 
@@ -1540,7 +1545,6 @@ public class NemoDataset extends AbstractDataset {
 //////////
 // Getters
 //////////
-
     /**
      * Gets the grid dimension in the XI-direction
      * @return an int, the grid dimension in the XI-direction (Zonal)

@@ -404,7 +404,7 @@
             <parameter>
                 <key>events</key>
                 <long_name>Release event(s)</long_name>
-                <value>"year 2010 month 05 day 13 at 10:00" "year 2010 month 05 day 13 at 18:00"</value>
+                <value>"year 01 month 05 day 03 at 00:00" "year 01 month 05 day 03 at 00:00"</value>
                 <default />
                 <format>list</format>
                 <description>Set the dates [year #### month ## day ## at HH:mm] of the release events. You can define as much events as necessary. Just make sure that: 1. the first release events does not occur before the beginning of the simulation, 2. events are defined in chronological order.</description>
