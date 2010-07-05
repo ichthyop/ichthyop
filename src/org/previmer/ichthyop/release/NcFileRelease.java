@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import ucar.ma2.ArrayDouble;
@@ -27,12 +28,11 @@ public class NcFileRelease extends AbstractReleaseProcess {
 
     @Override
     public void loadParameters() throws IOException {
-        filename = getParameter("ncfile");
+        
         /* make sure file exits and can be read */
-        File folder = new File(System.getProperty("user.dir"));
-        String pathname = new File(folder.toURI().resolve(filename)).getAbsolutePath();
+        filename = IOTools.resolveFile(getParameter("ncfile"));
 
-        File file = new File(pathname);
+        File file = new File(filename);
         if (!file.isFile()) {
             throw new FileNotFoundException("NetCDF file " + filename + " not found.");
         }

@@ -946,7 +946,7 @@ public class NemoDataset extends AbstractDataset {
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double zRho = 0.d;
-        
+
         /* case particle is going straight up to surface, due to strong
          * buoyancy for instance.
          */
@@ -1339,7 +1339,8 @@ public class NemoDataset extends AbstractDataset {
         file_hgr = checkExistenceAndUnicity(file, getParameter("hgr_pattern"));
         file_zgr = checkExistenceAndUnicity(file, getParameter("zgr_pattern"));
 
-        isGridInfoInOneFile = file_mask.matches(file_hgr) && file_mask.matches(file_zgr);
+        isGridInfoInOneFile = (new File(file_mask).equals(new File(file_hgr)))
+                && (new File(file_mask).equals(new File(file_zgr)));
 
         listUFiles = getInputList(path, getParameter("gridu_pattern"));
         listVFiles = getInputList(path, getParameter("gridv_pattern"));

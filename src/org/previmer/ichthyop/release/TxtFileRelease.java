@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
+import org.previmer.ichthyop.io.IOTools;
 
 /**
  *
@@ -36,9 +37,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
 
     private File getFile(String filename) throws IOException {
 
-        File folder = new File(System.getProperty("user.dir"));
-        String pathname = new File(folder.toURI().resolve(filename)).getAbsolutePath();
-
+        String pathname = IOTools.resolveFile(filename);
         File file = new File(pathname);
         if (!file.isFile()) {
             throw new FileNotFoundException("Drifter file " + filename + " not found.");

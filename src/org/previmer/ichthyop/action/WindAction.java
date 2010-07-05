@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.IOTools;
 
 /**
  *
@@ -28,9 +29,8 @@ public class WindAction extends AbstractAction {
 
         windprop = new Properties();
         scenarios = new HashMap();
-
-        File folder = new File(System.getProperty("user.dir"));
-        String filename = new File(folder.toURI().resolve(getParameter("wind_file"))).getAbsolutePath();
+        
+        String filename = IOTools.resolveFile(getParameter("wind_file"));
         File file = new File(filename);
         if (!file.isFile()) {
             throw new FileNotFoundException("Wind file " + filename + " not found.");

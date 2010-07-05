@@ -16,6 +16,7 @@ import org.previmer.ichthyop.io.XZone.XPoint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.ZoneFile;
 
 /**
@@ -42,9 +43,7 @@ public class ZoneManager extends AbstractManager implements IZoneManager {
 
     public void loadZonesFromFile(String filename, TypeZone type) throws Exception {
 
-        File file = new File(System.getProperty("user.dir"));
-        String pathname = new File(file.toURI().resolve(filename)).getAbsolutePath();
-
+        String pathname = IOTools.resolveFile(filename);
         File f = new File(pathname);
         if (!f.isFile()) {
             throw new FileNotFoundException("Zone file " + pathname + " not found.");
