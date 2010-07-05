@@ -25,7 +25,7 @@ public class OrientationZone extends Zone {
     private int[] startHour, startMinute, endHour, endMinute;
     private Calendar now, startTime, endTime;
     private int[] durationActivePeriod;
-    private int turtleActivity;
+    private long turtleActivity;
 
 ///////////////
 // Constructors
@@ -264,7 +264,7 @@ public class OrientationZone extends Zone {
     /**
      * @return the turtleActivity in seconds
      */
-    public int getTurtleActivity() {
+    public long getTurtleActivity() {
         return turtleActivity;
     }
 
@@ -272,7 +272,7 @@ public class OrientationZone extends Zone {
      * @param turtleActivity the turtleActivity to set
      */
     public void setTurtleActivity(float turtleActivity) {
-        this.turtleActivity = (int) (turtleActivity * Constant.ONE_DAY);
+        this.turtleActivity = (long) (turtleActivity * Constant.ONE_DAY);
     }
 
     /**

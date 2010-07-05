@@ -21,7 +21,7 @@ public class Turtle extends Particle {
     private HashMap<Integer, Integer[]> currentSpeedActivity, currentOrientationActivity;
     private boolean isActive;
     private int currentOrientationZone;
-    private int timerZone;
+    private long timerZone;
 
     public Turtle(int index, boolean is3D, double xmin, double xmax, double ymin, double ymax, double depthMin, double depthMax) {
         super(index, is3D, xmin, xmax, ymin, ymax, depthMin, depthMax);
