@@ -6,7 +6,6 @@ package ichthyop.core;
 
 import ichthyop.util.Constant;
 import java.awt.Color;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -21,11 +20,12 @@ public class OrientationZone extends Zone {
 ///////////////////////////////
     private int[] speedActivity, orientationActivity;
     private float[] swimmingSpeed, swimmingOrientation;
+    private float[] speedRange, orientationRange;
     private String[] activePeriod;
     private int[] startHour, startMinute, endHour, endMinute;
     private Calendar now, startTime, endTime;
     private int[] durationActivePeriod;
-    private int[] durationSwimmingSpeed, durationSwimmingOrientation;
+    private int turtleActivity;
 
 ///////////////
 // Constructors
@@ -65,10 +65,6 @@ public class OrientationZone extends Zone {
             endHour[i] = Integer.valueOf(period[1].split(":")[0]);
             endMinute[i] = Integer.valueOf(period[1].split(":")[1]);
         }
-
-        durationSwimmingSpeed = new int[speedActivity.length];
-
-        durationSwimmingOrientation = new int[orientationActivity.length];
         
         durationActivePeriod = new int[activePeriod.length];
         for (int i = 0; i < activePeriod.length; i++) {
@@ -95,18 +91,22 @@ public class OrientationZone extends Zone {
         for (int i = 0; i < speedActivity.length; i++) {
             sb.append("(");
             sb.append(swimmingSpeed[i]);
-            sb.append("m/s : ");
+            sb.append("m/s - activity: ");
             sb.append(speedActivity[i]);
-            sb.append("%) ");
+            sb.append("% - range: +/-");
+            sb.append(speedRange[i]);
+            sb.append("m/s)");
         }
         sb.append("\n");
         sb.append("  [Orientation] ");
         for (int i = 0; i < orientationActivity.length; i++) {
             sb.append("(");
             sb.append(swimmingOrientation[i]);
-            sb.append("° : ");
+            sb.append("° - activity: ");
             sb.append(orientationActivity[i]);
-            sb.append("%) ");
+            sb.append("% - range: ");
+            sb.append(orientationRange[i]);
+            sb.append("%)");
         }
         sb.append("\n");
         return sb.toString();
@@ -259,5 +259,47 @@ public class OrientationZone extends Zone {
             return (int) ((orientationActivity[rank] / 100.f) * durationActivePeriod[indexPeriod]);
         }
         return 0;
+    }
+
+    /**
+     * @return the turtleActivity in seconds
+     */
+    public int getTurtleActivity() {
+        return turtleActivity;
+    }
+
+    /**
+     * @param turtleActivity the turtleActivity to set
+     */
+    public void setTurtleActivity(float turtleActivity) {
+        this.turtleActivity = (int) (turtleActivity * Constant.ONE_DAY);
+    }
+
+    /**
+     * @return the speedRange
+     */
+    public float[] getSpeedRange() {
+        return speedRange;
+    }
+
+    /**
+     * @param speedRange the speedRange to set
+     */
+    public void setSpeedRange(float[] speedRange) {
+        this.speedRange = speedRange;
+    }
+
+    /**
+     * @return the orientationRange
+     */
+    public float[] getOrientationRange() {
+        return orientationRange;
+    }
+
+    /**
+     * @param orientationRange the orientationRange to set
+     */
+    public void setOrientationRange(float[] orientationRange) {
+        this.orientationRange = orientationRange;
     }
 }

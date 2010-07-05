@@ -257,11 +257,14 @@ public interface Structure {
     // TURTLE
     /////////
     final public static String SECTION_TURTLE = "TURTLE";
+    final public static String TURTLE_ACTIVITY = "turtle activity";
     final public static String ACTIVE_ORIENTATTION = "active orientation";
     final public static String ACTIVE_PERIOD = "active period";
     final public static String SPEED_INTENSITY = "speed";
+    final public static String SPEED_RANGE = "speed range";
     final public static String SPEED_ACTIVITY = "speed activity";
     final public static String ORIENTATION = "orientation";
+    final public static String ORIENTATION_RANGE = "orientation range";
     final public static String ORIENTATION_ACTIVITY = "orientation activity";
 
     ///////

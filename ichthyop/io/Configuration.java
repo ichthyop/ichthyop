@@ -1075,10 +1075,13 @@ public class Configuration {
                     bathyMin, bathyMax,
                     color);
             zone.setSwimmingSpeed(readFloat(file, section, Structure.SPEED_INTENSITY, true));
+            zone.setSpeedRange(readFloat(file, section, Structure.SPEED_RANGE, true));
             zone.setSpeedActivity(readInteger(file, section, Structure.SPEED_ACTIVITY, true));
             zone.setSwimmingOrientation(readFloat(file, section, Structure.ORIENTATION, true));
+            zone.setOrientationRange(readFloat(file, section, Structure.ORIENTATION_RANGE, true));
             zone.setOrientationActivity(readInteger(file, section, Structure.ORIENTATION_ACTIVITY, true));
             zone.setActivePeriod(readString(file, section, Structure.ACTIVE_PERIOD, true));
+            zone.setTurtleActivity(readFloat(file, section, Structure.TURTLE_ACTIVITY, false)[0]);
             list.add(zone);
         }
         return list;

@@ -20,6 +20,8 @@ public class Turtle extends Particle {
     private static boolean FLAG_ACTIVE_ORIENTATION, FLAG_ADVECTION;
     private HashMap<Integer, Integer[]> currentSpeedActivity, currentOrientationActivity;
     private boolean isActive;
+    private int currentOrientationZone;
+    private int timerZone;
 
     public Turtle(int index, boolean is3D, double xmin, double xmax, double ymin, double ymax, double depthMin, double depthMax) {
         super(index, is3D, xmin, xmax, ymin, ymax, depthMin, depthMax);
@@ -43,22 +45,24 @@ public class Turtle extends Particle {
             currentSpeedActivity = new HashMap(Configuration.getOrientationZones().size());
             currentOrientationActivity = new HashMap(Configuration.getOrientationZones().size());
             for (OrientationZone zone : Configuration.getOrientationZones()) {
-                resetActivity(zone);
+                resetActivePeriodCounters(zone);
             }
-
+            currentOrientationZone = -1;
+            timerZone = 0;
         }
+
     }
 
-    private void resetActivity(OrientationZone zone) {
+    private void resetActivePeriodCounters(OrientationZone zone) {
         isActive = false;
-        
+
         /* reset speed activity */
         Integer[] zeros = new Integer[zone.getSpeedActivity().length];
         for (int i = 0; i < zeros.length; i++) {
             zeros[i] = 0;
         }
         currentSpeedActivity.put(zone.getIndex(), zeros);
-        
+
         /* reset orientation activity */
         zeros = new Integer[zone.getOrientationActivity().length];
         for (int i = 0; i < zeros.length; i++) {
@@ -93,6 +97,15 @@ public class Turtle extends Particle {
         if (numZone != -1) {
             // retrieve the orientation zone
             OrientationZone zone = getOrientationZone(numZone);
+            // check if did not exceed turtle activity in this zone
+            if (currentOrientationZone == numZone) {
+                if (timerZone >= zone.getTurtleActivity()) {
+                    return;
+                }
+            } else {
+                currentOrientationZone = numZone;
+                timerZone = 0;
+            }
             // check wether it is active period for the corresponding zone
             if (isActivePeriod(time, zone)) {
                 if (!isActive) {
@@ -109,9 +122,10 @@ public class Turtle extends Particle {
                 geog2Grid();
             } else {
                 if (isActive) {
-                    resetActivity(zone);
+                    resetActivePeriodCounters(zone);
                 }
             }
+            timerZone += dt;
         }
     }
 
@@ -131,7 +145,13 @@ public class Turtle extends Particle {
 
         if (currentSpeedActivity.get(zone.getIndex())[rank] < zone.getDurationSwimmingSpeed(time, rank)) {
             currentSpeedActivity.get(zone.getIndex())[rank] += (int) dt;
-            return zone.getSwimmingSpeed()[rank];
+            // get base speed
+            double swimSpeed = zone.getSwimmingSpeed()[rank];
+            // get the range for this speed
+            double range = zone.getSpeedRange()[rank];
+            //  base_speed - range <= real_speed <= base_speed + range
+            swimSpeed += (2.d * Math.random() - 1.d) * range;
+            return swimSpeed;
         } else {
             return getSpeed(time, zone);
         }
@@ -144,7 +164,13 @@ public class Turtle extends Particle {
         if (currentOrientationActivity.get(zone.getIndex())[rank] < zone.getDurationSwimmingOrientation(time, rank)) {
             currentOrientationActivity.get(zone.getIndex())[rank] += (int) dt;
             if (rank < zone.getSwimmingOrientation().length) {
-                return zone.getSwimmingOrientation()[rank];
+                // get base orientation
+                double swimOrientation = zone.getSwimmingOrientation()[rank];
+                // get orientation range
+                double range = zone.getOrientationRange()[rank];
+                //  base_orientation - range <= real_orientation <= base_orientation + range
+                swimOrientation += (2.d * Math.random() - 1.d) * range;
+                return swimOrientation;
             } else {
                 return Math.random() * 360.d;
             }
