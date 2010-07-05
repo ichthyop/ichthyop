@@ -67,6 +67,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private List<ITracker> trackers;
     private List<Class> predefinedTrackers;
     private List<String> customTrackers;
+    private String basename;
 
     public static OutputManager getInstance() {
         return outputManager;
@@ -84,7 +85,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     }
 
     public String getFileLocation() {
-        return ncOut.getLocation();
+        return basename;
     }
 
     private String makeFileLocation() throws IOException {
@@ -94,7 +95,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             filename += getParameter("file_prefix") + "_";
         }
         filename += getSimulationManager().getId() + ".nc";
-        File file = new File(filename + ".tmp");
+        File file = new File(filename);
         try {
             IOTools.makeDirectories(file.getAbsolutePath());
             file.createNewFile();
@@ -104,7 +105,8 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        return filename;
+        basename = filename;
+        return filename + ".part";
     }
 
     /**
@@ -113,6 +115,11 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
     private void close() {
         try {
             ncOut.close();
+            String strFilePart = ncOut.getLocation();
+            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+            File filePart = new File(strFilePart);
+            File fileBase = new File(strFileBase);
+            filePart.renameTo(fileBase);
             getLogger().info("Closed NetCDF output file.");
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> " + ex.toString());
