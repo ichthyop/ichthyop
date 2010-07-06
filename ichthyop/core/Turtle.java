@@ -20,8 +20,8 @@ public class Turtle extends Particle {
     private static boolean FLAG_ACTIVE_ORIENTATION, FLAG_ADVECTION;
     private HashMap<Integer, Integer[]> currentSpeedActivity, currentOrientationActivity;
     private boolean isActive;
-    private int currentOrientationZone;
-    private long timerZone;
+    private long[] timerZone;
+    private boolean[] startTiming;
 
     public Turtle(int index, boolean is3D, double xmin, double xmax, double ymin, double ymax, double depthMin, double depthMax) {
         super(index, is3D, xmin, xmax, ymin, ymax, depthMin, depthMax);
@@ -42,15 +42,15 @@ public class Turtle extends Particle {
         FLAG_ADVECTION = Configuration.isAdvection();
         FLAG_ACTIVE_ORIENTATION = Configuration.isActiveOrientation();
         if (FLAG_ACTIVE_ORIENTATION) {
-            currentSpeedActivity = new HashMap(Configuration.getOrientationZones().size());
-            currentOrientationActivity = new HashMap(Configuration.getOrientationZones().size());
+            int nbZones = Configuration.getOrientationZones().size();
+            currentSpeedActivity = new HashMap(nbZones);
+            currentOrientationActivity = new HashMap(nbZones);
             for (OrientationZone zone : Configuration.getOrientationZones()) {
                 resetActivePeriodCounters(zone);
             }
-            currentOrientationZone = -1;
-            timerZone = 0;
+            timerZone = new long[nbZones];
+            startTiming = new boolean[nbZones];
         }
-
     }
 
     private void resetActivePeriodCounters(OrientationZone zone) {
@@ -98,13 +98,11 @@ public class Turtle extends Particle {
             // retrieve the orientation zone
             OrientationZone zone = getOrientationZone(numZone);
             // check if did not exceed turtle activity in this zone
-            if (currentOrientationZone == numZone) {
-                if (timerZone >= zone.getTurtleActivity()) {
-                    return;
-                }
-            } else {
-                currentOrientationZone = numZone;
-                timerZone = 0;
+            if (!startTiming[numZone]) {
+                startTiming[numZone] = true;
+            }
+            if (timerZone[numZone] >= zone.getTurtleActivity()) {
+                return;
             }
             // check wether it is active period for the corresponding zone
             if (isActivePeriod(time, zone)) {
@@ -125,7 +123,11 @@ public class Turtle extends Particle {
                     resetActivePeriodCounters(zone);
                 }
             }
-            timerZone += dt;
+        }
+        for (int i = 0; i < timerZone.length; i++) {
+            if (startTiming[i]) {
+                timerZone[i] += dt;
+            }
         }
     }
 
