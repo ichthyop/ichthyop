@@ -134,19 +134,19 @@
                                           <Group type="102" attributes="0">
                                               <EmptySpace min="-2" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="lblCfgFile" alignment="0" pref="420" max="32767" attributes="0"/>
+                                                  <Component id="lblCfgFile" alignment="0" pref="432" max="32767" attributes="0"/>
                                                   <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="btnNewCfgFile" pref="136" max="32767" attributes="0"/>
+                                                      <Component id="btnNewCfgFile" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                                                      <Component id="btnOpenCfgFile" pref="142" max="32767" attributes="0"/>
-                                                      <EmptySpace min="-2" max="-2" attributes="0"/>
-                                                      <Component id="btnCloseCfgFile" pref="130" max="32767" attributes="0"/>
+                                                      <Component id="btnOpenCfgFile" min="-2" pref="107" max="-2" attributes="0"/>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Component id="btnCloseCfgFile" min="-2" max="-2" attributes="0"/>
                                                   </Group>
                                                   <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="btnSaveCfgFile" pref="143" max="32767" attributes="0"/>
+                                                      <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="btnSaveAsCfgFile" pref="165" max="32767" attributes="0"/>
-                                                      <EmptySpace min="-2" pref="106" max="-2" attributes="0"/>
+                                                      <Component id="btnSaveAsCfgFile" min="-2" pref="112" max="-2" attributes="0"/>
+                                                      <EmptySpace pref="225" max="32767" attributes="1"/>
                                                   </Group>
                                               </Group>
                                               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -158,18 +158,22 @@
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace min="-2" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="btnOpenCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnNewCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnCloseCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
+                                                  <Group type="102" attributes="0">
+                                                      <Group type="103" groupAlignment="0" attributes="0">
+                                                          <Component id="btnOpenCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                          <Component id="btnNewCfgFile" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                      </Group>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Group type="103" groupAlignment="0" attributes="0">
+                                                          <Component id="btnSaveCfgFile" min="-2" max="-2" attributes="0"/>
+                                                          <Component id="btnSaveAsCfgFile" min="-2" max="-2" attributes="0"/>
+                                                      </Group>
+                                                  </Group>
+                                                  <Component id="btnCloseCfgFile" min="-2" max="-2" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="lblCfgFile" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace pref="36" max="32767" attributes="0"/>
+                                              <EmptySpace max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -262,12 +266,17 @@
                                   <Layout>
                                     <DimensionLayout dim="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace min="-2" max="-2" attributes="0"/>
-                                              <Component id="btnSimulationRun" pref="237" max="32767" attributes="0"/>
-                                              <EmptySpace min="-2" max="-2" attributes="0"/>
-                                              <Component id="btnPreview" pref="177" max="32767" attributes="0"/>
-                                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                                          <Group type="102" attributes="0">
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Group type="103" groupAlignment="0" attributes="0">
+                                                  <Group type="102" alignment="0" attributes="0">
+                                                      <Component id="btnPreview" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace max="-2" attributes="0"/>
+                                                      <Component id="btnSimulationRun" min="-2" max="-2" attributes="0"/>
+                                                  </Group>
+                                                  <Component id="ckBoxDrawGrid" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              </Group>
+                                              <EmptySpace pref="135" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -276,9 +285,11 @@
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="btnPreview" alignment="0" min="-2" max="-2" attributes="0"/>
                                                   <Component id="btnSimulationRun" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="btnPreview" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <Component id="ckBoxDrawGrid" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
@@ -306,6 +317,15 @@
                                         <Property name="name" type="java.lang.String" value="btnSimulationRun" noResource="true"/>
                                         <Property name="verticalTextPosition" type="int" value="3"/>
                                       </Properties>
+                                    </Component>
+                                    <Component class="javax.swing.JCheckBox" name="ckBoxDrawGrid">
+                                      <Properties>
+                                        <Property name="text" type="java.lang.String" resourceKey="ckBoxDrawGrid.text"/>
+                                        <Property name="name" type="java.lang.String" value="ckBoxDrawGrid" noResource="true"/>
+                                      </Properties>
+                                      <Events>
+                                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ckBoxDrawGridActionPerformed"/>
+                                      </Events>
                                     </Component>
                                   </SubComponents>
                                 </Container>
@@ -644,6 +664,9 @@
                                                   <StringArray count="1">
                                                     <StringItem index="0" value="None"/>
                                                   </StringArray>
+                                                </Property>
+                                                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="autoRangeColorbar" methodName="autoRangeColorbar"/>
                                                 </Property>
                                                 <Property name="name" type="java.lang.String" value="cbBoxVariable" noResource="true"/>
                                               </Properties>

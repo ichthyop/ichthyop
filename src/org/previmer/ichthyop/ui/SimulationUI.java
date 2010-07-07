@@ -70,6 +70,7 @@ public class SimulationUI extends JPanel {
     private static RenderingHints hints = null;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private int height = 500, width = 500;
+    private boolean isGridVisible = false;
 
 ///////////////
 // Constructors
@@ -161,8 +162,17 @@ public class SimulationUI extends JPanel {
                 cell.draw(i, j, w, h);
                 graphic.setColor(cell.getColor(i, j));
                 graphic.fillPolygon(cell);
+                if (isGridVisible) {
+                    graphic.setColor(Color.LIGHT_GRAY);
+                    graphic.drawPolygon(cell);
+                }
             }
         }
+    }
+
+    public void setGridVisible(boolean visible) {
+        isGridVisible = visible;
+        repaintBackground();
     }
 
     /**

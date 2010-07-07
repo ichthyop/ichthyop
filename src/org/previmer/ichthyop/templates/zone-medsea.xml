@@ -41,7 +41,7 @@
   <zone>
     <key>Recruit Med 1</key>
     <enabled>true</enabled>
-    <type>release</type>
+    <type>recruitment</type>
     <polygon>
       <point>
         <index>0</index>

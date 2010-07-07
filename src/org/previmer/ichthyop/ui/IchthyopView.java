@@ -516,6 +516,7 @@ public class IchthyopView extends FrameView
         scrollPaneSimulationUI.setVisible(true);
         getSimulationUI().init();
         getSimulationUI().repaintBackground();
+        ckBoxDrawGrid.setEnabled(true);
     }
 
     private void hideSimulationPreview() {
@@ -523,6 +524,7 @@ public class IchthyopView extends FrameView
         if (!taskPaneSimulation.isCollapsed()) {
             pnlProgress.setVisible(true);
         }
+        ckBoxDrawGrid.setEnabled(false);
     }
 
     private class SimulationPreviewTask extends SFTask {
@@ -1286,7 +1288,14 @@ public class IchthyopView extends FrameView
 
     @Action
     public Task autoRangeColorbar() {
-        return new AutoRangeTask(getApplication(), (String) cbBoxVariable.getSelectedItem());
+        String varName = (String) cbBoxVariable.getSelectedItem();
+        if (varName.startsWith("None")) {
+            btnAutoRange.setEnabled(false);
+            return null;
+        } else {
+            btnAutoRange.setEnabled(true);
+            return new AutoRangeTask(getApplication(), (String) cbBoxVariable.getSelectedItem());
+        }
     }
 
     private class AutoRangeTask extends SFTask<float[], Object> {
@@ -1339,7 +1348,7 @@ public class IchthyopView extends FrameView
         btnColorMin.setEnabled(enabled);
         btnColorMed.setEnabled(enabled);
         btnColorMax.setEnabled(enabled);
-        btnAutoRange.getAction().setEnabled(enabled);
+        btnAutoRange.getAction().setEnabled(enabled && !((String) cbBoxVariable.getSelectedItem()).matches("None"));
         btnApplyColorbar.getAction().setEnabled(enabled);
         spinnerParticleSize.setEnabled(enabled);
     }
@@ -1371,6 +1380,7 @@ public class IchthyopView extends FrameView
         pnlSimulation = new javax.swing.JPanel();
         btnPreview = new javax.swing.JToggleButton();
         btnSimulationRun = new javax.swing.JButton();
+        ckBoxDrawGrid = new javax.swing.JCheckBox();
         taskPaneMapping = new org.jdesktop.swingx.JXTaskPane();
         pnlMapping = new javax.swing.JPanel();
         btnMapping = new javax.swing.JButton();
@@ -1538,18 +1548,18 @@ public class IchthyopView extends FrameView
             .addGroup(pnlFileLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                    .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
                     .addGroup(pnlFileLayout.createSequentialGroup()
-                        .addComponent(btnNewCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                        .addComponent(btnNewCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnOpenCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
+                        .addComponent(btnOpenCfgFile, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCloseCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
+                        .addComponent(btnCloseCfgFile))
                     .addGroup(pnlFileLayout.createSequentialGroup()
-                        .addComponent(btnSaveCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
+                        .addComponent(btnSaveCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
-                        .addGap(106, 106, 106)))
+                        .addComponent(btnSaveAsCfgFile, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 225, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
@@ -1557,16 +1567,18 @@ public class IchthyopView extends FrameView
             .addGroup(pnlFileLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnOpenCfgFile)
-                    .addComponent(btnNewCfgFile)
+                    .addGroup(pnlFileLayout.createSequentialGroup()
+                        .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnOpenCfgFile)
+                            .addComponent(btnNewCfgFile))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnSaveCfgFile)
+                            .addComponent(btnSaveAsCfgFile)))
                     .addComponent(btnCloseCfgFile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSaveCfgFile)
-                    .addComponent(btnSaveAsCfgFile))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCfgFile)
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneConfiguration.getContentPane().add(pnlFile);
@@ -1596,24 +1608,37 @@ public class IchthyopView extends FrameView
         btnSimulationRun.setName("btnSimulationRun"); // NOI18N
         btnSimulationRun.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
+        ckBoxDrawGrid.setText(resourceMap.getString("ckBoxDrawGrid.text")); // NOI18N
+        ckBoxDrawGrid.setName("ckBoxDrawGrid"); // NOI18N
+        ckBoxDrawGrid.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ckBoxDrawGridActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlSimulationLayout = new javax.swing.GroupLayout(pnlSimulation);
         pnlSimulation.setLayout(pnlSimulationLayout);
         pnlSimulationLayout.setHorizontalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSimulationLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnSimulationRun, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnPreview, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlSimulationLayout.createSequentialGroup()
+                        .addComponent(btnPreview)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSimulationRun))
+                    .addComponent(ckBoxDrawGrid))
+                .addContainerGap(135, Short.MAX_VALUE))
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSimulationLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnPreview)
-                    .addComponent(btnSimulationRun))
+                    .addComponent(btnSimulationRun)
+                    .addComponent(btnPreview))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(ckBoxDrawGrid)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1693,6 +1718,7 @@ public class IchthyopView extends FrameView
         lblVariable.setName("lblVariable"); // NOI18N
 
         cbBoxVariable.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "None" }));
+        cbBoxVariable.setAction(actionMap.get("autoRangeColorbar")); // NOI18N
         cbBoxVariable.setName("cbBoxVariable"); // NOI18N
 
         lblMin.setText(resourceMap.getString("lblMin.text")); // NOI18N
@@ -2566,6 +2592,11 @@ public class IchthyopView extends FrameView
         });
 
     }//GEN-LAST:event_spinnerParticleSizeStateChanged
+
+    private void ckBoxDrawGridActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxDrawGridActionPerformed
+        // TODO add your handling code here:
+        getSimulationUI().setGridVisible(ckBoxDrawGrid.isSelected());
+    }//GEN-LAST:event_ckBoxDrawGridActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
@@ -2602,6 +2633,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenuItem cancelMapMenuItem;
     private javax.swing.JComboBox cbBoxVariable;
     private javax.swing.JComboBox cbBoxWMS;
+    private javax.swing.JCheckBox ckBoxDrawGrid;
     private javax.swing.JCheckBox ckBoxReverseTime;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;

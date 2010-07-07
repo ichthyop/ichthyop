@@ -886,11 +886,7 @@ public class NemoDataset extends AbstractDataset {
     }
 
     public boolean isInWater(int i, int j) {
-        try {
-            return isInWater(i, j, nz - 1);
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            return false;
-        }
+        return isInWater(i, j, nz - 1);
     }
 
     /**
@@ -901,7 +897,11 @@ public class NemoDataset extends AbstractDataset {
      * @see #isInWater(int i, int j)
      */
     public boolean isInWater(double[] pGrid) {
-        return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
+        if (pGrid.length > 2) {
+            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
+        } else {
+            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        }
     }
 
     /**

@@ -163,6 +163,7 @@ public class SimulationManager implements ISimulationManager {
 
     public void resetId() {
         id = null;
+        i_simulation = 0;
     }
 
     private static String newId() {
