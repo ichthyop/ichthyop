@@ -4,7 +4,6 @@
  */
 package org.previmer.ichthyop.manager;
 
-import java.util.logging.Level;
 import org.jdom.JDOMException;
 import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.arch.IActionManager;
@@ -25,6 +24,7 @@ import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -101,7 +101,14 @@ public class SimulationManager implements ISimulationManager {
         cfgFile = null;
         nb_simulations = 1;
         if (file != null) {
-            /* Make sure file exists ans is valid */
+            /* Make sure file exists */
+            if (!file.isFile()) {
+                throw new FileNotFoundException("Configuration file " + file.getPath() + " not found.");
+            }
+            if (!file.canRead()) {
+                throw new IOException("Configuration file " + file.getPath() + " cannot be read");
+            }
+            /* Make sure file is valid */
             if (isValidXML(file)) {
                 if (!isValidConfigFile(file)) {
                     throw new IOException(file.getName() + " is not a valid Ichthyop configuration file.");
@@ -313,29 +320,6 @@ public class SimulationManager implements ISimulationManager {
 
     public int getIndexSimulation() {
         return i_simulation;
-    }
-
-    public void run() {
-        resetTimerGlobal();
-        do {
-            try {
-                System.out.println("=========================");
-                System.out.println("Simulation " + indexSimulationToString());
-                System.out.println("=========================");
-                setup();
-                init();
-                getTimeManager().firstStepTriggered();
-                resetTimerCurrent();
-                do {
-                    System.out.println("-----< " + getTimeManager().timeToString() + " >-----");
-                    getSimulation().step();
-                    System.out.println(timeLeftGlobal());
-                } while (!isStopped() && getTimeManager().hasNextStep());
-            } catch (Exception ex) {
-                logger.log(Level.SEVERE, null, ex);
-            }
-        } while (!isStopped() && hasNextSimulation());
-        System.out.println("End of simulation");
     }
 
     public void setup() throws Exception {

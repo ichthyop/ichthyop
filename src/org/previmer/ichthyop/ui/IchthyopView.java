@@ -25,10 +25,8 @@ import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -54,7 +52,6 @@ import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.ui.logging.LogLevel;
-import org.previmer.ichthyop.ui.logging.SystemOutHandler;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -69,8 +66,11 @@ public class IchthyopView extends FrameView
         initComponents();
         setStatusBar(statusBar);
 
-        /* Initialize the logs */
-        initLogging();
+        /* Plug the loggerPanel and the StatusBar */
+        loggerScrollPane.connectToLogger(getLogger());
+        statusBar.connectToLogger(getLogger());
+        /* Welcome user */
+        getLogger().info(Application.getInstance().getContext().getResourceMap().getString("Application.msg.welcome"));
 
         /* Set frame icon */
         getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
@@ -95,37 +95,6 @@ public class IchthyopView extends FrameView
 
     public ISimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
-    }
-
-    private void initLogging() {
-
-        /* Create a FileHandler (logs will be recorded in a file */
-        try {
-            String logPath = System.getProperty("user.dir") + File.separator;
-            StringBuffer logfile = new StringBuffer(logPath);
-            logfile.append("ichthyop");
-            logfile.append(".log");
-            IOTools.makeDirectories(logfile.toString());
-            FileHandler fh = new FileHandler(logfile.toString());
-            getLogger().addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
-            fh.setFormatter(formatter);
-            getLogger().info(getResourceMap().getString("createdLogFile.msg.created") + " " + logfile.toString());
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
-
-        /* Plug the loggerPanel and the StatusBar */
-        loggerScrollPane.connectToLogger(getLogger());
-        statusBar.connectToLogger(getLogger());
-
-        /* Connect to the java console */
-        getLogger().addHandler(new SystemOutHandler());
-
-        /* Welcome user */
-        getLogger().info(getResourceMap().getString("Application.msg.welcome"));
     }
 
     @Action
