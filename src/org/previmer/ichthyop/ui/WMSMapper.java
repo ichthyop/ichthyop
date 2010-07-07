@@ -767,7 +767,7 @@ public class WMSMapper extends JXMapKit {
         kml = KmlFactory.createKml();
         kmlDocument = kml.createAndSetDocument().withName(getFile().getName()).withOpen(true);
         final Style style = kmlDocument.createAndAddStyle().withId("randomColorIcon");
-        final IconStyle iconstyle = style.createAndSetIconStyle().withColor("ffff3df0").withScale(0.3d);
+        final IconStyle iconstyle = style.createAndSetIconStyle().withColor("ffff3df0").withScale(particlePixel / 10.d);
         iconstyle.createAndSetIcon().withHref("http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
         kmlMainFolder = kmlDocument.createAndAddFolder();
         colors = new ArrayList();
@@ -1027,7 +1027,7 @@ public class WMSMapper extends JXMapKit {
         public void mouseMoved(MouseEvent e) {
             java.awt.Dimension dim = getMainMap().getTileFactory().getMapSize(getMainMap().getZoom());
             int tileSize = getMainMap().getTileFactory().getTileSize(getMainMap().getZoom());
-            float wMap = dim.width ;
+            float wMap = dim.width;
             float hMap = dim.height;
             Rectangle view = getMainMap().getViewportBounds();
             float x0Map = view.x;
