@@ -164,6 +164,7 @@ public class SimulationUI extends JPanel {
                 cell.draw(i, j, w, h);
                 graphic.setColor(cell.getColor(i, j));
                 graphic.fillPolygon(cell);
+                //graphic.drawPolygon(cell);
             }
         }
     }
