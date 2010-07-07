@@ -30,6 +30,7 @@ public class IchthyopApp extends SingleFrameApplication {
     @Override
     protected void startup() {
         show(new IchthyopView(this));
+        getMainFrame().setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
     }
 
     /**
