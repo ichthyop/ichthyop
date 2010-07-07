@@ -808,7 +808,7 @@ public class WMSMapper extends JXMapKit {
         if (!colors.contains(color)) {
             colors.add(color);
             Style style = kmlDocument.createAndAddStyle().withId("IconStyle" + color);
-            IconStyle iconstyle = style.createAndSetIconStyle().withColor(color).withScale(0.3d);
+            IconStyle iconstyle = style.createAndSetIconStyle().withColor(color).withScale(particlePixel / 10.d);
             iconstyle.createAndSetIcon().withHref("http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
         }
         return "IconStyle" + color;
