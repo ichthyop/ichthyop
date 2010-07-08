@@ -44,9 +44,9 @@ import java.awt.event.KeyEvent;
 import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.FocusListener;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 
@@ -72,7 +72,7 @@ public class FloatEditor extends DefaultCellEditor {
         maximum = new Float(max);
 
         //Set up the editor for the integer cells.
-        floatFormat = NumberFormat.getNumberInstance(Locale.US);
+        floatFormat = new DecimalFormat("0.######E0");
         floatFormat.setGroupingUsed(false);
         NumberFormatter floatFormatter = new NumberFormatter(floatFormat);
         floatFormatter.setFormat(floatFormat);
@@ -82,7 +82,7 @@ public class FloatEditor extends DefaultCellEditor {
 
         ftf.setFormatterFactory(
                 new DefaultFormatterFactory(floatFormatter));
-        ftf.setValue(minimum);
+        //ftf.setValue(minimum);
         ftf.setHorizontalAlignment(JTextField.TRAILING);
         ftf.setFocusLostBehavior(JFormattedTextField.PERSIST);
         ftf.addFocusListener(new FocusListener() {

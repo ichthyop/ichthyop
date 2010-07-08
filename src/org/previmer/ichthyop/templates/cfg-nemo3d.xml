@@ -352,10 +352,10 @@
             <parameter type="serial">
                 <key>epsilon</key>
                 <long_name>Dissipation rate [meter2/second3]</long_name>
-                <value>1e-9</value>
+                <value>1E-9</value>
                 <description>In the horizontal dispersion model, Peliz defined a lagrangian horizontal diffusion coefficient Kh = pow(epsilon, 1/3) * pow(l, 4/3), following Monin and Ozmidov 1981, with epsilon the turbulent dissipation rate [meter2/second3] and l the lenght of the grid cell (l is determined by the application). Monin and Ozmidov suggested epsilon = 1e-9. Make sure you have read and understood Monin and Ozmidov's paper before changing this value.</description>
                 <format>float</format>
-                <default>1e-9</default>
+                <default>1E-9</default>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
