@@ -946,6 +946,7 @@ public class NemoDataset extends AbstractDataset {
      */
     public double depth2z(double x, double y, double depth) {
 
+        if (depth > 0) depth = 0.d;
         depth = Math.abs(depth);
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -954,7 +955,7 @@ public class NemoDataset extends AbstractDataset {
         /* case particle is going straight up to surface, due to strong
          * buoyancy for instance.
          */
-        if (depth > gdepW[nz - 1]) {
+        if (depth < gdepT[nz - 1]) {
             return (nz - 1);
         }
         for (int k = nz - 1; k > 0; k--) {

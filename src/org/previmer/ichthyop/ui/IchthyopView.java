@@ -80,6 +80,7 @@ public class IchthyopView extends FrameView
         saveAsMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
         btnPreview.getAction().setEnabled(false);
+        ckBoxDrawGrid.setEnabled(false);
         btnCancelMapping.getAction().setEnabled(false);
         btnMapping.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
@@ -689,6 +690,7 @@ public class IchthyopView extends FrameView
         pnlConfiguration.setVisible(false);
         lblConfiguration.setVisible(true);
         btnPreview.getAction().setEnabled(false);
+        ckBoxDrawGrid.setEnabled(false);
         setMainTitle();
     }
 
@@ -1548,34 +1550,31 @@ public class IchthyopView extends FrameView
             .addGroup(pnlFileLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
+                    .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
                     .addGroup(pnlFileLayout.createSequentialGroup()
                         .addComponent(btnNewCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnOpenCfgFile, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnOpenCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCloseCfgFile))
                     .addGroup(pnlFileLayout.createSequentialGroup()
                         .addComponent(btnSaveCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveAsCfgFile, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 225, Short.MAX_VALUE)))
+                        .addComponent(btnSaveAsCfgFile)))
                 .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
             pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlFileLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlFileLayout.createSequentialGroup()
-                        .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnOpenCfgFile)
-                            .addComponent(btnNewCfgFile))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnSaveCfgFile)
-                            .addComponent(btnSaveAsCfgFile)))
+                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnOpenCfgFile)
+                    .addComponent(btnNewCfgFile)
                     .addComponent(btnCloseCfgFile))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnSaveCfgFile)
+                    .addComponent(btnSaveAsCfgFile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCfgFile)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))

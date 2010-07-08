@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.MTRandom;
-import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
 
 /**
@@ -14,7 +13,6 @@ import org.previmer.ichthyop.arch.IBasicParticle;
  */
 public class HDispAction extends AbstractAction {
 
-    private static final boolean DEBUG_HDISP = false;
     /**
      * Turbulent dissipation rate used in the parametrization of Lagrangian
      * horizontal diffusion.
@@ -41,21 +39,12 @@ public class HDispAction extends AbstractAction {
         int ny = getSimulationManager().getDataset().get_ny();
         i = Math.max(Math.min(i, nx - 1), 0);
         j = Math.max(Math.min(j, ny - 1), 0);
-        double R = 2.d * random.nextDouble() - 1.d;
-
-        if (DEBUG_HDISP) {
-            double my_epsilon16 = Math.pow(1e-6, 1.d / 6.d);
-            return new double[]{
-                        R * Math.sqrt(2.d * dt) * my_epsilon16 *
-                        Math.pow(getSimulationManager().getDataset().getdxi(j, i), -1.d / 3.d),
-                        R * Math.sqrt(2.d * dt) * my_epsilon16 *
-                        Math.pow(getSimulationManager().getDataset().getdeta(j, i), -1.d / 3.d)};
-        }
-
-        return new double[]{
-                    R * Math.sqrt(2.d * dt) * epsilon16 *
-                    Math.pow(getSimulationManager().getDataset().getdxi(j, i), -1.d / 3.d),
-                    R * Math.sqrt(2.d * dt) * epsilon16 *
-                    Math.pow(getSimulationManager().getDataset().getdeta(j, i), -1.d / 3.d)};
+        double Rx = 2.d * random.nextDouble() - 1.d;
+        double Ry = 2.d * random.nextDouble() - 1.d;
+        double dL = 0.5d * (getSimulationManager().getDataset().getdxi(j, i) + getSimulationManager().getDataset().getdeta(j, i));
+        double cff = Math.sqrt(2.d * dt) * epsilon16 * Math.pow(dL, 2.d / 3.d);
+        double dx = Rx * cff / getSimulationManager().getDataset().getdxi(j, i);
+        double dy = Ry * cff / getSimulationManager().getDataset().getdeta(j, i);
+        return new double[]{dx, dy};
     }
 }
