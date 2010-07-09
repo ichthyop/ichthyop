@@ -7,7 +7,7 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2010
 
-Release: 3.0 beta (2010/07/08)
+Release: 3.0b (2010/07/08)
 
 For the next couple of months, Ichthyop will remain on beta version.
 It means the tool has been fully tested by the programmers and it would be now greatly
