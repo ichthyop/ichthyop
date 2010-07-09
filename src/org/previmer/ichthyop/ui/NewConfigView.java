@@ -212,81 +212,37 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private void initComponents() {
 
         mainPanel = new javax.swing.JPanel();
-        jSplitPane1 = new javax.swing.JSplitPane();
-        pnlConfig = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        templateTree = new javax.swing.JTree();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        descriptionTextPane = new javax.swing.JTextPane();
-        jScrollPane2 = new javax.swing.JScrollPane();
         newFilePanel = new javax.swing.JPanel();
         btnChoosePath = new javax.swing.JButton();
         lblName = new javax.swing.JLabel();
         textFieldPath = new javax.swing.JTextField();
         lblPath = new javax.swing.JLabel();
-        pnlInfo = new javax.swing.JPanel();
-        lblInfo = new javax.swing.JLabel();
         lblFile = new javax.swing.JLabel();
         textFieldFile = new javax.swing.JTextField();
         textFieldName = new javax.swing.JTextField();
         lblType = new javax.swing.JLabel();
         textFieldTemplate = new javax.swing.JTextField();
         lblChecker = new javax.swing.JLabel();
+        jSplitPane1 = new javax.swing.JSplitPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        templateTree = new javax.swing.JTree();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        descriptionTextPane = new javax.swing.JTextPane();
+        pnlInfo = new javax.swing.JPanel();
+        lblInfo = new javax.swing.JLabel();
         btnSave = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
 
         mainPanel.setName("mainPanel"); // NOI18N
 
-        jSplitPane1.setDividerLocation(250);
-        jSplitPane1.setName("jSplitPane1"); // NOI18N
-
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(NewConfigView.class);
-        pnlConfig.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlConfig.border.title"))); // NOI18N
-        pnlConfig.setName("pnlConfig"); // NOI18N
-
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        templateTree.setName("templateTree"); // NOI18N
-        jScrollPane1.setViewportView(templateTree);
-
-        jScrollPane3.setName("jScrollPane3"); // NOI18N
-
-        descriptionTextPane.setContentType(resourceMap.getString("descriptionTextPane.contentType")); // NOI18N
-        descriptionTextPane.setEditable(false);
-        descriptionTextPane.setName("descriptionTextPane"); // NOI18N
-        jScrollPane3.setViewportView(descriptionTextPane);
-
-        javax.swing.GroupLayout pnlConfigLayout = new javax.swing.GroupLayout(pnlConfig);
-        pnlConfig.setLayout(pnlConfigLayout);
-        pnlConfigLayout.setHorizontalGroup(
-            pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlConfigLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        pnlConfigLayout.setVerticalGroup(
-            pnlConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlConfigLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jSplitPane1.setLeftComponent(pnlConfig);
-
-        jScrollPane2.setName("jScrollPane2"); // NOI18N
-
+        newFilePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         newFilePanel.setName("newFilePanel"); // NOI18N
 
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(NewConfigView.class, this);
         btnChoosePath.setAction(actionMap.get("changePath")); // NOI18N
         btnChoosePath.setName("btnChoosePath"); // NOI18N
 
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(NewConfigView.class);
         lblName.setText(resourceMap.getString("lblName.text")); // NOI18N
         lblName.setName("lblName"); // NOI18N
 
@@ -296,32 +252,6 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         lblPath.setText(resourceMap.getString("lblPath.text")); // NOI18N
         lblPath.setName("lblPath"); // NOI18N
-
-        pnlInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlInfo.border.title"))); // NOI18N
-        pnlInfo.setName("pnlInfo"); // NOI18N
-
-        lblInfo.setText(resourceMap.getString("lblInfo.text")); // NOI18N
-        lblInfo.setName("lblInfo"); // NOI18N
-
-        javax.swing.GroupLayout pnlInfoLayout = new javax.swing.GroupLayout(pnlInfo);
-        pnlInfo.setLayout(pnlInfoLayout);
-        pnlInfoLayout.setHorizontalGroup(
-            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 519, Short.MAX_VALUE)
-            .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(pnlInfoLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(lblInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 433, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(74, Short.MAX_VALUE)))
-        );
-        pnlInfoLayout.setVerticalGroup(
-            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 131, Short.MAX_VALUE)
-            .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlInfoLayout.createSequentialGroup()
-                    .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
-                    .addContainerGap()))
-        );
 
         lblFile.setText(resourceMap.getString("lblFile.text")); // NOI18N
         lblFile.setName("lblFile"); // NOI18N
@@ -350,6 +280,26 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         lblChecker.setName("lblChecker"); // NOI18N
         lblChecker.setText("");
 
+        jSplitPane1.setDividerLocation(250);
+        jSplitPane1.setResizeWeight(0.5);
+        jSplitPane1.setName("jSplitPane1"); // NOI18N
+
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        templateTree.setName("templateTree"); // NOI18N
+        jScrollPane1.setViewportView(templateTree);
+
+        jSplitPane1.setLeftComponent(jScrollPane1);
+
+        jScrollPane3.setName("jScrollPane3"); // NOI18N
+
+        descriptionTextPane.setContentType(resourceMap.getString("descriptionTextPane.contentType")); // NOI18N
+        descriptionTextPane.setEditable(false);
+        descriptionTextPane.setName("descriptionTextPane"); // NOI18N
+        jScrollPane3.setViewportView(descriptionTextPane);
+
+        jSplitPane1.setRightComponent(jScrollPane3);
+
         javax.swing.GroupLayout newFilePanelLayout = new javax.swing.GroupLayout(newFilePanel);
         newFilePanel.setLayout(newFilePanelLayout);
         newFilePanelLayout.setHorizontalGroup(
@@ -357,35 +307,30 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             .addGroup(newFilePanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 555, Short.MAX_VALUE)
                     .addGroup(newFilePanelLayout.createSequentialGroup()
                         .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblType)
                             .addComponent(lblPath)
-                            .addComponent(lblType))
-                        .addGap(46, 46, 46)
-                        .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, newFilePanelLayout.createSequentialGroup()
-                                .addComponent(textFieldPath, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnChoosePath))
-                            .addComponent(textFieldTemplate, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)))
-                    .addGroup(newFilePanelLayout.createSequentialGroup()
-                        .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblName)
                             .addComponent(lblFile))
                         .addGap(18, 18, 18)
                         .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(textFieldFile, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
-                            .addComponent(textFieldName, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, newFilePanelLayout.createSequentialGroup()
+                                .addComponent(textFieldPath, javax.swing.GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnChoosePath))
+                            .addComponent(textFieldName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                            .addComponent(textFieldFile, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                            .addComponent(textFieldTemplate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)))
                     .addComponent(lblChecker))
                 .addContainerGap())
         );
         newFilePanelLayout.setVerticalGroup(
             newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(newFilePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblType)
                     .addComponent(textFieldTemplate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -402,14 +347,36 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
                 .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblFile)
                     .addComponent(textFieldFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 96, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblChecker)
-                .addContainerGap())
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
-        jScrollPane2.setViewportView(newFilePanel);
+        pnlInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlInfo.border.title"))); // NOI18N
+        pnlInfo.setName("pnlInfo"); // NOI18N
 
-        jSplitPane1.setRightComponent(jScrollPane2);
+        lblInfo.setText(resourceMap.getString("lblInfo.text")); // NOI18N
+        lblInfo.setName("lblInfo"); // NOI18N
+
+        javax.swing.GroupLayout pnlInfoLayout = new javax.swing.GroupLayout(pnlInfo);
+        pnlInfo.setLayout(pnlInfoLayout);
+        pnlInfoLayout.setHorizontalGroup(
+            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 579, Short.MAX_VALUE)
+            .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlInfoLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 555, Short.MAX_VALUE)
+                    .addContainerGap()))
+        );
+        pnlInfoLayout.setVerticalGroup(
+            pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 112, Short.MAX_VALUE)
+            .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlInfoLayout.createSequentialGroup()
+                    .addComponent(lblInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
 
         btnSave.setAction(actionMap.get("save")); // NOI18N
         btnSave.setName("btnSave"); // NOI18N
@@ -421,11 +388,12 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+            .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 813, Short.MAX_VALUE)
-                    .addGroup(mainPanelLayout.createSequentialGroup()
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(newFilePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCancel)))
@@ -433,10 +401,12 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+            .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 446, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(newFilePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
                     .addComponent(btnSave))
@@ -474,7 +444,6 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private javax.swing.JButton btnSave;
     private javax.swing.JTextPane descriptionTextPane;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JLabel lblChecker;
@@ -485,7 +454,6 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private javax.swing.JLabel lblType;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JPanel newFilePanel;
-    private javax.swing.JPanel pnlConfig;
     private javax.swing.JPanel pnlInfo;
     private javax.swing.JTree templateTree;
     private javax.swing.JTextField textFieldFile;
