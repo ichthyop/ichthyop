@@ -30,6 +30,8 @@
                       <Component id="btnSaveAs" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="lblFile" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="677" max="32767" attributes="0"/>
+                      <Component id="btnHelp" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -46,6 +48,7 @@
                   <Component id="btnSave" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnSaveAs" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="lblFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnHelp" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -885,6 +888,19 @@
         <Property name="text" type="java.lang.String" resourceKey="lblFile.text"/>
         <Property name="name" type="java.lang.String" value="lblFile" noResource="true"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="btnHelp">
+      <Properties>
+        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+          <action class="org.previmer.ichthyop.ui.ZoneEditorPanel" id="howto" methodName="howto"/>
+        </Property>
+        <Property name="icon" type="javax.swing.Icon" resourceKey="btnHelp.icon"/>
+        <Property name="text" type="java.lang.String" resourceKey="btnHelp.text"/>
+        <Property name="name" type="java.lang.String" value="btnHelp" noResource="true"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnHelpActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

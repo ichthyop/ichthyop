@@ -24,8 +24,12 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.MouseInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -39,9 +43,13 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JColorChooser;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -49,6 +57,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import org.jdesktop.application.ResourceMap;
+import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.XZone;
@@ -393,6 +402,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnSave = new javax.swing.JButton();
         btnSaveAs = new javax.swing.JButton();
         lblFile = new javax.swing.JLabel();
+        btnHelp = new javax.swing.JButton();
 
         jSplitPane1.setBorder(null);
         jSplitPane1.setDividerLocation(250);
@@ -948,6 +958,17 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblFile.setText(resourceMap.getString("lblFile.text")); // NOI18N
         lblFile.setName("lblFile"); // NOI18N
 
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(ZoneEditorPanel.class, this);
+        btnHelp.setAction(actionMap.get("howto")); // NOI18N
+        btnHelp.setIcon(resourceMap.getIcon("btnHelp.icon")); // NOI18N
+        btnHelp.setText(resourceMap.getString("btnHelp.text")); // NOI18N
+        btnHelp.setName("btnHelp"); // NOI18N
+        btnHelp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHelpActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -961,7 +982,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSaveAs)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFile)))
+                        .addComponent(lblFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 677, Short.MAX_VALUE)
+                        .addComponent(btnHelp)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -973,7 +996,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSave)
                     .addComponent(btnSaveAs)
-                    .addComponent(lblFile))
+                    .addComponent(lblFile)
+                    .addComponent(btnHelp))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1206,13 +1230,82 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         for (int i = 0; i < tablePolygon.getColumnCount(); i++) {
             tablePolygon.getColumnModel().getColumn(i).setCellEditor(new DefaultCellEditor(new JFormattedTextField()));
         }
+
     }//GEN-LAST:event_rdBtnDegDecimalMinActionPerformed
+    private ResourceMap getResource() {
+        return IchthyopApp.getApplication().getContext().getResourceMap();
+    }
+
+    private void btnHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHelpActionPerformed
+
+        if (null != dialogHowto && dialogHowto.isVisible()) {
+            return;
+        }
+        JEditorPane editor = new JEditorPane();
+        editor.setPreferredSize(new Dimension(600, 600));
+        editor.setEditable(false);
+        try {
+            editor.setPage(Template.getTemplateURL("zone_help.html"));
+        } catch (IOException ex) {
+            editor.setText("Failed to load help file ==> " + ex.toString());
+        }
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(editor);
+        final JOptionPane optionPane = new JOptionPane(scrollPane,
+                JOptionPane.PLAIN_MESSAGE,
+                JOptionPane.OK_CANCEL_OPTION);
+        dialogHowto = new JDialog(new JFrame(), false);
+        dialogHowto.setTitle(getResource().getString("ZoneEditor.title"));
+        dialogHowto.setIconImage(getResource().getImageIcon("Application.icon").getImage());
+        dialogHowto.setLocation(MouseInfo.getPointerInfo().getLocation());
+        dialogHowto.setContentPane(optionPane);
+        dialogHowto.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        dialogHowto.addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent we) {
+                optionPane.setValue(JOptionPane.CLOSED_OPTION);
+
+            }
+        });
+        optionPane.addPropertyChangeListener(
+                new PropertyChangeListener() {
+
+                    public void propertyChange(PropertyChangeEvent e) {
+                        String prop = e.getPropertyName();
+                        if (dialogHowto.isVisible()
+                                && (e.getSource() == optionPane)
+                                && (JOptionPane.VALUE_PROPERTY.equals(prop)
+                                || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
+                            Object value = optionPane.getValue();
+                            if (value == JOptionPane.UNINITIALIZED_VALUE) {
+                                //ignore reset
+                                return;
+                            }
+                            //Reset the JOptionPane's value.
+                            //If you don't do this, then if the user
+                            //presses the same button next time, no
+                            //property change event will be fired.
+                            optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
+
+                            int answer = ((Integer) value).intValue();
+                            //If you were going to check something
+                            //before closing the window, you'd do
+                            //it here.
+                            dialogHowto.setVisible(false);
+                        }
+                    }
+                });
+        dialogHowto.pack();
+        dialogHowto.setVisible(true);
+    }//GEN-LAST:event_btnHelpActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnColor;
     private javax.swing.JButton btnDeletePoint;
     private javax.swing.JButton btnDeleteZone;
     private javax.swing.JButton btnDownPoint;
     private javax.swing.JButton btnDownZone;
+    private javax.swing.JButton btnHelp;
     private javax.swing.JButton btnNewPoint;
     private javax.swing.JButton btnNewZone;
     private javax.swing.JButton btnSave;
@@ -1261,18 +1354,5 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private ZoneFile zoneFile;
     private XZone zone;
     private boolean hasZoneChanged = false;
-
-    public static void main(String[] args) {
-        try {
-            JFrame frame = new JFrame();
-            ZoneEditorPanel editor = new ZoneEditorPanel();
-            editor.loadZonesFromFile(new File("/home/pverley/ichthyop/dev/nb/iv3/cfg/NewZoneFile.xml"));
-            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.add(editor);
-            frame.pack();
-            frame.setVisible(true);
-        } catch (Exception ex) {
-            Logger.getLogger(ZoneEditorPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    private JDialog dialogHowto;
 }

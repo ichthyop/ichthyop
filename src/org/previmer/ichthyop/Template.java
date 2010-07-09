@@ -32,15 +32,18 @@ import org.previmer.ichthyop.io.IOTools;
 public class Template {
 
     public static void createTemplate(String templateName, File destination) throws IOException {
-        String path = "templates/" + templateName;
-        URL url = Template.class.getResource(path);
         try {
-            writeTemplate(url, destination.getAbsolutePath());
+            writeTemplate(getTemplateURL(templateName), destination.getAbsolutePath());
         } catch (Exception ex) {
             IOException ioex = new IOException("Failed to create template at " + destination + " ==> " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+    }
+
+    public static URL getTemplateURL(String templateName) {
+        String path = "templates/" + templateName;
+        return Template.class.getResource(path);
     }
 
     private static void writeTemplate(URL url, String destination) throws Exception {
