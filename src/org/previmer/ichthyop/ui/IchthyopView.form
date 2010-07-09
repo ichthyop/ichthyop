@@ -134,7 +134,7 @@
                                           <Group type="102" attributes="0">
                                               <EmptySpace min="-2" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="lblCfgFile" alignment="0" pref="313" max="32767" attributes="0"/>
+                                                  <Component id="lblCfgFile" alignment="0" pref="420" max="32767" attributes="0"/>
                                                   <Group type="102" alignment="0" attributes="0">
                                                       <Component id="btnNewCfgFile" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace max="-2" attributes="0"/>
@@ -659,9 +659,6 @@
                                                   <StringArray count="1">
                                                     <StringItem index="0" value="None"/>
                                                   </StringArray>
-                                                </Property>
-                                                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
-                                                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="autoRangeColorbar" methodName="autoRangeColorbar"/>
                                                 </Property>
                                                 <Property name="name" type="java.lang.String" value="cbBoxVariable" noResource="true"/>
                                               </Properties>

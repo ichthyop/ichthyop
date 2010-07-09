@@ -1550,7 +1550,7 @@ public class IchthyopView extends FrameView
             .addGroup(pnlFileLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+                    .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                     .addGroup(pnlFileLayout.createSequentialGroup()
                         .addComponent(btnNewCfgFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1717,7 +1717,6 @@ public class IchthyopView extends FrameView
         lblVariable.setName("lblVariable"); // NOI18N
 
         cbBoxVariable.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "None" }));
-        cbBoxVariable.setAction(actionMap.get("autoRangeColorbar")); // NOI18N
         cbBoxVariable.setName("cbBoxVariable"); // NOI18N
 
         lblMin.setText(resourceMap.getString("lblMin.text")); // NOI18N
