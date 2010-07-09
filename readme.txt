@@ -9,10 +9,10 @@ Copyright (c) Philippe VERLEY 2006-2010
 
 Release: 3.0b (2010/07/08)
 
-For the next couple of months, Ichthyop will remain on beta version.
-It means the tool has been fully tested by the programmers and it would be now greatly
-appreciated having you as beta-tester. Please email any feedback, bug report, comment,
-congratulation, criticism, etc.
+++ For the next couple of months, Ichthyop will remain on beta version.
+++ It means the tool has been fully tested by the programmers and it would be now greatly
+++ appreciated having you as beta-tester. Please email any feedback, bug report, comment,
+++ congratulation, criticism, etc.
 
 Feedback & Bug reports: info@previmer.org
 
@@ -29,11 +29,15 @@ Latest version of JRE (at least 1.6) can be download at http://www.java.com/en/d
 =======
 Startup
 
-Double click on ichthyop-3.0beta.jar
+Double click on ichthyop-3.0b.jar
 
 Or from a command line, go to the ichthyop/ folder and type the following:
 
-java -jar ichthyop-3.0beta.jar
+java -jar ichthyop-3.0b.jar
+
+To avoid any heap memory problem, you'd rather type:
+
+java -Xms512m -Xmx1024m -jar ichthyop-3.0b.jar
 
 =========
 First Run
