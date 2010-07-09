@@ -378,7 +378,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     private class CreateBlockTreeTask extends SFTask {
 
-        private String cfgTitle, cfgDescription;
+        private String cfgTitle, cfgDescription, cfgVersion;
 
         CreateBlockTreeTask(Application instance) {
             super(instance);
@@ -389,6 +389,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         protected Object doInBackground() throws Exception {
             cfgTitle = getSimulationManager().getParameterManager().getConfigurationTitle();
             cfgDescription = getSimulationManager().getParameterManager().getConfigurationDescription();
+            cfgVersion = getSimulationManager().getParameterManager().getConfigurationVersion();
             blockTree.createModel();
             return null;
         }
@@ -414,6 +415,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 textAreaDescription.setText(cfgDescription);
             } else {
                 textAreaDescription.setText("You can type here a description for this configuration");
+            }
+            if (null != cfgVersion) {
+                textFieldVersion.setText(cfgVersion);
             }
             splitPaneCfg.setRightComponent(pnlNoBlockSelected);
         }
@@ -441,6 +445,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         textFieldTitle = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         textAreaDescription = new javax.swing.JTextArea();
+        lblVersion = new javax.swing.JLabel();
+        textFieldVersion = new javax.swing.JTextField();
         busyLabel = new JXBusyLabel(new Dimension(100, 100));
         splitPaneCfg = new javax.swing.JSplitPane();
         pnlBlockTree = new javax.swing.JPanel();
@@ -519,6 +525,13 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         });
         jScrollPane2.setViewportView(textAreaDescription);
 
+        lblVersion.setText("Version");
+        lblVersion.setName("lblVersion"); // NOI18N
+
+        textFieldVersion.setEditable(false);
+        textFieldVersion.setText("undetermined");
+        textFieldVersion.setName("textFieldVersion"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -529,7 +542,11 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 526, Short.MAX_VALUE)
                     .addComponent(textFieldTitle, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 526, Short.MAX_VALUE)
                     .addComponent(lblTitle, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblDescription, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(lblDescription, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(lblVersion)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textFieldVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -541,7 +558,11 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblDescription)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblVersion)
+                    .addComponent(textFieldVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -549,19 +570,19 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         pnlNoBlockSelected.setLayout(pnlNoBlockSelectedLayout);
         pnlNoBlockSelectedLayout.setHorizontalGroup(
             pnlNoBlockSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(lblSelectBlock, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)
             .addGroup(pnlNoBlockSelectedLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(12, 12, 12))
-            .addComponent(lblSelectBlock, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)
         );
         pnlNoBlockSelectedLayout.setVerticalGroup(
             pnlNoBlockSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlNoBlockSelectedLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblSelectBlock, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblSelectBlock, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE))
         );
 
         busyLabel.setText("jXBusyLabel1");
@@ -858,6 +879,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JLabel lblParameter;
     private javax.swing.JLabel lblSelectBlock;
     private javax.swing.JLabel lblTitle;
+    private javax.swing.JLabel lblVersion;
     private javax.swing.JPanel pnlBlock;
     private javax.swing.JPanel pnlBlockInfo;
     private javax.swing.JPanel pnlBlockTree;
@@ -871,6 +893,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JTable table;
     private javax.swing.JTextArea textAreaDescription;
     private javax.swing.JTextField textFieldTitle;
+    private javax.swing.JTextField textFieldVersion;
     // End of variables declaration//GEN-END:variables
     private boolean hasStructureChanged;
 }

@@ -28,12 +28,12 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
+              <Component id="lblSelectBlock" alignment="1" pref="586" max="32767" attributes="0"/>
               <Group type="102" attributes="0">
                   <EmptySpace min="12" pref="12" max="12" attributes="0"/>
                   <Component id="jPanel1" max="32767" attributes="0"/>
                   <EmptySpace min="12" pref="12" max="12" attributes="0"/>
               </Group>
-              <Component id="lblSelectBlock" alignment="1" pref="586" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -41,8 +41,8 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="lblSelectBlock" pref="259" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="lblSelectBlock" pref="188" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -79,6 +79,11 @@
                           <Component id="textFieldTitle" alignment="0" pref="526" max="32767" attributes="0"/>
                           <Component id="lblTitle" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="lblDescription" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="lblVersion" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="textFieldVersion" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -93,7 +98,12 @@
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="lblDescription" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="149" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="184" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="lblVersion" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="textFieldVersion" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -144,6 +154,19 @@
                 </Component>
               </SubComponents>
             </Container>
+            <Component class="javax.swing.JLabel" name="lblVersion">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Version"/>
+                <Property name="name" type="java.lang.String" value="lblVersion" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="textFieldVersion">
+              <Properties>
+                <Property name="editable" type="boolean" value="false"/>
+                <Property name="text" type="java.lang.String" value="undetermined"/>
+                <Property name="name" type="java.lang.String" value="textFieldVersion" noResource="true"/>
+              </Properties>
+            </Component>
           </SubComponents>
         </Container>
       </SubComponents>

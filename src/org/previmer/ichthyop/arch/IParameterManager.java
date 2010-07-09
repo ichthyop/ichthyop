@@ -48,4 +48,8 @@ public interface IParameterManager {
     public String getConfigurationDescription();
 
     public void setConfigurationDescription(String description);
+
+    public String getConfigurationVersion();
+
+    public void setConfigurationVersion(String version);
 }

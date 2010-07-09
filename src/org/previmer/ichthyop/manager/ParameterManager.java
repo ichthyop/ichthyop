@@ -50,6 +50,14 @@ public class ParameterManager extends AbstractManager implements IParameterManag
         cfgFile.setDescription(description);
     }
 
+    public String getConfigurationVersion() {
+        return cfgFile.getVersion();
+    }
+
+    public void setConfigurationVersion(String version) {
+        cfgFile.setVersion(version);
+    }
+
     public String getConfigurationTitle() {
         return cfgFile.getLongName();
     }
@@ -115,6 +123,7 @@ public class ParameterManager extends AbstractManager implements IParameterManag
         private HashMap<String, XBlock> map;
         public final static String DESCRIPTION = "description";
         public final static String LONG_NAME = "long_name";
+        public final static String VERSION = "version";
 
         ConfigurationFile(File file) {
             this.file = file;
@@ -142,6 +151,21 @@ public class ParameterManager extends AbstractManager implements IParameterManag
                 structure.getRootElement().addContent(new Element(DESCRIPTION));
             }
             structure.getRootElement().getChild(DESCRIPTION).setText(description);
+        }
+
+        private String getVersion() {
+            if (null != structure.getRootElement().getChild(VERSION)) {
+                return structure.getRootElement().getChildTextNormalize(VERSION);
+            } else {
+                return null;
+            }
+        }
+
+        private void setVersion(String version) {
+            if (null == structure.getRootElement().getChild(VERSION)) {
+                structure.getRootElement().addContent(new Element(VERSION));
+            }
+            structure.getRootElement().getChild(VERSION).setText(version);
         }
 
         private void setLongName(String longName) {

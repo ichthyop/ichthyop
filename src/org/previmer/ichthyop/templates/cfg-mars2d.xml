@@ -2,6 +2,7 @@
 <icstructure>
     <long_name>MARS 2D Ichthyop configuration file</long_name>
     <description>Predefined parameters for MARS dataset from NetCDF files.</description>
+    <version>3.0beta</version>
     <block type="option">
         <tree_path>Main/Time</tree_path>
         <key>app.time</key>
