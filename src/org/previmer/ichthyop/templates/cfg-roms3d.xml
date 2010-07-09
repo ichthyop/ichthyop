@@ -2,7 +2,7 @@
 <icstructure>
     <long_name>ROMS 3D Ichthyop configuration file</long_name>
     <description>Predefined parameters for ROMS dataset from NetCDF files.</description>
-    <version>3.0beta</version>
+    <version>3.0b</version>
     <block type="option">
         <tree_path>Main/Time</tree_path>
         <key>app.time</key>

@@ -2,7 +2,7 @@
 <icstructure>
     <long_name>MARS 3D Opendap Menor Ichthyop configuration file</long_name>
     <description>Predefined parameters to connect MARS dataset with OpenDAP for the Mediterranean sea http://www.previmer.org/previsions/courants/modele_mediterranee/</description>
-    <version>3.0beta</version>
+    <version>3.0b</version>
     <block type="option">
         <tree_path>Main/Time</tree_path>
         <key>app.time</key>
