@@ -370,6 +370,8 @@ public class OutputNC {
             ncOut.addGlobalAttribute("duration_min_expl",
                     "duration min in recruitment zone before being recruited");
             ncOut.addGlobalAttribute("duration_min_units", "second");
+            ncOut.addGlobalAttribute("num_recruitment_zones",
+                    String.valueOf(Configuration.getRecruitmentZones().size()));
             if (Configuration.isDepthRecruitment()) {
                 ncOut.addGlobalAttribute("depth_min_recruit",
                         String.valueOf(Simulation.getMinDepthRecruitment()));
@@ -398,6 +400,13 @@ public class OutputNC {
             ncOut.addGlobalAttribute("depth_night_expl",
                     "night-time depth of DVM scheme");
             ncOut.addGlobalAttribute("depth_night_unit", "meter");
+        }
+        /* 2010/09/24 Suggested by D.Kaplan
+         * Added number of release zones as a global attribute
+         */
+        if (Configuration.getTypeRelease() == Constant.RELEASE_ZONE) {
+            ncOut.addGlobalAttribute("num_release_zones",
+                    String.valueOf(Configuration.getReleaseZones().size()));
         }
 
     }
