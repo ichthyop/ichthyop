@@ -1349,6 +1349,57 @@
         </parameters>
     </block>
     <block type="action">
+        <key>action.andres_buoyancy</key>
+        <description>Block of options that control the buoyancy process. Customized for Andres. This block can be enabled for 3D simulations only. It requires sea water salinity and sea water temperature fields to compute sea water density. Do not activate this process unless you know that the hydrodynamic dataset provides both variables.</description>
+        <tree_path>Transport/Buoyancy Andres</tree_path>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>age_max</key>
+                <long_name>Maximum age [day]</long_name>
+                <value>3.0</value>
+                <format>float</format>
+                <default>3.0</default>
+                <description>Maximum age [day] for adding buoyancy effect to the particle. If the growth process is activated (see  Biology/Growth), this parameter is ignored by the application and the buoyancy only operates during the egg stage.</description>
+            </parameter>
+            <parameter>
+                <key>salinity_field</key>
+                <long_name>Salinity variable name</long_name>
+                <value>sal</value>
+                <default>salt</default>
+                <description>The name of the salinity variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.AndresBuoyancyAction</value>
+                <default>org.previmer.ichthyop.action.AndresBuoyancyAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
         <key>action.migration</key>
         <description>Block of options to control the Diel Vertical Migration (DVM) process of larvae. Only operate for 3D simulation. We impose deterministic pattern in which organisms reside at different depths at daytime and night-time. User can choose the daytime depth and the night-time depth, in meters. If the growth procedure is activated then the DVM operates during the larvae stages (yolk-sac and feeding larva). If not it operates after a “minimum age”. Setting the daytime depth equal to the night-time depth, the pattern forces the motion of particles at a constant depth.</description>
         <tree_path>Transport/Vertical migration</tree_path>
