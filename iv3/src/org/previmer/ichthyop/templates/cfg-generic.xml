@@ -1376,6 +1376,38 @@
                 <default>temp</default>
                 <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
             </parameter>
+            <parameter>
+                <key>water_density_tracker</key>
+                <long_name>Track water density</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "water_density" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>specific_gravity_tracker</key>
+                <long_name>Track specific gravity</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "spec_gravity" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>temperature_tracker</key>
+                <long_name>Track temperature</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "temp" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>salinity_tracker</key>
+                <long_name>Track salinity</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "salt" variable in the NetCDF output file.</description>
+            </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>

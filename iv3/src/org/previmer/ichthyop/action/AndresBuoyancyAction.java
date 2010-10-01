@@ -4,6 +4,10 @@ import org.previmer.ichthyop.arch.IAndresBuoyantParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IGrowingParticle.Stage;
+import org.previmer.ichthyop.io.SalinityTracker;
+import org.previmer.ichthyop.io.SpecificGravityTracker;
+import org.previmer.ichthyop.io.TemperatureTracker;
+import org.previmer.ichthyop.io.WaterDensityTracker;
 import org.previmer.ichthyop.particle.AndresBuoyantParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 
@@ -53,6 +57,44 @@ public class AndresBuoyancyAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
 
+        boolean addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("water_density_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(WaterDensityTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("specific_gravity_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SpecificGravityTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("temperature_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(TemperatureTracker.class);
+        }
+        addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("salinity_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(SalinityTracker.class);
+        }
+
+
     }
 
     public void execute(IBasicParticle particle) {
@@ -79,7 +121,7 @@ public class AndresBuoyancyAction extends AbstractAction {
         waterDensity = BuoyancyAction.waterDensity(sal, tp);
         int stage = ((IAndresBuoyantParticle) particle.getLayer(AndresBuoyantParticleLayer.class)).getStage();
         if (stage < 11) {
-            double particleDensity = ((IAndresBuoyantParticle) particle.getLayer(AndresBuoyantParticleLayer.class)).getSpecificGravity(tp);
+            double particleDensity = ((IAndresBuoyantParticle) particle.getLayer(AndresBuoyantParticleLayer.class)).computeSpecificGravity(tp, sal, waterDensity);
             return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f
                     * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
                     * (waterDensity - particleDensity)) / 100.0f) * dt);

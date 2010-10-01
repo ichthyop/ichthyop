@@ -9,6 +9,14 @@ public interface IAndresBuoyantParticle {
 
     public int getStage();
 
-    public double getSpecificGravity(double temperature);
+    public double computeSpecificGravity(double temperature, double salinity, double waterDensity);
+
+    public double getSpecificGravity();
+
+    public double getTemperature();
+
+    public double getSalinity();
+
+    public double getWaterDensity();
 
 }

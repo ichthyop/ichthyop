@@ -32,6 +32,10 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
 ///////////////////////////////
     private double ratioStage;
     private double spawningDensity;
+    private double specificGravity;
+    private double temperature;
+    private double salinity;
+    private double waterDensity;
 
     public AndresBuoyantParticleLayer(IBasicParticle particle) {
         super(particle);
@@ -54,13 +58,22 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
             spawningDensity = 0.d;
         }
         //System.out.println("spawning density = " + spawningDensity);
+        specificGravity = spawningDensity;
     }
 
     public int getStage() {
         return (int) Math.min(Math.floor(ratioStage), 11);
     }
 
-    public double getSpecificGravity(double temperature) {
+    public double getSpecificGravity() {
+        return specificGravity;
+    }
+
+    public double computeSpecificGravity(double temperature, double salinity, double waterDensity) {
+
+        this.temperature = temperature;
+        this.salinity = salinity;
+        this.waterDensity = waterDensity;
 
         int dt = getSimulationManager().getTimeManager().get_dt();
         double stageDuration = 0.d;
@@ -110,7 +123,7 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
         double ratDev = -1.424E-03 * Math.pow(ratioStage, 3) + 2.070E-02
                 * Math.pow(ratioStage, 2) + 3.554E-02 * ratioStage;
 
-        double spec_gravity = (41.568 * Math.pow(ratDev, 6) - 149.788 * Math.pow(ratDev, 5)
+        specificGravity = (41.568 * Math.pow(ratDev, 6) - 149.788 * Math.pow(ratDev, 5)
                 + 200.864 * Math.pow(ratDev, 4) - 114.05 * Math.pow(ratDev, 3) + 19.789
                 * Math.pow(ratDev, 2) + 2.423 * ratDev) * 0.0012 + spawningDensity;
 
@@ -146,9 +159,30 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
         info.append("\n");
         info.append("-----------------");
         System.out.println(info.toString());
-        */
-        
-        return spec_gravity;
+         */
 
+        return specificGravity;
+
+    }
+
+    /**
+     * @return the temperature
+     */
+    public double getTemperature() {
+        return temperature;
+    }
+
+    /**
+     * @return the salinity
+     */
+    public double getSalinity() {
+        return salinity;
+    }
+
+    /**
+     * @return the waterDensity
+     */
+    public double getWaterDensity() {
+        return waterDensity;
     }
 }
