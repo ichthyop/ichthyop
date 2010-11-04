@@ -598,6 +598,30 @@
                 <template>zone-benguela.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
             </parameter>
+             <parameter>
+                <key>global_release_depth</key>
+                <long_name>Release all particles within same layer ?</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>You may want to set a global lower and upper release depths for all particles. When this option is activated, the thickness of the zones is ignored and the application refers to parameters Lower release depth and Upper release depth</description>
+            </parameter>
+            <parameter>
+                <key>lower_depth</key>
+                <long_name>Lower release depth [meter]</long_name>
+                <value>50.0</value>
+                <default>50.0</default>
+                <format>float</format>
+                <description>Set the lower release depths for every particle.</description>
+            </parameter>
+            <parameter>
+                <key>upper_depth</key>
+                <long_name>Upper release depth [meter]</long_name>
+                <value>0.0</value>
+                <default>0.0</default>
+                <format>float</format>
+                <description>Set the upper release depth for every particle.</description>
+            </parameter>
             <parameter hidden="true">
                 <key>zone_tracker</key>
                 <long_name>Track zones</long_name>
