@@ -711,6 +711,11 @@ public class IchthyopView extends FrameView
     }
 
     @Action
+    public void updatePlatform() {
+        getLogger().info("{Update platform} Not supported yet.");
+    }
+
+    @Action
     public Task openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -1468,6 +1473,7 @@ public class IchthyopView extends FrameView
         saveasMapsMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
+        updateMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
         scrollPaneSimulationUI = new javax.swing.JScrollPane();
         pnlSimulationUI = new SimulationUI();
@@ -1627,7 +1633,7 @@ public class IchthyopView extends FrameView
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSimulationRun))
                     .addComponent(ckBoxDrawGrid))
-                .addContainerGap(135, Short.MAX_VALUE))
+                .addContainerGap(188, Short.MAX_VALUE))
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1817,7 +1823,7 @@ public class IchthyopView extends FrameView
                             .addComponent(btnColorMed)
                             .addComponent(btnColorMax)
                             .addComponent(btnColorMin))))
-                .addContainerGap(49, Short.MAX_VALUE))
+                .addContainerGap(84, Short.MAX_VALUE))
         );
         pnlColorBarLayout.setVerticalGroup(
             pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2171,7 +2177,7 @@ public class IchthyopView extends FrameView
         );
         titledPanelStepsLayout.setVerticalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
         );
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
@@ -2226,7 +2232,7 @@ public class IchthyopView extends FrameView
         );
         titledPanelMainLayout.setVerticalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
         );
 
         splitPane.setRightComponent(titledPanelMain);
@@ -2239,7 +2245,7 @@ public class IchthyopView extends FrameView
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -2353,6 +2359,10 @@ public class IchthyopView extends FrameView
 
         helpMenu.setText(resourceMap.getString("helpMenu.text")); // NOI18N
         helpMenu.setName("helpMenu"); // NOI18N
+
+        updateMenuItem.setAction(actionMap.get("updatePlatform")); // NOI18N
+        updateMenuItem.setName("updateMenuItem"); // NOI18N
+        helpMenu.add(updateMenuItem);
 
         aboutMenuItem.setAction(actionMap.get("showAboutBox")); // NOI18N
         aboutMenuItem.setName("aboutMenuItem"); // NOI18N
@@ -2702,6 +2712,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JFormattedTextField txtFieldMax;
     private javax.swing.JFormattedTextField txtFieldMed;
     private javax.swing.JFormattedTextField txtFieldMin;
+    private javax.swing.JMenuItem updateMenuItem;
     // End of variables declaration//GEN-END:variables
     private JDialog aboutBox;
     private File cfgPath = new File(System.getProperty("user.dir"));
