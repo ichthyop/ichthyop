@@ -15,7 +15,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="splitPane" alignment="0" pref="424" max="32767" attributes="0"/>
+              <Component id="splitPane" alignment="0" pref="428" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -66,7 +66,7 @@
                     </DimensionLayout>
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="stepsScrollPane" alignment="0" pref="168" max="32767" attributes="0"/>
+                          <Component id="stepsScrollPane" alignment="0" pref="178" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                   </Layout>
@@ -271,7 +271,7 @@
                                                   </Group>
                                                   <Component id="ckBoxDrawGrid" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace pref="135" max="32767" attributes="0"/>
+                                              <EmptySpace pref="188" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -607,7 +607,7 @@
                                                               </Group>
                                                           </Group>
                                                       </Group>
-                                                      <EmptySpace pref="49" max="32767" attributes="0"/>
+                                                      <EmptySpace pref="84" max="32767" attributes="0"/>
                                                   </Group>
                                               </Group>
                                             </DimensionLayout>
@@ -659,6 +659,9 @@
                                                   <StringArray count="1">
                                                     <StringItem index="0" value="None"/>
                                                   </StringArray>
+                                                </Property>
+                                                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="changeColorbarVariable" methodName="changeColorbarVariable"/>
                                                 </Property>
                                                 <Property name="name" type="java.lang.String" value="cbBoxVariable" noResource="true"/>
                                               </Properties>
@@ -1153,7 +1156,7 @@
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jScrollPane3" alignment="1" pref="392" max="32767" attributes="0"/>
+                      <Component id="jScrollPane3" alignment="1" pref="399" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
