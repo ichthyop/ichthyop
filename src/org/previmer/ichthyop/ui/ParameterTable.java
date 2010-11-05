@@ -40,6 +40,7 @@ import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
@@ -217,8 +218,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     null, column.getHeaderValue(),
                     false, false, 0, 0);
             headerWidth = comp.getPreferredSize().width;
-
+            try {
             comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
+            } catch (Exception ex) {
+                java.util.logging.Logger.getAnonymousLogger().log(Level.WARNING, ex.toString());
+            }
             cellWidth = comp.getPreferredSize().width;
 
             column.setPreferredWidth(Math.max(headerWidth, cellWidth));
