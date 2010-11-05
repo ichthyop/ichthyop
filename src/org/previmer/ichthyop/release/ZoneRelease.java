@@ -17,48 +17,21 @@ import org.previmer.ichthyop.io.ZoneTracker;
 public class ZoneRelease extends AbstractReleaseProcess {
 
     private int nbReleaseZones, nbParticles;
-    private boolean is3D, isGlobalReleaseDepth;
-    private float lowerReleaseDepth, upperReleaseDepth;
+    private boolean is3D;
 
     public void loadParameters() throws Exception {
-
+        
         /* Get number of particles to release */
         nbParticles = Integer.valueOf(getParameter("number_particles"));
 
         /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
 
-        /* Retrocompatibility v2 where user could set global release depths
-         * whereas in v3 release depth is given by the thickness of the zone.
-         * If release depths are not defined here, ichthyop will consider the
-         * zones thickness instead.
-         */
-        try {
-            isGlobalReleaseDepth = Boolean.valueOf(getParameter("global_release_depth"));
-            
-        } catch (Exception ex) {
-            isGlobalReleaseDepth = false;
-        }
-        if (isGlobalReleaseDepth) {
-            lowerReleaseDepth = Float.valueOf(getParameter("lower_depth"));
-            upperReleaseDepth = Float.valueOf(getParameter("upper_depth"));
-        }
-
         /* Load release zones*/
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
-        if (null == getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE)) {
-            throw new NullPointerException("There is not any release zone defined.");
-        }
-        nbReleaseZones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size();
-
-        /* Reset zone thickness when user defined global lower & upper release depths */
-        if (isGlobalReleaseDepth) {
-            for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-                getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone).setLowerDepth(lowerReleaseDepth);
-                getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone).setUpperDepth(upperReleaseDepth);
-            }
-        }
-
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
+                ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
+                : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
     }
 
