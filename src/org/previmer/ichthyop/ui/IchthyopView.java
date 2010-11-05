@@ -1294,6 +1294,11 @@ public class IchthyopView extends FrameView
     }
 
     @Action
+    public void changeColorbarVariable() {
+        btnAutoRange.getAction().setEnabled(!((String) cbBoxVariable.getSelectedItem()).matches("None"));
+    }
+
+    @Action
     public Task autoRangeColorbar() {
         String varName = (String) cbBoxVariable.getSelectedItem();
         if (varName.startsWith("None")) {
@@ -1723,6 +1728,7 @@ public class IchthyopView extends FrameView
         lblVariable.setName("lblVariable"); // NOI18N
 
         cbBoxVariable.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "None" }));
+        cbBoxVariable.setAction(actionMap.get("changeColorbarVariable")); // NOI18N
         cbBoxVariable.setName("cbBoxVariable"); // NOI18N
 
         lblMin.setText(resourceMap.getString("lblMin.text")); // NOI18N

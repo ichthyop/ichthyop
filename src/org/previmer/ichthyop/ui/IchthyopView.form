@@ -660,6 +660,9 @@
                                                     <StringItem index="0" value="None"/>
                                                   </StringArray>
                                                 </Property>
+                                                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                                                  <action class="org.previmer.ichthyop.ui.IchthyopView" id="changeColorbarVariable" methodName="changeColorbarVariable"/>
+                                                </Property>
                                                 <Property name="name" type="java.lang.String" value="cbBoxVariable" noResource="true"/>
                                               </Properties>
                                             </Component>
