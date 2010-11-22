@@ -62,7 +62,7 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
     }
 
     public int getStage() {
-        return (int) Math.min(Math.floor(ratioStage), 11);
+        return (int) Math.min(Math.floor(ratioStage), 10);
     }
 
     public double getSpecificGravity() {
@@ -111,8 +111,7 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
         {
             stageDuration = K9 * Math.pow(temperature, -betaK);
 
-        }
-        if (stage == 9) // Stage 10
+        } else if (stage == 9) // Stage 10
         {
             stageDuration = K10 * Math.pow(temperature, -betaK);
 

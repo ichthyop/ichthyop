@@ -111,7 +111,8 @@ public class AndresBuoyancyAction extends AbstractAction {
             double dt = getSimulationManager().getTimeManager().get_dt();
             double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
             double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
-            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt, particle)) - particle.getZ();
+            double move = move(sal, tp, dt, particle);
+            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move) - particle.getZ();
             particle.increment(new double[]{0.d, 0.d, dz});
         }
     }
