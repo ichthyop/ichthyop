@@ -26,6 +26,7 @@ public class MigrationAction extends AbstractAction {
     private boolean isodepth;
     private long minimumAge;
     private boolean isGrowth;
+    private TypeMigration type;
 
     public void loadParameters() throws Exception {
 
@@ -35,8 +36,18 @@ public class MigrationAction extends AbstractAction {
 
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
-        if (!isGrowth) {
+        type = TypeMigration.SUNSET_SUNRISE;
+        if (isGrowth) {
+            try {
+                type = getParameter("type").matches(TypeMigration.SUNSET_SUNRISE.getType())
+                        ? TypeMigration.SUNSET_SUNRISE
+                        : TypeMigration.LENGTH;
+            } catch (Exception ex) {
+                // default type will be sunset / sunrise migration
+            }
+        } else {
             minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
+            type = TypeMigration.SUNSET_SUNRISE;
         }
         depthDay = Float.valueOf(getParameter("daytime_depth"));
         depthNight = Float.valueOf(getParameter("nighttime_depth"));
@@ -63,8 +74,13 @@ public class MigrationAction extends AbstractAction {
                 /** isodepth migration */
                 depth = depthDay;
             } else {
-                /** diel vertical migration */
-                depth = getDepth(particle.getX(), particle.getY());
+                if (type == TypeMigration.SUNSET_SUNRISE) {
+                    /** diel vertical migration */
+                    depth = getDepth(particle.getX(), particle.getY());
+                } else {
+                    double length = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength();
+                    depth = getDepth(particle.getX(), particle.getY(), length);
+                }
             }
             double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
             particle.increment(new double[]{0.d, 0.d, dz}, false, true);
@@ -101,6 +117,31 @@ public class MigrationAction extends AbstractAction {
         }
     }
 
+    private double getDepth(double x, double y, double length) {
+
+        double bottom = getSimulationManager().getDataset().z2depth(x, y, 0);
+        calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));
+        long time = getSecondsOfDay(calendar);
+
+        if (length >= 2.8 && length <= 15.9) {
+            double factor = 0.0333 * length + 0.4667;
+            double tpi = Math.PI * ((time + 3600) - 3600) / (24 * 3600);
+            double depth_dvm = factor * (-((1 - Math.cos(2 * tpi)) / 2) * (depthDay - depthNight)) - depthNight;
+            return Math.max(bottom, depth_dvm);
+
+        } else if (length > 15.9) {
+            double factor = 1;
+            double tpi = Math.PI * ((time + 3600) - 3600) / (24 * 3600);
+            double depth_dvm = factor * (-((1 - Math.cos(2 * tpi)) / 2) * (depthDay - depthNight)) - depthNight;
+            return Math.max(bottom, depth_dvm);
+        } else {
+            double factor = 1;
+            double tpi = Math.PI * ((time + 3600) - 3600) / (24 * 3600);
+            double depth_dvm = factor * (-((1 - Math.cos(2 * tpi)) / 2) * (depthDay - depthNight)) - depthNight;
+            return Math.max(bottom, depth_dvm);
+        }
+    }
+
     private long getSecondsOfDay(Calendar calendar) {
         return calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60;
     }
@@ -117,6 +158,21 @@ public class MigrationAction extends AbstractAction {
 
         String getName() {
             return name;
+        }
+    }
+
+    enum TypeMigration {
+
+        SUNSET_SUNRISE("Based on sunset / sunrise"),
+        LENGTH("Based on particle length");
+        private String type;
+
+        TypeMigration(String type) {
+            this.type = type;
+        }
+
+        String getType() {
+            return type;
         }
     }
 }

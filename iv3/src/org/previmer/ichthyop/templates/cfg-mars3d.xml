@@ -417,6 +417,16 @@
         <enabled>false</enabled>
         <parameters>
             <parameter>
+                <key>type</key>
+                <long_name>Type of migration</long_name>
+                <value>Based on sunset / sunrise</value>
+                <default>Based on sunset / sunrise</default>
+                <format>combo</format>
+                <accepted>Based on sunset / sunrise</accepted>
+                <accepted>Based on particle length</accepted>
+                <description>Set the type of migration. The "Based on particle length" migration can only be used if the growth module is enabled.</description>
+            </parameter>
+            <parameter>
                 <key>daytime_depth</key>
                 <long_name>Depth at daytime [meter]</long_name>
                 <value>-30</value>
