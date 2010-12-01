@@ -29,6 +29,7 @@ public class GridPoint extends SimulationManagerAccessor {
     private boolean lonlatHaveChanged, depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
     private boolean exclusivityH, exclusivityV;
+    private boolean reflexiveCostline = false;
 
 ///////////////
 // Constructors
@@ -95,8 +96,38 @@ public class GridPoint extends SimulationManagerAccessor {
         }
     }
 
+    private double[] reflexiveCostline(double x, double y, double dx, double dy) {
+        return reflexiveCostline(x, y, dx, dy, 0);
+    }
+
+    private double[] reflexiveCostline(double x, double y, double dx, double dy, int iter) {
+
+        double newdx = dx;
+        double newdy = dy;
+        iter += 1;
+        if (!getSimulationManager().getDataset().isInWater(new double[]{x + dx, y + dy})) {
+            if (!getSimulationManager().getDataset().isInWater(new double[]{x + dx, y})) {
+                newdx = 2.d * (Math.round(x) + Math.signum(dx) * 0.5d - x) - dx;
+            }
+            if (!getSimulationManager().getDataset().isInWater(new double[]{x, y + dy})) {
+                newdy = 2.d * (Math.round(y) + Math.signum(dy) * 0.5d - y) - dy;
+            }
+            if (!getSimulationManager().getDataset().isInWater(new double[]{x + newdx, y + newdy})) {
+                if (iter < 10) {
+                    return reflexiveCostline(x, y, newdx, newdy, iter);
+                }
+            }
+        }
+        return new double[]{newdx, newdy};
+    }
+
     public void applyMove() {
-        
+
+        if (reflexiveCostline) {
+            double[] rmove = reflexiveCostline(x, y, dx, dy);
+            dx = rmove[0];
+            dy = rmove[1];
+        }
         setX(x + dx);
         dx = 0.d;
         setY(y + dy);
