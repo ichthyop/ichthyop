@@ -39,5 +39,5 @@ public interface IMasterParticle extends IBasicParticle {
 
     public void incrementAge();
 
-    public void applyMove(boolean reflexiveBoundary);
+    public void applyMove(boolean bouncyCostline);
 }

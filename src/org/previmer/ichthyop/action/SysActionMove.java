@@ -9,21 +9,21 @@ import org.previmer.ichthyop.particle.ParticleMortality;
  */
 public class SysActionMove extends AbstractSysAction {
 
-    private boolean reflexiveCostline;
+    private boolean bouncyCostline;
 
     @Override
     public void loadParameters() throws Exception {
         try {
-            reflexiveCostline = Boolean.valueOf(getParameter("app.transport", "reflexive-costline"));
+            bouncyCostline = Boolean.valueOf(getParameter("app.transport", "bouncy-costline"));
         } catch (Exception ex) {
-            getLogger().warning("Reflexive costline disabled since the parameter could not be found in the configuration file.");
+            getLogger().warning("Bouncy costline disabled since the parameter could not be found in the configuration file.");
         }
     }
 
     @Override
     public void execute(IMasterParticle particle) {
         if (!particle.isLocked()) {
-            particle.applyMove(reflexiveCostline);
+            particle.applyMove(bouncyCostline);
             if (particle.isOnEdge()) {
                 particle.kill(ParticleMortality.OUT_OF_DOMAIN);
                 return;

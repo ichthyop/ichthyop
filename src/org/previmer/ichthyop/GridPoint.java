@@ -95,11 +95,11 @@ public class GridPoint extends SimulationManagerAccessor {
         }
     }
 
-    private double[] reflexiveCostline(double x, double y, double dx, double dy) {
-        return reflexiveCostline(x, y, dx, dy, 0);
+    private double[] bounceCostline(double x, double y, double dx, double dy) {
+        return bounceCostline(x, y, dx, dy, 0);
     }
 
-    private double[] reflexiveCostline(double x, double y, double dx, double dy, int iter) {
+    private double[] bounceCostline(double x, double y, double dx, double dy, int iter) {
 
         double newdx = dx;
         double newdy = dy;
@@ -113,19 +113,19 @@ public class GridPoint extends SimulationManagerAccessor {
             }
             if (!getSimulationManager().getDataset().isInWater(new double[]{x + newdx, y + newdy})) {
                 if (iter < 10) {
-                    return reflexiveCostline(x, y, newdx, newdy, iter);
+                    return bounceCostline(x, y, newdx, newdy, iter);
                 }
             }
         }
         return new double[]{newdx, newdy};
     }
 
-    public void applyMove(boolean reflexiveCostline) {
+    public void applyMove(boolean bouncyCostline) {
 
-        if (reflexiveCostline) {
-            double[] rmove = reflexiveCostline(x, y, dx, dy);
-            dx = rmove[0];
-            dy = rmove[1];
+        if (bouncyCostline) {
+            double[] bounce = bounceCostline(x, y, dx, dy);
+            dx = bounce[0];
+            dy = bounce[1];
         }
         setX(x + dx);
         dx = 0.d;
