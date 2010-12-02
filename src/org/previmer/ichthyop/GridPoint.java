@@ -29,7 +29,6 @@ public class GridPoint extends SimulationManagerAccessor {
     private boolean lonlatHaveChanged, depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
     private boolean exclusivityH, exclusivityV;
-    private boolean reflexiveCostline = false;
 
 ///////////////
 // Constructors
@@ -121,7 +120,7 @@ public class GridPoint extends SimulationManagerAccessor {
         return new double[]{newdx, newdy};
     }
 
-    public void applyMove() {
+    public void applyMove(boolean reflexiveCostline) {
 
         if (reflexiveCostline) {
             double[] rmove = reflexiveCostline(x, y, dx, dy);
