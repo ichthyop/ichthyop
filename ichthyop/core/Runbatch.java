@@ -22,7 +22,7 @@ import javax.swing.SwingUtilities;
  *
  * @author pverley
  */
-public class Runbash {
+public class Runbatch {
 
     ///////////////////////////////
 // Declaration of the variables
@@ -46,13 +46,13 @@ public class Runbash {
     private boolean flagStop = false;
     public static int indexToStart;
 
-    public Runbash(String path) {
+    public Runbatch(String path) {
 
         this(path, String.valueOf(0));
 
     }
 
-    public Runbash(String path, String strStart) {
+    public Runbatch(String path, String strStart) {
 
         /** prints application title in the console */
         System.out.println();
@@ -95,9 +95,9 @@ public class Runbash {
                 }
             });
         } else if (args.length < 2) {
-            new Runbash(args[0]);
+            new Runbatch(args[0]);
         } else {
-            new Runbash(args[0], args[1]);
+            new Runbatch(args[0], args[1]);
         }
     }
 
