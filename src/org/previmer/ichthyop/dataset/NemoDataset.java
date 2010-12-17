@@ -164,7 +164,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      *
      */
-    static float[][][] e3t;
+    static double[][][] e3t;
     static double[][] e1t, e2t, e1v, e2u;
     static String stre1t, stre2t, stre3t, stre1v, stre2u;
     static String strueiv, strveiv, strweiv;
@@ -207,13 +207,13 @@ public class NemoDataset extends AbstractDataset {
             }
             //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
             //fichier *mesh*z*
-            gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
+            /*gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
                         0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().
                     copyTo1DJavaArray();
             gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
                         0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
-                    copyTo1DJavaArray();
-            e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, 0,
+                    copyTo1DJavaArray();*/
+            e3t = (double[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, 0,
                         0}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                     copyToNDJavaArray();
             if (!isGridInfoInOneFile) {
@@ -236,8 +236,8 @@ public class NemoDataset extends AbstractDataset {
                     copyToNDJavaArray();
             nc.close();
         } catch (Exception ex) {
-            ex.printStackTrace();
-            //throw new IOException(ex);
+            //ex.printStackTrace();
+            throw new IOException(ex);
         }
     }
 

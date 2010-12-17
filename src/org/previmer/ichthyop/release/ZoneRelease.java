@@ -20,7 +20,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
     private boolean is3D;
 
     public void loadParameters() throws Exception {
-        
+
         /* Get number of particles to release */
         nbParticles = Integer.valueOf(getParameter("number_particles"));
 
@@ -61,7 +61,21 @@ public class ZoneRelease extends AbstractReleaseProcess {
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nbParticles; p++) {
             /** Instantiate a new Particle */
-            IBasicParticle particle = ParticleFactory.createParticle(index, xmin, xmax, ymin, ymax, upDepth, lowDepth);
+            int DROP_MAX = 2000;
+            IBasicParticle particle = null;
+            int counter = 0;
+            while (null == particle) {
+                if (counter++ > DROP_MAX) {
+                    throw new NullPointerException("{Zone Release} Unable to release particle. Check out the zone definitions.");
+                }
+                double x = xmin + Math.random() * (xmax - xmin);
+                double y = ymin + Math.random() * (ymax - ymin);
+                double depth = Double.NaN;
+                if (is3D) {
+                    depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
+                }
+                particle = ParticleFactory.createGridParticle(index, x, y, depth);
+            }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
         }

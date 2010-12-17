@@ -61,17 +61,26 @@ public class StainRelease extends AbstractReleaseProcess {
             throw new IOException("{Release stain} Center of the stain [lon: " + lon_stain + "; lat: " + lat_stain + "] is not in water or out of the domain. Fixed that in section Release stain.");
         }
 
+        int DROP_MAX = 2000;
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nb_particles; p++) {
-            GeoPosition point = getGeoPosition();
-            double depth = Double.NaN;
-            if (is3D) {
-                depth = depth_stain + thickness_stain * (Math.random() - 0.5d);
+            IBasicParticle particlePatch = null;
+            int counter = 0;
+            while (null == particlePatch) {
+
+                if (counter++ > DROP_MAX) {
+                    throw new NullPointerException("{Release stain} Unable to release particle. Check out the stain definition.");
+                }
+                GeoPosition point = getGeoPosition();
+                double depth = Double.NaN;
+                if (is3D) {
+                    depth = depth_stain + thickness_stain * (Math.random() - 0.5d);
+                }
+                if (depth > 0) {
+                    depth *= -1.d;
+                }
+                particlePatch = ParticleFactory.createGeoParticle(index, point.getLongitude(), point.getLatitude(), depth);
             }
-            if (depth > 0) {
-                depth *= -1.d;
-            }
-            IBasicParticle particlePatch = ParticleFactory.createParticle(index, point.getLongitude(), point.getLatitude(), depth);
             getSimulationManager().getSimulation().getPopulation().add(particlePatch);
             index++;
         }

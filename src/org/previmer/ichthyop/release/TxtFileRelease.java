@@ -66,7 +66,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                     try {
                         coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
                     } catch (ParseException ex) {
-                        IOException ioex = new IOException("Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
+                        IOException ioex = new IOException("{Drifter release} Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
                         ioex.setStackTrace(ex.getStackTrace());
                         throw ioex;
                     }
@@ -79,16 +79,16 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                     if (depth > 0) {
                         depth *= -1;
                     }
-                    particle = ParticleFactory.createParticle(index, coord[0], coord[1], depth);
+                    particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1], depth);
                 } else {
-                    particle = ParticleFactory.createParticle(index, coord[0], coord[1]);
+                    particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1]);
                 }
-                if (getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {
+                if (null != particle) {
                     //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
                     getSimulationManager().getSimulation().getPopulation().add(particle);
                     index++;
                 } else {
-                    throw new IOException("Drifter at line " + (index + 1) + "is not in water");
+                    throw new IOException("{Drifter release} Drifter at line " + (index + 1) + "is not in water");
                 }
             }
         }
