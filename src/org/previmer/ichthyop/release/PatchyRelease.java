@@ -26,13 +26,13 @@ public class PatchyRelease extends AbstractReleaseProcess {
 
     @Override
     public void loadParameters() throws Exception {
-        
+
         /* retrieve patches parameters */
         nb_patches = Integer.valueOf(getParameter("number_patches"));
         nb_agregated = Integer.valueOf(getParameter("number_agregated"));
         radius_patch = Float.valueOf(getParameter("radius_patch"));
         thickness_patch = Float.valueOf(getParameter("thickness_patch"));
-        
+
         /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
 
@@ -46,8 +46,6 @@ public class PatchyRelease extends AbstractReleaseProcess {
 
     @Override
     public int release(ReleaseEvent event) throws Exception {
-
-        int indexEvent = event.getSource().getIndexEvent();
 
         double xmin, xmax, ymin, ymax;
         double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
@@ -73,18 +71,41 @@ public class PatchyRelease extends AbstractReleaseProcess {
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nb_patches; p++) {
             /** Instantiate a new Particle */
-            IBasicParticle particle = ParticleFactory.createParticle(index, xmin, xmax, ymin, ymax, upDepth, lowDepth);
+            int DROP_MAX = 2000;
+            IBasicParticle particle = null;
+            int counter = 0;
+            while (null == particle) {
+                if (counter++ > DROP_MAX) {
+                    throw new NullPointerException("{Patchy release} Unable to release particle. Check out the zone definitions.");
+                }
+                double x = xmin + Math.random() * (xmax - xmin);
+                double y = ymin + Math.random() * (ymax - ymin);
+                double depth = Double.NaN;
+                if (is3D) {
+                    depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
+                }
+                particle = ParticleFactory.createGridParticle(index, x, y, depth);
+            }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
             for (int f = 0; f < nb_agregated - 1; f++) {
-                double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
-                double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
-                double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
-                double depth = Double.NaN;
-                if (is3D) {
-                    depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
+
+                IBasicParticle particlePatch = null;
+                counter = 0;
+                while (null == particlePatch) {
+
+                    if (counter++ > DROP_MAX) {
+                        throw new NullPointerException("{Patchy release} Unable to release particle. Check out the patchy release definition.");
+                    }
+                    double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+                    double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
+                    double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
+                    double depth = Double.NaN;
+                    if (is3D) {
+                        depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
+                    }
+                    particlePatch = ParticleFactory.createGeoParticle(index, lon, lat, depth);
                 }
-                IBasicParticle particlePatch = ParticleFactory.createParticle(index, lon, lat, depth);
                 getSimulationManager().getSimulation().getPopulation().add(particlePatch);
                 index++;
             }
