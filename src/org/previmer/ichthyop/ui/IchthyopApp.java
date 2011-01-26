@@ -48,8 +48,8 @@ public class IchthyopApp extends SingleFrameApplication {
 
     @Override
     protected void shutdown() {
-        super.shutdown();
         ((IchthyopView) getMainView()).savePreferences();
+        super.shutdown();
     }
 
     /**
