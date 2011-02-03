@@ -5,6 +5,7 @@
 package org.previmer.ichthyop.io;
 
 import java.awt.Color;
+import java.io.IOException;
 import org.previmer.ichthyop.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,15 +17,15 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
  *
  * @author pverley
  */
-public class XZone extends org.jdom.Element {
+public class XZone extends XBlock {
 
     final public static String ZONE = "zone";
     final public static String TYPE_ZONE = "type";
     final public static String INDEX = "index";
     final public static String POLYGON = "polygon";
     final public static String COLOR = "color";
-    final public static String KEY = "key";
-    final public static String ENABLED = "enabled";
+    //final public static String KEY = "key";
+    //final public static String ENABLED = "enabled";
     private static final String THICKNESS = "thickness";
     private static final String LOWER_DEPTH = "lower_depth";
     private static final String UPPER_DEPTH = "upper_depth";
@@ -32,15 +33,12 @@ public class XZone extends org.jdom.Element {
     private static final String LINE_INSHORE = "line_inshore";
     private static final String LINE_OFFSHORE = "line_offshore";
 
-    public XZone(Element xzone) {
-        super(ZONE);
-        if (xzone != null) {
-            addContent(xzone.cloneContent());
-        }
+    public XZone(Element xzone) throws IOException {
+        super(xzone, ZONE);
     }
 
-    public XZone(String key) {
-        super(ZONE);
+    public XZone(String key) throws IOException {
+        super(null, ZONE);
         setKey(key);
         setEnabled(true);
         setType(TypeZone.RELEASE);
@@ -70,9 +68,9 @@ public class XZone extends org.jdom.Element {
         setLowerDepth(50.f);
     }
 
-    public String getKey() {
+    /*public String getKey() {
         return getChildTextNormalize(KEY);
-    }
+    }*/
 
     public void setKey(String key) {
         if (null == getChild(KEY)) {
@@ -81,7 +79,7 @@ public class XZone extends org.jdom.Element {
         getChild(KEY).setText(key);
     }
 
-    public boolean isEnabled() {
+    /*public boolean isEnabled() {
 
         if (null != getChild(ENABLED)) {
             return Boolean.valueOf(getChildTextNormalize(ENABLED));
@@ -95,7 +93,7 @@ public class XZone extends org.jdom.Element {
             addContent(new Element(ENABLED));
         }
         getChild(ENABLED).setText(String.valueOf(enabled));
-    }
+    }*/
 
     public TypeZone getTypeZone() {
 

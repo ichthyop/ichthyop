@@ -35,8 +35,8 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     private List<String> sortedKey;
     private int nbHiddenParameters;
 
-    public XBlock(Element element) throws IOException {
-        super(BLOCK);
+    public XBlock(Element element, String name) throws IOException {
+        super(name);
         this.block_type = getType(element);
         if (null == block_type) {
             throw new IllegalArgumentException("Unknow type for block " + element.getChildText(TREEPATH));
@@ -47,6 +47,10 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
             addContent(element.cloneContent());
             map = createMap();
         }
+    }
+
+    public XBlock(Element element) throws IOException {
+        this(element, BLOCK);
     }
 
     public XBlock(BlockType block_type, Element element) {

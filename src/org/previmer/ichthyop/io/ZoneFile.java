@@ -17,6 +17,7 @@
 package org.previmer.ichthyop.io;
 
 import java.io.FileNotFoundException;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -130,7 +131,11 @@ public class ZoneFile {
         List<Element> list = structure.getRootElement().getChildren(XZone.ZONE);
         List<XZone> listBlock = new ArrayList(list.size());
         for (Element elt : list) {
-            listBlock.add(new XZone(elt));
+            try {
+                listBlock.add(new XZone(elt));
+            } catch (IOException ex) {
+                Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return listBlock;
     }
@@ -153,7 +158,11 @@ public class ZoneFile {
         };
         List<XZone> list = new ArrayList();
         for (Object elt : structure.getRootElement().getContent(filtre)) {
-            list.add(new XZone((Element) elt));
+            try {
+                list.add(new XZone((Element) elt));
+            } catch (IOException ex) {
+                Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return list;
     }
@@ -178,7 +187,11 @@ public class ZoneFile {
     }
 
     public void addZone(String key) {
-        zones.put(key, new XZone(key));
+        try {
+            zones.put(key, new XZone(key));
+        } catch (IOException ex) {
+            Logger.getLogger(ZoneFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void updateKey(String oldKey, String newKey) {
