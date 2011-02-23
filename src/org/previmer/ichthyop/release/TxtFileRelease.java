@@ -88,7 +88,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                     getSimulationManager().getSimulation().getPopulation().add(particle);
                     index++;
                 } else {
-                    throw new IOException("{Drifter release} Drifter at line " + (index + 1) + "is not in water");
+                    throw new IOException("{Drifter release} Drifter at line " + (index + 1) + " is not in water");
                 }
             }
         }

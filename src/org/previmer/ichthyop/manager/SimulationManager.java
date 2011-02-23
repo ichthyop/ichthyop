@@ -32,7 +32,7 @@ import java.util.GregorianCalendar;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.jdom.input.SAXBuilder;
-import org.previmer.ichthyop.calendar.Calendar1900;
+import org.previmer.ichthyop.calendar.InterannualCalendar;
 
 /**
  *
@@ -267,9 +267,9 @@ public class SimulationManager implements ISimulationManager {
         if (progress != 0) {
             nbMilliSecLeft = (long) ((System.currentTimeMillis() - cpu_start) * (1 - progress) / progress);
         }
-        int nbHourLeft = (int) (nbMilliSecLeft / Calendar1900.ONE_HOUR);
-        int nbMinLeft = (int) ((nbMilliSecLeft - Calendar1900.ONE_HOUR * nbHourLeft) / Calendar1900.ONE_MINUTE);
-        int nbSecLeft = (int) ((nbMilliSecLeft - Calendar1900.ONE_HOUR * nbHourLeft - Calendar1900.ONE_MINUTE * nbMinLeft) / Calendar1900.ONE_SECOND);
+        int nbHourLeft = (int) (nbMilliSecLeft / InterannualCalendar.ONE_HOUR);
+        int nbMinLeft = (int) ((nbMilliSecLeft - InterannualCalendar.ONE_HOUR * nbHourLeft) / InterannualCalendar.ONE_MINUTE);
+        int nbSecLeft = (int) ((nbMilliSecLeft - InterannualCalendar.ONE_HOUR * nbHourLeft - InterannualCalendar.ONE_MINUTE * nbMinLeft) / InterannualCalendar.ONE_SECOND);
 
         strBf = new StringBuffer("Time left ");
         if (nbHourLeft == 0) {

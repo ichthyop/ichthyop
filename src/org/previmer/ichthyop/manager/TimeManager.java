@@ -10,7 +10,7 @@ import java.text.ParseException;
 import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
-import org.previmer.ichthyop.calendar.Calendar1900;
+import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
@@ -110,7 +110,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
         if (getParameter("calendar_type").matches(TypeCalendar.CLIMATO.toString())) {
             calendar = new ClimatoCalendar();
         } else {
-            calendar = new Calendar1900(getParameter("time_origin"), INPUT_DATE_FORMAT);
+            calendar = new InterannualCalendar(getParameter("time_origin"), INPUT_DATE_FORMAT);
         }
 
         /* initial time */
@@ -125,7 +125,7 @@ public class TimeManager extends AbstractManager implements ITimeManager {
 
         /* output date format */
         outputDateFormat = new SimpleDateFormat(
-                (calendar.getClass() == Calendar1900.class)
+                (calendar.getClass() == InterannualCalendar.class)
                 ? "yyyy/MM/dd HH:mm:ss"
                 : "yy/MM/dd HH:mm:ss");
         outputDateFormat.setCalendar(calendar);

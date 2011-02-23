@@ -21,7 +21,7 @@ import java.util.Calendar;
  * @see java.util.Calendar
  * @see java.util.GregorianCalendar
  */
-public class Calendar1900 extends Calendar {
+public class InterannualCalendar extends Calendar {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -49,9 +49,13 @@ public class Calendar1900 extends Calendar {
     /**
      * Constructs a Gregorian Calendar with origin of time
      * January 1, 1900 00:00:00.000 GMT.
+     *
+     * 2011/02/23 pverley: some simulation may have an origin of time prior
+     * to 1900 so a new origin has been set as the 1st day of the Gregorian
+     * calendar October 15, 1582 00:00:00.000 GMT
      */
-    public Calendar1900() {
-        this(1900, JANUARY, 1);
+    public InterannualCalendar() {
+        this(1582, OCTOBER, 15);
     }
 
     /**
@@ -61,7 +65,7 @@ public class Calendar1900 extends Calendar {
      * @param month an int, the month origin
      * @param day an int, the day origin
      */
-    public Calendar1900(int year, int month, int day) {
+    public InterannualCalendar(int year, int month, int day) {
 
         epoch_fields = new int[FIELD_COUNT];
         fields = new int[FIELD_COUNT];
@@ -74,9 +78,9 @@ public class Calendar1900 extends Calendar {
         setTimeInMillis(0);
     }
 
-    public Calendar1900(String origin, SimpleDateFormat dateFormat) throws ParseException {
+    public InterannualCalendar(String origin, SimpleDateFormat dateFormat) throws ParseException {
 
-        Calendar cld = new Calendar1900();
+        Calendar cld = new InterannualCalendar();
         dateFormat.setCalendar(cld);
         cld.setTime(dateFormat.parse(origin));
         epoch_fields = new int[FIELD_COUNT];
