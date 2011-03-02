@@ -5,6 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
  *
@@ -18,7 +19,6 @@ public class AdvectionAction extends AbstractAction {
     private boolean vertical;
     // Threshold for CFL error message
     public static final float THRESHOLD_CFL = 1.0f;
-
 
     public void loadParameters() throws Exception {
 
@@ -40,14 +40,14 @@ public class AdvectionAction extends AbstractAction {
         /* Horizontal advection enabled ? */
         try {
             horizontal = Boolean.valueOf(getParameter("horizontal"));
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             horizontal = true;
         }
 
         /* Vertical advection enabled ? */
         try {
             vertical = Boolean.valueOf(getParameter("vertical"));
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             vertical = true;
         }
     }
@@ -93,8 +93,8 @@ public class AdvectionAction extends AbstractAction {
         if (dim > 2) {
             dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time);
             if (Math.abs(dU[2]) > THRESHOLD_CFL) {
-            getLogger().warning("CFL broken for W " + (float) dU[2]);
-        }
+                getLogger().warning("CFL broken for W " + (float) dU[2]);
+            }
         }
 
         for (int i = 0; i < dim; i++) {
@@ -103,6 +103,17 @@ public class AdvectionAction extends AbstractAction {
         return dU;
     }
 
+    /**
+     * Advects the particle forward in time with the apropriate scheme (Euler
+     * or Runge Kutta 4).
+     * The process is a bit more complex than forward advection.
+     * <pre>
+     * Let's take X(t) = |x, y, z the particle vector position at time = t.
+     * X1(t - dt) = X(t) - Ua(t, x, y, z)dt with vector X1 = |x1, y1, z1
+     * X(t - dt) = X(t) - Ua(t, x1, y1, z1)dt
+     * With Ua the input model velocity vector.
+     * </pre>
+     */
     private void advectBackward(IBasicParticle particle, double time) throws
             ArrayIndexOutOfBoundsException {
 
@@ -114,11 +125,19 @@ public class AdvectionAction extends AbstractAction {
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }
+            if (getSimulationManager().getDataset().isOnEdge(pgrid)) {
+                particle.kill(ParticleMortality.OUT_OF_DOMAIN);
+                return;
+            }
             mvt = advectEuler(pgrid, time, dt);
         } else {
             mvt = advectRk4(pgrid = particle.getGridCoordinates(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
+            }
+            if (getSimulationManager().getDataset().isOnEdge(pgrid)) {
+                particle.kill(ParticleMortality.OUT_OF_DOMAIN);
+                return;
             }
             mvt = advectRk4(pgrid, time, dt);
         }
