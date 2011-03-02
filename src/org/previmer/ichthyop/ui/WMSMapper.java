@@ -52,7 +52,7 @@ import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.arch.ITimeManager;
-import org.previmer.ichthyop.calendar.Calendar1900;
+import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
 import ucar.ma2.Array;
@@ -192,9 +192,9 @@ public class WMSMapper extends JXMapKit {
             calendar = new ClimatoCalendar();
         } else {
             try {
-                calendar = new Calendar1900(vtime.findAttribute("origin").getStringValue(), ITimeManager.INPUT_DATE_FORMAT);
+                calendar = new InterannualCalendar(vtime.findAttribute("origin").getStringValue(), ITimeManager.INPUT_DATE_FORMAT);
             } catch (ParseException ex) {
-                calendar = new Calendar1900();
+                calendar = new InterannualCalendar();
             }
         }
 
