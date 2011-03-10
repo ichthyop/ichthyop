@@ -48,6 +48,7 @@ public class Mars3dDataset extends Mars3dCommon {
         }
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
+            ncIn.close();
             ncIn = MarsIO.openFile(MarsIO.getNextFile(time_arrow));
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);

@@ -946,7 +946,9 @@ public class NemoDataset extends AbstractDataset {
      */
     public double depth2z(double x, double y, double depth) {
 
-        if (depth > 0) depth = 0.d;
+        if (depth > 0) {
+            depth = 0.d;
+        }
         depth = Math.abs(depth);
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -1375,9 +1377,18 @@ public class NemoDataset extends AbstractDataset {
     private void open(int index) throws IOException {
 
         getLogger().info("Opening NEMO dataset");
+        if (ncU != null) {
+            ncU.close();
+        }
         ncU = NetcdfDataset.openFile(listUFiles.get(index), null);
+        if (ncV != null) {
+            ncV.close();
+        }
         ncV = NetcdfDataset.openFile(listVFiles.get(index), null);
         //ncW = NetcdfDataset.openFile(listWFiles.get(index), null);
+        if (ncT != null) {
+            ncT.close();
+        }
         ncT = NetcdfDataset.openFile(listTFiles.get(index), null);
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
     }
