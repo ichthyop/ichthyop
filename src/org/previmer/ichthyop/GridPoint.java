@@ -95,8 +95,111 @@ public class GridPoint extends SimulationManagerAccessor {
         }
     }
 
-    public void applyMove() {
-        
+    private double[] bounceCostline(double x, double y, double dx, double dy) {
+        return bounceCostline(x, y, dx, dy, 0);
+    }
+
+    private double[] bounceCostline(double x, double y, double dx, double dy, int iter) {
+
+        double newdx = dx;
+        double newdy = dy;
+        iter += 1;
+        if (!getSimulationManager().getDataset().isInWater(new double[]{x + dx, y + dy})) {
+            double s = x;
+            double ds = dx;
+            double signum = 1.d;
+            double ys = y;
+            boolean bounceMeridional = false;
+            boolean bounceZonal = false;
+            int n = 0;
+            /* Iterative process to estimate the point of impact with the
+             * costline.
+             */
+            while (n < 1000 && !(bounceMeridional | bounceZonal)) {
+                ds *= 0.5d;
+                s = s + signum * ds;
+                ys = dy / dx * (s - x) + y;
+                signum = (getSimulationManager().getDataset().isInWater(new double[]{s, ys}))
+                        ? 1.d
+                        : -1.d;
+                bounceMeridional = Math.abs(Math.round(s + 0.5d) - (s + 0.5d)) < 1e-8;
+                bounceZonal = Math.abs(Math.round(ys + 0.5d) - (ys + 0.5d)) < 1e-8;
+                n++;
+            }
+            /* Compute dx1 such as dx = dx1 + dx2, dx1 in water, dx2 on land
+             * or dy1 such as dy = dy1 + dy2, dy1 in water, dy2 on land
+             */
+            double dx1 = (Math.round(x) + Math.signum(dx) * 0.5d - x);
+            double dy1 = (Math.round(y) + Math.signum(dy) * 0.5d - y);
+            if (bounceMeridional & bounceZonal) {
+                /* case1 : particle hits the cost on a corner */
+                newdx = 2.d * dx1 - dx;
+                newdy = 2.d * dy1 - dy;
+            } else if (bounceMeridional) {
+                /* case2: particle hits the meridional cost */
+                newdx = 2.d * dx1 - dx;
+                newdy = dy;
+            } else if (bounceZonal) {
+                /* case3: particle hits the zonal cost */
+                newdy = 2.d * dy1 - dy;
+                newdx = dx;
+            }
+            /* Ensure the new point is in water and repeat the process otherwise */
+            if (!getSimulationManager().getDataset().isInWater(new double[]{x + newdx, y + newdy})) {
+                if (iter < 10) {
+                    return bounceCostline(x, y, newdx, newdy, iter);
+                }
+            }
+
+            /*if ((Math.abs(dx) > Math.abs(dx1)) && (Math.abs(dy) > Math.abs(dy1))) {
+                boolean bumpX = getSimulationManager().getDataset().isInWater(new double[]{x + dx1, y + dx1 / dx * dy});
+                boolean bumpY = getSimulationManager().getDataset().isInWater(new double[]{x + dy1 / dy * dx, y + dy1});
+                System.out.println(bumpX + " " + bumpY);
+                if (Math.abs(dx1) > Math.abs(dy1)) {
+                    //dx1 = dy1 / dy * dx;
+                    //System.out.println("x: " + (float) (x + dx1) + " y: " + (y + dy1));
+                    System.out.println("bounce 1.1");
+                    newdy = 2.d * dy1 - dy;
+                    newdx = dx;
+                } else {
+                    //dy1 = dx1 / dx * dy;
+                    //System.out.println("x: " + (x + dx1) + " y: " + (float) (y + dy1));
+                    System.out.println("bounce 1.2");
+                    newdx = 2.d * dx1 - dx;
+                    newdy = dy;
+                }
+            } else if ((Math.abs(dx) > Math.abs(dx1))) {
+                System.out.println("bounce 2");
+                newdx = 2.d * dx1 - dx;
+                newdy = dy;
+            } else if ((Math.abs(dy) > Math.abs(dy1))) {
+                System.out.println("bounce 3");
+                newdy = 2.d * dy1 - dy;
+                newdx = dx;
+            }
+            //System.out.println("bounce (" + (x + dx) + ":" + (y + dy) + ") ==> (" + (x + newdx) + ":" + (y + newdy) + ")");
+            /*if (!getSimulationManager().getDataset().isInWater(new double[]{x + dx, y})) {
+            newdx = 2.d * (Math.round(x) + Math.signum(dx) * 0.5d - x) - dx;
+            }
+            if (!getSimulationManager().getDataset().isInWater(new double[]{x, y + dy})) {
+            newdy = 2.d * (Math.round(y) + Math.signum(dy) * 0.5d - y) - dy;
+            }
+            if (!getSimulationManager().getDataset().isInWater(new double[]{x + newdx, y + newdy})) {
+            if (iter < 10) {
+            return bounceCostline(x, y, newdx, newdy, iter);
+            }
+            }*/
+        }
+        return new double[]{newdx, newdy};
+    }
+
+    public void applyMove(boolean bouncyCostline) {
+
+        if (bouncyCostline) {
+            double[] bounce = bounceCostline(x, y, dx, dy);
+            dx = bounce[0];
+            dy = bounce[1];
+        }
         setX(x + dx);
         dx = 0.d;
         setY(y + dy);

@@ -68,6 +68,21 @@
         </parameters>
     </block>
     <block type="option">
+        <tree_path>Advanced/Transport/General</tree_path>
+        <key>app.transport</key>
+        <description>Set the general transport options of the simulation.</description>
+        <parameters>
+            <parameter>
+                <key>bouncy-costline</key>
+                <long_name>Bouncy costline</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Determines whether the particles should bounce on the costline or just beach.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="option">
         <key>app.output</key>
         <description>Block of options that controls the record of the particle tracks in NetCDF ouput files.</description>
         <tree_path>IO/Output</tree_path>

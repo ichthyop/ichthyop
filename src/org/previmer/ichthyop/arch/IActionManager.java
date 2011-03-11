@@ -17,6 +17,8 @@ public interface IActionManager {
 
     public void executeActions(IBasicParticle particle);
 
+    public void executeSysActions(IMasterParticle particle);
+
     public boolean isEnabled(String actionName);
 
     public String getParameter(String actionName, String key);

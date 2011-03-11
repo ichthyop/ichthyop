@@ -68,6 +68,21 @@
         </parameters>
     </block>
     <block type="option">
+        <tree_path>Advanced/Transport/General</tree_path>
+        <key>app.transport</key>
+        <description>Set the general transport options of the simulation.</description>
+        <parameters>
+            <parameter>
+                <key>bouncy-costline</key>
+                <long_name>Bouncy costline</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Determines whether the particles should bounce on the costline or just beach.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="option">
         <key>app.output</key>
         <description>Block of options that controls the record of the particle tracks in NetCDF ouput files.</description>
         <tree_path>Main/Output</tree_path>
@@ -1047,6 +1062,44 @@
                 <long_name>priority</long_name>
                 <value>highest</value>
                 <default>highest</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.turtle</key>
+        <tree_path>Advanced/Biology/Turtle move</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options for modelling turtle moves influenced by earth magnetical field. First time you enable the turtle module, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk) or set an existing one.</description>
+        <parameters>
+            <parameter>
+                <key>zone_file</key>
+                <long_name>Zone file</long_name>
+                <value>cfg/benguela_zones.xml</value>
+                <default>cfg/my_zones.xml</default>
+                <format>zonefile</format>
+                <template>zone-benguela.xml</template>
+                <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads orientation zones from the file and ignores the other types of zone (release zone for instance).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.TurtleSwimAction</value>
+                <default>org.previmer.ichthyop.action.TurtleSwimAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>normal</value>
+                <default>normal</default>
                 <format>combo</format>
                 <accepted>lowest</accepted>
                 <accepted>low</accepted>
