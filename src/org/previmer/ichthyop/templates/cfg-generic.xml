@@ -68,6 +68,21 @@
         </parameters>
     </block>
     <block type="option">
+        <tree_path>Advanced/Transport/General</tree_path>
+        <key>app.transport</key>
+        <description>Set the general transport options of the simulation.</description>
+        <parameters>
+            <parameter>
+                <key>bouncy-costline</key>
+                <long_name>Bouncy costline</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Determines whether the particles should bounce on the costline or just beach.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="option">
         <key>app.output</key>
         <description>Block of options that controls the record of the particle tracks in NetCDF ouput files.</description>
         <tree_path>IO/Output</tree_path>
@@ -1129,6 +1144,20 @@
                 <long_name>Vertical scale factor at T points</long_name>
                 <value>e3t_ps</value>
                 <default>e3t_ps</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_e3u</key>
+                <long_name>Vertical scale factor at U points</long_name>
+                <value>e3u_ps</value>
+                <default>e3u_ps</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_e3v</key>
+                <long_name>Vertical scale factor at V points</long_name>
+                <value>e3v_ps</value>
+                <default>e3v_ps</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
