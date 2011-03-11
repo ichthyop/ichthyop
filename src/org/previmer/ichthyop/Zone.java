@@ -2,7 +2,9 @@ package org.previmer.ichthyop;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.XParameter;
 
 /** import AWT */
 /**
@@ -36,6 +38,7 @@ import org.previmer.ichthyop.arch.IBasicParticle;
 public class Zone extends SimulationManagerAccessor {
 
     private ArrayList<GridPoint> polygon = new ArrayList(3);
+    private HashMap<String, XParameter> parameters = new HashMap();
     private TypeZone type;
     /**
      * Lower bathymetric line [meter]
@@ -120,6 +123,14 @@ public class Zone extends SimulationManagerAccessor {
 
     public void addPoint(GridPoint point) {
         polygon.add(point);
+    }
+
+    public void addParameter(XParameter xparameter) {
+        parameters.put(xparameter.getKey(), xparameter);
+    }
+
+    public XParameter getParameter(String key) {
+        return parameters.get(key);
     }
 
     public void init() throws Exception {
