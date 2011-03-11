@@ -4,10 +4,7 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
-import ucar.ma2.InvalidRangeException;
 
 /**
  *
@@ -43,6 +40,7 @@ public class Mars2dDataset extends Mars2dCommon {
         v_tp0 = v_tp1;
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
+            ncIn.close();
             ncIn = MarsIO.openFile(MarsIO.getNextFile(time_arrow));
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);

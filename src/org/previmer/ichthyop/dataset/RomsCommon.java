@@ -716,7 +716,9 @@ abstract class RomsCommon extends AbstractDataset {
 
     void open(String filename) throws IOException {
         if (ncIn == null || (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
-
+            if (ncIn != null) {
+                ncIn.close();
+            }
             try {
                 ncIn = NetcdfDataset.openFile(filename, null);
             } catch (Exception ex) {

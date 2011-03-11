@@ -9,6 +9,7 @@ import java.io.IOException;
 /** import netcdf */
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.ma2.Array;
+import ucar.nc2.NetcdfFile;
 
 /**
  * A comparison function of two netcdf files for chronological order.
@@ -65,13 +66,16 @@ public class NCComparator implements Comparator<String> {
         Double n1 = new Double(0);
         Double n2 = new Double(0);
         Array timeArr;
+        NetcdfFile ncdf;
         try {
-            timeArr = NetcdfDataset.openFile(nc1,
-                                             null).findVariable(strTime).read();
+            ncdf = NetcdfDataset.openFile(nc1, null);
+            timeArr = ncdf.findVariable(strTime).read();
             n1 = timeArr.getDouble(timeArr.getIndex().set(0));
-            timeArr = NetcdfDataset.openFile(nc2,
-                                             null).findVariable(strTime).read();
+            ncdf.close();
+            ncdf = NetcdfDataset.openFile(nc2, null);
+            timeArr = ncdf.findVariable(strTime).read();
             n2 = timeArr.getDouble(timeArr.getIndex().set(0));
+            ncdf.close();
         } catch (IOException e) {
             //e.printStackTrace();
             return 0;
