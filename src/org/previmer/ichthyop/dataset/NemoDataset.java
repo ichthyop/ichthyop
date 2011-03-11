@@ -164,7 +164,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      *
      */
-    static float[][][] e3t;
+    static float[][][] e3t, e3u, e3v;
     static double[][] e1t, e2t, e1v, e2u;
     static String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     static String strueiv, strveiv, strweiv;
