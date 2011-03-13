@@ -279,16 +279,24 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         final List<GeoPosition> lregion = new ArrayList<GeoPosition>();
         IDataset dataset = getSimulationManager().getDataset();
         for (int i = 1; i < dataset.get_nx(); i++) {
-            lregion.add(new GeoPosition(dataset.getLat(i, 0), dataset.getLon(i, 0)));
+            if (!Double.isNaN(dataset.getLat(i, 0)) && !Double.isNaN(dataset.getLon(i, 0))) {
+                lregion.add(new GeoPosition(dataset.getLat(i, 0), dataset.getLon(i, 0)));
+            }
         }
         for (int j = 1; j < dataset.get_ny(); j++) {
-            lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), dataset.getLon(dataset.get_nx() - 1, j)));
+            if (!Double.isNaN(dataset.getLat(dataset.get_nx() - 1, j)) && !Double.isNaN(dataset.getLon(dataset.get_nx() - 1, j))) {
+                lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), dataset.getLon(dataset.get_nx() - 1, j)));
+            }
         }
         for (int i = dataset.get_nx() - 1; i > 0; i--) {
-            lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), dataset.getLon(i, dataset.get_ny() - 1)));
+            if (!Double.isNaN(dataset.getLat(i, dataset.get_ny() - 1)) && !Double.isNaN(dataset.getLon(i, dataset.get_ny() - 1))) {
+                lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), dataset.getLon(i, dataset.get_ny() - 1)));
+            }
         }
         for (int j = dataset.get_ny() - 1; j > 0; j--) {
-            lregion.add(new GeoPosition(dataset.getLat(0, j), dataset.getLon(0, j)));
+            if (!Double.isNaN(dataset.getLat(0, j)) && !Double.isNaN(dataset.getLon(0, j))) {
+                lregion.add(new GeoPosition(dataset.getLat(0, j), dataset.getLon(0, j)));
+            }
         }
         return lregion;
     }
