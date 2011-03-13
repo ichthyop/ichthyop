@@ -211,7 +211,10 @@ public class SimulationUI extends JPanel {
         p4 = grid2Screen(igrid + 1, jgrid + 1, w, h);
 
         for (int n = 0; n < 2; n++) {
-            point[n] = (int) ((1.d - dx) * (1.d - dy) * p1[n] + dx * (1.d - dy) * p2[n] + (1.d - dx) * dy * p3[n] + dx * dy * p4[n]);
+            double interp = (1.d - dx) * (1.d - dy) * p1[n] + dx * (1.d - dy) * p2[n] + (1.d - dx) * dy * p3[n] + dx * dy * p4[n];
+            point[n] = Double.isNaN(interp)
+                    ? -1
+                    : (int) interp;
         }
         return point;
     }
@@ -336,6 +339,10 @@ public class SimulationUI extends JPanel {
             points[3] = grid2Screen(i - 0.5f, j + 0.5f, w, h);
 
             for (int n = 0; n < 4; n++) {
+                if (points[n][0] < 0 || points[n][1] < 0) {
+                    reset();
+                    return;
+                }
                 addPoint(points[n][0], points[n][1]);
             }
         }
