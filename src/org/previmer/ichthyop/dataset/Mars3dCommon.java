@@ -77,6 +77,10 @@ abstract class Mars3dCommon extends MarsCommon {
      * 
      */
     float[] s_rho;
+    /*
+     *
+     */
+    String strHC, strCs_r, strCs_w;
 
     @Override
     public void setUp() throws Exception {
@@ -107,13 +111,33 @@ abstract class Mars3dCommon extends MarsCommon {
         strZDim = getParameter("field_dim_z");
         strZeta = getParameter("field_var_zeta");
         strSigma = getParameter("field_var_sigma");
+
+        /* Read specifi generalized sigma parameters for MARS V8 */
+        try {
+            strHC = getParameter("field_var_hc");
+            strCs_r = getParameter("field_var_csr");
+            strCs_w = getParameter("field_var_csw");
+        } catch (Exception ex) {
+            strHC = strCs_r = strCs_w = null;
+            getLogger().warning("{Dataset} Could not find generalized sigma level parameters in the configuration file. Simple sigma levels will be used then.");
+        }
+
     }
 
     /**
      * Computes the depth at sigma levels disregarding the free
      * surface elevation.
      */
-    void getCstSigLevels() {
+    void getCstSigLevels() throws IOException {
+        if ((strHC != null) && (null != ncIn.findVariable(strHC))) {
+            getLogger().info("{Dataset} Generalized sigma levels detected.");
+            getSigLevelsV8();
+        } else {
+            getSigLevelsV6();
+        }
+    }
+
+    private void getSigLevelsV6() {
 
         double[][][] z_r_tmp = new double[nz][ny][nx];
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
@@ -143,7 +167,79 @@ abstract class Mars3dCommon extends MarsCommon {
 
         z_w_tp0 = new double[nz + 1][ny][nx];
         z_w_tp1 = new double[nz + 1][ny][nx];
+    }
 
+    private void getSigLevelsV8() throws IOException {
+
+        float hc[][];
+        double[] sc_r = new double[nz];
+        double[] Cs_r = new double[nz];
+        double[] sc_w = new double[nz + 1];
+        double[] Cs_w = new double[nz + 1];
+        try {
+            //-----------------------------------------------------------
+            // Read hc, Cs_r and Cs_w in the NetCDF file.
+            Array arrHc = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+            hc = (float[][]) arrHc.copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("{Dataset} Error reading hc variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
+            Array arr_cs_r = ncIn.findVariable(strCs_r).read();
+            for (int k = 0; k < Cs_r.length - 1; k++) {
+                Cs_r[k] = arr_cs_r.getFloat(k);
+            }
+        } catch (IOException ex) {
+            IOException ioex = new IOException("{Dataset} Error reading Csu variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
+            Array arr_cs_w = ncIn.findVariable(strCs_w).read();
+            for (int k = 0; k < Cs_w.length - 1; k++) {
+                Cs_w[k] = arr_cs_w.getFloat(k);
+            }
+        } catch (IOException ex) {
+            IOException ioex = new IOException("{Dataset} Error reading Csw variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
+
+        //-----------------------------------------------------------
+        // Calculation of sc_r and sc_w, the sigma levels
+        for (int k = nz; k-- > 0;) {
+            sc_r[k] = ((double) (k - nz) + .5d) / (double) nz;
+            sc_w[k + 1] = (double) (k + 1 - nz) / (double) nz;
+        }
+        sc_w[0] = -1.d;
+
+        //------------------------------------------------------------
+        // Calculation of z_w , z_r
+        double[][][] z_r_tmp = new double[nz][ny][nx];
+        double[][][] z_w_tmp = new double[nz + 1][ny][nx];
+
+
+        // OLD: z_unperturbated = hc * (sc - Cs) + Cs * h
+
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
+                z_w_tmp[0][j][i] = -hRho[j][i];
+                for (int k = nz; k-- > 0;) {
+                    z_r_tmp[k][j][i] = hc[j][i] * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i];
+                    z_w_tmp[k + 1][j][i] = hc[j][i] * (sc_w[k + 1] - Cs_w[k + 1]) + Cs_w[k + 1] * hRho[j][i];
+                }
+                z_w_tmp[nz][j][i] = 0.d;
+            }
+        }
+
+        z_rho_cst = z_r_tmp;
+        z_w_cst = z_w_tmp;
+
+        z_w_tp0 = new double[nz + 1][ny][nx];
+        z_w_tp1 = new double[nz + 1][ny][nx];
     }
 
     @Override
