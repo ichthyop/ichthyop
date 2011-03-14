@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.EventObject;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,11 +52,13 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.CellEditorListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.TypeZone;
@@ -77,6 +80,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     /** Creates new form ZoneEditorPanel */
     public ZoneEditorPanel() {
         initComponents();
+        tablePolygon.setDefaultEditor(Float.class, new FloatEditor());
     }
 
     private void addChangeListeners(PropertyChangeListener pl, ActionListener al) {
