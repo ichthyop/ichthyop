@@ -244,6 +244,27 @@
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
+                <key>field_var_hc</key>
+                <long_name>HC</long_name>
+                <value>hc</value>
+                <default>hc</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_csr</key>
+                <long_name>C(s) at Rho point</long_name>
+                <value>Csu_sig</value>
+                <default>Csu_sig</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_csw</key>
+                <long_name>C(s) at W point</long_name>
+                <value>Csw_sig</value>
+                <default>Csw_sig</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
                 <key>field_var_u</key>
                 <long_name>Zonal velocity</long_name>
                 <value>uz</value>
