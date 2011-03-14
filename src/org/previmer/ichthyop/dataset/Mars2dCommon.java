@@ -12,7 +12,7 @@ import ucar.ma2.InvalidRangeException;
  *
  * @author pverley
  */
-public abstract class Mars2dCommon extends MarsCommon {
+public abstract class Mars2dCommon extends MarsCommonRotated {
 
     /**
      * Zonal component of the velocity field at current time
@@ -57,7 +57,7 @@ public abstract class Mars2dCommon extends MarsCommon {
                         * (.5d - (double) jj - dy));
                 CO += co;
                 x = (1.d - x_euler) * v_tp0[j + jj - 1][i + ii] + x_euler * v_tp1[j + jj - 1][i + ii];
-                dv += x * co / dyv;
+                dv += 2.d * x * co / (dyv[Math.max(j + jj - 1, 0)][i + ii] + dyv[j + jj][i + ii]);
             }
         }
 
@@ -90,7 +90,7 @@ public abstract class Mars2dCommon extends MarsCommon {
                         * (1.d - (double) jj - dy));
                 CO += co;
                 x = (1.d - x_euler) * u_tp0[j + jj][i + ii - 1] + x_euler * u_tp1[j + jj][i + ii - 1];
-                du += x * co / dxu[j + jj];
+                du += 2.d * x * co / (dxu[j + jj][Math.max(i + ii - 1, 0)] + dxu[j + jj][i + ii]);
             }
         }
         if (CO != 0) {

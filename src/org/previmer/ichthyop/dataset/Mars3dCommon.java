@@ -12,7 +12,7 @@ import ucar.ma2.Index;
  *
  * @author pverley
  */
-abstract class Mars3dCommon extends MarsCommon {
+abstract class Mars3dCommon extends MarsCommonRotated {
 
     /**
      * Vertical grid dimension
@@ -80,7 +80,7 @@ abstract class Mars3dCommon extends MarsCommon {
     /*
      *
      */
-    String strHC, strCs_r, strCs_w;
+    private String strHC, strCs_r, strCs_w;
 
     @Override
     public void setUp() throws Exception {
@@ -416,7 +416,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                    dv += x * co / dyv;
+                    dv += 2.d * x * co / (dyv[Math.max(j + jj - 1, 0)][i + ii] + dyv[j + jj][i + ii]);
                 }
             }
         }
@@ -453,7 +453,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                    du += x * co / dxu[j + jj];
+                    du += 2.d * x * co / (dxu[j + jj][Math.max(i + ii - 1, 0)] + dxu[j + jj][i + ii]);
                 }
             }
         }
@@ -547,21 +547,17 @@ abstract class Mars3dCommon extends MarsCommon {
         for (int k = nz; k-- > 0;) {
             for (int i = 0; i++ < nx - 1;) {
                 for (int j = ny; j-- > 0;) {
-                    Huon[k][j][i] = .5d * ((z_w_tmp[k + 1][j][i]
-                            - z_w_tmp[k][j][i])
-                            + (z_w_tmp[k + 1][j][i - 1]
-                            - z_w_tmp[k][j][i - 1])) * dyv
+                    Huon[k][j][i] = .25d * ((z_w_tmp[k + 1][j][i] - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j][i - 1] - z_w_tmp[k][j][i - 1]))
+                            * (dyv[j][i] + dyv[j][i - 1])
                             * u_tp1[k][j][i - 1];
                 }
             }
             for (int i = nx; i-- > 0;) {
                 for (int j = 0; j++ < ny - 1;) {
-                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i]
-                            - z_w_tmp[k][j][i])
-                            + (z_w_tmp[k + 1][j - 1][i]
-                            - z_w_tmp[k][j - 1][i]))
-                            * (dxu[j]
-                            + dxu[j - 1]))
+                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i] - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j - 1][i] - z_w_tmp[k][j - 1][i]))
+                            * (dxu[j][i] + dxu[j - 1][i]))
                             * v_tp1[k][j - 1][i];
                 }
             }
@@ -622,7 +618,7 @@ abstract class Mars3dCommon extends MarsCommon {
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j] * dyv));
+                    w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j][j] * dyv[j][i]));
                 }
             }
         }
