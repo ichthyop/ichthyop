@@ -76,7 +76,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
     /**
      * 
      */
-    float[] s_rho;
+    double[] s_rho, s_w;
     /*
      *
      */
@@ -129,6 +129,16 @@ abstract class Mars3dCommon extends MarsCommonRotated {
      * surface elevation.
      */
     void getCstSigLevels() throws IOException {
+
+        s_rho = new double[nz];
+        s_w = new double[nz + 1];
+        for (int k = nz; k-- > 0;) {
+            s_rho[k] = ((double) (k - nz) + .5d) / (double) nz;
+            s_w[k + 1] = (double) (k + 1 - nz) / (double) nz;
+        }
+        s_w[nz] = 0.d;
+        s_w[0] = -1.d;
+
         if ((strHC != null) && (null != ncIn.findVariable(strHC))) {
             getLogger().info("{Dataset} Generalized sigma levels detected.");
             getSigLevelsV8();
@@ -142,20 +152,12 @@ abstract class Mars3dCommon extends MarsCommonRotated {
         double[][][] z_r_tmp = new double[nz][ny][nx];
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
 
-        double[] s_w = new double[nz + 1];
-
-        s_w[nz] = 1.d;
-        s_w[0] = 0.d;
-        for (int k = 1; k < nz; k++) {
-            s_w[k] = .5d * (s_rho[k - 1] + s_rho[k]);
-        }
-
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 z_w_tmp[0][j][i] = -hRho[j][i];
                 for (int k = nz; k-- > 0;) {
-                    z_r_tmp[k][j][i] = ((double) s_rho[k] - 1.d) * hRho[j][i];
-                    z_w_tmp[k + 1][j][i] = (s_w[k + 1] - 1.d) * hRho[j][i];
+                    z_r_tmp[k][j][i] = s_rho[k] * hRho[j][i];
+                    z_w_tmp[k + 1][j][i] = s_w[k + 1] * hRho[j][i];
                 }
             }
         }
@@ -173,9 +175,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
 
         float hc[][];
         double a, b;
-        double[] sc_r = new double[nz];
         double[] Cs_r = new double[nz];
-        double[] sc_w = new double[nz + 1];
         double[] Cs_w = new double[nz + 1];
         try {
             //-----------------------------------------------------------
@@ -202,22 +202,13 @@ abstract class Mars3dCommon extends MarsCommonRotated {
             throw ioex;
         }
 
-
-        //-----------------------------------------------------------
-        // Calculation of sc_r and sc_w, the sigma levels
-        for (int k = nz; k-- > 0;) {
-            sc_r[k] = ((double) (k - nz) + .5d) / (double) nz;
-            sc_w[k + 1] = (double) (k + 1 - nz) / (double) nz;
-        }
-        sc_w[0] = -1.d;
-
         //-----------------------------------------------------------
         // Calculation of Cs_r and Cs_w, the streching functions
         for (int k = nz; k-- > 0;) {
-            Cs_r[k] = (1.d - b) * Math.sinh(a * sc_r[k]) / Math.sinh(a)
-                    + b * (Math.tanh(a * (sc_r[k] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
-            Cs_w[k + 1] = (1.d - b) * Math.sinh(a * sc_w[k + 1]) / Math.sinh(a)
-                    + b * (Math.tanh(a * (sc_w[k + 1] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
+            Cs_r[k] = (1.d - b) * Math.sinh(a * s_rho[k]) / Math.sinh(a)
+                    + b * (Math.tanh(a * (s_rho[k] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
+            Cs_w[k + 1] = (1.d - b) * Math.sinh(a * s_w[k + 1]) / Math.sinh(a)
+                    + b * (Math.tanh(a * (s_w[k + 1] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
         }
         Cs_w[0] = -1.d;
 
@@ -233,8 +224,8 @@ abstract class Mars3dCommon extends MarsCommonRotated {
             for (int j = ny; j-- > 0;) {
                 z_w_tmp[0][j][i] = -hRho[j][i];
                 for (int k = nz; k-- > 0;) {
-                    z_r_tmp[k][j][i] = hc[j][i] * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i];
-                    z_w_tmp[k + 1][j][i] = hc[j][i] * (sc_w[k + 1] - Cs_w[k + 1]) + Cs_w[k + 1] * hRho[j][i];
+                    z_r_tmp[k][j][i] = hc[j][i] * (s_rho[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i];
+                    z_w_tmp[k + 1][j][i] = hc[j][i] * (s_w[k + 1] - Cs_w[k + 1]) + Cs_w[k + 1] * hRho[j][i];
                 }
                 z_w_tmp[nz][j][i] = 0.d;
             }
@@ -276,20 +267,6 @@ abstract class Mars3dCommon extends MarsCommonRotated {
             }
         }
         zeta_tp1 = zeta_tp0;
-
-        /* read sigma levels */
-        try {
-            s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("Error reading sigma levels. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        if (s_rho[0] < 0) {
-            for (int k = 0; k < s_rho.length; k++) {
-                s_rho[k] += 1.d;
-            }
-        }
     }
 
     /**
@@ -349,9 +326,8 @@ abstract class Mars3dCommon extends MarsCommonRotated {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     if (isInWater(i + ii, j + jj)) {
-                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
-                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
-                                + jj][i + ii]);
+                        z_r = z_rho_cst[k + kk][j + jj][i + ii]
+                                + (double) zeta_tp0[j + jj][i + ii] * (1.d + s_rho[k + kk]);
                         depth += co * z_r;
                     }
                 }
@@ -482,8 +458,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                     double z_r = 0.d;
                     z_r = z_rho_cst[k][j + jj][i + ii]
-                            + (double) zeta_tp0[j + jj][i + ii]
-                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i + ii]);
+                            + (double) zeta_tp0[j + jj][i + ii] * (1.d + s_rho[k]);
                     hh += co * z_r;
                 }
             }
@@ -650,8 +625,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
                     zeta_tp1[j][i] = 0.f;
                 }
                 for (int k = 0; k < nz + 1; k++) {
-                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
-                            * (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
+                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i] * (1.d + s_w[k]);
                 }
             }
         }
