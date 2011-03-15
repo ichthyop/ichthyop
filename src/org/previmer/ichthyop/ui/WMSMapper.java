@@ -901,7 +901,7 @@ public class WMSMapper extends JXMapKit {
 
         /** Creates a new instance of IchthyopTileFactory */
         public NasaTileFactory() {
-            super(new TileFactoryInfo(8, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+            super(new TileFactoryInfo(4, 15, 17, 300, true, true, "", "x", "y", "zoom") {
 
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
@@ -942,7 +942,7 @@ public class WMSMapper extends JXMapKit {
 
         /** Creates a new instance of IchthyopTileFactory */
         public MGDSTileFactory() {
-            super(new TileFactoryInfo(8, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+            super(new TileFactoryInfo(4, 15, 17, 300, true, true, "", "x", "y", "zoom") {
 
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
@@ -959,7 +959,7 @@ public class WMSMapper extends JXMapKit {
 
         /** Creates a new instance of IchthyopTileFactory */
         public DemisTileFactory() {
-            super(new TileFactoryInfo(6, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+            super(new TileFactoryInfo(4, 15, 17, 300, true, true, "", "x", "y", "zoom") {
 
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
