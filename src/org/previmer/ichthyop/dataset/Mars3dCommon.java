@@ -80,7 +80,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
     /*
      *
      */
-    private String strHC, strCs_r, strCs_w;
+    private String strHC, strA, strB;
 
     @Override
     public void setUp() throws Exception {
@@ -115,10 +115,10 @@ abstract class Mars3dCommon extends MarsCommonRotated {
         /* Read specifi generalized sigma parameters for MARS V8 */
         try {
             strHC = getParameter("field_var_hc");
-            strCs_r = getParameter("field_var_csr");
-            strCs_w = getParameter("field_var_csw");
+            strA = getParameter("field_var_a");
+            strB = getParameter("field_var_b");
         } catch (Exception ex) {
-            strHC = strCs_r = strCs_w = null;
+            strHC = strA = strB = null;
             getLogger().warning("{Dataset} Could not find generalized sigma level parameters in the configuration file. Simple sigma levels will be used then.");
         }
 
@@ -172,6 +172,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
     private void getSigLevelsV8() throws IOException {
 
         float hc[][];
+        double a, b;
         double[] sc_r = new double[nz];
         double[] Cs_r = new double[nz];
         double[] sc_w = new double[nz + 1];
@@ -187,22 +188,16 @@ abstract class Mars3dCommon extends MarsCommonRotated {
             throw ioex;
         }
         try {
-            Array arr_cs_r = ncIn.findVariable(strCs_r).read();
-            for (int k = 0; k < Cs_r.length - 1; k++) {
-                Cs_r[k] = arr_cs_r.getFloat(k);
-            }
+            a = ncIn.findVariable(strA).readScalarDouble();
         } catch (IOException ex) {
-            IOException ioex = new IOException("{Dataset} Error reading Csu variable. " + ex.toString());
+            IOException ioex = new IOException("{Dataset} Error reading theta, surface control parameter. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
-            Array arr_cs_w = ncIn.findVariable(strCs_w).read();
-            for (int k = 0; k < Cs_w.length - 1; k++) {
-                Cs_w[k] = arr_cs_w.getFloat(k);
-            }
+            b = ncIn.findVariable(strB).readScalarDouble();
         } catch (IOException ex) {
-            IOException ioex = new IOException("{Dataset} Error reading Csw variable. " + ex.toString());
+            IOException ioex = new IOException("{Dataset} Error reading b, bottom control parameter. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
@@ -215,6 +210,16 @@ abstract class Mars3dCommon extends MarsCommonRotated {
             sc_w[k + 1] = (double) (k + 1 - nz) / (double) nz;
         }
         sc_w[0] = -1.d;
+
+        //-----------------------------------------------------------
+        // Calculation of Cs_r and Cs_w, the streching functions
+        for (int k = nz; k-- > 0;) {
+            Cs_r[k] = (1.d - b) * Math.sinh(a * sc_r[k]) / Math.sinh(a)
+                    + b * (Math.tanh(a * (sc_r[k] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
+            Cs_w[k + 1] = (1.d - b) * Math.sinh(a * sc_w[k + 1]) / Math.sinh(a)
+                    + b * (Math.tanh(a * (sc_w[k + 1] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
+        }
+        Cs_w[0] = -1.d;
 
         //------------------------------------------------------------
         // Calculation of z_w , z_r

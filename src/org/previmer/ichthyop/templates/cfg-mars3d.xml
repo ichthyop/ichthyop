@@ -251,17 +251,24 @@
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
-                <key>field_var_csr</key>
-                <long_name>C(s) at Rho point</long_name>
-                <value>Csu_sig</value>
-                <default>Csu_sig</default>
+                <key>field_var_hc</key>
+                <long_name>HC</long_name>
+                <value>hc</value>
+                <default>hc</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
-                <key>field_var_csw</key>
-                <long_name>C(s) at W point</long_name>
-                <value>Csw_sig</value>
-                <default>Csw_sig</default>
+                <key>field_var_a</key>
+                <long_name>Surface control parameter</long_name>
+                <value>theta</value>
+                <default>theta</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_b</key>
+                <long_name>Surface control parameter</long_name>
+                <value>b</value>
+                <default>b</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>

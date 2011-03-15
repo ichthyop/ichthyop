@@ -127,7 +127,7 @@
             <parameter>
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
-                <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
                 <description>Folder containing the MARS NetCDF files.</description>
             </parameter>
             <parameter>
@@ -229,6 +229,27 @@
                 <long_name>Ocean sigma coordinate</long_name>
                 <value>level</value>
                 <description>Set the name of the corresponding NetCDF variable.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_hc</key>
+                <long_name>HC</long_name>
+                <value>hc</value>
+                <default>hc</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_a</key>
+                <long_name>Surface control parameter</long_name>
+                <value>theta</value>
+                <default>theta</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_b</key>
+                <long_name>Surface control parameter</long_name>
+                <value>b</value>
+                <default>b</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter hidden="true">
                 <key>field_var_temp</key>

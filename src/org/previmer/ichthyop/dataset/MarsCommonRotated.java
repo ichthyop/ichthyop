@@ -604,16 +604,24 @@ public abstract class MarsCommonRotated extends AbstractDataset {
      * Reads longitude and latitude fields in NetCDF dataset
      */
     void readLonLat() throws IOException {
-        Array arrLon, arrLat;
+        Array arrLon = null, arrLat = null;
         try {
-            arrLon = ncIn.findVariable(strLon).read();
+            if (ncIn.findVariable(strLon).getShape().length > 1) {
+                arrLon = ncIn.findVariable(strLon).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+            } else {
+                arrLon = ncIn.findVariable(strLon).read(new int[]{ipo}, new int[]{nx});
+            }
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset longitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
-            arrLat = ncIn.findVariable(strLat).read();
+            if (ncIn.findVariable(strLat).getShape().length > 1) {
+                arrLat = ncIn.findVariable(strLat).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+            } else {
+                arrLat = ncIn.findVariable(strLat).read(new int[]{jpo}, new int[]{ny});
+            }
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset latitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());

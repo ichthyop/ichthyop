@@ -129,8 +129,8 @@
             <parameter>
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
-                <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
-                <default>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</default>
+                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
+                <default>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</default>
                 <description>OpenDAP URL of the MARS dataset. You can check the validity of the given URL by typing it in the URL adress bar of your web browser and appending ".html" at the end of the URL. Preset URL is a Bay of Biscay model centered above the Iroise sea.</description>
             </parameter>
             <parameter>
@@ -255,8 +255,8 @@
             <parameter>
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
-                <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
-                <default>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</default>
+                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
+                <default>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</default>
                 <description>OpenDAP URL of the MARS dataset. You can check the validity of the given URL by typing it in the URL adress bar of you browser and appending a ".html" at the end of the URL. Preset URL is a Bay of Biscay model centered above the Iroise sea.</description>
             </parameter>
             <parameter>
@@ -360,6 +360,27 @@
                 <long_name>Ocean sigma coordinate</long_name>
                 <value>level</value>
                 <default>level</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_hc</key>
+                <long_name>HC</long_name>
+                <value>hc</value>
+                <default>hc</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_a</key>
+                <long_name>Surface control parameter</long_name>
+                <value>theta</value>
+                <default>theta</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_b</key>
+                <long_name>Surface control parameter</long_name>
+                <value>b</value>
+                <default>b</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
@@ -649,6 +670,27 @@
                 <long_name>Ocean sigma coordinate</long_name>
                 <value>level</value>
                 <default>level</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_hc</key>
+                <long_name>HC</long_name>
+                <value>hc</value>
+                <default>hc</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_a</key>
+                <long_name>Surface control parameter</long_name>
+                <value>theta</value>
+                <default>theta</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_b</key>
+                <long_name>Surface control parameter</long_name>
+                <value>b</value>
+                <default>b</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
