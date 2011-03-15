@@ -416,7 +416,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                    dv += 2.d * x * co / (dyv[Math.max(j + jj - 1, 0)][i + ii] + dyv[j + jj][i + ii]);
+                    dv += 2.d * x * co / (dyv[j + jj - 1][i + ii] + dyv[j + jj][i + ii]);
                 }
             }
         }
@@ -453,7 +453,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                    du += 2.d * x * co / (dxu[j + jj][Math.max(i + ii - 1, 0)] + dxu[j + jj][i + ii]);
+                    du += 2.d * x * co / (dxu[j + jj][i + ii - 1] + dxu[j + jj][i + ii]);
                 }
             }
         }
@@ -511,8 +511,8 @@ abstract class Mars3dCommon extends MarsCommonRotated {
 
         try {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 60;
+            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
+            time_tp1 -= time_tp1 % 100;
             xTimeTp1 = null;
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
@@ -618,7 +618,7 @@ abstract class Mars3dCommon extends MarsCommonRotated {
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j][j] * dyv[j][i]));
+                    w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j][i] * dyv[j][i]));
                 }
             }
         }
