@@ -251,13 +251,6 @@
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
-                <key>field_var_hc</key>
-                <long_name>HC</long_name>
-                <value>hc</value>
-                <default>hc</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
                 <key>field_var_a</key>
                 <long_name>Surface control parameter</long_name>
                 <value>theta</value>
