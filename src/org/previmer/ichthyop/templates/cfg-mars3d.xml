@@ -90,7 +90,7 @@
             <parameter>
                 <key>file_prefix</key>
                 <long_name>Prefix of the NetCDF output file</long_name>
-                <value>manga3d-opendap</value>
+                <value>mars3d</value>
                 <default>my-simulation</default>
                 <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc, with YYYYMMDDHHmm the current time when running the simulation.</description>
             </parameter>

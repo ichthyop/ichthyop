@@ -132,9 +132,27 @@ abstract class Mars3dCommon extends MarsCommonRotated {
 
         s_rho = new double[nz];
         s_w = new double[nz + 1];
-        for (int k = nz; k-- > 0;) {
-            s_rho[k] = ((double) (k - nz) + .5d) / (double) nz;
-            s_w[k + 1] = (double) (k + 1 - nz) / (double) nz;
+
+        /* read sigma levels */
+        try {
+            Array arrSrho = ncIn.findVariable(strSigma).read();
+            Index index = arrSrho.getIndex();
+            for (int k = 0; k < nz; k++) {
+                s_rho[k] = arrSrho.getDouble(index.set(k));
+            }
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading sigma levels. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        if (s_rho[nz - 1] > 0) {
+            for (int k = 0; k < s_rho.length; k++) {
+                s_rho[k] -= 1.d;
+            }
+        }
+
+        for (int k = 1; k < nz; k++) {
+            s_w[k] = .5d * (s_rho[k - 1] + s_rho[k]);
         }
         s_w[nz] = 0.d;
         s_w[0] = -1.d;
