@@ -587,7 +587,7 @@ public class IchthyopView extends FrameView
         int returnVal = fc.showSaveDialog(getFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = addExtension(fc.getSelectedFile(), getResourceMap().getString("Application.configurationFile.extension"));
-            if (file.getAbsolutePath().matches(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
+            if (file.getAbsolutePath().equals(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
                 JOptionPane.showMessageDialog(fc, getResourceMap().getString("saveAsConfigurationFile.msg.different"), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.OK_OPTION);
                 saveAsConfigurationFile();
                 return null;
