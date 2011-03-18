@@ -272,6 +272,11 @@ public class SimulationUI extends JPanel {
         return height;
     }
 
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height);
+    }
+
 //////////
 // Setters
 //////////

@@ -15,7 +15,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="splitPane" alignment="0" pref="428" max="32767" attributes="0"/>
+              <Component id="splitPane" alignment="0" pref="430" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -66,7 +66,7 @@
                     </DimensionLayout>
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="stepsScrollPane" alignment="0" pref="178" max="32767" attributes="0"/>
+                          <Component id="stepsScrollPane" alignment="0" pref="184" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                   </Layout>
@@ -1156,7 +1156,7 @@
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jScrollPane3" alignment="1" pref="399" max="32767" attributes="0"/>
+                      <Component id="jScrollPane3" alignment="1" pref="403" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>

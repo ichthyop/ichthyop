@@ -36,6 +36,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
@@ -514,6 +515,10 @@ public class IchthyopView extends FrameView
 
     private void showSimulationPreview() {
         pnlProgress.setVisible(false);
+        //scrollPaneSimulationUI.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        //scrollPaneSimulationUI.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPaneSimulationUI.setPreferredSize(pnlSimulationUI.getSize());
+        scrollPaneSimulationUI.revalidate();
         scrollPaneSimulationUI.setVisible(true);
         getSimulationUI().init();
         getSimulationUI().repaintBackground();
