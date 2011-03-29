@@ -58,6 +58,7 @@ public class Configuration {
     private static String OUTPUT_FILENAME;
     //private static int RECORD_DT;
     private static int RECORD_FREQUENCY;
+    private static boolean BLN_TRACK_TEMPERATURE;
     ////////////////////
     // Section TRANSPORT
     ////////////////////
@@ -463,6 +464,8 @@ public class Configuration {
         if (BLN_RECORD) {
             OUTPUT_FILENAME = readString(file, section, Structure.OUTPUT_FILENAME);
             RECORD_FREQUENCY = readInteger(file, section, Structure.RECORD_DT);
+            BLN_TRACK_TEMPERATURE = file.getBooleanProperty(section, Structure.TRACK_TEMPERATURE);
+
         }
     }
 
@@ -791,14 +794,14 @@ public class Configuration {
             ArrayList list = new ArrayList();
             int i = 0;
             while ((nb = file.getLongProperty(section,
-                    property + " " +
-                    String.valueOf(i))) != null) {
+                    property + " "
+                    + String.valueOf(i))) != null) {
                 list.add(nb);
                 i++;
             }
             if (list.size() == 0) {
-                throw new NullPointerException("Problem reading property [" +
-                        section + "] <" + property + ">");
+                throw new NullPointerException("Problem reading property ["
+                        + section + "] <" + property + ">");
             }
             array = new long[list.size()];
             for (int n = 0; n < list.size(); n++) {
@@ -808,8 +811,8 @@ public class Configuration {
         } else {
             nb = file.getLongProperty(section, property);
             if (nb == null) {
-                throw new NullPointerException("Problem reading property [" +
-                        section + "] <" + property + ">");
+                throw new NullPointerException("Problem reading property ["
+                        + section + "] <" + property + ">");
             }
             array = new long[]{nb.longValue()};
         }
@@ -828,8 +831,8 @@ public class Configuration {
 
         Long nb = file.getLongProperty(section, property);
         if (nb == null) {
-            throw new NullPointerException("Problem reading property [" +
-                    section + "] <" + property + ">");
+            throw new NullPointerException("Problem reading property ["
+                    + section + "] <" + property + ">");
         }
         return nb;
     }
@@ -858,14 +861,14 @@ public class Configuration {
             ArrayList list = new ArrayList();
             int i = 0;
             while ((nb = file.getDoubleProperty(section,
-                    property + " " +
-                    String.valueOf(i))) != null) {
+                    property + " "
+                    + String.valueOf(i))) != null) {
                 list.add(nb);
                 i++;
             }
             if (list.size() == 0) {
-                throw new NullPointerException("Problem reading property [" +
-                        section + "] <" + property + ">");
+                throw new NullPointerException("Problem reading property ["
+                        + section + "] <" + property + ">");
             }
             array = new float[list.size()];
             for (int n = 0; n < list.size(); n++) {
@@ -875,8 +878,8 @@ public class Configuration {
         } else {
             nb = file.getDoubleProperty(section, property);
             if (nb == null) {
-                throw new NullPointerException("Problem reading property [" +
-                        section + "] <" + property + ">");
+                throw new NullPointerException("Problem reading property ["
+                        + section + "] <" + property + ">");
             }
             array = new float[]{nb.floatValue()};
         }
@@ -895,8 +898,8 @@ public class Configuration {
 
         Double nb = file.getDoubleProperty(section, property);
         if (nb == null) {
-            throw new NullPointerException("Problem reading property [" +
-                    section + "] <" + property + ">");
+            throw new NullPointerException("Problem reading property ["
+                    + section + "] <" + property + ">");
         }
         return nb.floatValue();
     }
@@ -925,14 +928,14 @@ public class Configuration {
             ArrayList list = new ArrayList();
             int i = 0;
             while ((nb = file.getIntegerProperty(section,
-                    property + " " +
-                    String.valueOf(i))) != null) {
+                    property + " "
+                    + String.valueOf(i))) != null) {
                 list.add(nb);
                 i++;
             }
             if (list.size() == 0) {
-                throw new NullPointerException("Problem reading property [" +
-                        section + "] <" + property + ">");
+                throw new NullPointerException("Problem reading property ["
+                        + section + "] <" + property + ">");
             }
             array = new int[list.size()];
             for (int n = 0; n < list.size(); n++) {
@@ -942,8 +945,8 @@ public class Configuration {
         } else {
             nb = file.getIntegerProperty(section, property);
             if (nb == null) {
-                throw new NullPointerException("Problem reading property [" +
-                        section + "] <" + property + ">");
+                throw new NullPointerException("Problem reading property ["
+                        + section + "] <" + property + ">");
             }
             array = new int[]{nb};
         }
@@ -962,8 +965,8 @@ public class Configuration {
 
         Integer nb = file.getIntegerProperty(section, property);
         if (nb == null) {
-            throw new NullPointerException("Problem reading property [" +
-                    section + "] <" + property + ">");
+            throw new NullPointerException("Problem reading property ["
+                    + section + "] <" + property + ">");
         }
         return nb;
     }
@@ -982,8 +985,8 @@ public class Configuration {
         String str;
         str = file.getStringProperty(section, property).trim();
         if (str == null) {
-            throw new NullPointerException("Problem reading property [" +
-                    section + "] <" + property + ">");
+            throw new NullPointerException("Problem reading property ["
+                    + section + "] <" + property + ">");
         }
 
         if (str.matches("null")) {
@@ -1369,6 +1372,11 @@ public class Configuration {
     //---------------------------------------------------------
     public static int getTypeRecord() {
         return Constant.RECORD_NC;
+    }
+
+    //---------------------------------------------------------
+    public static boolean isTrackTemperature() {
+        return BLN_TRACK_TEMPERATURE;
     }
 
     //---------------------------------------------------------

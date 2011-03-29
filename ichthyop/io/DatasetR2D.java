@@ -285,6 +285,7 @@ public class DatasetR2D extends Dataset {
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
      * @throws an IOException if an error occurs while reading the variables.
      */
+    @Override
     void setAllFieldsTp1AtTime(int i_time) throws IOException {
 
         int[] origin = new int[] {i_time, jpo, ipo};
@@ -299,10 +300,17 @@ public class DatasetR2D extends Dataset {
             v_tp1[0] = (float[][]) ncIn.findVariable(strV).read(origin,
                     new int[] {1, (ny - 1), nx}).reduce().copyToNDJavaArray();
 
+            if (FLAG_TP) {
+                temp_tp1 = new float[1][ny][nx];
+                temp_tp1[0] = (float[][]) ncIn.findVariable(strTp).read(origin,
+                    new int[] {1, ny, nx}).reduce().copyToNDJavaArray();
+            }
+
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(i_time));
             time_tp1 -= time_tp1 % 60;
             xTimeTp1 = null;
+
         } catch (IOException e) {
             throw new IOException("Problem extracting fields at location "
                                   + ncIn.getLocation().toString() + " : " +
@@ -318,6 +326,57 @@ public class DatasetR2D extends Dataset {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
+    }
+
+    @Override
+    public double getTemperature(double[] pGrid, double time) throws
+            ArrayIndexOutOfBoundsException {
+
+        if (!FLAG_TP) {
+            return Double.NaN;
+        }
+
+        double co, CO, x, frac, tp;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+
+        frac = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
+        //-----------------------------------------------------------
+        // Interpolate the temperature fields
+        // in the computational grid.
+        int i = (int) pGrid[0];
+        int j = (int) pGrid[1];
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
+        tp = 0.d;
+        CO = 0.d;
+        
+            for (int jj = 0; jj < n; jj++) {
+                for (int ii = 0; ii < n; ii++) {
+                    {
+                        co = Math.abs((1.d - (double) ii - dx) *
+                                      (1.d - (double) jj - dy));
+                        CO += co;
+                        x = 0.d;
+                        try {
+                            x = (1.d - frac) * temp_tp0[0][j + jj][i + ii] +
+                                frac * temp_tp1[0][j + jj][i + ii];
+                            tp += x * co;
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            throw new ArrayIndexOutOfBoundsException(
+                                    "Problem interpolating temperature field : " +
+                                    e.getMessage());
+                        }
+                    }
+                }
+            }
+        
+        if (CO != 0) {
+            tp /= CO;
+        }
+
+        return tp;
+
     }
 
     //---------- End of class

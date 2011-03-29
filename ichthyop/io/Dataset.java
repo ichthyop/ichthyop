@@ -156,11 +156,11 @@ public abstract class Dataset {
     /**
      * Water temperature at current time
      */
-    private static float[][][] temp_tp0;
+    static float[][][] temp_tp0;
     /**
      * Water temperature at time t + dt
      */
-    private static float[][][] temp_tp1;
+    static float[][][] temp_tp1;
     /**
      * Large zooplankton concentration at current time
      */
@@ -277,7 +277,7 @@ public abstract class Dataset {
      * Determines whether or not the temperature field should be read in the
      * NetCDF file, function of the user's options.
      */
-    private static boolean FLAG_TP;
+    static boolean FLAG_TP;
     /**
      * Determines whether or not the salinity field should be read in the
      * NetCDF file, function of the user's options.
@@ -689,13 +689,19 @@ public abstract class Dataset {
                         "Cannot display temperature. Temperature field " +
                         strTp + " not found in file " + ncIn.getLocation());
             }
+            if (Configuration.isTrackTemperature()) {
+                throw new IOException(
+                        "Cannot track temperature fields. Temperature field " +
+                        strTp + " not found in file " + ncIn.getLocation());
+            }
         } else {
-            FLAG_TP = Configuration.is3D()
+            FLAG_TP = (Configuration.is3D()
                       && (Configuration.isGrowth()
                           || Configuration.isBuoyancy()
                           || MainFrame.getDisplayColor() == Constant.DISPLAY_TP
                           || Configuration.isLethalTp()
-                          || Configuration.isRecord());
+                          || Configuration.isRecord()))
+                     || Configuration.isTrackTemperature();
         }
 
         /** vertical diffusivity */
@@ -1527,7 +1533,7 @@ public abstract class Dataset {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of
      * the domain.
      */
-    public static double getTemperature(double[] pGrid, double time) throws
+    public double getTemperature(double[] pGrid, double time) throws
             ArrayIndexOutOfBoundsException {
 
         if (!FLAG_TP) {

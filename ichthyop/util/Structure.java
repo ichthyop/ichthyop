@@ -72,6 +72,10 @@ public interface Structure {
     final public static String MAN_RECORD =
             "If TRUE, generates a NetCDF output file";
 
+    final public static String TRACK_TEMPERATURE = "track temperature";
+    final public static String MAN_TRACK_TEMPERATURE =
+            "If TRUE, tracks the temperature in the NetCDF output file";
+
     final public static String RECORD_DT = "record frequency";
 
     ////////

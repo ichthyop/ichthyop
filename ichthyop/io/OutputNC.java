@@ -47,7 +47,6 @@ public class OutputNC {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
     /**
      * Object for creating/writing netCDF files.
      */
@@ -85,6 +84,10 @@ public class OutputNC {
      * <code>false</code>otherwise
      */
     private static boolean FLAG_PLANKTON;
+    /**
+     * Addition for Nathan to track 2D temperature field at particle location.
+     */
+    private static boolean FLAG_2DTEMP;
     /**
      * NetCDF time dimension (unlimited)
      */
@@ -157,11 +160,9 @@ public class OutputNC {
      */
     private static int i_record;
 
-
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
     /**
      * Creates the NetCDF file after having added all of the Dimensions,
      * Variables, and Attributes
@@ -179,8 +180,8 @@ public class OutputNC {
 
         /** Ensures ouput path not null. Throws an exception otherwise */
         if (Configuration.getDirectorOut() == null) {
-            throw new IOException("Ouput path incorrect " +
-                                  Configuration.getDirectorOut());
+            throw new IOException("Ouput path incorrect "
+                    + Configuration.getDirectorOut());
         }
 
         // Determines output file name
@@ -199,7 +200,7 @@ public class OutputNC {
             }
 
             strNcOut = Configuration.getDirectorOut()
-                       + Configuration.getOutputFilename() + "_";
+                    + Configuration.getOutputFilename() + "_";
             for (int i = 0; i < (nf_simu - nf_isimu); i++) {
                 strNcOut += String.valueOf(0);
             }
@@ -207,7 +208,7 @@ public class OutputNC {
 
         } else {
             strNcOut = Configuration.getDirectorOut()
-                       + Configuration.getOutputFilename() + ".nc";
+                    + Configuration.getOutputFilename() + ".nc";
         }
 
         // Create new netcdf file and add dimensions.
@@ -216,7 +217,7 @@ public class OutputNC {
         time = ncOut.addUnlimitedDimension("time");
         if (Configuration.getTypeRecruitment() != Constant.NONE) {
             zone = ncOut.addDimension("recruit_zone",
-                                      Configuration.getRecruitmentZones().size());
+                    Configuration.getRecruitmentZones().size());
         }
 
         // Add variables
@@ -228,6 +229,8 @@ public class OutputNC {
         if (Configuration.is3D()) {
             addVar2NcOut(Field.TEMPERATURE);
             addVar2NcOut(Field.SALINITY);
+        } else if (Configuration.isTrackTemperature()) {
+            addVar2NcOut(Field.TEMPERATURE);
         }
         if (Configuration.isGrowth()) {
             addVar2NcOut(Field.LENGTH);
@@ -259,88 +262,78 @@ public class OutputNC {
 
         ncOut.addGlobalAttribute("title", "drifter monitoring");
         ncOut.addGlobalAttribute("model",
-                                 Configuration.getTypeModel() == Constant.ROMS ?
-                                 "roms" : "mars");
+                Configuration.getTypeModel() == Constant.ROMS
+                ? "roms" : "mars");
         ncOut.addGlobalAttribute("scheme",
-                                 Configuration.getScheme() == Constant.EULER ?
-                                 "euler" : "rk4");
+                Configuration.getScheme() == Constant.EULER
+                ? "euler" : "rk4");
         ncOut.addGlobalAttribute("transport_duration",
-                                 String.valueOf(Simulation.getTransportDuration()));
+                String.valueOf(Simulation.getTransportDuration()));
         ncOut.addGlobalAttribute("transport_duration_units", "second");
         ncOut.addGlobalAttribute("dt", String.valueOf(Configuration.get_dt()));
         ncOut.addGlobalAttribute("dt_expl", "computational time step");
         ncOut.addGlobalAttribute("dt_units", "second");
         if (Configuration.getTypeRelease() == Constant.RELEASE_ZONE) {
             ncOut.addGlobalAttribute("release_depth_min",
-                                     String.valueOf(Simulation.
-                    getDepthReleaseMin()));
+                    String.valueOf(Simulation.getDepthReleaseMin()));
             ncOut.addGlobalAttribute("release_depth_max",
-                                     String.valueOf(Simulation.
-                    getDepthReleaseMax()));
+                    String.valueOf(Simulation.getDepthReleaseMax()));
             ncOut.addGlobalAttribute("release_depth_units", "meter");
             if (Configuration.isPulsation()) {
                 ncOut.addGlobalAttribute("release_dt",
-                                         String.valueOf(Simulation.getReleaseDt()));
+                        String.valueOf(Simulation.getReleaseDt()));
                 ncOut.addGlobalAttribute("release_dt_expl",
-                                         "time between two release events");
+                        "time between two release events");
                 ncOut.addGlobalAttribute("release_dt_units", "second");
                 ncOut.addGlobalAttribute("number_release_event",
-                                         String.valueOf(Simulation.
-                        getNbReleaseEvents()));
+                        String.valueOf(Simulation.getNbReleaseEvents()));
             }
             if (Configuration.isPatchiness()) {
                 ncOut.addGlobalAttribute("number_patches",
-                                         String.valueOf(Configuration.
-                        getNbPatches()));
+                        String.valueOf(Configuration.getNbPatches()));
                 ncOut.addGlobalAttribute("patch_radius",
-                                         String.valueOf(Simulation.
-                        getRadiusPatchi()));
+                        String.valueOf(Simulation.getRadiusPatchi()));
                 ncOut.addGlobalAttribute("patch_radius_units", "meter");
                 ncOut.addGlobalAttribute("patch_thickness",
-                                         String.valueOf(Simulation.
-                        getThickPatchi()));
+                        String.valueOf(Simulation.getThickPatchi()));
                 ncOut.addGlobalAttribute("patch_thickness_units", "meter");
             }
         }
         if (Configuration.isLethalTp()) {
             ncOut.addGlobalAttribute("tp_egg",
-                                     String.valueOf(Simulation.getLethalTpEgg()));
+                    String.valueOf(Simulation.getLethalTpEgg()));
             ncOut.addGlobalAttribute("tp_egg_expl",
-                                     "lower lethal temperature for egg");
+                    "lower lethal temperature for egg");
             ncOut.addGlobalAttribute("tp_egg_units", "celsius");
             if (Configuration.isGrowth()) {
                 ncOut.addGlobalAttribute("tp_larva",
-                                         String.valueOf(Simulation.
-                        getLethalTpLarvae()));
+                        String.valueOf(Simulation.getLethalTpLarvae()));
                 ncOut.addGlobalAttribute("tp_larva_expl",
-                                         "lower lethal temperature for larva");
+                        "lower lethal temperature for larva");
                 ncOut.addGlobalAttribute("tp_larva_units", "celsius");
             }
         }
         if (Configuration.isBuoyancy()) {
             ncOut.addGlobalAttribute("egg_dentity",
-                                     String.valueOf(Simulation.getEggDensity()));
+                    String.valueOf(Simulation.getEggDensity()));
             ncOut.addGlobalAttribute("egg_dentity_units", "g.cm-3");
         }
         if (Configuration.getTypeRecruitment() == Constant.RECRUIT_AGE) {
             ncOut.addGlobalAttribute("age_recruit",
-                                     String.valueOf(Simulation.
-                    getAgeMinAtRecruitment()));
+                    String.valueOf(Simulation.getAgeMinAtRecruitment()));
             ncOut.addGlobalAttribute("age_recruit_units", "day");
         }
         if (Configuration.getTypeRecruitment() == Constant.RECRUIT_LENGTH) {
             ncOut.addGlobalAttribute("length_recruit",
-                                     String.valueOf(Simulation.
-                    getLengthMinAtRecruitment()));
+                    String.valueOf(Simulation.getLengthMinAtRecruitment()));
             ncOut.addGlobalAttribute("length_recruit_units", "millimeter");
         }
         if (Configuration.getTypeRecruitment() != Constant.NONE) {
             ncOut.addGlobalAttribute("duration_min",
-                                     String.valueOf((float) Configuration.
-                    getDurationInRecruitArea()
+                    String.valueOf((float) Configuration.getDurationInRecruitArea()
                     / (float) Constant.ONE_DAY));
             ncOut.addGlobalAttribute("duration_min_expl",
-                                     "duration min in recruitment zone before being recruited");
+                    "duration min in recruitment zone before being recruited");
             ncOut.addGlobalAttribute("duration_min_units", "second");
             if (Configuration.isDepthRecruitment()) {
                 ncOut.addGlobalAttribute("depth_min_recruit",
@@ -357,18 +350,18 @@ public class OutputNC {
         }
         if (Configuration.isSerial()) {
             ncOut.addGlobalAttribute("replica",
-                                     String.valueOf(Simulation.getReplica()));
+                    String.valueOf(Simulation.getReplica()));
         }
         if (Configuration.isMigration()) {
             ncOut.addGlobalAttribute("depth_day",
-                                     String.valueOf(Simulation.getDepthDay()));
+                    String.valueOf(Simulation.getDepthDay()));
             ncOut.addGlobalAttribute("depth_day_expl",
-                                     "daytime depth of DVM scheme");
+                    "daytime depth of DVM scheme");
             ncOut.addGlobalAttribute("depth_day_unit", "meter");
             ncOut.addGlobalAttribute("depth_night",
-                                     String.valueOf(Simulation.getDepthNight()));
+                    String.valueOf(Simulation.getDepthNight()));
             ncOut.addGlobalAttribute("depth_night_expl",
-                                     "night-time depth of DVM scheme");
+                    "night-time depth of DVM scheme");
             ncOut.addGlobalAttribute("depth_night_unit", "meter");
         }
 
@@ -383,15 +376,15 @@ public class OutputNC {
 
         ncOut.addVariable(field.short_name(), field.type(), field.dimensions());
         ncOut.addVariableAttribute(field.short_name(), "long_name",
-                                   field.long_name());
+                field.long_name());
         ncOut.addVariableAttribute(field.short_name(), "unit", field.unit());
         if (field.attribute1() != null) {
             ncOut.addVariableAttribute(field.short_name(), "origin",
-                                       field.attribute1());
+                    field.attribute1());
         }
         if (field.attribute2() != null) {
             ncOut.addVariableAttribute(field.short_name(), "calendar",
-                                       field.attribute2());
+                    field.attribute2());
         }
     }
 
@@ -422,7 +415,8 @@ public class OutputNC {
             ncOut.close();
         } catch (java.io.IOException e) {
             e.printStackTrace();
-        } catch (NullPointerException e) {}
+        } catch (NullPointerException e) {
+        }
     }
 
     /**
@@ -435,10 +429,11 @@ public class OutputNC {
         FLAG_3D = Configuration.is3D();
         FLAG_GROWTH = Configuration.isGrowth();
         FLAG_PLANKTON = Configuration.isPlankton();
+        FLAG_2DTEMP = Configuration.isTrackTemperature();
         FLAG_RECRUITMENT = (Configuration.getTypeRecruitment()
-                            != Constant.NONE);
-        FLAG_RELEASED_ZONE = (Configuration.getTypeRelease() ==
-                              Constant.RELEASE_ZONE);
+                != Constant.NONE);
+        FLAG_RELEASED_ZONE = (Configuration.getTypeRelease()
+                == Constant.RELEASE_ZONE);
         nbRecruitmentZones = Configuration.getRecruitmentZones().size();
 
         i_record = 0;
@@ -450,19 +445,21 @@ public class OutputNC {
         if (FLAG_3D) {
             arrTp = new ArrayFloat.D2(1, Configuration.getNbParticles());
             arrSal = new ArrayFloat.D2(1, Configuration.getNbParticles());
+        } else if (FLAG_2DTEMP) {
+            arrTp = new ArrayFloat.D2(1, Configuration.getNbParticles());
         }
         if (FLAG_RELEASED_ZONE) {
             arrZone = new ArrayInt.D2(1, Configuration.getNbParticles());
         }
         if (FLAG_RECRUITMENT) {
             arrRecruit = new ArrayInt.D3(1, Configuration.getNbParticles(),
-                                         nbRecruitmentZones);
+                    nbRecruitmentZones);
         }
         if (FLAG_GROWTH) {
             arrLength = new ArrayFloat.D2(1, Configuration.getNbParticles());
             if (FLAG_PLANKTON) {
                 arrLargePhyto = new ArrayFloat.D2(1,
-                                                  Configuration.getNbParticles());
+                        Configuration.getNbParticles());
                 arrLargeZoo = new ArrayFloat.D2(1, Configuration.getNbParticles());
                 arrSmallZoo = new ArrayFloat.D2(1, Configuration.getNbParticles());
             }
@@ -477,13 +474,13 @@ public class OutputNC {
      */
     public static void write(double time) {
 
-        System.out.println("  --> record " + i_record + " - time " +
-                           (long) time);
+        System.out.println("  --> record " + i_record + " - time "
+                + (long) time);
         IParticle particle;
         Iterator<IParticle> iter = population.iterator();
-        int[] origin = new int[] {i_record, 0};
-        int[] origin_time = new int[] {i_record};
-        int[] origin_recruited = new int[] {i_record, 0, 0};
+        int[] origin = new int[]{i_record, 0};
+        int[] origin_time = new int[]{i_record};
+        int[] origin_recruited = new int[]{i_record, 0, 0};
         int i;
         while (iter.hasNext()) {
             particle = iter.next();
@@ -495,6 +492,8 @@ public class OutputNC {
             if (FLAG_3D) {
                 arrTp.set(0, i, (float) particle.getTemperature(time));
                 arrSal.set(0, i, (float) particle.getSalinity(time));
+            } else if (FLAG_2DTEMP) {
+                arrTp.set(0, i, (float) particle.getTemperature(time));
             }
             if (FLAG_GROWTH) {
                 arrLength.set(0, i, (float) particle.getLength());
@@ -508,7 +507,7 @@ public class OutputNC {
                 //particle.checkRecruitment(Configuration.getTypeRecruitment());
                 for (int i_zone = 0; i_zone < nbRecruitmentZones; i_zone++) {
                     arrRecruit.set(0, i, i_zone,
-                                   particle.isRecruited(i_zone) ? 1 : 0);
+                            particle.isRecruited(i_zone) ? 1 : 0);
                 }
             }
             if (FLAG_RELEASED_ZONE) {
@@ -525,6 +524,8 @@ public class OutputNC {
         if (FLAG_3D) {
             write2NcOut(Field.TEMPERATURE, origin, arrTp);
             write2NcOut(Field.SALINITY, origin, arrSal);
+        } else if (FLAG_2DTEMP) {
+            write2NcOut(Field.TEMPERATURE, origin, arrTp);
         }
         if (FLAG_GROWTH) {
             write2NcOut(Field.LENGTH, origin, arrLength);
@@ -557,44 +558,44 @@ public class OutputNC {
      * @author P.Verley
      */
     public enum Field {
-        LONGITUDE("lon", "particle longitude", "degree east", DataType.FLOAT),
-                LATITUDE("lat", "particle latitude", "degree north",
-                         DataType.FLOAT),
-                DEPTH("depth", "particle depth", "meter", DataType.FLOAT),
-                XGRID("xgrid", "coordinate in x", "scalar", DataType.DOUBLE),
-                YGRID("ygrid", "coordinate in y", "scalar", DataType.DOUBLE),
-                ZGRID("zgrid", "coordinate in z", "scalar", DataType.DOUBLE),
-                TIME("time", "time in second since origin", "second",
-                     Configuration.getTimeOrigin(), Configuration.getCalendar(),
-                     DataType.DOUBLE, 1),
-                TEMPERATURE("temp", "water temperature at particle location",
-                            "celsius",
-                            DataType.FLOAT),
-                SALINITY("salt", "water salinity at particle location", "psu",
-                         DataType.FLOAT),
-                LENGTH("length", "particle length", "millimeter",
-                       DataType.FLOAT),
-                ZONE("zone", "zone number at particle location",
-                     "releasing zone > 0, recruitment zone < 0, out zone = 0",
-                     DataType.INT),
-                RECRUITED("recruited", "status of recruitment", "boolean",
-                          DataType.INT, 3),
-                DEATH("death", "cause of death",
-                      "error = -1, alive = 0, out = 1, cold = 2, cold larve = 3, beached = 4, old = 5",
-                      DataType.INT),
-                LARGE_PHYTO("largePhyto",
-                            "concentration in large phytoplankton at particule location ",
-                            "mMol N m-3",
-                            DataType.FLOAT),
-                LARGE_ZOO("largeZoo",
-                          "concentration in large zooplankton at particule location ",
-                          "mMol N m-3",
-                          DataType.FLOAT),
-                SMALL_ZOO("smallZoo",
-                          "concentration in small zooplankton at particule location ",
-                          "mMol N m-3",
-                          DataType.FLOAT);
 
+        LONGITUDE("lon", "particle longitude", "degree east", DataType.FLOAT),
+        LATITUDE("lat", "particle latitude", "degree north",
+        DataType.FLOAT),
+        DEPTH("depth", "particle depth", "meter", DataType.FLOAT),
+        XGRID("xgrid", "coordinate in x", "scalar", DataType.DOUBLE),
+        YGRID("ygrid", "coordinate in y", "scalar", DataType.DOUBLE),
+        ZGRID("zgrid", "coordinate in z", "scalar", DataType.DOUBLE),
+        TIME("time", "time in second since origin", "second",
+        Configuration.getTimeOrigin(), Configuration.getCalendar(),
+        DataType.DOUBLE, 1),
+        TEMPERATURE("temp", "water temperature at particle location",
+        "celsius",
+        DataType.FLOAT),
+        SALINITY("salt", "water salinity at particle location", "psu",
+        DataType.FLOAT),
+        LENGTH("length", "particle length", "millimeter",
+        DataType.FLOAT),
+        ZONE("zone", "zone number at particle location",
+        "releasing zone > 0, recruitment zone < 0, out zone = 0",
+        DataType.INT),
+        RECRUITED("recruited", "status of recruitment", "boolean",
+        DataType.INT, 3),
+        DEATH("death", "cause of death",
+        "error = -1, alive = 0, out = 1, cold = 2, cold larve = 3, beached = 4, old = 5",
+        DataType.INT),
+        LARGE_PHYTO("largePhyto",
+        "concentration in large phytoplankton at particule location ",
+        "mMol N m-3",
+        DataType.FLOAT),
+        LARGE_ZOO("largeZoo",
+        "concentration in large zooplankton at particule location ",
+        "mMol N m-3",
+        DataType.FLOAT),
+        SMALL_ZOO("smallZoo",
+        "concentration in small zooplankton at particule location ",
+        "mMol N m-3",
+        DataType.FLOAT);
         /**
          * Variable name
          */
@@ -627,7 +628,6 @@ public class OutputNC {
         ///////////////
         // Constructors
         ///////////////
-
         /**
          * Constructs a new {@code Field} with two dimensions and no additional
          * attributes.
@@ -652,7 +652,7 @@ public class OutputNC {
          * @param nb_dimensions an int, the number of dimensions
          */
         Field(String name, String description, String unit, DataType type,
-              int nb_dimensions) {
+                int nb_dimensions) {
             this(name, description, unit, null, null, type, nb_dimensions);
         }
 
@@ -667,9 +667,8 @@ public class OutputNC {
          * @param attribute1 a String for the first additional attribute
          * @param attribute2 a String for the second additional attribute
          */
-
         Field(String name, String description, String unit, String attribute1,
-              String attribute2, DataType type, int nb_dimensions) {
+                String attribute2, DataType type, int nb_dimensions) {
 
             this.short_name = name;
             this.long_name = description;
@@ -683,7 +682,6 @@ public class OutputNC {
         ////////////////////////////
         // Definition of the methods
         ////////////////////////////
-
         /**
          * Gets the name of the variable.
          * @return a String, the variable name
@@ -738,8 +736,7 @@ public class OutputNC {
          */
         public List<Dimension> dimensions() {
 
-            ArrayList<Dimension>
-                    dimensions = new ArrayList<Dimension>(nb_dimensions);
+            ArrayList<Dimension> dimensions = new ArrayList<Dimension>(nb_dimensions);
             dimensions.add(time);
             if (nb_dimensions >= 2) {
                 dimensions.add(drifter);
@@ -749,9 +746,7 @@ public class OutputNC {
             }
             return dimensions;
         }
-
         //----------- End of enum
     }
-
     //---------- End of class
 }
