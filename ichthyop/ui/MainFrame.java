@@ -799,6 +799,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
         message.append("  --> ");
         message.append(t.getMessage());
         System.err.println(message.toString());
+        t.printStackTrace();
 
         JOptionPane.showMessageDialog(null,
                 errTitle + "\n"

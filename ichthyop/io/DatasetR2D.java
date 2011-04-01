@@ -302,8 +302,8 @@ public class DatasetR2D extends Dataset {
 
             if (FLAG_TP) {
                 temp_tp1 = new float[1][ny][nx];
-                temp_tp1[0] = (float[][]) ncIn.findVariable(strTp).read(origin,
-                    new int[] {1, ny, nx}).reduce().copyToNDJavaArray();
+                temp_tp1[0] = (float[][]) ncIn.findVariable(strTp).read(new int[] {i_time, 0, jpo, ipo},
+                    new int[] {1, 1, ny, nx}).reduce().copyToNDJavaArray();
             }
 
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
