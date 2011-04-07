@@ -121,6 +121,8 @@ public class MarsIO extends SimulationManagerAccessor {
             time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
                     timeArr.getShape()[0] - 1)));
             nc.close();
+            timeArr = null;
+            nc = null;
 
             return (time >= time_r0 && time < time_rf);
             /*switch (time_arrow) {
@@ -153,13 +155,15 @@ public class MarsIO extends SimulationManagerAccessor {
                 timeArr = nc.findVariable(strTime).read();
                 time_nc[i] = DatasetUtil.skipSeconds(
                         timeArr.getLong(timeArr.getIndex().set(0)));
+                timeArr = null;
                 nc.close();
+                nc = null;
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
                 return true;
             }
-        } catch (IOException e) {
-            throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
+        //} catch (IOException e) {
+            //throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
             throw new IOException("{Dataset} Unable to read " + strTime
                     + " variable in file " + filename + " : " + e.getCause());
