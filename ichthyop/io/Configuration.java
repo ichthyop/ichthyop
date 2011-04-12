@@ -73,6 +73,7 @@ public class Configuration {
     private static float MIGRATION_AGE_LIMIT;
     private static float[] DEPTH_DAY;
     private static float[] DEPTH_NIGHT;
+    private static boolean BLN_BOUNCY_COASTLINE;
     //////////////////
     // Section RELEASE
     //////////////////
@@ -522,6 +523,7 @@ public class Configuration {
         DIM_SIMU = readInteger(file, section, Structure.DIMENSION);
 
         BLN_ADVECTION = file.getBooleanProperty(section, Structure.ADVECTION);
+        BLN_BOUNCY_COASTLINE = file.getBooleanProperty(section, Structure.BOUNCY_COASTLINE);
         BLN_HDISP = file.getBooleanProperty(section, Structure.HDISP);
         BLN_VDISP = file.getBooleanProperty(section, Structure.VDISP);
         BLN_BUOYANCY = file.getBooleanProperty(section, Structure.BUOYANCY);
@@ -1423,6 +1425,11 @@ public class Configuration {
     //---------------------------------------------------------
     public static boolean is3D() {
         return DIM_SIMU == Constant.SIMU_3D;
+    }
+
+    //---------------------------------------------------------
+    public static boolean isBouncyCoastline() {
+        return  BLN_BOUNCY_COASTLINE;
     }
 
     //---------------------------------------------------------

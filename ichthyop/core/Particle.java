@@ -288,6 +288,7 @@ public class Particle extends RhoPoint implements IParticle {
         FLAG_MIGRATION = Configuration.isMigration();
         FLAG_PLANKTON = Configuration.isPlankton();
         FLAG_RECRUITMENT = Configuration.getTypeRecruitment() != Constant.NONE;
+        FLAG_BOUNCY_COASTLINE = Configuration.isBouncyCoastline();
 
         if (FLAG_MIGRATION) {
             FLAG_ISODEPTH = (Simulation.getDepthDay() == Simulation.getDepthNight());

@@ -31,6 +31,8 @@ public class RhoPoint {
 
     /** <code>true</code> if 3 dimensions point false otherwise */
     private static boolean bln3D;
+    /** Bouncy coastline */
+    public static boolean FLAG_BOUNCY_COASTLINE = false;
 
 ///////////////
 // Constructors
@@ -97,6 +99,65 @@ public class RhoPoint {
                 (y < 1.0f));
     }
 
+    private double[] bounceCostline(double x, double y, double dx, double dy) {
+        return bounceCostline(x, y, dx, dy, 0);
+    }
+
+    private double[] bounceCostline(double x, double y, double dx, double dy, int iter) {
+
+        double newdx = dx;
+        double newdy = dy;
+        iter += 1;
+        if (!Dataset.isInWater(new double[]{x + dx, y + dy})) {
+            double s = x;
+            double ds = dx;
+            double signum = 1.d;
+            double ys = y;
+            boolean bounceMeridional = false;
+            boolean bounceZonal = false;
+            int n = 0;
+            /* Iterative process to estimate the point of impact with the
+             * costline.
+             */
+            while (n < 1000 && !(bounceMeridional | bounceZonal)) {
+                ds *= 0.5d;
+                s = s + signum * ds;
+                ys = dy / dx * (s - x) + y;
+                signum = (Dataset.isInWater(new double[]{s, ys}))
+                        ? 1.d
+                        : -1.d;
+                bounceMeridional = Math.abs(Math.round(s + 0.5d) - (s + 0.5d)) < 1e-8;
+                bounceZonal = Math.abs(Math.round(ys + 0.5d) - (ys + 0.5d)) < 1e-8;
+                n++;
+            }
+            /* Compute dx1 such as dx = dx1 + dx2, dx1 in water, dx2 on land
+             * or dy1 such as dy = dy1 + dy2, dy1 in water, dy2 on land
+             */
+            double dx1 = (Math.round(x) + Math.signum(dx) * 0.5d - x);
+            double dy1 = (Math.round(y) + Math.signum(dy) * 0.5d - y);
+            if (bounceMeridional & bounceZonal) {
+                /* case1 : particle hits the cost on a corner */
+                newdx = 2.d * dx1 - dx;
+                newdy = 2.d * dy1 - dy;
+            } else if (bounceMeridional) {
+                /* case2: particle hits the meridional cost */
+                newdx = 2.d * dx1 - dx;
+                newdy = dy;
+            } else if (bounceZonal) {
+                /* case3: particle hits the zonal cost */
+                newdy = 2.d * dy1 - dy;
+                newdx = dx;
+            }
+            /* Ensure the new point is in water and repeat the process otherwise */
+            if (!Dataset.isInWater(new double[]{x + newdx, y + newdy})) {
+                if (iter < 10) {
+                    return bounceCostline(x, y, newdx, newdy, iter);
+                }
+            }
+        }
+        return new double[]{newdx, newdy};
+    }
+
     /**
      * Increments (x, y, z) with (dx, dy, dz) if 3 dimensions move.
      * Increments (x, y) with (dx, dy) if 2 dimensions move.
@@ -105,8 +166,15 @@ public class RhoPoint {
      */
     public void increment(double[] move) {
 
-        x += move[0];
-        y += move[1];
+        if (FLAG_BOUNCY_COASTLINE) {
+            double[] bounce = bounceCostline(x, y, move[0], move[1]);
+            x += bounce[0];
+            y += bounce[1];
+
+        } else {
+            x += move[0];
+            y += move[1];
+        }
         if (move.length > 2) {
             z += move[2];
             z = Math.max(0.d, Math.min(z, (double) Dataset.get_nz() - 1.00001f));

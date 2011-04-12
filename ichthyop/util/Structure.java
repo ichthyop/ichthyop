@@ -130,6 +130,7 @@ public interface Structure {
 
     final public static String ADVECTION = "advection";
 
+    final public static String  BOUNCY_COASTLINE = "bouncy coastline";
 
     ///////
     // TIME

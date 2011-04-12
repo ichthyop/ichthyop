@@ -1070,6 +1070,10 @@ public abstract class Dataset {
         }
     }
 
+    public static boolean isInWater(double[] pGrid) {
+        return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+    }
+
     /**
      * Determines whether or not the specified grid point is close to cost line.
      * The method first determines in which quater of the cell the grid point is
