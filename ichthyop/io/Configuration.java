@@ -524,6 +524,7 @@ public class Configuration {
 
         BLN_ADVECTION = file.getBooleanProperty(section, Structure.ADVECTION);
         BLN_BOUNCY_COASTLINE = file.getBooleanProperty(section, Structure.BOUNCY_COASTLINE);
+        System.out.println("Bouncy coastline: " + BLN_BOUNCY_COASTLINE);
         BLN_HDISP = file.getBooleanProperty(section, Structure.HDISP);
         BLN_VDISP = file.getBooleanProperty(section, Structure.VDISP);
         BLN_BUOYANCY = file.getBooleanProperty(section, Structure.BUOYANCY);
