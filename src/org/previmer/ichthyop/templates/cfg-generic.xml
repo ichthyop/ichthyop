@@ -73,12 +73,15 @@
         <description>Set the general transport options of the simulation.</description>
         <parameters>
             <parameter>
-                <key>bouncy-costline</key>
-                <long_name>Bouncy costline</long_name>
-                <value>false</value>
-                <default>false</default>
-                <format>boolean</format>
-                <description>Determines whether the particles should bounce on the costline or just beach.</description>
+                <key>coastline_behavior</key>
+                <long_name>Coastline behavior</long_name>
+                <value>Beaching</value>
+                <default>Beaching</default>
+                <format>combo</format>
+                <accepted>Beaching</accepted>
+                <accepted>Bouncing</accepted>
+                <accepted>Standstill</accepted>
+                <description>Determines what should be the behavior of a particle in case a move would take it inland : either it stands still, either it beaches, either it bounces on the coasline as a billiard ball.</description>
             </parameter>
         </parameters>
     </block>
