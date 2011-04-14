@@ -965,7 +965,7 @@
         </parameters>
     </block>
     <block type="action">
-        <key>action.recruitment</key>
+        <key>action.recruitment.zone</key>
         <tree_path>Advanced/Biology/Recruitment/In zones</tree_path>
         <enabled>false</enabled>
         <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
@@ -1041,8 +1041,8 @@
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
-                <value>org.previmer.ichthyop.action.RecruitmentAction</value>
-                <default>org.previmer.ichthyop.action.RecruitmentAction</default>
+                <value>org.previmer.ichthyop.action.RecruitmentZoneAction</value>
+                <default>org.previmer.ichthyop.action.RecruitmentZoneAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>

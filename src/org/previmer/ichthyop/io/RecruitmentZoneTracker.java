@@ -34,9 +34,9 @@ import ucar.nc2.Attribute;
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
-public class RecruitmentTracker extends AbstractTracker {
+public class RecruitmentZoneTracker extends AbstractTracker {
 
-    public RecruitmentTracker() {
+    public RecruitmentZoneTracker() {
         super(DataType.INT);
     }
 

@@ -952,8 +952,8 @@
         </parameters>
     </block>
     <block type="action">
-        <key>action.recruitment</key>
-        <tree_path>Advanced/Biology/Recruitment</tree_path>
+        <key>action.recruitment.zone</key>
+        <tree_path>Advanced/Biology/Recruitment/In zones</tree_path>
         <enabled>false</enabled>
         <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
         <parameters>
@@ -1028,8 +1028,120 @@
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
-                <value>org.previmer.ichthyop.action.RecruitmentAction</value>
-                <default>org.previmer.ichthyop.action.RecruitmentAction</default>
+                <value>org.previmer.ichthyop.action.RecruitmentZoneAction</value>
+                <default>org.previmer.ichthyop.action.RecruitmentZoneAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>highest</value>
+                <default>highest</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.recruitment.stain</key>
+        <tree_path>Advanced/Biology/Recruitment/In stain</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options for defining some recruitment criterions and a recruitment stain, in order to study, for instance, the recruitment success of a particular geographic area.</description>
+        <parameters>
+            <parameter>
+                <key>criterion</key>
+                <long_name>Recruitment criterion</long_name>
+                <value>Age criterion</value>
+                <default>Age criterion</default>
+                <format>combo</format>
+                <accepted>Age criterion</accepted>
+                <accepted>Length criterion</accepted>
+                <default>Age criterion</default>
+                <description>Select the type of criterion the application should use to check wheter a particle has been recruited or not. When the growth process is idle, you must use the age based criterion (otherwise application will crash). When growth is taken into account the criterion might also be a minimal length threshold.</description>
+            </parameter>
+            <parameter>
+                <key>limit_age</key>
+                <long_name>Recruitment limit age [day]</long_name>
+                <value>7.0</value>
+                <default>7.0</default>
+                <format>float</format>
+                <description>A particle must be "older" than the specified age [day] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle length.</description>
+            </parameter>
+            <parameter>
+                <key>limit_length</key>
+                <long_name>Recruitment limit length [millimeter]</long_name>
+                <value>6.0</value>
+                <default>6.0</default>
+                <format>float</format>
+                <description>A particle must be "bigger" than the specified length [millimeter] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle age. Only use this criterion if the growth model is activated.</description>
+            </parameter>
+            <parameter>
+                <key>stop_moving</key>
+                <long_name>Stop moving when recruited</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Force a particle to remain where it is as soon as it is recruited. If activated, the particle could not be recruited in any other recruitment area. On the contrary, a particle that does not stop moving when recruited can keep drifting and being recruited in others recruitment areas, as long as the recruitement conditions are fulfilled.</description>
+            </parameter>
+            <parameter>
+                <key>lon_stain</key>
+                <long_name>Longitude [East degree]</long_name>
+                <value>-5.5</value>
+                <default>-5.5</default>
+                <format>lonlat</format>
+                <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
+            </parameter>
+            <parameter>
+                <key>lat_stain</key>
+                <long_name>Latitude [North degree]</long_name>
+                <value>48.4</value>
+                <default>48.4</default>
+                <format>lonlat</format>
+                <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
+            </parameter>
+            <parameter>
+                <key>depth_stain</key>
+                <long_name>Depth [meter]</long_name>
+                <value>-20.0</value>
+                <default>-20.0</default>
+                <format>float</format>
+                <description>Depth [meter] of the stain. The parameter is ignored for 2D simulation. Positive depth is automatically converted by the application (depth = -depth)</description>
+            </parameter>
+            <parameter>
+                <key>radius_stain</key>
+                <long_name>Radius of the stain [meter]</long_name>
+                <value>2000.0</value>
+                <default>2000.0</default>
+                <format>float</format>
+                <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
+            </parameter>
+            <parameter>
+                <key>thickness_stain</key>
+                <long_name>Thickness of the stain [meter]</long_name>
+                <value>10.0</value>
+                <default>10.0</default>
+                <format>float</format>
+                <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>recruited_tracker</key>
+                <long_name>Track recruitment status</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "recruited" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.RecruitmentStainAction</value>
+                <default>org.previmer.ichthyop.action.RecruitmentStainAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>

@@ -18,16 +18,12 @@
 package org.previmer.ichthyop.io;
 
 import java.util.Iterator;
-import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayBoolean;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
-import ucar.ma2.Index;
 
 /**
  *
