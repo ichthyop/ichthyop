@@ -31,8 +31,9 @@ public class RhoPoint {
 
     /** <code>true</code> if 3 dimensions point false otherwise */
     private static boolean bln3D;
+    
     /** Bouncy coastline */
-    public static boolean FLAG_BOUNCY_COASTLINE = false;
+    public static boolean FLAG_BOUNCY_COASTLINE;
 
 ///////////////
 // Constructors
