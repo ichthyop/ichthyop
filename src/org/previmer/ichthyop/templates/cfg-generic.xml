@@ -439,6 +439,14 @@
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
+                <key>skip_sorting</key>
+                <long_name>Skip NetCDF file sorting</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
+            </parameter>
+            <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>
                 <value>false</value>
@@ -571,6 +579,14 @@
                 <value>*iroise*.nc</value>
                 <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>skip_sorting</key>
+                <long_name>Skip NetCDF file sorting</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -749,6 +765,14 @@
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
+                <key>skip_sorting</key>
+                <long_name>Skip NetCDF file sorting</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
+            </parameter>
+            <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>
                 <value>false</value>
@@ -902,6 +926,14 @@
                 <value>*.nc</value>
                 <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>skip_sorting</key>
+                <long_name>Skip NetCDF file sorting</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -1085,6 +1117,14 @@
                 <format>path</format>
                 <default>input</default>
                 <description>Folder containing the NEMO NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders.</description>
+            </parameter>
+            <parameter>
+                <key>skip_sorting</key>
+                <long_name>Skip NetCDF file sorting</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
             </parameter>
             <parameter>
                 <key>byte_mask_pattern</key>

@@ -135,7 +135,7 @@ public class ConfigurationFile {
         return map.values();
     }
 
-    public Iterable getBlocks(BlockType type) {
+    public Iterable<XBlock> getBlocks(BlockType type) {
         ArrayList<XBlock> list = new ArrayList();
         for (XBlock xblock : map.values()) {
             if (xblock.getType().equals(type)) {

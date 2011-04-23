@@ -39,18 +39,18 @@ public class MarsIO extends SimulationManagerAccessor {
         strTime = timeField;
     }
 
-    static NetcdfFile openLocation(String rawPath, String fileMask) throws IOException {
+    static NetcdfFile openLocation(String rawPath, String fileMask, boolean skipSorting) throws IOException {
 
         String path = IOTools.resolvePath(rawPath);
 
         if (!isDirectory(path)) {
             throw new IOException("{Dataset} " + rawPath + " is not a valid directory.");
         }
-        listInputFiles = getInputList(path, fileMask);
+        listInputFiles = getInputList(path, fileMask, skipSorting);
         return openFile(listInputFiles.get(0));
     }
 
-    static ArrayList<String> getInputList(String path, String fileMask) throws IOException {
+    private static ArrayList<String> getInputList(String path, String fileMask, boolean skipSorting) throws IOException {
 
         ArrayList<String> list = null;
 
@@ -64,7 +64,11 @@ public class MarsIO extends SimulationManagerAccessor {
             list.add(file.toString());
         }
         if (list.size() > 1) {
-            Collections.sort(list, new NCComparator(strTime));
+            if (skipSorting) {
+                Collections.sort(list);
+            } else {
+                Collections.sort(list, new NCComparator(strTime));
+            }
         }
         return list;
     }
@@ -162,7 +166,7 @@ public class MarsIO extends SimulationManagerAccessor {
             if (time >= time_nc[0] && time < time_nc[1]) {
                 return true;
             }
-        //} catch (IOException e) {
+            //} catch (IOException e) {
             //throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
             throw new IOException("{Dataset} Unable to read " + strTime

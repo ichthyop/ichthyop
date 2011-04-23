@@ -14,7 +14,13 @@ public class Mars3dDataset extends Mars3dCommon {
 
     void openDataset() throws Exception {
         MarsIO.setTimeField(strTime);
-        ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"));
+        boolean skipSorting = false;
+        try {
+            skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
+        } catch (Exception ex) {
+            skipSorting = false;
+        }
+        ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"), skipSorting);
         readTimeLength();
     }
 

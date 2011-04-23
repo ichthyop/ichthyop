@@ -126,6 +126,14 @@ public class UpdateManager extends AbstractManager {
             getXBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3v"));
         }
         /*
+         * Add skip_sorting option in Dataset blocks
+         */
+        for (XBlock xblock : getConfigurationFile().getBlocks(BlockType.DATASET)) {
+            if (null != cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting")) {
+                xblock.addXParameter(cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting"));
+            }
+        }
+        /*
          * Update version number
          */
         getConfigurationFile().setVersion(Version.v3_1.number);

@@ -130,7 +130,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
     @Action
     public void cancel() {
-        getLogger().info(resourceMap.getString("view.close.text"));
+        //getLogger().info(resourceMap.getString("view.close.text"));
         try {
             getFrame().setVisible(false);
             finalize();
