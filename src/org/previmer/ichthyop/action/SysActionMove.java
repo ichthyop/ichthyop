@@ -9,7 +9,7 @@ import org.previmer.ichthyop.particle.ParticleMortality;
  */
 public class SysActionMove extends AbstractSysAction {
 
-    private CoastlineBehavior coastlineBehavior;
+    private CoastlineBehavior coastlineBehavior = CoastlineBehavior.BEACHING;
 
     @Override
     public void loadParameters() throws Exception {
@@ -137,10 +137,14 @@ public class SysActionMove extends AbstractSysAction {
         STANDSTILL;
 
         public static CoastlineBehavior getBehavior(String s) {
+            try {
             for (CoastlineBehavior cb : CoastlineBehavior.values()) {
                 if (cb.name().equalsIgnoreCase(s)) {
                     return cb;
                 }
+            }
+            } catch (Exception ex) {
+                return BEACHING;
             }
             return BEACHING;
         }
