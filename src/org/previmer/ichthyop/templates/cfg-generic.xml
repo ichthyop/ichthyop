@@ -2,7 +2,7 @@
 <icstructure>
     <long_name>Generic Ichthyop configuration file</long_name>
     <description>The file has few pre-defined parameters.</description>
-    <version>3.0b</version>
+    <version>3.1</version>
     <block type="option">
         <tree_path>Time/General time options</tree_path>
         <key>app.time</key>
@@ -68,7 +68,7 @@
         </parameters>
     </block>
     <block type="option">
-        <tree_path>Advanced/Transport/General</tree_path>
+        <tree_path>Transport/General</tree_path>
         <key>app.transport</key>
         <description>Set the general transport options of the simulation.</description>
         <parameters>
@@ -2036,7 +2036,7 @@
     </block>
      <block type="action">
         <key>action.recruitment.stain</key>
-        <tree_path>Advanced/Biology/Recruitment/In stain</tree_path>
+        <tree_path>Biology/Recruitment/In stain</tree_path>
         <enabled>false</enabled>
         <description>Block of options for defining some recruitment criterions and a recruitment stain, in order to study, for instance, the recruitment success of a particular geographic area.</description>
         <parameters>
