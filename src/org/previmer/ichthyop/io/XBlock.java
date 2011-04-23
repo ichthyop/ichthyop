@@ -138,8 +138,10 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     public void addXParameter(XParameter xparam) {
-        getChild(PARAMETERS).addContent(xparam.detach());
-        map = createMap();
+        if (!map.containsKey(xparam.getKey())) {
+            getChild(PARAMETERS).addContent(xparam.detach());
+            map = createMap();
+        }
     }
 
     private ArrayList<XParameter> readParameters() {

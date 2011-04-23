@@ -149,6 +149,10 @@ public class ConfigurationFile {
         return map.get(new BlockId(type, key).toString());
     }
 
+    public boolean containsBlock(final BlockType type, final String key) {
+        return map.containsKey(new BlockId(type, key).toString());
+    }
+
     public List<XBlock> readBlocks() throws IOException {
         List<Element> list = structure.getRootElement().getChildren(XBlock.BLOCK);
         List<XBlock> listBlock = new ArrayList(list.size());

@@ -77,21 +77,25 @@ public class UpdateManager extends AbstractManager {
         /*
          * Add the recruitment in stain block
          */
-        getConfigurationFile().addBlock(cfg31.getBlock(BlockType.ACTION, "action.recruitment.stain").detach());
-        treepath = getXBlock(BlockType.ACTION, "action.recruitment.zone").getTreePath();
-        newTreepath = treepath.startsWith("Advanced")
-                ? "Advanced/Biology/Recruitment/In stain"
-                : "Biology/Recruitment/In stain";
-        getXBlock(BlockType.ACTION, "action.recruitment.stain").setTreePath(newTreepath);
+        if (!getConfigurationFile().containsBlock(BlockType.ACTION, "action.recruitment.stain")) {
+            getConfigurationFile().addBlock(cfg31.getBlock(BlockType.ACTION, "action.recruitment.stain").detach());
+            treepath = getXBlock(BlockType.ACTION, "action.recruitment.zone").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Recruitment/In stain"
+                    : "Biology/Recruitment/In stain";
+            getXBlock(BlockType.ACTION, "action.recruitment.stain").setTreePath(newTreepath);
+        }
         /*
          * Add the coastline behavior block
          */
-        getConfigurationFile().addBlock(cfg31.getBlock(BlockType.OPTION, "app.transport").detach());
-        treepath = getXBlock(BlockType.ACTION, "action.advection").getTreePath();
-        newTreepath = treepath.startsWith("Advanced")
-                ? "Advanced/Transport/General"
-                : "Transport/General";
-        getXBlock(BlockType.OPTION, "app.transport").setTreePath(newTreepath);
+        if (!getConfigurationFile().containsBlock(BlockType.OPTION, "app.transport")) {
+            getConfigurationFile().addBlock(cfg31.getBlock(BlockType.OPTION, "app.transport").detach());
+            treepath = getXBlock(BlockType.ACTION, "action.advection").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Transport/General"
+                    : "Transport/General";
+            getXBlock(BlockType.OPTION, "app.transport").setTreePath(newTreepath);
+        }
         /*
          * Update MARS OpendDAP URL
          */
