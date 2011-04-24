@@ -12,7 +12,7 @@ import ucar.ma2.InvalidRangeException;
  *
  * @author pverley
  */
-public abstract class Mars2dCommon extends MarsCommonRotated {
+public abstract class Mars2dCommon extends MarsCommon {
 
     /**
      * Zonal component of the velocity field at current time

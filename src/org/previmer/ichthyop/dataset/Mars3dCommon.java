@@ -12,7 +12,7 @@ import ucar.ma2.Index;
  *
  * @author pverley
  */
-abstract class Mars3dCommon extends MarsCommonRotated {
+abstract class Mars3dCommon extends MarsCommon {
 
     /**
      * Vertical grid dimension
