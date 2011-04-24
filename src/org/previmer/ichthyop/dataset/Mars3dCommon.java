@@ -165,6 +165,8 @@ abstract class Mars3dCommon extends MarsCommon {
         }
     }
 
+    private void getSigLevelsV6() {
+
         double[][][] z_r_tmp = new double[nz][ny][nx];
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
 
@@ -185,6 +187,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
         z_w_tp0 = new double[nz + 1][ny][nx];
         z_w_tp1 = new double[nz + 1][ny][nx];
+    }
 
     private void getSigLevelsV8() throws IOException {
 
