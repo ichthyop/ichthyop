@@ -180,7 +180,17 @@ abstract class RomsCommon extends AbstractDataset {
             list.add(file.toString());
         }
         if (list.size() > 1) {
-            Collections.sort(list, new NCComparator(strTime));
+            boolean skipSorting = false;
+            try {
+                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
+            } catch (Exception ex) {
+                skipSorting = false;
+            }
+            if (skipSorting) {
+                Collections.sort(list);
+            } else {
+                Collections.sort(list, new NCComparator(strTime));
+            }
         }
         return list;
     }

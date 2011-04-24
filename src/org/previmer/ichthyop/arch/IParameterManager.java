@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import org.previmer.ichthyop.io.ConfigurationFile;
 
 /**
  *
@@ -21,6 +22,8 @@ import java.util.List;
 public interface IParameterManager {
 
     public void setConfigurationFile(File file) throws Exception;
+
+    public ConfigurationFile getConfigurationFile();
 
     public String getParameter(String blockName, String key);
 

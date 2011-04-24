@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 Philippe Verley <philippe dot verley at ird dot fr>
+ *  Copyright (C) 2011 mcuif
  * 
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,29 +14,24 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.previmer.ichthyop.io;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
-import ucar.ma2.Index;
-import ucar.nc2.Attribute;
 
 /**
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author mcuif
  */
-public class RecruitmentTracker extends AbstractTracker {
+public class RecruitmentStainTracker extends AbstractTracker {
 
-    public RecruitmentTracker() {
+    public RecruitmentStainTracker() {
         super(DataType.INT);
     }
 
@@ -44,12 +39,16 @@ public class RecruitmentTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addZoneDimension(TypeZone.RECRUITMENT);
     }
 
     @Override
     Array createArray() {
-        return new ArrayInt.D3(1, dimensions().get(1).getLength(), dimensions().get(2).getLength());
+        return new ArrayInt.D2(1, dimensions().get(1).getLength());
+    }
+
+    @Override
+    public ArrayInt.D2 getArray() {
+        return (ArrayInt.D2) super.getArray();
     }
 
     public void track() {
@@ -59,26 +58,8 @@ public class RecruitmentTracker extends AbstractTracker {
         while (iter.hasNext()) {
             particle = iter.next();
             rparticle = (IRecruitableParticle) particle.getLayer(RecruitableParticleLayer.class);
-            Index index = getArray().getIndex();
-            for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
-                index.set(0, particle.getIndex(), zone.getIndex());
-                int recruited = rparticle.isRecruited(zone.getIndex())
-                        ? 1
-                        : 0;
-                getArray().setInt(index, recruited);
-            }
+            getArray().set(0, particle.getIndex(), rparticle.isRecruited() ? 1 : 0);
         }
     }
 
-    @Override
-    public Attribute[] attributes() {
-        List<Attribute> listAttributes = new ArrayList();
-        for (Attribute attr : super.attributes()) {
-            listAttributes.add(attr);
-        }
-        for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
-            listAttributes.add(new Attribute("recruitment zone " + zone.getIndex(), zone.getKey()));
-        }
-        return listAttributes.toArray(new Attribute[listAttributes.size()]);
-    }
 }

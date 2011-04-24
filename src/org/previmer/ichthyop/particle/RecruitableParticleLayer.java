@@ -27,7 +27,7 @@ import org.previmer.ichthyop.arch.IRecruitableParticle;
         numRecruitmentZone = -1;
         isRecruited = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT))
                 ? new boolean[getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT).size()]
-                : new boolean[0];
+                : new boolean[1];
     }
 
     public boolean isRecruited() {

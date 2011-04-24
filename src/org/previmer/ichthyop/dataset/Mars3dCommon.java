@@ -76,7 +76,11 @@ abstract class Mars3dCommon extends MarsCommon {
     /**
      * 
      */
-    float[] s_rho;
+    double[] s_rho, s_w;
+    /*
+     *
+     */
+    private String strHC, strA, strB;
 
     @Override
     public void setUp() throws Exception {
@@ -107,31 +111,69 @@ abstract class Mars3dCommon extends MarsCommon {
         strZDim = getParameter("field_dim_z");
         strZeta = getParameter("field_var_zeta");
         strSigma = getParameter("field_var_sigma");
+
+        /* Read specifi generalized sigma parameters for MARS V8 */
+        try {
+            strHC = getParameter("field_var_hc");
+            strA = getParameter("field_var_a");
+            strB = getParameter("field_var_b");
+        } catch (Exception ex) {
+            strHC = strA = strB = null;
+            getLogger().warning("{Dataset} Could not find generalized sigma level parameters in the configuration file. Simple sigma levels will be used then.");
+        }
+
     }
 
     /**
      * Computes the depth at sigma levels disregarding the free
      * surface elevation.
      */
-    void getCstSigLevels() {
+    void getCstSigLevels() throws IOException {
 
-        double[][][] z_r_tmp = new double[nz][ny][nx];
-        double[][][] z_w_tmp = new double[nz + 1][ny][nx];
+        s_rho = new double[nz];
+        s_w = new double[nz + 1];
 
-        double[] s_w = new double[nz + 1];
+        /* read sigma levels */
+        try {
+            Array arrSrho = ncIn.findVariable(strSigma).read();
+            Index index = arrSrho.getIndex();
+            for (int k = 0; k < nz; k++) {
+                s_rho[k] = arrSrho.getDouble(index.set(k));
+            }
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading sigma levels. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        if (s_rho[nz - 1] > 0) {
+            for (int k = 0; k < s_rho.length; k++) {
+                s_rho[k] -= 1.d;
+            }
+        }
 
-        s_w[nz] = 1.d;
-        s_w[0] = 0.d;
         for (int k = 1; k < nz; k++) {
             s_w[k] = .5d * (s_rho[k - 1] + s_rho[k]);
         }
+        s_w[nz] = 0.d;
+        s_w[0] = -1.d;
+
+        if ((strHC != null) && (null != ncIn.findVariable(strHC))) {
+            getLogger().info("{Dataset} Generalized sigma levels detected.");
+            getSigLevelsV8();
+        } else {
+            getSigLevelsV6();
+        }
+    }
+
+        double[][][] z_r_tmp = new double[nz][ny][nx];
+        double[][][] z_w_tmp = new double[nz + 1][ny][nx];
 
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 z_w_tmp[0][j][i] = -hRho[j][i];
                 for (int k = nz; k-- > 0;) {
-                    z_r_tmp[k][j][i] = ((double) s_rho[k] - 1.d) * hRho[j][i];
-                    z_w_tmp[k + 1][j][i] = (s_w[k + 1] - 1.d) * hRho[j][i];
+                    z_r_tmp[k][j][i] = s_rho[k] * hRho[j][i];
+                    z_w_tmp[k + 1][j][i] = s_w[k + 1] * hRho[j][i];
                 }
             }
         }
@@ -144,6 +186,71 @@ abstract class Mars3dCommon extends MarsCommon {
         z_w_tp0 = new double[nz + 1][ny][nx];
         z_w_tp1 = new double[nz + 1][ny][nx];
 
+    private void getSigLevelsV8() throws IOException {
+
+        float hc[][];
+        double a, b;
+        double[] Cs_r = new double[nz];
+        double[] Cs_w = new double[nz + 1];
+        try {
+            //-----------------------------------------------------------
+            // Read hc, Cs_r and Cs_w in the NetCDF file.
+            Array arrHc = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+            hc = (float[][]) arrHc.copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("{Dataset} Error reading hc variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
+            a = ncIn.findVariable(strA).readScalarDouble();
+        } catch (IOException ex) {
+            IOException ioex = new IOException("{Dataset} Error reading theta, surface control parameter. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
+            b = ncIn.findVariable(strB).readScalarDouble();
+        } catch (IOException ex) {
+            IOException ioex = new IOException("{Dataset} Error reading b, bottom control parameter. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
+        //-----------------------------------------------------------
+        // Calculation of Cs_r and Cs_w, the streching functions
+        for (int k = nz; k-- > 0;) {
+            Cs_r[k] = (1.d - b) * Math.sinh(a * s_rho[k]) / Math.sinh(a)
+                    + b * (Math.tanh(a * (s_rho[k] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
+            Cs_w[k + 1] = (1.d - b) * Math.sinh(a * s_w[k + 1]) / Math.sinh(a)
+                    + b * (Math.tanh(a * (s_w[k + 1] + 0.5d)) / (2 * Math.tanh(0.5d * a)) - 0.5d);
+        }
+        Cs_w[0] = -1.d;
+
+        //------------------------------------------------------------
+        // Calculation of z_w , z_r
+        double[][][] z_r_tmp = new double[nz][ny][nx];
+        double[][][] z_w_tmp = new double[nz + 1][ny][nx];
+
+
+        // OLD: z_unperturbated = hc * (sc - Cs) + Cs * h
+
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
+                z_w_tmp[0][j][i] = -hRho[j][i];
+                for (int k = nz; k-- > 0;) {
+                    z_r_tmp[k][j][i] = hc[j][i] * (s_rho[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i];
+                    z_w_tmp[k + 1][j][i] = hc[j][i] * (s_w[k + 1] - Cs_w[k + 1]) + Cs_w[k + 1] * hRho[j][i];
+                }
+                z_w_tmp[nz][j][i] = 0.d;
+            }
+        }
+
+        z_rho_cst = z_r_tmp;
+        z_w_cst = z_w_tmp;
+
+        z_w_tp0 = new double[nz + 1][ny][nx];
+        z_w_tp1 = new double[nz + 1][ny][nx];
     }
 
     @Override
@@ -175,20 +282,6 @@ abstract class Mars3dCommon extends MarsCommon {
             }
         }
         zeta_tp1 = zeta_tp0;
-
-        /* read sigma levels */
-        try {
-            s_rho = (float[]) ncIn.findVariable(strSigma).read().copyToNDJavaArray();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("Error reading sigma levels. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        if (s_rho[0] < 0) {
-            for (int k = 0; k < s_rho.length; k++) {
-                s_rho[k] += 1.d;
-            }
-        }
     }
 
     /**
@@ -248,9 +341,8 @@ abstract class Mars3dCommon extends MarsCommon {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     if (isInWater(i + ii, j + jj)) {
-                        z_r = z_rho_cst[k + kk][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
-                                * (1.d + z_rho_cst[k + kk][j + jj][i + ii] / hRho[j
-                                + jj][i + ii]);
+                        z_r = z_rho_cst[k + kk][j + jj][i + ii]
+                                + (double) zeta_tp0[j + jj][i + ii] * (1.d + s_rho[k + kk]);
                         depth += co * z_r;
                     }
                 }
@@ -320,7 +412,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                    dv += x * co / dyv;
+                    dv += 2.d * x * co / (dyv[j + jj - 1][i + ii] + dyv[j + jj][i + ii]);
                 }
             }
         }
@@ -357,7 +449,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                    du += x * co / dxu[j + jj];
+                    du += 2.d * x * co / (dxu[j + jj][i + ii - 1] + dxu[j + jj][i + ii]);
                 }
             }
         }
@@ -381,8 +473,7 @@ abstract class Mars3dCommon extends MarsCommon {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                     double z_r = 0.d;
                     z_r = z_rho_cst[k][j + jj][i + ii]
-                            + (double) zeta_tp0[j + jj][i + ii]
-                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i + ii]);
+                            + (double) zeta_tp0[j + jj][i + ii] * (1.d + s_rho[k]);
                     hh += co * z_r;
                 }
             }
@@ -415,8 +506,8 @@ abstract class Mars3dCommon extends MarsCommon {
 
         try {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 60;
+            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
+            time_tp1 -= time_tp1 % 100;
             xTimeTp1 = null;
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
@@ -451,21 +542,17 @@ abstract class Mars3dCommon extends MarsCommon {
         for (int k = nz; k-- > 0;) {
             for (int i = 0; i++ < nx - 1;) {
                 for (int j = ny; j-- > 0;) {
-                    Huon[k][j][i] = .5d * ((z_w_tmp[k + 1][j][i]
-                            - z_w_tmp[k][j][i])
-                            + (z_w_tmp[k + 1][j][i - 1]
-                            - z_w_tmp[k][j][i - 1])) * dyv
+                    Huon[k][j][i] = .25d * ((z_w_tmp[k + 1][j][i] - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j][i - 1] - z_w_tmp[k][j][i - 1]))
+                            * (dyv[j][i] + dyv[j][i - 1])
                             * u_tp1[k][j][i - 1];
                 }
             }
             for (int i = nx; i-- > 0;) {
                 for (int j = 0; j++ < ny - 1;) {
-                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i]
-                            - z_w_tmp[k][j][i])
-                            + (z_w_tmp[k + 1][j - 1][i]
-                            - z_w_tmp[k][j - 1][i]))
-                            * (dxu[j]
-                            + dxu[j - 1]))
+                    Hvom[k][j][i] = .25d * (((z_w_tmp[k + 1][j][i] - z_w_tmp[k][j][i])
+                            + (z_w_tmp[k + 1][j - 1][i] - z_w_tmp[k][j - 1][i]))
+                            * (dxu[j][i] + dxu[j - 1][i]))
                             * v_tp1[k][j - 1][i];
                 }
             }
@@ -526,7 +613,7 @@ abstract class Mars3dCommon extends MarsCommon {
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j] * dyv));
+                    w[k][j][i] = (float) (w_double[k][j][i] / (dxu[j][i] * dyv[j][i]));
                 }
             }
         }
@@ -553,8 +640,7 @@ abstract class Mars3dCommon extends MarsCommon {
                     zeta_tp1[j][i] = 0.f;
                 }
                 for (int k = 0; k < nz + 1; k++) {
-                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
-                            * (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
+                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i] * (1.d + s_w[k]);
                 }
             }
         }

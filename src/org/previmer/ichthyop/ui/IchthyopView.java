@@ -51,6 +51,7 @@ import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
+import org.previmer.ichthyop.manager.UpdateManager;
 import org.previmer.ichthyop.ui.logging.LogLevel;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
@@ -514,6 +515,10 @@ public class IchthyopView extends FrameView
 
     private void showSimulationPreview() {
         pnlProgress.setVisible(false);
+        //scrollPaneSimulationUI.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        //scrollPaneSimulationUI.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPaneSimulationUI.setPreferredSize(pnlSimulationUI.getSize());
+        scrollPaneSimulationUI.revalidate();
         scrollPaneSimulationUI.setVisible(true);
         getSimulationUI().init();
         getSimulationUI().repaintBackground();
@@ -587,7 +592,7 @@ public class IchthyopView extends FrameView
         int returnVal = fc.showSaveDialog(getFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = addExtension(fc.getSelectedFile(), getResourceMap().getString("Application.configurationFile.extension"));
-            if (file.getAbsolutePath().matches(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
+            if (file.getAbsolutePath().equals(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
                 JOptionPane.showMessageDialog(fc, getResourceMap().getString("saveAsConfigurationFile.msg.different"), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.OK_OPTION);
                 saveAsConfigurationFile();
                 return null;
@@ -717,9 +722,79 @@ public class IchthyopView extends FrameView
         chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.configurationFile"), getResourceMap().getString("Application.configurationFile.extension")));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            return loadConfigurationFile(chooser.getSelectedFile());
+            checkCfgVersionAndLoad(chooser.getSelectedFile());
         }
         return null;
+    }
+
+    private void checkCfgVersionAndLoad(final File file) {
+        try {
+            getSimulationManager().setConfigurationFile(file);
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, resourceMap.getString("openConfigurationFile.msg.error"), e);
+        }
+        try {
+            if (getUpdateManager().versionMismatch()) {
+                if (getUpdateManager().getApplicationVersion().priorTo(getUpdateManager().getConfigurationVersion())) {
+
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        public void run() {
+                            String title = resourceMap.getString("Application.title") + " - " + resourceMap.getString("openConfigurationFile.Action.shortDescription");
+                            StringBuffer message = new StringBuffer(resourceMap.getString("updateConfigurationFile.cfgFile"));
+                            message.append(": ");
+                            message.append(file.getPath());
+                            message.append('\n');
+                            message.append(resourceMap.getString("updateConfigurationFile.cfgVersion"));
+                            message.append(": ");
+                            message.append(getUpdateManager().getConfigurationVersion().toString());
+                            message.append('\n');
+                            message.append(resourceMap.getString("updateConfigurationFile.appVersion"));
+                            message.append(": ");
+                            message.append(getUpdateManager().getApplicationVersion().toString());
+                            message.append('\n');
+                            message.append(resourceMap.getString("updateConfigurationFile.inconsistency"));
+                            JOptionPane.showMessageDialog(null, message.toString(), title, JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
+                    return;
+                }
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    public void run() {
+                        String title = resourceMap.getString("Application.title") + " - " + resourceMap.getString("openConfigurationFile.Action.shortDescription");
+                        StringBuffer message = new StringBuffer(resourceMap.getString("updateConfigurationFile.cfgFile"));
+                        message.append(": ");
+                        message.append(file.getPath());
+                        message.append('\n');
+                        message.append(resourceMap.getString("updateConfigurationFile.cfgVersion"));
+                        message.append(": ");
+                        message.append(getUpdateManager().getConfigurationVersion().toString());
+                        message.append('\n');
+                        message.append(resourceMap.getString("updateConfigurationFile.appVersion"));
+                        message.append(": ");
+                        message.append(getUpdateManager().getApplicationVersion().toString());
+                        message.append('\n');
+                        message.append(resourceMap.getString("updateConfigurationFile.requestUpgrade"));
+                        int reply = JOptionPane.showConfirmDialog(null, message.toString(), title, JOptionPane.YES_NO_OPTION);
+                        if (reply == JOptionPane.YES_OPTION) {
+                            try {
+                                getUpdateManager().upgrade();
+                                getLogger().info(resourceMap.getString("updateConfigurationFile.uptodate") + " " + getUpdateManager().getApplicationVersion().toString());
+                                loadConfigurationFile(file).execute();
+                            } catch (Exception ex) {
+                                getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
+                            }
+                        } else {
+                        }
+                    }
+                });
+            } else {
+                loadConfigurationFile(file).execute();
+            }
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
+        }
     }
 
     private class FailedTask extends SFTask {
@@ -775,6 +850,10 @@ public class IchthyopView extends FrameView
         btnPreview.getAction().setEnabled(true);
         setMainTitle();
         return pnlConfiguration.loadBlockTree();
+    }
+
+    private UpdateManager getUpdateManager() {
+        return UpdateManager.getInstance();
     }
 
     @Action
@@ -1106,7 +1185,7 @@ public class IchthyopView extends FrameView
             File file = new File((String) property);
             if (file.isFile()) {
                 cfgPath = file.getParentFile();
-                loadConfigurationFile(file).execute();
+                checkCfgVersionAndLoad(file);
             } else if (file.isDirectory()) {
                 cfgPath = file;
             }

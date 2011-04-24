@@ -918,7 +918,8 @@ public class NemoDataset extends AbstractDataset {
 
         try {
             Array xTimeTp1 = ncU.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
+            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
+            time_tp1 -= time_tp1 % 100;
             xTimeTp1 = null;
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
@@ -1409,7 +1410,17 @@ public class NemoDataset extends AbstractDataset {
             list.add(file.toString());
         }
         if (list.size() > 1) {
-            Collections.sort(list, new NCComparator(strTime));
+             boolean skipSorting = false;
+            try {
+                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
+            } catch (Exception ex) {
+                skipSorting = false;
+            }
+            if (skipSorting) {
+                Collections.sort(list);
+            } else {
+                Collections.sort(list, new NCComparator(strTime));
+            }
         }
         return list;
     }
