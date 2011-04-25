@@ -5,8 +5,8 @@
 
 package org.previmer.ichthyop.event;
 
-import org.previmer.ichthyop.arch.ITimeManager;
 import java.util.EventObject;
+import org.previmer.ichthyop.manager.TimeManager;
 
 /**
  *
@@ -22,8 +22,8 @@ public class NextStepEvent extends EventObject {
     }
 
     @Override
-    public ITimeManager getSource() {
-        return (ITimeManager) source;
+    public TimeManager getSource() {
+        return (TimeManager) source;
     }
 
     public boolean isInterrupted() {

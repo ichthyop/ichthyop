@@ -7,7 +7,6 @@ package org.previmer.ichthyop;
 
 import java.util.logging.Logger;
 import org.previmer.ichthyop.manager.*;
-import org.previmer.ichthyop.arch.ISimulationManager;
 
 /**
  *
@@ -15,7 +14,7 @@ import org.previmer.ichthyop.arch.ISimulationManager;
  */
 public class SimulationManagerAccessor {
 
-    public static ISimulationManager getSimulationManager() {
+    public static SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
     

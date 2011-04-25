@@ -19,7 +19,6 @@ package org.previmer.ichthyop.io;
 
 import java.util.Iterator;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
@@ -53,11 +52,11 @@ public class RecruitmentStainTracker extends AbstractTracker {
 
     public void track() {
         IBasicParticle particle;
-        IRecruitableParticle rparticle;
+        RecruitableParticleLayer rparticle;
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            rparticle = (IRecruitableParticle) particle.getLayer(RecruitableParticleLayer.class);
+            rparticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
             getArray().set(0, particle.getIndex(), rparticle.isRecruited() ? 1 : 0);
         }
     }

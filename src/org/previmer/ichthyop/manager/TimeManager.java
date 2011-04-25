@@ -7,7 +7,6 @@ package org.previmer.ichthyop.manager;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
@@ -25,7 +24,13 @@ import org.previmer.ichthyop.util.Constant;
  *
  * @author pverley
  */
-public class TimeManager extends AbstractManager implements ITimeManager {
+public class TimeManager extends AbstractManager {
+    
+///////////////////////////////
+// Declaration of the constants
+///////////////////////////////
+    public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+    public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
 
 ///////////////////////////////
 // Declaration of the variables

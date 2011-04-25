@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IZoneParticle;
 import java.util.Iterator;
 import org.previmer.ichthyop.arch.IBasicParticle;
 
@@ -13,7 +12,7 @@ import org.previmer.ichthyop.arch.IBasicParticle;
  *
  * @author pverley
  */
-public class ZoneParticleLayer extends ParticleLayer implements IZoneParticle {
+public class ZoneParticleLayer extends ParticleLayer {
 
     public ZoneParticleLayer(IBasicParticle particle) {
         super(particle);

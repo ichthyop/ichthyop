@@ -5,9 +5,8 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IGrowingParticle;
-import org.previmer.ichthyop.arch.IGrowingParticle.Stage;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
 
 /**
  *
@@ -80,7 +79,7 @@ public class BuoyancyAction extends AbstractAction {
 
         boolean canApplyBuoyancy = false;
         if (isGrowth) {
-            canApplyBuoyancy = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
+            canApplyBuoyancy = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
         } else {
             canApplyBuoyancy = particle.getAge() < maximumAge;
         }

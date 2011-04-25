@@ -10,7 +10,6 @@ import java.io.IOException;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IZoneManager;
 import org.previmer.ichthyop.io.XZone;
 import org.previmer.ichthyop.io.XZone.XPoint;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ import org.previmer.ichthyop.io.ZoneFile;
  *
  * @author pverley
  */
-public class ZoneManager extends AbstractManager implements IZoneManager {
+public class ZoneManager extends AbstractManager {
 
     private static ZoneManager zoneManager = new ZoneManager();
     private HashMap<TypeZone, ArrayList<Zone>> map;

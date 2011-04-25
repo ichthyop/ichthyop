@@ -12,12 +12,10 @@ import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.arch.IOutputManager;
 import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.util.logging.Level;
 import ucar.nc2.NetcdfFileWriteable;
-import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.arch.ITracker;
 import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
@@ -26,6 +24,7 @@ import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.LatTracker;
@@ -44,7 +43,7 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public class OutputManager extends AbstractManager implements IOutputManager, LastStepListener {
+public class OutputManager extends AbstractManager implements LastStepListener, NextStepListener {
 
     final private static OutputManager outputManager = new OutputManager();
     private final static String block_key = "app.output";
@@ -417,7 +416,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         if (e.isInterrupted()) {
             return;
         }
-        ITimeManager timeManager = e.getSource();
+        TimeManager timeManager = e.getSource();
         if (((timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
             writeToNetCDF(i_record++);
         }

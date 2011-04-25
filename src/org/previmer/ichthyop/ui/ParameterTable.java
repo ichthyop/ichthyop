@@ -52,7 +52,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
-import org.previmer.ichthyop.arch.ITimeManager;
+import org.previmer.ichthyop.manager.TimeManager;
 
 /**
  *
@@ -238,7 +238,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
             try {
                 if (null != model.block) {
                     if (null != block.getXParameter("time_origin")) {
-                        calendar = new InterannualCalendar(block.getXParameter("time_origin").getValue(), ITimeManager.INPUT_DATE_FORMAT);
+                        calendar = new InterannualCalendar(block.getXParameter("time_origin").getValue(), TimeManager.INPUT_DATE_FORMAT);
                     }
                 }
             } catch (Exception ex) {

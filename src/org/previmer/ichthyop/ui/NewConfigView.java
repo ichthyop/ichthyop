@@ -27,7 +27,6 @@ import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.Template;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -54,11 +53,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         btnSave.getAction().setEnabled(false);
         templateTree.addTreeSelectionListener(this);
     }
-
-    public ISimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
-    }
-
+    
     @Action
     public void changePath() {
         JFileChooser chooser = new JFileChooser(location);

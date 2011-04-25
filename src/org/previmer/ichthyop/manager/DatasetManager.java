@@ -9,7 +9,6 @@ import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.arch.IDataset;
-import org.previmer.ichthyop.arch.IDatasetManager;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.List;
  *
  * @author pverley
  */
-public class DatasetManager extends AbstractManager implements IDatasetManager {
+public class DatasetManager extends AbstractManager {
 
     final private static DatasetManager datasetManager = new DatasetManager();
     private IDataset dataset;

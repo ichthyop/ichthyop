@@ -22,7 +22,6 @@ import java.util.GregorianCalendar;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IZoneParticle;
 import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.particle.TurtleLayer;
 import org.previmer.ichthyop.particle.ZoneParticleLayer;
@@ -53,7 +52,7 @@ public class TurtleSwimAction extends AbstractAction {
     public void execute(IBasicParticle particle) {
 
         TurtleLayer turtle =  (TurtleLayer) particle.getLayer(TurtleLayer.class);
-        int numZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.ORIENTATION);
+        int numZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.ORIENTATION);
         if (numZone != -1) {
             // check if did not exceed turtle activity in this zone
             if (!turtle.hasStartedTiming(numZone)) {
