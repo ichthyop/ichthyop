@@ -379,7 +379,7 @@ public class DatasetR3D extends Dataset {
             for (int ii = 0; ii < 2; ii++) {
                 for (int jj = 0; jj < n; jj++) {
                     for (int kk = 0; kk < 2; kk++) {
-                        //if (isInWater(i + ii, j + jj)) {
+                        if (Dataset.isInWater(i + ii - 1, j + jj))
                         {
                             co = Math.abs((.5d - (double) ii - dx) *
                                           (1.d - (double) jj - dy) *
@@ -410,7 +410,7 @@ public class DatasetR3D extends Dataset {
             for (int kk = 0; kk < 2; kk++) {
                 for (int jj = 0; jj < 2; jj++) {
                     for (int ii = 0; ii < n; ii++) {
-                        //if (isInWater(i + ii, j + jj)) {
+                        if (Dataset.isInWater(i + ii, j + jj - 1))
                         {
                             co = Math.abs((1.d - (double) ii - dx) *
                                           (.5d - (double) jj - dy) *

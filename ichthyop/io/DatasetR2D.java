@@ -30,8 +30,6 @@ public class DatasetR2D extends Dataset {
 //////////////////////////////////////////////
 // Definition of the inherited abstact methods
 //////////////////////////////////////////////
-
-
     void getFieldsName() {
 
         super.getFieldsName();
@@ -43,8 +41,8 @@ public class DatasetR2D extends Dataset {
      * Reads time non-dependant fields in NetCDF dataset
      */
     void readConstantField(String gridFile) {
-        int[] origin = new int[] {jpo, ipo};
-        int[] size = new int[] {ny, nx};
+        int[] origin = new int[]{jpo, ipo};
+        int[] size = new int[]{ny, nx};
         Array arrLon, arrLat, arrMask, arrH, arrPm, arrPn;
         Index index;
         try {
@@ -115,7 +113,8 @@ public class DatasetR2D extends Dataset {
 
         } catch (IOException ex) {
             ex.printStackTrace();
-        } catch (InvalidRangeException ex) {}
+        } catch (InvalidRangeException ex) {
+        }
     }
 
     /**
@@ -153,7 +152,8 @@ public class DatasetR2D extends Dataset {
     /**
      * Does nothing. Vertical dimension disregarded for 2D simulation.
      */
-    void getCstSigLevels() {}
+    void getCstSigLevels() {
+    }
 
     /**
      * Advects the particle with the model velocity vector, using a Forward
@@ -185,16 +185,18 @@ public class DatasetR2D extends Dataset {
             CO = 0.d;
             for (int ii = 0; ii < 2; ii++) {
                 for (int jj = 0; jj < 2; jj++) {
-                    co = Math.abs((.5d - (double) ii - dx) *
-                                  (1.d - (double) jj - dy));
-                    CO += co;
-                    x = 0.d;
-                    x = (1.d - x_euler) * u_tp0[0][j + jj][i + ii - 1]
-                        + x_euler * u_tp1[0][j + jj][i + ii - 1];
+                    if (Dataset.isInWater(i + ii - 1, j + jj)) {
+                        co = Math.abs((.5d - (double) ii - dx)
+                                * (1.d - (double) jj - dy));
+                        CO += co;
+                        x = 0.d;
+                        x = (1.d - x_euler) * u_tp0[0][j + jj][i + ii - 1]
+                                + x_euler * u_tp1[0][j + jj][i + ii - 1];
 
-                    du += .5d * x * co *
-                            (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j +
-                             jj][i + ii]);
+                        du += .5d * x * co
+                                * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j
+                                + jj][i + ii]);
+                    }
                 }
             }
             du *= dt_sec;
@@ -212,15 +214,17 @@ public class DatasetR2D extends Dataset {
 
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < 2; ii++) {
-                    co = Math.abs((1.d - (double) ii - dx) *
-                                  (.5d - (double) jj - dy));
-                    CO += co;
-                    x = 0.d;
-                    x = (1.d - x_euler) * v_tp0[0][j + jj - 1][i + ii]
-                        + x_euler * v_tp1[0][j + jj - 1][i + ii];
-                    dv += .5d * x * co *
-                            (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j +
-                             jj][i + ii]);
+                    if (Dataset.isInWater(i + ii, j + jj - 1)) {
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (.5d - (double) jj - dy));
+                        CO += co;
+                        x = 0.d;
+                        x = (1.d - x_euler) * v_tp0[0][j + jj - 1][i + ii]
+                                + x_euler * v_tp1[0][j + jj - 1][i + ii];
+                        dv += .5d * x * co
+                                * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j
+                                + jj][i + ii]);
+                    }
                 }
             }
 
@@ -239,7 +243,7 @@ public class DatasetR2D extends Dataset {
             System.err.println("! WARNING : CFL broken for v " + (float) dv);
         }
 
-        return (new double[] {du, dv});
+        return (new double[]{du, dv});
 
     }
 
@@ -254,9 +258,9 @@ public class DatasetR2D extends Dataset {
      * Adimensionalizes the given magnitude at the specified grid location.
      */
     public double adimensionalize(double number, double xRho, double yRho) {
-        return .5d * number *
-                (pm[(int) Math.round(yRho)][(int) Math.round(xRho)]
-                 + pn[(int) Math.round(yRho)][(int) Math.round(xRho)]);
+        return .5d * number
+                * (pm[(int) Math.round(yRho)][(int) Math.round(xRho)]
+                + pn[(int) Math.round(yRho)][(int) Math.round(xRho)]);
     }
 
     /**
@@ -276,7 +280,6 @@ public class DatasetR2D extends Dataset {
 ///////////////////////////////////
 // Definition of overriding methods
 ///////////////////////////////////
-
     /**
      * Overrides {@code Dataset#setAllFieldsTp1AtTime}.
      * <br>
@@ -288,22 +291,22 @@ public class DatasetR2D extends Dataset {
     @Override
     void setAllFieldsTp1AtTime(int i_time) throws IOException {
 
-        int[] origin = new int[] {i_time, jpo, ipo};
+        int[] origin = new int[]{i_time, jpo, ipo};
         u_tp1 = new float[1][ny][nx - 1];
         v_tp1 = new float[1][ny - 1][nx];
         double time_tp0 = time_tp1;
 
         try {
             u_tp1[0] = (float[][]) ncIn.findVariable(strU).read(origin,
-                    new int[] {1, ny, (nx - 1)}).reduce().copyToNDJavaArray();
+                    new int[]{1, ny, (nx - 1)}).reduce().copyToNDJavaArray();
 
             v_tp1[0] = (float[][]) ncIn.findVariable(strV).read(origin,
-                    new int[] {1, (ny - 1), nx}).reduce().copyToNDJavaArray();
+                    new int[]{1, (ny - 1), nx}).reduce().copyToNDJavaArray();
 
             if (FLAG_TP) {
                 temp_tp1 = new float[1][ny][nx];
-                temp_tp1[0] = (float[][]) ncIn.findVariable(strTp).read(new int[] {i_time, 0, jpo, ipo},
-                    new int[] {1, 1, ny, nx}).reduce().copyToNDJavaArray();
+                temp_tp1[0] = (float[][]) ncIn.findVariable(strTp).read(new int[]{i_time, 0, jpo, ipo},
+                        new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
             }
 
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
@@ -313,16 +316,16 @@ public class DatasetR2D extends Dataset {
 
         } catch (IOException e) {
             throw new IOException("Problem extracting fields at location "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getMessage());
+                    + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (InvalidRangeException e) {
             throw new IOException("Problem extracting fields at location "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getMessage());
+                    + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         } catch (NullPointerException e) {
             throw new IOException("Problem extracting fields at location "
-                                  + ncIn.getLocation().toString() + " : " +
-                                  e.getMessage());
+                    + ncIn.getLocation().toString() + " : "
+                    + e.getMessage());
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
@@ -350,27 +353,27 @@ public class DatasetR2D extends Dataset {
         double dy = pGrid[1] - (double) j;
         tp = 0.d;
         CO = 0.d;
-        
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    {
-                        co = Math.abs((1.d - (double) ii - dx) *
-                                      (1.d - (double) jj - dy));
-                        CO += co;
-                        x = 0.d;
-                        try {
-                            x = (1.d - frac) * temp_tp0[0][j + jj][i + ii] +
-                                frac * temp_tp1[0][j + jj][i + ii];
-                            tp += x * co;
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new ArrayIndexOutOfBoundsException(
-                                    "Problem interpolating temperature field : " +
-                                    e.getMessage());
-                        }
+
+        for (int jj = 0; jj < n; jj++) {
+            for (int ii = 0; ii < n; ii++) {
+                {
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (1.d - (double) jj - dy));
+                    CO += co;
+                    x = 0.d;
+                    try {
+                        x = (1.d - frac) * temp_tp0[0][j + jj][i + ii]
+                                + frac * temp_tp1[0][j + jj][i + ii];
+                        tp += x * co;
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        throw new ArrayIndexOutOfBoundsException(
+                                "Problem interpolating temperature field : "
+                                + e.getMessage());
                     }
                 }
             }
-        
+        }
+
         if (CO != 0) {
             tp /= CO;
         }
@@ -378,6 +381,5 @@ public class DatasetR2D extends Dataset {
         return tp;
 
     }
-
     //---------- End of class
 }
