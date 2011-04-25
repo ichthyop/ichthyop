@@ -17,8 +17,6 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.Constant;
-import org.previmer.ichthyop.arch.IGrowingParticle;
-import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 
@@ -90,7 +88,7 @@ public class RecruitmentStainAction extends AbstractAction {
 
         //@todo
         // catch cast exception
-        IRecruitableParticle rParticle = (IRecruitableParticle) particle.getLayer(RecruitableParticleLayer.class);
+        RecruitableParticleLayer rParticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
         if (stopMovingOnceRecruited && rParticle.isRecruited()) {
             particle.lock();
             return;
@@ -119,7 +117,7 @@ public class RecruitmentStainAction extends AbstractAction {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
-            return (((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
+            return (((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
         }
     }
 

@@ -7,15 +7,12 @@ package org.previmer.ichthyop.particle;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IMasterParticle;
-import org.previmer.ichthyop.arch.ISimulationManager;
-import org.previmer.ichthyop.arch.IZoneParticle;
-import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
  * @author pverley
  */
-public class ParticleFactory {
+public class ParticleFactory extends SimulationManagerAccessor {
 
     public static IBasicParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
 
@@ -69,16 +66,12 @@ public class ParticleFactory {
                 return null;
             }
         }
-        int numReleaseZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
+        int numReleaseZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
         if (numReleaseZone == -1) {
             return null;
         }
         particle.grid2Geo();
         particle.geo2Grid();
         return particle;
-    }
-
-    private static ISimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
     }
 }

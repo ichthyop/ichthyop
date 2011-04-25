@@ -1,12 +1,10 @@
 package org.previmer.ichthyop;
 
 /** import java.util */
-import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IPopulation;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.previmer.ichthyop.arch.IMasterParticle;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.manager.SimulationManager;
 
@@ -70,7 +68,7 @@ public class Population extends HashSet implements IPopulation {
         population.clear();
     }
 
-    private ISimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
     //------- End of class

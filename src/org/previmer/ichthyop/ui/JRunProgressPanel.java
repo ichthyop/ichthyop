@@ -12,7 +12,6 @@ package org.previmer.ichthyop.ui;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -86,7 +85,7 @@ public class JRunProgressPanel extends javax.swing.JPanel {
         }
     }
 
-    public ISimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 

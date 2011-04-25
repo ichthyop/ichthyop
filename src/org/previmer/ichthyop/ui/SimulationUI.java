@@ -16,7 +16,6 @@ import javax.swing.JPanel;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -96,7 +95,7 @@ public class SimulationUI extends JPanel {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    public ISimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 

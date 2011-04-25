@@ -3,7 +3,6 @@ package org.previmer.ichthyop.manager;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.arch.IParameterManager;
 import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
@@ -19,7 +18,7 @@ import org.previmer.ichthyop.io.ConfigurationFile;
  *
  * @author pverley
  */
-public class ParameterManager extends AbstractManager implements IParameterManager {
+public class ParameterManager extends AbstractManager {
 
     private static ParameterManager parameterManager = new ParameterManager();
     private ConfigurationFile cfgFile;

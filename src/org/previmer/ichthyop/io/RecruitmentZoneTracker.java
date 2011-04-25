@@ -22,7 +22,6 @@ import java.util.List;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
@@ -54,11 +53,11 @@ public class RecruitmentZoneTracker extends AbstractTracker {
 
     public void track() {
         IBasicParticle particle;
-        IRecruitableParticle rparticle;
+        RecruitableParticleLayer rparticle;
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            rparticle = (IRecruitableParticle) particle.getLayer(RecruitableParticleLayer.class);
+            rparticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
             Index index = getArray().getIndex();
             for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
                 index.set(0, particle.getIndex(), zone.getIndex());

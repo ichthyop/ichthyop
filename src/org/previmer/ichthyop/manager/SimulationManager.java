@@ -6,17 +6,8 @@ package org.previmer.ichthyop.manager;
 
 import org.jdom.JDOMException;
 import org.previmer.ichthyop.Simulation;
-import org.previmer.ichthyop.arch.IActionManager;
 import org.previmer.ichthyop.arch.IDataset;
-import org.previmer.ichthyop.arch.IDatasetManager;
-import org.previmer.ichthyop.arch.IOutputManager;
-import org.previmer.ichthyop.arch.IParameterManager;
-import org.previmer.ichthyop.arch.IPropertyManager;
-import org.previmer.ichthyop.arch.IReleaseManager;
 import org.previmer.ichthyop.arch.ISimulation;
-import org.previmer.ichthyop.arch.ISimulationManager;
-import org.previmer.ichthyop.arch.ITimeManager;
-import org.previmer.ichthyop.arch.IZoneManager;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.InitializeListener;
 import org.previmer.ichthyop.event.SetupEvent;
@@ -38,7 +29,7 @@ import org.previmer.ichthyop.calendar.InterannualCalendar;
  *
  * @author pverley
  */
-public class SimulationManager implements ISimulationManager {
+public class SimulationManager {
 
     final private static SimulationManager simulationManager = new SimulationManager();
     /**
@@ -386,7 +377,7 @@ public class SimulationManager implements ISimulationManager {
         }
     }
 
-    public IDatasetManager getDatasetManager() {
+    public DatasetManager getDatasetManager() {
         return DatasetManager.getInstance();
     }
 
@@ -394,31 +385,31 @@ public class SimulationManager implements ISimulationManager {
         return getDatasetManager().getDataset();
     }
 
-    public IActionManager getActionManager() {
+    public ActionManager getActionManager() {
         return ActionManager.getInstance();
     }
 
-    public IParameterManager getParameterManager() {
+    public ParameterManager getParameterManager() {
         return ParameterManager.getInstance();
     }
 
-    public IPropertyManager getPropertyManager(Class forClass) {
+    public PropertyManager getPropertyManager(Class forClass) {
         return PropertyManager.getInstance(forClass);
     }
 
-    public IZoneManager getZoneManager() {
+    public ZoneManager getZoneManager() {
         return ZoneManager.getInstance();
     }
 
-    public IReleaseManager getReleaseManager() {
+    public ReleaseManager getReleaseManager() {
         return ReleaseManager.getInstance();
     }
 
-    public IOutputManager getOutputManager() {
+    public OutputManager getOutputManager() {
         return OutputManager.getInstance();
     }
 
-    public ITimeManager getTimeManager() {
+    public TimeManager getTimeManager() {
         return TimeManager.getInstance();
     }
 }

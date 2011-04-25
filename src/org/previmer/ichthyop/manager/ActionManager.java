@@ -9,7 +9,6 @@ import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.action.AbstractAction;
-import org.previmer.ichthyop.arch.IActionManager;
 import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ import org.previmer.ichthyop.arch.ISysAction;
  *
  * @author pverley
  */
-public class ActionManager extends AbstractManager implements IActionManager, SetupListener {
+public class ActionManager extends AbstractManager implements SetupListener {
 
     final private static ActionManager actionManager = new ActionManager();
     private HashMap<String, IAction> actionMap;

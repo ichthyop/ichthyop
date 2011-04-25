@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.mapviewer.TileFactory;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 import java.awt.Color;
 import java.awt.Font;
@@ -51,10 +50,10 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.manager.TimeManager;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
@@ -192,7 +191,7 @@ public class WMSMapper extends JXMapKit {
             calendar = new ClimatoCalendar();
         } else {
             try {
-                calendar = new InterannualCalendar(vtime.findAttribute("origin").getStringValue(), ITimeManager.INPUT_DATE_FORMAT);
+                calendar = new InterannualCalendar(vtime.findAttribute("origin").getStringValue(), TimeManager.INPUT_DATE_FORMAT);
             } catch (ParseException ex) {
                 calendar = new InterannualCalendar();
             }
@@ -708,10 +707,6 @@ public class WMSMapper extends JXMapKit {
     private float bound(float x) {
 
         return Math.max(Math.min(1.f, x), 0.f);
-    }
-
-    public ISimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
     }
 
     private double readTime(int index) {
