@@ -123,25 +123,25 @@ public class Calendar1900 extends Calendar {
         int rawYear, year, month, dayOfMonth, dayOfYear;
         boolean isLeap;
         long timeInDay = millisToDay(time);
-        int n400, n4, n1;
 
         long timeInDay_o = timeInDay + (isLeap(epoch_fields[YEAR])
-                                        ?
-                                        LEAP_NUM_DAYS[epoch_fields[MONTH]] +
-                                        epoch_fields[DAY_OF_MONTH] - 1
-                                        :
-                                        NUM_DAYS[epoch_fields[MONTH]] +
-                                        epoch_fields[DAY_OF_MONTH] - 1);
+                ? LEAP_NUM_DAYS[epoch_fields[MONTH]] + epoch_fields[DAY_OF_MONTH] - 1
+                : NUM_DAYS[epoch_fields[MONTH]] + epoch_fields[DAY_OF_MONTH] - 1);
 
-        n400 = (int) (timeInDay_o / 146097);
-        dayOfYear = (int) (timeInDay_o % 146097);
-        n4 = dayOfYear / 1461;
-        dayOfYear %= 1461;
-        n1 = dayOfYear / 365;
-        dayOfYear %= 365; // zero-based day of year
-        rawYear = 400 * n400 + 4 * n4 + n1;
-        rawYear += epoch_fields[YEAR];
-
+        long nbDays = 0;
+        int currentYear = epoch_fields[YEAR];
+        while (nbDays < timeInDay_o) {
+            nbDays += isLeap(currentYear)
+                    ? 366
+                    : 365;
+            currentYear++;
+        }
+        --currentYear;
+        nbDays -= isLeap(currentYear)
+                ? 366
+                : 365;
+        rawYear = (int) currentYear;
+        dayOfYear = (int) (timeInDay_o - nbDays);
         isLeap = isLeap(rawYear);
 
         if (dayOfYear > (isLeap ? 365 : 364)) {
@@ -156,8 +156,7 @@ public class Calendar1900 extends Calendar {
         }
 
         month = (12 * (dayOfYear + correction) + 6) / 367; // zero-based month
-        dayOfMonth = dayOfYear -
-                     (isLeap ? LEAP_NUM_DAYS[month] : NUM_DAYS[month]) + 1; // one-based DOM
+        dayOfMonth = dayOfYear - (isLeap ? LEAP_NUM_DAYS[month] : NUM_DAYS[month]) + 1; // one-based DOM
 
         year = rawYear;
         set(YEAR, year);
@@ -198,7 +197,6 @@ public class Calendar1900 extends Calendar {
      */
     protected void computeTime() {
 
-        int n400, n4, n1;
         int yearOn = fields[YEAR];
         int monthOn = fields[MONTH];
         boolean isLeap = isLeap(yearOn);
@@ -207,16 +205,14 @@ public class Calendar1900 extends Calendar {
             time2Day += isLeap
                     ? (long) (LEAP_NUM_DAYS[monthOn])
                     : (long) (NUM_DAYS[monthOn]);
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+        }
 
-        int deltaYear = yearOn - epoch_fields[YEAR];
-
-        n400 = (int) (deltaYear / 400);
-        deltaYear = (int) (deltaYear % 400);
-        n4 = (int) (deltaYear / 4);
-        n1 = deltaYear % 4;
-
-        time2Day += (long) (n400 * 146097L + n4 * 1461L + n1 * 365L);
+        for (int incYear = epoch_fields[YEAR]; incYear < yearOn; incYear++) {
+            time2Day += isLeap(incYear)
+                    ? 366
+                    : 365;
+        }
 
         time2Day -= (epoch_fields[DAY_OF_MONTH] - 1);
         time2Day -= isLeap(epoch_fields[YEAR])
@@ -224,13 +220,12 @@ public class Calendar1900 extends Calendar {
                 : NUM_DAYS[epoch_fields[MONTH]];
 
         long millis = dayToMillis(time2Day);
-        int millisInDay = fields[MILLISECOND] +
-                          1000 *
-                          (fields[SECOND] +
-                           60 * (fields[MINUTE] + 60 * fields[HOUR_OF_DAY]));
+        int millisInDay = fields[MILLISECOND]
+                + 1000
+                * (fields[SECOND]
+                + 60 * (fields[MINUTE] + 60 * fields[HOUR_OF_DAY]));
         time = millis + millisInDay;
     }
-
 
 //////////////////////////////////
 // Inherited methods not redefined
