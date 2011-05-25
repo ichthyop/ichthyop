@@ -4,8 +4,8 @@ import java.util.logging.Level;
 import org.previmer.ichthyop.action.BuoyancyAction;
 import org.previmer.ichthyop.arch.IAndresBuoyantParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IParameterManager;
 import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.manager.ParameterManager;
 
 /**
  *
@@ -46,7 +46,7 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
 
         ratioStage = 1.d;
         try {
-            IParameterManager parameterManager = getSimulationManager().getParameterManager();
+            ParameterManager parameterManager = getSimulationManager().getParameterManager();
             String salinity_field = parameterManager.getParameter(BlockType.ACTION, "action.andres_buoyancy", "salinity_field");
             String temperature_field = parameterManager.getParameter(BlockType.ACTION, "action.andres_buoyancy", "temperature_field");
             double time = getSimulationManager().getTimeManager().get_tO();

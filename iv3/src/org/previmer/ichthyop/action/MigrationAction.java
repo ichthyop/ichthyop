@@ -77,7 +77,7 @@ public class MigrationAction extends AbstractAction {
                     /** diel vertical migration */
                     depth = getDepth(particle.getX(), particle.getY());
                 } else {
-                    double length = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength();
+                    double length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength();
                     depth = getDepth(particle.getX(), particle.getY(), length);
                 }
             }

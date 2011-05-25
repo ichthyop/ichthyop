@@ -2,14 +2,13 @@ package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.arch.IAndresBuoyantParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IGrowingParticle;
-import org.previmer.ichthyop.arch.IGrowingParticle.Stage;
 import org.previmer.ichthyop.io.SalinityTracker;
 import org.previmer.ichthyop.io.SpecificGravityTracker;
 import org.previmer.ichthyop.io.TemperatureTracker;
 import org.previmer.ichthyop.io.WaterDensityTracker;
 import org.previmer.ichthyop.particle.AndresBuoyantParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
 
 /**
  *
@@ -101,7 +100,7 @@ public class AndresBuoyancyAction extends AbstractAction {
 
          boolean canApplyBuoyancy = false;
         if (isGrowth) {
-            canApplyBuoyancy = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
+            canApplyBuoyancy = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
         } else {
             canApplyBuoyancy = particle.getAge() < maximumAge;
         }
