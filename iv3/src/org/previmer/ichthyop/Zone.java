@@ -66,7 +66,7 @@ public class Zone extends SimulationManagerAccessor {
      */
     private Color color;
     private boolean enabledThickness;
-    private  boolean enabledBathyMask;
+    private boolean enabledBathyMask;
 
     public Zone(TypeZone type, String key, int index) {
         this.type = type;
@@ -180,6 +180,9 @@ public class Zone extends SimulationManagerAccessor {
     public boolean isParticleInZone(IBasicParticle particle) {
 
         boolean isInZone = true;
+        if (!getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {
+            return false;
+        }
         if (particle.getGridCoordinates().length > 2 && enabledThickness) {
             isInZone = isDepthInLayer(Math.abs(particle.getDepth()));
         }
@@ -196,12 +199,14 @@ public class Zone extends SimulationManagerAccessor {
     }
 
     public boolean isGridPointInZone(double x, double y) {
-        /*boolean isIn = true;
+        boolean isIn = true;
+        if (!getSimulationManager().getDataset().isInWater(new double[]{x, y})) {
+            return false;
+        }
         if (enabledBathyMask) {
             isIn = isXYBetweenBathyLines(x, y);
         }
-        return isIn && isXYInPolygon(x, y);*/
-        return isXYInPolygon(x, y);
+        return isIn && isXYInPolygon(x, y);
     }
 
     private boolean isXYBetweenBathyLines(double x, double y) {
@@ -213,11 +218,9 @@ public class Zone extends SimulationManagerAccessor {
 
     private boolean isXYInPolygon(double x, double y) {
 
-        boolean isInBox;
         int inc, crossings;
         double dx1, dx2, dxy;
 
-        isInBox = true;
         crossings = 0;
 
         for (int k = 0; k < polygon.size() - 1; k++) {
@@ -242,18 +245,8 @@ public class Zone extends SimulationManagerAccessor {
                 }
             }
         }
-        if (crossings == 0) {
-            isInBox = false;
-        }
 
-        if (isInBox) {
-            isInBox = (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
-                    > inshoreLine
-                    & getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
-                    < offshoreLine);
-        }
-
-        return (isInBox);
+        return (crossings != 0);
     }
 
     /**

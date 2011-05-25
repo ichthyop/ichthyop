@@ -76,8 +76,16 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
         return getChildTextNormalize(KEY);
     }
 
+    void setKey(String key) {
+        getChild(KEY).setText(key);
+    }
+
     public String getTreePath() {
         return getChildTextNormalize(TREEPATH);
+    }
+
+    public void setTreePath(String treePath) {
+        getChild(TREEPATH).setText(treePath);
     }
 
     public boolean isEnabled() {
@@ -123,6 +131,13 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
             }
         }
         return lmap;
+    }
+
+    public void addXParameter(XParameter xparam) {
+        if (!map.containsKey(xparam.getKey())) {
+            getChild(PARAMETERS).addContent(xparam.detach());
+            map = createMap();
+        }
     }
 
     private ArrayList<XParameter> readParameters() {

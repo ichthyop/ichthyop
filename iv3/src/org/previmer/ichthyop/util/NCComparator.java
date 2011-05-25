@@ -1,14 +1,10 @@
 package org.previmer.ichthyop.util;
 
-/** import java.util */
+/** imports */
 import java.util.Comparator;
 
-/** import java.io */
-import java.io.IOException;
-
-/** import netcdf */
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.ma2.Array;
+import ucar.nc2.NetcdfFile;
 
 /**
  * A comparison function of two netcdf files for chronological order.
@@ -18,13 +14,11 @@ import ucar.ma2.Array;
  *
  * @author P.Verley
  */
-
 public class NCComparator implements Comparator<String> {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
     /**
      * The name of the time variable to be read in the netcdf files.
      */
@@ -33,7 +27,6 @@ public class NCComparator implements Comparator<String> {
 ///////////////
 // Constructors
 ///////////////
-
     /**
      * Constructs a new netcdf file comparator.
      *
@@ -44,11 +37,9 @@ public class NCComparator implements Comparator<String> {
         this.strTime = strTime;
     }
 
-
 ///////////////////////////
 // Definition of the method
 ///////////////////////////
-
     /**
      * Compares two netcdf files for chronological order.
      *
@@ -64,25 +55,20 @@ public class NCComparator implements Comparator<String> {
 
         Double n1 = new Double(0);
         Double n2 = new Double(0);
-        Array timeArr;
+        NetcdfFile ncdf;
         try {
-            timeArr = NetcdfDataset.openFile(nc1,
-                                             null).findVariable(strTime).read();
-            n1 = timeArr.getDouble(timeArr.getIndex().set(0));
-            timeArr = NetcdfDataset.openFile(nc2,
-                                             null).findVariable(strTime).read();
-            n2 = timeArr.getDouble(timeArr.getIndex().set(0));
-        } catch (IOException e) {
-            //e.printStackTrace();
-            return 0;
-        } catch (NullPointerException e) {
+            ncdf = NetcdfDataset.openFile(nc1, null);
+            n1 = ncdf.findVariable(strTime).read(new int[]{0}, new int[]{1}).getDouble(0);
+            ncdf.close();
+            ncdf = NetcdfDataset.openFile(nc2, null);
+            n2 = ncdf.findVariable(strTime).read(new int[]{0}, new int[]{1}).getDouble(0);
+            ncdf.close();
+        } catch (Exception e) {
             //e.printStackTrace();
             return 0;
         }
-        timeArr = null;
 
         return n1.compareTo(n2);
     }
-
     //---------- End of class
 }

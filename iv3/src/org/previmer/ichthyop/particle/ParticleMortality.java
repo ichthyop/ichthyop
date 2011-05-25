@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.previmer.ichthyop.particle;
 
 /**
@@ -39,9 +38,18 @@ public enum ParticleMortality {
         return code;
     }
 
+    public static ParticleMortality getMortality(int code) {
+
+        for (ParticleMortality mortality : ParticleMortality.values()) {
+            if (code == mortality.getCode()) {
+                return mortality;
+            }
+        }
+        return ALIVE;
+    }
+
     @Override
     public String toString() {
         return name().toLowerCase();
     }
-
 }

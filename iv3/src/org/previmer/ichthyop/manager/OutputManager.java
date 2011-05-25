@@ -12,12 +12,10 @@ import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.arch.IOutputManager;
 import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.util.logging.Level;
 import ucar.nc2.NetcdfFileWriteable;
-import org.previmer.ichthyop.arch.ITimeManager;
 import org.previmer.ichthyop.arch.ITracker;
 import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
@@ -26,6 +24,7 @@ import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.LatTracker;
@@ -44,7 +43,7 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public class OutputManager extends AbstractManager implements IOutputManager, LastStepListener {
+public class OutputManager extends AbstractManager implements LastStepListener, NextStepListener {
 
     final private static OutputManager outputManager = new OutputManager();
     private final static String block_key = "app.output";
@@ -279,16 +278,24 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         final List<GeoPosition> lregion = new ArrayList<GeoPosition>();
         IDataset dataset = getSimulationManager().getDataset();
         for (int i = 1; i < dataset.get_nx(); i++) {
-            lregion.add(new GeoPosition(dataset.getLat(i, 0), dataset.getLon(i, 0)));
+            if (!Double.isNaN(dataset.getLat(i, 0)) && !Double.isNaN(dataset.getLon(i, 0))) {
+                lregion.add(new GeoPosition(dataset.getLat(i, 0), dataset.getLon(i, 0)));
+            }
         }
         for (int j = 1; j < dataset.get_ny(); j++) {
-            lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), dataset.getLon(dataset.get_nx() - 1, j)));
+            if (!Double.isNaN(dataset.getLat(dataset.get_nx() - 1, j)) && !Double.isNaN(dataset.getLon(dataset.get_nx() - 1, j))) {
+                lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), dataset.getLon(dataset.get_nx() - 1, j)));
+            }
         }
         for (int i = dataset.get_nx() - 1; i > 0; i--) {
-            lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), dataset.getLon(i, dataset.get_ny() - 1)));
+            if (!Double.isNaN(dataset.getLat(i, dataset.get_ny() - 1)) && !Double.isNaN(dataset.getLon(i, dataset.get_ny() - 1))) {
+                lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), dataset.getLon(i, dataset.get_ny() - 1)));
+            }
         }
         for (int j = dataset.get_ny() - 1; j > 0; j--) {
-            lregion.add(new GeoPosition(dataset.getLat(0, j), dataset.getLon(0, j)));
+            if (!Double.isNaN(dataset.getLat(0, j)) && !Double.isNaN(dataset.getLon(0, j))) {
+                lregion.add(new GeoPosition(dataset.getLat(0, j), dataset.getLon(0, j)));
+            }
         }
         return lregion;
     }
@@ -409,7 +416,7 @@ public class OutputManager extends AbstractManager implements IOutputManager, La
         if (e.isInterrupted()) {
             return;
         }
-        ITimeManager timeManager = e.getSource();
+        TimeManager timeManager = e.getSource();
         if (((timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
             writeToNetCDF(i_record++);
         }

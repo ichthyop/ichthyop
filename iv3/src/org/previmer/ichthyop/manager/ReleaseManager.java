@@ -12,19 +12,19 @@ import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.arch.IReleaseProcess;
-import org.previmer.ichthyop.arch.IReleaseManager;
 import org.previmer.ichthyop.event.ReleaseListener;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
+import org.previmer.ichthyop.event.NextStepListener;
 
 /**
  *
  * @author pverley
  */
-public class ReleaseManager extends AbstractManager implements IReleaseManager {
+public class ReleaseManager extends AbstractManager implements ReleaseListener, NextStepListener {
 
     private static final ReleaseManager releaseManager = new ReleaseManager();
     private IReleaseProcess releaseProcess;
@@ -37,7 +37,7 @@ public class ReleaseManager extends AbstractManager implements IReleaseManager {
     /** */
     private EventListenerList listeners = new EventListenerList();
 
-    public static IReleaseManager getInstance() {
+    public static ReleaseManager getInstance() {
         return releaseManager;
     }
 

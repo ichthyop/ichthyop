@@ -18,10 +18,8 @@ package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.arch.IBasicParticle;
 import java.util.Iterator;
-import org.previmer.ichthyop.arch.IGrowingParticle;
-import org.previmer.ichthyop.arch.IGrowingParticle.Stage;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
-import org.previmer.ichthyop.particle.ParticleMortality;
+import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
@@ -48,7 +46,7 @@ public class StageTracker extends AbstractTracker {
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            IGrowingParticle gParticle = (IGrowingParticle) particle.getLayer(GrowingParticleLayer.class);
+            GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
             getArray().set(0, particle.getIndex(), gParticle.getStage().getCode());
         }
     }

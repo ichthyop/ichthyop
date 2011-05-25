@@ -7,15 +7,14 @@ package org.previmer.ichthyop.particle;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IMasterParticle;
-import org.previmer.ichthyop.arch.IZoneParticle;
 
 /**
  *
  * @author pverley
  */
-public class ParticleFactory {
+public class ParticleFactory extends SimulationManagerAccessor {
 
-    public static IBasicParticle createParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
+    public static IBasicParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
 
         IMasterParticle particle = new MasterParticle();
         particle.setIndex(index);
@@ -29,7 +28,12 @@ public class ParticleFactory {
             }
             particle.geo2Grid();
             if (!particle.isInWater() || particle.isOnEdge()) {
-                particle.kill(ParticleMortality.OUT_OF_DOMAIN);
+                return null;
+            }
+            if (!Double.isNaN(depth)) {
+                if (getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0) > depth || depth > 0) {
+                    return null;
+                }
             }
         } else {
             particle.kill(mortality);
@@ -37,55 +41,37 @@ public class ParticleFactory {
         return particle;
     }
 
-    public static IBasicParticle createParticle(int index, double lon, double lat, double depth) {
-        return createParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
+    public static IBasicParticle createGeoParticle(int index, double lon, double lat, double depth) {
+        return createGeoParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
     }
 
-    public static IBasicParticle createParticle(int index, double lon, double lat) {
-        return createParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
+    public static IBasicParticle createGeoParticle(int index, double lon, double lat) {
+        return createGeoParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
     }
 
-    public static IBasicParticle createParticle(int index, double xmin, double xmax, double ymin, double ymax, double upDepth, double lowDepth) {
-
-        int DROP_MAX = 2000;
-        /** Constructs a new Particle */
+    public static IBasicParticle createGridParticle(int index, double x, double y, double depth) {
         IMasterParticle particle = new MasterParticle();
         particle.setIndex(index);
-        boolean is3D = !Double.isNaN(upDepth);
-        if (!is3D) {
+        particle.setX(x);
+        particle.setY(y);
+        particle.setDepth(depth);
+        if (Double.isNaN(depth)) {
             particle.make2D();
         }
-
-        boolean outZone = true;
-        double x = 0, y = 0, depth = 0;
-        int counter = 0;
-        /** Attempts of random release */
-        while (outZone) {
-            x = xmin + Math.random() * (xmax - xmin);
-            y = ymin + Math.random() * (ymax - ymin);
-            particle.setX(x);
-            particle.setY(y);
-            if (is3D) {
-                depth = -1.D * (upDepth + Math.random() * (lowDepth - upDepth));
-                //System.out.println("x " + x + " y " + y + " depth " + depth);
-                particle.setDepth(depth);
-                particle.geo2Grid();
-            }
-            //System.out.println("x " + x + " y " + y + " depth " + depth);
-            //System.out.println("water " + particle.isInWater() + " edge " + particle.isOnEdge());
-            //System.out.println(index + " - num zone " + ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE));
-            int numReleaseZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
-            outZone = !particle.isInWater() || (numReleaseZone == -1) || particle.isOnEdge();
-
-            if (counter++ > DROP_MAX) {
-                throw new NullPointerException("Unable to release particle. Check out the zone definitions.");
+        if (!particle.isInWater() || particle.isOnEdge()) {
+            return null;
+        }
+        if (!Double.isNaN(depth)) {
+            if (getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0) > depth || depth > 0) {
+                return null;
             }
         }
-
-        /** initialises */
-        particle.geo2Grid();
+        int numReleaseZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
+        if (numReleaseZone == -1) {
+            return null;
+        }
         particle.grid2Geo();
-
+        particle.geo2Grid();
         return particle;
     }
 }

@@ -109,6 +109,12 @@ public class GridPoint extends SimulationManagerAccessor {
         exclusivityV = false;
     }
 
+    public double[] getMove() {
+        return is3D
+                ? new double[]{dx, dy, dz}
+                : new double[]{dx, dy};
+    }
+
     /**
      * Increments (x, y, z) with (dx, dy, dz) if 3 dimensions move.
      * Increments (x, y) with (dx, dy) if 2 dimensions move.

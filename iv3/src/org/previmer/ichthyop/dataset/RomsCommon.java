@@ -180,7 +180,17 @@ abstract class RomsCommon extends AbstractDataset {
             list.add(file.toString());
         }
         if (list.size() > 1) {
-            Collections.sort(list, new NCComparator(strTime));
+            boolean skipSorting = false;
+            try {
+                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
+            } catch (Exception ex) {
+                skipSorting = false;
+            }
+            if (skipSorting) {
+                Collections.sort(list);
+            } else {
+                Collections.sort(list, new NCComparator(strTime));
+            }
         }
         return list;
     }
@@ -246,13 +256,13 @@ abstract class RomsCommon extends AbstractDataset {
         Array timeArr;
         try {
             timeArr = ncIn.findVariable(strTime).read();
-            time_rank = skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
             while (time >= time_rank) {
                 if (time_arrow < 0 && time == time_rank) {
                     break;
                 }
                 lrank++;
-                time_rank = skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
@@ -296,8 +306,8 @@ abstract class RomsCommon extends AbstractDataset {
             filename = listInputFiles.get(index);
             nc = NetcdfDataset.openFile(filename, null);
             timeArr = nc.findVariable(strTime).read();
-            time_r0 = skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
+            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
+            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
             nc.close();
 
             return (time >= time_r0 && time < time_rf);
@@ -331,8 +341,7 @@ abstract class RomsCommon extends AbstractDataset {
                 filename = listInputFiles.get(index + i);
                 nc = NetcdfDataset.openFile(filename, null);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = skipSeconds(
-                        timeArr.getLong(timeArr.getIndex().set(0)));
+                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
                 nc.close();
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
@@ -716,7 +725,9 @@ abstract class RomsCommon extends AbstractDataset {
 
     void open(String filename) throws IOException {
         if (ncIn == null || (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
-
+            if (ncIn != null) {
+                ncIn.close();
+            }
             try {
                 ncIn = NetcdfDataset.openFile(filename, null);
             } catch (Exception ex) {
@@ -812,10 +823,6 @@ abstract class RomsCommon extends AbstractDataset {
         nx = Math.min(nx, ipn - ipo + 1);
         ny = Math.min(ny, jpn - jpo + 1);
         //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
-    }
-
-    private long skipSeconds(long time) {
-        return time - time % 60L;
     }
 
     /**

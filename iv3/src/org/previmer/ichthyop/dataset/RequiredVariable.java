@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.IDataset;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -65,7 +64,7 @@ public class RequiredVariable {
         return requiredByList;
     }
 
-    private ISimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 

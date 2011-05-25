@@ -2,7 +2,7 @@
 <icstructure>
     <long_name>MARS 3D Opendap Manga Ichthyop configuration file</long_name>
     <description>Predefined parameters to connect MARS dataset with OpenDAP for the Bay of Biscay http://www.previmer.org/previsions/courants/modele_mars3d_manche_gascogne</description>
-    <version>3.0b</version>
+    <version>3.1</version>
     <block type="option">
         <tree_path>Main/Time</tree_path>
         <key>app.time</key>
@@ -68,6 +68,24 @@
         </parameters>
     </block>
     <block type="option">
+        <tree_path>Advanced/Transport/General</tree_path>
+        <key>app.transport</key>
+        <description>Set the general transport options of the simulation.</description>
+        <parameters>
+            <parameter>
+                <key>coastline_behavior</key>
+                <long_name>Coastline behavior</long_name>
+                <value>Beaching</value>
+                <default>Beaching</default>
+                <format>combo</format>
+                <accepted>Beaching</accepted>
+                <accepted>Bouncing</accepted>
+                <accepted>Standstill</accepted>
+                <description>Determines what should be the behavior of a particle in case a move would take it inland : either it stands still, either it beaches, either it bounces on the coasline as a billiard ball.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="option">
         <key>app.output</key>
         <description>Block of options that controls the record of the particle tracks in NetCDF ouput files.</description>
         <tree_path>Main/Output</tree_path>
@@ -112,7 +130,7 @@
             <parameter>
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
-                <value>http://www.ifremer.fr/thredds3/standard/dodsC/PREVIMER_F1-MARS3D-MANGA_FULL_TIME_SERIE</value>
+                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
                 <description>Folder containing the MARS NetCDF files.</description>
             </parameter>
             <parameter>
@@ -214,6 +232,27 @@
                 <long_name>Ocean sigma coordinate</long_name>
                 <value>level</value>
                 <description>Set the name of the corresponding NetCDF variable.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_hc</key>
+                <long_name>HC</long_name>
+                <value>hc</value>
+                <default>hc</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_a</key>
+                <long_name>Surface control parameter</long_name>
+                <value>theta</value>
+                <default>theta</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_b</key>
+                <long_name>Surface control parameter</long_name>
+                <value>b</value>
+                <default>b</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter hidden="true">
                 <key>field_var_temp</key>
@@ -913,8 +952,8 @@
         </parameters>
     </block>
     <block type="action">
-        <key>action.recruitment</key>
-        <tree_path>Advanced/Biology/Recruitment</tree_path>
+        <key>action.recruitment.zone</key>
+        <tree_path>Advanced/Biology/Recruitment/In zones</tree_path>
         <enabled>false</enabled>
         <description>Block of options for defining some recruitment criterions and recruitment zones, in order to study, for instance, the recruitment success of a particular geographic area. First time you enable the recruitment process, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
         <parameters>
@@ -989,8 +1028,120 @@
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
-                <value>org.previmer.ichthyop.action.RecruitmentAction</value>
-                <default>org.previmer.ichthyop.action.RecruitmentAction</default>
+                <value>org.previmer.ichthyop.action.RecruitmentZoneAction</value>
+                <default>org.previmer.ichthyop.action.RecruitmentZoneAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>highest</value>
+                <default>highest</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.recruitment.stain</key>
+        <tree_path>Advanced/Biology/Recruitment/In stain</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options for defining some recruitment criterions and a recruitment stain, in order to study, for instance, the recruitment success of a particular geographic area.</description>
+        <parameters>
+            <parameter>
+                <key>criterion</key>
+                <long_name>Recruitment criterion</long_name>
+                <value>Age criterion</value>
+                <default>Age criterion</default>
+                <format>combo</format>
+                <accepted>Age criterion</accepted>
+                <accepted>Length criterion</accepted>
+                <default>Age criterion</default>
+                <description>Select the type of criterion the application should use to check wheter a particle has been recruited or not. When the growth process is idle, you must use the age based criterion (otherwise application will crash). When growth is taken into account the criterion might also be a minimal length threshold.</description>
+            </parameter>
+            <parameter>
+                <key>limit_age</key>
+                <long_name>Recruitment limit age [day]</long_name>
+                <value>7.0</value>
+                <default>7.0</default>
+                <format>float</format>
+                <description>A particle must be "older" than the specified age [day] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle length.</description>
+            </parameter>
+            <parameter>
+                <key>limit_length</key>
+                <long_name>Recruitment limit length [millimeter]</long_name>
+                <value>6.0</value>
+                <default>6.0</default>
+                <format>float</format>
+                <description>A particle must be "bigger" than the specified length [millimeter] to be considered as recruitable. This parameter is ignored if the recruitment criterion is based on the particle age. Only use this criterion if the growth model is activated.</description>
+            </parameter>
+            <parameter>
+                <key>stop_moving</key>
+                <long_name>Stop moving when recruited</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Force a particle to remain where it is as soon as it is recruited. If activated, the particle could not be recruited in any other recruitment area. On the contrary, a particle that does not stop moving when recruited can keep drifting and being recruited in others recruitment areas, as long as the recruitement conditions are fulfilled.</description>
+            </parameter>
+            <parameter>
+                <key>lon_stain</key>
+                <long_name>Longitude [East degree]</long_name>
+                <value>-5.5</value>
+                <default>-5.5</default>
+                <format>lonlat</format>
+                <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
+            </parameter>
+            <parameter>
+                <key>lat_stain</key>
+                <long_name>Latitude [North degree]</long_name>
+                <value>48.4</value>
+                <default>48.4</default>
+                <format>lonlat</format>
+                <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
+            </parameter>
+            <parameter>
+                <key>depth_stain</key>
+                <long_name>Depth [meter]</long_name>
+                <value>-20.0</value>
+                <default>-20.0</default>
+                <format>float</format>
+                <description>Depth [meter] of the stain. The parameter is ignored for 2D simulation. Positive depth is automatically converted by the application (depth = -depth)</description>
+            </parameter>
+            <parameter>
+                <key>radius_stain</key>
+                <long_name>Radius of the stain [meter]</long_name>
+                <value>2000.0</value>
+                <default>2000.0</default>
+                <format>float</format>
+                <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
+            </parameter>
+            <parameter>
+                <key>thickness_stain</key>
+                <long_name>Thickness of the stain [meter]</long_name>
+                <value>10.0</value>
+                <default>10.0</default>
+                <format>float</format>
+                <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>recruited_tracker</key>
+                <long_name>Track recruitment status</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "recruited" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.RecruitmentStainAction</value>
+                <default>org.previmer.ichthyop.action.RecruitmentStainAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>

@@ -34,7 +34,6 @@ import org.jdesktop.application.Task;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
@@ -423,7 +422,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
     }
 
-    public ISimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 

@@ -15,6 +15,7 @@ import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
@@ -78,7 +79,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
 
         ArrayFloat.D2 lonArr = (ArrayFloat.D2) nc.findVariable("lon").read();
         ArrayFloat.D2 latArr = (ArrayFloat.D2) nc.findVariable("lat").read();
-        //ArrayInt.D2 deathArr = (ArrayInt.D2) nc.findVariable("death").read();
+        ArrayInt.D2 mortalityArr = (ArrayInt.D2) nc.findVariable("mortality").read();
         boolean bln3D = getSimulationManager().getDataset().is3D();
         ArrayFloat.D2 depthArr = null;
         if (bln3D) {
@@ -88,7 +89,6 @@ public class NcFileRelease extends AbstractReleaseProcess {
         IBasicParticle particle;
         int nb_particles = lonArr.getShape()[1];
 
-        boolean living;
         for (int i = 0; i < nb_particles; i++) {
 
             if (x == 0.f) {
@@ -108,9 +108,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
                 }
             }
 
-            //living = (deathArr.get(rank, i) == Constant.DEAD_NOT);
-            living = true;
-            particle = ParticleFactory.createParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
+            particle = ParticleFactory.createGeoParticle(index, lon, lat, depth, ParticleMortality.getMortality(mortalityArr.get(rank, i)));
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
         }

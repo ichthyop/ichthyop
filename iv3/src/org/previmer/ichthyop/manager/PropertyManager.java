@@ -4,7 +4,6 @@
  */
 package org.previmer.ichthyop.manager;
 
-import org.previmer.ichthyop.arch.IPropertyManager;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -14,7 +13,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class PropertyManager implements IPropertyManager {
+public class PropertyManager {
 
     private static final Logger logger = Logger.getLogger(PropertyManager.class.getName());
     private final Class myClass;

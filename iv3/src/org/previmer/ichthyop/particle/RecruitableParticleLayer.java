@@ -6,13 +6,12 @@ package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IRecruitableParticle;
 
 /**
  *
  * @author pverley
  */
-    public class RecruitableParticleLayer extends ParticleLayer implements IRecruitableParticle {
+    public class RecruitableParticleLayer extends ParticleLayer {
 
     public RecruitableParticleLayer(IBasicParticle particle) {
         super(particle);
@@ -27,7 +26,7 @@ import org.previmer.ichthyop.arch.IRecruitableParticle;
         numRecruitmentZone = -1;
         isRecruited = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT))
                 ? new boolean[getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT).size()]
-                : new boolean[0];
+                : new boolean[1];
     }
 
     public boolean isRecruited() {

@@ -6,11 +6,8 @@ package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IGrowingParticle;
-import org.previmer.ichthyop.arch.IRecruitableParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IZoneParticle;
-import org.previmer.ichthyop.io.RecruitmentTracker;
+import org.previmer.ichthyop.io.RecruitmentZoneTracker;
 import org.previmer.ichthyop.io.ZoneTracker;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
@@ -20,7 +17,7 @@ import org.previmer.ichthyop.particle.ZoneParticleLayer;
  *
  * @author pverley
  */
-public class RecruitmentAction extends AbstractAction {
+public class RecruitmentZoneAction extends AbstractAction {
 
     /**
      * Minimum duration [second] a particle has to spend within the same zone
@@ -60,7 +57,7 @@ public class RecruitmentAction extends AbstractAction {
             // do nothing and just add the tracker
         }
         if (addTracker) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentTracker.class);
+            getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentZoneTracker.class);
         }
         addTracker = true;
         try {
@@ -77,13 +74,13 @@ public class RecruitmentAction extends AbstractAction {
 
         //@todo
         // catch cast exception
-        IRecruitableParticle rParticle = (IRecruitableParticle) particle.getLayer(RecruitableParticleLayer.class);
+        RecruitableParticleLayer rParticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
         if (stopMovingOnceRecruited && rParticle.isRecruited()) {
             particle.lock();
             return;
         }
 
-        int numCurrentZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RECRUITMENT);
+        int numCurrentZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RECRUITMENT);
         if ((numCurrentZone != -1) && !rParticle.isRecruited(numCurrentZone)) {
 
             if (satisfyRecruitmentCriterion(particle)) {
@@ -101,7 +98,7 @@ public class RecruitmentAction extends AbstractAction {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
-            return (((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
+            return (((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
         }
     }
 

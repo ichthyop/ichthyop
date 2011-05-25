@@ -5,12 +5,11 @@
 package org.previmer.ichthyop.action;
 
 import java.text.SimpleDateFormat;
-import org.previmer.ichthyop.arch.IGrowingParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import java.util.Calendar;
 import java.util.Date;
-import org.previmer.ichthyop.arch.IGrowingParticle.Stage;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
 
 /**
  *
@@ -65,7 +64,7 @@ public class MigrationAction extends AbstractAction {
         if (!isGrowth) {
             isSatisfiedCriterion = particle.getAge() > minimumAge;
         } else {
-            isSatisfiedCriterion = ((IGrowingParticle) particle.getLayer(GrowingParticleLayer.class)).getStage() != Stage.EGG;
+            isSatisfiedCriterion = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() != Stage.EGG;
         }
 
         if (isSatisfiedCriterion) {

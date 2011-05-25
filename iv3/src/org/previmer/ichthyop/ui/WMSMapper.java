@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.mapviewer.TileFactory;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 import java.awt.Color;
 import java.awt.Font;
@@ -51,10 +50,10 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.previmer.ichthyop.arch.ITimeManager;
-import org.previmer.ichthyop.calendar.Calendar1900;
+import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.manager.TimeManager;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
@@ -192,9 +191,9 @@ public class WMSMapper extends JXMapKit {
             calendar = new ClimatoCalendar();
         } else {
             try {
-                calendar = new Calendar1900(vtime.findAttribute("origin").getStringValue(), ITimeManager.INPUT_DATE_FORMAT);
+                calendar = new InterannualCalendar(vtime.findAttribute("origin").getStringValue(), TimeManager.INPUT_DATE_FORMAT);
             } catch (ParseException ex) {
-                calendar = new Calendar1900();
+                calendar = new InterannualCalendar();
             }
         }
 
@@ -710,10 +709,6 @@ public class WMSMapper extends JXMapKit {
         return Math.max(Math.min(1.f, x), 0.f);
     }
 
-    public ISimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
-    }
-
     private double readTime(int index) {
         double timeD = 0.d;
         try {
@@ -901,7 +896,7 @@ public class WMSMapper extends JXMapKit {
 
         /** Creates a new instance of IchthyopTileFactory */
         public NasaTileFactory() {
-            super(new TileFactoryInfo(8, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+            super(new TileFactoryInfo(4, 15, 17, 300, true, true, "", "x", "y", "zoom") {
 
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
@@ -942,7 +937,7 @@ public class WMSMapper extends JXMapKit {
 
         /** Creates a new instance of IchthyopTileFactory */
         public MGDSTileFactory() {
-            super(new TileFactoryInfo(8, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+            super(new TileFactoryInfo(4, 15, 17, 300, true, true, "", "x", "y", "zoom") {
 
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
@@ -959,7 +954,7 @@ public class WMSMapper extends JXMapKit {
 
         /** Creates a new instance of IchthyopTileFactory */
         public DemisTileFactory() {
-            super(new TileFactoryInfo(6, 14, 17, 300, true, true, "", "x", "y", "zoom") {
+            super(new TileFactoryInfo(4, 15, 17, 300, true, true, "", "x", "y", "zoom") {
 
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {

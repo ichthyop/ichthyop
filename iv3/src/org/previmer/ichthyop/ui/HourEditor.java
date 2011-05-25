@@ -34,8 +34,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DateFormatter;
 import javax.swing.text.DefaultFormatterFactory;
-import org.previmer.ichthyop.arch.ISimulationManager;
-import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -136,10 +134,6 @@ public class HourEditor extends DefaultCellEditor {
             return true;
         }
         return false;
-    }
-
-    public ISimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
     }
 
 }

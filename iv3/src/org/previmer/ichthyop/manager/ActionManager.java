@@ -9,7 +9,6 @@ import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.action.AbstractAction;
-import org.previmer.ichthyop.arch.IActionManager;
 import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
@@ -18,16 +17,21 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import org.previmer.ichthyop.action.SysActionAgeMonitoring;
+import org.previmer.ichthyop.action.SysActionMove;
 import org.previmer.ichthyop.arch.IAction;
+import org.previmer.ichthyop.arch.IMasterParticle;
+import org.previmer.ichthyop.arch.ISysAction;
 
 /**
  *
  * @author pverley
  */
-public class ActionManager extends AbstractManager implements IActionManager, SetupListener {
+public class ActionManager extends AbstractManager implements SetupListener {
 
     final private static ActionManager actionManager = new ActionManager();
     private HashMap<String, IAction> actionMap;
+    private List<ISysAction> sysActionList;
 
     public static ActionManager getInstance() {
         return actionManager;
@@ -59,6 +63,30 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         }
     }
 
+    private void implementSysActions() throws InstantiationException {
+
+        sysActionList = new ArrayList();
+
+        sysActionList.add(new SysActionAgeMonitoring());
+        sysActionList.add(new SysActionMove());
+
+        for (ISysAction sysaction : sysActionList) {
+            try {
+                sysaction.loadParameters();
+                getLogger().info("Instantiated system action \"" + sysaction.getClass().getCanonicalName() + "\"");
+            } catch (Exception ex) {
+                StringBuffer msg = new StringBuffer();
+                msg.append("Failed to setup system action ");
+                msg.append(sysaction.getClass().getCanonicalName());
+                msg.append("\n");
+                msg.append(ex.toString());
+                InstantiationException iex = new InstantiationException(msg.toString());
+                iex.setStackTrace(ex.getStackTrace());
+                throw iex;
+            }
+        }
+    }
+
     private List<AbstractAction> getSortedActions() {
         List<AbstractAction> actions = new ArrayList(actionMap.values());
         Collections.sort(actions, new ActionComparator());
@@ -77,8 +105,15 @@ public class ActionManager extends AbstractManager implements IActionManager, Se
         }
     }
 
+    public void executeSysActions(IMasterParticle particle) {
+        for (ISysAction sysaction : sysActionList) {
+            sysaction.execute(particle);
+        }
+    }
+
     public void setupPerformed(SetupEvent e) throws Exception {
         loadActions();
+        implementSysActions();
         getLogger().info("Action manager setup [OK]");
     }
 

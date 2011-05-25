@@ -3,14 +3,10 @@
  */
 package org.previmer.ichthyop.ui;
 
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
 import java.io.File;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -18,7 +14,6 @@ import javax.swing.JOptionPane;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
-import org.previmer.ichthyop.arch.ISimulationManager;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.ui.logging.LogLevel;
@@ -51,7 +46,7 @@ public class ExportMapsView extends FrameView {
         btnSave.getAction().setEnabled(false);
     }
 
-    public ISimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 

@@ -5,13 +5,12 @@
 
 package org.previmer.ichthyop.ui.param;
 
-import java.awt.Dimension;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.JFormattedTextField;
 import javax.swing.text.DateFormatter;
 import javax.swing.text.DefaultFormatterFactory;
-import org.previmer.ichthyop.calendar.Calendar1900;
+import org.previmer.ichthyop.calendar.InterannualCalendar;
 
 /**
  *
@@ -39,7 +38,7 @@ public class JDateTextField extends JFormattedTextField {
 ///////////////
 
     public JDateTextField() {
-        this(new Calendar1900());
+        this(new InterannualCalendar());
     }
 
     public JDateTextField(Calendar calendar) {

@@ -73,6 +73,13 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
 
     public void kill(ParticleMortality cause) {
 
+        /* The method is only called once per time-step.
+         * Therefore the first action to call method kill() will
+         * permanently set the death cause.
+         */
+        if (!living) {
+            return;
+        }
         this.deathCause = cause;
         living = false;
         setLon(Double.NaN);
@@ -102,25 +109,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
 
     public void step() {
 
-        if (!getSimulationManager().getTimeManager().keepDrifting() && getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
-            kill(ParticleMortality.OLD);
-            return;
-        }
-
         getSimulationManager().getActionManager().executeActions(this);
-
-        if (!isLocked()) {
-            applyMove();
-            if (isOnEdge()) {
-                kill(ParticleMortality.OUT_OF_DOMAIN);
-                return;
-            } else if (!isInWater()) {
-                kill(ParticleMortality.BEACHED);
-                return;
-            }
-            grid2Geo();
-        }
-        incrementAge();
-        unlock();
+        getSimulationManager().getActionManager().executeSysActions(this);
     }
 }

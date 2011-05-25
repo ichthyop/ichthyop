@@ -160,8 +160,8 @@ public class Roms2dDataset extends RomsCommon {
 
         try {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getFloat(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 60;
+            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
+            time_tp1 -= time_tp1 % 100;
             xTimeTp1 = null;
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());

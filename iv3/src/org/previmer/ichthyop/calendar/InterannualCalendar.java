@@ -21,7 +21,7 @@ import java.util.Calendar;
  * @see java.util.Calendar
  * @see java.util.GregorianCalendar
  */
-public class Calendar1900 extends Calendar {
+public class InterannualCalendar extends Calendar {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -29,7 +29,7 @@ public class Calendar1900 extends Calendar {
     /**
      * Origin of time
      */
-    int[] epoch_fields;
+    final private int[] epoch_fields;
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
@@ -40,8 +40,6 @@ public class Calendar1900 extends Calendar {
     public static final long ONE_WEEK = 7 * ONE_DAY;
     private static final int NUM_DAYS[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334}; // 0-based, for day-in-year
     private static final int LEAP_NUM_DAYS[] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}; // 0-based, for day-in-year
-    private static final int MONTH_LENGTH[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0-based
-    private static final int LEAP_MONTH_LENGTH[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0-based
 
 ///////////////
 // Constructors
@@ -50,8 +48,8 @@ public class Calendar1900 extends Calendar {
      * Constructs a Gregorian Calendar with origin of time
      * January 1, 1900 00:00:00.000 GMT.
      */
-    public Calendar1900() {
-        this(1900, JANUARY, 1);
+    public InterannualCalendar() {
+        this(1582, OCTOBER, 15, 0, 0);
     }
 
     /**
@@ -61,22 +59,22 @@ public class Calendar1900 extends Calendar {
      * @param month an int, the month origin
      * @param day an int, the day origin
      */
-    public Calendar1900(int year, int month, int day) {
+    public InterannualCalendar(int year, int month, int day, int hour, int minute) {
 
         epoch_fields = new int[FIELD_COUNT];
         fields = new int[FIELD_COUNT];
         setEpoch(YEAR, year);
         setEpoch(MONTH, month);
         setEpoch(DAY_OF_MONTH, day);
-        setEpoch(HOUR_OF_DAY, 0);
-        setEpoch(MINUTE, 0);
+        setEpoch(HOUR_OF_DAY, hour);
+        setEpoch(MINUTE, minute);
         setEpoch(SECOND, 0);
         setTimeInMillis(0);
     }
 
-    public Calendar1900(String origin, SimpleDateFormat dateFormat) throws ParseException {
+    public InterannualCalendar(String origin, SimpleDateFormat dateFormat) throws ParseException {
 
-        Calendar cld = new Calendar1900();
+        Calendar cld = new InterannualCalendar();
         dateFormat.setCalendar(cld);
         cld.setTime(dateFormat.parse(origin));
         epoch_fields = new int[FIELD_COUNT];
@@ -131,23 +129,25 @@ public class Calendar1900 extends Calendar {
         int rawYear, year, month, dayOfMonth, dayOfYear;
         boolean isLeap;
         long timeInDay = millisToDay(time);
-        int n400, n4, n1;
 
         long timeInDay_o = timeInDay + (isLeap(epoch_fields[YEAR])
-                ? LEAP_NUM_DAYS[epoch_fields[MONTH]]
-                + epoch_fields[DAY_OF_MONTH] - 1
-                : NUM_DAYS[epoch_fields[MONTH]]
-                + epoch_fields[DAY_OF_MONTH] - 1);
+                ? LEAP_NUM_DAYS[epoch_fields[MONTH]] + epoch_fields[DAY_OF_MONTH] - 1
+                : NUM_DAYS[epoch_fields[MONTH]] + epoch_fields[DAY_OF_MONTH] - 1);
 
-        n400 = (int) (timeInDay_o / 146097);
-        dayOfYear = (int) (timeInDay_o % 146097);
-        n4 = dayOfYear / 1461;
-        dayOfYear %= 1461;
-        n1 = dayOfYear / 365;
-        dayOfYear %= 365; // zero-based day of year
-        rawYear = 400 * n400 + 4 * n4 + n1;
-        rawYear += epoch_fields[YEAR];
-
+        long nbDays = 0;
+        int currentYear = epoch_fields[YEAR];
+        while (nbDays < timeInDay_o) {
+            nbDays += isLeap(currentYear)
+                    ? 366
+                    : 365;
+            currentYear++;
+        }
+        --currentYear;
+        nbDays -= isLeap(currentYear)
+                ? 366
+                : 365;
+        rawYear = (int) currentYear;
+        dayOfYear = (int) (timeInDay_o - nbDays);
         isLeap = isLeap(rawYear);
 
         if (dayOfYear > (isLeap ? 365 : 364)) {
@@ -162,8 +162,7 @@ public class Calendar1900 extends Calendar {
         }
 
         month = (12 * (dayOfYear + correction) + 6) / 367; // zero-based month
-        dayOfMonth = dayOfYear
-                - (isLeap ? LEAP_NUM_DAYS[month] : NUM_DAYS[month]) + 1; // one-based DOM
+        dayOfMonth = dayOfYear - (isLeap ? LEAP_NUM_DAYS[month] : NUM_DAYS[month]) + 1; // one-based DOM
 
         year = rawYear;
         set(YEAR, year);
@@ -204,7 +203,6 @@ public class Calendar1900 extends Calendar {
      */
     protected void computeTime() {
 
-        int n400, n4, n1;
         int yearOn = fields[YEAR];
         int monthOn = fields[MONTH];
         boolean isLeap = isLeap(yearOn);
@@ -216,14 +214,11 @@ public class Calendar1900 extends Calendar {
         } catch (Exception ex) {
         }
 
-        int deltaYear = yearOn - epoch_fields[YEAR];
-
-        n400 = (int) (deltaYear / 400);
-        deltaYear = (int) (deltaYear % 400);
-        n4 = (int) (deltaYear / 4);
-        n1 = deltaYear % 4;
-
-        time2Day += (long) (n400 * 146097L + n4 * 1461L + n1 * 365L);
+        for (int incYear = epoch_fields[YEAR]; incYear < yearOn; incYear++) {
+            time2Day += isLeap(incYear)
+                    ? 366
+                    : 365;
+        }
 
         time2Day -= (epoch_fields[DAY_OF_MONTH] - 1);
         time2Day -= isLeap(epoch_fields[YEAR])

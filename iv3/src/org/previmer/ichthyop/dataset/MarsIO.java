@@ -39,18 +39,18 @@ public class MarsIO extends SimulationManagerAccessor {
         strTime = timeField;
     }
 
-    static NetcdfFile openLocation(String rawPath, String fileMask) throws IOException {
+    static NetcdfFile openLocation(String rawPath, String fileMask, boolean skipSorting) throws IOException {
 
         String path = IOTools.resolvePath(rawPath);
 
         if (!isDirectory(path)) {
             throw new IOException("{Dataset} " + rawPath + " is not a valid directory.");
         }
-        listInputFiles = getInputList(path, fileMask);
+        listInputFiles = getInputList(path, fileMask, skipSorting);
         return openFile(listInputFiles.get(0));
     }
 
-    static ArrayList<String> getInputList(String path, String fileMask) throws IOException {
+    private static ArrayList<String> getInputList(String path, String fileMask, boolean skipSorting) throws IOException {
 
         ArrayList<String> list = null;
 
@@ -64,7 +64,11 @@ public class MarsIO extends SimulationManagerAccessor {
             list.add(file.toString());
         }
         if (list.size() > 1) {
-            Collections.sort(list, new NCComparator(strTime));
+            if (skipSorting) {
+                Collections.sort(list);
+            } else {
+                Collections.sort(list, new NCComparator(strTime));
+            }
         }
         return list;
     }
@@ -121,6 +125,8 @@ public class MarsIO extends SimulationManagerAccessor {
             time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
                     timeArr.getShape()[0] - 1)));
             nc.close();
+            timeArr = null;
+            nc = null;
 
             return (time >= time_r0 && time < time_rf);
             /*switch (time_arrow) {
@@ -153,13 +159,15 @@ public class MarsIO extends SimulationManagerAccessor {
                 timeArr = nc.findVariable(strTime).read();
                 time_nc[i] = DatasetUtil.skipSeconds(
                         timeArr.getLong(timeArr.getIndex().set(0)));
+                timeArr = null;
                 nc.close();
+                nc = null;
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
                 return true;
             }
-        } catch (IOException e) {
-            throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
+            //} catch (IOException e) {
+            //throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
             throw new IOException("{Dataset} Unable to read " + strTime
                     + " variable in file " + filename + " : " + e.getCause());

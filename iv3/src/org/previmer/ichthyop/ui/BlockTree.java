@@ -21,10 +21,8 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
-import org.previmer.ichthyop.arch.IParameterManager;
-import org.previmer.ichthyop.arch.ISimulationManager;
-import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.manager.ParameterManager;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -102,7 +100,7 @@ public class BlockTree extends JTree {
         return null;
     }
 
-    public void writeStructure(IParameterManager manager) {
+    public void writeStructure(ParameterManager manager) {
         for (Enumeration e1 = getRoot().postorderEnumeration(); e1.hasMoreElements();) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
             if (node.isLeaf()) {
@@ -297,7 +295,7 @@ public class BlockTree extends JTree {
         return null;
     }
 
-    private ISimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 

@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.EventObject;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,11 +52,13 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.CellEditorListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.TypeZone;
@@ -77,6 +80,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     /** Creates new form ZoneEditorPanel */
     public ZoneEditorPanel() {
         initComponents();
+        tablePolygon.setDefaultEditor(Float.class, new FloatEditor());
     }
 
     private void addChangeListeners(PropertyChangeListener pl, ActionListener al) {
@@ -644,7 +648,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlThickness.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlThickness.border.title"))); // NOI18N
         pnlThickness.setName("pnlThickness"); // NOI18N
 
-        txtFieldUpperDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat(""))));
+        txtFieldUpperDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
         txtFieldUpperDepth.setName("txtFieldUpperDepth"); // NOI18N
 
         ckBoxThickness.setText(resourceMap.getString("ckBoxThickness.text")); // NOI18N
@@ -661,7 +665,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblLowerDepth.setText(resourceMap.getString("lblLowerDepth.text")); // NOI18N
         lblLowerDepth.setName("lblLowerDepth"); // NOI18N
 
-        txtFieldLowerDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat(""))));
+        txtFieldLowerDepth.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
         txtFieldLowerDepth.setName("txtFieldLowerDepth"); // NOI18N
 
         javax.swing.GroupLayout pnlThicknessLayout = new javax.swing.GroupLayout(pnlThickness);
@@ -677,11 +681,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlThicknessLayout.createSequentialGroup()
                                 .addComponent(lblLowerDepth)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFieldLowerDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE))
+                                .addComponent(txtFieldLowerDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlThicknessLayout.createSequentialGroup()
                                 .addComponent(lblUpperDepth)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtFieldUpperDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE))))
+                                .addComponent(txtFieldUpperDepth, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE))))
                     .addComponent(ckBoxThickness))
                 .addContainerGap())
         );
@@ -739,8 +743,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                     .addComponent(ckBoxBathyMask))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlBathyMaskLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFieldOffshore, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)
-                    .addComponent(txtFieldInshore, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE))
+                    .addComponent(txtFieldOffshore, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
+                    .addComponent(txtFieldInshore, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlBathyMaskLayout.setVerticalGroup(
@@ -800,14 +804,14 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             pnlTypeZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlTypeZoneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(cbBoxType, 0, 265, Short.MAX_VALUE)
+                .addComponent(cbBoxType, 0, 280, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlTypeZoneLayout.setVerticalGroup(
             pnlTypeZoneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlTypeZoneLayout.createSequentialGroup()
                 .addComponent(cbBoxType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout pnlZoneLayout = new javax.swing.GroupLayout(pnlZone);
@@ -897,7 +901,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(rdBtnDegMinSec))
                     .addComponent(lblLonlat))
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addContainerGap(188, Short.MAX_VALUE))
         );
         pnlOptionLayout.setVerticalGroup(
             pnlOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -983,7 +987,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                         .addComponent(btnSaveAs)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 677, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 721, Short.MAX_VALUE)
                         .addComponent(btnHelp)))
                 .addContainerGap())
         );
