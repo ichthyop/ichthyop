@@ -5,14 +5,9 @@ http://www.previmer.org/ichthyop
 
 Ichthtyop is an individual based model that simulates Lagrangian transport of particles.
 
-Copyright (c) Philippe VERLEY 2006-2010
+Copyright (c) Philippe VERLEY 2006-2011
 
-Release: 3.0b (2010/07/08)
-
-++ For the next couple of months, Ichthyop will remain on beta version.
-++ It means the tool has been fully tested by the programmers and it would be now greatly
-++ appreciated having you as beta-tester. Please email any feedback, bug report, comment,
-++ congratulation, criticism, etc.
+Release: v3 - Customed version for CSIC
 
 Feedback & Bug reports: info@previmer.org
 
@@ -59,7 +54,7 @@ For details about the GNU General Public License, please see http://www.gnu.org/
 Description of files and folders
 
 % Files
-ichthyop-3.0beta.jar --> Ichthyop executable file
+ichthyop*.jar --> Ichthyop executable file
 readme.txt --> this document
 
 % Directories
