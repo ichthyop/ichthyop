@@ -1463,7 +1463,7 @@
         </parameters>
     </block>
     <block type="action">
-        <key>action.andres_buoyancy</key>
+        <key>action.buoyancy.andres</key>
         <description>Block of options that control the buoyancy process. Customized for Andres. This block can be enabled for 3D simulations only. It requires sea water salinity and sea water temperature fields to compute sea water density. Do not activate this process unless you know that the hydrodynamic dataset provides both variables.</description>
         <tree_path>Transport/Buoyancy Andres</tree_path>
         <enabled>false</enabled>
@@ -1546,11 +1546,97 @@
         </parameters>
     </block>
     <block type="action">
+        <key>action.buoyancy.ignacio</key>
+        <description>Block of options that control the buoyancy process. Customized for Ignacio. This block can be enabled for 3D simulations only. It requires sea water salinity and sea water temperature fields to compute sea water density. Do not activate this process unless you know that the hydrodynamic dataset provides both variables.</description>
+        <tree_path>Transport/Buoyancy Ignacio</tree_path>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>age_max</key>
+                <long_name>Maximum age [day]</long_name>
+                <value>3.0</value>
+                <format>float</format>
+                <default>3.0</default>
+                <description>Maximum age [day] for adding buoyancy effect to the particle. If the growth process is activated (see  Biology/Growth), this parameter is ignored by the application and the buoyancy only operates during the egg stage.</description>
+            </parameter>
+            <parameter>
+                <key>salinity_field</key>
+                <long_name>Salinity variable name</long_name>
+                <value>sal</value>
+                <default>salt</default>
+                <description>The name of the salinity variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>water_density_tracker</key>
+                <long_name>Track water density</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "water_density" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>temperature_tracker</key>
+                <long_name>Track temperature</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "temp" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>salinity_tracker</key>
+                <long_name>Track salinity</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "salt" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.IgnacioBuoyancyAction</value>
+                <default>org.previmer.ichthyop.action.IgnacioBuoyancyAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
         <key>action.migration</key>
         <description>Block of options to control the Diel Vertical Migration (DVM) process of larvae. Only operate for 3D simulation. We impose deterministic pattern in which organisms reside at different depths at daytime and night-time. User can choose the daytime depth and the night-time depth, in meters. If the growth procedure is activated then the DVM operates during the larvae stages (yolk-sac and feeding larva). If not it operates after a “minimum age”. Setting the daytime depth equal to the night-time depth, the pattern forces the motion of particles at a constant depth.</description>
         <tree_path>Transport/Vertical migration</tree_path>
         <enabled>false</enabled>
         <parameters>
+            <parameter>
+                <key>type</key>
+                <long_name>Type of migration</long_name>
+                <value>Based on sunset / sunrise</value>
+                <default>Based on sunset / sunrise</default>
+                <format>combo</format>
+                <accepted>Based on sunset / sunrise</accepted>
+                <accepted>Based on particle length</accepted>
+                <accepted>Based on both length and daytime / nightime</accepted>
+                <description>Set the type of migration. The "Based on particle length" and "Based on both length and daytime / nightime" migration can only be used if the growth module is enabled.</description>
+            </parameter>
             <parameter>
                 <key>daytime_depth</key>
                 <long_name>Depth at daytime [meter]</long_name>
@@ -1924,6 +2010,27 @@
             </parameter>
         </parameters>
     </block>
+    <block type="option">
+        <key>option.biology_dataset</key>
+        <tree_path>Biology/Biological dataset</tree_path>
+        <description>Block of options for setting up names of common NetCDF variable names used in biological functions, such as temperature and salinity.</description>
+        <parameters>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>salinity_field</key>
+                <long_name>Salinity variable name</long_name>
+                <value>salt</value>
+                <default>salt</default>
+                <description>The name of the salinity variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+        </parameters>
+    </block>
     <block type="action">
         <key>action.lethal_temp</key>
         <tree_path>Biology/Lethal temperature</tree_path>
@@ -1991,12 +2098,23 @@
         <description>Block of options for setting up the growth model. It simulates the growth in length of particles as a function of water temperature. Length increases linearly with time, at a growth rate that is a linear function of temperature: length(t + dt) = length(t) + (growth_coeff1 + growth_coeff2 * max(temp, threshold_temp)) * dt</description>
         <parameters>
             <parameter>
+                <key>type</key>
+                <long_name>Type of growth</long_name>
+                <value>Linear growth</value>
+                <default>Linear growth</default>
+                <format>combo</format>
+                <accepted>Linear growth</accepted>
+                <accepted>Equation based on particle stage</accepted>
+                <accepted>Food limitated</accepted>
+                <description>Set the type of growth.</description>
+            </parameter>
+            <parameter>
                 <key>coeff1</key>
                 <long_name>Growth coefficient 1</long_name>
                 <value>0.02</value>
                 <default>0.02</default>
                 <format>float</format>
-                <description>Value of the first coefficient of the growth function (detailed in the block description)</description>
+                <description>For type = Linear growth. Value of the first coefficient of the growth function (detailed in the block description)</description>
             </parameter>
             <parameter>
                 <key>coeff2</key>
@@ -2004,7 +2122,7 @@
                 <value>0.03</value>
                 <default>0.03</default>
                 <format>float</format>
-                <description>Value of the second coefficient of the growth function (detailed in the block description)</description>
+                <description>For type = Linear growth. Value of the second coefficient of the growth function (detailed in the block description)</description>
             </parameter>
             <parameter>
                 <key>threshold_temp</key>
@@ -2015,13 +2133,27 @@
                 <description>Threshold temperature [Celsius degree] for the sea water. It ensures that the particles keep growing with a minimum rate, though they are facing colder sea water.</description>
             </parameter>
             <parameter>
-                <key>temperature_field</key>
+                <key>largePhyto_field</key>
                 <long_name>Temperature variable name</long_name>
-                <value>temp</value>
-                <default>temp</default>
-                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+                <value>LARGE_PHYTO</value>
+                <default>LARGE_PHYTO</default>
+                <description>For type = Food limitated. The name of the large phytoplankton variable (case sensitive) in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
+                <key>smallZoo_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>SMALL_ZOO</value>
+                <default>SMALL_ZOO</default>
+                <description>For type = Food limitated. The name of the small zooplankton variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>largeZoo_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>LARGE_ZOO</value>
+                <default>LARGE_ZOO</default>
+                <description>For type = Food limitated. The name of the large zooplankton variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
                 <key>length_tracker</key>
                 <long_name>Track particle length</long_name>
                 <value>true</value>
@@ -2029,7 +2161,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "length" variable in the NetCDF output file.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>stage_tracker</key>
                 <long_name>Track particle biological stage</long_name>
                 <value>true</value>
@@ -2040,8 +2172,8 @@
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
-                <value>org.previmer.ichthyop.action.LinearGrowthAction</value>
-                <default>org.previmer.ichthyop.action.LinearGrowthAction</default>
+                <value>org.previmer.ichthyop.action.GrowthAction</value>
+                <default>org.previmer.ichthyop.action.GrowthAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>

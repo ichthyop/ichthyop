@@ -6,8 +6,7 @@ package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.arch.IBasicParticle;
 import java.util.Iterator;
-import org.previmer.ichthyop.arch.IAndresBuoyantParticle;
-import org.previmer.ichthyop.particle.AndresBuoyantParticleLayer;
+import org.previmer.ichthyop.particle.BuoyantParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
@@ -33,7 +32,7 @@ public class SpecificGravityTracker extends AbstractTracker {
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            IAndresBuoyantParticle gParticle = (IAndresBuoyantParticle) particle.getLayer(AndresBuoyantParticleLayer.class);
+            BuoyantParticleLayer gParticle = (BuoyantParticleLayer) particle.getLayer(BuoyantParticleLayer.class);
             getArray().set(0, particle.getIndex(), (float) gParticle.getSpecificGravity());
         }
     }

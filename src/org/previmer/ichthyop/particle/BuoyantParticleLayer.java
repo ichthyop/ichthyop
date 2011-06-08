@@ -2,7 +2,6 @@ package org.previmer.ichthyop.particle;
 
 import java.util.logging.Level;
 import org.previmer.ichthyop.action.BuoyancyAction;
-import org.previmer.ichthyop.arch.IAndresBuoyantParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.manager.ParameterManager;
@@ -11,7 +10,7 @@ import org.previmer.ichthyop.manager.ParameterManager;
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
-public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndresBuoyantParticle {
+public class BuoyantParticleLayer extends ParticleLayer {
 
 ///////////////////////////////
 // Declaration of the constants
@@ -37,7 +36,7 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
     private double salinity;
     private double waterDensity;
 
-    public AndresBuoyantParticleLayer(IBasicParticle particle) {
+    public BuoyantParticleLayer(IBasicParticle particle) {
         super(particle);
     }
 
@@ -47,8 +46,8 @@ public class AndresBuoyantParticleLayer extends ParticleLayer implements IAndres
         ratioStage = 1.d;
         try {
             ParameterManager parameterManager = getSimulationManager().getParameterManager();
-            String salinity_field = parameterManager.getParameter(BlockType.ACTION, "action.andres_buoyancy", "salinity_field");
-            String temperature_field = parameterManager.getParameter(BlockType.ACTION, "action.andres_buoyancy", "temperature_field");
+            String salinity_field = parameterManager.getParameter(BlockType.OPTION, "option.biology_dataset", "salinity_field");
+            String temperature_field = parameterManager.getParameter(BlockType.OPTION, "option.biology_dataset", "temperature_field");
             double time = getSimulationManager().getTimeManager().get_tO();
             double sal = getSimulationManager().getDataset().get(salinity_field, particle().getGridCoordinates(), time).doubleValue();
             double tp = getSimulationManager().getDataset().get(temperature_field, particle().getGridCoordinates(), time).doubleValue();

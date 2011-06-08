@@ -1,12 +1,12 @@
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.arch.IAndresBuoyantParticle;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.SalinityTracker;
 import org.previmer.ichthyop.io.SpecificGravityTracker;
 import org.previmer.ichthyop.io.TemperatureTracker;
 import org.previmer.ichthyop.io.WaterDensityTracker;
-import org.previmer.ichthyop.particle.AndresBuoyantParticleLayer;
+import org.previmer.ichthyop.particle.BuoyantParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
 
@@ -42,8 +42,8 @@ public class AndresBuoyancyAction extends AbstractAction {
 
     public void loadParameters() throws Exception {
 
-        salinity_field = getParameter("salinity_field");
-        temperature_field = getParameter("temperature_field");
+        salinity_field = getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "option.biology_dataset", "salinity_field");
+        temperature_field = getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "option.biology_dataset", "temperature_field");
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth) {
             try {
@@ -98,7 +98,7 @@ public class AndresBuoyancyAction extends AbstractAction {
 
     public void execute(IBasicParticle particle) {
 
-         boolean canApplyBuoyancy = false;
+        boolean canApplyBuoyancy = false;
         if (isGrowth) {
             canApplyBuoyancy = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
         } else {
@@ -119,9 +119,9 @@ public class AndresBuoyancyAction extends AbstractAction {
     private double move(double sal, double tp, double dt, IBasicParticle particle) {
 
         waterDensity = BuoyancyAction.waterDensity(sal, tp);
-        int stage = ((IAndresBuoyantParticle) particle.getLayer(AndresBuoyantParticleLayer.class)).getStage();
+        int stage = ((BuoyantParticleLayer) particle.getLayer(BuoyantParticleLayer.class)).getStage();
         if (stage < 11) {
-            double particleDensity = ((IAndresBuoyantParticle) particle.getLayer(AndresBuoyantParticleLayer.class)).computeSpecificGravity(tp, sal, waterDensity);
+            double particleDensity = ((BuoyantParticleLayer) particle.getLayer(BuoyantParticleLayer.class)).computeSpecificGravity(tp, sal, waterDensity);
             return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f
                     * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
                     * (waterDensity - particleDensity)) / 100.0f) * dt);

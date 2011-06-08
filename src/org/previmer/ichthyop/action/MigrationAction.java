@@ -38,9 +38,7 @@ public class MigrationAction extends AbstractAction {
         type = TypeMigration.SUNSET_SUNRISE;
         if (isGrowth) {
             try {
-                type = getParameter("type").matches(TypeMigration.SUNSET_SUNRISE.getType())
-                        ? TypeMigration.SUNSET_SUNRISE
-                        : TypeMigration.LENGTH;
+                type = TypeMigration.getType(getParameter("type"));
             } catch (Exception ex) {
                 // default type will be sunset / sunrise migration
             }
@@ -73,12 +71,19 @@ public class MigrationAction extends AbstractAction {
                 /** isodepth migration */
                 depth = depthDay;
             } else {
-                if (type == TypeMigration.SUNSET_SUNRISE) {
-                    /** diel vertical migration */
-                    depth = getDepth(particle.getX(), particle.getY());
-                } else {
-                    double length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength();
-                    depth = getDepth(particle.getX(), particle.getY(), length);
+                double length = 0.d;
+                switch (type) {
+                    case SUNSET_SUNRISE:
+                        depth = getDepth(particle.getX(), particle.getY());
+                        break;
+                    case LENGTH:
+                        length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength();
+                        depth = getDepth(particle.getX(), particle.getY(), length);
+                        break;
+                    case LENGTH_DAYNIGHT:
+                        length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength();
+                        depth = getStepDepth(particle.getX(), particle.getY(), length);
+                        break;
                 }
             }
             double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
@@ -141,29 +146,48 @@ public class MigrationAction extends AbstractAction {
         }
     }
 
-    private long getSecondsOfDay(Calendar calendar) {
-        return calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60;
+    private double getStepDepth(double x, double y, double length) {
+
+        double bottom = getSimulationManager().getDataset().z2depth(x, y, 0);
+        calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));
+        long timeDay = getSecondsOfDay(calendar);
+        calendar.setTime(sunrise);
+        long timeSunrise = getSecondsOfDay(calendar);
+        calendar.setTime(sunset);
+        long timeSunset = getSecondsOfDay(calendar);
+
+        double depthDia;
+        /**ahora hago el filtro dependiendo de los tamanos que hemos definido*/
+        /** Yolk-Sac Larvae */
+        if (length >= 2.5d & length < 4.5d) {
+            depthDia = 0.34d * depthDay;
+        } /** First Feeding Larvae*/
+        else if (length >= 4.5d & length < 7.0d) {
+            depthDia = 0.5d * depthDay;
+        } /** First Finned Larvae */
+        else if (length >= 7.0d & length < 10.0d) {
+            depthDia = 0.8d * depthDay;
+        } /** Post Larvae */
+        else {
+            depthDia = 1.0d * depthDay;
+        }
+
+        if (timeDay >= timeSunrise && timeDay < timeSunset) {
+            return Math.max(bottom, depthDia);
+        } else {
+            return Math.max(bottom, depthNight);
+        }
     }
 
-    enum Criterion {
-
-        AGE("Age criterion"),
-        LENGTH("Length criterion");
-        private String name;
-
-        Criterion(String name) {
-            this.name = name;
-        }
-
-        String getName() {
-            return name;
-        }
+    private long getSecondsOfDay(Calendar calendar) {
+        return calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60;
     }
 
     enum TypeMigration {
 
         SUNSET_SUNRISE("Based on sunset / sunrise"),
-        LENGTH("Based on particle length");
+        LENGTH("Based on particle length"),
+        LENGTH_DAYNIGHT("Based on both length and daytime / nightime");
         private String type;
 
         TypeMigration(String type) {
@@ -172,6 +196,16 @@ public class MigrationAction extends AbstractAction {
 
         String getType() {
             return type;
+        }
+
+        static TypeMigration getType(String type) {
+
+            for (TypeMigration typeMigration : values()) {
+                if (type.matches(typeMigration.getType())) {
+                    return typeMigration;
+                }
+            }
+            return SUNSET_SUNRISE;
         }
     }
 }
