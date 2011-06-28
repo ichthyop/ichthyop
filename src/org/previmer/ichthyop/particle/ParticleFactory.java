@@ -55,6 +55,10 @@ public class ParticleFactory extends SimulationManagerAccessor {
         particle.setX(x);
         particle.setY(y);
         particle.setDepth(depth);
+        /* bugfixing 2011/06/28
+         * setDepth but z unset and then calling isInWater ==> crash
+         */
+        particle.geo2Grid();
         if (Double.isNaN(depth)) {
             particle.make2D();
         }
