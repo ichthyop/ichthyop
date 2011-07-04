@@ -241,6 +241,20 @@
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
+                <key>field_var_masku</key>
+                <long_name>Mask on U points</long_name>
+                <value>mask_u</value>
+                <default>mask_u</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset. Mask_u & Mask_v are only be usefull for some Rutgers simulations. If you don't have such fields archived in the NetCDF ouput file, just skip this parameter.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_maskv</key>
+                <long_name>Mask on V points</long_name>
+                <value>mask_v</value>
+                <default>mask_v</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.Mask_u & Mask_v are only be usefull for some Rutgers simulations. If you don't have such fields archived in the NetCDF ouput file, just skip this parameter.</description>
+            </parameter>
+            <parameter>
                 <key>field_var_pm</key>
                 <long_name>Curvilinear coordinate metric in XI</long_name>
                 <value>pm</value>

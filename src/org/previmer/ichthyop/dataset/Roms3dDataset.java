@@ -527,15 +527,31 @@ public class Roms3dDataset extends RomsCommon {
 
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
-
+            if (null != masku) {
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx - 1; i++) {
+                            u_tp1[k][j][i] *= masku[j][i];
+                        }
+                    }
+                }
+            }
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
-            v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
-                    new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
+            v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin, new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
+            if (null != maskv) {
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny - 1; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            v_tp1[k][j][i] *= maskv[j][i];
+                        }
+                    }
+                }
+            }
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());

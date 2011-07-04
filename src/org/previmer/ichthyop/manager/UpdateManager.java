@@ -126,6 +126,17 @@ public class UpdateManager extends AbstractManager {
             getXBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3v"));
         }
         /*
+         * Add ROMS mask_u & masl_v parameters
+         */
+        if (null != getXBlock(BlockType.DATASET, "dataset.roms2d")) {
+            getXBlock(BlockType.DATASET, "dataset.roms2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_masku"));
+            getXBlock(BlockType.DATASET, "dataset.roms2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_maskv"));
+        }
+        if (null != getXBlock(BlockType.DATASET, "dataset.roms3d")) {
+            getXBlock(BlockType.DATASET, "dataset.roms3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_masku"));
+            getXBlock(BlockType.DATASET, "dataset.roms3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_maskv"));
+        }
+        /*
          * Add skip_sorting option in Dataset blocks
          */
         for (XBlock xblock : getConfigurationFile().getBlocks(BlockType.DATASET)) {

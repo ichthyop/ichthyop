@@ -64,7 +64,7 @@ abstract class RomsCommon extends AbstractDataset {
     /**
      * Mask: water = 1, cost = 0
      */
-    static byte[][] maskRho;
+    static byte[][] maskRho, masku, maskv;
     /**
      *
      */
@@ -104,7 +104,7 @@ abstract class RomsCommon extends AbstractDataset {
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strLon, strLat, strMask, strBathy;
+    static String strLon, strLat, strMask, strMasku, strMaskv, strBathy;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -130,6 +130,8 @@ abstract class RomsCommon extends AbstractDataset {
         strLat = getParameter("field_var_lat");
         strBathy = getParameter("field_var_bathy");
         strMask = getParameter("field_var_mask");
+        strMasku = getParameter("field_var_masku");
+        strMaskv = getParameter("field_var_maskv");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strTime = getParameter("field_var_time");
@@ -363,7 +365,7 @@ abstract class RomsCommon extends AbstractDataset {
 
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
-        Array arrLon, arrLat, arrMask, arrH, arrZeta, arrPm, arrPn;
+        Array arrLon, arrLat, arrMask, arrMasku, arrMaskv, arrH, arrZeta, arrPm, arrPn;
         Index index;
 
         NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
@@ -387,6 +389,20 @@ abstract class RomsCommon extends AbstractDataset {
             IOException ioex = new IOException("Problem reading dataset mask. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
+        }
+        try {
+            arrMasku = ncGrid.findVariable(strMasku).read(origin, new int[]{ny, nx - 1});
+        } catch (Exception e) {
+            getLogger().warning("Problem reading dataset mask_u. " + e.toString());
+            masku = null;
+            arrMasku = null;
+        }
+        try {
+            arrMaskv = ncGrid.findVariable(strMaskv).read(origin, new int[]{ny - 1, nx});
+        } catch (Exception e) {
+            getLogger().warning("Problem reading dataset mask_v. " + e.toString());
+            maskv = null;
+            arrMaskv = null;
         }
         try {
             arrH = ncGrid.findVariable(strBathy).read(origin, size);
@@ -438,6 +454,34 @@ abstract class RomsCommon extends AbstractDataset {
             }
         } else {
             maskRho = (byte[][]) arrMask.copyToNDJavaArray();
+        }
+
+        if (arrMasku != null) {
+            if (arrMask.getElementType() != byte.class) {
+                masku = new byte[ny][nx];
+                index = arrMasku.getIndex();
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx - 1; i++) {
+                        masku[j][i] = arrMasku.getByte(index.set(j, i));
+                    }
+                }
+            } else {
+                masku = (byte[][]) arrMask.copyToNDJavaArray();
+            }
+        }
+
+        if (arrMaskv != null) {
+            if (arrMaskv.getElementType() != byte.class) {
+                maskv = new byte[ny][nx];
+                index = arrMaskv.getIndex();
+                for (int j = 0; j < ny - 1; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        maskv[j][i] = arrMaskv.getByte(index.set(j, i));
+                    }
+                }
+            } else {
+                maskv = (byte[][]) arrMask.copyToNDJavaArray();
+            }
         }
 
         if (arrPm.getElementType() == double.class) {
