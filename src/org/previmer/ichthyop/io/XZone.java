@@ -24,8 +24,6 @@ public class XZone extends XBlock {
     final public static String INDEX = "index";
     final public static String POLYGON = "polygon";
     final public static String COLOR = "color";
-    //final public static String KEY = "key";
-    //final public static String ENABLED = "enabled";
     private static final String THICKNESS = "thickness";
     private static final String LOWER_DEPTH = "lower_depth";
     private static final String UPPER_DEPTH = "upper_depth";
@@ -38,7 +36,7 @@ public class XZone extends XBlock {
     }
 
     public XZone(String key) throws IOException {
-        super(null, ZONE);
+        super(ZONE);
         setKey(key);
         setEnabled(true);
         setType(TypeZone.RELEASE);
@@ -67,33 +65,6 @@ public class XZone extends XBlock {
         setUpperDepth(0.f);
         setLowerDepth(50.f);
     }
-
-    /*public String getKey() {
-        return getChildTextNormalize(KEY);
-    }*/
-
-    public void setKey(String key) {
-        if (null == getChild(KEY)) {
-            addContent(new Element(KEY));
-        }
-        getChild(KEY).setText(key);
-    }
-
-    /*public boolean isEnabled() {
-
-        if (null != getChild(ENABLED)) {
-            return Boolean.valueOf(getChildTextNormalize(ENABLED));
-        } else {
-            return true;
-        }
-    }
-
-    public void setEnabled(boolean enabled) {
-        if (null == getChild(ENABLED)) {
-            addContent(new Element(ENABLED));
-        }
-        getChild(ENABLED).setText(String.valueOf(enabled));
-    }*/
 
     public TypeZone getTypeZone() {
 

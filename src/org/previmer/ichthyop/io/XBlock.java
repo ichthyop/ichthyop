@@ -7,7 +7,6 @@ package org.previmer.ichthyop.io;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom.Element;
-import org.jdom.filter.Filter;
 
 /**
  *
@@ -34,6 +32,11 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     private HashMap<String, XParameter> map;
     private List<String> sortedKey;
     private int nbHiddenParameters;
+
+    public XBlock(String name) {
+        super(name);
+        block_type = BlockType.OPTION;
+    }
 
     public XBlock(Element element, String name) throws IOException {
         super(name);
@@ -81,6 +84,9 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     void setKey(String key) {
+        if (null == getChild(KEY)) {
+            addContent(new Element(KEY));
+        }
         getChild(KEY).setText(key);
     }
 
@@ -89,6 +95,9 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     public void setTreePath(String treePath) {
+        if (null == getChild(TREEPATH)) {
+            addContent(new Element(TREEPATH));
+        }
         getChild(TREEPATH).setText(treePath);
     }
 
