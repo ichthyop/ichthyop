@@ -473,7 +473,6 @@ public abstract class Dataset {
         strEtaDim = Configuration.getStrEtaDim();
         strZDim = Configuration.getStrZDim();
         strTimeDim = Configuration.getStrTimeDim();
-        System.out.println("strTimeDim: " + Configuration.getStrTimeDim());
         strLon = Configuration.getStrLon();
         strLat = Configuration.getStrLat();
         strBathy = Configuration.getStrBathy();
