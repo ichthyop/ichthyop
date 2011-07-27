@@ -54,7 +54,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         int index = 0;
         String[] strCoord;
         double[] coord;
-        NumberFormat nbFormat = NumberFormat.getInstance(Locale.getDefault());
+        NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
 
         BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
         String line;
