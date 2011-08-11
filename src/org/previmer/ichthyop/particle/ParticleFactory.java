@@ -78,4 +78,34 @@ public class ParticleFactory extends SimulationManagerAccessor {
         particle.geo2Grid();
         return particle;
     }
+
+    public static IBasicParticle createGridParticle(int index, double x, double y) {
+
+        IMasterParticle particle = new MasterParticle();
+        particle.setIndex(index);
+        particle.setX(x);
+        particle.setY(y);
+        /*
+         * Make sure the particle is released at the bottom, ie z = 0
+         */
+        particle.setZ(0);
+        /*
+         * Test wether the grid point is on land or at the edge of the domain
+         */
+        if (!particle.isInWater() || particle.isOnEdge()) {
+            return null;
+        }
+        /*
+         * Test wether the grid point is inside one of the release zones
+         */
+        int numReleaseZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
+        if (numReleaseZone == -1) {
+            return null;
+        }
+        /*
+         * Converts (x, y, z) into (lon, lat, depth)
+         */
+        particle.grid2Geo();
+        return particle;
+    }
 }
