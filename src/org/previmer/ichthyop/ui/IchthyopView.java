@@ -727,6 +727,8 @@ public class IchthyopView extends FrameView
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             checkCfgVersionAndLoad(chooser.getSelectedFile());
+            cfgPath=chooser.getCurrentDirectory();
+
         }
         return null;
     }
