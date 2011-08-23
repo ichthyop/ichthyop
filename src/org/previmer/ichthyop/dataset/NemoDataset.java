@@ -65,7 +65,7 @@ public class NemoDataset extends AbstractDataset {
      *
      * pverley pour chourdin: attention ici le masque devient 3D
      */
-    static byte[][][] maskRho;
+    static byte[][][] maskRho, masku, maskv;
     /**
      * Ocean free surface elevetation at current time
      */
@@ -201,6 +201,12 @@ public class NemoDataset extends AbstractDataset {
             maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
                         0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                     copyToNDJavaArray();
+            /*masku = (byte[][][]) nc.findVariable("umask").read(new int[]{0,
+            0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+            copyToNDJavaArray();
+            maskv = (byte[][][]) nc.findVariable("vmask").read(new int[]{0,
+            0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+            copyToNDJavaArray();*/
             if (!isGridInfoInOneFile) {
                 nc.close();
                 nc = NetcdfDataset.openFile(file_zgr, null);
@@ -372,8 +378,8 @@ public class NemoDataset extends AbstractDataset {
                     x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii]
                             + x_euler * w_tp1[k + kk][j + jj][i + ii];
                     dw += 2.d * x * co
-                            / (gdepW[Math.min(k + kk + 1, nz)]
-                            - gdepW[Math.max(k + kk - 1, 0)]);
+                            / (gdepW[Math.max(k + kk - 1, 0)]
+                            - gdepW[Math.min(k + kk + 1, nz)]);
                 }
             }
         }
@@ -417,8 +423,8 @@ public class NemoDataset extends AbstractDataset {
                     x = (1.d - x_euler) * wr_tp0[k + kk][j + jj][i + ii]
                             + x_euler * wr_tp1[k + kk][j + jj][i + ii];
                     dw += 2.d * x * co
-                            / (gdepW[Math.min(k + kk + 1, nz)]
-                            - gdepW[Math.max(k + kk - 1, 0)]);
+                            / (gdepW[Math.max(k + kk - 1, 0)]
+                            - gdepW[Math.min(k + kk + 1, nz)]);
                 }
             }
         }
@@ -932,13 +938,12 @@ public class NemoDataset extends AbstractDataset {
             variable.nextStep(ncT, rank, ipo, jpo, time_tp1, dt_HyMo);
         }
         /*try {
-            ncW = NetcdfDataset.openFile("/home/pverley/ichthyop/dev/io/input/opa/ORCA025-G70_INDIAN_y2001m11_gridW.nc", null);
             wr_tp1 = (float[][][]) ncW.findVariable("vovecrtz").read(origin, new int[]{1, nz + 1, ny, nx}).
                     flip(1).reduce().copyToNDJavaArray();
-        } catch (IOException ex) {
-            Logger.getLogger(NemoDataset.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(NemoDataset.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading W variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
         }*/
         w_tp1 = computeW();
     }
@@ -966,7 +971,8 @@ public class NemoDataset extends AbstractDataset {
     private boolean isInWater(int i, int j, int k) {
         //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
         try {
-            return (maskRho[k][j][i] > 0);
+            return true;
+            //return (maskRho[k][j][i] > 0);
         } catch (ArrayIndexOutOfBoundsException ex) {
             return false;
         }
@@ -993,9 +999,6 @@ public class NemoDataset extends AbstractDataset {
 
     /**
      * Determines whether or not the specified grid point is close to cost line.
-     * The method first determines in which quater of the cell the grid point is
-     * located, and then checks wether or not its cell and the three adjacent
-     * cells to the quater are in water.
      *
      * @param pGrid a double[] the coordinates of the grid point
      * @return <code>true</code> if the grid point is close to cost,
@@ -1085,7 +1088,8 @@ public class NemoDataset extends AbstractDataset {
         double depth = Double.NaN;
         double dz;
 
-        int k = (int) Math.round(z);
+        double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
+        int k = (int) Math.round(kz);
         dz = z - k;
 
         if (dz < 0) { // >= ?
@@ -1410,7 +1414,7 @@ public class NemoDataset extends AbstractDataset {
             list.add(file.toString());
         }
         if (list.size() > 1) {
-             boolean skipSorting = false;
+            boolean skipSorting = false;
             try {
                 skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
             } catch (Exception ex) {
