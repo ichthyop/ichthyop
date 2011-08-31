@@ -725,8 +725,8 @@ public class WMSMapper extends JXMapKit {
     private List<DrawableParticle> getParticles(int index) {
         List<DrawableParticle> list = new ArrayList();
         try {
-            ArrayFloat.D1 arrLon = (D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce();
-            ArrayFloat.D1 arrLat = (D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce();
+            ArrayFloat.D1 arrLon = (D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce(0);
+            ArrayFloat.D1 arrLat = (D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
                 if (pcolorVariable.getName().matches("time")) {
@@ -736,7 +736,7 @@ public class WMSMapper extends JXMapKit {
                 }
             }
             int length = arrLon.getShape()[0];
-            for (int i = 0; i < length - 1; i++) {
+            for (int i = 0; i < length; i++) {
                 float lon = arrLon.get(i);
                 if (!Float.isNaN(lon)) {
                     if (null != arrColorVariable) {
