@@ -194,6 +194,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 ? "3d"
                 : "2d";
         ncOut.addGlobalAttribute("transport_dimension", dim);
+
+        /* Write all parameters */
         for (BlockType type : BlockType.values()) {
             for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
                 if (!block.getType().equals(BlockType.OPTION)) {
@@ -209,6 +211,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
             }
         }
+
+        /* Add the corresponding xml file */
+        ncOut.addGlobalAttribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath());
     }
 
     private List<GeoPosition> makeZoneEdge(Zone zone) {
