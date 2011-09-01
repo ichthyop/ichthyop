@@ -147,7 +147,7 @@ public class Roms3dDataset extends RomsCommon {
     private VertCoordType getVertCoordType() {
 
         if (null != ncIn.findGlobalAttribute("VertCoordType")) {
-            String strCoordType = ncIn.findGlobalAttribute(strCs_w).getStringValue();
+            String strCoordType = ncIn.findGlobalAttribute("VertCoordType").getStringValue();
             if (strCoordType.toLowerCase().matches(VertCoordType.OLD.name().toLowerCase())) {
                 return VertCoordType.NEW;
             }
@@ -590,8 +590,8 @@ public class Roms3dDataset extends RomsCommon {
                             - z_w_tmp[k][j][i - 1]))
                             / (pn[j][i] + pn[j][i - 1]))
                             * u_tp1[k][j][i - 1];
+                    }
                 }
-            }
             for (int i = nx; i-- > 0;) {
                 for (int j = 0; j++ < ny - 1;) {
                     Hvom[k][j][i] = (((z_w_tmp[k + 1][j][i]
@@ -617,8 +617,7 @@ public class Roms3dDataset extends RomsCommon {
                 for (int i = nx - 1; i-- > 0;) {
                     w_double[k][j][i] = w_double[k - 1][j][i]
                             + (float) (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1]
-                            + Hvom[k - 1][j][i] - Hvom[k
-                            - 1][j + 1][i]);
+                            + Hvom[k - 1][j][i] - Hvom[k - 1][j + 1][i]);
                 }
             }
             for (int i = nx; i-- > 0;) {

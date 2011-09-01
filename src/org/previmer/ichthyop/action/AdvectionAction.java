@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.action;
 
+import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
@@ -69,7 +70,7 @@ public class AdvectionAction extends AbstractAction {
         //Logger.getAnonymousLogger().info("dx " + mvt[0] + " dy " + mvt[1] + " dz " + mvt[2]);
         if (!horizontal) {
             mvt[0] = 0;
-            mvt[1] = 1;
+            mvt[1] = 0;
         }
         if (!vertical && mvt.length > 2) {
             mvt[2] = 0;
