@@ -198,7 +198,7 @@ abstract class Mars3dCommon extends MarsCommon {
         try {
             //-----------------------------------------------------------
             // Read hc, Cs_r and Cs_w in the NetCDF file.
-            Array arrHc = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+            Array arrHc = ncIn.findVariable(strHC).read(new int[]{jpo, ipo}, new int[]{ny, nx});
             hc = (float[][]) arrHc.copyToNDJavaArray();
         } catch (Exception ex) {
             IOException ioex = new IOException("{Dataset} Error reading hc variable. " + ex.toString());
