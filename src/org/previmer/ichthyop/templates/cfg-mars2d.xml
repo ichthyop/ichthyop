@@ -78,6 +78,7 @@
                 <value>Beaching</value>
                 <default>Beaching</default>
                 <format>combo</format>
+                <accepted>None</accepted>
                 <accepted>Beaching</accepted>
                 <accepted>Bouncing</accepted>
                 <accepted>Standstill</accepted>
