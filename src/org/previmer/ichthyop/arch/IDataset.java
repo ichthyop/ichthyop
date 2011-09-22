@@ -5,6 +5,8 @@
 package org.previmer.ichthyop.arch;
 
 import org.previmer.ichthyop.event.NextStepListener;
+import ucar.ma2.Array;
+import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -71,4 +73,6 @@ public interface IDataset extends NextStepListener {
     public double getDepthMax();
 
     public boolean is3D();
+    
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception;
 }

@@ -9,6 +9,8 @@ import java.io.IOException;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -520,7 +522,7 @@ public class Roms3dDataset extends RomsCommon {
         setAllFieldsTp1AtTime(rank);
     }
 
-    void setAllFieldsTp1AtTime(int rank) throws IOException {
+    void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -566,7 +568,7 @@ public class Roms3dDataset extends RomsCommon {
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
@@ -590,8 +592,8 @@ public class Roms3dDataset extends RomsCommon {
                             - z_w_tmp[k][j][i - 1]))
                             / (pn[j][i] + pn[j][i - 1]))
                             * u_tp1[k][j][i - 1];
-                    }
                 }
+            }
             for (int i = nx; i-- > 0;) {
                 for (int j = 0; j++ < ny - 1;) {
                     Hvom[k][j][i] = (((z_w_tmp[k + 1][j][i]
@@ -696,5 +698,31 @@ public class Roms3dDataset extends RomsCommon {
 
         NEW,
         OLD;
+    }
+
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length) {
+            case 4:
+                origin = new int[]{rank, 0, jpo, ipo};
+                shape = new int[]{1, nz, ny, nx};
+                break;
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                if (!variable.isUnlimited()) {
+                    origin = new int[]{0, jpo, ipo};
+                    shape = new int[]{nz, ny, nx};
+                } else {
+                    origin = new int[]{rank, jpo, ipo};
+                    shape = new int[]{1, ny, nx};
+                }
+                break;
+        }
+
+        return variable.read(origin, shape).reduce();
     }
 }

@@ -18,6 +18,7 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 
 /**
@@ -103,8 +104,8 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      * Depth at rho point
      */
     // modif spous
-    //  static float[] gdepT;
-    static double[] gdepT;
+    static float[] gdepT;
+    //static double[] gdepT;
     /**
      * Depth at w point at current time.
      * Takes account of free surface elevation.
@@ -119,8 +120,8 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      * Depth at w point. The free surface elevation is disregarded.
      */
     // modif spous
-    //  static float[] gdepW;
-    static double[] gdepW;
+    static float[] gdepW;
+    //static double[] gdepW;
     /**
      * Geographical boundary of the domain
      */
@@ -220,12 +221,12 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
         //System.out.println("read bathy gdept" + nc.getLocation());
-        gdepT = (double[]) nc.findVariable(str_gdepT).read(new int[]{0,
-                    0, jpo, ipo}, new int[]{1, nz}).flip(1).reduce().
+        gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
+                    0, jpo, ipo}, new int[]{1, nz, 1, 1}).flip(1).reduce().
                 copyTo1DJavaArray();
         //System.out.println("read bathy gdepw" + nc.getLocation());
-        gdepW = (double[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, nz + 1}).flip(1).reduce().
+        gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
+                    jpo, ipo}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
                 copyTo1DJavaArray();
 //            System.out.println("read bathy gdept" + nc.getLocation());
 //            gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
@@ -934,7 +935,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      * pverley pour chourdin: la aussi je fais du provisoire en attendant
      * de voir si on peut dégager une structure systématique des input.
      */
-    void setAllFieldsTp1AtTime(int rank) throws IOException {
+    void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -970,7 +971,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(ncT, rank, ipo, jpo, time_tp1, dt_HyMo);
+            variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
         }
         /*try {
         wr_tp1 = (float[][][]) ncW.findVariable("vovecrtz").read(origin, new int[]{1, nz + 1, ny, nx}).
@@ -1844,5 +1845,38 @@ public class NemoSWIO12Dataset extends AbstractDataset {
 
         setAllFieldsTp1AtTime(rank);
 
+    }
+
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        boolean hasVerticalDim = false;
+        switch (variable.getShape().length) {
+            case 4:
+                origin = new int[]{rank, 0, jpo, ipo};
+                shape = new int[]{1, nz, ny, nx};
+                hasVerticalDim = true;
+                break;
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                if (!variable.isUnlimited()) {
+                    origin = new int[]{0, jpo, ipo};
+                    shape = new int[]{nz, ny, nx};
+                    hasVerticalDim = true;
+                } else {
+                    origin = new int[]{rank, jpo, ipo};
+                    shape = new int[]{1, ny, nx};
+                }
+                break;
+        }
+
+        Array array = variable.read(origin, shape).reduce();
+        if (hasVerticalDim) {
+            array = array.flip(0);
+        }
+        return array;
     }
 }

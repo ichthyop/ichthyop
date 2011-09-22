@@ -7,6 +7,8 @@ package org.previmer.ichthyop.dataset;
 import java.io.IOException;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -105,7 +107,7 @@ public abstract class Mars2dCommon extends MarsCommon {
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
      * @throws an IOException if an error occurs while reading the variables.
      */
-    void setAllFieldsTp1AtTime(int i_time) throws IOException, InvalidRangeException {
+    void setAllFieldsTp1AtTime(int i_time) throws Exception {
 
         int[] origin = new int[]{i_time, jpo, ipo};
         u_tp1 = new float[ny][nx - 1];
@@ -143,7 +145,7 @@ public abstract class Mars2dCommon extends MarsCommon {
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
     }
 
@@ -165,5 +167,25 @@ public abstract class Mars2dCommon extends MarsCommon {
     @Override
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+    }
+
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length) {
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                origin = new int[]{rank, jpo, ipo};
+                shape = new int[]{1, ny, nx};
+                break;
+            default:
+                throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+
+        }
+
+        return variable.read(origin, shape).reduce();
     }
 }

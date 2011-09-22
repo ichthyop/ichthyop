@@ -119,7 +119,7 @@ abstract class RomsCommon extends AbstractDataset {
      */
     private double latMin, lonMin, latMax, lonMax, depthMax;
 
-    abstract void setAllFieldsTp1AtTime(int rank) throws IOException;
+    abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
 
     void loadParameters() {
 
