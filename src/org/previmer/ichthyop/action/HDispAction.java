@@ -43,7 +43,7 @@ public class HDispAction extends AbstractAction {
     private MTRandom random;
 
     public void loadParameters() throws Exception {
-        random = new MTRandom();
+        random = new MTRandom(true);
         epsilon = Double.valueOf(getParameter("epsilon"));
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);
     }
