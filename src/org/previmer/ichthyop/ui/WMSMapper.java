@@ -247,6 +247,18 @@ public class WMSMapper extends JXMapKit {
                 cp.setPainters(getBgPainter());
                 cp.setCacheable(false);
                 getMainMap().setOverlayPainter(cp);
+                /*
+                 * Check whether the mask can be drawn
+                 */
+                gridVisible = false;
+                if (null != getSimulationManager().getConfigurationFile()) {
+                    if (null != nc.findGlobalAttribute("xml_file")) {
+                        String xml = nc.findGlobalAttribute("xml_file").getStringValue();
+                        if (getSimulationManager().getConfigurationFile().getPath().matches(xml)) {
+                            gridVisible = true;
+                        }
+                    }
+                }
             } catch (IOException ex) {
                 SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             }
@@ -259,20 +271,6 @@ public class WMSMapper extends JXMapKit {
             setZoom(defaultZoom);
             getMainMap().setOverlayPainter(null);
         }
-
-        /*
-         * Check whether the mask can be drawn
-         */
-        gridVisible = false;
-        if (null != getSimulationManager().getConfigurationFile()) {
-            if (null != nc.findGlobalAttribute("xml_file")) {
-                String xml = nc.findGlobalAttribute("xml_file").getStringValue();
-                if (getSimulationManager().getConfigurationFile().getPath().matches(xml)) {
-                    gridVisible = true;
-                }
-            }
-        }
-
     }
 
     public String[] getVariableList() {
