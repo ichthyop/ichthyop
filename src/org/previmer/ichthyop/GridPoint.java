@@ -84,7 +84,7 @@ public class GridPoint extends SimulationManagerAccessor {
     public void grid2Geo() {
 
         if (xyHaveChanged) {
-            double[] pGeog = getSimulationManager().getDataset().xy2lonlat(x, y);
+            double[] pGeog = getSimulationManager().getDataset().xy2latlon(x, y);
             lon = pGeog[1];
             lat = pGeog[0];
             xyHaveChanged = false;

@@ -555,7 +555,7 @@ abstract class RomsCommon extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
-    public double[] xy2lonlat(double xRho, double yRho) {
+    public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
@@ -938,4 +938,16 @@ abstract class RomsCommon extends AbstractDataset {
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
+
+    /*public double getVar(String varname, double[] pgrid, long time) throws Exception {
+        RequiredVariable var = new RequiredVariable(varname);
+        open(getFile(time));
+        findCurrentRank(time);
+        Array xTimeTp1 = ncIn.findVariable(strTime).read();
+        time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
+        var.nextStep(readVariable(ncIn, varname, rank), time_tp1, dt_HyMo);
+        time_tp1 += dt_HyMo;
+        var.nextStep(readVariable(ncIn, varname, rank + 1), time_tp1, dt_HyMo);
+        return Double.NaN;
+    }*/
 }

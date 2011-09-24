@@ -482,14 +482,14 @@ public class WMSMapper extends JXMapKit {
     }
 
     private void addCellPoint(JXMapViewer map, Polygon polygon, double x, double y) {
-        double[] pos = getSimulationManager().getDataset().xy2lonlat(x, y);
+        double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
         GeoPosition gp = new GeoPosition(pos[0], pos[1]);
         Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
         polygon.addPoint((int) pt.getX(), (int) pt.getY());
     }
 
     private Point2D getPoint(JXMapViewer map, double x, double y) {
-        double[] pos = getSimulationManager().getDataset().xy2lonlat(x, y);
+        double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
         GeoPosition gp = new GeoPosition(pos[0], pos[1]);
         return map.getTileFactory().geoToPixel(gp, map.getZoom());
     }

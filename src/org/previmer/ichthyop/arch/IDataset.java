@@ -18,7 +18,7 @@ public interface IDataset extends NextStepListener {
 
     public double[] lonlat2xy(double lon, double lat);
 
-    public double[] xy2lonlat(double xRho, double yRho);
+    public double[] xy2latlon(double xRho, double yRho);
 
     public double depth2z(double x, double y, double depth);
 

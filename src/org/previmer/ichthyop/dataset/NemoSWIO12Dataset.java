@@ -1153,7 +1153,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      * @param yRho double
      * @return double[]
      */
-    public double[] xy2lonlat(double xRho, double yRho) {
+    public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
