@@ -54,14 +54,12 @@ import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
-import org.previmer.ichthyop.dataset.NemoDataset;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.TimeManager;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayFloat.D1;
 import ucar.ma2.ArrayFloat.D2;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.InvalidRangeException;
@@ -118,11 +116,10 @@ public class WMSMapper extends JXMapKit {
     private boolean gridVisible = false;
 
     public WMSMapper() {
-        setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
+        setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
         setMiniMapVisible(false);
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
-        setTileFactory(tileFactory);
         //getMainMap().addMouseMotionListener(new LonLatTracker());
     }
 
@@ -251,7 +248,7 @@ public class WMSMapper extends JXMapKit {
                  * Check whether the mask can be drawn
                  */
                 gridVisible = false;
-                if (null != getSimulationManager().getConfigurationFile()) {
+                if (null != getSimulationManager().getConfigurationFile() && getSimulationManager().isSetup()) {
                     if (null != nc.findGlobalAttribute("xml_file")) {
                         String xml = nc.findGlobalAttribute("xml_file").getStringValue();
                         if (getSimulationManager().getConfigurationFile().getPath().matches(xml)) {
@@ -275,8 +272,8 @@ public class WMSMapper extends JXMapKit {
 
     public String[] getVariableList() {
         List<String> list = new ArrayList();
-        list.add(new String("None"));
-        list.add(new String("time"));
+        list.add("None");
+        list.add("time");
         for (Variable variable : nc.getVariables()) {
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
@@ -512,13 +509,13 @@ public class WMSMapper extends JXMapKit {
         addCellPoint(map, polygon, i - 0.5, j + 0.5);
 
         Color color = getBathyColor(getSimulationManager().getDataset().getBathy(i, j));
-        //Color color = getMaskColor(i, j);
+        /*double value = getSimulationManager().getDataset().get("temp", new double[] {i, j, getSimulationManager().getDataset().get_nz() - 1}, getSimulationManager().getTimeManager().get_tO() + getSimulationManager().getTimeManager().getSimulationDuration()).doubleValue();
+        Color color = getSimulationManager().getDataset().isInWater(i, j)
+                ? getVarColor(value)
+                : Color.DARK_GRAY;*/
         Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
         g.setColor(fillColor);
         g.fill(polygon);
-        if (!getSimulationManager().getDataset().isInWater(i, j)) {
-            g.setColor(Color.DARK_GRAY);
-        }
         g.draw(polygon);
     }
 
@@ -563,12 +560,34 @@ public class WMSMapper extends JXMapKit {
                 + (1 - xdepth) * bottom.getBlue())));
 
     }
+    
+    private Color getVarColor(double value) {
+        
+        Color low = Color.CYAN;
+        Color high = Color.ORANGE;
+        
+        float xdepth = 0.f;
+        if (Double.isNaN(value)) {
+            return (Color.darkGray);
+        } else {
+            xdepth = (float) Math.abs(value - 10) / 15.f;
+            xdepth = Math.max(0, Math.min(xdepth, 1));
+
+        }
+        return (new Color((int) (xdepth * high.getRed()
+                + (1 - xdepth) * low.getRed()),
+                (int) (xdepth * high.getGreen()
+                + (1 - xdepth) * low.getGreen()),
+                (int) (xdepth * high.getBlue()
+                + (1 - xdepth) * low.getBlue())));
+    }
 
     private void drawGrid(Graphics2D g, JXMapViewer map) {
 
         IDataset dataset = getSimulationManager().getDataset();
         for (int i = 1; i < dataset.get_nx() - 1; i++) {
             for (int j = 1; j < dataset.get_ny() - 1; j++) {
+                //drawCell(g, map, i, j);
                 if (!dataset.isInWater(i, j)) {
                     drawCell(g, map, i, j);
                     //drawMask(g, map, i, j);
@@ -935,7 +954,7 @@ public class WMSMapper extends JXMapKit {
         int red = color.getRed();
         int green = color.getGreen();
         int blue = color.getBlue();
-        StringBuffer hexColor = new StringBuffer(8);
+        StringBuilder hexColor = new StringBuilder(8);
         hexColor.append("ff");
         String hR = Integer.toHexString(red);
         if (hR.length() < 2) {
@@ -996,7 +1015,7 @@ public class WMSMapper extends JXMapKit {
 
         public void run() {
             dtFormat.setCalendar(calendar);
-            StringBuffer filename = new StringBuffer(getFile().getParent());
+            StringBuilder filename = new StringBuilder(getFile().getParent());
             filename.append(File.separator);
             String id = getFile().getName().substring(0, getFile().getName().indexOf(".nc"));
             filename.append(id);
