@@ -743,7 +743,7 @@ abstract class RomsCommon extends AbstractDataset {
                 throw ioex;
             }
         }
-        getLogger().info("Opened dataset " + filename);
+        getLogger().log(Level.INFO, "Opened dataset {0}", filename);
     }
 
     /**
@@ -938,16 +938,4 @@ abstract class RomsCommon extends AbstractDataset {
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
-
-    /*public double getVar(String varname, double[] pgrid, long time) throws Exception {
-        RequiredVariable var = new RequiredVariable(varname);
-        open(getFile(time));
-        findCurrentRank(time);
-        Array xTimeTp1 = ncIn.findVariable(strTime).read();
-        time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-        var.nextStep(readVariable(ncIn, varname, rank), time_tp1, dt_HyMo);
-        time_tp1 += dt_HyMo;
-        var.nextStep(readVariable(ncIn, varname, rank + 1), time_tp1, dt_HyMo);
-        return Double.NaN;
-    }*/
 }
