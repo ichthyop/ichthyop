@@ -63,8 +63,9 @@ public class GradientMoveAction extends AbstractAction {
                 : -1;
         for (Cell ncell : cells) {
             double val2 = getValue(ncell, time);
-            if (sign * (val1 - val2) > dval) {
-                dval = val1 - val2;
+            double dvaltmp = sign * (val1 - val2) / cell.distance(ncell);
+            if (dvaltmp > dval) {
+                dval = dvaltmp;
                 attractiveCell = ncell;
             }
         }
