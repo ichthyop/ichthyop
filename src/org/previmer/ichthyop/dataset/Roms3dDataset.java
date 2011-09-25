@@ -371,8 +371,8 @@ public class Roms3dDataset extends RomsCommon {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
-        int j = (int) jy;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) Math.round(kz);
         double dx = ix - (double) i;
         double dy = jy - (double) j;
@@ -405,7 +405,7 @@ public class Roms3dDataset extends RomsCommon {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
         int k = (int) kz;
         double dx = ix - (double) i;
@@ -443,7 +443,7 @@ public class Roms3dDataset extends RomsCommon {
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (int) Math.round(ix);
-        int j = (int) jy;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) kz;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
