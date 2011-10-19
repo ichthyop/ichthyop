@@ -933,7 +933,11 @@ public class WMSMapper extends JXMapKit {
         dtFormat.setCalendar(calendar);
         dtFormat2.setCalendar(calendar);
         stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
-        stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
+        if (getTime(i).before(getTime(i + 1))) {
+            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
+        } else {
+            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i + 1))).withEnd(dtFormat.format(getTime(i)));
+        }
         for (DrawableParticle particle : getParticles(i)) {
             String coord = Double.toString(particle.getLongitude()) + "," + Double.toString(particle.getLatitude());
             Placemark placeMark = stepFolder.createAndAddPlacemark();
