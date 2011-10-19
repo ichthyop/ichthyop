@@ -49,7 +49,11 @@ public class GridPoint extends SimulationManagerAccessor {
         dx = dy = dz = 0.d;
         x = y = z = -1;
         lon = lat = depth = Double.NaN;
+        try {
         nz = getSimulationManager().getDataset().get_nz();
+        } catch (Exception ex) {
+            nz = -1;
+        }
     }
 
     public GridPoint() {
