@@ -292,7 +292,11 @@ public class WMSMapper extends JXMapKit {
         Array array = nc.findVariable(variable).read();
         float[] dataset = (float[]) array.get1DJavaArray(Float.class);
         if (variable.matches("time")) {
-            return new float[]{dataset[0], dataset[dataset.length - 1]};
+            if (dataset[0] > dataset[dataset.length - 1]) {
+                return new float[]{dataset[dataset.length - 1], dataset[0]};
+            } else {
+                return new float[]{dataset[0], dataset[dataset.length - 1]};
+            }
         } else {
             double mean = getMean(dataset);
             double stdDeviation = getStandardDeviation(dataset, mean);
@@ -511,8 +515,8 @@ public class WMSMapper extends JXMapKit {
         Color color = getBathyColor(getSimulationManager().getDataset().getBathy(i, j));
         /*double value = getSimulationManager().getDataset().get("temp", new double[] {i, j, getSimulationManager().getDataset().get_nz() - 1}, getSimulationManager().getTimeManager().get_tO() + getSimulationManager().getTimeManager().getSimulationDuration()).doubleValue();
         Color color = getSimulationManager().getDataset().isInWater(i, j)
-                ? getVarColor(value)
-                : Color.DARK_GRAY;*/
+        ? getVarColor(value)
+        : Color.DARK_GRAY;*/
         Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
         g.setColor(fillColor);
         g.fill(polygon);
@@ -560,12 +564,12 @@ public class WMSMapper extends JXMapKit {
                 + (1 - xdepth) * bottom.getBlue())));
 
     }
-    
+
     private Color getVarColor(double value) {
-        
+
         Color low = Color.CYAN;
         Color high = Color.ORANGE;
-        
+
         float xdepth = 0.f;
         if (Double.isNaN(value)) {
             return (Color.darkGray);
