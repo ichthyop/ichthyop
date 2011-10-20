@@ -176,7 +176,7 @@ public class Population extends HashSet {
                     : 1];
         for (int i = 0; i < Simulation.getNbReleaseEvents(); i++) {
             timeEvent[i] = Simulation.get_t0() +
-                           (long) (i * Simulation.getReleaseDt());
+                           (long) (i * Simulation.getReleaseDt() * Configuration.getTimeArrow());
         }
 
         if (DEBUG_PULSATION) {
