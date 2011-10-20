@@ -120,7 +120,7 @@ public class StepSerial implements Cloneable {
         dateFormat.setCalendar(calendar);
 
         i_simulation = -1;
-        dt = Configuration.get_dt();
+        dt = Configuration.getTimeArrow() * Configuration.get_dt();
         dt_record = Configuration.getDtRecord();
         reset();
         cpu_start = System.currentTimeMillis();

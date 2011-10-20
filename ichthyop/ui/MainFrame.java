@@ -1570,7 +1570,7 @@ public class MainFrame extends JFrame implements ActionListener, ChangeListener,
                 this.cancel(true);
             }
 
-            step = new Step(1, 0);
+            step = new Step(timeArrow, 0);
             /** Starts SERIAL simulation */
             do {
                 /** Initializes each new run */
