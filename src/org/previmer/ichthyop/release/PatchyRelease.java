@@ -84,7 +84,7 @@ public class PatchyRelease extends AbstractReleaseProcess {
                 if (is3D) {
                     depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
                 }
-                particle = ParticleFactory.createGridParticle(index, x, y, depth);
+                particle = ParticleFactory.createZoneParticle(index, x, y, depth);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;

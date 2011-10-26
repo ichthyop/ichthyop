@@ -7,6 +7,8 @@ package org.previmer.ichthyop.dataset;
 import java.io.IOException;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -198,7 +200,7 @@ abstract class Mars3dCommon extends MarsCommon {
         try {
             //-----------------------------------------------------------
             // Read hc, Cs_r and Cs_w in the NetCDF file.
-            Array arrHc = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+            Array arrHc = ncIn.findVariable(strHC).read(new int[]{jpo, ipo}, new int[]{ny, nx});
             hc = (float[][]) arrHc.copyToNDJavaArray();
         } catch (Exception ex) {
             IOException ioex = new IOException("{Dataset} Error reading hc variable. " + ex.toString());
@@ -364,8 +366,8 @@ abstract class Mars3dCommon extends MarsCommon {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
-        int j = (int) jy;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) Math.round(kz);
         double dx = ix - (double) i;
         double dy = jy - (double) j;
@@ -398,7 +400,7 @@ abstract class Mars3dCommon extends MarsCommon {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
         int k = (int) kz;
         double dx = ix - (double) i;
@@ -436,7 +438,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (int) Math.round(ix);
-        int j = (int) jy;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) kz;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
@@ -528,7 +530,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
@@ -649,5 +651,31 @@ abstract class Mars3dCommon extends MarsCommon {
         }
         z_w_cst_tmp = null;
         return z_w_tmp;
+    }
+
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length) {
+            case 4:
+                origin = new int[]{rank, 0, jpo, ipo};
+                shape = new int[]{1, nz, ny, nx};
+                break;
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                if (!variable.isUnlimited()) {
+                    origin = new int[]{0, jpo, ipo};
+                    shape = new int[]{nz, ny, nx};
+                } else {
+                    origin = new int[]{rank, jpo, ipo};
+                    shape = new int[]{1, ny, nx};
+                }
+                break;
+        }
+
+        return variable.read(origin, shape).reduce();
     }
 }

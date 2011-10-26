@@ -83,9 +83,6 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         }
         this.deathCause = cause;
         living = false;
-        setLon(Double.NaN);
-        setLat(Double.NaN);
-        setDepth(Double.NaN);
     }
 
     public ParticleMortality getDeathCause() {

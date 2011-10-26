@@ -78,6 +78,7 @@
                 <value>Beaching</value>
                 <default>Beaching</default>
                 <format>combo</format>
+                <accepted>None</accepted>
                 <accepted>Beaching</accepted>
                 <accepted>Bouncing</accepted>
                 <accepted>Standstill</accepted>
@@ -637,6 +638,47 @@
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.release.ZoneRelease</value>
                 <default>org.previmer.ichthyop.release.ZoneRelease</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="release">
+        <key>release.bottom</key>
+        <tree_path>Advanced/Release/At bottom</tree_path>
+        <description>Block of options for releasing particles within pre-defined geographical zones at sea bottom. This release mode adds a "zone" variable in the NetCDF output file. First time you enable the zone release, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>number_particles</key>
+                <long_name>Number of particles</long_name>
+                <value>1000</value>
+                <default>1000</default>
+                <format>integer</format>
+                <description>Number of particles released in the zones. The application randomly releases the particles within the zones in order to ensure a homogeneous distribution (= constant concentration of particles among the zones). The downside is that you do not control the number of particles released per zone. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
+            </parameter>
+            <parameter>
+                <key>zone_file</key>
+                <long_name>Zone file</long_name>
+                <value>cfg/benguela_zones.xml</value>
+                <default>cfg/my_zones.xml</default>
+                <format>zonefile</format>
+                <template>zone-benguela.xml</template>
+                <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>zone_tracker</key>
+                <long_name>Track zones</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "zone" variable in the NetCDF output file. Setting to false does not guarantee the "zone" variable will not be recorded in the NetCDF output file because it migt be required by another module (Recruitment for instance).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.release.BottomRelease</value>
+                <default>org.previmer.ichthyop.release.BottomRelease</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this release process.</description>
             </parameter>

@@ -9,6 +9,8 @@ import java.io.IOException;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -147,7 +149,7 @@ public class Roms3dDataset extends RomsCommon {
     private VertCoordType getVertCoordType() {
 
         if (null != ncIn.findGlobalAttribute("VertCoordType")) {
-            String strCoordType = ncIn.findGlobalAttribute(strCs_w).getStringValue();
+            String strCoordType = ncIn.findGlobalAttribute("VertCoordType").getStringValue();
             if (strCoordType.toLowerCase().matches(VertCoordType.OLD.name().toLowerCase())) {
                 return VertCoordType.NEW;
             }
@@ -369,8 +371,8 @@ public class Roms3dDataset extends RomsCommon {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
-        int j = (int) jy;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) Math.round(kz);
         double dx = ix - (double) i;
         double dy = jy - (double) j;
@@ -403,7 +405,7 @@ public class Roms3dDataset extends RomsCommon {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
         int k = (int) kz;
         double dx = ix - (double) i;
@@ -441,7 +443,7 @@ public class Roms3dDataset extends RomsCommon {
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (int) Math.round(ix);
-        int j = (int) jy;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) kz;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
@@ -520,7 +522,7 @@ public class Roms3dDataset extends RomsCommon {
         setAllFieldsTp1AtTime(rank);
     }
 
-    void setAllFieldsTp1AtTime(int rank) throws IOException {
+    void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -566,7 +568,7 @@ public class Roms3dDataset extends RomsCommon {
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
@@ -617,8 +619,7 @@ public class Roms3dDataset extends RomsCommon {
                 for (int i = nx - 1; i-- > 0;) {
                     w_double[k][j][i] = w_double[k - 1][j][i]
                             + (float) (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1]
-                            + Hvom[k - 1][j][i] - Hvom[k
-                            - 1][j + 1][i]);
+                            + Hvom[k - 1][j][i] - Hvom[k - 1][j + 1][i]);
                 }
             }
             for (int i = nx; i-- > 0;) {
@@ -697,5 +698,31 @@ public class Roms3dDataset extends RomsCommon {
 
         NEW,
         OLD;
+    }
+
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length) {
+            case 4:
+                origin = new int[]{rank, 0, jpo, ipo};
+                shape = new int[]{1, nz, ny, nx};
+                break;
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                if (!variable.isUnlimited()) {
+                    origin = new int[]{0, jpo, ipo};
+                    shape = new int[]{nz, ny, nx};
+                } else {
+                    origin = new int[]{rank, jpo, ipo};
+                    shape = new int[]{1, ny, nx};
+                }
+                break;
+        }
+
+        return variable.read(origin, shape).reduce();
     }
 }

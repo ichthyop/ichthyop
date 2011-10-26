@@ -209,11 +209,11 @@ public abstract class MarsCommon extends AbstractDataset {
         double[] ptGeo1, ptGeo2;
         for (int j = 1; j < ny - 1; j++) {
             for (int i = 1; i < nx - 1; i++) {
-                ptGeo1 = xy2lonlat(i - 0.5d, (double) j);
-                ptGeo2 = xy2lonlat(i + 0.5d, (double) j);
+                ptGeo1 = xy2latlon(i - 0.5d, (double) j);
+                ptGeo2 = xy2latlon(i + 0.5d, (double) j);
                 dxu[j][i] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
-                ptGeo1 = xy2lonlat((double) i, j - 0.5d);
-                ptGeo2 = xy2lonlat((double) i, j + 0.5d);
+                ptGeo1 = xy2latlon((double) i, j - 0.5d);
+                ptGeo2 = xy2latlon((double) i, j + 0.5d);
                 dyv[j][i] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
             }
         }
@@ -346,7 +346,7 @@ public abstract class MarsCommon extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
-    public double[] xy2lonlat(double xRho, double yRho) {
+    public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)

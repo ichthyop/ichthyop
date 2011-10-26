@@ -18,7 +18,7 @@ public class VDispAction extends AbstractAction {
     private String kv_field;
 
     public void loadParameters() throws Exception {
-        random = new MTRandom();
+        random = new MTRandom(true);
         kv_field = getParameter("kv_field");
         getSimulationManager().getDataset().requireVariable(kv_field, getClass());
     }

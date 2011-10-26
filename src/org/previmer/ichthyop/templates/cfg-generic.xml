@@ -78,6 +78,7 @@
                 <value>Beaching</value>
                 <default>Beaching</default>
                 <format>combo</format>
+                <accepted>None</accepted>
                 <accepted>Beaching</accepted>
                 <accepted>Bouncing</accepted>
                 <accepted>Standstill</accepted>
@@ -1125,6 +1126,46 @@
                 <default>false</default>
                 <format>boolean</format>
                 <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
+            </parameter>
+            <parameter>
+                <key>shrink_domain</key>
+                <long_name>Shrink simulated domain</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lat</key>
+                <long_name>Latitude of Northwest corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lon</key>
+                <long_name>Longitude of Northwest corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lat</key>
+                <long_name>Latitude of Southeast corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lon</key>
+                <long_name>Longitude of Southeast corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
             </parameter>
             <parameter>
                 <key>byte_mask_pattern</key>

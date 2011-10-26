@@ -23,13 +23,9 @@ public class SysActionMove extends AbstractSysAction {
     @Override
     public void execute(IMasterParticle particle) {
         if (!particle.isLocked()) {
-            checkCoastline(particle);
-            particle.applyMove();
+            checkCoastlineAndMove(particle);
             if (particle.isOnEdge()) {
                 particle.kill(ParticleMortality.OUT_OF_DOMAIN);
-                return;
-            } else if (!particle.isInWater()) {
-                particle.kill(ParticleMortality.BEACHED);
                 return;
             }
             particle.grid2Geo();
@@ -41,34 +37,44 @@ public class SysActionMove extends AbstractSysAction {
      * Implements specific behaviours in case the current move take the particle
      * inland.
      */
-    private void checkCoastline(IMasterParticle particle) {
+    private void checkCoastlineAndMove(IMasterParticle particle) {
 
         double[] move;
         switch (coastlineBehavior) {
-            case BEACHING:
-                /*
-                 * Default behaviorn, does nothing, the move might take the
-                 * particle inland and lead to a beaching.
+            case NONE:
+                /* Does nothing, the move might take the
+                 * particle inland.
                  */
                 break;
+            case BEACHING:
+                /*
+                 * The move might take the particle inland
+                 * and lead to a beaching.
+                 */
+                particle.applyMove();
+                if (!particle.isInWater()) {
+                    particle.kill(ParticleMortality.BEACHED);
+                }
+                return;
             case BOUNCING:
                 /*
                  * The particle will act exactly as a billard ball.
                  */
                 move = particle.getMove();
                 double[] bounce = bounceCostline(particle.getX(), particle.getY(), move[0], move[1]);
-                particle.increment(new double[] {bounce[0] - move[0], bounce[1] - move[1]});
+                particle.increment(new double[]{bounce[0] - move[0], bounce[1] - move[1]});
                 break;
             case STANDSTILL:
                 /*
                  * The particle will stand still instead of going in land.
                  */
                 move = particle.getMove();
-                if (!getSimulationManager().getDataset().isInWater(new double[] {particle.getX() + move[0], particle.getY() + move[1]})) {
-                    particle.increment(new double[] {-1.d * move[0], -1.d * move[1]});
+                if (!getSimulationManager().getDataset().isInWater(new double[]{particle.getX() + move[0], particle.getY() + move[1]})) {
+                    particle.increment(new double[]{-1.d * move[0], -1.d * move[1]});
                 }
                 break;
         }
+        particle.applyMove();
     }
 
     private double[] bounceCostline(double x, double y, double dx, double dy) {
@@ -132,17 +138,18 @@ public class SysActionMove extends AbstractSysAction {
 
     public enum CoastlineBehavior {
 
+        NONE,
         BEACHING,
         BOUNCING,
         STANDSTILL;
 
         public static CoastlineBehavior getBehavior(String s) {
             try {
-            for (CoastlineBehavior cb : CoastlineBehavior.values()) {
-                if (cb.name().equalsIgnoreCase(s)) {
-                    return cb;
+                for (CoastlineBehavior cb : CoastlineBehavior.values()) {
+                    if (cb.name().equalsIgnoreCase(s)) {
+                        return cb;
+                    }
                 }
-            }
             } catch (Exception ex) {
                 return BEACHING;
             }

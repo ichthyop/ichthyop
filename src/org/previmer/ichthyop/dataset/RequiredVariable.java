@@ -16,7 +16,6 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -94,40 +93,12 @@ public class RequiredVariable {
         }
     }
 
-    public void nextStep(NetcdfFile nc, int rank, int ip0, int jp0, double time_tp1, double dt_dataset) {
+    public void nextStep(Array array_tp1, double time_tp1, double dt_dataset) {
 
         this.time_tp1 = time_tp1;
         this.dt_dataset = dt_dataset;
-
-        Variable variable = nc.findVariable(name);
-        int[] origin = null, shape = null;
-        array_tp0 = array_tp1;
-        switch (variable.getShape().length) {
-            case 4:
-                origin = new int[]{rank, 0, jp0, ip0};
-                shape = new int[]{1, dataset.get_nz(), dataset.get_ny(), dataset.get_nx()};
-                break;
-            case 2:
-                origin = new int[]{jp0, ip0};
-                shape = new int[]{dataset.get_ny(), dataset.get_nx()};
-                break;
-            case 3:
-                if (!isUnlimited) {
-                    origin = new int[]{0, jp0, ip0};
-                    shape = new int[]{dataset.get_nz(), dataset.get_ny(), dataset.get_nx()};
-                } else {
-                    origin = new int[]{rank, jp0, ip0};
-                    shape = new int[]{1, dataset.get_ny(), dataset.get_nx()};
-                }
-                break;
-        }
-        try {
-            array_tp1 = variable.read(origin, shape).reduce();
-        } catch (IOException ex) {
-            Logger.getLogger(RequiredVariable.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(RequiredVariable.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        array_tp0 = this.array_tp1;
+        this.array_tp1 = array_tp1;
     }
 
     public Number get(double[] pGrid, double time) {
