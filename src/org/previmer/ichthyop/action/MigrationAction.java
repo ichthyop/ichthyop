@@ -78,7 +78,10 @@ public class MigrationAction extends AbstractAction {
                         break;
                     case LENGTH:
                         length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength();
-                        depth = getDepth(particle.getX(), particle.getY(), length);
+                        if (length >= 4){
+                            depth = getDepth(particle.getX(), particle.getY(), length);
+                        } else
+                            depth = particle.getDepth();
                         break;
                     case LENGTH_DAYNIGHT:
                         length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength();
@@ -127,21 +130,19 @@ public class MigrationAction extends AbstractAction {
         calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));
         long time = getSecondsOfDay(calendar);
 
-        if (length >= 2.8 && length <= 15.9) {
-            double factor = 0.0333 * length + 0.4667;
-            double tpi = Math.PI * ((time + 3600) - 3600) / (24 * 3600);
-            double depth_dvm = factor * (-((1 - Math.cos(2 * tpi)) / 2) * (depthDay - depthNight)) - depthNight;
+        //Equivalent equation:   double depth_dvm = factor * (((1 - Math.cos(2 * tpi)) / 2) * (depthDay - depthNight)) - depthNight;
+        if (length >= 4 && length <= 15.9) {
+            double factor = 0.05 * length + 0.2;
+            double tpi = Math.PI * (time - 3600) / (24 * 3600);
+            double depth_dvm = (factor * (Math.pow(-Math.sin(tpi),2)))*
+                    (depthDay - depthNight) - depthNight;
             return Math.max(bottom, depth_dvm);
 
-        } else if (length > 15.9) {
-            double factor = 1;
-            double tpi = Math.PI * ((time + 3600) - 3600) / (24 * 3600);
-            double depth_dvm = factor * (-((1 - Math.cos(2 * tpi)) / 2) * (depthDay - depthNight)) - depthNight;
-            return Math.max(bottom, depth_dvm);
         } else {
             double factor = 1;
-            double tpi = Math.PI * ((time + 3600) - 3600) / (24 * 3600);
-            double depth_dvm = factor * (-((1 - Math.cos(2 * tpi)) / 2) * (depthDay - depthNight)) - depthNight;
+            double tpi = Math.PI * (time - 3600) / (24 * 3600);
+            double depth_dvm = (factor * (Math.pow(-Math.sin(tpi),2)))*
+                    (depthDay - depthNight) - depthNight;
             return Math.max(bottom, depth_dvm);
         }
     }

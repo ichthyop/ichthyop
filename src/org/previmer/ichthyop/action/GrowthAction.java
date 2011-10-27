@@ -26,6 +26,7 @@ public class GrowthAction extends AbstractAction {
     private double tp_threshold;// = 10.d; //°C
     private double coeff1; //0.02d
     private double coeff2; //0.03d
+    private double temperature;
     private String temperature_field;
     private String largePhyto_field;
     private String smallZoo_field;
@@ -58,7 +59,6 @@ public class GrowthAction extends AbstractAction {
         }
         temperature_field = getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "option.biology_dataset", "temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-
         if (type.equals(TypeGrowth.FOOD_LIMITATED)) {
             largePhyto_field = getParameter("largePhyto_field");
             smallZoo_field = getParameter("smallZoo_field");
@@ -96,71 +96,126 @@ public class GrowthAction extends AbstractAction {
         double spawningTp;
         switch (type) {
             case LINEAR:
-                length = linearGrow(gparticle.getLength(), tp);
+                length = grow(gparticle.getLength(), tp, particle);
                 break;
             case STAGE_DEPENDANT:
                 spawningTp = ((IniStageLayer) particle.getLayer(IniStageLayer.class)).getSpawingTemperature();
-                length = growPerStage(spawningTp, particle.getAge(), gparticle.getLength(), tp, gparticle.getStage());
+                length = grow(spawningTp, particle.getAge(), gparticle.getLength(), tp, particle);
                 break;
             case FOOD_LIMITATED:
                 spawningTp = ((IniStageLayer) particle.getLayer(IniStageLayer.class)).getSpawingTemperature();
                 double lphyto = getSimulationManager().getDataset().get(largePhyto_field, particle.getGridCoordinates(), time).doubleValue();
                 double lzoo = getSimulationManager().getDataset().get(largeZoo_field, particle.getGridCoordinates(), time).doubleValue();
                 double szoo = getSimulationManager().getDataset().get(smallZoo_field, particle.getGridCoordinates(), time).doubleValue();
-                length = gompertzGrow(spawningTp, particle.getAge(), gparticle.getLength(), tp, lphyto, szoo, lzoo, gparticle.getStage());
+                length = grow(spawningTp, particle.getAge(), gparticle.getLength(), tp, lphyto, szoo, lzoo, gparticle.getStage());
                 break;
         }
         gparticle.setLength(length);
     }
 
-    private double linearGrow(double length, double temperature) {
+    private double grow(double length, double temperature, IBasicParticle particle) {
 
-        double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
-        length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
-        return length;
+        int eggstage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getEggStage();
+        this.temperature = temperature;
 
+        System.out.println("Length GrowthAction: " + (float)length);
+
+        if (eggstage < 10) {
+            return length = 2.79d;
+        } else {
+            double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
+            length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
+            return length;}
     }
 
-    private double growPerStage(double temp_ini, double age, double length, double temperature, Stage stage) {
-        double erre;
-        /**constante para la expresion de los huevos*/
-        double constante;
-        double constante2;
-        double constante3;
-        double zeta;
-        double Regner;
-        /**para pasar el age (sg) a edad (dias) */
-        double edad = age / (double) Constant.ONE_DAY;
-        temperature = Math.max(temperature, tp_threshold);
-        erre = 0.0016 * temperature * temperature;
-        constante = 0.20466d + (0.369659d * temperature) - (0.00893519d * temperature * temperature);
-        constante2 = 0.335907d + (0.001603d * temperature);
-        constante3 = 7.87357d - (0.841969d * temperature) + (0.028809d * temperature * temperature);
-        zeta = -constante2 * Math.exp(-1.d * constante3 * edad);
-        Regner = (1.d / 1.012896d) * (1.d + Math.exp((4.914322d) - (0.257451d * temp_ini)));
-        double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
-        double dlength = 0;
-        switch (stage) {
-            case EGG:
-                dlength = (erre * Math.exp(erre * edad)) * dt_day;
-                break;
-            case YOLK_SAC_LARVA:
-                dlength = (constante * constante2 * constante3 * Math.exp(-1 * constante3 * (edad - Regner)) * Math.exp(zeta)) * dt_day;
-                break;
-            case FEEDING_LARVA:
-                dlength = (.02d + .03d * temperature) * dt_day;
-                break;
 
+    public double getTemperature() {
+        return temperature;
+    }
+
+private double grow(double temp_ini, double age, double length, double temperature, IBasicParticle particle) {
+    
+        int eggstage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getEggStage();
+        Stage stage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage();this.temperature = temperature;
+
+        double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
+        double edad = age / 86400;
+        double constante = 0.20466 + (0.369659 * temperature) - (0.00893519 * temperature * temperature);
+        double constante2 = 0.335907 + (0.001603 * temperature);
+        double constante3 = 7.87357 - (0.841969 * temperature) + (0.028809 * temperature * temperature);
+        double zeta = -constante2 * Math.exp(-1 * constante3 * edad);
+        double Regner = (1 / 1.012896) * (1 + Math.exp((4.914322) - (0.257451 * temp_ini)));
+
+        double Lini = 3.4d;
+        double Akte = 0.1868d;
+        double alfa = 0.0781d;
+
+//        System.out.println("New length:               " + (float)length);
+//        System.out.println("==========================================");
+
+
+        /** eggs */
+        if (eggstage < 10){
+            return length = 2.79d;
+        }else {
+
+        /** Yolk-Sac Larvae */
+        if (stage==Stage.YOLK_SAC_LARVA) {
+            //length += Lini *  Math.exp((Akte/alfa)*(1- Math.exp(-alfa*dt_day)));
+            length += (constante * constante2 * constante3 * Math.exp(-1 * constante3 * (edad - Regner)) * Math.exp(zeta)) * dt_day;
+            return length;
+        } /** Feeding Larvae */
+        else if (stage==Stage.FEEDING_LARVA){
+            //length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
+            length += (0.02 + 0.03 * Math.max(temperature, tp_threshold)) * dt_day;
+            return length;
+        }else {
+            length = 2.8;
+            return length;}
         }
-        return length + dlength;
-    }
+}
+
+//    private double grow(double temp_ini, double age, double length, double temperature, Stage stage) {
+//        double erre;
+//        /**constante para la expresion de los huevos*/
+//        double constante;
+//        double constante2;
+//        double constante3;
+//        double zeta;
+//        double edad;
+//        /**para pasar el age (sg) a edad (dias) */
+//        double Regner;
+//        edad = age / 86400;
+//        temperature = Math.max(temperature, tp_threshold);
+//        erre = 0.0016 * temperature * temperature;
+//        constante = 0.20466 + (0.369659 * temperature) - (0.00893519 * temperature * temperature);
+//        constante2 = 0.335907 + (0.001603 * temperature);
+//        constante3 = 7.87357 - (0.841969 * temperature) + (0.028809 * temperature * temperature);
+//        zeta = -constante2 * Math.exp(-1 * constante3 * edad);
+//        Regner = (1 / 1.012896) * (1 + Math.exp((4.914322) - (0.257451 * temp_ini)));
+//        double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
+//        switch (stage) {
+//            case EGG:
+//                length += (erre * Math.exp(erre * edad)) * dt_day;
+//                break;
+//            case YOLK_SAC_LARVA:
+//                length += (constante * constante2 * constante3 * Math.exp(-1 * constante3 * (edad - Regner)) * Math.exp(zeta)) * dt_day;
+//                break;
+//            case FEEDING_LARVA:
+//                length += (.02d + .03d * Math.max(temperature,
+//                        tp_threshold)) * dt_day;
+//                break;
+//
+//        }
+//        return length;
+//    }
 
     /**
      * Esta seria la expresion de crecimiento segun la equacion de Gompertz limitada por comida
      * para los huevos y yolk sac larva sigue la de Gompertz. Si es feeding sigue la original de
      * Ichthyop con el food limiting factor
      */
-    private double gompertzGrow(double temp_ini, double age, double length, double temperature, double lPhyto,
+    private double grow(double temp_ini, double age, double length, double temperature, double lPhyto,
             double sZoo, double lZoo, Stage stage) {
 
         double erre;

@@ -13,6 +13,26 @@ import org.previmer.ichthyop.manager.ParameterManager;
  */
 public class GrowingParticleLayer extends ParticleLayer {
 
+///////////////////////////////
+// Declaration of the constants
+///////////////////////////////
+    final public static double alfaK = 42922.0767d;
+    final public static double betaK = 2.290236d;
+    final public static double K2 = 6953.4d;
+    final public static double K3 = 3562.5d;
+    final public static double K4 = 6438.3d;
+    final public static double K5 = 3476.7d;
+    final public static double K6 = 8284d;
+    final public static double K7 = 4678.5d;
+    final public static double K8 = 4807.2d;
+    final public static double K9 = 2704.1d;
+    final public static double K10 = 2017.4d;
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
+    private double ratioStage;
+    private double temperature;
+
     /**
      * Particle length [millimeter]
      */
@@ -34,8 +54,10 @@ public class GrowingParticleLayer extends ParticleLayer {
         super(particle);
     }
 
+    @Override
     public void init() {
         loadParameters();
+        ratioStage = 1.d;
         length = length_init;
     }
 
@@ -45,6 +67,70 @@ public class GrowingParticleLayer extends ParticleLayer {
         length_init = Float.valueOf(parameterManager.getParameter("app.particle_length", "initial_length"));
         hatch_length = Float.valueOf(parameterManager.getParameter("app.particle_length", "hatch_length"));
         yolk_to_feeding_length = Float.valueOf(parameterManager.getParameter("app.particle_length", "yolk2feeding_length"));
+    }
+
+    public int getEggStage() {
+        return (int) Math.min(Math.floor(ratioStage), 10);
+    }
+
+    public double ratiostage(double temperature, double salinity, double waterDensity) {
+
+        this.temperature = temperature;
+
+        int dt = getSimulationManager().getTimeManager().get_dt();
+        double stageDuration = 0.d;
+
+        int stage = getEggStage();
+
+        if (stage == 1) {
+            stageDuration = K2 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 2) // Stage 3
+        {
+            stageDuration = K3 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 3) // Stage 4
+        {
+            stageDuration = K4 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 4) // Stage 5
+        {
+            stageDuration = K5 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 5) // Stage 6
+        {
+            stageDuration = K6 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 6) // Stage 7
+        {
+            stageDuration = K7 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 7) // Stage 8
+        {
+            stageDuration = K8 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 8) // Stage 9
+        {
+            stageDuration = K9 * Math.pow(temperature, -betaK);
+
+        } else if (stage == 9) // Stage 10
+        {
+            stageDuration = K10 * Math.pow(temperature, -betaK);
+
+        }
+        ratioStage = ratioStage + (dt / 3600.f) / stageDuration;
+
+        //System.out.println("ratioStage Buoyant: " + (float)ratioStage);
+        //System.out.println("Stage Buoyant:      " + (float)stage);
+
+        return ratioStage;
+    }
+
+     /**
+     * @return the temperature
+     */
+    public double getTemperature() {
+        return temperature;
     }
 
     public double getLength() {

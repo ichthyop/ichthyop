@@ -119,9 +119,9 @@ public class AndresBuoyancyAction extends AbstractAction {
     private double move(double sal, double tp, double dt, IBasicParticle particle) {
 
         waterDensity = BuoyancyAction.waterDensity(sal, tp);
-        int stage = ((BuoyantParticleLayer) particle.getLayer(BuoyantParticleLayer.class)).getStage();
-        if (stage < 11) {
-            double particleDensity = ((BuoyantParticleLayer) particle.getLayer(BuoyantParticleLayer.class)).computeSpecificGravity(tp, sal, waterDensity);
+        int stage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getEggStage();
+        if (stage < 10) {
+            double particleDensity = ((BuoyantParticleLayer) particle.getLayer(BuoyantParticleLayer.class)).computeSpecificGravity(tp, sal, waterDensity, particle);
             return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f
                     * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
                     * (waterDensity - particleDensity)) / 100.0f) * dt);
