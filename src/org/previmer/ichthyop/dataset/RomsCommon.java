@@ -119,7 +119,7 @@ abstract class RomsCommon extends AbstractDataset {
      */
     private double latMin, lonMin, latMax, lonMax, depthMax;
 
-    abstract void setAllFieldsTp1AtTime(int rank) throws IOException;
+    abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
 
     void loadParameters() {
 
@@ -599,7 +599,7 @@ abstract class RomsCommon extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
-    public double[] xy2lonlat(double xRho, double yRho) {
+    public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
@@ -787,7 +787,7 @@ abstract class RomsCommon extends AbstractDataset {
                 throw ioex;
             }
         }
-        getLogger().info("Opened dataset " + filename);
+        getLogger().log(Level.INFO, "Opened dataset {0}", filename);
     }
 
     /**

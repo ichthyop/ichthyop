@@ -32,6 +32,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -50,6 +51,7 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.IOTools;
@@ -58,8 +60,8 @@ import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayFloat.D1;
 import ucar.ma2.ArrayFloat.D2;
+import ucar.ma2.ArrayInt;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -78,7 +80,7 @@ public class WMSMapper extends JXMapKit {
     private HashMap<String, DrawableZone> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private NetcdfFile nc;
-    private Variable vlon, vlat, pcolorVariable, vtime;
+    private Variable vlon, vlat, pcolorVariable, vtime, vmortality;
     boolean canRepaint = false;
     private Painter bgPainter;
     boolean loadFromHeap = false;
@@ -109,13 +111,15 @@ public class WMSMapper extends JXMapKit {
     private float valmed = 50;
     private float valmax = 100;
     private Painter colorbarPainter;
+    final private Color bottom = new Color(0, 0, 150);
+    final private Color surface = Color.CYAN;
+    private boolean gridVisible = false;
 
     public WMSMapper() {
-        setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.Custom);
+        setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
         setMiniMapVisible(false);
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
-        setTileFactory(tileFactory);
         //getMainMap().addMouseMotionListener(new LonLatTracker());
     }
 
@@ -124,9 +128,7 @@ public class WMSMapper extends JXMapKit {
             setTileFactory(new MGDSTileFactory());
         } else if (wmsURL.contains("demis")) {
             setTileFactory(new DemisTileFactory());
-        } else if (wmsURL.contains("nasa")) {
-            setTileFactory(new NasaTileFactory());
-        } else {
+        } else if (wmsURL.contains("street")) {
             setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
         }
         setAddressLocation(new GeoPosition(defaultLat, defaultLon));
@@ -186,6 +188,7 @@ public class WMSMapper extends JXMapKit {
 
         vlon = nc.findVariable("lon");
         vlat = nc.findVariable("lat");
+        vmortality = nc.findVariable("mortality");
         vtime = nc.findVariable("time");
         if (vtime.findAttribute("calendar").getStringValue().matches("climato")) {
             calendar = new ClimatoCalendar();
@@ -241,6 +244,18 @@ public class WMSMapper extends JXMapKit {
                 cp.setPainters(getBgPainter());
                 cp.setCacheable(false);
                 getMainMap().setOverlayPainter(cp);
+                /*
+                 * Check whether the mask can be drawn
+                 */
+                gridVisible = false;
+                if (null != getSimulationManager().getConfigurationFile() && getSimulationManager().isSetup()) {
+                    if (null != nc.findGlobalAttribute("xml_file")) {
+                        String xml = nc.findGlobalAttribute("xml_file").getStringValue();
+                        if (getSimulationManager().getConfigurationFile().getPath().matches(xml)) {
+                            gridVisible = true;
+                        }
+                    }
+                }
             } catch (IOException ex) {
                 SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             }
@@ -253,13 +268,12 @@ public class WMSMapper extends JXMapKit {
             setZoom(defaultZoom);
             getMainMap().setOverlayPainter(null);
         }
-
     }
 
     public String[] getVariableList() {
         List<String> list = new ArrayList();
-        list.add(new String("None"));
-        list.add(new String("time"));
+        list.add("None");
+        list.add("time");
         for (Variable variable : nc.getVariables()) {
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
@@ -278,12 +292,17 @@ public class WMSMapper extends JXMapKit {
         Array array = nc.findVariable(variable).read();
         float[] dataset = (float[]) array.get1DJavaArray(Float.class);
         if (variable.matches("time")) {
-            return new float[]{dataset[0], dataset[dataset.length - 1]};
+            if (dataset[0] > dataset[dataset.length - 1]) {
+                return new float[]{dataset[dataset.length - 1], dataset[0]};
+            } else {
+                return new float[]{dataset[0], dataset[dataset.length - 1]};
+            }
         } else {
             double mean = getMean(dataset);
             double stdDeviation = getStandardDeviation(dataset, mean);
             float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
             float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
+            System.out.println("min: " + getMin(dataset) + " max: " + getMax(dataset));
             return new float[]{lower, upper};
         }
     }
@@ -393,11 +412,12 @@ public class WMSMapper extends JXMapKit {
 
                 drawRegion(g, map);
                 drawZones(g, map);
-
+                if (gridVisible) {
+                    drawGrid(g, map);
+                }
                 g.dispose();
             }
         };
-
         return bgOverlay;
     }
 
@@ -462,6 +482,124 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
+    private void addCellPoint(JXMapViewer map, Polygon polygon, double x, double y) {
+        double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
+        GeoPosition gp = new GeoPosition(pos[0], pos[1]);
+        Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
+        polygon.addPoint((int) pt.getX(), (int) pt.getY());
+    }
+
+    private Point2D getPoint(JXMapViewer map, double x, double y) {
+        double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
+        GeoPosition gp = new GeoPosition(pos[0], pos[1]);
+        return map.getTileFactory().geoToPixel(gp, map.getZoom());
+    }
+
+    private void drawMask(Graphics2D g, JXMapViewer map, int i, int j) {
+
+        Line2D line = new Line2D.Float(getPoint(map, i - 0.5, j + 0.5), getPoint(map, i + 0.5, j + 0.5));
+        g.setColor(Color.DARK_GRAY);
+        g.draw(line);
+        line.setLine(getPoint(map, i + 0.5, j + 0.5), getPoint(map, i + 0.5, j - 0.5));
+        g.draw(line);
+    }
+
+    private void drawCell(Graphics2D g, JXMapViewer map, int i, int j) {
+
+        Polygon polygon = new Polygon();
+        addCellPoint(map, polygon, i - 0.5, j - 0.5);
+        addCellPoint(map, polygon, i + 0.5, j - 0.5);
+        addCellPoint(map, polygon, i + 0.5, j + 0.5);
+        addCellPoint(map, polygon, i - 0.5, j + 0.5);
+
+        Color color = getBathyColor(getSimulationManager().getDataset().getBathy(i, j));
+        /*double value = getSimulationManager().getDataset().get("temp", new double[] {i, j, getSimulationManager().getDataset().get_nz() - 1}, getSimulationManager().getTimeManager().get_tO() + getSimulationManager().getTimeManager().getSimulationDuration()).doubleValue();
+        Color color = getSimulationManager().getDataset().isInWater(i, j)
+        ? getVarColor(value)
+        : Color.DARK_GRAY;*/
+        Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
+        g.setColor(fillColor);
+        g.fill(polygon);
+        g.draw(polygon);
+    }
+
+    SimulationManager getSimulationManager() {
+        return SimulationManager.getInstance();
+    }
+
+    /*private Color getMaskColor(int i, int j) {
+    
+    NemoDataset dataset = (NemoDataset) getSimulationManager().getDataset();
+    if (!dataset.getUMask(i, j) && !dataset.getVMask(i, j)) {
+    return Color.ORANGE;
+    }
+    if (!dataset.getUMask(i, j)) {
+    return Color.GREEN;
+    }
+    if (!dataset.getVMask(i, j)) {
+    return Color.MAGENTA;
+    }
+    if (!dataset.isInWater(i, j)) {
+    return Color.DARK_GRAY;
+    }
+    return Color.CYAN;
+    
+    }*/
+    private Color getBathyColor(double depth) {
+
+        float xdepth = 0.f;
+        if (Double.isNaN(depth)) {
+            return (Color.darkGray);
+        } else {
+            xdepth = (float) Math.abs((getSimulationManager().getDataset().getDepthMax() - depth)
+                    / getSimulationManager().getDataset().getDepthMax());
+            xdepth = Math.max(0, Math.min(xdepth, 1));
+
+        }
+        return (new Color((int) (xdepth * surface.getRed()
+                + (1 - xdepth) * bottom.getRed()),
+                (int) (xdepth * surface.getGreen()
+                + (1 - xdepth) * bottom.getGreen()),
+                (int) (xdepth * surface.getBlue()
+                + (1 - xdepth) * bottom.getBlue())));
+
+    }
+
+    private Color getVarColor(double value) {
+
+        Color low = Color.CYAN;
+        Color high = Color.ORANGE;
+
+        float xdepth = 0.f;
+        if (Double.isNaN(value)) {
+            return (Color.darkGray);
+        } else {
+            xdepth = (float) Math.abs(value - 10) / 15.f;
+            xdepth = Math.max(0, Math.min(xdepth, 1));
+
+        }
+        return (new Color((int) (xdepth * high.getRed()
+                + (1 - xdepth) * low.getRed()),
+                (int) (xdepth * high.getGreen()
+                + (1 - xdepth) * low.getGreen()),
+                (int) (xdepth * high.getBlue()
+                + (1 - xdepth) * low.getBlue())));
+    }
+
+    private void drawGrid(Graphics2D g, JXMapViewer map) {
+
+        IDataset dataset = getSimulationManager().getDataset();
+        for (int i = 1; i < dataset.get_nx() - 1; i++) {
+            for (int j = 1; j < dataset.get_ny() - 1; j++) {
+                //drawCell(g, map, i, j);
+                if (!dataset.isInWater(i, j)) {
+                    drawCell(g, map, i, j);
+                    //drawMask(g, map, i, j);
+                }
+            }
+        }
+    }
+
     private void drawRegion(Graphics2D g, JXMapViewer map) {
         Polygon poly = new Polygon();
         for (GeoPosition gp : getRegion()) {
@@ -472,7 +610,7 @@ public class WMSMapper extends JXMapKit {
 
         //do the drawing
         g.setColor(new Color(255, 255, 205, 50));
-        g.fill(poly);
+        //g.fill(poly);
         g.setColor(Color.WHITE);
         g.draw(poly);
     }
@@ -481,11 +619,15 @@ public class WMSMapper extends JXMapKit {
 
         //create a polygon
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
-        Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), particlePixel, particlePixel);
-
-        //do the drawing
-        g.setColor(getColor(particle.getColorValue()));
-        g.fill(ellipse);
+        if (particle.isLiving()) {
+            Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), particlePixel, particlePixel);
+            g.setColor(getColor(particle.getColorValue()));
+            g.fill(ellipse);
+        } else {
+            g.setColor(Color.BLACK);
+            Rectangle2D rectangle = new Rectangle2D.Double(pt.getX() + 0.5d * particlePixel, pt.getY() - 0.5d * particlePixel, particlePixel, particlePixel);
+            g.fill(rectangle);
+        }
     }
 
     /**
@@ -725,8 +867,9 @@ public class WMSMapper extends JXMapKit {
     private List<DrawableParticle> getParticles(int index) {
         List<DrawableParticle> list = new ArrayList();
         try {
-            ArrayFloat.D1 arrLon = (D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce();
-            ArrayFloat.D1 arrLat = (D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce();
+            ArrayFloat.D1 arrLon = (ArrayFloat.D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce(0);
+            ArrayFloat.D1 arrLat = (ArrayFloat.D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce(0);
+            ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
                 if (pcolorVariable.getName().matches("time")) {
@@ -736,9 +879,9 @@ public class WMSMapper extends JXMapKit {
                 }
             }
             int length = arrLon.getShape()[0];
-            for (int i = 0; i < length - 1; i++) {
+            for (int i = 0; i < length; i++) {
                 float lon = arrLon.get(i);
-                if (!Float.isNaN(lon)) {
+                if (arrMortality.get(i) == 0) {
                     if (null != arrColorVariable) {
                         if (arrColorVariable.getSize() < 2) {
                             list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
@@ -748,6 +891,8 @@ public class WMSMapper extends JXMapKit {
                     } else {
                         list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
                     }
+                } else {
+                    list.add(new DrawableParticle(lon, arrLat.get(i)));
                 }
             }
         } catch (IOException ex) {
@@ -788,7 +933,11 @@ public class WMSMapper extends JXMapKit {
         dtFormat.setCalendar(calendar);
         dtFormat2.setCalendar(calendar);
         stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
-        stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
+        if (getTime(i).before(getTime(i + 1))) {
+            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
+        } else {
+            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i + 1))).withEnd(dtFormat.format(getTime(i)));
+        }
         for (DrawableParticle particle : getParticles(i)) {
             String coord = Double.toString(particle.getLongitude()) + "," + Double.toString(particle.getLatitude());
             Placemark placeMark = stepFolder.createAndAddPlacemark();
@@ -813,7 +962,7 @@ public class WMSMapper extends JXMapKit {
         int red = color.getRed();
         int green = color.getGreen();
         int blue = color.getBlue();
-        StringBuffer hexColor = new StringBuffer(8);
+        StringBuilder hexColor = new StringBuilder(8);
         hexColor.append("ff");
         String hR = Integer.toHexString(red);
         if (hR.length() < 2) {
@@ -874,7 +1023,7 @@ public class WMSMapper extends JXMapKit {
 
         public void run() {
             dtFormat.setCalendar(calendar);
-            StringBuffer filename = new StringBuffer(getFile().getParent());
+            StringBuilder filename = new StringBuilder(getFile().getParent());
             filename.append(File.separator);
             String id = getFile().getName().substring(0, getFile().getName().indexOf(".nc"));
             filename.append(id);
@@ -970,14 +1119,26 @@ public class WMSMapper extends JXMapKit {
     class DrawableParticle extends GeoPosition {
 
         private float colorValue;
+        private boolean isLiving;
 
         DrawableParticle(float lon, float lat, float colorValue) {
             super(lat, lon);
             this.colorValue = colorValue;
+            isLiving = true;
+        }
+
+        private DrawableParticle(float lon, float lat) {
+            super(lat, lon);
+            isLiving = false;
+            colorValue = Float.NaN;
         }
 
         public float getColorValue() {
             return colorValue;
+        }
+
+        public boolean isLiving() {
+            return isLiving;
         }
     }
 
@@ -1000,6 +1161,7 @@ public class WMSMapper extends JXMapKit {
         }
 
         private Color getColor(String strColor) {
+
             if (null == strColor) {
                 return Color.WHITE;
             }

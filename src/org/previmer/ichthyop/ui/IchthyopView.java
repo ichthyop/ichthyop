@@ -722,6 +722,8 @@ public class IchthyopView extends FrameView
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             checkCfgVersionAndLoad(chooser.getSelectedFile());
+            cfgPath=chooser.getCurrentDirectory();
+
         }
         return null;
     }
@@ -1663,7 +1665,7 @@ public class IchthyopView extends FrameView
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        taskPaneConfiguration.getContentPane().add(pnlFile);
+        taskPaneConfiguration.add(pnlFile);
 
         taskPaneSimulation.setAnimated(false);
         taskPaneSimulation.setIcon(resourceMap.getIcon("step.Simulation.icon")); // NOI18N
@@ -1724,7 +1726,7 @@ public class IchthyopView extends FrameView
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        taskPaneSimulation.getContentPane().add(pnlSimulation);
+        taskPaneSimulation.add(pnlSimulation);
 
         taskPaneMapping.setAnimated(false);
         taskPaneMapping.setIcon(resourceMap.getIcon("step.Mapping.icon")); // NOI18N
@@ -1752,7 +1754,7 @@ public class IchthyopView extends FrameView
         pnlWMS.setName("pnlWMS"); // NOI18N
         pnlWMS.setOpaque(false);
 
-        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "http://www.marine-geo.org/services/wms?", "http://wms.jpl.nasa.gov/wms.cgi?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
+        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&", "None" }));
         cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
         cbBoxWMS.setName("cbBoxWMS"); // NOI18N
 
@@ -2011,7 +2013,7 @@ public class IchthyopView extends FrameView
             pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlMappingLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnMapping)
@@ -2029,7 +2031,7 @@ public class IchthyopView extends FrameView
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        taskPaneMapping.getContentPane().add(pnlMapping);
+        taskPaneMapping.add(pnlMapping);
 
         taskPaneAnimation.setAnimated(false);
         taskPaneAnimation.setIcon(resourceMap.getIcon("step.Animation.icon")); // NOI18N
@@ -2221,7 +2223,7 @@ public class IchthyopView extends FrameView
                 .addGap(12, 12, 12))
         );
 
-        taskPaneAnimation.getContentPane().add(pnlAnimation);
+        taskPaneAnimation.add(pnlAnimation);
 
         javax.swing.GroupLayout stepsPanelLayout = new javax.swing.GroupLayout(stepsPanel);
         stepsPanel.setLayout(stepsPanelLayout);
@@ -2247,15 +2249,15 @@ public class IchthyopView extends FrameView
 
         stepsScrollPane.setViewportView(stepsPanel);
 
-        javax.swing.GroupLayout titledPanelStepsLayout = new javax.swing.GroupLayout(titledPanelSteps.getContentContainer());
-        titledPanelSteps.getContentContainer().setLayout(titledPanelStepsLayout);
+        javax.swing.GroupLayout titledPanelStepsLayout = new javax.swing.GroupLayout(titledPanelSteps);
+        titledPanelSteps.setLayout(titledPanelStepsLayout);
         titledPanelStepsLayout.setHorizontalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(stepsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         titledPanelStepsLayout.setVerticalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
         );
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
@@ -2265,8 +2267,8 @@ public class IchthyopView extends FrameView
 
         loggerScrollPane.setName("loggerScrollPane"); // NOI18N
 
-        javax.swing.GroupLayout titledPanelLoggerLayout = new javax.swing.GroupLayout(titledPanelLogger.getContentContainer());
-        titledPanelLogger.getContentContainer().setLayout(titledPanelLoggerLayout);
+        javax.swing.GroupLayout titledPanelLoggerLayout = new javax.swing.GroupLayout(titledPanelLogger);
+        titledPanelLogger.setLayout(titledPanelLoggerLayout);
         titledPanelLoggerLayout.setHorizontalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
@@ -2302,15 +2304,15 @@ public class IchthyopView extends FrameView
         jScrollPane3.setViewportView(gradientPanel);
         createMainPanel();
 
-        javax.swing.GroupLayout titledPanelMainLayout = new javax.swing.GroupLayout(titledPanelMain.getContentContainer());
-        titledPanelMain.getContentContainer().setLayout(titledPanelMainLayout);
+        javax.swing.GroupLayout titledPanelMainLayout = new javax.swing.GroupLayout(titledPanelMain);
+        titledPanelMain.setLayout(titledPanelMainLayout);
         titledPanelMainLayout.setHorizontalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
         );
         titledPanelMainLayout.setVerticalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
         );
 
         splitPane.setRightComponent(titledPanelMain);

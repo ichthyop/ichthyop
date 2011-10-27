@@ -194,6 +194,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 ? "3d"
                 : "2d";
         ncOut.addGlobalAttribute("transport_dimension", dim);
+
+        /* Write all parameters */
         for (BlockType type : BlockType.values()) {
             for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
                 if (!block.getType().equals(BlockType.OPTION)) {
@@ -209,6 +211,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
             }
         }
+
+        /* Add the corresponding xml file */
+        ncOut.addGlobalAttribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath());
     }
 
     private List<GeoPosition> makeZoneEdge(Zone zone) {
@@ -246,7 +251,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         Point2D.Float pt1 = listPt.get(0);
-        double[] lonlat = dataset.xy2lonlat(pt1.x, pt1.y);
+        double[] lonlat = dataset.xy2latlon(pt1.x, pt1.y);
         GeoPosition gp = new GeoPosition(lonlat[0], lonlat[1]);
         list.add(gp);
         listPt.remove(pt1);
@@ -260,7 +265,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     distMin = dist;
                 }
             }
-            lonlat = dataset.xy2lonlat(closestToP1.x, closestToP1.y);
+            lonlat = dataset.xy2latlon(closestToP1.x, closestToP1.y);
             gp = new GeoPosition(lonlat[0], lonlat[1]);
             list.add(gp);
             listPt.remove(closestToP1);

@@ -1,22 +1,35 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  Copyright (C) 2011 lysel
+ * 
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.previmer.ichthyop.release;
 
-import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.io.ZoneTracker;
+import org.previmer.ichthyop.event.ReleaseEvent;
 
 /**
  *
- * @author pverley
+ * @author lysel
  */
-public class ZoneRelease extends AbstractReleaseProcess {
+public class BottomRelease extends AbstractReleaseProcess {
 
-    private int nbReleaseZones, nbParticles;
+ private int nbReleaseZones, nbParticles;
     private boolean is3D;
 
     public void loadParameters() throws Exception {
@@ -25,7 +38,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
         nbParticles = Integer.valueOf(getParameter("number_particles"));
 
         /* Check whether 2D or 3D simulation */
-        is3D = getSimulationManager().getDataset().is3D();
+        is3D = true;
 
         /* Load release zones*/
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
@@ -50,12 +63,6 @@ public class ZoneRelease extends AbstractReleaseProcess {
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());
             ymax = Math.max(ymax, zone.getYmax());
-            if (is3D) {
-                upDepth = Math.min(upDepth, zone.getUpperDepth());
-                lowDepth = Math.max(lowDepth, zone.getLowerDepth());
-            } else {
-                upDepth = lowDepth = Double.NaN;
-            }
         }
 
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
@@ -70,11 +77,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
                 }
                 double x = xmin + Math.random() * (xmax - xmin);
                 double y = ymin + Math.random() * (ymax - ymin);
-                double depth = Double.NaN;
-                if (is3D) {
-                    depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
-                }
-                particle = ParticleFactory.createZoneParticle(index, x, y, depth);
+                particle = ParticleFactory.createBottomParticle(index, x, y);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;

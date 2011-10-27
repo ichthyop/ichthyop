@@ -29,7 +29,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
 
     @Override
     public void loadParameters() throws IOException {
-        
+
         /* make sure file exits and can be read */
         filename = IOTools.resolveFile(getParameter("ncfile"));
 
@@ -116,7 +116,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
         lonArr = null;
         latArr = null;
         depthArr = null;
-        //deathArr = null;
+        mortalityArr = null;
         nc.close();
         return index;
     }

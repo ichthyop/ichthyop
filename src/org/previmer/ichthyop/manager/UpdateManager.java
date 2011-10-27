@@ -67,7 +67,7 @@ public class UpdateManager extends AbstractManager {
         /*
          * Update the recruitment in zone block
          */
-        getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getSimpleName());
+        getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
         String treepath = getXBlock(BlockType.ACTION, "action.recruitment").getTreePath();
         String newTreepath = treepath.startsWith("Advanced")
                 ? "Advanced/Biology/Recruitment/In zones"

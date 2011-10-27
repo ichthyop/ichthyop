@@ -117,32 +117,17 @@ public class MarsIO extends SimulationManagerAccessor {
         Array timeArr;
         long time_r0, time_rf;
 
-        try {
-            filename = listInputFiles.get(index);
-            nc = NetcdfDataset.openFile(filename, null);
-            timeArr = nc.findVariable(strTime).read();
-            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                    timeArr.getShape()[0] - 1)));
-            nc.close();
-            timeArr = null;
-            nc = null;
+        filename = listInputFiles.get(index);
+        nc = NetcdfDataset.openFile(filename, null);
+        timeArr = nc.findVariable(strTime).read();
+        time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
+        time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
+                timeArr.getShape()[0] - 1)));
+        nc.close();
+        timeArr = null;
+        nc = null;
 
-            return (time >= time_r0 && time < time_rf);
-            /*switch (time_arrow) {
-            case 1:
-            return (time >= time_r0 && time < time_rf);
-            case -1:
-            return (time > time_r0 && time <= time_rf);
-            }*/
-        } catch (IOException e) {
-            throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("{Dataset} Unable to read " + strTime
-                    + " variable in file " + filename + " : " + e.getCause());
-        }
-        //return false;
-
+        return (time >= time_r0 && time < time_rf);
     }
 
     static boolean isTimeBetweenFile(long time, int index) throws IOException {

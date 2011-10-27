@@ -49,7 +49,24 @@ public class ParticleFactory extends SimulationManagerAccessor {
         return createGeoParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
     }
 
-    public static IBasicParticle createGridParticle(int index, double x, double y, double depth) {
+    public static IBasicParticle createSurfaceParticle(int index, double x, double y, boolean is3D) {
+        IMasterParticle particle = new MasterParticle();
+        particle.setIndex(index);
+        particle.setX(x);
+        particle.setY(y);
+        if (is3D) {
+            particle.setZ(getSimulationManager().getDataset().get_nz() - 1);
+        } else {
+            particle.make2D();
+        }
+        if (!particle.isInWater() || particle.isOnEdge()) {
+            return null;
+        }
+        particle.grid2Geo();
+        return particle;
+    }
+
+    public static IBasicParticle createZoneParticle(int index, double x, double y, double depth) {
         IMasterParticle particle = new MasterParticle();
         particle.setIndex(index);
         particle.setX(x);
@@ -72,6 +89,36 @@ public class ParticleFactory extends SimulationManagerAccessor {
         }
         particle.grid2Geo();
         particle.geo2Grid();
+        return particle;
+    }
+
+    public static IBasicParticle createBottomParticle(int index, double x, double y) {
+
+        IMasterParticle particle = new MasterParticle();
+        particle.setIndex(index);
+        particle.setX(x);
+        particle.setY(y);
+        /*
+         * Make sure the particle is released at the bottom, ie z = 0
+         */
+        particle.setZ(0);
+        /*
+         * Test wether the grid point is on land or at the edge of the domain
+         */
+        if (!particle.isInWater() || particle.isOnEdge()) {
+            return null;
+        }
+        /*
+         * Test wether the grid point is inside one of the release zones
+         */
+        int numReleaseZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
+        if (numReleaseZone == -1) {
+            return null;
+        }
+        /*
+         * Converts (x, y, z) into (lon, lat, depth)
+         */
+        particle.grid2Geo();
         return particle;
     }
 }
