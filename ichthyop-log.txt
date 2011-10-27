@@ -1,8 +1,0 @@
-Oct 27, 2011 1:49:59 PM org.previmer.ichthyop.ui.IchthyopApp initLogging
-INFO: Created log file /Research/NetBeansProjects/ichthyop-csic/ichthyop-log.txt
-Oct 27, 2011 1:50:12 PM org.previmer.ichthyop.ui.IchthyopView <init>
-INFO: Ichthyop 3.1 - Welcome on board !
-Oct 27, 2011 1:50:18 PM org.previmer.ichthyop.ui.IchthyopView loadConfigurationFile
-INFO: {Configuration} Opened /Research/NetBeansProjects/ichthyop-csic/cfg/MPOCAT_2007.xml
-Oct 27, 2011 1:53:43 PM org.previmer.ichthyop.ui.IchthyopView$ConfirmExit willExit
-INFO: Ichthyop 3.1 - Bye bye !
