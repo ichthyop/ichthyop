@@ -157,6 +157,7 @@ public class Roms3dDataset extends RomsCommon {
         return VertCoordType.OLD;
     }
 
+    @Override
     public boolean is3D() {
         return true;
     }
@@ -270,9 +271,10 @@ public class Roms3dDataset extends RomsCommon {
                             z_r_tmp[k][j][i] = hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]);
                             z_w_tmp[k + 1][j][i] = hRho[j][i] * (sc_w[k + 1] * hc + Cs_w[k + 1] * hRho[j][i]) / (hc + hRho[j][i]);
                         }
-                        break;
+                        z_w_tmp[nz][j][i] = 0.d;
                     }
                 }
+                break;
         }
 
         z_rho_cst = z_r_tmp;
@@ -311,6 +313,7 @@ public class Roms3dDataset extends RomsCommon {
         zeta_tp1 = zeta_tp0;
     }
 
+    @Override
     public double depth2z(double x, double y, double depth) {
 
         //-----------------------------------------------
@@ -331,6 +334,7 @@ public class Roms3dDataset extends RomsCommon {
         return (z);
     }
 
+    @Override
     public double z2depth(double x, double y, double z) {
 
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
@@ -361,6 +365,7 @@ public class Roms3dDataset extends RomsCommon {
         return depth;
     }
 
+    @Override
     public double get_dWz(double[] pGrid, double time) {
 
         double dw = 0.d;
@@ -396,6 +401,7 @@ public class Roms3dDataset extends RomsCommon {
         return dw;
     }
 
+    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy, kz;
@@ -432,6 +438,7 @@ public class Roms3dDataset extends RomsCommon {
         return dv;
     }
 
+    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
@@ -493,10 +500,12 @@ public class Roms3dDataset extends RomsCommon {
         return (hh);
     }
 
+    @Override
     public int get_nz() {
         return nz;
     }
 
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         long time = e.getSource().getTime();
@@ -522,6 +531,7 @@ public class Roms3dDataset extends RomsCommon {
         setAllFieldsTp1AtTime(rank);
     }
 
+    @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
@@ -700,6 +710,7 @@ public class Roms3dDataset extends RomsCommon {
         OLD;
     }
 
+    @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         Variable variable = nc.findVariable(name);
         int[] origin = null, shape = null;
