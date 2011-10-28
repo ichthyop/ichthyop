@@ -52,11 +52,9 @@ public class BuoyantParticleLayer extends ParticleLayer {
 
     public double computeSpecificGravity(double temperature, double salinity, double waterDensity, IBasicParticle particle) {
 
-        double ratioStage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).ratiostage(temperature, salinity, waterDensity);
+        double ratioStage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getRationStage();
         this.salinity = salinity;
         this.waterDensity = waterDensity;
-
-        int dt = getSimulationManager().getTimeManager().get_dt();
 
         double ratDev = -1.424E-03 * Math.pow(ratioStage, 3) + 2.070E-02
                 * Math.pow(ratioStage, 2) + 3.554E-02 * ratioStage;

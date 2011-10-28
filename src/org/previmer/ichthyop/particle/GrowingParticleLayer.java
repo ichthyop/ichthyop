@@ -32,7 +32,6 @@ public class GrowingParticleLayer extends ParticleLayer {
 ///////////////////////////////
     private double ratioStage;
     private double temperature;
-
     /**
      * Particle length [millimeter]
      */
@@ -49,6 +48,7 @@ public class GrowingParticleLayer extends ParticleLayer {
      * Threshold [millimeter] between Yolk-Sac Larvae and Feeding Larvae
      */
     private static double yolk_to_feeding_length;// = 4.5d; //mm
+    private int step;
 
     public GrowingParticleLayer(IBasicParticle particle) {
         super(particle);
@@ -59,6 +59,7 @@ public class GrowingParticleLayer extends ParticleLayer {
         loadParameters();
         ratioStage = 1.d;
         length = length_init;
+        step = -1;
     }
 
     private void loadParameters() {
@@ -73,7 +74,25 @@ public class GrowingParticleLayer extends ParticleLayer {
         return (int) Math.min(Math.floor(ratioStage), 10);
     }
 
-    public double ratiostage(double temperature, double salinity, double waterDensity) {
+    public void updateRatioStage(double temperature, double salinity, double waterDensity) {
+
+        /*
+         * First, ensure that the function has not already been called
+         * during this time step.
+         */
+        int currentStep = getSimulationManager().getTimeManager().index();
+        if (step == currentStep) {
+            /*
+             * It means updateRatioStage has already been called this time step
+             * So we exit the function.
+             */
+            return;
+        } else {
+            /*
+             * updateRatioStage has not been called yet. So we can continue.
+             */
+            step = currentStep;
+        }
 
         this.temperature = temperature;
 
@@ -122,11 +141,13 @@ public class GrowingParticleLayer extends ParticleLayer {
 
         //System.out.println("ratioStage Buoyant: " + (float)ratioStage);
         //System.out.println("Stage Buoyant:      " + (float)stage);
+    }
 
+    public double getRationStage() {
         return ratioStage;
     }
 
-     /**
+    /**
      * @return the temperature
      */
     public double getTemperature() {
