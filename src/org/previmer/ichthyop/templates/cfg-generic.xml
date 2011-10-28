@@ -950,6 +950,17 @@
                 <format>boolean</format>
                 <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
             </parameter>
+            <parameter hidden="true">
+                <key>vertical_coord_type</key>
+                <long_name>Type of vertical coordinate</long_name>
+                <value>Auto-detect</value>
+                <default>Auto-detect</default>
+                <format>combo</format>
+                <accepted>Auto-detect</accepted>
+                <accepted>Old</accepted>
+                <accepted>New</accepted>
+                <description>Set the type of vertical coordinate, either old or new formulation. If you do not know just leave the auto-detect value and ichthyop will guess for you.</description>
+            </parameter>
             <parameter>
                 <key>shrink_domain</key>
                 <long_name>Shrink simulated domain</long_name>

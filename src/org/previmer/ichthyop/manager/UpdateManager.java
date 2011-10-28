@@ -63,17 +63,26 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the 3.0b configuration file to 3.1
      */
     private void u30bTo31() throws Exception {
+
+        String treepath, newTreepath;
+
         ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
         /*
          * Update the recruitment in zone block
          */
-        getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
-        String treepath = getXBlock(BlockType.ACTION, "action.recruitment").getTreePath();
-        String newTreepath = treepath.startsWith("Advanced")
-                ? "Advanced/Biology/Recruitment/In zones"
-                : "Biology/Recruitment/In zones";
-        getXBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
-        getConfigurationFile().updateKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
+        try {
+            getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
+        } catch (Exception ex) {
+        }
+        if (null != getXBlock(BlockType.ACTION, "action.recruitment")) {
+            treepath = getXBlock(BlockType.ACTION, "action.recruitment").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Recruitment/In zones"
+                    : "Biology/Recruitment/In zones";
+
+            getXBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
+            getConfigurationFile().updateKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
+        }
         /*
          * Add the recruitment in stain block
          */
@@ -128,13 +137,21 @@ public class UpdateManager extends AbstractManager {
         /*
          * Add ROMS mask_u & masl_v parameters
          */
-        if (null != getXBlock(BlockType.DATASET, "dataset.roms2d")) {
-            getXBlock(BlockType.DATASET, "dataset.roms2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_masku"));
-            getXBlock(BlockType.DATASET, "dataset.roms2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_maskv"));
+        if (null != getXBlock(BlockType.DATASET, "dataset.roms_2d")) {
+            getXBlock(BlockType.DATASET, "dataset.roms_2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_2d", "field_var_masku"));
+            getXBlock(BlockType.DATASET, "dataset.roms_2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_2d", "field_var_maskv"));
         }
-        if (null != getXBlock(BlockType.DATASET, "dataset.roms3d")) {
-            getXBlock(BlockType.DATASET, "dataset.roms3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_masku"));
-            getXBlock(BlockType.DATASET, "dataset.roms3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms2d", "field_var_maskv"));
+        if (null != getXBlock(BlockType.DATASET, "dataset.roms_3d")) {
+            getXBlock(BlockType.DATASET, "dataset.roms_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_3d", "field_var_masku"));
+            getXBlock(BlockType.DATASET, "dataset.roms_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_3d", "field_var_maskv"));
+        }
+        /*
+         * Add Vertical Coordinate Type parameters in ROMS dataset.
+         */
+        System.out.println("Add Vertical Coordinate Type parameters in ROMS dataset.");
+        if (null != getXBlock(BlockType.DATASET, "dataset.roms_3d")) {
+            getXBlock(BlockType.DATASET, "dataset.roms_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_3d", "vertical_coord_type"));
+            System.out.println(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_3d", "vertical_coord_type").getValue());
         }
         /*
          * Add skip_sorting option in Dataset blocks
@@ -204,7 +221,7 @@ public class UpdateManager extends AbstractManager {
     public enum Version {
 
         v3_0_beta("3.0b", "2010/07/08"),
-        v3_1("3.1", "2011/04/14");
+        v3_1("3.1", "2011/11/02");
         private String number;
         private String date;
 

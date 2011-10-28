@@ -4,6 +4,8 @@
  */
 package org.previmer.ichthyop.dataset;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.IOException;
 import ucar.ma2.Array;
@@ -148,12 +150,56 @@ public class Roms3dDataset extends RomsCommon {
 
     private VertCoordType getVertCoordType() {
 
+        /*
+         * Set by the user
+         */
+        String vertCoordType = getParameter("vertical_coord_type");
+        if (null != vertCoordType) {
+            /* 
+             * Set to OLD
+             */
+            if (vertCoordType.equalsIgnoreCase("old")) {
+                return VertCoordType.OLD;
+            }
+            /*
+             * Set to new
+             */
+            if (vertCoordType.equalsIgnoreCase("new")) {
+                return VertCoordType.NEW;
+            }
+            /*
+             * Either the parameter is set to "auto-detect" or does not
+             * exist. In both case, ichthyop will try to determine by itself
+             * what is the type of vertical coordinate.
+             */
+        }
+        /*
+         * UCLA - Attribute "VertCoordType" NEW / OLD
+         */
         if (null != ncIn.findGlobalAttribute("VertCoordType")) {
             String strCoordType = ncIn.findGlobalAttribute("VertCoordType").getStringValue();
             if (strCoordType.toLowerCase().matches(VertCoordType.OLD.name().toLowerCase())) {
                 return VertCoordType.NEW;
             }
         }
+        /*
+         * Rutgers - Variable "VTransform" 1 = OLD / 2 = NEW
+         */
+        if (null != ncIn.findVariable("Vtransform")) {
+            try {
+                int vTransform = ncIn.findVariable("Vtransform").readScalarInt();
+                switch (vTransform) {
+                    case 1:
+                        return VertCoordType.OLD;
+                    case 2:
+                        return VertCoordType.NEW;
+                }
+            } catch (IOException ex) {
+            }
+        }
+        /*
+         * Nothing worked and eventually returned OLD type.
+         */
         return VertCoordType.OLD;
     }
 
