@@ -693,23 +693,25 @@ abstract class RomsCommon extends AbstractDataset {
         }
     }
 
+    /**
+     * Determines whether or not the specified grid point is close to cost line.
+     * The method first determines in which quater of the cell the grid point is
+     * located, and then checks wether or not its cell and the three adjacent
+     * cells to the quater are in water.
+     *
+     * @param pGrid a double[] the coordinates of the grid point
+     * @return <code>true</code> if the grid point is close to cost,
+     *         <code>false</code> otherwise.
+     */
+    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
-        boolean isAllWater = isInWater(i, j);
-        for (ii = -1; ii <= 1; ii++) {
-            for (jj = -1; jj <= 1; jj++) {
-                isAllWater &= isInWater(i + ii, j + jj);
-                if (!isAllWater) {
-                    /* no need to continue as soon as one surrounding cell
-                     * is not in water */
-                    return true;
-                }
-            }
-        }
-        return !isAllWater;
+        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
+        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+        return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
     String getNextFile(int time_arrow) throws IOException {
