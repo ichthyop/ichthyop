@@ -201,12 +201,12 @@ public class NemoDataset extends AbstractDataset {
         maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
                     0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
-            /*masku = (byte[][][]) nc.findVariable("umask").read(new int[]{0,
-                    0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
+        /*masku = (byte[][][]) nc.findVariable("umask").read(new int[]{0,
+        0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+        copyToNDJavaArray();
         maskv = (byte[][][]) nc.findVariable("vmask").read(new int[]{0,
-                    0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-            copyToNDJavaArray();*/
+        0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+        copyToNDJavaArray();*/
         if (!isGridInfoInOneFile) {
             nc.close();
             nc = NetcdfDataset.openFile(file_zgr, null);
@@ -993,29 +993,24 @@ public class NemoDataset extends AbstractDataset {
 
     /**
      * Determines whether or not the specified grid point is close to cost line.
+     * The method first determines in which quater of the cell the grid point is
+     * located, and then checks wether or not its cell and the three adjacent
+     * cells to the quater are in water.
      *
      * @param pGrid a double[] the coordinates of the grid point
      * @return <code>true</code> if the grid point is close to cost,
      *         <code>false</code> otherwise.
      */
+    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, k, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         k = (int) (Math.round(pGrid[2]));
-        boolean isAllWater = isInWater(i, j, k);
-        for (ii = -1; ii <= 1; ii++) {
-            for (jj = -1; jj <= 1; jj++) {
-                isAllWater &= isInWater(i + ii, j + jj, k);
-                if (!isAllWater) {
-                    /* no need to continue as soon as one surrounding cell
-                     * is not in water */
-                    return true;
-                }
-            }
-        }
-        return !isAllWater;
+        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
+        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+        return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
     }
 
     /**
@@ -1107,7 +1102,7 @@ public class NemoDataset extends AbstractDataset {
      * @param yRho a double, the y-coordinate
      * @return a double[], the corresponding geographical coordinates
      * (latitude, longitude)
-
+    
      * @param xRho double
      * @param yRho double
      * @return double[]
@@ -1153,7 +1148,7 @@ public class NemoDataset extends AbstractDataset {
      *  it belongs by successively dividing the domain by a half (binary
      *  search).
      * </pre>
-
+    
      * @param lon a double, the longitude of the geographical point
      * @param lat a double, the latitude of the geographical point
      * @return a double[], the corresponding grid coordinates (x, y)
@@ -1829,11 +1824,11 @@ public class NemoDataset extends AbstractDataset {
                 }
                 break;
         }
-        
-            Array array = variable.read(origin, shape).reduce();
-            if (hasVerticalDim) {
-                array = array.flip(0);
-            }
-            return array;
+
+        Array array = variable.read(origin, shape).reduce();
+        if (hasVerticalDim) {
+            array = array.flip(0);
+        }
+        return array;
     }
 }
