@@ -186,45 +186,6 @@ public class GrowthAction extends AbstractAction {
         }
     }
 
-//    private double grow(double temp_ini, double age, double length, double temperature, Stage stage) {
-//        double erre;
-//        /**constante para la expresion de los huevos*/
-//        double constante;
-//        double constante2;
-//        double constante3;
-//        double zeta;
-//        double edad;
-//        /**para pasar el age (sg) a edad (dias) */
-//        double Regner;
-//        edad = age / 86400;
-//        temperature = Math.max(temperature, tp_threshold);
-//        erre = 0.0016 * temperature * temperature;
-//        constante = 0.20466 + (0.369659 * temperature) - (0.00893519 * temperature * temperature);
-//        constante2 = 0.335907 + (0.001603 * temperature);
-//        constante3 = 7.87357 - (0.841969 * temperature) + (0.028809 * temperature * temperature);
-//        zeta = -constante2 * Math.exp(-1 * constante3 * edad);
-//        Regner = (1 / 1.012896) * (1 + Math.exp((4.914322) - (0.257451 * temp_ini)));
-//        double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
-//        switch (stage) {
-//            case EGG:
-//                length += (erre * Math.exp(erre * edad)) * dt_day;
-//                break;
-//            case YOLK_SAC_LARVA:
-//                length += (constante * constante2 * constante3 * Math.exp(-1 * constante3 * (edad - Regner)) * Math.exp(zeta)) * dt_day;
-//                break;
-//            case FEEDING_LARVA:
-//                length += (.02d + .03d * Math.max(temperature,
-//                        tp_threshold)) * dt_day;
-//                break;
-//
-//        }
-//        return length;
-//    }
-    /**
-     * Esta seria la expresion de crecimiento segun la equacion de Gompertz limitada por comida
-     * para los huevos y yolk sac larva sigue la de Gompertz. Si es feeding sigue la original de
-     * Ichthyop con el food limiting factor
-     */
     private double grow(double temp_ini, double age, double length, double temperature, double lPhyto,
             double sZoo, double lZoo, Stage stage) {
 
