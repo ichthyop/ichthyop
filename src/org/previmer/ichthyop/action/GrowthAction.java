@@ -130,7 +130,7 @@ public class GrowthAction extends AbstractAction {
         //System.out.println("Length GrowthAction: " + (float) length);
 
         if (eggstage < 10) {
-            return length = 2.79d;
+            return length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getHatch_length()-(0.01d);
         } else {
             double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
             length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
@@ -166,7 +166,7 @@ public class GrowthAction extends AbstractAction {
 
         /** eggs */
         if (eggstage < 10) {
-            return length = 2.49d;
+            return length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getHatch_length()-(0.01d);
         } else {
 
             /** Yolk-Sac Larvae */
@@ -177,10 +177,10 @@ public class GrowthAction extends AbstractAction {
             } /** Feeding Larvae */
             else if (stage == Stage.FEEDING_LARVA) {
                 //length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
-                length += (0.02 + 0.03 * Math.max(temperature, tp_threshold)) * dt_day;
+                length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
                 return length;
             } else {
-                length = 2.5;
+                length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getHatch_length();
                 return length;
             }
         }
