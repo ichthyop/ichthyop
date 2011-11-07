@@ -166,7 +166,7 @@ public class GrowthAction extends AbstractAction {
 
         /** eggs */
         if (eggstage < 10) {
-            return length = 2.79d;
+            return length = 2.49d;
         } else {
 
             /** Yolk-Sac Larvae */
@@ -180,7 +180,7 @@ public class GrowthAction extends AbstractAction {
                 length += (0.02 + 0.03 * Math.max(temperature, tp_threshold)) * dt_day;
                 return length;
             } else {
-                length = 2.8;
+                length = 2.5;
                 return length;
             }
         }
