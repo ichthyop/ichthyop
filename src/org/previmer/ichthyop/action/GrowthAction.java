@@ -58,6 +58,10 @@ public class GrowthAction extends AbstractAction {
             coeff1 = Float.valueOf(getParameter("coeff1"));
             coeff2 = Float.valueOf(getParameter("coeff2"));
         }
+        if (type.equals(TypeGrowth.STAGE_DEPENDANT)) {
+            coeff1 = Float.valueOf(getParameter("coeff1"));
+            coeff2 = Float.valueOf(getParameter("coeff2"));
+        }
         temperature_field = getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "option.biology_dataset", "temperature_field");
         salinity_field = getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "option.biology_dataset", "salinity_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
@@ -126,14 +130,15 @@ public class GrowthAction extends AbstractAction {
 
         int eggstage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getEggStage();
         this.temperature = temperature;
+        double egglength = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength_init();
 
         //System.out.println("Length GrowthAction: " + (float) length);
 
         if (eggstage < 10) {
-            return length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getHatch_length()-(0.01d);
+            return length = egglength;
         } else {
             double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
-            length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
+            length += (0.02 + 0.03 * Math.max(temperature, tp_threshold)) * dt_day;
             return length;
         }
     }
@@ -156,9 +161,8 @@ public class GrowthAction extends AbstractAction {
         double zeta = -constante2 * Math.exp(-1 * constante3 * edad);
         double Regner = (1 / 1.012896) * (1 + Math.exp((4.914322) - (0.257451 * temp_ini)));
 
-        double Lini = 3.4d;
-        double Akte = 0.1868d;
-        double alfa = 0.0781d;
+        double egglength = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength_init();
+        double hatchlength = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getHatch_length();
 
 //        System.out.println("New length:               " + (float)length);
 //        System.out.println("==========================================");
@@ -166,21 +170,20 @@ public class GrowthAction extends AbstractAction {
 
         /** eggs */
         if (eggstage < 10) {
-            return length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getHatch_length()-(0.01d);
+            return length = egglength;
         } else {
 
             /** Yolk-Sac Larvae */
             if (stage == Stage.YOLK_SAC_LARVA) {
-                //length += Lini *  Math.exp((Akte/alfa)*(1- Math.exp(-alfa*dt_day)));
                 length += (constante * constante2 * constante3 * Math.exp(-1 * constante3 * (edad - Regner)) * Math.exp(zeta)) * dt_day;
                 return length;
             } /** Feeding Larvae */
             else if (stage == Stage.FEEDING_LARVA) {
-                //length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
+                //length += (0.02 + 0.03 * Math.max(temperature, tp_threshold)) * dt_day;
                 length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
                 return length;
             } else {
-                length = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getHatch_length();
+                length = hatchlength;
                 return length;
             }
         }
