@@ -70,6 +70,18 @@ public class GrowingParticleLayer extends ParticleLayer {
         yolk_to_feeding_length = Float.valueOf(parameterManager.getParameter("app.particle_length", "yolk2feeding_length"));
     }
 
+        public double getLength_init() {
+        return length_init;
+    }
+        
+        public double getHatch_length() {
+        return hatch_length;
+    }
+                
+        public double getYolk_to_feeding_length() {
+        return yolk_to_feeding_length;
+    }
+     
     public int getEggStage() {
         return (int) Math.min(Math.floor(ratioStage), 10);
     }
