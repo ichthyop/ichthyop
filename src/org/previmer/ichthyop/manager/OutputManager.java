@@ -255,7 +255,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         Point2D.Float pt1 = listPt.get(0);
-        double[] lonlat = dataset.xy2lonlat(pt1.x, pt1.y);
+        double[] lonlat = dataset.xy2latlon(pt1.x, pt1.y);
         GeoPosition gp = new GeoPosition(lonlat[0], lonlat[1]);
         list.add(gp);
         listPt.remove(pt1);
@@ -269,7 +269,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     distMin = dist;
                 }
             }
-            lonlat = dataset.xy2lonlat(closestToP1.x, closestToP1.y);
+            lonlat = dataset.xy2latlon(closestToP1.x, closestToP1.y);
             gp = new GeoPosition(lonlat[0], lonlat[1]);
             list.add(gp);
             listPt.remove(closestToP1);

@@ -29,6 +29,7 @@ public class GridPoint extends SimulationManagerAccessor {
     private boolean lonlatHaveChanged, depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
     private boolean exclusivityH, exclusivityV;
+    private static int nz;
 
 ///////////////
 // Constructors
@@ -48,6 +49,11 @@ public class GridPoint extends SimulationManagerAccessor {
         dx = dy = dz = 0.d;
         x = y = z = -1;
         lon = lat = depth = Double.NaN;
+        try {
+        nz = getSimulationManager().getDataset().get_nz();
+        } catch (Exception ex) {
+            nz = -1;
+        }
     }
 
     public GridPoint() {
@@ -84,7 +90,7 @@ public class GridPoint extends SimulationManagerAccessor {
     public void grid2Geo() {
 
         if (xyHaveChanged) {
-            double[] pGeog = getSimulationManager().getDataset().xy2lonlat(x, y);
+            double[] pGeog = getSimulationManager().getDataset().xy2latlon(x, y);
             lon = pGeog[1];
             lat = pGeog[0];
             xyHaveChanged = false;
@@ -249,9 +255,14 @@ public class GridPoint extends SimulationManagerAccessor {
      */
     public void setZ(double z) {
         if (this.z != z) {
-            this.z = z;
+            this.z = bound(z);
             zHasChanged = true;
         }
+    }
+    
+    private double bound(double z) {
+
+        return Math.max(Math.min(nz - 1, z), 0.f);
     }
 
     public double[] getGridCoordinates() {

@@ -8,6 +8,8 @@ import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.IOException;
 import org.previmer.ichthyop.dataset.MarsCommon.ErrorMessage;
 import ucar.ma2.Array;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -56,14 +58,14 @@ public class Roms2dDataset extends RomsCommon {
         jy = pGrid[1];
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double CO = 0.d;
         double co = 0.d;
         double x = 0.d;
-        
+
         for (int jj = 0; jj < 2; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 co = Math.abs((1.d - (double) ii - dx)
@@ -90,7 +92,7 @@ public class Roms2dDataset extends RomsCommon {
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (int) Math.round(ix);
-        int j = (int) jy;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double CO = 0.d;
@@ -136,7 +138,7 @@ public class Roms2dDataset extends RomsCommon {
         setAllFieldsTp1AtTime(rank);
     }
 
-    void setAllFieldsTp1AtTime(int rank) throws IOException {
+    void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -171,7 +173,27 @@ public class Roms2dDataset extends RomsCommon {
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(ncIn, rank, ipo, jpo, time_tp1, dt_HyMo);
+            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
+    }
+
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length) {
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                origin = new int[]{rank, jpo, ipo};
+                shape = new int[]{1, ny, nx};
+                break;
+            default:
+                throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+
+        }
+
+        return variable.read(origin, shape).reduce();
     }
 }

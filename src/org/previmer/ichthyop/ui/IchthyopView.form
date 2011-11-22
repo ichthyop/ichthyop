@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.1" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.7">
   <NonVisualComponents>
@@ -115,8 +115,8 @@
                               <Properties>
                                 <Property name="animated" type="boolean" value="false"/>
                                 <Property name="icon" type="javax.swing.Icon" resourceKey="step.Configuration.icon"/>
-                                <Property name="title" type="java.lang.String" resourceKey="step.Configuration.text"/>
                                 <Property name="name" type="java.lang.String" value="taskPaneConfiguration" noResource="true"/>
+                                <Property name="title" type="java.lang.String" resourceKey="step.Configuration.text"/>
                               </Properties>
                               <Events>
                                 <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="taskPaneConfigurationPropertyChange"/>
@@ -245,8 +245,8 @@
                               <Properties>
                                 <Property name="animated" type="boolean" value="false"/>
                                 <Property name="icon" type="javax.swing.Icon" resourceKey="step.Simulation.icon"/>
-                                <Property name="title" type="java.lang.String" resourceKey="step.Simulation.text"/>
                                 <Property name="name" type="java.lang.String" value="taskPaneSimulation" noResource="true"/>
+                                <Property name="title" type="java.lang.String" resourceKey="step.Simulation.text"/>
                               </Properties>
                               <Events>
                                 <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="taskPaneSimulationPropertyChange"/>
@@ -330,8 +330,8 @@
                               <Properties>
                                 <Property name="animated" type="boolean" value="false"/>
                                 <Property name="icon" type="javax.swing.Icon" resourceKey="step.Mapping.icon"/>
-                                <Property name="title" type="java.lang.String" resourceKey="step.Mapping.text"/>
                                 <Property name="name" type="java.lang.String" value="taskPaneMapping" noResource="true"/>
+                                <Property name="title" type="java.lang.String" resourceKey="step.Mapping.text"/>
                               </Properties>
                               <Events>
                                 <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="taskPaneMappingPropertyChange"/>
@@ -372,7 +372,7 @@
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="pnlColor" min="-2" max="-2" attributes="0"/>
+                                              <Component id="pnlColor" min="-2" pref="325" max="-2" attributes="0"/>
                                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="3" attributes="0">
                                                   <Component id="btnMapping" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -458,10 +458,11 @@
                                         <Component class="javax.swing.JComboBox" name="cbBoxWMS">
                                           <Properties>
                                             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                                              <StringArray count="3">
-                                                <StringItem index="0" value="http://www.marine-geo.org/services/wms?"/>
-                                                <StringItem index="1" value="http://wms.jpl.nasa.gov/wms.cgi?"/>
+                                              <StringArray count="4">
+                                                <StringItem index="0" value="http://www.openstreetmap.org/"/>
+                                                <StringItem index="1" value="http://www.marine-geo.org/services/wms?"/>
                                                 <StringItem index="2" value="http://www2.demis.nl/wms/wms.asp?wms=WorldMap&amp;"/>
+                                                <StringItem index="3" value="None"/>
                                               </StringArray>
                                             </Property>
                                             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
@@ -812,8 +813,8 @@
                               <Properties>
                                 <Property name="animated" type="boolean" value="false"/>
                                 <Property name="icon" type="javax.swing.Icon" resourceKey="step.Animation.icon"/>
-                                <Property name="title" type="java.lang.String" resourceKey="step.Animation.text"/>
                                 <Property name="name" type="java.lang.String" value="taskPaneAnimation" noResource="true"/>
+                                <Property name="title" type="java.lang.String" resourceKey="step.Animation.text"/>
                               </Properties>
                               <Events>
                                 <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="taskPaneAnimationPropertyChange"/>

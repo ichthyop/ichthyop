@@ -74,6 +74,10 @@ public class SimulationManager {
      * are allowed to dialog with the SimulationManager
      */
     private static final Logger logger = Logger.getLogger(SimulationManager.class.getName());
+    /*
+     * Whether the simulation has been setup or not 
+     */
+    private boolean isSetup;
 
     /**
      * 
@@ -91,6 +95,7 @@ public class SimulationManager {
 
         cfgFile = null;
         nb_simulations = 1;
+        isSetup = false;
         if (file != null) {
             /* Make sure file exists */
             if (!file.isFile()) {
@@ -318,6 +323,11 @@ public class SimulationManager {
         flagStop = false;
         getZoneManager().cleanup();
         fireSetupPerformed();
+        isSetup = true;
+    }
+    
+    public boolean isSetup() {
+        return isSetup;
     }
 
     public void init() throws Exception {

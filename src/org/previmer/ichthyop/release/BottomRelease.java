@@ -77,7 +77,7 @@ public class BottomRelease extends AbstractReleaseProcess {
                 }
                 double x = xmin + Math.random() * (xmax - xmin);
                 double y = ymin + Math.random() * (ymax - ymin);
-                particle = ParticleFactory.createGridParticle(index, x, y);
+                particle = ParticleFactory.createBottomParticle(index, x, y);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;

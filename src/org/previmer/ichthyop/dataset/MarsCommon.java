@@ -209,11 +209,11 @@ public abstract class MarsCommon extends AbstractDataset {
         double[] ptGeo1, ptGeo2;
         for (int j = 1; j < ny - 1; j++) {
             for (int i = 1; i < nx - 1; i++) {
-                ptGeo1 = xy2lonlat(i - 0.5d, (double) j);
-                ptGeo2 = xy2lonlat(i + 0.5d, (double) j);
+                ptGeo1 = xy2latlon(i - 0.5d, (double) j);
+                ptGeo2 = xy2latlon(i + 0.5d, (double) j);
                 dxu[j][i] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
-                ptGeo1 = xy2lonlat((double) i, j - 0.5d);
-                ptGeo2 = xy2lonlat((double) i, j + 0.5d);
+                ptGeo1 = xy2latlon((double) i, j - 0.5d);
+                ptGeo2 = xy2latlon((double) i, j + 0.5d);
                 dyv[j][i] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
             }
         }
@@ -346,7 +346,7 @@ public abstract class MarsCommon extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
-    public double[] xy2lonlat(double xRho, double yRho) {
+    public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
@@ -450,23 +450,25 @@ public abstract class MarsCommon extends AbstractDataset {
         }
     }
 
+    /**
+     * Determines whether or not the specified grid point is close to cost line.
+     * The method first determines in which quater of the cell the grid point is
+     * located, and then checks wether or not its cell and the three adjacent
+     * cells to the quater are in water.
+     *
+     * @param pGrid a double[] the coordinates of the grid point
+     * @return <code>true</code> if the grid point is close to cost,
+     *         <code>false</code> otherwise.
+     */
+    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
-        boolean isAllWater = isInWater(i, j);
-        for (ii = -1; ii <= 1; ii++) {
-            for (jj = -1; jj <= 1; jj++) {
-                isAllWater &= isInWater(i + ii, j + jj);
-                if (!isAllWater) {
-                    /* no need to continue as soon as one surrounding cell
-                     * is not in water */
-                    return true;
-                }
-            }
-        }
-        return !isAllWater;
+        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
+        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+        return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
     public int get_nx() {
