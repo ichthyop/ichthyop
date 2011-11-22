@@ -45,7 +45,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import javax.imageio.ImageIO;
-import javax.swing.SwingWorker;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
@@ -55,7 +54,6 @@ import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.calendar.ClimatoCalendar;
-import org.previmer.ichthyop.dataset.NemoDataset;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.TimeManager;
 import ucar.ma2.Array;
@@ -115,6 +113,7 @@ public class WMSMapper extends JXMapKit {
     private Painter colorbarPainter;
     final private Color bottom = new Color(0, 0, 150);
     final private Color surface = Color.CYAN;
+    private boolean gridVisible = false;
 
     public WMSMapper() {
         setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
@@ -413,8 +412,9 @@ public class WMSMapper extends JXMapKit {
 
                 drawRegion(g, map);
                 drawZones(g, map);
-                drawGrid(g, map);
-
+                if (gridVisible) {
+                    drawGrid(g, map);
+                }
                 g.dispose();
             }
         };
@@ -483,10 +483,25 @@ public class WMSMapper extends JXMapKit {
     }
 
     private void addCellPoint(JXMapViewer map, Polygon polygon, double x, double y) {
-        double[] pos = getSimulationManager().getDataset().xy2lonlat(x, y);
+        double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
         GeoPosition gp = new GeoPosition(pos[0], pos[1]);
         Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
         polygon.addPoint((int) pt.getX(), (int) pt.getY());
+    }
+
+    private Point2D getPoint(JXMapViewer map, double x, double y) {
+        double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
+        GeoPosition gp = new GeoPosition(pos[0], pos[1]);
+        return map.getTileFactory().geoToPixel(gp, map.getZoom());
+    }
+
+    private void drawMask(Graphics2D g, JXMapViewer map, int i, int j) {
+
+        Line2D line = new Line2D.Float(getPoint(map, i - 0.5, j + 0.5), getPoint(map, i + 0.5, j + 0.5));
+        g.setColor(Color.DARK_GRAY);
+        g.draw(line);
+        line.setLine(getPoint(map, i + 0.5, j + 0.5), getPoint(map, i + 0.5, j - 0.5));
+        g.draw(line);
     }
 
     private void drawCell(Graphics2D g, JXMapViewer map, int i, int j) {
@@ -498,39 +513,38 @@ public class WMSMapper extends JXMapKit {
         addCellPoint(map, polygon, i - 0.5, j + 0.5);
 
         Color color = getBathyColor(getSimulationManager().getDataset().getBathy(i, j));
-        //Color color = getMaskColor(i, j);
+        /*double value = getSimulationManager().getDataset().get("temp", new double[] {i, j, getSimulationManager().getDataset().get_nz() - 1}, getSimulationManager().getTimeManager().get_tO() + getSimulationManager().getTimeManager().getSimulationDuration()).doubleValue();
+        Color color = getSimulationManager().getDataset().isInWater(i, j)
+        ? getVarColor(value)
+        : Color.DARK_GRAY;*/
         Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
         g.setColor(fillColor);
         g.fill(polygon);
-        if (!getSimulationManager().getDataset().isInWater(i, j)) {
-            g.setColor(Color.DARK_GRAY);
-        }
         g.draw(polygon);
     }
 
     SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
-/*
-    private Color getMaskColor(int i, int j) {
 
-        NemoDataset dataset = (NemoDataset) getSimulationManager().getDataset();
-        if (!dataset.getUMask(i, j) && !dataset.getVMask(i, j)) {
-            return Color.ORANGE;
-        }
-        if (!dataset.getUMask(i, j)) {
-            return Color.GREEN;
-        }
-        if (!dataset.getVMask(i, j)) {
-            return Color.MAGENTA;
-        }
-        if (!dataset.isInWater(i, j)) {
-            return Color.DARK_GRAY;
-        }
-        return Color.CYAN;
-
+    /*private Color getMaskColor(int i, int j) {
+    
+    NemoDataset dataset = (NemoDataset) getSimulationManager().getDataset();
+    if (!dataset.getUMask(i, j) && !dataset.getVMask(i, j)) {
+    return Color.ORANGE;
+    }
+    if (!dataset.getUMask(i, j)) {
+    return Color.GREEN;
+    }
+    if (!dataset.getVMask(i, j)) {
+    return Color.MAGENTA;
+    }
+    if (!dataset.isInWater(i, j)) {
+    return Color.DARK_GRAY;
+    }
+    return Color.CYAN;
+    
     }*/
-
     private Color getBathyColor(double depth) {
 
         float xdepth = 0.f;
@@ -551,12 +565,36 @@ public class WMSMapper extends JXMapKit {
 
     }
 
+    private Color getVarColor(double value) {
+
+        Color low = Color.CYAN;
+        Color high = Color.ORANGE;
+
+        float xdepth = 0.f;
+        if (Double.isNaN(value)) {
+            return (Color.darkGray);
+        } else {
+            xdepth = (float) Math.abs(value - 10) / 15.f;
+            xdepth = Math.max(0, Math.min(xdepth, 1));
+
+        }
+        return (new Color((int) (xdepth * high.getRed()
+                + (1 - xdepth) * low.getRed()),
+                (int) (xdepth * high.getGreen()
+                + (1 - xdepth) * low.getGreen()),
+                (int) (xdepth * high.getBlue()
+                + (1 - xdepth) * low.getBlue())));
+    }
+
     private void drawGrid(Graphics2D g, JXMapViewer map) {
+
         IDataset dataset = getSimulationManager().getDataset();
         for (int i = 1; i < dataset.get_nx() - 1; i++) {
             for (int j = 1; j < dataset.get_ny() - 1; j++) {
+                //drawCell(g, map, i, j);
                 if (!dataset.isInWater(i, j)) {
                     drawCell(g, map, i, j);
+                    //drawMask(g, map, i, j);
                 }
             }
         }

@@ -165,7 +165,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      *
      */
-    static double[][][] e3t, e3u, e3v;
+    static float[][][] e3t, e3u, e3v;
     static double[][] e1t, e2t, e1v, e2u;
     static String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     static String strueiv, strveiv, strweiv;
@@ -207,39 +207,46 @@ public class NemoDataset extends AbstractDataset {
         maskv = (byte[][][]) nc.findVariable("vmask").read(new int[]{0,
         0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
         copyToNDJavaArray();*/
-            if (!isGridInfoInOneFile) {
-                nc.close();
-                nc = NetcdfDataset.openFile(file_zgr, null);
-            }
-            //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
-            //fichier *mesh*z*
-        gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0, 0, jpo, ipo}, new int[]{1, nz, 1, 1}).flip(1).reduce().copyTo1DJavaArray();
-        gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0, jpo, ipo}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().copyTo1DJavaArray();
-        e3t = (double[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().copyToNDJavaArray();
-        e3u = (double[][][]) nc.findVariable(stre3u).read(new int[]{0, 0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().copyToNDJavaArray();
-        e3v = (double[][][]) nc.findVariable(stre3v).read(new int[]{0, 0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().copyToNDJavaArray();
         if (!isGridInfoInOneFile) {
-                nc.close();
-                nc = NetcdfDataset.openFile(file_hgr, null);
-            }
-            //System.out.println("read e1t e2t " + nc.getLocation());
-            // fichier *mesh*h*
-            e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0,
-                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                    copyToNDJavaArray();
-            System.out.println("ok9");
-            e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0, 
-                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                    copyToNDJavaArray();
-            System.out.println("ok10");
-            e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0,
-                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                    copyToNDJavaArray();
-            System.out.println("ok11");
-            e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0, 
-                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                    copyToNDJavaArray();
             nc.close();
+            nc = NetcdfDataset.openFile(file_zgr, null);
+        }
+        //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
+        //fichier *mesh*z*
+        gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
+                    0, jpo, ipo}, new int[]{1, nz, 1, 1}).flip(1).reduce().
+                copyTo1DJavaArray();
+        gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
+                    jpo, ipo}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
+                copyTo1DJavaArray();
+        e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo,
+                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+                copyToNDJavaArray();
+        e3u = (float[][][]) nc.findVariable(stre3u).read(new int[]{0, 0, jpo,
+                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+                copyToNDJavaArray();
+        e3v = (float[][][]) nc.findVariable(stre3v).read(new int[]{0, 0, jpo,
+                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+                copyToNDJavaArray();
+        if (!isGridInfoInOneFile) {
+            nc.close();
+            nc = NetcdfDataset.openFile(file_hgr, null);
+        }
+        //System.out.println("read e1t e2t " + nc.getLocation());
+        // fichier *mesh*h*
+        e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0, 0,
+                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+                copyToNDJavaArray();
+        e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0, 0,
+                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+                copyToNDJavaArray();
+        e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0, 0,
+                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+                copyToNDJavaArray();
+        e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0, 0,
+                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+                copyToNDJavaArray();
+        nc.close();
     }
 
     /**
@@ -1790,5 +1797,38 @@ public class NemoDataset extends AbstractDataset {
 
         setAllFieldsTp1AtTime(rank);
 
+    }
+
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        boolean hasVerticalDim = false;
+        switch (variable.getShape().length) {
+            case 4:
+                origin = new int[]{rank, 0, jpo, ipo};
+                shape = new int[]{1, nz, ny, nx};
+                hasVerticalDim = true;
+                break;
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                if (!variable.isUnlimited()) {
+                    origin = new int[]{0, jpo, ipo};
+                    shape = new int[]{nz, ny, nx};
+                    hasVerticalDim = true;
+                } else {
+                    origin = new int[]{rank, jpo, ipo};
+                    shape = new int[]{1, ny, nx};
+                }
+                break;
+        }
+
+        Array array = variable.read(origin, shape).reduce();
+        if (hasVerticalDim) {
+            array = array.flip(0);
+        }
+        return array;
     }
 }
