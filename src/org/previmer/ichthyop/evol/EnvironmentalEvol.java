@@ -5,13 +5,12 @@ package org.previmer.ichthyop.evol;
  * @author mariem
  */
 public class EnvironmentalEvol extends AbstractEvol{
-
+    private boolean var_temp, var_sal;
+    private float margin_temp, margin_sal;
+    
     @Override
      public void loadParameters() throws Exception {
         try {
-            boolean var_temp, var_sal;
-            float margin_temp, margin_sal;
-
             /* load common parameters*/
             super.loadParameters();
 
@@ -26,5 +25,33 @@ public class EnvironmentalEvol extends AbstractEvol{
             getLogger().info("Failed to read the natal parameters.");
         }
      }
+
+    /**
+     * @return the var_temp
+     */
+    public boolean temperatureCriterionEnv() {
+        return var_temp;
+    }
+
+    /**
+     * @return the var_sal
+     */
+    public boolean salinityCriterionEnv() {
+        return var_sal;
+    }
+
+    /**
+     * @return the margin_temp
+     */
+    public float getMarginTempEnv() {
+        return margin_temp;
+    }
+
+    /**
+     * @return the margin_sal
+     */
+    public float getMarginSalEnv() {
+        return margin_sal;
+    }
 
 }

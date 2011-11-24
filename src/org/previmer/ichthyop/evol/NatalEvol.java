@@ -4,12 +4,11 @@ package org.previmer.ichthyop.evol;
  * @author mariem
  */
 public class NatalEvol extends AbstractEvol {
+    private double margin_loc, margin_bat;
 
     @Override
      public void loadParameters() throws Exception {
         try {
-            double margin_loc, margin_bat;
-
             /* load common parameters*/
             super.loadParameters();
 
@@ -21,6 +20,20 @@ public class NatalEvol extends AbstractEvol {
             getLogger().info("Failed to read the natal parameters.");
         }
      }
+
+    /**
+     * @return the margin_loc
+     */
+    public double getMarginLoc() {
+        return margin_loc;
+    }
+
+    /**
+     * @return the margin_bat
+     */
+    public double getMarginBat() {
+        return margin_bat;
+    }
 
 
 
