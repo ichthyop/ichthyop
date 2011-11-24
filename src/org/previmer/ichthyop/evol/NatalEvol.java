@@ -14,8 +14,8 @@ public class NatalEvol extends AbstractEvol {
             super.loadParameters();
 
             /* load Natal Homing parameters */
-            margin_loc= Double.valueOf("margin_loc");
-            margin_bat= Double.valueOf("margin_bat");
+            margin_loc= Double.valueOf(getParameter("margin_loc"));
+            margin_bat= Double.valueOf(getParameter("margin_bat"));
         } catch (Exception ex) {
            
             getLogger().info("Failed to read the natal parameters.");

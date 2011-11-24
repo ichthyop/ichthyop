@@ -15,12 +15,12 @@ public class OpportunismEvol extends AbstractEvol{
             super.loadParameters();
 
             /* load Natal Homing parameters */
-            temperature= Boolean.valueOf("var_temp");
-            salinity= Boolean.valueOf("var_sal");
-            margin_temp_opp= Float.valueOf("margin_loc");
-            margin_sal_opp= Float.valueOf("margin_bat");
-            optimal_sal= Float.valueOf("optimal_sal");
-            optimal_temp= Float.valueOf("optimal_temp");
+            temperature= Boolean.valueOf(getParameter("var_temp"));
+            salinity= Boolean.valueOf(getParameter("var_sal"));
+            margin_temp_opp= Float.valueOf(getParameter("margin_loc"));
+            margin_sal_opp= Float.valueOf(getParameter("margin_bat"));
+            optimal_sal= Float.valueOf(getParameter("optimal_sal"));
+            optimal_temp= Float.valueOf(getParameter("optimal_temp"));
 
         } catch (Exception ex) {
 

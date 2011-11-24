@@ -4,8 +4,10 @@ package org.previmer.ichthyop.evol;
  * @author mariem
  */
 
+import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.arch.IEvol;
 import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 public class AbstractEvol extends SimulationManagerAccessor implements IEvol{
 
@@ -24,9 +26,9 @@ public class AbstractEvol extends SimulationManagerAccessor implements IEvol{
 
         /* load common parameters*/
         nb_generations = Integer.valueOf(getParameter("nb_generations"));
-        age_min= Integer.valueOf("min_maturity");
-        age_max= Integer.valueOf("max_maturity");
-        spawn_freq= Integer.valueOf("spawn_frequency");
+        age_min= Integer.valueOf(getParameter("min_maturity"));
+        age_max= Integer.valueOf(getParameter("max_maturity"));
+        spawn_freq= Integer.valueOf(getParameter("spawn_frequency"));
     }
 
     // pour garantir qu'une seule stratégie de reproduction a été sélectionnée
@@ -35,7 +37,7 @@ public class AbstractEvol extends SimulationManagerAccessor implements IEvol{
     }
 
     public int getNbParticles() {
-        return Integer.valueOf(getParameter("number_particles"));
+        return SimulationManager.getInstance().getReleaseManager().getNbParticles();
     }
 
 }

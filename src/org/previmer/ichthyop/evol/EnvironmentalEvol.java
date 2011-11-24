@@ -16,10 +16,10 @@ public class EnvironmentalEvol extends AbstractEvol{
             super.loadParameters();
 
             /* load Natal Homing parameters */
-            var_temp= Boolean.valueOf("var_temp");
-            var_sal= Boolean.valueOf("var_sal");
-            margin_temp= Float.valueOf("margin_loc");
-            margin_sal= Float.valueOf("margin_bat");
+            var_temp= Boolean.valueOf(getParameter("var_temp"));
+            var_sal= Boolean.valueOf(getParameter("var_sal"));
+            margin_temp= Float.valueOf(getParameter("margin_loc"));
+            margin_sal= Float.valueOf(getParameter("margin_bat"));
 
         } catch (Exception ex) {
 
