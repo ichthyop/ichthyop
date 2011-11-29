@@ -4,7 +4,6 @@ package org.previmer.ichthyop.manager;
  *
  * @author mariem
  */
-
 import org.previmer.ichthyop.event.SetupListener;
 import java.io.IOException;
 import org.previmer.ichthyop.event.InitializeEvent;
@@ -13,12 +12,14 @@ import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
+import org.previmer.ichthyop.arch.IEvol;
+import org.previmer.ichthyop.evol.Stray;
 
-
-public class EvolManager extends AbstractManager implements SetupListener{
+public class EvolManager extends AbstractManager implements SetupListener {
 
     private static final EvolManager evolManager = new EvolManager();
-
+    private IEvol evolStrategy;
+    private Stray str;
 
     public static EvolManager getInstance() {
         return evolManager;
@@ -57,18 +58,36 @@ public class EvolManager extends AbstractManager implements SetupListener{
         return list.get(0);
     }
 
-        private void instantiateReproductiveStrategy() throws Exception {
+    private void instantiateReproductiveStrategy() throws Exception {
 
         XBlock strategyBlock = findActiveReproductiveStrategy();
         String className = getParameter(strategyBlock.getKey(), "class_name");
+        //  float lost;
+
         if (strategyBlock != null) {
             try {
-                
+                evolStrategy = (IEvol) Class.forName(className).newInstance();
+                getEvolStrategy().loadParameters();
+
+                // A partir de la première ponte     
+                //      str.loadParameters();
+                //      lost=str.getRateStray();
             } catch (Exception ex) {
-                
+                StringBuilder sb = new StringBuilder();
+                sb.append("Evol process instantiation failed ==> ");
+                sb.append(ex.toString());
+                InstantiationException ieex = new InstantiationException(sb.toString());
+                ieex.setStackTrace(ex.getStackTrace());
+                throw ieex;
+
             }
         }
     }
 
-
+    /**
+     * @return the evolStrategy
+     */
+    private IEvol getEvolStrategy() {
+        return evolStrategy;
+    }
 }

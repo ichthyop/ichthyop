@@ -6,7 +6,5 @@ package org.previmer.ichthyop.arch;
 public interface IEvol {
 
     public void loadParameters() throws Exception;
-
-    public int getNbParticles();
-
+    
 }

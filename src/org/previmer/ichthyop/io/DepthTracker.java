@@ -25,6 +25,7 @@ public class DepthTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
+        addAliveDimension();
     }
 
     public void track() {

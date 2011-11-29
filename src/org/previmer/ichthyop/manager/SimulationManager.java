@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.jdom.input.SAXBuilder;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
+import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.io.BlockType;
 
 /**
  *
@@ -421,5 +423,13 @@ public class SimulationManager {
 
     public TimeManager getTimeManager() {
         return TimeManager.getInstance();
+    }
+    
+    public EvolManager getEvolManager() {
+        return EvolManager.getInstance();
+    }
+    public boolean testEvol(){
+        boolean test=getConfigurationFile().getName().contains("Evol");
+        return test;        
     }
 }

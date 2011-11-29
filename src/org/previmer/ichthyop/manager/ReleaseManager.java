@@ -85,6 +85,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     }
 
     public void releaseTriggered(ReleaseEvent event) throws Exception {
+        // le seul cas que j'ai fait est le release par défaut, ichthyop evol ne fait pas encore les autres modes de release.
         int nbReleased = getReleaseProcess().release(event);
         StringBuffer sb = new StringBuffer();
         sb.append("Release event (");
@@ -181,7 +182,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
         return new String[]{st0};
     }
-
+   
     /**
      * Adds the specified value listener to receive ValueChanged events from
      * the paremeter.

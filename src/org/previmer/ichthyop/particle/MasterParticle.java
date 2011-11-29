@@ -27,6 +27,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
     private boolean living = true;
     private boolean locked = false;
     private List<ParticleLayer> layers = new ArrayList();
+    private int generation=0;
 
     public ParticleLayer getLayer(Class layerClass) {
         for (ParticleLayer layer : layers) {
@@ -69,6 +70,10 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
     public long getAge() {
         return age;
     }
+    
+    public int getGeneration() {
+        return generation;
+    }
 
     public float getTemperature() {
         return temperature;
@@ -81,6 +86,13 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
     public void incrementAge() {
         age += getSimulationManager().getTimeManager().get_dt();
     }
+    
+    // -------------------------A compléter et probablement à rectifier plus tard----------
+    // suggestion: en faire une fonction abstraite à  implémenter ailleurs
+    public void incrementGeneration() {
+        generation++;
+    }
+    //------------------------------------------------------------
 
     public void kill(ParticleMortality cause) {
 

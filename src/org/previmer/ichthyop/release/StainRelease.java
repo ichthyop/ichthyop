@@ -24,6 +24,9 @@ import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
+import org.previmer.ichthyop.manager.SimulationManager;
+import org.previmer.ichthyop.io.ConfigurationFile;
+import org.previmer.ichthyop.evol.InitialSpawn;
 
 /**
  *
@@ -43,8 +46,16 @@ public class StainRelease extends AbstractReleaseProcess {
         /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
 
-        /* retrieve stain parameters */
-        nb_particles = Integer.valueOf(getParameter("number_particles"));
+        /* retrieve stain parameters */   
+        if(SimulationManager.getInstance().testEvol()){
+            nb_particles = Integer.valueOf(getParameter("number_particles"));
+        }else{
+            // si ponte initiale
+            nb_particles = InitialSpawn.nb_per_day;
+            //sinon, calculer la valeur nb_particules
+        }        
+        // sinon ne faire le lacher que du nombre d'individus par jour
+        //****************** a faire  ********************************************
         radius_stain = Float.valueOf(getParameter("radius_stain"));
         lon_stain = Double.valueOf(LonLatConverter.convert(getParameter("lon_stain"), LonLatFormat.DecimalDeg));
         lat_stain = Double.valueOf(LonLatConverter.convert(getParameter("lat_stain"), LonLatFormat.DecimalDeg));
@@ -62,6 +73,11 @@ public class StainRelease extends AbstractReleaseProcess {
         }
 
         int DROP_MAX = 2000;
+        ////////////////////////////////////////////////////////////////////////
+        // *******************  index à vérifier    ****************************
+        // j'opterais pour 
+        //int index = Math.max(nb_particles - 1, 0);
+        ////////////////////////////////////////////////////////////////////////
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
         for (int p = 0; p < nb_particles; p++) {
             IBasicParticle particlePatch = null;
@@ -101,5 +117,9 @@ public class StainRelease extends AbstractReleaseProcess {
 
     public int getNbParticles() {
         return Integer.valueOf(getParameter("number_particles"));
+    }
+
+    private ConfigurationFile getConfigurationFile() {
+        return getSimulationManager().getParameterManager().getConfigurationFile();
     }
 }

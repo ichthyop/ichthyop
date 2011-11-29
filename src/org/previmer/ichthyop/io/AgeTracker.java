@@ -32,7 +32,7 @@ public class AgeTracker extends AbstractTracker {
         while (iter.hasNext()) {
             particle = iter.next();
             getArray().set(0, particle.getIndex(), (int) particle.getAge());
-            // le getAge défini dans IBasicParticle est un long, et il est en jours !!!
+            // le getAge défini dans IBasicParticle est un long, et il est en jours.
         }
     }
 

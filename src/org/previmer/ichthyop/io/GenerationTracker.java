@@ -23,7 +23,7 @@ public class GenerationTracker extends AbstractTracker {
     @Override
     void setDimensions() {
         addTimeDimension();
-        addDrifterDimension();
+        addAliveDimension();
     }
 
     public void track() {
@@ -31,7 +31,7 @@ public class GenerationTracker extends AbstractTracker {
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            getArray().set(0, particle.getIndex(), particle.getDeathCause().getCode());
+            getArray().set(0, particle.getIndex(), particle.getGeneration());
         }
     }
 

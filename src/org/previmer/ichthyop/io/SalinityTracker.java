@@ -23,7 +23,7 @@ public class SalinityTracker extends AbstractTracker {
     @Override
     void setDimensions() {
         addTimeDimension();
-        addDrifterDimension();
+        addAliveDimension();
     }
 
     public void track() {

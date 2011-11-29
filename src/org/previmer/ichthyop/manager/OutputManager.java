@@ -34,6 +34,7 @@ import org.previmer.ichthyop.io.GenerationTracker;
 import org.previmer.ichthyop.io.MortalityTracker;
 import org.previmer.ichthyop.io.TimeTracker;
 import org.previmer.ichthyop.io.CustomTracker;
+import org.previmer.ichthyop.io.IndividualTracker;
 import org.previmer.ichthyop.io.SalinityTracker;
 import org.previmer.ichthyop.io.TemperatureTracker;
 import org.previmer.ichthyop.io.XParameter;
@@ -334,22 +335,20 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             customTrackers.add(variableName);
         }
     }
-
-
-        private void addEvolTrackers() throws Exception {
+ 
+        private void addPredefinedEvolTrackers() throws Exception {
         trackers = new ArrayList();
-       // trackers.add(new IndividualTracker());
+        trackers.add(new IndividualTracker());
+        trackers.add(new GenerationTracker());
+        trackers.add(new AgeTracker());
+        trackers.add(new MortalityTracker());
         trackers.add(new LonTracker());
         trackers.add(new LatTracker());
-        trackers.add(new MortalityTracker());
-        trackers.add(new AgeTracker());
-        trackers.add(new GenerationTracker());
-        trackers.add(new TemperatureTracker());
-        trackers.add(new SalinityTracker());
-
         if (getSimulationManager().getDataset().is3D()) {
             trackers.add(new DepthTracker());
         }
+        trackers.add(new TemperatureTracker());
+        trackers.add(new SalinityTracker());
         /* Add trackers requested by external actions */
         if (null != predefinedTrackers) {
             for (Class trackerClass : predefinedTrackers) {
@@ -382,8 +381,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 throw ioex;
             }
         }
-    }
-
+    }    
     private void addPredefinedTrackers() throws Exception {
         trackers = new ArrayList();
         trackers.add(new TimeTracker());
@@ -584,10 +582,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
-
-        /* add application trackers lon lat depth time */
-        addPredefinedTrackers();
-
+        
+        if (SimulationManager.getInstance().testEvol()) {
+            /* add Evol application trackers individual, genaration, age, lon, lat, depth, salinity, temperature*/
+            addPredefinedEvolTrackers();
+        } else {
+            /* add application trackers lon lat depth time */
+            addPredefinedTrackers();
+            
+        }
         /* add custom trackers */
         addCustomTrackers(customTrackers);
 
@@ -605,7 +608,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         getLogger().info("Output manager setup [OK]");
     }
-
+    
     public void initializePerformed(InitializeEvent e) throws Exception {
 
         /* add the zones

@@ -75,6 +75,11 @@ public interface IBasicParticle {
      * @return the age in seconds.
      */
     public long getAge();
+    /**
+     * Gets the generation of the particle.
+     * @return the age in seconds.
+     */
+    public int getGeneration();
 
     /**
      * Gets the temperature of the the location where the particle is.
