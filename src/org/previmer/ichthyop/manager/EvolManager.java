@@ -13,20 +13,24 @@ import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;
 import org.previmer.ichthyop.arch.IEvol;
-import org.previmer.ichthyop.evol.Stray;
+import org.previmer.ichthyop.evol.InitialSpawn;
+//import org.previmer.ichthyop.evol.Stray;
 
 public class EvolManager extends AbstractManager implements SetupListener {
 
     private static final EvolManager evolManager = new EvolManager();
     private IEvol evolStrategy;
-    private Stray str;
+    //private Stray str;
 
     public static EvolManager getInstance() {
         return evolManager;
     }
-
+    
     public void setupPerformed(SetupEvent e) throws Exception {
-        //traitement nécessaire;
+        InitialSpawn init_spawn = new InitialSpawn();
+        do {
+            init_spawn.InitialSpawnSetUp();
+        } while (InitialSpawn.last_spawn <= SimulationManager.getInstance().getTimeManager().get_tO() + 31536000);
         getLogger().info("Evol manager setup [OK]");
     }
 

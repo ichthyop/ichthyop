@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.jdom.input.SAXBuilder;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
+import org.previmer.ichthyop.evol.InitialSpawn;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.BlockType;
 
@@ -150,7 +151,11 @@ public class SimulationManager {
     public String getId() {
 
         if (null == id) {
-            id = newId();
+            if(testEvol()){
+                id = newEvolId();
+            } else{
+                id = newId();
+            }            
         }
         if (this.getNumberOfSimulations() > 1) {
             return id + "_s" + (getIndexSimulation() + 1);
@@ -166,6 +171,19 @@ public class SimulationManager {
 
     private static String newId() {
         StringBuffer strBfRunId = new StringBuffer("ichthyop-run");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        dtformatterId.setCalendar(calendar);
+        strBfRunId.append(dtformatterId.format(calendar.getTime()));
+        return strBfRunId.toString();
+    }
+    
+    private static String newEvolId() {
+        StringBuffer strBfRunId = new StringBuffer("ichthyopevol-spawn");
+        String time_spawn= String.valueOf(InitialSpawn.last_spawn);
+        // normalement la valeur que je vais récupérer est en secondes, à corriger plus tard.
+        strBfRunId.append(time_spawn);
+        strBfRunId.append("-run");
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
         dtformatterId.setCalendar(calendar);

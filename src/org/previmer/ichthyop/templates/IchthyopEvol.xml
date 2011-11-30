@@ -1390,7 +1390,7 @@
   <block type="action">
     <key>action.recruitment.stain</key>
     <tree_path>Advanced/Biology/Recruitment/In stain</tree_path>
-    <enabled>false</enabled>
+    <enabled>true</enabled>
     <description>Block of options for defining some recruitment criterions and a recruitment stain, in order to study, for instance, the recruitment success of a particular geographic area.</description>
     <parameters>
       <parameter>

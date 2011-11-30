@@ -199,7 +199,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 ? "3d"
                 : "2d";
         ncOut.addGlobalAttribute("transport_dimension", dim);
-
+       
+        if (SimulationManager.getInstance().testEvol()) {
+            /* Add the time of the NETCDF file */
+            String temps = String.valueOf(getSimulationManager().getTimeManager().getTime());
+            ncOut.addGlobalAttribute("time", temps);
+        }        
+        
         /* Write all parameters */
         for (BlockType type : BlockType.values()) {
             for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
@@ -595,6 +601,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         addCustomTrackers(customTrackers);
 
         /* add user defined trackers */
+        
+        // j'ai activé le tracker de recrutement, en mettant recruitment.stain enabled.
         addCustomTrackers(getUserTrackers());
 
         /* add gloabal attributes */
