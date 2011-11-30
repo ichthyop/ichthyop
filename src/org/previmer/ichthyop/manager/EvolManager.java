@@ -31,7 +31,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
         do {
             init_spawn.InitialSpawnSetUp();
         } while (InitialSpawn.last_spawn <= SimulationManager.getInstance().getTimeManager().get_tO() + 31536000);
-        getLogger().info("Evol manager setup [OK]");
+        getLogger().info("Evol manager initial spawn setup [OK]");
     }
 
     public void initializePerformed(InitializeEvent e) throws Exception {
