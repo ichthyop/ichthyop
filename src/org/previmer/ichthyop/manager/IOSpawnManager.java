@@ -3,7 +3,6 @@ package org.previmer.ichthyop.manager;
 import java.io.File;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.event.InitializeEvent;
-import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import java.io.IOException;
@@ -11,12 +10,12 @@ import java.util.logging.Level;
 import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.NetcdfFile;
 import org.previmer.ichthyop.arch.ITracker;
-import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
 import java.util.List;
-import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.evol.AbstractEvol;
 import org.previmer.ichthyop.io.IOTools;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.dataset.NetcdfDataset;
 
@@ -38,7 +37,8 @@ public class IOSpawnManager extends AbstractManager{
     private static NetcdfFileWriteable ncOut;
     private NetcdfFile ncIn;
     private String basename;
-    private String last_name;
+    private String last_name= null;
+    public int count=0;
 
     public static IOSpawnManager getInstance() {
         return IOSpawnManager;
@@ -199,9 +199,40 @@ public class IOSpawnManager extends AbstractManager{
         // to verify
         writeToNetCDF(i_record);
         close();
+        last_name = basename;
+    }
+    
+    public int setupPerformed() throws Exception {
 
+        /* Create the NetCDF writeable object */
+        ncOut = NetcdfFileWriteable.createNew("");
+        ncOut.setLocation(makeFileLocation());
+
+        if (SimulationManager.getInstance().getTimeManager().getTime()
+                == SimulationManager.getInstance().getTimeManager().get_tO()) {
+            // A compléter
+            writeToNetCDF(i_record);
+        } else {
+            copy();
+            clean();
+        }
+        // to verify
+        writeToNetCDF(i_record);
+        close();
+        return count;
     }
 
+    public int[] canBeParent(){
+        int[] candidate=null;
+        try {
+            ncIn = NetcdfFile.open(getLast_name());
+        } catch (IOException ex) {
+            Logger.getLogger(IOSpawnManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return candidate;
+        
+    }
+    
     private void copy() {
         try {
             ncIn = NetcdfFile.open(getLast_name());
@@ -217,16 +248,18 @@ public class IOSpawnManager extends AbstractManager{
         }
     }
 
-    private void clean() {
+    public void clean() {
         try {
             int[] dead = findIndexDead(readMortality(basename));
             int[] outOfAge = this.oldNotRecruited();
            
             for (int i = 0; i < dead.length; i++) {
                 ncOut.removeDimension(null, String.valueOf(dead[i])); // dimname => l'individu en question
+                count++;
             }
             for (int i = 0; i < outOfAge.length; i++) {
                 ncOut.removeDimension(null, String.valueOf(outOfAge[i]));
+                count++;
             }
 
         } catch (IOException ex) {
@@ -280,14 +313,14 @@ public class IOSpawnManager extends AbstractManager{
         
     public int[] findIndexDead(Array death){
         int[] index = null;
-        int i=0;    // compteur dans death
+        Integer buff= null;
         int j=0;    //compteur dans index[]
         while(death.hasNext()){
-            if(death.getInt(i) != 0){
-                index[j] = i;
+            buff= Integer.class.cast(death.getIndex());
+            if(death.getInt(buff.intValue()) != 0){
+                index[j] = buff.intValue();
                 j++;
             }
-            i++; 
             death.getIndex().incr();
         }
         return index;
@@ -300,7 +333,7 @@ public class IOSpawnManager extends AbstractManager{
         try {
             recruitment = ncIn.findVariable("recruitment").read();      // A vérifier le nom dans le fichier netcdf
         } catch (Exception ex) {
-            IOException ioex = new IOException("Error reading last mortality. " + ex.toString());
+            IOException ioex = new IOException("Error reading recruitment. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
@@ -312,14 +345,14 @@ public class IOSpawnManager extends AbstractManager{
     
     public int[] findIndexNotRecruited(Array recruitment){
         int[] index = null;
-        int i=0;    // compteur dans recruitment
+       Integer buff = null;
         int j=0;    //compteur dans index[]
         while(recruitment.hasNext()){
-            if(recruitment.getInt(i) == 0){
-                index[j] = i;
+            buff= Integer.class.cast(recruitment.getIndex());
+            if(recruitment.getInt(buff.intValue()) == 0){
+                index[j] = buff.intValue();
                 j++;
             }
-            i++;
             recruitment.getIndex().incr();
         }
         return index;
@@ -345,14 +378,32 @@ public class IOSpawnManager extends AbstractManager{
     public int[] findIndexOld(Array age){
         long limit= SimulationManager.getInstance().getTimeManager().getTransportDuration();
         int[] index = null;
-        int i=0;    // compteur dans recruitment
+        Integer buff= null;
         int j=0;    //compteur dans index[]
         while(age.hasNext()){
-            if(age.getInt(i) > limit){
-                index[j] = i;
+            buff= Integer.class.cast(age.getIndex());
+            if(age.getInt(buff.intValue()) > limit){
+                index[j] = buff.intValue();
                 j++;
             }
-            i++;
+            age.getIndex().incr();
+        }
+        return index;
+    }
+    
+    public int[] findIndexCanBeParent(Array age){
+        AbstractEvol param= new AbstractEvol();
+        int min = param.getAge_min();
+        int max = param.getAge_max();
+        int[] index = null;
+        Integer buff= null;
+        int j=0;    //compteur dans index[]
+        while( age.hasNext() ){
+            buff= Integer.class.cast(age.getIndex());
+            if( age.getInt(buff.intValue()) >= min && (max >= age.getInt(buff.intValue()))){
+                index[j] = buff.intValue();
+                j++;
+            }
             age.getIndex().incr();
         }
         return index;

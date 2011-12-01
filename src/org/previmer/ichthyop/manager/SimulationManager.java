@@ -438,6 +438,10 @@ public class SimulationManager {
     public OutputManager getOutputManager() {
         return OutputManager.getInstance();
     }
+    
+   public IOSpawnManager getIOSpawnManager() {
+        return IOSpawnManager.getInstance();
+    }
 
     public TimeManager getTimeManager() {
         return TimeManager.getInstance();
