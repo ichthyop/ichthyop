@@ -1,8 +1,0 @@
-nov. 30, 2011 3:27:55 PM org.previmer.ichthyop.ui.IchthyopApp initLogging
-Infos: Created log file /home/mariem/ichthyop/dev/evol/ichthyop-log.txt
-nov. 30, 2011 3:27:57 PM org.previmer.ichthyop.ui.IchthyopView <init>
-Infos: Ichthyop 3.1 - Welcome on board !
-nov. 30, 2011 3:27:57 PM org.previmer.ichthyop.ui.IchthyopView loadConfigurationFile
-Infos: {Configuration} Opened /home/mariem/ichthyop/dev/evol/src/org/previmer/ichthyop/templates/IchthyopEvol.xml
-nov. 30, 2011 3:28:45 PM org.previmer.ichthyop.ui.IchthyopView$ConfirmExit willExit
-Infos: Ichthyop 3.1 - Bye bye !
