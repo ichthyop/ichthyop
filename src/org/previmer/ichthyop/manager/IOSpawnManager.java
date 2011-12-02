@@ -15,9 +15,9 @@ import java.util.List;
 import org.previmer.ichthyop.evol.AbstractEvol;
 import org.previmer.ichthyop.io.IOTools;
 import ucar.ma2.Array;
-import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.FileWriter;
 
 /**
  *
@@ -47,7 +47,7 @@ public class IOSpawnManager extends AbstractManager{
     public String getFileLocation() {
         return basename;
     }
-
+    
     public String getParameter(String key) {
         return getSimulationManager().getParameterManager().getParameter(block_key, key);
     }
@@ -221,24 +221,11 @@ public class IOSpawnManager extends AbstractManager{
         close();
         return count;
     }
-
-    public int[] canBeParent(){
-        int[] candidate=null;
-        try {
-            ncIn = NetcdfFile.open(getLast_name());
-        } catch (IOException ex) {
-            Logger.getLogger(IOSpawnManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return candidate;
-        
-    }
     
     private void copy() {
         try {
             ncIn = NetcdfFile.open(getLast_name());
-            /* copie du fichier de la ponte à t-1, dans celui de la ponte à t*/
-            ncOut = (NetcdfFileWriteable) ncIn;
-            /*  vérification copie effectuée    */
+            ncOut= (NetcdfFileWriteable) FileWriter.writeToFile(ncIn, "ncOut");
             if (!ncOut.equals(ncIn)) {
                 System.out.println("failed to copy the netcdf file.");
                 // je dois copier vecteur par vecteur
@@ -389,6 +376,17 @@ public class IOSpawnManager extends AbstractManager{
             age.getIndex().incr();
         }
         return index;
+    } 
+    
+    public int[] canBeParent(){
+        int[] candidate=null;
+        try {
+            ncIn = NetcdfFile.open(getLast_name());
+        } catch (IOException ex) {
+            Logger.getLogger(IOSpawnManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return candidate;
+        
     }
     
     public int[] findIndexCanBeParent(Array age){
@@ -408,16 +406,53 @@ public class IOSpawnManager extends AbstractManager{
         }
         return index;
     }
+    
+    // le nombre d'oeufs est réparti aléatoirement sur les individus qui sont candidats à la reproduction.
+    public int[] randomSelection() {
+        int index[] = null;
+        int selected[] = null;
+        int random = 0;
+
+        try {
+            index = this.findIndexCanBeParent(readAge(basename));
+            for (int i = 0; i < count; i++) {
+                random = (int) (Math.random() * index.length);
+                selected[i] = random;
+            }
+
+        } catch (IOException ex) {
+            Logger.getLogger(IOSpawnManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return selected;
+    }
 
     /**
      * @return the last_name
      */
-    private String getLast_name() {
-        // to do 
+    public String getLast_name() {
+        // to do
         return last_name;
+    }
+    
+    public int countSpawn(String File) {
+        int nb_ind = 0;
+        int pop = getSimulationManager().getSimulation().getPopulation().size();
+        nb_ind = getNbParticles(last_name);
+        int x = pop - nb_ind;
+        return x;
     }
 
     public void initializePerformed(InitializeEvent e) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public int getNbParticles(String filename) {
+
+        try {
+            return NetcdfDataset.open(filename).findDimension("individual").getLength();
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, null, ex);
+        }
+        return -1;
     }
 }

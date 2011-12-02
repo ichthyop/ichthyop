@@ -33,8 +33,8 @@ public class EvolManager extends AbstractManager implements SetupListener {
         } while (InitialSpawn.last_spawn <= SimulationManager.getInstance().getTimeManager().get_tO() + 31536000);
         getLogger().info("Evol manager initial spawn setup [OK]");
         
-        //boucle
-        int nb_spawn= SimulationManager.getInstance().getIOSpawnManager().setupPerformed();
+        //début de la deuxième génération
+        int nb_spawn = SimulationManager.getInstance().getIOSpawnManager().countSpawn(SimulationManager.getInstance().getIOSpawnManager().getLast_name());
         
     }
 
