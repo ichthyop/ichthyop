@@ -32,7 +32,7 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
     //private File textFile;
     private boolean is3D;
     private int nbParticles;
-    private HashMap<Double, File> mapRelease;
+    private HashMap<String, File> mapRelease;
 
     @Override
     public void loadParameters() throws IOException {
@@ -44,7 +44,7 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
         for (File file : mapRelease.values()) {
             nbParticles += readNbParticles(file);
         }
-        
+
     }
 
     private File getFile(String filename) throws IOException {
@@ -54,7 +54,7 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
         if (!file.isDirectory()) {
             throw new FileNotFoundException("Drifter directory " + filename + " not found.");
         }
-        if (null== file.list()) {
+        if (null == file.list()) {
             throw new IOException("Drifter directory " + file + " is empty");
         }
         return file;
@@ -68,7 +68,7 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
 
-        File drifterFile = mapRelease.get(event.getSource().getTime());
+        File drifterFile = findReleaseFile(mapRelease, event.getSource().getTime());
         if (null != drifterFile) {
             getSimulationManager().getLogger().info("Drifter text file " + drifterFile.toString());
         } else {
@@ -111,7 +111,7 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
                     throw new IOException("{Drifter release} Drifter at line " + (index + 1) + " is not in water");
                 }
             }
-        }
+        }        
         return index;
     }
 
@@ -132,24 +132,53 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
         return nbParticles;
     }
 
-    private HashMap<Double, File> createMapRelease(File directory) {
-        
-        HashMap<Double, File> map = new HashMap();
+    private File findReleaseFile(HashMap<String, File> map, double time) {
+
+        File file = null;
+        String dateOn = null;
+        for (String date : map.keySet()) {
+            double match = time - dateStrToSeconds(date);
+            if (match == 0) {
+                dateOn = date;
+                file = map.get(date);
+            }
+        }
+        if (null != dateOn) {
+            map.remove(dateOn);
+        }
+        return file;
+    }
+
+    /* 
+     * Transforms a String such as y2010m05d13h1200 into seconds.
+     * 
+     * @param dateStr date formatted as "'y'yyyy'm'MM'd'dd'h'HHmm"
+     * @return date into seconds elapsed since origin of time
+     */
+    private double dateStrToSeconds(String dateStr) {
 
         Calendar calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
+
         SimpleDateFormat releaseDateFormat = new SimpleDateFormat("'y'yyyy'm'MM'd'dd'h'HHmm");
         releaseDateFormat.setCalendar(calendar);
+        double seconds = Double.NaN;
+        try {
+            calendar.setTime(releaseDateFormat.parse(dateStr));
+            seconds = calendar.getTimeInMillis() / 1000.d;
+        } catch (ParseException ex) {
+            Logger.getLogger(TimeDrifterRelease.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return seconds;
+    }
+
+    private HashMap<String, File> createMapRelease(File directory) {
+
+        HashMap<String, File> map = new HashMap();
 
         for (File filename : directory.listFiles(new MetaFilenameFilter("*.txt"))) {
             String[] tokens = filename.getName().split("_");
             String filedate = tokens[tokens.length - 1].replace(".txt", "");
-            try {
-                calendar.setTime(releaseDateFormat.parse(filedate));
-                double filetime = calendar.getTimeInMillis() / 1000.d;
-                map.put(filetime, filename);
-            } catch (ParseException ex) {
-                Logger.getLogger(TimeDrifterRelease.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            map.put(filedate, filename);
         }
         return map;
     }
