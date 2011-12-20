@@ -75,6 +75,23 @@ public interface IBasicParticle {
      * @return the age in seconds.
      */
     public long getAge();
+    
+    public void setGeneration(int generation);
+    
+    public void setSalinity(float salinity);
+    
+    public void setTemperature(float temperature);
+    
+    public void setLon(double lon);
+    
+    public void setLat(double lat);
+
+    public void setAge(long age);
+    
+    public void setdeathCause(int deathCause);
+    
+    public void setDepth(double depth);
+    
     /**
      * Gets the generation of the particle.
      * @return the age in seconds.

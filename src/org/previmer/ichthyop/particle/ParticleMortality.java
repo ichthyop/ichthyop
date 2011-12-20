@@ -47,6 +47,10 @@ public enum ParticleMortality {
         }
         return ALIVE;
     }
+    
+    public void setMortality(int code) {
+       this.code = code;       
+    }
 
     @Override
     public String toString() {

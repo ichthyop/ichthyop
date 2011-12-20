@@ -174,6 +174,17 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode2.add(treeNode3);
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS3D);
         treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2); 
+                
+        treeNode2 = new DefaultMutableTreeNode("Evol");
+       // treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ICHTHYOPEVOLMARS2D);
+       // treeNode2.add(treeNode3);
+       // treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ICHTHYOPEVOLMARS3D);
+       // treeNode2.add(treeNode3);
+       // treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ICHTHYOPEVOLROMS2D);
+       // treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ICHTHYOPEVOLROMS3D);
+        treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
 
         treeNode2 = new DefaultMutableTreeNode("OPA");
@@ -471,6 +482,10 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         ROMS2D,
         ROMS3D,
         OPA3D_NEMO,
+      //  ICHTHYOPEVOLMARS2D,
+      //  ICHTHYOPEVOLMARS3D,
+      //  ICHTHYOPEVOLROMS2D,
+        ICHTHYOPEVOLROMS3D,
         GENERIC;
         /* variables */
         private String longName;
@@ -480,7 +495,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         private ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(NewConfigView.class);
 
         TEMPLATE() {
-            longName = resourceMap.getString(name() + ".title");
+            longName = resourceMap.getString(name()  + ".title");
+            System.out.println(longName);
             description = resourceMap.getString(name() + ".description");
             filename = resourceMap.getString(name() + ".xml");
             cfgname = resourceMap.getString(name() + ".cfg");
@@ -523,6 +539,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         public static TEMPLATE getTemplate(String name) {
             for (TEMPLATE template : TEMPLATE.values()) {
+                System.out.println("template: "+template);
                 if (template.toString().matches(name)) {
                     return template;
                 }

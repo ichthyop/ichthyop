@@ -24,6 +24,9 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
     private ParticleMortality deathCause;
     private float temperature;
     private float salinity;
+    private float depth;
+    private double lon;
+    private double lat;    
     private boolean living = true;
     private boolean locked = false;
     private List<ParticleLayer> layers = new ArrayList();
@@ -82,7 +85,27 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
     public float getSalinity() {
         return salinity;
     }
+    
+    public void setSalinity(float salinity) {
+        this.salinity = salinity;
+    }
+    
+    public void setTemperature(float temperature) {
+        this.temperature = temperature;
+    }
 
+    public void setAge(long age) {
+        this.age = age;
+    }
+    
+    public void setdeathCause(int d) { 
+        ParticleMortality.ALIVE.setMortality(d);
+    }
+    
+    public void setgeneration(int generation) {
+        this.generation= generation;
+    }   
+    
     public void incrementAge() {
         age += getSimulationManager().getTimeManager().get_dt();
     }
@@ -105,6 +128,9 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         }
         this.deathCause = cause;
         living = false;
+        setLon(Double.NaN);
+        setLat(Double.NaN);
+        setDepth(Double.NaN);
     }
 
     public ParticleMortality getDeathCause() {
@@ -133,17 +159,11 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         getSimulationManager().getActionManager().executeSysActions(this);
     }
 
-    /**
-     * @param temperature the temperature to set
-     */
-    public void setTemperature(float temperature) {
-        this.temperature = temperature;
+    public void setAge(int age) {
+        this.age=age;
     }
 
-    /**
-     * @param salinity the salinity to set
-     */
-    public void setSalinity(float salinity) {
-        this.salinity = salinity;
+    public void setGeneration(int generation) {
+        this.generation= generation;
     }
 }

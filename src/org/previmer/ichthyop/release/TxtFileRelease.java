@@ -5,6 +5,8 @@
 package org.previmer.ichthyop.release;
 
 import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.arch.IBasicParticle;
@@ -14,8 +16,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
+import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
  *
@@ -96,7 +102,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     }
 
     private int readNbParticles() throws IOException {
-        
+
         int index = 0;
         BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
         String line;

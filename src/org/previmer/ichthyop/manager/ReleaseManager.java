@@ -160,7 +160,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
             }
         }
     }
-
+    
     private String[] getReleaseEvents() throws Exception {
 
         try {
@@ -182,7 +182,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
         return new String[]{st0};
     }
-   
+
     /**
      * Adds the specified value listener to receive ValueChanged events from
      * the paremeter.
@@ -255,7 +255,32 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     public void initializePerformed(InitializeEvent e) throws Exception {
         addReleaseListener(this);
         getSimulationManager().getTimeManager().addNextStepListener(this);
+        // if (SimulationManager.getInstance().testEvol()
+        //         && SimulationManager.getInstance().getTimeManager().getTime()
+        //         <= SimulationManager.getInstance().getTimeManager().get_tO() + 31449600) {
+        //     evolSchedule();
+        // } else {
         schedule();
+        // }
         getLogger().info("Release manager initialization [OK]");
     }
+
+    public double getMinDepth() {
+        return Double.parseDouble(getSimulationManager().getParameterManager().getParameter("release.schedule", "depth_min"));
+
+    }
+
+    public double getMaxDepth() {
+        return Double.parseDouble(getSimulationManager().getParameterManager().getParameter("release.schedule", "depth_max"));
+
+    }
+    
+    public int getReleaseFrequency(){
+        return Integer.parseInt(getSimulationManager().getParameterManager().getParameter("release.schedule", "release_frequency"));
+    }
+    
+    public String getTimeBeginning(){
+        return getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
+    }
+    
 }

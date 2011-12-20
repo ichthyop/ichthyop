@@ -26,7 +26,6 @@ import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.io.ConfigurationFile;
-import org.previmer.ichthyop.evol.InitialSpawn;
 
 /**
  *
@@ -47,13 +46,9 @@ public class StainRelease extends AbstractReleaseProcess {
         is3D = getSimulationManager().getDataset().is3D();
 
         /* retrieve stain parameters */   
-        if(SimulationManager.getInstance().testEvol()){
+        //if(!SimulationManager.getInstance().testEvol()){
             nb_particles = Integer.valueOf(getParameter("number_particles"));
-        }else{
-            // si ponte initiale
-            nb_particles = InitialSpawn.nb_per_day;
-            //sinon, calculer la valeur nb_particules
-        }        
+        //}      
         // sinon ne faire le lacher que du nombre d'individus par jour
         //****************** a faire  ********************************************
         radius_stain = Float.valueOf(getParameter("radius_stain"));

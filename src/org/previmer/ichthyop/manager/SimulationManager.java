@@ -24,9 +24,9 @@ import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.jdom.input.SAXBuilder;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
-import org.previmer.ichthyop.evol.InitialSpawn;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.io.IOTools;
 
 /**
  *
@@ -180,7 +180,10 @@ public class SimulationManager {
     
     private static String newEvolId() {
         StringBuffer strBfRunId = new StringBuffer("ichthyopevol-spawn");
-        String time_spawn= String.valueOf(InitialSpawn.last_spawn);
+        String time_spawn = null;
+        /////////////////////////////////////////////////////////////////
+        // A rectifier car j'ai supprimé le fichier innitialSpawn
+        //= String.valueOf(InitialSpawn.last_spawn);
         // normalement la valeur que je vais récupérer est en secondes, à corriger plus tard.
         strBfRunId.append(time_spawn);
         strBfRunId.append("-run");
@@ -315,6 +318,7 @@ public class SimulationManager {
 
         /* Time manager must come after the release manager because the 
         calculation of the simulation duration required the release schedule */
+        getEvolManager();
         getReleaseManager();
         getTimeManager();
 
@@ -343,6 +347,8 @@ public class SimulationManager {
         flagStop = false;
         getZoneManager().cleanup();
         fireSetupPerformed();
+        System.out.println("le id de ce fichier est: "+this.getId());
+        System.out.println("ce fichier se trouve à: " +IOTools.resolveFile(this.getId()));
         isSetup = true;
     }
     
@@ -385,10 +391,10 @@ public class SimulationManager {
 
     private void fireSetupPerformed() throws Exception {
         SetupListener[] listenerList = (SetupListener[]) listeners.getListeners(SetupListener.class);
-        for (int i = listenerList.length; i-- > 0;) {
-            SetupListener listener = listenerList[i];
-            listener.setupPerformed(new SetupEvent(this));
-        }
+            for (int i = listenerList.length; i-- > 0;) {
+                SetupListener listener = listenerList[i];
+                listener.setupPerformed(new SetupEvent(this));
+            }
     }
 
     public void addInitializeListener(InitializeListener listener) {
@@ -439,9 +445,9 @@ public class SimulationManager {
         return OutputManager.getInstance();
     }
     
-   public IOSpawnManager getIOSpawnManager() {
-        return IOSpawnManager.getInstance();
-    }
+//   public IOSpawnManager getIOSpawnManager() {
+ //       return IOSpawnManager.getInstance();
+ //   }
 
     public TimeManager getTimeManager() {
         return TimeManager.getInstance();
@@ -450,8 +456,12 @@ public class SimulationManager {
     public EvolManager getEvolManager() {
         return EvolManager.getInstance();
     }
+    
     public boolean testEvol(){
         boolean test=getConfigurationFile().getName().contains("Evol");
         return test;        
+    }    
+    public UpdateManager getUpdateManager(){
+        return new UpdateManager();
     }
 }

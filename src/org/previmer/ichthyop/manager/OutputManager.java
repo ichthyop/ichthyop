@@ -29,14 +29,9 @@ import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.LatTracker;
 import org.previmer.ichthyop.io.LonTracker;
-import org.previmer.ichthyop.io.AgeTracker;
-import org.previmer.ichthyop.io.GenerationTracker;
 import org.previmer.ichthyop.io.MortalityTracker;
 import org.previmer.ichthyop.io.TimeTracker;
 import org.previmer.ichthyop.io.CustomTracker;
-import org.previmer.ichthyop.io.IndividualTracker;
-import org.previmer.ichthyop.io.SalinityTracker;
-import org.previmer.ichthyop.io.TemperatureTracker;
 import org.previmer.ichthyop.io.XParameter;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
@@ -200,12 +195,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 : "2d";
         ncOut.addGlobalAttribute("transport_dimension", dim);
 
-        if (SimulationManager.getInstance().testEvol()) {
-            /* Add the time of the NETCDF file */
-            String temps = String.valueOf(getSimulationManager().getTimeManager().getTime());
-            ncOut.addGlobalAttribute("time", temps);
-        }
-
         /* Write all parameters */
         for (BlockType type : BlockType.values()) {
             for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
@@ -339,53 +328,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
         if (!customTrackers.contains(variableName)) {
             customTrackers.add(variableName);
-        }
-    }
-
-    private void addPredefinedEvolTrackers() throws Exception {
-        trackers = new ArrayList();
-        trackers.add(new IndividualTracker());
-        trackers.add(new GenerationTracker());
-        trackers.add(new AgeTracker());
-        trackers.add(new MortalityTracker());
-        trackers.add(new LonTracker());
-        trackers.add(new LatTracker());
-        if (getSimulationManager().getDataset().is3D()) {
-            trackers.add(new DepthTracker());
-        }
-        trackers.add(new TemperatureTracker());
-        trackers.add(new SalinityTracker());
-        /* Add trackers requested by external actions */
-        if (null != predefinedTrackers) {
-            for (Class trackerClass : predefinedTrackers) {
-                try {
-                    ITracker tracker = (ITracker) trackerClass.newInstance();
-                    trackers.add(tracker);
-                } catch (Exception ex) {
-                    StringBuffer msg = new StringBuffer();
-                    msg.append("Error instanciating application tracker \"");
-                    msg.append(trackerClass.getCanonicalName());
-                    msg.append("\" == >");
-                    msg.append(ex.toString());
-                    IOException ioex = new IOException(msg.toString());
-                    ioex.setStackTrace(ex.getStackTrace());
-                    throw ioex;
-                }
-            }
-        }
-        for (ITracker tracker : trackers) {
-            try {
-                addVar2NcOut(tracker);
-            } catch (Exception ex) {
-                StringBuffer msg = new StringBuffer();
-                msg.append("Error adding application tracker \"");
-                msg.append(tracker.short_name());
-                msg.append("\" in the NetCDF output file == >");
-                msg.append(ex.toString());
-                IOException ioex = new IOException(msg.toString());
-                ioex.setStackTrace(ex.getStackTrace());
-                throw ioex;
-            }
         }
     }
 
@@ -590,14 +532,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
 
-        if (SimulationManager.getInstance().testEvol()) {
-            /* add Evol application trackers individual, genaration, age, lon, lat, depth, salinity, temperature*/
-            addPredefinedEvolTrackers();
-        } else {
-            /* add application trackers lon lat depth time */
-            addPredefinedTrackers();
+        /* add application trackers lon lat depth time */
+        addPredefinedTrackers();
 
-        }
+
         /* add custom trackers */
         addCustomTrackers(customTrackers);
 

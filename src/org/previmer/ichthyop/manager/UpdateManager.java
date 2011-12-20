@@ -145,8 +145,8 @@ public class UpdateManager extends AbstractManager {
         str.append('.');
         getConfigurationFile().setDescription(str.toString());
     }
-
-    private ConfigurationFile getConfigurationFile() {
+    
+    public ConfigurationFile getConfigurationFile() {
         return getSimulationManager().getParameterManager().getConfigurationFile();
     }
 
