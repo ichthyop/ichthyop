@@ -87,9 +87,9 @@ public class Roms3dDataset extends RomsCommon {
      * Name of the Variable in NetCDF file
      */
     private String strCs_r, strCs_w, strHC;
-
+    
     private double getHc() throws IOException {
-
+        
         if (null != ncIn.findGlobalAttribute(strHC)) {
             /* supposedly UCLA */
             return ncIn.findGlobalAttribute(strHC).getNumericValue().floatValue();
@@ -101,7 +101,7 @@ public class Roms3dDataset extends RomsCommon {
             throw new IOException("S-coordinate critical depth (hc) could not be found, neither among variables nor global attributes");
         }
     }
-
+    
     private double[] getCs_r() throws IOException {
         if (null != ncIn.findGlobalAttribute(strCs_r)) {
             /* supposedly UCLA */
@@ -124,7 +124,7 @@ public class Roms3dDataset extends RomsCommon {
             throw new IOException("S-coordinate stretching curves at Rho-points (Cs_r) could not be found, neither among variables nor global attributes");
         }
     }
-
+    
     private double[] getCs_w() throws IOException {
         if (null != ncIn.findGlobalAttribute(strCs_w)) {
             /* supposedly UCLA */
@@ -147,7 +147,7 @@ public class Roms3dDataset extends RomsCommon {
             throw new IOException("S-coordinate stretching curves at W-points (Cs_w) could not be found, neither among variables nor global attributes");
         }
     }
-
+    
     private VertCoordType getVertCoordType() {
 
         /*
@@ -202,12 +202,12 @@ public class Roms3dDataset extends RomsCommon {
          */
         return VertCoordType.OLD;
     }
-
+    
     @Override
     public boolean is3D() {
         return true;
     }
-
+    
     @Override
     void loadParameters() {
 
@@ -220,7 +220,7 @@ public class Roms3dDataset extends RomsCommon {
         strCs_r = getParameter("field_csr");
         strCs_w = getParameter("field_csw");
         strHC = getParameter("field_hc");
-
+        
     }
 
     /**
@@ -242,7 +242,7 @@ public class Roms3dDataset extends RomsCommon {
             throw ioex;
         }
     }
-
+    
     @Override
     public void setUp() throws Exception {
 
@@ -259,7 +259,7 @@ public class Roms3dDataset extends RomsCommon {
      * surface elevation.
      */
     private void getCstSigLevels() throws IOException {
-
+        
         double hc;
         double[] sc_r = new double[nz];
         double[] Cs_r = new double[nz];
@@ -322,21 +322,21 @@ public class Roms3dDataset extends RomsCommon {
                 }
                 break;
         }
-
+        
         z_rho_cst = z_r_tmp;
         z_w_cst = z_w_tmp;
-
+        
         z_w_tp0 = new double[nz + 1][ny][nx];
         z_w_tp1 = new double[nz + 1][ny][nx];
     }
-
+    
     @Override
     void readConstantField(String gridFile) throws IOException {
-
+        
         super.readConstantField(gridFile);
         Array arrZeta;
         Index index;
-
+        
         try {
             arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
         } catch (Exception e) {
@@ -344,7 +344,7 @@ public class Roms3dDataset extends RomsCommon {
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
-
+        
         if (arrZeta.getElementType() == float.class) {
             zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
         } else {
@@ -358,7 +358,7 @@ public class Roms3dDataset extends RomsCommon {
         }
         zeta_tp1 = zeta_tp0;
     }
-
+    
     @Override
     public double depth2z(double x, double y, double depth) {
 
@@ -379,10 +379,10 @@ public class Roms3dDataset extends RomsCommon {
         }
         return (z);
     }
-
+    
     @Override
     public double z2depth(double x, double y, double z) {
-
+        
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         final int i = (int) Math.floor(x);
         final int j = (int) Math.floor(y);
@@ -410,17 +410,17 @@ public class Roms3dDataset extends RomsCommon {
         }
         return depth;
     }
-
+    
     @Override
     public double get_dWz(double[] pGrid, double time) {
-
+        
         double dw = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
+        
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
@@ -446,7 +446,7 @@ public class Roms3dDataset extends RomsCommon {
         }
         return dw;
     }
-
+    
     @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
@@ -455,7 +455,7 @@ public class Roms3dDataset extends RomsCommon {
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
+        
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
@@ -483,17 +483,17 @@ public class Roms3dDataset extends RomsCommon {
         }
         return dv;
     }
-
+    
     @Override
     public double get_dUx(double[] pGrid, double time) {
-
+        
         double du = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
+        
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (int) Math.round(ix);
         int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
@@ -521,9 +521,9 @@ public class Roms3dDataset extends RomsCommon {
         }
         return du;
     }
-
+    
     private double getDepth(double xRho, double yRho, int k) {
-
+        
         final int i = (int) xRho;
         final int j = (int) yRho;
         double hh = 0.d;
@@ -545,23 +545,23 @@ public class Roms3dDataset extends RomsCommon {
         }
         return (hh);
     }
-
+    
     @Override
     public int get_nz() {
         return nz;
     }
-
+    
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
-
+        
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
-
+        
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
         }
-
+        
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
@@ -576,13 +576,13 @@ public class Roms3dDataset extends RomsCommon {
         }
         setAllFieldsTp1AtTime(rank);
     }
-
+    
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-
+        
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
-
+        
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
             if (null != masku) {
@@ -615,7 +615,7 @@ public class Roms3dDataset extends RomsCommon {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-
+        
         try {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
@@ -626,18 +626,23 @@ public class Roms3dDataset extends RomsCommon {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-
-
+        
+        
         try {
             zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
                     new int[]{rank, 0, 0},
                     new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    zeta_tp1[j][i] *= maskRho[j][i];
+                }
+            }
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset ocean free surface elevation. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-
+        
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
             variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
@@ -645,7 +650,7 @@ public class Roms3dDataset extends RomsCommon {
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
     }
-
+    
     private float[][][] computeW() {
 
         //System.out.println("Compute vertical velocity");
@@ -682,7 +687,7 @@ public class Roms3dDataset extends RomsCommon {
         // Calcultaion of w(i, j, k)
         double[] wrk = new double[nx];
         double[][][] w_double = new double[nz + 1][ny][nx];
-
+        
         for (int j = ny - 1; j-- > 0;) {
             for (int i = nx; i-- > 0;) {
                 w_double[0][j][i] = 0.f;
@@ -738,9 +743,9 @@ public class Roms3dDataset extends RomsCommon {
         //---------------------------------------------------
         // Return w
         return w;
-
+        
     }
-
+    
     private double[][][] getSigLevels() {
 
         //-----------------------------------------------------
@@ -753,9 +758,6 @@ public class Roms3dDataset extends RomsCommon {
 
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
-                if (zeta_tp1[j][i] == 999.f) {
-                    zeta_tp1[j][i] = 0.f;
-                }
                 for (int k = 0; k < nz + 1; k++) {
                     z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
                             * (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
@@ -765,13 +767,13 @@ public class Roms3dDataset extends RomsCommon {
         z_w_cst_tmp = null;
         return z_w_tmp;
     }
-
+    
     private enum VertCoordType {
-
+        
         NEW,
         OLD;
     }
-
+    
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         Variable variable = nc.findVariable(name);
@@ -795,7 +797,7 @@ public class Roms3dDataset extends RomsCommon {
                 }
                 break;
         }
-
+        
         return variable.read(origin, shape).reduce();
     }
 }
