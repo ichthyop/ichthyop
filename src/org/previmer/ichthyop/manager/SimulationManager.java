@@ -81,6 +81,7 @@ public class SimulationManager {
      * Whether the simulation has been setup or not 
      */
     private boolean isSetup;
+    private String lastId = null;
 
     /**
      * 
@@ -151,16 +152,25 @@ public class SimulationManager {
     public String getId() {
 
         if (null == id) {
-            if(testEvol()){
+            if (testEvol()) {
                 id = newEvolId();
-            } else{
+                lastId = id;
+            } else {
                 id = newId();
-            }            
+            }
         }
         if (this.getNumberOfSimulations() > 1) {
             return id + "_s" + (getIndexSimulation() + 1);
         } else {
             return id;
+        }
+    }
+
+    private String getLastId() {
+        if (lastId == null) {
+            return null;
+        } else {
+            return lastId;
         }
     }
 
@@ -177,16 +187,20 @@ public class SimulationManager {
         strBfRunId.append(dtformatterId.format(calendar.getTime()));
         return strBfRunId.toString();
     }
-    
-    private static String newEvolId() {
-        StringBuffer strBfRunId = new StringBuffer("ichthyopevol-spawn");
-        String time_spawn = null;
-        /////////////////////////////////////////////////////////////////
-        // A rectifier car j'ai supprimé le fichier innitialSpawn
-        //= String.valueOf(InitialSpawn.last_spawn);
-        // normalement la valeur que je vais récupérer est en secondes, à corriger plus tard.
-        strBfRunId.append(time_spawn);
-        strBfRunId.append("-run");
+
+    private String newEvolId() {
+        StringBuffer strBfRunId = new StringBuffer("ichthyopevol_runG");
+        String verif = getLastId();
+        if(null==verif){
+            strBfRunId.append("0-");
+        }else{
+            String g=(String) verif.subSequence(verif.indexOf("G"), verif.indexOf("-"));
+            g= g.substring(1);
+            int x= Integer.parseInt(g)+1;
+            g= String.valueOf(x);
+            strBfRunId.append(g);
+            strBfRunId.append("-");
+        }
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
         dtformatterId.setCalendar(calendar);
@@ -347,11 +361,11 @@ public class SimulationManager {
         flagStop = false;
         getZoneManager().cleanup();
         fireSetupPerformed();
-        System.out.println("le id de ce fichier est: "+this.getId());
-        System.out.println("ce fichier se trouve à: " +IOTools.resolveFile(this.getId()));
+        System.out.println("le id de ce fichier est: " + this.getId());
+        System.out.println("ce fichier se trouve à: " + IOTools.resolveFile(this.getId()));
         isSetup = true;
     }
-    
+
     public boolean isSetup() {
         return isSetup;
     }
@@ -391,10 +405,10 @@ public class SimulationManager {
 
     private void fireSetupPerformed() throws Exception {
         SetupListener[] listenerList = (SetupListener[]) listeners.getListeners(SetupListener.class);
-            for (int i = listenerList.length; i-- > 0;) {
-                SetupListener listener = listenerList[i];
-                listener.setupPerformed(new SetupEvent(this));
-            }
+        for (int i = listenerList.length; i-- > 0;) {
+            SetupListener listener = listenerList[i];
+            listener.setupPerformed(new SetupEvent(this));
+        }
     }
 
     public void addInitializeListener(InitializeListener listener) {
@@ -444,24 +458,24 @@ public class SimulationManager {
     public OutputManager getOutputManager() {
         return OutputManager.getInstance();
     }
-    
-//   public IOSpawnManager getIOSpawnManager() {
- //       return IOSpawnManager.getInstance();
- //   }
 
+//   public IOSpawnManager getIOSpawnManager() {
+    //       return IOSpawnManager.getInstance();
+    //   }
     public TimeManager getTimeManager() {
         return TimeManager.getInstance();
     }
-    
+
     public EvolManager getEvolManager() {
         return EvolManager.getInstance();
     }
-    
-    public boolean testEvol(){
-        boolean test=getConfigurationFile().getName().contains("Evol");
-        return test;        
-    }    
-    public UpdateManager getUpdateManager(){
+
+    public boolean testEvol() {
+        boolean test = getConfigurationFile().getName().contains("evol");
+        return test;
+    }
+
+    public UpdateManager getUpdateManager() {
         return new UpdateManager();
     }
 }
