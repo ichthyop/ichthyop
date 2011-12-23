@@ -812,7 +812,7 @@
             <parameter>
                 <key>lethal_temperature_larva</key>
                 <long_name>Lethal temperature (larva) [Celsius degree]</long_name>
-                <value>12.O</value>
+                <value>12.0</value>
                 <default>12.0</default>
                 <format>float</format>
                 <description>Lower lethal water temperature [Celsius degree] for particles at larva stage (yolk-sac and feeding larva). This parameter is ignored by the application when the growth process is idle.</description>

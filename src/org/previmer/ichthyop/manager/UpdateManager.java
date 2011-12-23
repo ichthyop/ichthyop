@@ -65,16 +65,19 @@ public class UpdateManager extends AbstractManager {
      */
     private void u30bTo31() throws Exception {
         ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        String treepath, newTreepath;
         /*
          * Update the recruitment in zone block
          */
-        getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
-        String treepath = getXBlock(BlockType.ACTION, "action.recruitment").getTreePath();
-        String newTreepath = treepath.startsWith("Advanced")
-                ? "Advanced/Biology/Recruitment/In zones"
-                : "Biology/Recruitment/In zones";
-        getXBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
-        getConfigurationFile().updateKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
+        if (null != getXBlock(BlockType.ACTION, "action.recruitment")) {
+            getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
+            treepath = getXBlock(BlockType.ACTION, "action.recruitment").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Recruitment/In zones"
+                    : "Biology/Recruitment/In zones";
+            getXBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
+            getConfigurationFile().updateKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
+        }
         /*
          * Add the recruitment in stain block
          */
@@ -132,6 +135,16 @@ public class UpdateManager extends AbstractManager {
         for (XBlock xblock : getConfigurationFile().getBlocks(BlockType.DATASET)) {
             if (null != cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting")) {
                 xblock.addXParameter(cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting"));
+            }
+        }
+        /*
+         * Fixed lethal_temperature_larva value 12.0 instead of 12.O  
+         */
+        if (null != getXBlock(BlockType.ACTION, "action.lethal_temp")) {
+            try {
+                float f = Float.valueOf(getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
+            } catch (NumberFormatException ex) {
+                getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").setValue("12.0");
             }
         }
         /*
