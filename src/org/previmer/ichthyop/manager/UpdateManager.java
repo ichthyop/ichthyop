@@ -6,6 +6,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.logging.Level;
 import org.previmer.ichthyop.Template;
+import org.previmer.ichthyop.Version;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
@@ -45,7 +46,7 @@ public class UpdateManager extends AbstractManager {
         /*
          * Upgrade the configuration file to latest version
          */
-        if (getConfigurationVersion().priorTo(Version.v3_1)) {
+        if (getConfigurationVersion().priorTo(getApplicationVersion())) {
             u30bTo31();
         }
         /*
@@ -136,12 +137,12 @@ public class UpdateManager extends AbstractManager {
         /*
          * Update version number
          */
-        getConfigurationFile().setVersion(Version.v3_1.number);
+        getConfigurationFile().setVersion(Version.v3_1.getNumber());
         StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
         str.append('\n');
         str.append((new GregorianCalendar()).getTime());
         str.append(" File updated to version ");
-        str.append(Version.v3_1.number);
+        str.append(Version.v3_1.getNumber());
         str.append('.');
         getConfigurationFile().setDescription(str.toString());
     }
@@ -159,11 +160,16 @@ public class UpdateManager extends AbstractManager {
     }
 
     public boolean versionMismatch() throws Exception {
-        return !getApplicationVersion().equals(getConfigurationVersion());
+        Version appVersion = getApplicationVersion();
+        Version cfgVersion = getConfigurationVersion();
+        return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
+                || !(appVersion.getDate().equals(cfgVersion.getDate()));
     }
 
     public Version getApplicationVersion() {
-        return identifyVersion(IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version"));
+        return new Version(
+                IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version"),
+                IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version.date"));
     }
 
     public Version getConfigurationVersion() {
@@ -183,32 +189,10 @@ public class UpdateManager extends AbstractManager {
             return Version.v3_0_beta;
         }
         for (Version version : Version.values()) {
-            if (version.number.equals(s)) {
+            if (version.getNumber().equals(s)) {
                 return version;
             }
         }
         throw new NullPointerException("Version number " + s + " is not identified as a valid ichthyop version number.");
-    }
-
-    public enum Version {
-
-        v3_0_beta("3.0b", "2010/07/08"),
-        v3_1("3.1", "2011/04/14");
-        private String number;
-        private String date;
-
-        Version(String number, String date) {
-            this.date = date;
-            this.number = number;
-        }
-
-        public boolean priorTo(Version version) {
-            return (date.compareTo(version.date) < 0);
-        }
-
-        @Override
-        public String toString() {
-            return number;
-        }
     }
 }
