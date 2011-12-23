@@ -36,7 +36,23 @@ public class Version {
     }
 
     public boolean priorTo(Version version) {
-        return (date.compareTo(version.date) < 0);
+        if (null == date) {
+            /*
+             * I am an undated version so we can assume that I am older.
+             */
+            return true;
+        } else if (null == version.date) {
+            /*
+             * I am a dated version and I am compared to an undated version so
+             * we can assume that I am newer.
+             */
+            return false;
+        } else {
+            /*
+             * We both are dated versions so let's compare dates.
+             */
+            return (date.compareTo(version.date) < 0);
+        }
     }
 
     public String getNumber() {
@@ -53,6 +69,6 @@ public class Version {
 
     @Override
     public String toString() {
-        return number + " (" + date + ")";
+        return number + " (" + (date != null ? date : "undated") + ")";
     }
 }

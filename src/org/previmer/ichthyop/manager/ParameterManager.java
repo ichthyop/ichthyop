@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import org.previmer.ichthyop.Version;
 import org.previmer.ichthyop.io.ConfigurationFile;
 
 /**
@@ -44,11 +45,11 @@ public class ParameterManager extends AbstractManager {
         cfgFile.setDescription(description);
     }
 
-    public String getConfigurationVersion() {
+    public Version getConfigurationVersion() {
         return cfgFile.getVersion();
     }
 
-    public void setConfigurationVersion(String version) {
+    public void setConfigurationVersion(Version version) {
         cfgFile.setVersion(version);
     }
 

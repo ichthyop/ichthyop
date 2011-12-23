@@ -16,6 +16,7 @@ import org.jdom.JDOMException;
 import org.jdom.filter.Filter;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
+import org.previmer.ichthyop.Version;
 
 public class ConfigurationFile {
 
@@ -25,6 +26,7 @@ public class ConfigurationFile {
     public final static String DESCRIPTION = "description";
     public final static String LONG_NAME = "long_name";
     public final static String VERSION = "version";
+    public final static String DATE = "date";
 
     public ConfigurationFile(File file) {
         this.file = file;
@@ -70,19 +72,22 @@ public class ConfigurationFile {
         structure.getRootElement().getChild(DESCRIPTION).setText(description);
     }
 
-    public String getVersion() {
+    public Version getVersion() {
         if (null != structure.getRootElement().getChild(VERSION)) {
-            return structure.getRootElement().getChildTextNormalize(VERSION);
+            String number = structure.getRootElement().getChildTextNormalize(VERSION);
+            String date = structure.getRootElement().getChild(VERSION).getAttributeValue(DATE);
+            return new Version(number, date);  
         } else {
-            return null;
+            return Version.v3_0_beta;
         }
     }
 
-    public void setVersion(String version) {
+    public void setVersion(Version version) {
         if (null == structure.getRootElement().getChild(VERSION)) {
             structure.getRootElement().addContent(new Element(VERSION));
         }
-        structure.getRootElement().getChild(VERSION).setText(version);
+        structure.getRootElement().getChild(VERSION).setText(version.getNumber());
+        structure.getRootElement().getChild(VERSION).setAttribute(DATE, version.getDate());
     }
 
     public void setLongName(String longName) {
