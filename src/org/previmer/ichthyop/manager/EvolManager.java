@@ -6,6 +6,7 @@ package org.previmer.ichthyop.manager;
  */
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -418,9 +419,132 @@ public class EvolManager extends AbstractManager implements SetupListener {
         }
         return selectedList;
     }
+    /**********************************************************************************************************
+     *                  Mettre le tableau des nouveauc cacndidats dans des fichiers de release.txt
+     */
     
-    
-    
+    public int createMarge(float x, float marge) {
+        float eupsilon = (float) (-marge + (Math.random() * (marge + marge)));
+        x = (x + eupsilon);
+        //DecimalFormat myFormatter = new DecimalFormat("### ###,00");
+        //x= Float.valueOf(myFormatter.format(x));
+        return (int) x;
+    }
 
-    
+    /* public static float deuxApVir (float d){
+    DecimalFormat df = new DecimalFormat("########.00"); 
+    String str = df.format(d); 
+    d = Float.parseFloat(str.replace(',', '.')); 
+    return d;
+    }*/
+    public int[][] createArrayNewParticles(float[][] candidates, List<Integer> selectedList, float time_marge, float marge, float bathy_marge) {
+        int[][] newParticles = new int[selectedList.size()][4];
+        for (int i = 0; i < newParticles.length; i++) {
+            int j = 0;
+            newParticles[i][j] = Math.abs(createMarge(candidates[selectedList.get(i)][j], time_marge));
+            for (j = 1; j < 3; j++) {
+                newParticles[i][j] = createMarge(candidates[selectedList.get(i)][j], marge);
+
+            }
+            j = 3;
+            newParticles[i][j] = createMarge(candidates[selectedList.get(i)][j], bathy_marge);
+        }
+        return newParticles;
+
+    }
+
+    public void createReleaseNextGeneration(int[][] newParticles) throws IOException {
+        String nomFile = getSimulationManager().getOutputManager().getFileLocation();
+        //String nomFile = "/home/mariem/ichthyop/dev/evol/output/roms3d_ichthyopevol_runG3-201112261546.nc";
+        String parent = new File(nomFile).getParentFile().getParent();
+        parent = parent.concat("/");
+        System.out.println("\n" + parent);
+
+        String g = (String) nomFile.subSequence(nomFile.indexOf("G"), nomFile.indexOf("-"));
+        g = g.substring(1);
+        int x = Integer.parseInt(g) + 1;
+        g = String.valueOf(x);
+        System.out.println(g);
+        parent = parent.concat("releaseG").concat(g);
+
+        boolean verif = new File(parent).mkdir();
+        if (verif) {
+            System.out.println("dossier créé.");
+        }
+        String time = "";
+        List<String> timeList = new ArrayList<String>();
+
+        for (int i = 0; i < newParticles.length; i++) {
+            FileWriter fw = null;
+            time = String.valueOf(newParticles[i][0]);   // récupérer le birthday de chaque individu
+            String fichier = parent.concat("/").concat("release").concat(time);
+
+            //Calendar calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
+            //Calendar calendar = new GregorianCalendar(1900, 1, 1);
+            //calendar.setTimeInMillis((long) newParticles[i][0] * 1000L);
+            //System.out.println(calendar.getTime());
+
+
+            // vérifier s'il y'a un autre fichier déjà crée pour ce temps
+            if (!timeList.isEmpty()) {
+                int idx = 0;
+                while (idx < timeList.size()) {
+                    if (timeList.get(idx).equals(time)) {
+                        //ouvrir le fichier en question et écrire à la fin
+                        String ligne = String.valueOf(newParticles[i][1]) + " " + String.valueOf(newParticles[i][2]) + " " + String.valueOf(newParticles[i][3]) + "\n";
+                        try {   // ajouter la particule à la fin du fichier
+                            fw = new FileWriter(fichier, true);
+                            fw.write(ligne, 0, ligne.length());
+                        } catch (IOException ex) {
+                            Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+                        } finally {
+                            if (fw != null) {
+                                fw.close();
+                            }
+                        }
+                        break;
+                    } else {
+                        idx++;
+                    }
+                }
+                if (idx == timeList.size()) {   // c'est un temps qui n'existe pas au paravant.
+                    timeList.add(time);
+                    try {
+                        fw = new FileWriter(fichier);
+                    } catch (IOException ex) {
+                        Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    String ligne = String.valueOf(newParticles[i][1]) + " " + String.valueOf(newParticles[i][2]) + " " + String.valueOf(newParticles[i][3]) + "\n";
+
+                    try {
+                        fw.write(ligne);
+                    } catch (IOException ex) {
+                        Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        if (fw != null) {
+                            fw.close();
+                        }
+                    }
+                }
+            } else {    // C'est la première ligne du tableau
+                timeList.add(time);
+                try {
+                    fw = new FileWriter(fichier);
+                } catch (IOException ex) {
+                    Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                String ligne = String.valueOf(newParticles[i][1]) + " " + String.valueOf(newParticles[i][2]) + " " + String.valueOf(newParticles[i][3]) + "\n";
+
+                try {
+                    fw.write(ligne);
+                } catch (IOException ex) {
+                    Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+                } finally {
+                    if (fw != null) {
+                        fw.close();
+                    }
+                }
+            }
+        }
+    }    
 }
