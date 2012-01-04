@@ -105,8 +105,88 @@ public class EvolManager extends AbstractManager implements SetupListener {
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {
-        cfgEvolToCfgIchthyop();
+        if (getSimulationManager().getOutputManager().getIndexGeneration() == 0) {
+            cfgEvolToCfgIchthyop();
+        } else {
+            cfgEvolGenToCfgIchthyop();
+        }
+    }
 
+    public void cfgEvolGenToCfgIchthyop() {
+        // modifier le release schedule avec les nouvelles dates dans le fichier xml
+        // charger time drifter release dans le fichier xml
+        File evolFile = getSimulationManager().getConfigurationFile();
+        ConfigurationFile cfgTemplate = new ConfigurationFile(Template.getTemplateURL("cfg-roms3d.xml"));
+        ConfigurationFile Mycfg = new ConfigurationFile(evolFile);
+        try {
+            Mycfg.load();
+        } catch (Exception ex) {
+            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        String fileName = getSimulationManager().getOutputManager().getFileLocation();
+        String parent = new File(fileName).getParentFile().getParent();
+        parent = parent.concat("/releaseG");
+        int x = OutputManager.getIndexGeneration();
+        parent = parent.concat(String.valueOf(x));
+        String[] dates = setGenReleaseDates(parent);
+        String event = StringtabToString(dates);
+        Mycfg.getXParameter(BlockType.OPTION, "release.schedule", "events").reset();
+        Mycfg.getXParameter(BlockType.OPTION, "release.schedule", "events").setValue(event);
+        if (!Mycfg.containsBlock(BlockType.RELEASE, "release.TimeDrifterRelease")) {
+            Mycfg.addBlock(cfgTemplate.getBlock(BlockType.RELEASE, "release.TimeDrifterRelease").detach());
+            Mycfg.getBlock(BlockType.RELEASE, "release.TimeDrifterRelease").setEnabled(true);
+            Mycfg.getXParameter(BlockType.RELEASE, "release.TimeDrifterRelease", "directory").setValue(parent);
+            try {
+                Mycfg.write(new FileOutputStream(Mycfg.getFile()));
+            } catch (IOException ex) {
+                Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            Mycfg.getXParameter(BlockType.RELEASE, "release.TimeDrifterRelease", "directory").reset();
+            Mycfg.getXParameter(BlockType.RELEASE, "release.TimeDrifterRelease", "directory").setValue(parent);
+        }
+        /*
+         * Save the updated configuration file
+         */
+        Iterator<XBlock> it = Mycfg.getAllBlocks().iterator();
+        getSimulationManager().getParameterManager().cleanup();
+        while (it.hasNext()) {
+            getSimulationManager().getParameterManager().addBlock(it.next());
+        }
+        try {
+            getSimulationManager().getParameterManager().save();
+        } catch (IOException ex) {
+            Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private String[] setGenReleaseDates(String parent) {
+        String[] dates = null;
+        File directory = new File(parent);
+        String[] files = null;
+
+        if (directory.isDirectory()) {
+            files = directory.list();
+        }
+        if (files != null) {
+            String date;
+            SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+
+            for (int i = 0; i < files.length; i++) {
+                date = (String) files[i].subSequence(files[i].indexOf("_"), files[i].indexOf("."));
+                Date dateSchedule = null;
+                try {
+                    dateSchedule = (Date) INPUT_DATE_FORMAT.parse(date);
+                } catch (ParseException ex) {
+                    Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateSchedule);
+                date = INPUT_DATE_FORMAT.format(cal.getTime());
+                dates[i] = date;
+            }
+        }
+        return dates;
     }
 
     private String[] setReleaseDates() {
@@ -118,8 +198,6 @@ public class EvolManager extends AbstractManager implements SetupListener {
             Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
         }
         String t0 = Mycfg.getXParameter(BlockType.OPTION, "app.time", "initial_time").getValue();
-        //String t0= "year 102 month 06 day 16 at 11:06";
-        System.out.println("*************************  t0: "+t0);
         int frequency = Integer.parseInt(Mycfg.getXParameter(BlockType.OPTION, "release.evol", "release_frequency").getValue());
         Double Days = Math.ceil(360 / frequency);
         int nbDays = Days.intValue();
@@ -143,9 +221,8 @@ public class EvolManager extends AbstractManager implements SetupListener {
         return dates;
     }
 
-    private String StringtabToString() {
+    private String StringtabToString(String[] dates) {
         String str = "";
-        String[] dates = setReleaseDates();
         for (int k = 0; k < dates.length; k++) {
             str = str.concat("\"");
             str = str.concat(dates[k]);
@@ -167,7 +244,8 @@ public class EvolManager extends AbstractManager implements SetupListener {
             Mycfg.addBlock(cfgTemplate.getBlock(BlockType.OPTION, "release.schedule").detach());
             Mycfg.getBlock(BlockType.OPTION, "release.schedule").setTreePath("Advanced/Release/Schedule");
             Mycfg.getXParameter(BlockType.OPTION, "release.schedule", "is_enabled").setValue("true");
-            String event = StringtabToString();
+            String[] dates = setReleaseDates();
+            String event = StringtabToString(dates);
             Mycfg.getXParameter(BlockType.OPTION, "release.schedule", "events").setValue(event);
         } else {
             System.out.println("release.schedule block is already existing in your file.");
@@ -198,9 +276,8 @@ public class EvolManager extends AbstractManager implements SetupListener {
             }
         }
     }
-    
+
     /*********************************************************************************************************/
-    
     /*******************  Lecture des sorties de la génération i-1 ******************************************/
     public Array readMortality(NetcdfFile ncIn, int[] origin, int[] size) {
         Array death = null;
@@ -264,7 +341,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
             //System.out.println("recrutement=  " + recruit[j] + " pour l'individu " + j);
             j++;
         }
-        //System.out.println("il y'a " + recruitedList.size() + " individus recrutés.********************");
+        System.out.println("il y'a " + recruitedList.size() + " individus recrutés.********************");
         return recruitedList;
     }
 
@@ -272,7 +349,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
         List<Integer> indexList = new ArrayList<Integer>();
         if (recruitedList.isEmpty()) {
             System.out.println("Aucun individu recruited");
-            return null;
+            return indexList;
         }
         int j;
         for (int i = 0; i < aliveList.size(); i++) {
@@ -331,7 +408,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
                 System.out.println("Erreur: individu recrute aber date de naissance introuvable !!!");
             } else {
                 // j= date de naissance
-                start = new int[]{j, aliveRecruited.get(i)};    // même si je pense que C avec -1; à vérifier****
+                start = new int[]{j, aliveRecruited.get(i)};
                 taille = new int[]{1, 1};
 
                 ArrayFloat.D0 lonArr = null;
@@ -348,17 +425,22 @@ public class EvolManager extends AbstractManager implements SetupListener {
                     Logger.getLogger(TestLectureDataNC.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 candidates[i][0] = j;
+                System.out.println("naissance du candidat " + i + " = " + candidates[i][0]);
                 candidates[i][1] = lonArr.get();
+                System.out.println("longitude du candidat " + i + " = " + candidates[i][1]);
                 candidates[i][2] = latArr.get();
+                System.out.println("latitude du candidat " + i + " = " + candidates[i][2]);
                 candidates[i][3] = depthArr.get();
+                System.out.println("profondeur du candidat " + i + " = " + candidates[i][3]);
             }
         }
         return candidates;
     }
 
     // retourne le tableau des candidats à la reproduction avec leurs caractéristiques
-    public void getCandidate() throws IOException, InvalidRangeException {
-        String File= getSimulationManager().getOutputManager().getFileLocation();
+    public float[][] getCandidate() throws IOException, InvalidRangeException {
+        String File = getSimulationManager().getOutputManager().getFileLocation();
+        System.out.println("dans getCandidate(), getFileLocation()= " + File);
         //String File = "/home/mariem/ichthyop/dev/evol/output/roms3d_ichthyop-run201112261623.nc";
         NetcdfFile ncIn = NetcdfFile.open(File);
         ArrayDouble.D1 timeArr = null;
@@ -383,15 +465,22 @@ public class EvolManager extends AbstractManager implements SetupListener {
             candidats = readWhenRecruited(ncIn, aliveRecruitedList, length);
         }
         ncIn.close();
-        
+        return candidats;
+
     }
-    
+
     // retourne les indexes des parents sélectionnés autant de fois qu'ils l'ont été.
     //testée et validée.
-    public  List<Integer> selectIndexParents(int nbParticles, float[][] candidates) {
+    public List<Integer> selectIndexParents(int nbParticles, float[][] candidates) {
         List<Integer> selectedList = new ArrayList<Integer>();
-        int nbParents = candidates.length;
-        int newParticle = nbParticles - nbParents;
+
+        int nbParents = 0;
+        int newParticle = 0;
+        if (candidates != null) {
+            nbParents = candidates.length;
+            newParticle = nbParticles - nbParents;
+        }
+
         if (newParticle == 0) {
             return null;
         }
@@ -419,10 +508,10 @@ public class EvolManager extends AbstractManager implements SetupListener {
         }
         return selectedList;
     }
+
     /**********************************************************************************************************
-     *                  Mettre le tableau des nouveauc cacndidats dans des fichiers de release.txt
+     *                  Mettre le tableau des nouveaux cacndidats dans des fichiers de release.txt
      */
-    
     public int createMarge(float x, float marge) {
         float eupsilon = (float) (-marge + (Math.random() * (marge + marge)));
         x = (x + eupsilon);
@@ -438,6 +527,9 @@ public class EvolManager extends AbstractManager implements SetupListener {
     return d;
     }*/
     public int[][] createArrayNewParticles(float[][] candidates, List<Integer> selectedList, float time_marge, float marge, float bathy_marge) {
+        if ((candidates == null) || (selectedList.isEmpty())) {
+            return null;
+        }
         int[][] newParticles = new int[selectedList.size()][4];
         for (int i = 0; i < newParticles.length; i++) {
             int j = 0;
@@ -453,18 +545,33 @@ public class EvolManager extends AbstractManager implements SetupListener {
 
     }
 
+    private double dateStrToSeconds(String dateStr) {
+
+        Calendar calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
+        SimpleDateFormat releaseDateFormat = new SimpleDateFormat("'y'yyyy'm'MM'd'dd'h'HHmm");
+        releaseDateFormat.setCalendar(calendar);
+        double seconds = Double.NaN;
+        try {
+            calendar.setTime(releaseDateFormat.parse(dateStr));
+        } catch (ParseException ex) {
+            Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        seconds = calendar.getTimeInMillis() / 1000.d;
+
+        return seconds;
+    }
+
     public void createReleaseNextGeneration(int[][] newParticles) throws IOException {
         String nomFile = getSimulationManager().getOutputManager().getFileLocation();
         //String nomFile = "/home/mariem/ichthyop/dev/evol/output/roms3d_ichthyopevol_runG3-201112261546.nc";
         String parent = new File(nomFile).getParentFile().getParent();
         parent = parent.concat("/");
-        System.out.println("\n" + parent);
+        //System.out.println("\n*************************** parent: " + parent);
 
         String g = (String) nomFile.subSequence(nomFile.indexOf("G"), nomFile.indexOf("-"));
         g = g.substring(1);
         int x = Integer.parseInt(g) + 1;
         g = String.valueOf(x);
-        System.out.println(g);
         parent = parent.concat("releaseG").concat(g);
 
         boolean verif = new File(parent).mkdir();
@@ -474,27 +581,52 @@ public class EvolManager extends AbstractManager implements SetupListener {
         String time = "";
         List<String> timeList = new ArrayList<String>();
 
-        for (int i = 0; i < newParticles.length; i++) {
-            FileWriter fw = null;
-            time = String.valueOf(newParticles[i][0]);   // récupérer le birthday de chaque individu
-            String fichier = parent.concat("/").concat("release").concat(time);
+        if (newParticles != null) {
+            for (int i = 0; i < newParticles.length; i++) {
+                FileWriter fw = null;
+                //time = String.valueOf(newParticles[i][0]);   // récupérer le birthday de chaque individu
+                //String fichier = parent.concat("/").concat("release_").concat(time);
 
-            //Calendar calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
-            //Calendar calendar = new GregorianCalendar(1900, 1, 1);
-            //calendar.setTimeInMillis((long) newParticles[i][0] * 1000L);
-            //System.out.println(calendar.getTime());
+                Calendar calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
+                calendar.setTimeInMillis((long) newParticles[i][0] * 1000L);
+                calendar.add(Calendar.YEAR, 1);     // spécifier que c'estla même date, mais de l'année suivante.
+                SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'y' yyyy 'm' MM 'd' dd 'h' HHmm");
+                String timeAsStr = INPUT_DATE_FORMAT.format(calendar.getTime());
 
-
-            // vérifier s'il y'a un autre fichier déjà crée pour ce temps
-            if (!timeList.isEmpty()) {
-                int idx = 0;
-                while (idx < timeList.size()) {
-                    if (timeList.get(idx).equals(time)) {
-                        //ouvrir le fichier en question et écrire à la fin
+                String fichier = parent.concat("/").concat("release_").concat(timeAsStr);
+                // vérifier s'il y'a un autre fichier déjà crée pour ce temps
+                if (!timeList.isEmpty()) {
+                    int idx = 0;
+                    while (idx < timeList.size()) {
+                        if (timeList.get(idx).equals(timeAsStr)) {
+                            //ouvrir le fichier en question et écrire à la fin
+                            String ligne = String.valueOf(newParticles[i][1]) + " " + String.valueOf(newParticles[i][2]) + " " + String.valueOf(newParticles[i][3]) + "\n";
+                            try {   // ajouter la particule à la fin du fichier
+                                fw = new FileWriter(fichier, true);
+                                fw.write(ligne, 0, ligne.length());
+                            } catch (IOException ex) {
+                                Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+                            } finally {
+                                if (fw != null) {
+                                    fw.close();
+                                }
+                            }
+                            break;
+                        } else {
+                            idx++;
+                        }
+                    }
+                    if (idx == timeList.size()) {   // c'est un temps qui n'existe pas au paravant.
+                        timeList.add(timeAsStr);
+                        try {
+                            fw = new FileWriter(fichier);
+                        } catch (IOException ex) {
+                            Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                         String ligne = String.valueOf(newParticles[i][1]) + " " + String.valueOf(newParticles[i][2]) + " " + String.valueOf(newParticles[i][3]) + "\n";
-                        try {   // ajouter la particule à la fin du fichier
-                            fw = new FileWriter(fichier, true);
-                            fw.write(ligne, 0, ligne.length());
+
+                        try {
+                            fw.write(ligne);
                         } catch (IOException ex) {
                             Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
                         } finally {
@@ -502,13 +634,9 @@ public class EvolManager extends AbstractManager implements SetupListener {
                                 fw.close();
                             }
                         }
-                        break;
-                    } else {
-                        idx++;
                     }
-                }
-                if (idx == timeList.size()) {   // c'est un temps qui n'existe pas au paravant.
-                    timeList.add(time);
+                } else {    // C'est la première ligne du tableau
+                    timeList.add(timeAsStr);
                     try {
                         fw = new FileWriter(fichier);
                     } catch (IOException ex) {
@@ -526,25 +654,37 @@ public class EvolManager extends AbstractManager implements SetupListener {
                         }
                     }
                 }
-            } else {    // C'est la première ligne du tableau
-                timeList.add(time);
-                try {
-                    fw = new FileWriter(fichier);
-                } catch (IOException ex) {
-                    Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                String ligne = String.valueOf(newParticles[i][1]) + " " + String.valueOf(newParticles[i][2]) + " " + String.valueOf(newParticles[i][3]) + "\n";
-
-                try {
-                    fw.write(ligne);
-                } catch (IOException ex) {
-                    Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    if (fw != null) {
-                        fw.close();
-                    }
-                }
             }
         }
-    }    
+    }
+
+    public void prepareEvolRelease() throws ParseException {
+        float[][] next = null;
+        try {
+            next = getCandidate();
+        } catch (IOException ex) {
+            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (next == null) {
+            getLogger().log(Level.INFO, "Extinction of the specie in the generation: {0}", OutputManager.getIndexGeneration());
+        }
+        int nbParticles = getSimulationManager().getReleaseManager().getNbParticles();
+        System.out.println("--------------------------  nbParticles: " + nbParticles);
+        List<Integer> newList = selectIndexParents(nbParticles, next);
+        String timeMargin = getSimulationManager().getParameterManager().getParameter(BlockType.EVOL, "evol.strict", "margin_time");
+        long releaseMargin = getSimulationManager().getTimeManager().day2seconds(timeMargin);
+        String locationMargin = getSimulationManager().getParameterManager().getParameter(BlockType.EVOL, "evol.strict", "margin_loc");
+        String bathyMargin = getSimulationManager().getParameterManager().getParameter(BlockType.EVOL, "evol.strict", "margin_bat");
+        int[][] nouveaux = createArrayNewParticles(next, newList, releaseMargin, Float.valueOf(locationMargin), Float.valueOf(bathyMargin));
+        if (nouveaux == null) {
+            System.out.println("Aucune nouvelle particule");
+        }
+        try {
+            createReleaseNextGeneration(nouveaux);
+        } catch (IOException ex) {
+            Logger.getLogger(TestTableToTxt.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
