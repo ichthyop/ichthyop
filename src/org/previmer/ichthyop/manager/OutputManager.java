@@ -6,6 +6,8 @@ package org.previmer.ichthyop.manager;
 
 import java.awt.geom.Point2D;
 import java.io.File;
+import java.text.ParseException;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.NextStepEvent;
@@ -56,6 +58,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private Dimension latlonDim;
     private boolean clearPredefinedTrackerList = false;
     private boolean clearCustomTrackerList = false;
+    private static int indexGeneration = 0;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -517,6 +520,30 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (null != customTrackers) {
             customTrackers.clear();
         }
+        if (getSimulationManager().testEvol()) {
+            if (indexGeneration < Integer.valueOf(getSimulationManager().getParameterManager().getParameter(BlockType.EVOL,"evol.strict", "nb_generations"))) {
+                indexGeneration++;
+                try {
+                    getSimulationManager().getEvolManager().prepareEvolRelease();
+                } catch (ParseException ex) {
+                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+               // getLogger().info("Setting up..."+indexGeneration);
+                /*try {
+                    getSimulationManager().setup();
+                } catch (Exception ex) {
+                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                getLogger().info("Setup [OK]");*/
+            }
+        }
+    }
+
+    /**
+     * @return the indexGeneration
+     */
+    public static int getIndexGeneration() {
+        return indexGeneration;
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {
@@ -674,6 +701,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             drifter = null;
             zoneDimension = null;
             dimensions = new Hashtable();
+        }
+
+        public void findOutputLastGeneration() {
+            String fileLastGeneration = SimulationManager.getInstance().getOutputManager().getFileLocation();
+            System.out.println("****************************** dossier: " + fileLastGeneration);
+
         }
     }
 }
