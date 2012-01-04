@@ -39,6 +39,14 @@
         <description>Set the spawn frequency(months),every 3 months for example.</description>
       </parameter>
       <parameter hidden="true">
+        <key>margin_time</key>
+        <long_name>time margin</long_name>
+        <value>15</value>
+        <default>15</default>
+        <format>integer</format>
+        <description>defines the temporal margin of spawn (days).</description>
+      </parameter>
+      <parameter hidden="true">
         <key>margin_loc</key>
         <long_name>geographical margin of tolerance of particles</long_name>
         <value>15</value>
@@ -106,6 +114,14 @@
         <default>false</default>
         <format>boolean</format>
         <description>defines if we have to consider the salinity criterion in the environmental homing.</description>
+      </parameter>
+      <parameter>
+        <key>scan_frequency</key>
+        <long_name>scan frequency</long_name>
+        <value>2</value>
+        <default>2</default>
+        <format>integer</format>
+        <description>defines the frequency of environment scanning</description>
       </parameter>
       <parameter hidden="true">
         <key>margin_temp</key>
@@ -204,6 +220,21 @@
         <value>0.1</value>
         <default>0.1</default>
         <format>float</format>
+      </parameter>
+      <parameter>
+        <key>optimal_time</key>
+        <long_name>optimal time</long_name>
+         <value>year 01 month 05 day 03 at 00:00</value>
+        <format>date</format>
+        <description>defines the optimal date of spawn (date).</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>margin_time_opp</key>
+        <long_name>time margin</long_name>
+        <value>15</value>
+        <default>15</default>
+        <format>integer</format>
+        <description>defines the temporal margin of spawn (days).</description>
       </parameter>
     </parameters>
   </block>
