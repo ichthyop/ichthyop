@@ -7,6 +7,7 @@ package org.previmer.ichthyop.evol;
 public class EnvironmentalEvol extends AbstractEvol{
     private boolean var_temp, var_sal;
     private float margin_temp, margin_sal;
+    private int scan_frequency;
     
     @Override
      public void loadParameters() throws Exception {
@@ -19,6 +20,7 @@ public class EnvironmentalEvol extends AbstractEvol{
             var_sal= Boolean.valueOf(getParameter("var_sal"));
             margin_temp= Float.valueOf(getParameter("margin_loc"));
             margin_sal= Float.valueOf(getParameter("margin_bat"));
+            scan_frequency= Integer.valueOf(getParameter("scan_frequency"));
 
         } catch (Exception ex) {
 
@@ -52,6 +54,13 @@ public class EnvironmentalEvol extends AbstractEvol{
      */
     public float getMarginSalEnv() {
         return margin_sal;
+    }
+
+    /**
+     * @return the scan_frequency
+     */
+    public int getScanFrequency() {
+        return scan_frequency;
     }
 
 }

@@ -38,20 +38,7 @@ public class AbstractEvol extends SimulationManagerAccessor implements IEvol {
         return getSimulationManager().getEvolManager().isEnabled(evolKey);
     }
 
-
     public int getNb_generations() {
         return nb_generations;
-    }
- 
-    public int getAge_min() {
-        return age_min;
-    }
-
-    public int getAge_max() {
-        return age_max;
-    }
-
-    public int getSpawn_freq() {
-        return spawn_freq;
     }
 }

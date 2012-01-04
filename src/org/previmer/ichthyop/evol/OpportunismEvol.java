@@ -5,7 +5,7 @@ package org.previmer.ichthyop.evol;
  */
 public class OpportunismEvol extends AbstractEvol{
     private boolean temperature, salinity;
-    private float margin_temp_opp, margin_sal_opp, optimal_sal, optimal_temp;
+    private float margin_temp_opp, margin_sal_opp, optimal_sal, optimal_temp,optimal_time_opp, margin_time_opp;
 
     @Override
      public void loadParameters() throws Exception {
@@ -20,6 +20,8 @@ public class OpportunismEvol extends AbstractEvol{
             margin_sal_opp= Float.valueOf(getParameter("margin_bat"));
             optimal_sal= Float.valueOf(getParameter("optimal_sal"));
             optimal_temp= Float.valueOf(getParameter("optimal_temp"));
+            optimal_time_opp= Float.valueOf(getParameter("optimal_time"));
+            margin_time_opp= Float.valueOf(getParameter("margin_time_opp"));
 
         } catch (Exception ex) {
 
