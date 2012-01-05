@@ -174,13 +174,14 @@ public class EvolManager extends AbstractManager implements SetupListener {
 
             for (int i = 0; i < files.length; i++) {
                 date = (String) files[i].subSequence(files[i].indexOf("_"), files[i].indexOf("."));
+                System.out.println(date);
                 Date dateSchedule = null;
                 try {
                     dateSchedule = (Date) INPUT_DATE_FORMAT.parse(date);
                 } catch (ParseException ex) {
                     Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                Calendar cal = Calendar.getInstance();
+                Calendar cal = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
                 cal.setTime(dateSchedule);
                 date = INPUT_DATE_FORMAT.format(cal.getTime());
                 dates[i] = date;
@@ -287,13 +288,6 @@ public class EvolManager extends AbstractManager implements SetupListener {
                 // lecture de mortality à t_end
                 Array mortalityArr = ncIn.findVariable("mortality").read(origin, size);
                 death = mortalityArr.reduce();
-                int buff = 0;
-                while (buff < death.getSize()) {
-                    //System.out.println(death.getInt(death.getIndex()));
-                    death.getIndex().incr();
-                    buff++;
-                }
-                System.out.println(buff);
             } catch (InvalidRangeException ex) {
                 Logger.getLogger(TestLectureDataNC.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -338,10 +332,8 @@ public class EvolManager extends AbstractManager implements SetupListener {
             if (recruit[j] == 1) {
                 recruitedList.add(j);
             }
-            //System.out.println("recrutement=  " + recruit[j] + " pour l'individu " + j);
             j++;
         }
-        System.out.println("il y'a " + recruitedList.size() + " individus recrutés.********************");
         return recruitedList;
     }
 
@@ -359,7 +351,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
             }
             if (i < aliveList.size() && j < recruitedList.size()) {
                 if (aliveList.get(i) == recruitedList.get(j)) {
-                    indexList.add(j);
+                    indexList.add(recruitedList.get(j));
                     recruitedList.remove(j);
                 }
             }
@@ -373,13 +365,14 @@ public class EvolManager extends AbstractManager implements SetupListener {
         int[] size = new int[]{length, 1};      //{61,1}
         int[] taille;
         ArrayInt recrut = null;
-        int[] tabRecruited = null;
-        boolean found = false;
+        int[] tabRecruited = null; 
+        boolean found;
 
         int j; // curseur dans le tableau recrut de l'individu i;
         float[][] candidates = new float[aliveRecruited.size()][4];  // 4 = t, lon, lat, depth
         for (int i = 0; i < aliveRecruited.size(); i++) {
             start = new int[]{0, aliveRecruited.get(i)};
+            found = false;
             j = 0;
             try {   // lecture de la variable mortality pour les individus recrutés -> qlq soit t.
                 recrut = (ArrayInt) ncIn.findVariable("mortality").read(start, size).reduce();
@@ -396,7 +389,6 @@ public class EvolManager extends AbstractManager implements SetupListener {
             // et encore moins avec mes simulations car je n'ai que des recrutés et en vie !!!
             //
             while (!found && j < tabRecruited.length) {
-                System.out.println("ok");
                 if (tabRecruited[j] != -99) {
                     found = true;
                 } else {
@@ -424,14 +416,15 @@ public class EvolManager extends AbstractManager implements SetupListener {
                 } catch (InvalidRangeException ex) {
                     Logger.getLogger(TestLectureDataNC.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                candidates[i][0] = j;
-                System.out.println("naissance du candidat " + i + " = " + candidates[i][0]);
+                // C bon :)
+                /*candidates[i][0] = j;
+                System.out.println("naissance du candidat " + aliveRecruited.get(i) + " = " + candidates[i][0]);
                 candidates[i][1] = lonArr.get();
-                System.out.println("longitude du candidat " + i + " = " + candidates[i][1]);
+                System.out.println("longitude du candidat " + aliveRecruited.get(i) + " = " + candidates[i][1]);
                 candidates[i][2] = latArr.get();
-                System.out.println("latitude du candidat " + i + " = " + candidates[i][2]);
+                System.out.println("latitude du candidat " + aliveRecruited.get(i) + " = " + candidates[i][2]);
                 candidates[i][3] = depthArr.get();
-                System.out.println("profondeur du candidat " + i + " = " + candidates[i][3]);
+                System.out.println("profondeur du candidat " + aliveRecruited.get(i) + " = " + candidates[i][3]);*/
             }
         }
         return candidates;
@@ -590,7 +583,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
                 Calendar calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
                 calendar.setTimeInMillis((long) newParticles[i][0] * 1000L);
                 calendar.add(Calendar.YEAR, 1);     // spécifier que c'estla même date, mais de l'année suivante.
-                SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'y' yyyy 'm' MM 'd' dd 'h' HHmm");
+                SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'y'yyyy'm'MM'd'dd'h'HHmm");
                 String timeAsStr = INPUT_DATE_FORMAT.format(calendar.getTime());
 
                 String fichier = parent.concat("/").concat("release_").concat(timeAsStr);
