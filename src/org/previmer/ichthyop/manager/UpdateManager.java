@@ -6,8 +6,10 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.logging.Level;
 import org.previmer.ichthyop.Template;
+import org.previmer.ichthyop.Version;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.exception.InvalidVersionNumberException;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.ConfigurationFile;
 import org.previmer.ichthyop.io.IOTools;
@@ -45,7 +47,7 @@ public class UpdateManager extends AbstractManager {
         /*
          * Upgrade the configuration file to latest version
          */
-        if (getConfigurationVersion().priorTo(Version.v3_1)) {
+        if (getConfigurationVersion().priorTo(getApplicationVersion())) {
             u30bTo31();
         }
         /*
@@ -64,16 +66,19 @@ public class UpdateManager extends AbstractManager {
      */
     private void u30bTo31() throws Exception {
         ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        String treepath, newTreepath;
         /*
          * Update the recruitment in zone block
          */
-        getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
-        String treepath = getXBlock(BlockType.ACTION, "action.recruitment").getTreePath();
-        String newTreepath = treepath.startsWith("Advanced")
-                ? "Advanced/Biology/Recruitment/In zones"
-                : "Biology/Recruitment/In zones";
-        getXBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
-        getConfigurationFile().updateKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
+        if (null != getXBlock(BlockType.ACTION, "action.recruitment")) {
+            getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.previmer.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
+            treepath = getXBlock(BlockType.ACTION, "action.recruitment").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Recruitment/In zones"
+                    : "Biology/Recruitment/In zones";
+            getXBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
+            getConfigurationFile().updateKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
+        }
         /*
          * Add the recruitment in stain block
          */
@@ -134,14 +139,24 @@ public class UpdateManager extends AbstractManager {
             }
         }
         /*
-         * Update version number
+         * Fix lethal_temperature_larva value 12.0 instead of 12.O  
          */
-        getConfigurationFile().setVersion(Version.v3_1.number);
+        if (null != getXBlock(BlockType.ACTION, "action.lethal_temp")) {
+            try {
+                float f = Float.valueOf(getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
+            } catch (NumberFormatException ex) {
+                getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").setValue("12.0");
+            }
+        }
+        /*
+         * Update version number and date
+         */
+        getConfigurationFile().setVersion(getApplicationVersion());
         StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
-        str.append('\n');
+        str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
         str.append(" File updated to version ");
-        str.append(Version.v3_1.number);
+        str.append(getApplicationVersion());
         str.append('.');
         getConfigurationFile().setDescription(str.toString());
     }
@@ -159,56 +174,38 @@ public class UpdateManager extends AbstractManager {
     }
 
     public boolean versionMismatch() throws Exception {
-        return !getApplicationVersion().equals(getConfigurationVersion());
+        Version appVersion = getApplicationVersion();
+        Version cfgVersion = getConfigurationVersion();
+        validateVersion(cfgVersion);
+        return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
+                || !(appVersion.getDate().equals(cfgVersion.getDate()));
     }
 
     public Version getApplicationVersion() {
-        return identifyVersion(IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version"));
+        return new Version(
+                IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version"),
+                IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version.date"));
     }
 
     public Version getConfigurationVersion() {
-        return identifyVersion(getSimulationManager().getParameterManager().getConfigurationVersion());
+        return getSimulationManager().getParameterManager().getConfigurationVersion();
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
     }
-
+    
     public void initializePerformed(InitializeEvent e) throws Exception {
         // does nothing
     }
 
-    private Version identifyVersion(String s) {
-        if (null == s) {
-            return Version.v3_0_beta;
-        }
+    private void validateVersion(Version testedVersion) {
+        
         for (Version version : Version.values()) {
-            if (version.number.equals(s)) {
-                return version;
+            if (version.getNumber().equals(testedVersion.getNumber())) {
+                return;
             }
         }
-        throw new NullPointerException("Version number " + s + " is not identified as a valid ichthyop version number.");
-    }
-
-    public enum Version {
-
-        v3_0_beta("3.0b", "2010/07/08"),
-        v3_1("3.1", "2011/04/14");
-        private String number;
-        private String date;
-
-        Version(String number, String date) {
-            this.date = date;
-            this.number = number;
-        }
-
-        public boolean priorTo(Version version) {
-            return (date.compareTo(version.date) < 0);
-        }
-
-        @Override
-        public String toString() {
-            return number;
-        }
+        throw new InvalidVersionNumberException("Version number " + testedVersion + " is not identified as a valid ichthyop version number.");
     }
 }

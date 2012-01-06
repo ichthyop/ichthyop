@@ -388,7 +388,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         protected Object doInBackground() throws Exception {
             cfgTitle = getSimulationManager().getParameterManager().getConfigurationTitle();
             cfgDescription = getSimulationManager().getParameterManager().getConfigurationDescription();
-            cfgVersion = getSimulationManager().getParameterManager().getConfigurationVersion();
+            cfgVersion = getSimulationManager().getParameterManager().getConfigurationVersion().toString();
             blockTree.createModel();
             return null;
         }
