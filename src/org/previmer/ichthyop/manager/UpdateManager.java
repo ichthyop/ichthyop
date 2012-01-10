@@ -177,8 +177,12 @@ public class UpdateManager extends AbstractManager {
         Version appVersion = getApplicationVersion();
         Version cfgVersion = getConfigurationVersion();
         validateVersion(cfgVersion);
+        try {
         return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
                 || !(appVersion.getDate().equals(cfgVersion.getDate()));
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     public Version getApplicationVersion() {
