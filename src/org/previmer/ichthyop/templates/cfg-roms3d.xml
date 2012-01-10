@@ -910,14 +910,14 @@
       <parameter>
         <key>depth_min</key>
         <long_name>minimum depth of the specie</long_name>
-        <value>-50.0</value>
+        <value>-20.0</value>
         <default />
         <format>float</format>
       </parameter>
       <parameter>
         <key>depth_max</key>
         <long_name>maximum depth of the specie</long_name>
-        <value>-20.0</value>
+        <value>-50.0</value>
         <default />
         <format>float</format>
       </parameter>
