@@ -58,7 +58,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private Dimension latlonDim;
     private boolean clearPredefinedTrackerList = false;
     private boolean clearCustomTrackerList = false;
-    private static int indexGeneration = 0;
+ 
     /**
      * Object for creating/writing netCDF files.
      */
@@ -520,30 +520,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (null != customTrackers) {
             customTrackers.clear();
         }
-        if (getSimulationManager().testEvol()) {
-            if (indexGeneration < Integer.valueOf(getSimulationManager().getParameterManager().getParameter(BlockType.EVOL,"evol.strict", "nb_generations"))) {
-                indexGeneration++;
-                try {
-                    getSimulationManager().getEvolManager().prepareEvolRelease();
-                } catch (ParseException ex) {
-                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-               // getLogger().info("Setting up..."+indexGeneration);
-                /*try {
-                    getSimulationManager().setup();
-                } catch (Exception ex) {
-                    Logger.getLogger(OutputManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                getLogger().info("Setup [OK]");*/
-            }
-        }
-    }
 
-    /**
-     * @return the indexGeneration
-     */
-    public static int getIndexGeneration() {
-        return indexGeneration;
     }
 
     public void setupPerformed(SetupEvent e) throws Exception {
@@ -668,16 +645,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         public Dimension getDrifterDimension() {
             if (null == drifter) {
                 drifter = ncOut.addDimension("drifter", getSimulationManager().getReleaseManager().getNbParticles());
-                dimensions.put(drifter.getName(), drifter);
-            }
-            return drifter;
-        }
-
-        public Dimension getAliveDimension() {
-            if (null == drifter) {
-                drifter = ncOut.addDimension("drifter", getSimulationManager().getReleaseManager().getNbParticles());
-                // en plus des particules qui sont en vie précédemment
-                // drifter += drifter + ....
                 dimensions.put(drifter.getName(), drifter);
             }
             return drifter;
