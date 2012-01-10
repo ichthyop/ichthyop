@@ -17,27 +17,6 @@
         <description>Set the number of generations to start the simulation.</description>
       </parameter>
       <parameter>
-        <key>min_maturity</key>
-        <long_name>minimum age of maturity</long_name>
-        <value>06</value>
-        <format>integer</format>
-        <description>Set the minimum age of maturity (months).</description>
-      </parameter>
-      <parameter>
-        <key>max_maturity</key>
-        <long_name>maximum age of maturity</long_name>
-        <value>12</value>
-        <format>integer</format>
-        <description>Set the maximum age of maturity (months).</description>
-      </parameter>
-      <parameter>
-        <key>spawn_frequency</key>
-        <long_name>spawn frequency</long_name>
-        <value>3</value>
-        <default>3</default>
-        <format>integer</format>
-        <description>Set the spawn frequency(months),every 3 months for example.</description>
-      </parameter>
       <parameter hidden="true">
         <key>margin_time</key>
         <long_name>time margin</long_name>
@@ -76,28 +55,6 @@
         <value>50</value>
         <format>integer</format>
         <description>Set the number of generations to start the simulation.</description>
-      </parameter>
-      <parameter>
-        <key>min_maturity</key>
-        <long_name>minimum age of maturity</long_name>
-        <value>06</value>
-        <format>integer</format>
-        <description>Set the minimum age of maturity (months).</description>
-      </parameter>
-      <parameter>
-        <key>max_maturity</key>
-        <long_name>maximum age of maturity</long_name>
-        <value>12</value>
-        <format>integer</format>
-        <description>Set the maximum age of maturity (months).</description>
-      </parameter>
-      <parameter>
-        <key>spawn_frequency</key>
-        <long_name>spawn frequency</long_name>
-        <value>3</value>
-        <default>3</default>
-        <format>integer</format>
-        <description>Set the spawn frequency(months),every 3 months for example.</description>
       </parameter>
       <parameter>
         <key>var_temp</key>
@@ -152,28 +109,6 @@
         <value>50</value>
         <format>integer</format>
         <description>Set the number of generations to start the simulation.</description>
-      </parameter>
-      <parameter>
-        <key>min_maturity</key>
-        <long_name>minimum age of maturity</long_name>
-        <value>06</value>
-        <format>integer</format>
-        <description>Set the minimum age of maturity (months).</description>
-      </parameter>
-      <parameter>
-        <key>max_maturity</key>
-        <long_name>maximum age of maturity</long_name>
-        <value>12</value>
-        <format>integer</format>
-        <description>Set the maximum age of maturity (months).</description>
-      </parameter>
-      <parameter>
-        <key>spawn_frequency</key>
-        <long_name>spawn frequency</long_name>
-        <value>3</value>
-        <default>3</default>
-        <format>integer</format>
-        <description>Set the spawn frequency(months),every 3 months for example.</description>
       </parameter>
       <parameter>
         <key>temperature</key>
@@ -301,25 +236,25 @@
     <key>app.time</key>
     <description>Set the general time options of the simulation.</description>
     <parameters>
-      <parameter type="serial">
+      <parameter>
         <key>initial_time</key>
         <long_name>Beginning of simulation</long_name>
-        <value>year 01 month 05 day 03 at 00:00</value>
+        <value>year 2000 month 01 day 02 at 11:06</value>
         <format>date</format>
         <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
       </parameter>
       <parameter type="serial">
         <key>transport_duration</key>
         <long_name>Transport duration</long_name>
-        <value>0000 day(s) 12 hour(s) 00 minute(s)</value>
+        <value>0010 day(s) 00 hour(s) 00 minute(s)</value>
         <format>duration</format>
         <description>Set the duration of particle transport. Format: #### day(s) ## hour(s) ## minute(s)</description>
       </parameter>
       <parameter hidden="true">
         <key>keep_drifting</key>
         <long_name>Particle keep drifting</long_name>
-        <value>true</value>
-        <default>true</default>
+        <value>false</value>
+        <default>false</default>
         <format>boolean</format>
         <description>Determine whether a particle should be deactivated or on the contrary should keep drifting once its age exceeds transport duration. This parameter only operates with several release events (see section release schedule) when the simulation duration is upper than the transport duration.</description>
       </parameter>
@@ -335,8 +270,8 @@
         <long_name>Type of calendar</long_name>
         <value>Climatology calendar</value>
         <format>combo</format>
-        <accepted>Climatology calendar</accepted>
         <accepted>Gregorian calendar</accepted>
+        <accepted>Climatology calendar</accepted>
         <default>Gregorian calendar</default>
         <description>Choose the type of calendar for converting the time variable of the hydrodynamic model (expressed in seconds) into human readble time format. Climatology calendar: 360 days per year. Gregorian calendar: the usual calendar. If you do not know, just skip it ! It is a "cosmetic" parameter that does not affect the run of the simulation. It only controls the display of time on screen.</description>
       </parameter>
@@ -414,7 +349,7 @@
       <parameter>
         <key>file_filter</key>
         <long_name>File filter</long_name>
-        <value>*benguela*.nc</value>
+        <value>*avg*.nc</value>
         <default>*.nc</default>
         <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
       </parameter>
@@ -611,22 +546,22 @@
       <parameter>
         <key>nb_particles</key>
         <long_name>the number of Particles</long_name>
-        <value>1000</value>
-        <default>1000</default>
+        <value>50</value>
+        <default>50</default>
         <format>integer</format>
         <description>the number of Particles for each release event.</description>
       </parameter>
       <parameter>
         <key>depth_min</key>
         <long_name>minimum depth of the specie</long_name>
-        <value>-50.0</value>
+        <value>0.0</value>
         <default />
         <format>float</format>
       </parameter>
       <parameter>
         <key>depth_max</key>
         <long_name>maximum depth of the specie</long_name>
-        <value>-20.0</value>
+        <value>-30.0</value>
         <default />
         <format>float</format>
       </parameter>
@@ -1217,16 +1152,16 @@
       <parameter>
         <key>lon_stain</key>
         <long_name>Longitude [East degree]</long_name>
-        <value>17</value>
-        <default>17</default>
+        <value>-15.29</value>
+        <default>-15.29</default>
         <format>lonlat</format>
         <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
       </parameter>
       <parameter>
         <key>lat_stain</key>
         <long_name>Latitude [North degree]</long_name>
-        <value>-33</value>
-        <default>-33</default>
+        <value>28.83</value>
+        <default>28.83</default>
         <format>lonlat</format>
         <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
       </parameter>
@@ -1241,7 +1176,7 @@
       <parameter>
         <key>radius_stain</key>
         <long_name>Radius of the stain [meter]</long_name>
-        <value>50000.0</value>
+        <value>600000.0</value>
         <default>2000.0</default>
         <format>float</format>
         <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
@@ -1249,7 +1184,7 @@
       <parameter>
         <key>thickness_stain</key>
         <long_name>Thickness of the stain [meter]</long_name>
-        <value>10.0</value>
+        <value>40.0</value>
         <default>10.0</default>
         <format>float</format>
         <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
