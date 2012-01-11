@@ -173,17 +173,18 @@ public class EvolManager extends AbstractManager implements SetupListener {
         parent = parent.concat("/releaseG");
         int x = getIndexGeneration();
         parent = parent.concat(String.valueOf(x));
+        System.out.println("<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>> parent = " + parent);
         List<String> dates = setGenReleaseDates(parent);
-        if (dates != null) {
+        if (!dates.isEmpty()) {
             String timeBeginning = dates.get(0);
             Mycfg.getXParameter(BlockType.OPTION, "app.time", "initial_time").setValue(timeBeginning);
         } else {
-            System.out.println("<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>timeBeginning == null !!!!!!!");
+            System.out.println("<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>La liste des dates est vide.");
         }
         String event = StringListToString(dates);
         Mycfg.getXParameter(BlockType.OPTION, "release.schedule", "events").reset();
         Mycfg.getXParameter(BlockType.OPTION, "release.schedule", "events").setValue(event);
-        
+
         System.out.println(event);
         if (!Mycfg.containsBlock(BlockType.RELEASE, "release.TimeDrifterRelease")) {
             Mycfg.getBlock(BlockType.RELEASE, "release.uniform").setEnabled(false);
@@ -227,8 +228,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
             String date;
             Arrays.sort(files);
             for (int i = 0; i < files.length; i++) {
-                files[i] = files[i].concat(".nc");
-                System.out.println("files[i] =" + files[i]);
+                //System.out.println(" dans setGenReleaseDates() files[i] =" + files[i]);
                 date = (String) files[i].subSequence(files[i].indexOf("_") + 1, files[i].indexOf("."));
                 String time = date.substring(date.length() - 5, date.length());
                 String hour = time.substring(1, 3);
@@ -239,7 +239,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
                 date = date.replace("m", " month ");
                 date = date.replace("d", " day ");
                 date = date.concat(ch).concat(hour).concat(":").concat(seconds);
-                System.out.println("date:  " + date);
+                //System.out.println("date:  " + date);
                 dates.add(i, date);
             }
         }
@@ -413,10 +413,10 @@ public class EvolManager extends AbstractManager implements SetupListener {
             System.out.println("Aucun individu recruited");
             return indexList;
         }
-          for (int i = 0; i < aliveList.size(); i++) {
-            if(recruitedList.contains(aliveList.get(i))){
+        for (int i = 0; i < aliveList.size(); i++) {
+            if (recruitedList.contains(aliveList.get(i))) {
                 indexList.add(aliveList.get(i));
-            }            
+            }
         }
         return indexList;
     }
@@ -455,7 +455,6 @@ public class EvolManager extends AbstractManager implements SetupListener {
                     found = true;
                 } else {
                     j++;
-                    System.out.println("pas encore né");
                 }
             }
             if (j == tabRecruited.length) {
@@ -574,6 +573,22 @@ public class EvolManager extends AbstractManager implements SetupListener {
     public double createMarge(double x, double marge) {
         double eupsilon = -marge + (Math.random() * (marge + marge));
         x = (x + eupsilon);
+        return x;
+    }
+
+    public double createMargeLon(double x, double marge, double lat) {
+        //double one_deg_lon_meter = 111138.d * Math.cos(Math.PI * particle.getLat() / 180.d);
+        marge = marge / (111138.d * Math.cos(Math.PI * lat / 180.d));
+        double eupsilon = -marge + (Math.random() * (marge + marge));
+        x = x + eupsilon;
+        return x;
+    }
+
+    public double createMargeLat(double x, double marge) {
+        //ONE_DEG_LATITUDE_IN_METER = 111138.d;
+        marge = marge / 111138.d;
+        double eupsilon = -marge + (Math.random() * (marge + marge));
+        x = x + eupsilon;
         return x;
     }
 
