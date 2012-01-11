@@ -76,56 +76,67 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
             return 0;
         }
 
-        BufferedReader bfIn = new BufferedReader(new FileReader(drifterFile));
-        String line;
-        while ((line = bfIn.readLine()) != null) {
-            if (!line.startsWith("#") & !(line.length() < 1)) {
-                strCoord = line.trim().split(" ");
-                coord = new double[strCoord.length];
-                for (int i = 0; i < strCoord.length; i++) {
-                    try {
-                        coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
-                    } catch (ParseException ex) {
-                        IOException ioex = new IOException("{Drifter release} Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
-                        ioex.setStackTrace(ex.getStackTrace());
-                        throw ioex;
+        BufferedReader bfIn = null;
+        try {
+            bfIn = new BufferedReader(new FileReader(drifterFile));
+            String line;
+            while ((line = bfIn.readLine()) != null) {
+                if (!line.startsWith("#") & !(line.length() < 1)) {
+                    strCoord = line.trim().split(" ");
+                    coord = new double[strCoord.length];
+                    for (int i = 0; i < strCoord.length; i++) {
+                        try {
+                            coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
+                        } catch (ParseException ex) {
+                            IOException ioex = new IOException("{Drifter release} Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
+                            ioex.setStackTrace(ex.getStackTrace());
+                            throw ioex;
+                        }
                     }
-                }
-                IBasicParticle particle;
-                if (is3D) {
-                    double depth = coord.length > 2
-                            ? coord[2]
-                            : 0.d;
-                    if (depth > 0) {
-                        depth *= -1;
+                    IBasicParticle particle;
+                    if (is3D) {
+                        double depth = coord.length > 2
+                                ? coord[2]
+                                : 0.d;
+                        if (depth > 0) {
+                            depth *= -1;
+                        }
+                        particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1], depth);
+                    } else {
+                        particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1]);
                     }
-                    particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1], depth);
-                } else {
-                    particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1]);
-                }
-                if (null != particle) {
-                    //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
-                    getSimulationManager().getSimulation().getPopulation().add(particle);
-                    index++;
-                } else {
-                    throw new IOException("{Drifter release} Drifter at line " + (index + 1) + " is not in water");
+                    if (null != particle) {
+                        //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
+                        getSimulationManager().getSimulation().getPopulation().add(particle);
+                        index++;
+                    } else {
+                        throw new IOException("{Drifter release} Drifter at line " + (index + 1) + " is not in water");
+                    }
                 }
             }
-        }        
+        } finally {
+            bfIn.close();
+        }
         return index;
     }
 
     private int readNbParticles(File drifterFile) throws IOException {
 
         int index = 0;
-        BufferedReader bfIn = new BufferedReader(new FileReader(drifterFile));
-        String line;
-        while ((line = bfIn.readLine()) != null) {
-            if (!line.startsWith("#") & !(line.length() < 1)) {
-                index++;
+        BufferedReader bfIn = null;
+        try {
+            bfIn = new BufferedReader(new FileReader(drifterFile));
+            String line;
+            while ((line = bfIn.readLine()) != null) {
+                if (!line.startsWith("#") & !(line.length() < 1)) {
+                    index++;
+                }
             }
+        } finally {
+            bfIn.close();
         }
         return index;
+
     }
 
     public int getNbParticles() {
@@ -165,6 +176,8 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
         try {
             calendar.setTime(releaseDateFormat.parse(dateStr));
             seconds = calendar.getTimeInMillis() / 1000.d;
+
+
         } catch (ParseException ex) {
             Logger.getLogger(TimeDrifterRelease.class.getName()).log(Level.SEVERE, null, ex);
         }
