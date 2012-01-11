@@ -12,7 +12,7 @@
             <parameter>
                 <key>nb_generations</key>
                 <long_name>Number of generations</long_name>
-                <value>50</value>
+                <value>3</value>
                 <format>integer</format>
                 <description>Set the number of generations to start the simulation.</description>
             </parameter>
@@ -267,7 +267,7 @@
             <parameter hidden="true">
                 <key>calendar_type</key>
                 <long_name>Type of calendar</long_name>
-                <value>Climatology calendar</value>
+                <value>Gregorian calendar</value>
                 <format>combo</format>
                 <accepted>Gregorian calendar</accepted>
                 <accepted>Climatology calendar</accepted>
