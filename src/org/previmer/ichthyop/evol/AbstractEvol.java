@@ -12,9 +12,6 @@ public class AbstractEvol extends SimulationManagerAccessor implements IEvol {
 
     private String evolKey;
     private int nb_generations;
-    private int age_min;
-    private int age_max;
-    private int spawn_freq;
 
     public AbstractEvol() {
         evolKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
@@ -28,9 +25,6 @@ public class AbstractEvol extends SimulationManagerAccessor implements IEvol {
 
         // load common parameters
         nb_generations = Integer.valueOf(getParameter("nb_generations"));
-        age_min = Integer.valueOf(getParameter("min_maturity"));
-        age_max = Integer.valueOf(getParameter("max_maturity"));
-        spawn_freq = Integer.valueOf(getParameter("spawn_frequency"));
     }
 
     // pour garantir qu'une seule stratégie de reproduction a été sélectionnée
@@ -38,7 +32,7 @@ public class AbstractEvol extends SimulationManagerAccessor implements IEvol {
         return getSimulationManager().getEvolManager().isEnabled(evolKey);
     }
 
-    public int getNb_generations() {
+    public int getNbGenerations() {
         return nb_generations;
     }
 }

@@ -38,4 +38,11 @@ public class NatalEvol extends AbstractEvol {
     public double getMarginBat() {
         return margin_bat;
     }
+
+    /**
+     * @return the margin_time
+     */
+    public double getMarginTime() {
+        return margin_time;
+    }
 }
