@@ -361,8 +361,6 @@ public class SimulationManager {
         flagStop = false;
         getZoneManager().cleanup();
         fireSetupPerformed();
-        System.out.println("le id de ce fichier est: " + this.getId());
-        System.out.println("ce fichier se trouve à: " + IOTools.resolveFile(this.getId()));
         isSetup = true;
     }
 
