@@ -722,7 +722,7 @@ public class IchthyopView extends FrameView
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             checkCfgVersionAndLoad(chooser.getSelectedFile());
-            cfgPath=chooser.getCurrentDirectory();
+            cfgPath = chooser.getCurrentDirectory();
 
         }
         return null;
@@ -1009,7 +1009,17 @@ public class IchthyopView extends FrameView
             }
             btnCloseNC.doClick();
             closeFolderAnimation();
-            return simulActionTask = new SimulationRunTask(getApplication());
+            /*
+             * si fichier xml de type EVOL alors:
+             * return simulActionTask = new SimulationRunEvolTask(getApplication());
+             * sinon:
+             * return simulActionTask = new SimulationRunTask(getApplication());
+             */
+            if (getSimulationManager().testEvol()) {
+                return simulActionTask = new SimulationRunEvolTask(getApplication());
+            } else {
+                return simulActionTask = new SimulationRunTask(getApplication());
+            }
         } else {
             simulActionTask.cancel(true);
             return null;
@@ -1083,7 +1093,126 @@ public class IchthyopView extends FrameView
                     publish(getSimulationManager().progressCurrent());
 
                 } while (getSimulationManager().getTimeManager().hasNextStep());
+
             } while (getSimulationManager().hasNextSimulation());
+            return null;
+        }
+
+        protected void onFailure(Throwable t) {
+            if (!isSetup) {
+                setMessage(resourceMap.getString("simulationRun.msg.setup.failed"), false, Level.SEVERE);
+            } else if (!isInit) {
+                setMessage(resourceMap.getString("simulationRun.msg.init.failed"), false, Level.SEVERE);
+            }
+            isSetup = isInit = false;
+        }
+
+        @Override
+        protected void process(List values) {
+            if (getSimulationManager().isStopped()) {
+                return;
+            }
+            if (getProgress() > 0) {
+                btnSimulationRun.getAction().setEnabled(true);
+            }
+            pnlProgress.printProgress();
+            StringBuffer sb = new StringBuffer();
+            sb.append("(");
+            sb.append(getProgress());
+            sb.append("%) ");
+            sb.append(getResourceMap().getString("Application.title"));
+            getFrame().setTitle(sb.toString());
+        }
+
+        @Override
+        protected void cancelled() {
+            getSimulationManager().stop();
+            setMessage(resourceMap.getString("simulationRun.msg.interrupted"));
+        }
+
+        public void onSuccess(Object obj) {
+            setMessage(resourceMap.getString("simulationRun.msg.completed"), false, LogLevel.COMPLETE);
+            taskPaneSimulation.setCollapsed(true);
+            taskPaneMapping.setCollapsed(false);
+        }
+
+        @Override
+        protected void finished() {
+            if (!isFailed()) {
+                outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
+                openNetCDF();
+            }
+            getFrame().setTitle(title);
+            btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
+            btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
+            setMenuEnabled(true);
+            isRunning = false;
+            pnlProgress.hideBars();
+            pnlProgress.resetProgressBar();
+            btnPreview.getAction().setEnabled(true);
+        }
+    }
+
+    public class SimulationRunEvolTask extends SFTask {
+
+        private boolean isInit;
+        private String title;
+
+        SimulationRunEvolTask(Application instance) {
+            super(instance);
+            setMessage(resourceMap.getString("simulationRun.msg.started"));
+            setMenuEnabled(false);
+            pnlProgress.setupProgress();
+            btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.stop"));
+            btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.stop"));
+            isRunning = true;
+            //getSimulationManager().resetId();
+            isSetup = false;
+            isInit = false;
+            title = getFrame().getTitle();
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            getSimulationManager().resetTimerGlobal();
+            do {
+                getSimulationManager().resetId();
+                getSimulationManager().getEvolManager().prepareNextGeneration();
+                setMessage(resourceMap.getString("simulationRun.msg.simulation") + " " + getSimulationManager().indexSimulationToString());
+                /* setup */
+                setMessage(resourceMap.getString("simulationRun.msg.setup.start"), true, Level.INFO);
+                getSimulationManager().setup();
+                setMessage(resourceMap.getString("simulationRun.msg.setup.ok"));
+                isSetup = true;
+                /* initialization */
+                setMessage(resourceMap.getString("simulationRun.msg.init.start"), true, Level.INFO);
+                getSimulationManager().init();
+                setMessage(resourceMap.getString("simulationRun.msg.init.ok"));
+                isInit = true;
+                /* */
+                getSimulationManager().getTimeManager().firstStepTriggered();
+                getSimulationManager().resetTimerCurrent();
+                do {
+                    /* check whether the simulation has been interrupted by user */
+                    if (getSimulationManager().isStopped()) {
+                        break;
+                    }
+                    /* step simulation */
+                    getSimulationManager().getSimulation().step();
+                    /* Print message progress */
+                    StringBuffer msg = new StringBuffer();
+                    msg.append(getSimulationManager().getTimeManager().stepToString());
+                    msg.append(" - ");
+                    msg.append(resourceMap.getString("simulationRun.msg.time"));
+                    msg.append(" ");
+                    msg.append(getSimulationManager().getTimeManager().timeToString());
+                    setMessage(msg.toString());
+                    setProgress(getSimulationManager().progressCurrent());
+                    publish(getSimulationManager().progressCurrent());
+
+                } while (getSimulationManager().getTimeManager().hasNextStep());
+                getSimulationManager().getEvolManager().incrementGeneration();
+            } while (getSimulationManager().getEvolManager().hasNextGeneration());
             return null;
         }
 
