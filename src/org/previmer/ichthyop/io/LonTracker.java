@@ -26,7 +26,6 @@ public class LonTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addAliveDimension();
     }
 
     public void track() {

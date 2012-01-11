@@ -55,10 +55,6 @@ public abstract class AbstractTracker extends SimulationManagerAccessor implemen
         addDimension(dimFactory.getDrifterDimension());
     }
 
-    public void addAliveDimension() {
-        addDimension(dimFactory.getAliveDimension());
-    }
-
     public void addZoneDimension(TypeZone type) {
         addDimension(dimFactory.getZoneDimension(type));
     }

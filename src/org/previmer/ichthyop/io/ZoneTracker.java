@@ -44,7 +44,6 @@ public class ZoneTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addAliveDimension();
         addCustomDimension(new Dimension("type_zone", TypeZone.values().length));
     }
 
