@@ -417,7 +417,7 @@
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
         </parameters>
-    </block>
+    </block> 
     <block type="dataset">
         <key>dataset.mars_2d</key>
         <enabled>false</enabled>
@@ -1765,6 +1765,68 @@
         </parameters>
     </block>
     <block type="release">
+        <key>release.uniform</key>
+        <tree_path>Advanced/Release/Uniform release</tree_path>
+        <description>Block of options for releasing particles uniformily at sea.</description>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>number_particles</key>
+                <long_name>Number of particles</long_name>
+                <value>1000</value>
+                <default>1000</default>
+                <format>integer</format>
+                <description>Number of particles released in the zones. The application randomly releases the particles at sea surface. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.release.UniformRelease</value>
+                <default>org.previmer.ichthyop.release.UniformRelease</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+            <parameter>
+                <key>depth_min</key>
+                <long_name>minimum depth of the specie</long_name>
+                <value>-20.0</value>
+                <default />
+                <format>float</format>
+            </parameter>
+            <parameter>
+                <key>depth_max</key>
+                <long_name>maximum depth of the specie</long_name>
+                <value>-50.0</value>
+                <default />
+                <format>float</format>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="release">
+        <key>release.TimeDrifterRelease</key>
+        <tree_path>Advanced/Release/Time Drifter release</tree_path>
+        <description>Block of options for releasing particles from a directory which contains file(s) of release particles.</description>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>directory</key>
+                <long_name>Drifter directory</long_name>
+                <value>cfg</value>
+                <default>cfg</default>
+                <format>path</format>
+                <description>Select an existing directory where there is one or more release file(s).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.release.TimeDrifterRelease</value>
+                <default>org.previmer.ichthyop.release.TimeDrifterRelease</default>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="release">
         <key>release.ncfile</key>
         <tree_path>Release/Restart mode</tree_path>
         <description>Block of options for releasing particles with initial coordinates read in an Ichthyop NetCDF output file. The application interpolates the position of the particle in the NetCDF file at time “Beginning of the simulation” or for every "Release event" if the release schedule is activated. It also reads the status of the particle. If the particle had already die, the application releases the particle but it is immediately disabled (not transported). Make sure the time “Beginning of simulation” (or the "Release events") is contained inside the NetCDF file, otherwise the application will crash.</description>
@@ -1851,6 +1913,30 @@
             </parameter>
         </parameters>
     </block>
+    <block type="release">
+        <key>release.surface</key>
+        <tree_path>Advanced/Release/Surface release</tree_path>
+        <description>Block of options for releasing particles uniformily at sea surface.</description>
+        <enabled>true</enabled>
+        <parameters>
+            <parameter>
+                <key>number_particles</key>
+                <long_name>Number of particles</long_name>
+                <value>1000</value>
+                <default>1000</default>
+                <format>integer</format>
+                <description>Number of particles released in the zones. The application randomly releases the particles at sea surface. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.release.ZoneRelease</value>
+                <default>org.previmer.ichthyop.release.ZoneRelease</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+        </parameters>
+    </block>
     <block type="option">
         <key>app.particle_length</key>
         <tree_path>Biology/Early-life stages</tree_path>
@@ -1899,7 +1985,7 @@
             <parameter>
                 <key>lethal_temperature_larva</key>
                 <long_name>Lethal temperature (larva) [Celsius degree]</long_name>
-                <value>12.0</value>
+                <value>12.O</value>
                 <default>12.0</default>
                 <format>float</format>
                 <description>Lower lethal water temperature [Celsius degree] for particles at larva stage (yolk-sac and feeding larva). This parameter is ignored by the application when the growth process is idle.</description>
@@ -2115,7 +2201,7 @@
             </parameter>
         </parameters>
     </block>
-     <block type="action">
+    <block type="action">
         <key>action.recruitment.stain</key>
         <tree_path>Biology/Recruitment/In stain</tree_path>
         <enabled>false</enabled>
