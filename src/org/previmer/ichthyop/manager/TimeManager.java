@@ -168,6 +168,12 @@ public class TimeManager extends AbstractManager {
         lcalendar.setTime(INPUT_DATE_FORMAT.parse(date));
         return lcalendar.getTimeInMillis() / 1000L;
     }
+    
+    public long day2seconds(String day) throws ParseException {
+        long x= Long.valueOf(day);
+        x= x* 24 * 3600;
+        return x;
+    }
 
     private String getParameter(String key) {
         return getSimulationManager().getParameterManager().getParameter("app.time", key);
