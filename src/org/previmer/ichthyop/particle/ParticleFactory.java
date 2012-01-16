@@ -65,6 +65,31 @@ public class ParticleFactory extends SimulationManagerAccessor {
         particle.grid2Geo();
         return particle;
     }
+    
+    public static IBasicParticle createUniformParticle(int index, double x, double y, double depth) {
+        IMasterParticle particle = new MasterParticle();
+        particle.setIndex(index);
+        particle.setX(x);
+        particle.setY(y);
+        particle.setDepth(depth);
+        
+        
+         particle.geo2Grid();
+        if (Double.isNaN(depth)) {
+            particle.make2D();
+        }
+        if (!particle.isInWater() || particle.isOnEdge()) {
+            return null;
+        }
+        if (!Double.isNaN(depth)) {
+            if (getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0) > depth || depth > 0) {
+                return null;
+            }
+        }
+        particle.grid2Geo();
+        particle.geo2Grid();
+        return particle;
+    }
 
     public static IBasicParticle createZoneParticle(int index, double x, double y, double depth) {
         IMasterParticle particle = new MasterParticle();
