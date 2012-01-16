@@ -65,6 +65,8 @@ public class SimulationManager {
      * The id of the current simulation ichthyop-run_yyyyMMddHHmm
      */
     private String id;
+    
+    private String firstId = null;
     /**
      * The date format used for generating the id of the simulation
      */
@@ -148,7 +150,22 @@ public class SimulationManager {
     public String getId() {
 
         if (null == id) {
-            id = newId();
+            if (testEvol()) {
+                if(EvolManager.getIndexGeneration()==0){
+                    id = newEvolId(); 
+                    firstId=id;
+                }
+                String verif = getFirstId();
+                id = firstId;
+                if (null == verif) {
+                    return id + "_G0";
+                } else {
+                    id= id.concat("_G").concat(String.valueOf(EvolManager.getIndexGeneration()));
+                    return id;
+                }
+            } else {
+                id = newId();
+            }
         }
         if (this.getNumberOfSimulations() > 1) {
             return id + "_s" + (getIndexSimulation() + 1);
@@ -164,6 +181,15 @@ public class SimulationManager {
 
     private static String newId() {
         StringBuffer strBfRunId = new StringBuffer("ichthyop-run");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        dtformatterId.setCalendar(calendar);
+        strBfRunId.append(dtformatterId.format(calendar.getTime()));
+        return strBfRunId.toString();
+    }
+    
+    private String newEvolId() {
+        StringBuffer strBfRunId = new StringBuffer("ichthyopevol_run");
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
         dtformatterId.setCalendar(calendar);
@@ -295,6 +321,7 @@ public class SimulationManager {
 
         /* Time manager must come after the release manager because the 
         calculation of the simulation duration required the release schedule */
+        getEvolManager();
         getReleaseManager();
         getTimeManager();
 
@@ -411,6 +438,23 @@ public class SimulationManager {
         return ZoneManager.getInstance();
     }
 
+    public EvolManager getEvolManager() {
+        return EvolManager.getInstance();
+    }
+    
+    private String getFirstId() {
+        if (firstId == null) {
+            return null;
+        } else {
+            return firstId;
+        }
+    }
+    
+    public boolean testEvol() {
+        boolean test = getConfigurationFile().getName().contains("evol");
+        return test;
+    }
+    
     public ReleaseManager getReleaseManager() {
         return ReleaseManager.getInstance();
     }
