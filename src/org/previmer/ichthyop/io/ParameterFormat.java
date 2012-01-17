@@ -25,7 +25,8 @@ public enum ParameterFormat {
     CLASS("class not set yet"),
     LIST("value not set yet"),
     ZONEFILE(System.getProperty("user.dir")),
-    LONLAT("0.0");
+    LONLAT("0.0"),
+    SLIDER("0.0");
     
     private String defaultValue;
 

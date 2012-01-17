@@ -136,6 +136,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 case FILE:
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.FILES_ONLY));
                     break;
+                case SLIDER:
+                    editorModel.addEditorForRow(row, new SlideEditor());
+                    break;
                 case PATH:
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.DIRECTORIES_ONLY));
                     break;
@@ -219,7 +222,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     false, false, 0, 0);
             headerWidth = comp.getPreferredSize().width;
             try {
-            comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
+                comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
             } catch (Exception ex) {
                 java.util.logging.Logger.getAnonymousLogger().log(Level.WARNING, ex.toString());
             }
