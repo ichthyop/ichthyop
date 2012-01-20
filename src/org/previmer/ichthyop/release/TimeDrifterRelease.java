@@ -62,7 +62,7 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
     @Override
     public int release(ReleaseEvent event) throws IOException {
 
-        int index = 0;
+        int index = getSimulationManager().getSimulation().getPopulation().size();
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
