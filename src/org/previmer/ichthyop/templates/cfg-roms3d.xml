@@ -603,6 +603,68 @@
         </parameters>
     </block>
     <block type="release">
+        <key>release.TimeDrifterRelease</key>
+        <tree_path>Advanced/Release/Time Drifter release</tree_path>
+        <description>Block of options for releasing particles from a directory which contains file(s) of release particles.</description>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>directory</key>
+                <long_name>Drifter directory</long_name>
+                <value>cfg</value>
+                <default>cfg</default>
+                <format>path</format>
+                <description>Select an existing directory where there is one or more release file(s).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.release.TimeDrifterRelease</value>
+                <default>org.previmer.ichthyop.release.TimeDrifterRelease</default>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="release">
+        <key>release.uniform</key>
+        <tree_path>Advanced/Release/Uniform release</tree_path>
+        <description>Block of options for releasing particles uniformily at sea.</description>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>number_particles</key>
+                <long_name>Number of particles</long_name>
+                <value>1000</value>
+                <default>1000</default>
+                <format>integer</format>
+                <description>Number of particles released in the zones. The application randomly releases the particles at sea surface. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the zones per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.release.UniformRelease</value>
+                <default>org.previmer.ichthyop.release.UniformRelease</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+            <parameter>
+                <key>depth_min</key>
+                <long_name>minimum depth of the specie</long_name>
+                <value>-20.0</value>
+                <default />
+                <format>float</format>
+            </parameter>
+            <parameter>
+                <key>depth_max</key>
+                <long_name>maximum depth of the specie</long_name>
+                <value>-50.0</value>
+                <default />
+                <format>float</format>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="release">
         <key>release.zone</key>
         <tree_path>Advanced/Release/From zones</tree_path>
         <description>Block of options for releasing particles within pre-defined geographical zones. This release mode adds a "zone" variable in the NetCDF output file. First time you enable the zone release, do not forget to create a new zone file (the filename is preset but the file may not exist yet on your disk).</description>
