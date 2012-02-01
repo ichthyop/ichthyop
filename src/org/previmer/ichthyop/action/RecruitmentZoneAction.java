@@ -7,6 +7,7 @@ package org.previmer.ichthyop.action;
 import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.RecruitmentStainTracker;
 import org.previmer.ichthyop.io.RecruitmentZoneTracker;
 import org.previmer.ichthyop.io.ZoneTracker;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
@@ -57,7 +58,8 @@ public class RecruitmentZoneAction extends AbstractAction {
             // do nothing and just add the tracker
         }
         if (addTracker) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentZoneTracker.class);
+            //getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentZoneTracker.class);
+            getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentStainTracker.class);
         }
         addTracker = true;
         try {
