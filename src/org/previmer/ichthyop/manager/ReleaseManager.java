@@ -99,7 +99,9 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
 
     public int getNbParticles() {
         //return getNbReleaseEvents() * getReleaseProcess().getNbParticles();
-        return 9000;
+        //return 49500;
+        return 9900;
+        //return 18000;
     }
 
     public void nextStepTriggered(NextStepEvent event) throws Exception {
