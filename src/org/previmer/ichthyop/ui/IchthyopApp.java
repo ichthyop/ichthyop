@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.previmer.ichthyop.IchthyopBatch;
+import org.previmer.ichthyop.IchthyopEvolBatch;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.ui.logging.SystemOutHandler;
@@ -92,7 +93,11 @@ public class IchthyopApp extends SingleFrameApplication {
      */
     public static void main(String[] args) {
         initLogging();
-        if (args.length > 0) {
+        if (args.length > 1) {
+            String firstId = null;
+            if (args.length > 2) firstId = args[2];
+            new Thread(new IchthyopEvolBatch(args[0], args[1], firstId)).start();
+        } else if (args.length > 0) {
             new Thread(new IchthyopBatch(args[0])).start();
         } else {
             launch(IchthyopApp.class, args);
