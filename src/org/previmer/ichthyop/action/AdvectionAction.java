@@ -54,10 +54,14 @@ public class AdvectionAction extends AbstractAction {
     }
 
     public void execute(IBasicParticle particle) {
-        if (isForward) {
-            advectForward(particle, getSimulationManager().getTimeManager().getTime());
-        } else {
-            advectBackward(particle, getSimulationManager().getTimeManager().getTime());
+        try {
+            if (isForward) {
+                advectForward(particle, getSimulationManager().getTimeManager().getTime());
+            } else {
+                advectBackward(particle, getSimulationManager().getTimeManager().getTime());
+            }
+        } catch (Exception ex) {
+            particle.kill(ParticleMortality.OUT_OF_DOMAIN);
         }
     }
 
