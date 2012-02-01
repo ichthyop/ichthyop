@@ -44,6 +44,10 @@ public class TimeManager extends AbstractManager {
      * Begining of the simulation [second]
      */
     private long t0;
+    /*
+     * Initial year of the simulation
+     */
+    private int year0;
     /**
      * Transport duration [second]
      */
@@ -127,6 +131,10 @@ public class TimeManager extends AbstractManager {
             throw pex;
         }
         calendar.setTimeInMillis(t0 * 1000L);
+        
+        /* Year associated to initial time */
+        year0 = calendar.get(Calendar.YEAR);
+        //System.out.println("========== year0 = " + year0);
 
         /* output date format */
         outputDateFormat = new SimpleDateFormat(
@@ -241,6 +249,10 @@ public class TimeManager extends AbstractManager {
 
     public long get_tO() {
         return t0;
+    }
+    
+    public int get_year0() {
+        return year0;
     }
 
     /**
