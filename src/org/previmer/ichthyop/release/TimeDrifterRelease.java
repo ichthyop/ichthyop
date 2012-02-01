@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.particle.ParticleMortality;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
@@ -63,6 +64,7 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
     public int release(ReleaseEvent event) throws IOException {
 
         int index = getSimulationManager().getSimulation().getPopulation().size();
+        int nbLine = 0;
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
@@ -105,8 +107,13 @@ public class TimeDrifterRelease extends AbstractReleaseProcess {
                     if (null != particle) {
                         getSimulationManager().getSimulation().getPopulation().add(particle);
                         index++;
+                        nbLine++;
                     } else {
-                        throw new IOException("{Drifter release} Drifter at line " + (index + 1) + " is not in water");
+                        particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1], coord[2], ParticleMortality.OUT_OF_DOMAIN);
+                        getSimulationManager().getSimulation().getPopulation().add(particle);
+                        index++;
+                        nbLine++;
+                        //throw new IOException("{Drifter release} Drifter at line " + nbLine + " is not in water lon = " + coord[0] + "; lat = " + coord[1] + "; depth = " + coord[2] + ";");
                     }
                 }
             }
