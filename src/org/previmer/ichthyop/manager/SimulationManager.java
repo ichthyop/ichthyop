@@ -65,7 +65,6 @@ public class SimulationManager {
      * The id of the current simulation ichthyop-run_yyyyMMddHHmm
      */
     private String id;
-    
     private String firstId = null;
     /**
      * The date format used for generating the id of the simulation
@@ -151,16 +150,16 @@ public class SimulationManager {
 
         if (null == id) {
             if (testEvol()) {
-                if(EvolManager.getIndexGeneration()==0){
-                    id = newEvolId(); 
-                    firstId=id;
+                if (EvolManager.getIndexGeneration() == 0) {
+                    id = newEvolId();
+                    firstId = id;
                 }
                 String verif = getFirstId();
                 id = firstId;
                 if (null == verif) {
                     return id + "_G0";
                 } else {
-                    id= id.concat("_G").concat(String.valueOf(EvolManager.getIndexGeneration()));
+                    id = id.concat("_G").concat(String.valueOf(EvolManager.getIndexGeneration()));
                     return id;
                 }
             } else {
@@ -187,7 +186,7 @@ public class SimulationManager {
         strBfRunId.append(dtformatterId.format(calendar.getTime()));
         return strBfRunId.toString();
     }
-    
+
     private String newEvolId() {
         StringBuffer strBfRunId = new StringBuffer("ichthyopevol_run");
         Calendar calendar = new GregorianCalendar();
@@ -352,7 +351,7 @@ public class SimulationManager {
         fireSetupPerformed();
         isSetup = true;
     }
-    
+
     public boolean isSetup() {
         return isSetup;
     }
@@ -441,7 +440,7 @@ public class SimulationManager {
     public EvolManager getEvolManager() {
         return EvolManager.getInstance();
     }
-    
+
     private String getFirstId() {
         if (firstId == null) {
             return null;
@@ -449,12 +448,16 @@ public class SimulationManager {
             return firstId;
         }
     }
-    
+
+    public void setFirstId(String firstId) {
+        this.firstId = firstId;
+    }
+
     public boolean testEvol() {
         boolean test = getConfigurationFile().getName().contains("evol");
         return test;
     }
-    
+
     public ReleaseManager getReleaseManager() {
         return ReleaseManager.getInstance();
     }
