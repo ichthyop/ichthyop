@@ -144,6 +144,14 @@
                 <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
+            <parameter hidden="true">
+                <key>grid_file</key>
+                <long_name>Grid file</long_name>
+                <value />
+                <default />
+                <format>file</format>
+                <description>Separate grid file for ROMS configuration. In some simulations, lon, lat and mask are archived in separate grid file. In most cases this parameter should be empty.</description>
+            </parameter>
             <parameter>
                 <key>skip_sorting</key>
                 <long_name>Skip NetCDF file sorting</long_name>
