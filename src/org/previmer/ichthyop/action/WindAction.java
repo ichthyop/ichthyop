@@ -69,7 +69,7 @@ public class WindAction extends AbstractAction {
             double dt = getSimulationManager().getTimeManager().get_dt();
             double newLon = particle.getLon() + getdlon(intensity, direction, windage, particle.getLat(), dt);
             double newLat = particle.getLat() + getdlat(intensity, direction, windage, dt);
-            double[] newPos = getSimulationManager().getDataset().lonlat2xy(newLon, newLat);
+            double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
             double[] windincr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
             particle.increment(windincr);
         }
