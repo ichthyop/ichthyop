@@ -102,7 +102,11 @@ public class GetmDataset extends AbstractDataset {
      *
      */
     double[][] dyv;
-
+    /**
+     * hauteur des cellules verticales, correspond au h du fichier netcdf________________________________input Morgane
+     */
+    double[][][] dzw; 
+    
      /**
      * Determines whether or not the turbulent diffusivity should be read in the
      * NetCDF file, function of the user's options.
@@ -124,6 +128,14 @@ public class GetmDataset extends AbstractDataset {
      *  Meridional component of the velocity field at time t + dt
      */
     static float[][][] v_tp1;
+     /**
+     * Vertical component of the velocity field at current time
+     */
+    static float[][][] w_tp0;
+    /**
+     *  Vertical component of the velocity field at time t + dt
+     */
+    static float[][][] w_tp1;
     /**
      *
      */
@@ -296,9 +308,16 @@ public class GetmDataset extends AbstractDataset {
             throw ioex;
         }
         ipo = jpo = 0;
-        /* read the vertical dimension */
+        /* read the vertical dimension 
+         * dans Getm, la dimension verticale est 26, mais il n'y a que 25 couches 
+         * (la premiere couche est remplie de NeN pour les variables u, v, h...)
+         * ca sert surtout à la variable w qui elle est fournies pour les points W (donc 26 points) 
+         * avec la premiere couche égale à 0 car vitesse nulle au fond
+         * _____________________________________________> faut-il mettre nz=26 (pour toutes les lectures de fichier) ou 25 ?________________________
+         */
         try {
-            nz = ncIn.findDimension(strZDim).getLength();
+          //  nz = ncIn.findDimension(strZDim).getLength();
+            nz = ncIn.findDimension(strZDim).getLength() - 1;                       // modif Morgane pour ramener nz au nb reel de couches d'eau
         } catch (Exception ex) {
             IOException ioex = new IOException("Failed to read dataset vertical dimension. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -435,6 +454,9 @@ public class GetmDataset extends AbstractDataset {
         /* read vertical information */
 //_________________________________________________________________________________________ A FAIRE se baser sur e3t ou gdepW
         //__________________________________________________________ Probleme : ces infos varient dans le temps, faut-il les lire maintenant ?
+        
+        // read h et remplir dwz
+        
   }
 
        
@@ -799,16 +821,46 @@ public class GetmDataset extends AbstractDataset {
         return dv;
     }
 
-//_____________________________________________________________________________________________ A FAIRE
+//_____________________________________________________________________________________________ MODIFIE PAR MORGANE -> meme structure que les autres mais appelle w_tp0 et dzw
 
-    @Override
     public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        double dw = 0.d;
+        double ix, jy, kz;
+        int n = isCloseToCost(pGrid) ? 1 : 2;           
+        ix = pGrid[0];
+        jy = pGrid[1];
+        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int k = (int) Math.round(kz);
+        double dx = ix - (double) i;
+        double dy = jy - (double) j;
+        double dz = kz - (double) k;
+        double CO = 0.d;
+        double co = 0.d;
+        double x = 0.d;
+        
+        for (int ii = 0; ii < n; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                    CO += co;
+                    x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
+                    dw += 2.d * x * co / (dzw[Math.min(k + kk + 1, nz)][j + jj][i + ii] - dzw[Math.max(k + kk - 1, 0)][j + jj][i + ii]);
+                }
+            }
+        }
+        if (CO != 0) {
+            dw /= CO;
+        }
+        return dw;
     }
 
  /*   @Override
     public boolean isInWater(double[] pGrid) {
-        throw new UnsupportedOperationException("Not supported yet.");   //________________________ a priori pas besoin
+        throw new UnsupportedOperationException("Not supported yet.");   //________________________ a priori pas besoin (Morgane)
     }
 */
     public boolean isInWater(int i, int j) {
@@ -901,7 +953,8 @@ public class GetmDataset extends AbstractDataset {
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        int[] origin = new int[]{rank, 0, jpo, ipo};
+        //int[] origin = new int[]{rank, 0, jpo, ipo};      ----------------------------------> modif Morgane : on ne veut pas la premiere couche verticale qui est remplie de NaN
+        int[] origin = new int[]{rank, 1, jpo, ipo};
         double time_tp0 = time_tp1;
 
         try {
@@ -987,7 +1040,8 @@ public class GetmDataset extends AbstractDataset {
         int[] origin = null, shape = null;
         switch (variable.getShape().length) {
             case 4:
-                origin = new int[]{rank, 0, jpo, ipo};
+  //              origin = new int[]{rank, 0, jpo, ipo};        ---------------------------------------------> modif Morgane car on ne veut pas la premiere couche verticale qui est pleine de NaN
+                origin = new int[]{rank, 1, jpo, ipo};
                 shape = new int[]{1, nz, ny, nx};
                 break;
             case 2:
@@ -996,7 +1050,8 @@ public class GetmDataset extends AbstractDataset {
                 break;
             case 3:
                 if (!variable.isUnlimited()) {
-                    origin = new int[]{0, jpo, ipo};
+    //                origin = new int[]{0, jpo, ipo};              ---------------------------------------------> modif Morgane car on ne veut pas la premiere couche verticale qui est pleine de NaN
+                    origin = new int[]{1, jpo, ipo};
                     shape = new int[]{nz, ny, nx};
                 } else {
                     origin = new int[]{rank, jpo, ipo};
