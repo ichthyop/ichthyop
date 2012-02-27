@@ -184,6 +184,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode2 = new DefaultMutableTreeNode("Evol");
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ICHTHYOPEVOLROMS3D);
         treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ICHTHYOPEVOLNEMO3D);
+        treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
         
         treeNode2 = new DefaultMutableTreeNode("Miscellaneous");
@@ -477,6 +479,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         ROMS3D,
         OPA3D_NEMO,
         ICHTHYOPEVOLROMS3D,
+        ICHTHYOPEVOLNEMO3D,
         GENERIC;
         /* variables */
         private String longName;
