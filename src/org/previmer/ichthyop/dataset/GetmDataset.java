@@ -105,6 +105,7 @@ public class GetmDataset extends AbstractDataset {
     /**
      * hauteur des cellules verticales, correspond au h du fichier netcdf________________________________input Morgane
      */
+    float[][][] h_tp0, h_tp1;
     double[][][] dzw; 
     
      /**
@@ -310,10 +311,9 @@ public class GetmDataset extends AbstractDataset {
         ipo = jpo = 0;
         /* read the vertical dimension 
          * dans Getm, la dimension verticale est 26, mais il n'y a que 25 couches 
-         * (la premiere couche est remplie de NeN pour les variables u, v, h...)
+         * (la premiere couche est remplie de NaN pour les variables u, v, h...)
          * ca sert surtout à la variable w qui elle est fournies pour les points W (donc 26 points) 
          * avec la premiere couche égale à 0 car vitesse nulle au fond
-         * _____________________________________________> faut-il mettre nz=26 (pour toutes les lectures de fichier) ou 25 ?________________________
          */
         try {
           //  nz = ncIn.findDimension(strZDim).getLength();
@@ -451,11 +451,12 @@ public class GetmDataset extends AbstractDataset {
             dyv[ny - 1][i] = dyv[ny - 2][i];
         }    
         
-        /* read vertical information */
-//_________________________________________________________________________________________ A FAIRE se baser sur e3t ou gdepW
-        //__________________________________________________________ Probleme : ces infos varient dans le temps, faut-il les lire maintenant ?
-        
-        // read h et remplir dwz
+        /** read vertical information
+         * 
+         * vertical velocity W and thickness of each layer h vary with time, 
+         * they are read in setAllFieldsTp1AtTime()
+         * h is used directly to compute dzw
+         */
         
   }
 
@@ -738,7 +739,30 @@ public class GetmDataset extends AbstractDataset {
 
     @Override
     public double depth2z(double x, double y, double depth) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //-----------------------------------------------
+        // Return z[grid] corresponding to depth[meters]
+        double z = 0.d;
+        int lk = nz;
+        double cumulatedZ = 0.d;
+ /*       
+        boolean doContinue = true;
+        
+        while((lk>0) && (cumulatedZ>depth)){
+            cumulatedZ += dzw[x][y][lk];
+        }
+   */     
+ /*       while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
+            lk--;
+        }
+        if (lk == (nz - 1)) {
+            z = (double) lk;
+        } else {
+            double pr = getDepth(x, y, lk);
+            z = Math.max(0.d,
+                    (double) lk
+                    + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
+        }
+  */      return (z);
     }
 //_____________________________________________________________________________________________ A FAIRE
 
@@ -842,13 +866,15 @@ public class GetmDataset extends AbstractDataset {
         double co = 0.d;
         double x = 0.d;
         
+        dzw = compute_dzw_at_time(time, h_tp0, h_tp1);                                          // Ajout Morgane - cf fonction suivante - est-ce que c'est la qu'il faut l'appeler ?????? 
+        
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
                     co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                    dw += 2.d * x * co / (dzw[Math.min(k + kk + 1, nz)][j + jj][i + ii] - dzw[Math.max(k + kk - 1, 0)][j + jj][i + ii]);
+                    dw += 2.d * x * co / (dzw[Math.min(k + kk + 1, nz)][j + jj][i + ii] - dzw[Math.max(k + kk - 1, 0)][j + jj][i + ii]); //_____________dzw varie dans le tps - il faut interpoler dzw a partir de h_tp1 et h_tp0
                 }
             }
         }
@@ -857,6 +883,22 @@ public class GetmDataset extends AbstractDataset {
         }
         return dw;
     }
+    
+    /*
+     * Compute the height of a cell at the time t (interpolation between t0 and t1)
+     * Corresponds to the length of the cell in the vertical direction
+     */
+    double[][][] compute_dzw_at_time(double time, float[][][] h_tp0, float[][][] h_tp1){    
+        double[][][] dzw_t = new double[h_tp0.length][][];
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        for (int i=0; i<h_tp0.length; i++)
+            for (int j=0; j<h_tp0[i].length; j++)
+                for (int k=0; k<h_tp0[i][j].length; k++){
+                    dzw_t[i][j][k] = (double) h_tp1[i][j][k]*x_euler + (double) h_tp0[i][j][k]*(1-x_euler);
+                }
+        return dzw_t;
+    }
+    
 
  /*   @Override
     public boolean isInWater(double[] pGrid) {
@@ -925,7 +967,7 @@ public class GetmDataset extends AbstractDataset {
     public double getdeta(int j, int i) {
         return dyv[j][i];
     }
-
+    
        /**
      * Initializes the {@code Dataset}. Opens the file holding the first time
      * of the simulation. Checks out the existence of the fields required
@@ -953,12 +995,12 @@ public class GetmDataset extends AbstractDataset {
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        //int[] origin = new int[]{rank, 0, jpo, ipo};      ----------------------------------> modif Morgane : on ne veut pas la premiere couche verticale qui est remplie de NaN
+        int[] originW = new int[]{rank, 0, jpo, ipo};    //  ----------------------------------> modif Morgane : on ne veut pas la premiere couche verticale qui est remplie de NaN
         int[] origin = new int[]{rank, 1, jpo, ipo};
         double time_tp0 = time_tp1;
 
         try {
-            u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).
+            u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}). 
                     flip(1).reduce().copyToNDJavaArray();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
@@ -990,15 +1032,26 @@ public class GetmDataset extends AbstractDataset {
         for (RequiredVariable variable : requiredVariables.values()) {
             variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
-        /*try {
-        wr_tp1 = (float[][][]) ncW.findVariable("vovecrtz").read(origin, new int[]{1, nz + 1, ny, nx}).
-        flip(1).reduce().copyToNDJavaArray();
+        
+        
+        try {
+            w_tp1 = (float[][][]) ncIn.findVariable(strW).read(originW, new int[]{1, nz + 1, ny , nx}).
+                    flip(1).reduce().copyToNDJavaArray();               // ---------------> different origin
         } catch (Exception ex) {
-        IOException ioex = new IOException("Error reading W variable. " + ex.toString());
-        ioex.setStackTrace(ex.getStackTrace());
-        throw ioex;
-        }*/
-        w_tp1 = computeW();
+            IOException ioex = new IOException("Error reading W velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        
+        try {
+            h_tp1 = (float[][][]) ncIn.findVariable(strh).read(origin, new int[]{1, nz, ny , nx}).
+                    flip(1).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading h variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
     }
 
     
@@ -1076,12 +1129,13 @@ public class GetmDataset extends AbstractDataset {
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
+        h_tp0 = h_tp1;                  // Ajout Morgane : hauteur d'eau de chaque cellule
         //wr_tp0 = wr_tp1;
-        zeta_tp0 = zeta_tp1;
+/*        zeta_tp0 = zeta_tp1;                                                      // ________ pas sure que wr_tp0, zeta_tp0 et z_w_tp1 servent....
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
         }
-        rank += time_arrow;
+*/        rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             open(indexFile = getIndexNextFile(time, indexFile));
