@@ -215,7 +215,109 @@ public class GetmDataset extends AbstractDataset {
         }
         open(listInputFiles.get(0));
     }
+   
+    // vient de RomsCommon
+    private String getFile(long time) throws IOException {
+
+        int indexLast = listInputFiles.size() - 1;
+        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
+
+        for (int i = 0; i < indexLast; i++) {
+            if (isTimeIntoFile(time, i)) {
+                indexFile = i;
+                return listInputFiles.get(i);
+            } else if (isTimeBetweenFile(time, i)) {
+                indexFile = i - (time_arrow - 1) / 2;
+                return listInputFiles.get(indexFile);
+            }
+        }
+
+        if (isTimeIntoFile(time, indexLast)) {
+            indexFile = indexLast;
+            return listInputFiles.get(indexLast);
+        }
+
+        throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
+    }
     
+    
+    private boolean isTimeIntoFile(long time, int index) throws IOException {
+
+        String filename = "";
+        NetcdfFile nc;
+        Array timeArr;
+        long time_r0, time_rf;
+
+        try {
+            filename = listInputFiles.get(index);
+            nc = NetcdfDataset.openFile(filename, null);
+            timeArr = nc.findVariable(strTime).read();
+            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
+            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
+            nc.close();
+
+            return (time >= time_r0 && time < time_rf);
+            /*switch (time_arrow) {
+            case 1:
+            return (time >= time_r0 && time < time_rf);
+            case -1:
+            return (time > time_r0 && time <= time_rf);
+            }*/
+        } catch (IOException e) {
+            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        } catch (NullPointerException e) {
+            IOException ioex = new IOException("Unable to read " + strTime + " variable in file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+
+    }
+
+    private boolean isTimeBetweenFile(long time, int index) throws IOException {
+
+        NetcdfFile nc;
+        String filename = "";
+        Array timeArr;
+        long[] time_nc = new long[2];
+
+        try {
+            for (int i = 0; i < 2; i++) {
+                filename = listInputFiles.get(index + i);
+                nc = NetcdfDataset.openFile(filename, null);
+                timeArr = nc.findVariable(strTime).read();
+                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
+                nc.close();
+            }
+            if (time >= time_nc[0] && time < time_nc[1]) {
+                return true;
+            }
+        } catch (IOException e) {
+            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        } catch (NullPointerException e) {
+            IOException ioex = new IOException("Unable to read " + strTime + " variable in file " + filename + " : " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        return false;
+    }
+
+    
+    // vient de RomsCommon
+    String getNextFile(int time_arrow) throws IOException {
+
+        int index = indexFile - (1 - time_arrow) / 2;
+        boolean noNext = (listInputFiles.size() == 1) || (index < 0) || (index >= listInputFiles.size() - 1);
+        if (noNext) {
+            throw new IOException("Unable to find any file following " + listInputFiles.get(indexFile));
+        }
+        indexFile += time_arrow;
+        return listInputFiles.get(indexFile);
+    }
+        // vient de RomsCommon
     private ArrayList<String> getInputList(String path) throws IOException {
 
         ArrayList<String> list = null;
@@ -735,23 +837,15 @@ public class GetmDataset extends AbstractDataset {
         return (isInPolygone);
     }
 
-    //_____________________________________________________________________________________________ A FAIRE
+    // vient de mars 3d, mais getDepth est different
 
-    @Override
     public double depth2z(double x, double y, double depth) {
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double z = 0.d;
         int lk = nz;
-        double cumulatedZ = 0.d;
- /*       
-        boolean doContinue = true;
-        
-        while((lk>0) && (cumulatedZ>depth)){
-            cumulatedZ += dzw[x][y][lk];
-        }
-   */     
- /*       while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
+  
+        while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
             lk--;
         }
         if (lk == (nz - 1)) {
@@ -762,13 +856,57 @@ public class GetmDataset extends AbstractDataset {
                     (double) lk
                     + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
         }
-  */      return (z);
+        return (z);
     }
-//_____________________________________________________________________________________________ A FAIRE
+    
+    double getDepth(double xRho, double yRho, int k) {
 
-    @Override
+        final int i = (int) xRho;
+        final int j = (int) yRho;
+        double hh = 0.d;
+        final double dx = (xRho - i);
+        final double dy = (yRho - j);
+        double co = 0.d;
+        for (int ii = 0; ii < 2; ii++) {
+            for (int jj = 0; jj < 2; jj++) {
+                if (isInWater(i + ii, j + jj)) {
+                    co = Math.abs((1 - ii - dx) * (1 - jj - dy));
+                    double z_r = computeDepth(h_tp0)[k][j+jj][i+ii];        // ____________________________________ici Modif Morgane
+                    hh += co * z_r;
+                }
+            }
+        }
+        return (hh);
+    }
+    
+
+    // vient de mars 3d, mais un peu different
     public double z2depth(double x, double y, double z) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
+        final int i = (int) Math.floor(x);
+        final int j = (int) Math.floor(y);
+        final int k = (int) Math.floor(kz);
+        double depth = 0.d;
+        final double dx = x - (double) i;
+        final double dy = y - (double) j;
+        final double dz = kz - (double) k;
+        double co = 0.d;
+        double z_r;
+        for (int ii = 0; ii < 2; ii++) {
+            for (int jj = 0; jj < 2; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    co = Math.abs((1.d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
+                    if (isInWater(i + ii, j + jj)) {
+                        z_r = computeDepth(h_tp0)[k+kk][j+jj][i+ii];        // ___________ici modif Morgane
+                        depth += co * z_r;
+                    }
+                }
+            }
+        }
+        return depth;
+
     }
 
 
@@ -899,12 +1037,25 @@ public class GetmDataset extends AbstractDataset {
         return dzw_t;
     }
     
-
- /*   @Override
-    public boolean isInWater(double[] pGrid) {
-        throw new UnsupportedOperationException("Not supported yet.");   //________________________ a priori pas besoin (Morgane)
+    double[][][] computeDepth(float[][][] h){
+        double[][][] cDepth = new double[nz+1][][];
+        for (int j=0; j<h[0].length; j++)
+            for (int k=0; k<h[0][j].length; k++){
+                cDepth[0][j][k] = getBathy(j,k);
+            }
+        for (int i=1; i<(nz+1); i++)
+            for (int j=0; j<h[i].length; j++)
+                for (int k=0; k<h[i][j].length; k++){
+                    cDepth[i][j][k] = cDepth[i-1][j][k] + (double) h[i][j][k];
+                }
+        return cDepth;
     }
-*/
+    
+
+    public boolean isInWater(double[] pGrid) {
+        return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+    }
+
     public boolean isInWater(int i, int j) {
         try {
             return (maskRho[j][i] > 0);
@@ -941,9 +1092,9 @@ public class GetmDataset extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
-    public double getBathy(int i, int j) {      // vient de MARS
+    public double getBathy(int i, int j) {      // vient de MARS mais le signe - a été rajouté pour avoir une bathy négative
         if (isInWater(i, j)) {
-            return hRho[j][i];
+            return -1.0d * hRho[j][i];
         }
         return Double.NaN;
     }
@@ -979,12 +1130,35 @@ public class GetmDataset extends AbstractDataset {
     public void init() throws Exception {
         time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         long t0 = getSimulationManager().getTimeManager().get_tO();
-        open(indexFile = getIndexFile(t0));
+        open(getFile(t0));
         checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
     }
     
+    private int findCurrentRank(long time) throws Exception {
+
+        int lrank = 0;
+        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
+        long time_rank;
+        Array timeArr;
+        try {
+            timeArr = ncIn.findVariable(strTime).read();
+            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+            while (time >= time_rank) {
+                if (time_arrow < 0 && time == time_rank) {
+                    break;
+                }
+                lrank++;
+                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            lrank = nbTimeRecords;
+        }
+        lrank = lrank - (time_arrow + 1) / 2;
+
+        return lrank;
+    }
     /**
      * Reads time dependant variables in NetCDF dataset at specified rank.
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
@@ -1138,7 +1312,7 @@ public class GetmDataset extends AbstractDataset {
 */        rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(indexFile = getIndexNextFile(time, indexFile));
+            open(getNextFile(time_arrow));
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
 
