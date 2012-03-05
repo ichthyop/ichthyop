@@ -85,7 +85,7 @@ public class GetmDataset extends AbstractDataset {
     /**
      * __________________________________SPECIFICITE GETM : a modifier car sinon il faut changer la config 
      */
-    static String  strElev, strh, strW;
+    static String  strh, strW;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -180,7 +180,7 @@ public class GetmDataset extends AbstractDataset {
         strV = getParameter("field_var_v");
         strTime = getParameter("field_var_time");
         
-        //  LE VERTICAL : CF NEMO en partie
+        //  LE VERTICAL : CF NEMO en partie-----------------------------------------------------> les noms ne sont pas déclarés
         strZDim = getParameter("field_dim_level");  // dimension verticale
         strh = getParameter("field_var_h");     // hauteur de chaque couche d'eau
         strW = getParameter("field_var_w");     // vitesse verticale
@@ -986,6 +986,7 @@ public class GetmDataset extends AbstractDataset {
 //_____________________________________________________________________________________________ MODIFIE PAR MORGANE -> meme structure que les autres mais appelle w_tp0 et dzw
 
     public double get_dWz(double[] pGrid, double time) {
+        
         double dw = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;           
@@ -1004,7 +1005,7 @@ public class GetmDataset extends AbstractDataset {
         double co = 0.d;
         double x = 0.d;
         
-        dzw = compute_dzw_at_time(time, h_tp0, h_tp1);                                          // Ajout Morgane - cf fonction suivante - est-ce que c'est la qu'il faut l'appeler ?????? 
+        dzw = compute_dzw_at_time(time, h_tp0, h_tp1,pGrid);                                          // Ajout Morgane - cf fonction suivante - est-ce que c'est la qu'il faut l'appeler ?????? 
         
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
@@ -1012,7 +1013,8 @@ public class GetmDataset extends AbstractDataset {
                     co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                    dw += 2.d * x * co / (dzw[Math.min(k + kk + 1, nz)][j + jj][i + ii] - dzw[Math.max(k + kk - 1, 0)][j + jj][i + ii]); //_____________dzw varie dans le tps - il faut interpoler dzw a partir de h_tp1 et h_tp0
+                    dw += 2.d * x * co / (dzw[Math.min(k + kk + 1, nz)][j + jj][i + ii] + dzw[Math.max(k + kk - 1, 0)][j + jj][i + ii]); //_____________dzw varie dans le tps - il faut interpoler dzw a partir de h_tp1 et h_tp0
+                    // les hauteurs de cellules sont des nombres positifs : le signe au dénominateur est donc un "+" (et non pas "-" comme pour mars3d)
                 }
             }
         }
@@ -1026,28 +1028,44 @@ public class GetmDataset extends AbstractDataset {
      * Compute the height of a cell at the time t (interpolation between t0 and t1)
      * Corresponds to the length of the cell in the vertical direction
      */
-    double[][][] compute_dzw_at_time(double time, float[][][] h_tp0, float[][][] h_tp1){    
-        double[][][] dzw_t = new double[h_tp0.length][][];
+    double[][][] compute_dzw_at_time(double time, float[][][] h_tp0, float[][][] h_tp1, double[] pGrid){    
+        double[][][] dzw_t = new double[nz][][];
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        for (int i=0; i<h_tp0.length; i++)
-            for (int j=0; j<h_tp0[i].length; j++)
-                for (int k=0; k<h_tp0[i][j].length; k++){
-                    dzw_t[i][j][k] = (double) h_tp1[i][j][k]*x_euler + (double) h_tp0[i][j][k]*(1-x_euler);
+        for (int i=0; i<nz; i++){
+            dzw_t[i] = new double[ny][];
+            for (int j=0; j<ny; j++){
+                dzw_t[i][j] = new double[nx];
+                for (int k=0; k<nx; k++){
+                    if(isInWater(pGrid)){
+                        dzw_t[i][j][k] = (double) h_tp1[i][j][k]*x_euler + (double) h_tp0[i][j][k]*(1-x_euler);
+                    } else{
+                        dzw_t[i][j][k] = Double.NaN;
+                    }
                 }
+            }
+        }
         return dzw_t;
     }
     
     double[][][] computeDepth(float[][][] h){
         double[][][] cDepth = new double[nz+1][][];
-        for (int j=0; j<h[0].length; j++)
-            for (int k=0; k<h[0][j].length; k++){
+        cDepth[0] = new double[ny][];
+        for (int j=0; j<ny; j++){
+            cDepth[0][j] = new double[nx];
+            for (int k=0; k<nx; k++){
                 cDepth[0][j][k] = getBathy(j,k);
             }
-        for (int i=1; i<(nz+1); i++)
-            for (int j=0; j<h[i].length; j++)
-                for (int k=0; k<h[i][j].length; k++){
-                    cDepth[i][j][k] = cDepth[i-1][j][k] + (double) h[i][j][k];
+        }
+
+        for (int i=1; i<(nz+1); i++){         
+            cDepth[i] = new double[ny][];
+            for (int j=0; j<ny; j++){
+                cDepth[i][j] = new double[nx];
+                for (int k=0; k<nx; k++){
+                    cDepth[i][j][k] = cDepth[i-1][j][k] + (double) h[i-1][j][k];
                 }
+            }
+        }
         return cDepth;
     }
     
