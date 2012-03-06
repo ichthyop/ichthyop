@@ -442,9 +442,7 @@ public class GetmDataset extends AbstractDataset {
                 float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
-                float[] p1 = new float[]{lon1, lat1};
-                float[] p2 = new float[]{lon2, lat2};
-                range(p1, p2);
+                range(lat1, lon1, lat2, lon2);
             } catch (Exception ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
@@ -462,15 +460,15 @@ public class GetmDataset extends AbstractDataset {
      * @throws an IOException if the new domain is not strictly nested
      * within the NetCDF dataset domain.
      */
-    void range(float[] pGeog1, float[] pGeog2) throws IOException {
+    void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
 
         double[] pGrid1, pGrid2;
         int ipn, jpn;
 
         readLonLat();
 
-        pGrid1 = latlon2xy(pGeog1[0], pGeog1[1]);
-        pGrid2 = latlon2xy(pGeog2[0], pGeog2[1]);
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
             throw new IOException("Impossible to proportion the simulation area : points out of domain");
         }
