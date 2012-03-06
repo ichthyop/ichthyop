@@ -469,8 +469,8 @@ public class GetmDataset extends AbstractDataset {
 
         readLonLat();
 
-        pGrid1 = lonlat2xy(pGeog1[0], pGeog1[1]);
-        pGrid2 = lonlat2xy(pGeog2[0], pGeog2[1]);
+        pGrid1 = latlon2xy(pGeog1[0], pGeog1[1]);
+        pGrid2 = latlon2xy(pGeog2[0], pGeog2[1]);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
             throw new IOException("Impossible to proportion the simulation area : points out of domain");
         }
@@ -677,8 +677,8 @@ public class GetmDataset extends AbstractDataset {
             latMax = double_tmp;
         }
     }
-
-    public double[] lonlat2xy(double lon, double lat) {
+    
+    public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
@@ -740,7 +740,7 @@ public class GetmDataset extends AbstractDataset {
         }
         return (new double[]{xgrid, ygrid});
     }
-
+    
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
