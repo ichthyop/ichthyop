@@ -843,7 +843,7 @@ public class GetmDataset extends AbstractDataset {
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double z = 0.d;
-        int lk = nz;
+        int lk = nz-1;
   
         while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
             lk--;
@@ -859,6 +859,14 @@ public class GetmDataset extends AbstractDataset {
         return (z);
     }
     
+     /**
+     * Computes the depth  of the specified sigma level at the x-y particle
+     * location.
+     * @param xRho a double, x-coordinate of the grid point
+     * @param yRho a double, y-coordinate of the grid point
+     * @param k an int, the index of the sigma level
+     * @return a double, the depth [meter] at (x, y, k)
+     */
     double getDepth(double xRho, double yRho, int k) {
 
         final int i = (int) xRho;
@@ -1056,7 +1064,6 @@ public class GetmDataset extends AbstractDataset {
                 cDepth[0][j][k] = getBathy(j,k);
             }
         }
-
         for (int i=1; i<(nz+1); i++){         
             cDepth[i] = new double[ny][];
             for (int j=0; j<ny; j++){
