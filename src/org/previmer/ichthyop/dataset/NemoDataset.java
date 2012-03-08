@@ -103,7 +103,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    static float[] gdepT;
+    static double[] gdepT;
     /**
      * Depth at w point at current time.
      * Takes account of free surface elevation.
@@ -117,7 +117,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    static float[] gdepW;
+    static double[] gdepW;
     /**
      * Geographical boundary of the domain
      */
@@ -165,7 +165,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      *
      */
-    static float[][][] e3t, e3u, e3v;
+    static double[][][] e3t, e3u, e3v;
     static double[][] e1t, e2t, e1v, e2u;
     static String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     static String strueiv, strveiv, strweiv;
@@ -213,19 +213,17 @@ public class NemoDataset extends AbstractDataset {
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
-        gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
-                    0, jpo, ipo}, new int[]{1, nz, 1, 1}).flip(1).reduce().
+        gdepT = (double[]) nc.findVariable(str_gdepT).read(new int[]{jpo, ipo}, new int[]{1, nz}).flip(1).reduce().
                 copyTo1DJavaArray();
-        gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
+        gdepW = (double[]) nc.findVariable(str_gdepW).read(new int[]{jpo, ipo}, new int[]{1, nz + 1}).flip(1).reduce().
                 copyTo1DJavaArray();
-        e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo,
+        e3t = (double[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo,
                     ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
-        e3u = (float[][][]) nc.findVariable(stre3u).read(new int[]{0, 0, jpo,
+        e3u = (double[][][]) nc.findVariable(stre3u).read(new int[]{0, 0, jpo,
                     ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
-        e3v = (float[][][]) nc.findVariable(stre3v).read(new int[]{0, 0, jpo,
+        e3v = (double[][][]) nc.findVariable(stre3v).read(new int[]{0, 0, jpo,
                     ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
         if (!isGridInfoInOneFile) {
@@ -234,17 +232,17 @@ public class NemoDataset extends AbstractDataset {
         }
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
-        e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+        e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0,
+                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
                 copyToNDJavaArray();
-        e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+        e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0,
+                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
                 copyToNDJavaArray();
-        e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+        e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0,
+                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
                 copyToNDJavaArray();
-        e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
+        e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0,
+                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
                 copyToNDJavaArray();
         nc.close();
     }
