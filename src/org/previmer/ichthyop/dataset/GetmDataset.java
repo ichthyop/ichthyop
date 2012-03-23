@@ -35,17 +35,24 @@ import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  *
- * @author mtravers
- * fevrier 2012
- * pour pouvoir lire des fichiers netcdf issu du modele hydro GETM (fourni par CEFAS)
+ * @author mtravers fevrier 2012 pour pouvoir lire des fichiers netcdf issu du
+ * modele hydro GETM (fourni par CEFAS)
  */
 public class GetmDataset extends AbstractDataset {
 
-    
     /**
      * Number of time records in NetCDF dataset
      */
     int nbTimeRecords;
+    /**
+     * Ocean free surface elevetation at current time
+     */
+    static float[][] elev_tp0;
+    /**
+     * /**
+     * Ocean free surface elevetation at time t + dt
+     */
+    static float[][] elev_tp1;
     /**
      * Grid dimension
      */
@@ -83,9 +90,9 @@ public class GetmDataset extends AbstractDataset {
      */
     static String strLonDim, strLatDim, strTimeDim, strZDim;
     /**
-     * __________________________________SPECIFICITE GETM : a modifier car sinon il faut changer la config 
+     * __________________________________SPECIFICITE GETM 
      */
-    static String  strh, strW;
+    static String strh, strW, strElev;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -97,21 +104,20 @@ public class GetmDataset extends AbstractDataset {
     /**
      *
      */
-    double[][] dxu; //_________________________________j'ai dlon et dlat dans le fichier netcdf... est-ce qu'il faut les utiliser ou laisser ces dxu et dyv ????
+    double[][] dxu; 
     /**
      *
      */
     double[][] dyv;
     /**
-     * hauteur des cellules verticales, correspond au h du fichier netcdf________________________________input Morgane
+     * hauteur des cellules verticales, correspond au h du fichier
+     * netcdf________________________________input Morgane
      */
     float[][][] h_tp0, h_tp1;
-    double[][][] dzw; 
-    
-     /**
-     * Determines whether or not the turbulent diffusivity should be read in the
-     * NetCDF file, function of the user's options.
-     * --------------------------------> je ne suis pas convaincue que ce soit le bon commentaire...*/
+    double dzw;
+    /**
+     *
+     */
     private String gridFile;
     /**
      * Zonal component of the velocity field at current time
@@ -126,15 +132,15 @@ public class GetmDataset extends AbstractDataset {
      */
     static float[][][] v_tp0;
     /**
-     *  Meridional component of the velocity field at time t + dt
+     * Meridional component of the velocity field at time t + dt
      */
     static float[][][] v_tp1;
-     /**
+    /**
      * Vertical component of the velocity field at current time
      */
     static float[][][] w_tp0;
     /**
-     *  Vertical component of the velocity field at time t + dt
+     * Vertical component of the velocity field at time t + dt
      */
     static float[][][] w_tp1;
     /**
@@ -145,8 +151,7 @@ public class GetmDataset extends AbstractDataset {
      * List on NetCDF input files in which dataset is read.
      */
     ArrayList<String> listInputFiles;
-    
-     /**
+    /**
      * Time arrow: forward = +1, backward = -1
      */
     private static int time_arrow;
@@ -158,7 +163,7 @@ public class GetmDataset extends AbstractDataset {
      * Time t + dt expressed in seconds
      */
     static double time_tp1;
-     /**
+    /**
      * Time step [second] between two records in NetCDF dataset
      */
     static double dt_HyMo;
@@ -166,8 +171,7 @@ public class GetmDataset extends AbstractDataset {
      * Current rank in NetCDF dataset
      */
     private static int rank;
-    
-    
+
     @Override
     void loadParameters() {
         strLonDim = getParameter("field_dim_lon");
@@ -179,11 +183,12 @@ public class GetmDataset extends AbstractDataset {
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strTime = getParameter("field_var_time");
-        
+
         //  LE VERTICAL : CF NEMO en partie-----------------------------------------------------> les noms ne sont pas déclarés
         strZDim = getParameter("field_dim_level");  // dimension verticale
         strh = getParameter("field_var_h");     // hauteur de chaque couche d'eau
         strW = getParameter("field_var_w");     // vitesse verticale
+        strElev = getParameter("field_var_elev");   // elevation
     }
 
     @Override
@@ -196,7 +201,7 @@ public class GetmDataset extends AbstractDataset {
         readConstantField();
         getDimGeogArea();
     }
-    
+
     private void openLocation(String rawPath) throws IOException {
 
         String path = IOTools.resolvePath(rawPath);
@@ -215,7 +220,7 @@ public class GetmDataset extends AbstractDataset {
         }
         open(listInputFiles.get(0));
     }
-   
+
     // vient de RomsCommon
     private String getFile(long time) throws IOException {
 
@@ -239,8 +244,7 @@ public class GetmDataset extends AbstractDataset {
 
         throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
     }
-    
-    
+
     private boolean isTimeIntoFile(long time, int index) throws IOException {
 
         String filename = "";
@@ -257,12 +261,11 @@ public class GetmDataset extends AbstractDataset {
             nc.close();
 
             return (time >= time_r0 && time < time_rf);
-            /*switch (time_arrow) {
-            case 1:
-            return (time >= time_r0 && time < time_rf);
-            case -1:
-            return (time > time_r0 && time <= time_rf);
-            }*/
+            /*
+             * switch (time_arrow) { case 1: return (time >= time_r0 && time <
+             * time_rf); case -1: return (time > time_r0 && time <= time_rf);
+            }
+             */
         } catch (IOException e) {
             IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
@@ -305,7 +308,6 @@ public class GetmDataset extends AbstractDataset {
         return false;
     }
 
-    
     // vient de RomsCommon
     String getNextFile(int time_arrow) throws IOException {
 
@@ -317,7 +319,8 @@ public class GetmDataset extends AbstractDataset {
         indexFile += time_arrow;
         return listInputFiles.get(indexFile);
     }
-        // vient de RomsCommon
+    // vient de RomsCommon
+
     private ArrayList<String> getInputList(String path) throws IOException {
 
         ArrayList<String> list = null;
@@ -347,7 +350,7 @@ public class GetmDataset extends AbstractDataset {
         }
         return list;
     }
-    
+
     void open(String filename) throws IOException {
         if (ncIn == null || (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
             if (ncIn != null) {
@@ -370,7 +373,7 @@ public class GetmDataset extends AbstractDataset {
         }
         getLogger().log(Level.INFO, "Opened dataset {0}", filename);
     }
-    
+
     private boolean isDirectory(String location) throws IOException {
 
         File f = new File(location);
@@ -379,7 +382,7 @@ public class GetmDataset extends AbstractDataset {
         }
         return f.isDirectory();
     }
-        
+
     private String getGridFile(String rawFile) throws IOException {
 
         File filename = new File(IOTools.resolveFile(rawFile));
@@ -388,10 +391,10 @@ public class GetmDataset extends AbstractDataset {
         }
         return filename.toString();
     }
-    
-    
-     /**
+
+    /**
      * Reads the dimensions of the NetCDF dataset
+     *
      * @throws an IOException if an error occurs while reading the dimensions.
      */
     void getDimNC() throws IOException {
@@ -411,14 +414,15 @@ public class GetmDataset extends AbstractDataset {
             throw ioex;
         }
         ipo = jpo = 0;
-        /* read the vertical dimension 
-         * dans Getm, la dimension verticale est 26, mais il n'y a que 25 couches 
-         * (la premiere couche est remplie de NaN pour les variables u, v, h...)
-         * ca sert surtout à la variable w qui elle est fournies pour les points W (donc 26 points) 
-         * avec la premiere couche égale à 0 car vitesse nulle au fond
+        /*
+         * read the vertical dimension dans Getm, la dimension verticale est 26,
+         * mais il n'y a que 25 couches (la premiere couche est remplie de NaN
+         * pour les variables u, v, h...) ca sert surtout à la variable w qui
+         * elle est fournies pour les points W (donc 26 points) avec la premiere
+         * couche égale à 0 car vitesse nulle au fond
          */
         try {
-          //  nz = ncIn.findDimension(strZDim).getLength();
+            //  nz = ncIn.findDimension(strZDim).getLength();
             nz = ncIn.findDimension(strZDim).getLength() - 1;                       // modif Morgane pour ramener nz au nb reel de couches d'eau
         } catch (Exception ex) {
             IOException ioex = new IOException("Failed to read dataset vertical dimension. " + ex.toString());
@@ -450,15 +454,16 @@ public class GetmDataset extends AbstractDataset {
     }
 
     /**
-     * Resizes the domain and determines the range of the grid indexes
-     * taht will be used in the simulation.
-     * The new domain is limited by the Northwest and the Southeast corners.
-     * @param pGeog1 a float[], the geodesic coordinates of the domain
-     * Northwest corner
-     * @param pGeog2  a float[], the geodesic coordinates of the domain
-     * Southeast corner
-     * @throws an IOException if the new domain is not strictly nested
-     * within the NetCDF dataset domain.
+     * Resizes the domain and determines the range of the grid indexes taht will
+     * be used in the simulation. The new domain is limited by the Northwest and
+     * the Southeast corners.
+     *
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     * corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     * corner
+     * @throws an IOException if the new domain is not strictly nested within
+     * the NetCDF dataset domain.
      */
     void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
 
@@ -486,7 +491,6 @@ public class GetmDataset extends AbstractDataset {
         //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 
-    
     void readConstantField() throws Exception {
 
         Array arrH = null;
@@ -497,10 +501,14 @@ public class GetmDataset extends AbstractDataset {
         dxu = new double[ny][nx];
         dyv = new double[ny][nx];
 
-        /* Read longitude & latitude */
+        /*
+         * Read longitude & latitude
+         */
         readLonLat();
 
-        /* Read bathymetry */
+        /*
+         * Read bathymetry
+         */
         try {
             arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
         } catch (Exception ex) {
@@ -516,16 +524,20 @@ public class GetmDataset extends AbstractDataset {
             }
         }
 
-        /* Compute mask */
+        /*
+         * Compute mask
+         */
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                maskRho[j][i] = (hRho[j][i] == Double.NaN)    // la cote est codée en NaN dans GETM
+                maskRho[j][i] = (hRho[j][i] == Double.NaN) // la cote est codée en NaN dans GETM
                         ? (byte) 0
                         : (byte) 1;
             }
         }
 
-        /* Compute metrics dxu & dyv */
+        /*
+         * Compute metrics dxu & dyv
+         */
         double[] ptGeo1, ptGeo2;
         for (int j = 1; j < ny - 1; j++) {
             for (int i = 1; i < nx - 1; i++) {
@@ -537,7 +549,9 @@ public class GetmDataset extends AbstractDataset {
                 dyv[j][i] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
             }
         }
-        /* Boundary conditions */
+        /*
+         * Boundary conditions
+         */
         for (int j = ny; j-- > 0;) {
             dxu[j][0] = dxu[j][1];
             dxu[j][nx - 1] = dxu[j][nx - 2];
@@ -549,18 +563,17 @@ public class GetmDataset extends AbstractDataset {
             dxu[ny - 1][i] = dxu[ny - 2][i];
             dyv[0][i] = dyv[1][i];
             dyv[ny - 1][i] = dyv[ny - 2][i];
-        }    
-        
-        /** read vertical information
-         * 
-         * vertical velocity W and thickness of each layer h vary with time, 
-         * they are read in setAllFieldsTp1AtTime()
-         * h is used directly to compute dzw
-         */
-        
-  }
+        }
 
-       
+        /**
+         * read vertical information
+         *
+         * vertical velocity W and thickness of each layer h vary with time,
+         * they are read in setAllFieldsTp1AtTime() h is used directly to
+         * compute dzw
+         */
+    }
+
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      */
@@ -622,7 +635,6 @@ public class GetmDataset extends AbstractDataset {
         arrLat = null;
     }
 
-    
     /**
      * Determines the geographical boundaries of the domain in longitude,
      * latitude and depth.--------------> vient de NEMO
@@ -675,7 +687,8 @@ public class GetmDataset extends AbstractDataset {
             latMax = double_tmp;
         }
     }
-    
+
+    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
@@ -738,7 +751,8 @@ public class GetmDataset extends AbstractDataset {
         }
         return (new double[]{xgrid, ygrid});
     }
-    
+
+    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -836,13 +850,13 @@ public class GetmDataset extends AbstractDataset {
     }
 
     // vient de mars 3d, mais getDepth est different
-
+    @Override
     public double depth2z(double x, double y, double depth) {
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double z = 0.d;
-        int lk = nz-1;
-  
+        int lk = nz - 1;
+
         while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
             lk--;
         }
@@ -856,10 +870,11 @@ public class GetmDataset extends AbstractDataset {
         }
         return (z);
     }
-    
-     /**
-     * Computes the depth  of the specified sigma level at the x-y particle
+
+    /**
+     * Computes the depth of the specified sigma level at the x-y particle
      * location.
+     *
      * @param xRho a double, x-coordinate of the grid point
      * @param yRho a double, y-coordinate of the grid point
      * @param k an int, the index of the sigma level
@@ -877,16 +892,21 @@ public class GetmDataset extends AbstractDataset {
             for (int jj = 0; jj < 2; jj++) {
                 if (isInWater(i + ii, j + jj)) {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                    double z_r = computeDepth(h_tp0)[k][j+jj][i+ii];        // ____________________________________ici Modif Morgane
+                    // il faut changer l'ordre des indices 
+                    float[] h_temp = new float[nz];
+                    for (int ktemp = 0; ktemp < nz; ktemp++) {
+                        h_temp[ktemp] = h_tp0[ktemp][j + jj][i + ii];
+                    }
+                    double z_r = computeLocalDepth(i + ii, j + jj, h_temp, k);        // ____________________________________ici Modif Morgane
                     hh += co * z_r;
                 }
             }
         }
         return (hh);
     }
-    
 
     // vient de mars 3d, mais un peu different
+    @Override
     public double z2depth(double x, double y, double z) {
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         final int i = (int) Math.floor(x);
@@ -905,7 +925,12 @@ public class GetmDataset extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     if (isInWater(i + ii, j + jj)) {
-                        z_r = computeDepth(h_tp0)[k+kk][j+jj][i+ii];        // ___________ici modif Morgane
+                        // il faut changer l'ordre des indices 
+                        float[] h_temp = new float[nz];
+                        for (int ktemp = 0; ktemp < nz; ktemp++) {
+                            h_temp[ktemp] = h_tp0[ktemp][j + jj][i + ii];
+                        }
+                        z_r = computeLocalDepth(i + ii, j + jj, h_temp, k + kk);
                         depth += co * z_r;
                     }
                 }
@@ -915,7 +940,7 @@ public class GetmDataset extends AbstractDataset {
 
     }
 
-
+    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
@@ -925,7 +950,7 @@ public class GetmDataset extends AbstractDataset {
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;   
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (int) Math.round(ix);
         int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) kz;
@@ -953,6 +978,7 @@ public class GetmDataset extends AbstractDataset {
         return du;
     }
 
+    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy, kz;
@@ -990,12 +1016,12 @@ public class GetmDataset extends AbstractDataset {
     }
 
 //_____________________________________________________________________________________________ MODIFIE PAR MORGANE -> meme structure que les autres mais appelle w_tp0 et dzw
-
+    @Override
     public double get_dWz(double[] pGrid, double time) {
-        
+
         double dw = 0.d;
         double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;           
+        int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
@@ -1010,17 +1036,20 @@ public class GetmDataset extends AbstractDataset {
         double CO = 0.d;
         double co = 0.d;
         double x = 0.d;
-        
-        dzw = compute_dzw_at_time(time, h_tp0, h_tp1,pGrid);                                          // Ajout Morgane - cf fonction suivante - est-ce que c'est la qu'il faut l'appeler ?????? 
-        
+
+
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
                     co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                    dw += 2.d * x * co / (dzw[Math.min(k + kk + 1, nz)][j + jj][i + ii] + dzw[Math.max(k + kk - 1, 0)][j + jj][i + ii]); //_____________dzw varie dans le tps - il faut interpoler dzw a partir de h_tp1 et h_tp0
-                    // les hauteurs de cellules sont des nombres positifs : le signe au dénominateur est donc un "+" (et non pas "-" comme pour mars3d)
+                    dzw = (1.d - x_euler) * 0.5 * (h_tp0[Math.min(k + kk, nz - 1)][j + jj][i + ii] 
+                            + h_tp0[Math.min(k + kk + 1, nz - 1)][j + jj][i + ii])
+                            + x_euler * 0.5 * (h_tp1[Math.min(k + kk, nz - 1)][j + jj][i + ii] 
+                            + h_tp1[Math.min(k + kk + 1, nz - 1)][j + jj][i + ii]);
+
+                    dw += x * co / dzw;
                 }
             }
         }
@@ -1029,56 +1058,32 @@ public class GetmDataset extends AbstractDataset {
         }
         return dw;
     }
-    
-    /*
-     * Compute the height of a cell at the time t (interpolation between t0 and t1)
-     * Corresponds to the length of the cell in the vertical direction
-     */
-    double[][][] compute_dzw_at_time(double time, float[][][] h_tp0, float[][][] h_tp1, double[] pGrid){    
-        double[][][] dzw_t = new double[nz][][];
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        for (int i=0; i<nz; i++){
-            dzw_t[i] = new double[ny][];
-            for (int j=0; j<ny; j++){
-                dzw_t[i][j] = new double[nx];
-                for (int k=0; k<nx; k++){
-                    if(isInWater(pGrid)){
-                        dzw_t[i][j][k] = (double) h_tp1[i][j][k]*x_euler + (double) h_tp0[i][j][k]*(1-x_euler);
-                    } else{
-                        dzw_t[i][j][k] = Double.NaN;
-                    }
-                }
-            }
-        }
-        return dzw_t;
-    }
-    
-    double[][][] computeDepth(float[][][] h){
-        double[][][] cDepth = new double[nz+1][][];
-        cDepth[0] = new double[ny][];
-        for (int j=0; j<ny; j++){
-            cDepth[0][j] = new double[nx];
-            for (int k=0; k<nx; k++){
-                cDepth[0][j][k] = getBathy(j,k);
-            }
-        }
-        for (int i=1; i<(nz+1); i++){         
-            cDepth[i] = new double[ny][];
-            for (int j=0; j<ny; j++){
-                cDepth[i][j] = new double[nx];
-                for (int k=0; k<nx; k++){
-                    cDepth[i][j][k] = cDepth[i-1][j][k] + (double) h[i-1][j][k];
-                }
-            }
-        }
-        return cDepth;
-    }
-    
 
+    /**
+     * Compute the depth at the center of the vertical layer k, for the cell
+     * (i,j)
+     */
+    double computeLocalDepth(int i, int j, float[] h, int k) {
+        // double cDepth = 0;
+        double cDepth = elev_tp0[j][i]; // peut etre faire une interpolation temporelle ?
+
+        for (int kk = nz - 1; kk > k; kk--) {
+            cDepth -= h[kk];
+        }
+        cDepth += h[k] / 2;   // on enleve(rajoute car en négatif) la moitié de la hauteur de la derniere cellule pour avoir la profondeur
+        // au centre de la cellule et non pas à l'entre cellule
+
+        return cDepth;
+        
+        
+    }
+
+    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
+    @Override
     public boolean isInWater(int i, int j) {
         try {
             return (maskRho[j][i] > 0);
@@ -1093,9 +1098,12 @@ public class GetmDataset extends AbstractDataset {
      * located, and then checks wether or not its cell and the three adjacent
      * cells to the quater are in water.
      *
-     * @param pGrid a double[] the coordinates of the grid point -> HERE AS MARS IN 2D... BUT IN 3D IN NEMO - OK faire comme mars car toutes les cellules sont de l'eau
-     * @return <code>true</code> if the grid point is close to cost,
-     *         <code>false</code> otherwise.
+     * @param pGrid a double[] the coordinates of the grid point -> HERE AS MARS
+     * IN 2D... BUT IN 3D IN NEMO - OK faire comme mars car toutes les cellules
+     * sont de l'eau
+     * @return
+     * <code>true</code> if the grid point is close to cost,
+     * <code>false</code> otherwise.
      */
     @Override
     public boolean isCloseToCost(double[] pGrid) {
@@ -1108,6 +1116,7 @@ public class GetmDataset extends AbstractDataset {
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
+    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 2.0f))
                 || (pGrid[0] < 1.0f)
@@ -1115,41 +1124,48 @@ public class GetmDataset extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
+    @Override
     public double getBathy(int i, int j) {      // vient de MARS mais le signe - a été rajouté pour avoir une bathy négative
         if (isInWater(i, j)) {
             return -1.0d * hRho[j][i];
         }
         return Double.NaN;
     }
-    
+
+    @Override
     public int get_nx() {
         return nx;
     }
 
+    @Override
     public int get_ny() {
         return ny;
     }
 
+    @Override
     public int get_nz() {
         return nz;
     }
 
+    @Override
     public double getdxi(int j, int i) {
         return dxu[j][i];
     }
 
+    @Override
     public double getdeta(int j, int i) {
         return dyv[j][i];
     }
-    
-       /**
-     * Initializes the {@code Dataset}. Opens the file holding the first time
-     * of the simulation. Checks out the existence of the fields required
-     * by the current simulation. Sets all fields at time for the first time
-     * step.
+
+    /**
+     * Initializes the {@code Dataset}. Opens the file holding the first time of
+     * the simulation. Checks out the existence of the fields required by the
+     * current simulation. Sets all fields at time for the first time step.
+     *
      * @throws an IOException if a required field cannot be found in the NetCDF
      * dataset.
      */
+    @Override
     public void init() throws Exception {
         time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         long t0 = getSimulationManager().getTimeManager().get_tO();
@@ -1158,7 +1174,7 @@ public class GetmDataset extends AbstractDataset {
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
     }
-    
+
     private int findCurrentRank(long time) throws Exception {
 
         int lrank = 0;
@@ -1182,13 +1198,15 @@ public class GetmDataset extends AbstractDataset {
 
         return lrank;
     }
+
     /**
      * Reads time dependant variables in NetCDF dataset at specified rank.
+     *
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
      * @throws an IOException if an error occurs while reading the variables.
      *
-     * pverley pour chourdin: la aussi je fais du provisoire en attendant
-     * de voir si on peut dégager une structure systématique des input.
+     * pverley pour chourdin: la aussi je fais du provisoire en attendant de
+     * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
@@ -1197,7 +1215,7 @@ public class GetmDataset extends AbstractDataset {
         double time_tp0 = time_tp1;
 
         try {
-            u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}). 
+            u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).
                     flip(1).reduce().copyToNDJavaArray();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
@@ -1229,19 +1247,19 @@ public class GetmDataset extends AbstractDataset {
         for (RequiredVariable variable : requiredVariables.values()) {
             variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
-        
-        
+
+
         try {
-            w_tp1 = (float[][][]) ncIn.findVariable(strW).read(originW, new int[]{1, nz + 1, ny , nx}).
+            w_tp1 = (float[][][]) ncIn.findVariable(strW).read(originW, new int[]{1, nz + 1, ny, nx}).
                     flip(1).reduce().copyToNDJavaArray();               // ---------------> different origin
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading W velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         try {
-            h_tp1 = (float[][][]) ncIn.findVariable(strh).read(origin, new int[]{1, nz, ny , nx}).
+            h_tp1 = (float[][][]) ncIn.findVariable(strh).read(origin, new int[]{1, nz, ny, nx}).
                     flip(1).reduce().copyToNDJavaArray();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading h variable. " + ex.toString());
@@ -1249,48 +1267,70 @@ public class GetmDataset extends AbstractDataset {
             throw ioex;
         }
 
+        /*
+         * read zeta ocean free surface
+         */
+        int[] origin3d = new int[]{rank, jpo, ipo};
+
+        try {
+            elev_tp1 = (float[][]) ncIn.findVariable(strElev).read(origin3d, new int[]{1, ny, nx}).
+                    flip(1).reduce().copyToNDJavaArray();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading elev variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
     }
 
-    
+    @Override
     public double getLatMin() {
         return latMin;
     }
 
+    @Override
     public double getLatMax() {
         return latMax;
     }
 
+    @Override
     public double getLonMin() {
         return lonMin;
     }
 
+    @Override
     public double getLonMax() {
         return lonMax;
     }
 
+    @Override
     public double getLon(int igrid, int jgrid) {
         return lonRho[jgrid][igrid];
     }
 
+    @Override
     public double getLat(int igrid, int jgrid) {
         return latRho[jgrid][igrid];
     }
 
+    @Override
     public double getDepthMax() {
         return depthMax;
     }
 
+    @Override
     public boolean is3D() {
         return true;
     }
 
     // PROVIENT DE MARS3D - Difference avec NEMO : pas de bouleen hasVerticalDim....
+    @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         Variable variable = nc.findVariable(name);
         int[] origin = null, shape = null;
         switch (variable.getShape().length) {
             case 4:
-  //              origin = new int[]{rank, 0, jpo, ipo};        ---------------------------------------------> modif Morgane car on ne veut pas la premiere couche verticale qui est pleine de NaN
+                //              origin = new int[]{rank, 0, jpo, ipo};        ---------------------------------------------> modif Morgane car on ne veut pas la premiere couche verticale qui est pleine de NaN
                 origin = new int[]{rank, 1, jpo, ipo};
                 shape = new int[]{1, nz, ny, nx};
                 break;
@@ -1300,7 +1340,7 @@ public class GetmDataset extends AbstractDataset {
                 break;
             case 3:
                 if (!variable.isUnlimited()) {
-    //                origin = new int[]{0, jpo, ipo};              ---------------------------------------------> modif Morgane car on ne veut pas la premiere couche verticale qui est pleine de NaN
+                    //                origin = new int[]{0, jpo, ipo};              ---------------------------------------------> modif Morgane car on ne veut pas la premiere couche verticale qui est pleine de NaN
                     origin = new int[]{1, jpo, ipo};
                     shape = new int[]{nz, ny, nx};
                 } else {
@@ -1314,7 +1354,6 @@ public class GetmDataset extends AbstractDataset {
     }
 
     //_____________________________________________________________________________________________ A FAIRE
-
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
@@ -1327,12 +1366,9 @@ public class GetmDataset extends AbstractDataset {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         h_tp0 = h_tp1;                  // Ajout Morgane : hauteur d'eau de chaque cellule
-        //wr_tp0 = wr_tp1;
-/*        zeta_tp0 = zeta_tp1;                                                      // ________ pas sure que wr_tp0, zeta_tp0 et z_w_tp1 servent....
-        if (z_w_tp1 != null) {
-            z_w_tp0 = z_w_tp1;
-        }
-*/        rank += time_arrow;
+        elev_tp0 = elev_tp1;
+
+        rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             open(getNextFile(time_arrow));
@@ -1341,5 +1377,4 @@ public class GetmDataset extends AbstractDataset {
 
         setAllFieldsTp1AtTime(rank);
     }
-    
 }
