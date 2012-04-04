@@ -251,9 +251,9 @@ public class EvolManager extends AbstractManager implements SetupListener {
             Date date_start = (Date) INPUT_DATE_FORMAT.parse(t0);
             Calendar cal = Calendar.getInstance();
             cal.setTime(date_start);
-
+            long max_time_Malabar = SimulationManager.getInstance().getTimeManager().get_tO()+31104000;
             for (int i = 0; i < nbDays; i++) {
-                if (cal.getTimeInMillis()*1000 <= (Long.valueOf(t0)+31104000)) {
+                if (cal.getTimeInMillis()*1000 <= max_time_Malabar) {
                     timeAsStr = INPUT_DATE_FORMAT.format(cal.getTime());
                     dates[i] = timeAsStr;
                     cal.add(Calendar.DATE, frequency);
