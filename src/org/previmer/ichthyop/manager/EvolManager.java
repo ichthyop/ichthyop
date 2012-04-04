@@ -251,14 +251,28 @@ public class EvolManager extends AbstractManager implements SetupListener {
             Date date_start = (Date) INPUT_DATE_FORMAT.parse(t0);
             Calendar cal = Calendar.getInstance();
             cal.setTime(date_start);
-            long max_time_Malabar = SimulationManager.getInstance().getTimeManager().get_tO()+31104000;
+            System.out.println(cal.getTime());
+
+            Calendar cal_max = Calendar.getInstance();
+            cal_max = cal;
+            cal.add(cal.SECOND, 31104000);
+            System.out.println(cal_max.getTime());
+            int t = 0;
+
             for (int i = 0; i < nbDays; i++) {
-                if (cal.getTimeInMillis()*1000 <= max_time_Malabar) {
+                System.out.println(i);
+                System.out.println(cal.getTimeInMillis());
+                System.out.println(cal_max.getTimeInMillis());
+
+                if (cal.getTimeInMillis() <= cal_max.getTimeInMillis()) {
+                    System.out.println("in");
                     timeAsStr = INPUT_DATE_FORMAT.format(cal.getTime());
                     dates[i] = timeAsStr;
                     cal.add(Calendar.DATE, frequency);
-                }
+                } 
             }
+
+
         } catch (ParseException ex) {
             Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -304,21 +318,28 @@ public class EvolManager extends AbstractManager implements SetupListener {
         } else {
             //System.out.println("release.schedule block is already existing in your file.");
         }
-        /* if (!Mycfg.containsBlock(BlockType.RELEASE, "release.uniform")) {
-        Mycfg.addBlock(cfgTemplate.getBlock(BlockType.RELEASE, "release.uniform").detach());
-        Mycfg.getBlock(BlockType.RELEASE, "release.uniform").setEnabled(true);
-        String nb_particles = Mycfg.getXParameter(BlockType.OPTION, "release.evol", "nb_particles").getValue();
-        String depth_min = Mycfg.getXParameter(BlockType.OPTION, "release.evol", "depth_min").getValue();
-        String depth_max = Mycfg.getXParameter(BlockType.OPTION, "release.evol", "depth_max").getValue();
-        
-        Mycfg.getXParameter(BlockType.RELEASE, "release.uniform", "number_particles").setValue(nb_particles);
-        Mycfg.getXParameter(BlockType.RELEASE, "release.uniform", "depth_max").setValue(depth_max);
-        Mycfg.getXParameter(BlockType.RELEASE, "release.uniform", "depth_min").setValue(depth_min);
-        try {
-        Mycfg.write(new FileOutputStream(Mycfg.getFile()));
-        } catch (IOException ex) {
-        Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+        /*
+         * if (!Mycfg.containsBlock(BlockType.RELEASE, "release.uniform")) {
+         * Mycfg.addBlock(cfgTemplate.getBlock(BlockType.RELEASE,
+         * "release.uniform").detach()); Mycfg.getBlock(BlockType.RELEASE,
+         * "release.uniform").setEnabled(true); String nb_particles =
+         * Mycfg.getXParameter(BlockType.OPTION, "release.evol",
+         * "nb_particles").getValue(); String depth_min =
+         * Mycfg.getXParameter(BlockType.OPTION, "release.evol",
+         * "depth_min").getValue(); String depth_max =
+         * Mycfg.getXParameter(BlockType.OPTION, "release.evol",
+         * "depth_max").getValue();
+         *
+         * Mycfg.getXParameter(BlockType.RELEASE, "release.uniform",
+         * "number_particles").setValue(nb_particles);
+         * Mycfg.getXParameter(BlockType.RELEASE, "release.uniform",
+         * "depth_max").setValue(depth_max);
+         * Mycfg.getXParameter(BlockType.RELEASE, "release.uniform",
+         * "depth_min").setValue(depth_min); try { Mycfg.write(new
+         * FileOutputStream(Mycfg.getFile())); } catch (IOException ex) {
+         * Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null,
+         * ex); }
+         */
 
         if (!Mycfg.containsBlock(BlockType.RELEASE, "release.zone")) {
             Mycfg.addBlock(cfgTemplate.getBlock(BlockType.RELEASE, "release.zone").detach());
@@ -326,7 +347,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
             String nb_particles = Mycfg.getXParameter(BlockType.OPTION, "release.evol", "nb_particles").getValue();
 
             Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "number_particles").setValue(nb_particles);
-            Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "zone_file").setValue("/media/My Passport/mariem/Tim_Param_31_01_2012/peru_zones2.xml");
+            Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "zone_file").setValue("/media/HP SimpleSave/20120403_malabar_simulation/malabar.xml");
             Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "zone_tracker").setValue("true");
             try {
                 Mycfg.write(new FileOutputStream(Mycfg.getFile()));
@@ -353,8 +374,13 @@ public class EvolManager extends AbstractManager implements SetupListener {
         }
     }
 
-    /*********************************************************************************************************/
-    /*******************  Lecture des sorties de la génération i-1 ******************************************/
+    /**
+     * ******************************************************************************************************
+     */
+    /**
+     * ***************** Lecture des sorties de la génération i-1
+     * *****************************************
+     */
     public Array readMortality(NetcdfFile ncIn, int[] origin, int[] size) {
         Array death = null;
         try {
@@ -542,7 +568,9 @@ public class EvolManager extends AbstractManager implements SetupListener {
                 }
             }
             if (reste != 0) {
-                /** Generate 'reste' random integers in the range 0 .. nbParents. */
+                /**
+                 * Generate 'reste' random integers in the range 0 .. nbParents.
+                 */
                 Random randomGenerator = new Random();
                 for (int idx = 1; idx <= reste; ++idx) {
                     int randomInt = randomGenerator.nextInt(nbParents);
@@ -581,9 +609,10 @@ public class EvolManager extends AbstractManager implements SetupListener {
         //int nbDt = (int) (Math.random() * nbDtMax);
         int nbDt = (int) ((2.d * Math.random() - 1.d) * nbDtMax);
         double newTime = time + nbDt * dt;
-        /*if (newTime < getSimulationManager().getTimeManager().get_tO()) {
-        return createTimeMargin(time, margin);
-        }*/
+        /*
+         * if (newTime < getSimulationManager().getTimeManager().get_tO()) {
+         * return createTimeMargin(time, margin); }
+         */
         StringBuilder newYear = new StringBuilder("year ");
         newYear.append(getSimulationManager().getTimeManager().get_year0() + 1);
         newYear.append(" month 01 day 01 at 00:00");
