@@ -241,7 +241,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
         }
         String t0 = Mycfg.getXParameter(BlockType.OPTION, "app.time", "initial_time").getValue();
         int frequency = Integer.parseInt(Mycfg.getXParameter(BlockType.OPTION, "release.evol", "release_frequency").getValue());
-        Double Days = Math.ceil(360 / frequency);
+        Double Days = Math.ceil(358 / frequency);
         int nbDays = Days.intValue();
         String[] dates = new String[nbDays];
         String timeAsStr;
@@ -251,28 +251,12 @@ public class EvolManager extends AbstractManager implements SetupListener {
             Date date_start = (Date) INPUT_DATE_FORMAT.parse(t0);
             Calendar cal = Calendar.getInstance();
             cal.setTime(date_start);
-            System.out.println(cal.getTime());
-
-            Calendar cal_max = Calendar.getInstance();
-            cal_max = cal;
-            cal.add(cal.SECOND, 31104000);
-            System.out.println(cal_max.getTime());
-            int t = 0;
 
             for (int i = 0; i < nbDays; i++) {
-                System.out.println(i);
-                System.out.println(cal.getTimeInMillis());
-                System.out.println(cal_max.getTimeInMillis());
-
-                if (cal.getTimeInMillis() <= cal_max.getTimeInMillis()) {
-                    System.out.println("in");
                     timeAsStr = INPUT_DATE_FORMAT.format(cal.getTime());
                     dates[i] = timeAsStr;
                     cal.add(Calendar.DATE, frequency);
-                } 
             }
-
-
         } catch (ParseException ex) {
             Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -338,7 +322,8 @@ public class EvolManager extends AbstractManager implements SetupListener {
          * "depth_min").setValue(depth_min); try { Mycfg.write(new
          * FileOutputStream(Mycfg.getFile())); } catch (IOException ex) {
          * Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null,
-         * ex); }
+         * ex);
+            }
          */
 
         if (!Mycfg.containsBlock(BlockType.RELEASE, "release.zone")) {
@@ -378,8 +363,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
      * ******************************************************************************************************
      */
     /**
-     * ***************** Lecture des sorties de la génération i-1
-     * *****************************************
+     * ***************** Lecture des sorties de la génération i-1 *****************************************
      */
     public Array readMortality(NetcdfFile ncIn, int[] origin, int[] size) {
         Array death = null;
@@ -611,7 +595,8 @@ public class EvolManager extends AbstractManager implements SetupListener {
         double newTime = time + nbDt * dt;
         /*
          * if (newTime < getSimulationManager().getTimeManager().get_tO()) {
-         * return createTimeMargin(time, margin); }
+         * return createTimeMargin(time, margin);
+        }
          */
         StringBuilder newYear = new StringBuilder("year ");
         newYear.append(getSimulationManager().getTimeManager().get_year0() + 1);
