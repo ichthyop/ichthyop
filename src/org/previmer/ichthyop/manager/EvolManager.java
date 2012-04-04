@@ -241,7 +241,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
         }
         String t0 = Mycfg.getXParameter(BlockType.OPTION, "app.time", "initial_time").getValue();
         int frequency = Integer.parseInt(Mycfg.getXParameter(BlockType.OPTION, "release.evol", "release_frequency").getValue());
-        Double Days = Math.ceil(358 / frequency);
+        Double Days = Math.ceil(360 / frequency);
         int nbDays = Days.intValue();
         String[] dates = new String[nbDays];
         String timeAsStr;
