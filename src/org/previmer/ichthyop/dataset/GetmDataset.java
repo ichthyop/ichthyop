@@ -529,12 +529,27 @@ public class GetmDataset extends AbstractDataset {
          */
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                maskRho[j][i] = (hRho[j][i] == Double.NaN) // la cote est codée en NaN dans GETM
+
+                maskRho[j][i] = (hRho[j][i] <0) 
                         ? (byte) 0
                         : (byte) 1;
+                
             }
         }
-
+  /*      
+        int tempX = 0;
+        int tempY = 0;
+        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+        tempX = 0;
+        tempY = 40;
+        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+        tempX = 40;
+        tempY = 0;
+        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+        tempX = 100;
+        tempY = 100;
+        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+*/
         /*
          * Compute metrics dxu & dyv
          */
@@ -892,7 +907,7 @@ public class GetmDataset extends AbstractDataset {
             for (int jj = 0; jj < 2; jj++) {
                 if (isInWater(i + ii, j + jj)) {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                    // il faut changer l'ordre des indices 
+                    // il faut réduire la taille du tableau (enlever les dimensions i et j)
                     float[] h_temp = new float[nz];
                     for (int ktemp = 0; ktemp < nz; ktemp++) {
                         h_temp[ktemp] = h_tp0[ktemp][j + jj][i + ii];
@@ -925,7 +940,7 @@ public class GetmDataset extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     if (isInWater(i + ii, j + jj)) {
-                        // il faut changer l'ordre des indices 
+                        // il faut réduire la taille du tableau (enlever les dimensions i et j)
                         float[] h_temp = new float[nz];
                         for (int ktemp = 0; ktemp < nz; ktemp++) {
                             h_temp[ktemp] = h_tp0[ktemp][j + jj][i + ii];
@@ -963,12 +978,14 @@ public class GetmDataset extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
+                    if(isInWater(i + ii, j + jj)){                       
                     co = Math.abs((.5d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                     du += 2.d * x * co / (dxu[j + jj][i + ii - 1] + dxu[j + jj][i + ii]);
+                }
                 }
             }
         }
@@ -1000,13 +1017,14 @@ public class GetmDataset extends AbstractDataset {
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
+                    if(isInWater(i + ii, j + jj)){
                     co = Math.abs((1.d - (double) ii - dx)
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
                     dv += 2.d * x * co / (dyv[j + jj - 1][i + ii] + dyv[j + jj][i + ii]);
-                }
+                }}
             }
         }
         if (CO != 0) {
@@ -1041,6 +1059,7 @@ public class GetmDataset extends AbstractDataset {
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
+                    if (isInWater(i + ii, j + jj)){
                     co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
                     x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
@@ -1050,6 +1069,7 @@ public class GetmDataset extends AbstractDataset {
                             + h_tp1[Math.min(k + kk + 1, nz - 1)][j + jj][i + ii]);
 
                     dw += x * co / dzw;
+                    }
                 }
             }
         }
@@ -1065,12 +1085,12 @@ public class GetmDataset extends AbstractDataset {
      */
     double computeLocalDepth(int i, int j, float[] h, int k) {
         // double cDepth = 0;
-        double cDepth = elev_tp0[j][i]; // peut etre faire une interpolation temporelle ?
+        double cDepth = elev_tp0[j][i]; // peut etre faire une interpolation temporelle ? mais il faudrait le faire aussi pour h
 
         for (int kk = nz - 1; kk > k; kk--) {
             cDepth -= h[kk];
         }
-        cDepth += h[k] / 2;   // on enleve(rajoute car en négatif) la moitié de la hauteur de la derniere cellule pour avoir la profondeur
+        cDepth -= h[k] / 2;   // on enleve la moitié de la hauteur de la derniere cellule (qui n'était pas ds la boucle) pour avoir la profondeur
         // au centre de la cellule et non pas à l'entre cellule
 
         return cDepth;
@@ -1117,17 +1137,25 @@ public class GetmDataset extends AbstractDataset {
     }
 
     @Override
-    public boolean isOnEdge(double[] pGrid) {
+     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 2.0f))
                 || (pGrid[0] < 1.0f)
                 || (pGrid[1] > (ny - 2.0f))
                 || (pGrid[1] < 1.0f));
     }
-
+   /*
+   public boolean isOnEdge(double[] pGrid) {    // version de NEMO
+        return ((pGrid[0] > (nx - 3.0f))
+                || (pGrid[0] < 2.0f)
+                || (pGrid[1] > (ny - 3.0f))
+                || (pGrid[1] < 2.0f));
+    }
+   */ 
     @Override
-    public double getBathy(int i, int j) {      // vient de MARS mais le signe - a été rajouté pour avoir une bathy négative
+    public double getBathy(int i, int j) {      
         if (isInWater(i, j)) {
-            return -1.0d * hRho[j][i];
+            return hRho[j][i];
+            //return -1.0d * hRho[j][i];    // vient de MARS mais le signe - a été rajouté pour avoir une bathy négative
         }
         return Double.NaN;
     }
