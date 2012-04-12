@@ -529,7 +529,6 @@ public class GetmDataset extends AbstractDataset {
          */
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-
                 maskRho[j][i] = (hRho[j][i] <0) 
                         ? (byte) 0
                         : (byte) 1;
@@ -1083,7 +1082,7 @@ public class GetmDataset extends AbstractDataset {
      * Compute the depth at the center of the vertical layer k, for the cell
      * (i,j)
      */
-    double computeLocalDepth(int i, int j, float[] h, int k) {
+    double computeLocalDepth2(int i, int j, float[] h, int k) {
         // double cDepth = 0;
         double cDepth = elev_tp0[j][i]; // peut etre faire une interpolation temporelle ? mais il faudrait le faire aussi pour h
 
@@ -1093,9 +1092,20 @@ public class GetmDataset extends AbstractDataset {
         cDepth -= h[k] / 2;   // on enleve la moitié de la hauteur de la derniere cellule (qui n'était pas ds la boucle) pour avoir la profondeur
         // au centre de la cellule et non pas à l'entre cellule
 
-        return cDepth;
-        
-        
+        return cDepth; 
+    }
+    
+    double computeLocalDepth(int i, int j, float[] h, int k) {
+        // double cDepth = 0;
+        double cDepth = -1.0 * hRho[j][i]; 
+
+        for (int kk = 0; kk < k; kk++) {
+            cDepth += h[kk];
+        }
+        cDepth += h[k] / 2;   // on enleve la moitié de la hauteur de la derniere cellule (qui n'était pas ds la boucle) pour avoir la profondeur
+        // au centre de la cellule et non pas à l'entre cellule
+
+        return cDepth; 
     }
 
     @Override
@@ -1155,7 +1165,6 @@ public class GetmDataset extends AbstractDataset {
     public double getBathy(int i, int j) {      
         if (isInWater(i, j)) {
             return hRho[j][i];
-            //return -1.0d * hRho[j][i];    // vient de MARS mais le signe - a été rajouté pour avoir une bathy négative
         }
         return Double.NaN;
     }
@@ -1381,7 +1390,7 @@ public class GetmDataset extends AbstractDataset {
         return variable.read(origin, shape).reduce();
     }
 
-    //_____________________________________________________________________________________________ A FAIRE
+    
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
