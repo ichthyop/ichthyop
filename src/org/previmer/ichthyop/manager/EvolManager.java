@@ -253,9 +253,9 @@ public class EvolManager extends AbstractManager implements SetupListener {
             cal.setTime(date_start);
 
             for (int i = 0; i < nbDays; i++) {
-                    timeAsStr = INPUT_DATE_FORMAT.format(cal.getTime());
-                    dates[i] = timeAsStr;
-                    cal.add(Calendar.DATE, frequency);
+                timeAsStr = INPUT_DATE_FORMAT.format(cal.getTime());
+                dates[i] = timeAsStr;
+                cal.add(Calendar.DATE, frequency);
             }
         } catch (ParseException ex) {
             Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -779,8 +779,18 @@ public class EvolManager extends AbstractManager implements SetupListener {
 
     public void prepareEvolRelease() throws ParseException {
         double[][] next = null;
+        /*****************************************************************
+        //test Canary
         //int[] yearRelease = {2000, 2001, 2002};
+         * **************************************************************/
+        
+        /****************************************************************
+         test Pérou
         int[] yearRelease = {1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999};
+         * **************************************************************/
+        
+        /*test malabar*/
+        int[] yearRelease = {1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003};
         try {
             System.out.println("Prepare Evol Release " + getIndexGeneration());
             next = getCandidate();
