@@ -332,7 +332,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
             String nb_particles = Mycfg.getXParameter(BlockType.OPTION, "release.evol", "nb_particles").getValue();
 
             Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "number_particles").setValue(nb_particles);
-            Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "zone_file").setValue("/media/HP SimpleSave/20120403_malabar_simulation/malabar.xml");
+            Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "zone_file").setValue("/media/HP SimpleSave/20120425_malabar_simulation/malabar.xml");
             Mycfg.getXParameter(BlockType.RELEASE, "release.zone", "zone_tracker").setValue("true");
             try {
                 Mycfg.write(new FileOutputStream(Mycfg.getFile()));
@@ -790,7 +790,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
          * **************************************************************/
         
         /*test malabar*/
-        int[] yearRelease = {1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003};
+        int[] yearRelease = {1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002};
         try {
             System.out.println("Prepare Evol Release " + getIndexGeneration());
             next = getCandidate();
