@@ -15,7 +15,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="splitPane" alignment="0" pref="428" max="32767" attributes="0"/>
+              <Component id="splitPane" alignment="0" pref="426" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -66,7 +66,7 @@
                     </DimensionLayout>
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="stepsScrollPane" alignment="0" pref="228" max="32767" attributes="0"/>
+                          <Component id="stepsScrollPane" alignment="0" pref="390" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                   </Layout>
@@ -268,10 +268,12 @@
                                                       <Component id="btnPreview" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace max="-2" attributes="0"/>
                                                       <Component id="btnSimulationRun" min="-2" max="-2" attributes="0"/>
+                                                      <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                                                      <Component id="jButton1" min="-2" pref="104" max="-2" attributes="0"/>
                                                   </Group>
                                                   <Component id="ckBoxDrawGrid" alignment="0" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <EmptySpace pref="188" max="32767" attributes="0"/>
+                                              <EmptySpace pref="64" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -279,13 +281,14 @@
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="btnSimulationRun" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="btnPreview" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                                  <Component id="jButton1" alignment="0" max="32767" attributes="1"/>
+                                                  <Component id="btnSimulationRun" alignment="0" max="32767" attributes="1"/>
+                                                  <Component id="btnPreview" alignment="0" max="32767" attributes="1"/>
                                               </Group>
                                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Component id="ckBoxDrawGrid" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="32767" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -320,6 +323,15 @@
                                       </Properties>
                                       <Events>
                                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ckBoxDrawGridActionPerformed"/>
+                                      </Events>
+                                    </Component>
+                                    <Component class="javax.swing.JButton" name="jButton1">
+                                      <Properties>
+                                        <Property name="text" type="java.lang.String" resourceKey="jButton1.text"/>
+                                        <Property name="name" type="java.lang.String" value="jButton1" noResource="true"/>
+                                      </Properties>
+                                      <Events>
+                                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
                                       </Events>
                                     </Component>
                                   </SubComponents>
@@ -608,7 +620,7 @@
                                                               </Group>
                                                           </Group>
                                                       </Group>
-                                                      <EmptySpace pref="84" max="32767" attributes="0"/>
+                                                      <EmptySpace pref="74" max="32767" attributes="0"/>
                                                   </Group>
                                               </Group>
                                             </DimensionLayout>
@@ -1121,7 +1133,7 @@
                     </DimensionLayout>
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="loggerScrollPane" alignment="0" pref="186" max="32767" attributes="0"/>
+                          <Component id="loggerScrollPane" alignment="0" pref="22" max="32767" attributes="0"/>
                       </Group>
                     </DimensionLayout>
                   </Layout>
@@ -1157,7 +1169,7 @@
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jScrollPane3" alignment="1" pref="424" max="32767" attributes="0"/>
+                      <Component id="jScrollPane3" alignment="1" pref="422" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>

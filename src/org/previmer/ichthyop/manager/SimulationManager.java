@@ -66,6 +66,8 @@ public class SimulationManager {
      */
     private String id;
     private String firstId = null;
+    
+    private int start_again = 0;
     /**
      * The date format used for generating the id of the simulation
      */
@@ -468,5 +470,19 @@ public class SimulationManager {
 
     public TimeManager getTimeManager() {
         return TimeManager.getInstance();
+    }
+
+    /**
+     * @return the start_again
+     */
+    public int getStart_again() {
+        return start_again;
+    }
+
+    /**
+     * @param start_again the start_again to set
+     */
+    public void setStart_again(int start_again) {
+        this.start_again = start_again;
     }
 }

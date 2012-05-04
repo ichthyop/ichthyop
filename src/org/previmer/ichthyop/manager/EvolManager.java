@@ -20,6 +20,7 @@ import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -137,7 +138,13 @@ public class EvolManager extends AbstractManager implements SetupListener {
             cfgEvolToCfgIchthyop();
         } else {
             try {
-                prepareEvolRelease();
+                if (getSimulationManager().getStart_again() == 0) {
+                    prepareEvolRelease();
+                }
+                else{
+                    prepareRestartRelease();
+                    getSimulationManager().setStart_again(0);
+                }
             } catch (ParseException ex) {
                 Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -323,7 +330,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
          * FileOutputStream(Mycfg.getFile())); } catch (IOException ex) {
          * Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null,
          * ex);
-            }
+        }
          */
 
         if (!Mycfg.containsBlock(BlockType.RELEASE, "release.zone")) {
@@ -499,6 +506,39 @@ public class EvolManager extends AbstractManager implements SetupListener {
     // retourne le tableau des candidats à la reproduction avec leurs caractéristiques
     public double[][] getCandidate() throws IOException, InvalidRangeException {
         String File = getSimulationManager().getOutputManager().getFileLocation();
+        System.out.println("dans getCandidate(), getFileLocation()= " + File);
+        NetcdfFile ncIn = NetcdfFile.open(File);
+        ArrayDouble.D1 timeArr = null;
+        try {
+            timeArr = (ArrayDouble.D1) ncIn.findVariable("time").read();
+        } catch (IOException ex) {
+            Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        int length = timeArr.getShape()[0];     // récupérer t_end
+        int[] origin = new int[]{length - 1, 0};
+        Dimension drifter = ncIn.getDimensions().get(1);
+        int[] size = new int[]{1, drifter.getLength()};
+
+        Array arrMortality = readMortality(ncIn, origin, size);
+        List<Integer> mortalityList = findIndexAlive(arrMortality);
+        Array arrRecruitment = readRecruitment(ncIn, origin, size);
+        List<Integer> recruitedList = findIndexRecruitment(arrRecruitment);
+        //List<Integer> aliveRecruitedList = indexAliveRecruited(mortalityList, recruitedList);
+        System.out.println("=============>>>>>>>>>> Combien d'individus recrutes ? " + recruitedList.size());
+
+        double[][] candidats = null;
+        if (!recruitedList.isEmpty()) {
+            candidats = readWhenRecruited(ncIn, recruitedList, length);
+        }
+        ncIn.close();
+        return candidats;
+
+    }
+
+    /*
+     * find the candidates of the last completed file, that's why it's an argument for the function
+     */
+    public double[][] getCandidateRestart(String File) throws IOException, InvalidRangeException {
         System.out.println("dans getCandidate(), getFileLocation()= " + File);
         NetcdfFile ncIn = NetcdfFile.open(File);
         ArrayDouble.D1 timeArr = null;
@@ -785,7 +825,7 @@ public class EvolManager extends AbstractManager implements SetupListener {
          * **************************************************************/
         
         /****************************************************************
-         test Pérou
+        test Pérou
         int[] yearRelease = {1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999};
          * **************************************************************/
         
@@ -794,6 +834,101 @@ public class EvolManager extends AbstractManager implements SetupListener {
         try {
             System.out.println("Prepare Evol Release " + getIndexGeneration());
             next = getCandidate();
+        } catch (IOException ex) {
+            Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (next == null) {
+            getLogger().log(Level.INFO, "Extinction of the specie in the generation: {0}", getIndexGeneration());
+        }
+        int nbParticles = getSimulationManager().getReleaseManager().getNbParticles();
+        //System.out.println("--------------------------  nbParticles: " + nbParticles);
+        List<Integer> newList = selectIndexParents(nbParticles, next);
+        String timeMargin = getSimulationManager().getParameterManager().getParameter(BlockType.EVOL, "evol.strict", "margin_time");
+        long releaseMargin = getSimulationManager().getTimeManager().day2seconds(timeMargin);
+        String locationMargin = getSimulationManager().getParameterManager().getParameter(BlockType.EVOL, "evol.strict", "margin_loc");
+        //String locationMargin = "0";
+        String bathyMargin = getSimulationManager().getParameterManager().getParameter(BlockType.EVOL, "evol.strict", "margin_bat");
+        //String bathyMargin= "0";
+        double[][] nouveaux = createArrayNewParticles(next, newList, releaseMargin, Float.valueOf(locationMargin), Float.valueOf(bathyMargin));
+        if (nouveaux == null) {
+            System.out.println("Aucune nouvelle particule");
+        }
+        Random random = new Random();
+        int rank = random.nextInt(yearRelease.length);
+        try {
+            createReleaseNextGeneration(next, nouveaux, yearRelease[rank]);
+        } catch (IOException ex) {
+            Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        /*
+         * Delete output file (except every 10 generations)
+         */
+        if (((getIndexGeneration() - 1) % 2) != 0) {
+            String outputFile = getSimulationManager().getOutputManager().getFileLocation();
+            new File(outputFile).delete();
+        }
+    }
+
+    /*
+     * I'm searching the last completed netcdf file in the output folder
+     * after that I update the indexGeneration to restart the simulation where it stopped
+     * and I return the name of the concerned file to lanch find candidate function
+     */
+    private String findLastIndexGeneration() {
+        String fileName = getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "app.output", "output_path");
+        File directory = new File(fileName);
+        String[] files = null;
+        int n = 0, m = 0;
+        String lastCompletedFile = "";
+        String f = "";
+        String generation = "";
+
+        if (directory.isDirectory()) {
+            files = directory.list();
+        }
+
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].endsWith(".nc") == true) {
+                f = files[i];
+                generation = (String) f.subSequence(f.indexOf("G"), f.indexOf(".nc"));
+                System.out.println("**** " + generation);
+                m = Integer.valueOf(generation.substring(1));
+                if (m > n) {
+                    n = m;
+                    lastCompletedFile = files[i];
+                }
+            }
+        }
+        EvolManager.setIndexGeneration(n);
+        return fileName.concat(lastCompletedFile);
+
+    }
+
+    /*
+     *  I prepare the release of the next generation where it stopped before.
+     * So I use findLastIndexGeneration() to update the indexGeneration, and to get back the name
+     * of the last completed ncfile
+     * After that I launch the function to search candidates getCandidateRestart(fileLastGeneration)
+     */
+    public void prepareRestartRelease() throws ParseException {
+        double[][] next = null;
+        /*****************************************************************
+        //test Canary
+        //int[] yearRelease = {2000, 2001, 2002};
+         * **************************************************************/
+        /****************************************************************
+        test Pérou
+        int[] yearRelease = {1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999};
+         * **************************************************************/
+        /*test malabar*/
+        int[] yearRelease = {1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002};
+        try {
+            String fileLastGeneration = findLastIndexGeneration();
+            System.out.println("Prepare Evol Release " + getIndexGeneration());
+            next = getCandidateRestart(fileLastGeneration);
         } catch (IOException ex) {
             Logger.getLogger(EvolManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {

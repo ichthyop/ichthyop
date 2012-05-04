@@ -1591,6 +1591,7 @@ public class IchthyopView extends FrameView
         btnPreview = new javax.swing.JToggleButton();
         btnSimulationRun = new javax.swing.JButton();
         ckBoxDrawGrid = new javax.swing.JCheckBox();
+        jButton1 = new javax.swing.JButton();
         taskPaneMapping = new org.jdesktop.swingx.JXTaskPane();
         pnlMapping = new javax.swing.JPanel();
         btnMapping = new javax.swing.JButton();
@@ -1706,8 +1707,8 @@ public class IchthyopView extends FrameView
 
         taskPaneConfiguration.setAnimated(false);
         taskPaneConfiguration.setIcon(resourceMap.getIcon("step.Configuration.icon")); // NOI18N
-        taskPaneConfiguration.setTitle(resourceMap.getString("step.Configuration.text")); // NOI18N
         taskPaneConfiguration.setName("taskPaneConfiguration"); // NOI18N
+        taskPaneConfiguration.setTitle(resourceMap.getString("step.Configuration.text")); // NOI18N
         taskPaneConfiguration.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 taskPaneConfigurationPropertyChange(evt);
@@ -1792,8 +1793,8 @@ public class IchthyopView extends FrameView
 
         taskPaneSimulation.setAnimated(false);
         taskPaneSimulation.setIcon(resourceMap.getIcon("step.Simulation.icon")); // NOI18N
-        taskPaneSimulation.setTitle(resourceMap.getString("step.Simulation.text")); // NOI18N
         taskPaneSimulation.setName("taskPaneSimulation"); // NOI18N
+        taskPaneSimulation.setTitle(resourceMap.getString("step.Simulation.text")); // NOI18N
         taskPaneSimulation.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 taskPaneSimulationPropertyChange(evt);
@@ -1823,6 +1824,14 @@ public class IchthyopView extends FrameView
             }
         });
 
+        jButton1.setText(resourceMap.getString("jButton1.text")); // NOI18N
+        jButton1.setName("jButton1"); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlSimulationLayout = new javax.swing.GroupLayout(pnlSimulation);
         pnlSimulation.setLayout(pnlSimulationLayout);
         pnlSimulationLayout.setHorizontalGroup(
@@ -1833,28 +1842,31 @@ public class IchthyopView extends FrameView
                     .addGroup(pnlSimulationLayout.createSequentialGroup()
                         .addComponent(btnPreview)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSimulationRun))
+                        .addComponent(btnSimulationRun)
+                        .addGap(6, 6, 6)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(ckBoxDrawGrid))
-                .addContainerGap(188, Short.MAX_VALUE))
+                .addContainerGap(64, Short.MAX_VALUE))
         );
         pnlSimulationLayout.setVerticalGroup(
             pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSimulationLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSimulationRun)
-                    .addComponent(btnPreview))
+                .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnSimulationRun, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnPreview, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(ckBoxDrawGrid)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         taskPaneSimulation.add(pnlSimulation);
 
         taskPaneMapping.setAnimated(false);
         taskPaneMapping.setIcon(resourceMap.getIcon("step.Mapping.icon")); // NOI18N
-        taskPaneMapping.setTitle(resourceMap.getString("step.Mapping.text")); // NOI18N
         taskPaneMapping.setName("taskPaneMapping"); // NOI18N
+        taskPaneMapping.setTitle(resourceMap.getString("step.Mapping.text")); // NOI18N
         taskPaneMapping.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 taskPaneMappingPropertyChange(evt);
@@ -2026,7 +2038,7 @@ public class IchthyopView extends FrameView
                             .addComponent(btnColorMed)
                             .addComponent(btnColorMax)
                             .addComponent(btnColorMin))))
-                .addContainerGap(84, Short.MAX_VALUE))
+                .addContainerGap(74, Short.MAX_VALUE))
         );
         pnlColorBarLayout.setVerticalGroup(
             pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2158,8 +2170,8 @@ public class IchthyopView extends FrameView
 
         taskPaneAnimation.setAnimated(false);
         taskPaneAnimation.setIcon(resourceMap.getIcon("step.Animation.icon")); // NOI18N
-        taskPaneAnimation.setTitle(resourceMap.getString("step.Animation.text")); // NOI18N
         taskPaneAnimation.setName("taskPaneAnimation"); // NOI18N
+        taskPaneAnimation.setTitle(resourceMap.getString("step.Animation.text")); // NOI18N
         taskPaneAnimation.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 taskPaneAnimationPropertyChange(evt);
@@ -2380,7 +2392,7 @@ public class IchthyopView extends FrameView
         );
         titledPanelStepsLayout.setVerticalGroup(
             titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+            .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
         );
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
@@ -2398,7 +2410,7 @@ public class IchthyopView extends FrameView
         );
         titledPanelLoggerLayout.setVerticalGroup(
             titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
+            .addComponent(loggerScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 22, Short.MAX_VALUE)
         );
 
         leftSplitPane.setRightComponent(titledPanelLogger);
@@ -2435,7 +2447,7 @@ public class IchthyopView extends FrameView
         );
         titledPanelMainLayout.setVerticalGroup(
             titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 422, Short.MAX_VALUE)
         );
 
         splitPane.setRightComponent(titledPanelMain);
@@ -2448,7 +2460,7 @@ public class IchthyopView extends FrameView
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+            .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar"); // NOI18N
@@ -2804,6 +2816,14 @@ public class IchthyopView extends FrameView
         // TODO add your handling code here:
         getSimulationUI().setGridVisible(ckBoxDrawGrid.isSelected());
     }//GEN-LAST:event_ckBoxDrawGridActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        //System.out.println("bouton ajoute");
+        //SimulationManager.getInstance().getEvolManager().findLastIndexGeneration();
+        getSimulationManager().setStart_again(1);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu animationMenu;
     private javax.swing.JSpinner animationSpeed;
@@ -2847,6 +2867,7 @@ public class IchthyopView extends FrameView
     private javax.swing.JMenuItem exportToKMZMenuItem;
     private org.previmer.ichthyop.ui.GradientPanel gradientPanel;
     private org.jdesktop.swingx.JXHyperlink hyperLinkLogo;
+    private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator13;
