@@ -97,14 +97,8 @@ public class IchthyopApp extends SingleFrameApplication {
             String firstId = null;
             if (args.length == 3) {
                 firstId = args[2];
-            }
-
-            if (args.length > 3) {
                 SimulationManager.getInstance().setStart_again(1);
-                firstId = args[2];
             }
-
-
             new Thread(new IchthyopEvolBatch(args[0], args[1], firstId)).start();
         } else if (args.length > 0) {
             new Thread(new IchthyopBatch(args[0])).start();

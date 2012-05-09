@@ -44,6 +44,9 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     private void instantiateReleaseProcess() throws Exception {
 
         XBlock releaseBlock = findActiveReleaseProcess();
+        if (null == releaseBlock) {
+            return;
+        }
         String className = getParameter(releaseBlock.getKey(), "class_name");
         if (releaseBlock != null) {
             try {
@@ -76,7 +79,8 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
             }
         }
         if (list.isEmpty()) {
-            throw new NullPointerException("Could not find any enabled " + BlockType.RELEASE.toString() + " block in the configuration file.");
+            //throw new NullPointerException("Could not find any enabled " + BlockType.RELEASE.toString() + " block in the configuration file.");
+            return null;
         }
         if (list.size() > 1) {
             throw new IOException("Found several " + BlockType.RELEASE.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");

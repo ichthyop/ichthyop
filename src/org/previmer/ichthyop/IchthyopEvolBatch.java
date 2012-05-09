@@ -29,6 +29,10 @@ public class IchthyopEvolBatch extends SimulationManagerAccessor implements Runn
             restart = true;
         }
         this.firstId = firstId;
+        System.out.println("Restart mode is " + (restart ? "ON" : "OFF"));
+        System.out.println("pathname: " + pathname);
+        System.out.println("startIndexGeneration: " + startIndexGeneration);
+        System.out.println("firstId: " + firstId);
     }
 
     public void run() {
@@ -42,10 +46,10 @@ public class IchthyopEvolBatch extends SimulationManagerAccessor implements Runn
                 /* */
                 getLogger().info("===== Simulation started =====");
                 getSimulationManager().resetId();
-                restart = false;
                 if (restart) {
                     getSimulationManager().setFirstId(this.firstId);
                     getSimulationManager().getEvolManager().setIndexGeneration(this.startIndexGeneration);
+                    getSimulationManager().getEvolManager().cfgEvolToCfgIchthyop();
                     getSimulationManager().setup();
                     restart = false;
                 }
