@@ -302,6 +302,7 @@ public class NemoDataset extends AbstractDataset {
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
+                    index.set(k, j, i);
                     field[k][j][i] = array.getDouble(index);
                 }
             }
