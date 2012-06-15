@@ -191,14 +191,14 @@ public class NemoDataset extends AbstractDataset {
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
         NetcdfFile nc;
-        nc = NetcdfDataset.openFile(listTFiles.get(0), null);
+        nc = NetcdfDataset.openDataset(listTFiles.get(0));
         //System.out.println("read lon lat mask " + nc.getLocation());
         //fichier *byte*mask*
         lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
                 copyToNDJavaArray();
         latRho = (float[][]) nc.findVariable(strLat).read(origin, size).
                 copyToNDJavaArray();
-        nc = NetcdfDataset.openFile(file_mask, null);
+        nc = NetcdfDataset.openDataset(file_mask);
         maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
                     0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
@@ -210,7 +210,7 @@ public class NemoDataset extends AbstractDataset {
         copyToNDJavaArray();*/
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openFile(file_zgr, null);
+            nc = NetcdfDataset.openDataset(file_zgr);
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
@@ -230,7 +230,7 @@ public class NemoDataset extends AbstractDataset {
         
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openFile(file_hgr, null);
+            nc = NetcdfDataset.openDataset(file_hgr);
         }
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
@@ -737,7 +737,7 @@ public class NemoDataset extends AbstractDataset {
         NetcdfFile nc;
         Array arrLon, arrLat;
         try {
-            nc = NetcdfDataset.openFile(listTFiles.get(0), null);
+            nc = NetcdfDataset.openDataset(listTFiles.get(0));
             arrLon = nc.findVariable(strLon).read();
             arrLat = nc.findVariable(strLat).read();
             if (arrLon.getElementType() == float.class) {
@@ -867,7 +867,7 @@ public class NemoDataset extends AbstractDataset {
     private void getDimNC() throws IOException {
 
         NetcdfFile nc = new NetcdfDataset();
-        nc = NetcdfDataset.openFile(file_mask, null);
+        nc = NetcdfDataset.openDataset(file_mask);
         try {
             nx = nc.findDimension(strXDim).getLength();
         } catch (Exception ex) {
@@ -1585,16 +1585,16 @@ public class NemoDataset extends AbstractDataset {
         if (ncU != null) {
             ncU.close();
         }
-        ncU = NetcdfDataset.openFile(listUFiles.get(index), null);
+        ncU = NetcdfDataset.openDataset(listUFiles.get(index));
         if (ncV != null) {
             ncV.close();
         }
-        ncV = NetcdfDataset.openFile(listVFiles.get(index), null);
-        //ncW = NetcdfDataset.openFile(listWFiles.get(index), null);
+        ncV = NetcdfDataset.openDataset(listVFiles.get(index));
+        //ncW = NetcdfDataset.openDataset(listWFiles.get(index), null);
         if (ncT != null) {
             ncT.close();
         }
-        ncT = NetcdfDataset.openFile(listTFiles.get(index), null);
+        ncT = NetcdfDataset.openDataset(listTFiles.get(index));
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
     }
 
@@ -1651,7 +1651,7 @@ public class NemoDataset extends AbstractDataset {
 
         try {
             filename = listUFiles.get(index);
-            nc = NetcdfDataset.openFile(filename, null);
+            nc = NetcdfDataset.openDataset(filename);
             timeArr = nc.findVariable(strTime).read();
             time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
             time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
@@ -1696,7 +1696,7 @@ public class NemoDataset extends AbstractDataset {
         try {
             for (int i = 0; i < 2; i++) {
                 filename = listUFiles.get(index + i);
-                nc = NetcdfDataset.openFile(filename, null);
+                nc = NetcdfDataset.openDataset(filename);
                 timeArr = nc.findVariable(strTime).read();
                 time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
                         0)));
