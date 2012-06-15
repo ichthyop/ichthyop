@@ -4,17 +4,17 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
-import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
+import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
+import org.previmer.ichthyop.util.MetaFilenameFilter;
+import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
@@ -213,12 +213,19 @@ public class NemoDataset extends AbstractDataset {
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
-        gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
-                    0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().
-                copyTo1DJavaArray();
-        gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
-                    0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
-                copyTo1DJavaArray();
+        
+        Variable ncvar = nc.findVariable(str_gdepT);
+        if (ncvar.getShape().length > 2) {
+            gdepT = (float[]) ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().copyTo1DJavaArray();
+        } else {
+            gdepT = (float[]) ncvar.read(new int[]{0, 0}, new int[]{1, nz}).flip(1).reduce().copyTo1DJavaArray();
+        }
+        ncvar = nc.findVariable(str_gdepW);
+        if (ncvar.getShape().length > 2) {
+            gdepW = (float[]) ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().copyTo1DJavaArray();
+        } else {
+            gdepW = (float[]) ncvar.read(new int[]{0, 0}, new int[]{1, nz + 1}).flip(1).reduce().copyTo1DJavaArray();
+        }
         e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo,
                     ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
