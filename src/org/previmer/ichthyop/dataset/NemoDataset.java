@@ -214,10 +214,10 @@ public class NemoDataset extends AbstractDataset {
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
         gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
-                    0, jpo, ipo}, new int[]{1, nz, 1, 1}).flip(1).reduce().
+                    0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().
                 copyTo1DJavaArray();
         gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
+                    0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
                 copyTo1DJavaArray();
         e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo,
                     ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
