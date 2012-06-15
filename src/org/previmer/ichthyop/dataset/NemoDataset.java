@@ -17,6 +17,7 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
@@ -103,7 +104,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    static float[] gdepT;
+    static double[] gdepT;
     /**
      * Depth at w point at current time.
      * Takes account of free surface elevation.
@@ -117,7 +118,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    static float[] gdepW;
+    static double[] gdepW;
     /**
      * Geographical boundary of the domain
      */
@@ -165,7 +166,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      *
      */
-    static float[][][] e3t, e3u, e3v;
+    static double[][][] e3t, e3u, e3v;
     static double[][] e1t, e2t, e1v, e2u;
     static String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     static String strueiv, strveiv, strweiv;
@@ -213,47 +214,156 @@ public class NemoDataset extends AbstractDataset {
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
+        read_gdep_fields(nc);
         
-        Variable ncvar = nc.findVariable(str_gdepT);
-        if (ncvar.getShape().length > 2) {
-            gdepT = (float[]) ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().copyTo1DJavaArray();
+        e3t = read_e3_field(nc, stre3t);
+        if (stre3u.matches(stre3t) || (null == nc.findVariable(stre3u))) {
+            e3u = compute_e3u(e3t);
         } else {
-            gdepT = (float[]) ncvar.read(new int[]{0, 0}, new int[]{1, nz}).flip(1).reduce().copyTo1DJavaArray();
+            e3u = read_e3_field(nc, stre3u);
         }
-        ncvar = nc.findVariable(str_gdepW);
-        if (ncvar.getShape().length > 2) {
-            gdepW = (float[]) ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().copyTo1DJavaArray();
+        if (stre3v.matches(stre3t) || (null == nc.findVariable(stre3v))) {
+            e3v = compute_e3v(e3t);
         } else {
-            gdepW = (float[]) ncvar.read(new int[]{0, 0}, new int[]{1, nz + 1}).flip(1).reduce().copyTo1DJavaArray();
+            e3v = read_e3_field(nc, stre3v);
         }
-        e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo,
-                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
-        e3u = (float[][][]) nc.findVariable(stre3u).read(new int[]{0, 0, jpo,
-                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
-        e3v = (float[][][]) nc.findVariable(stre3v).read(new int[]{0, 0, jpo,
-                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
+        
         if (!isGridInfoInOneFile) {
             nc.close();
             nc = NetcdfDataset.openFile(file_hgr, null);
         }
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
-        e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-                copyToNDJavaArray();
-        e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-                copyToNDJavaArray();
-        e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-                copyToNDJavaArray();
-        e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-                copyToNDJavaArray();
+        e1t = read_e1_e2_field(nc, stre1t);
+        e2t = read_e1_e2_field(nc, stre2t);
+        e1v = read_e1_e2_field(nc, stre1v);
+        e2u = read_e1_e2_field(nc, stre2u);
         nc.close();
+    }
+    
+    private double[][][] compute_e3u(double[][][] e3t) {
+
+        double[][][] e3u_calc = new double[nz][ny][nx];
+
+        for (int k = 0; k < nz; k++) {
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx - 1; i++) {
+                    /*
+                     * In NEMO domzgr.F90
+                     * e3u (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji+1,jj,jk))
+                     */
+                    //e3u_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j][i + 1]);
+                    e3u_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
+                }
+                e3u_calc[k][j][nx - 1] = e3t[k][j][nx - 1];
+            }
+        }
+        return e3u_calc;
+    }
+
+    private double[][][] compute_e3v(double[][][] e3t) {
+
+        double[][][] e3v_calc = new double[nz][ny][nx];
+
+        for (int k = 0; k < nz; k++) {
+            for (int i = 0; i < nx; i++) {
+                for (int j = 0; j < ny - 1; j++) {
+                    /*
+                     * In Nemo domzgr.F90
+                     * e3v (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji,jj+1,jk))
+                     */
+                    //e3v_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j + 1][i]);
+                    e3v_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
+                }
+                e3v_calc[k][ny - 1][i] = e3t[k][ny - 1][i];
+            }
+        }
+        return e3v_calc;
+    }
+    
+    private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
+        
+        Variable ncvar;
+        Index index;
+        Array array;
+        
+        ncvar = nc.findVariable(stre3t);
+        switch (ncvar.getShape().length) {
+            case 4:
+                array = ncvar.read(new int[]{0, 0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce();
+                break;
+            case 3:
+                array = ncvar.read(new int[]{0, jpo, ipo}, new int[]{nz, ny, nx}).flip(0).reduce();
+            default:
+                throw new UnsupportedOperationException("Field " + varname + " cannot be read because of undexpected dimensions.");
+        }
+        index = array.getIndex();
+        double[][][] field = new double[nz][ny][nx];
+        for (int k = 0; k < nz; k++) {
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    field[k][j][i] = array.getDouble(index);
+                }
+            }
+        }
+        return field;
+    }
+    
+    private void read_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
+        
+        Variable ncvar;
+        Index index;
+        Array array;
+        /*
+         * Read gdept
+         */
+        ncvar = nc.findVariable(str_gdepT);
+        if (ncvar.getShape().length > 2) {
+            array = ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce();
+        } else {
+            array = ncvar.read(new int[]{0, 0}, new int[]{1, nz}).flip(1).reduce();
+        }
+        index = array.getIndex();
+        gdepT = new double[nz ];
+        for (int k = 0; k < nz; k++) {
+            index.set(k);
+            gdepT[k] = array.getDouble(index);
+        }
+        /*
+         * Read gdepw
+         */
+        ncvar = nc.findVariable(str_gdepW);
+        if (ncvar.getShape().length > 2) {
+            array = ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce();
+        } else {
+            array = ncvar.read(new int[]{0, 0}, new int[]{1, nz + 1}).flip(1).reduce();
+        }
+        index = array.getIndex();
+        gdepW = new double[nz + 1];
+        for (int k = 0; k < nz + 1; k++) {
+            index.set(k);
+            gdepW[k] = array.getDouble(index);
+        }
+    }
+    
+    private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
+
+        Variable ncvar = nc.findVariable(varname);
+        Array array;
+        if (ncvar.getShape().length > 3) {
+            array = ncvar.read(new int[]{0, 0, jpo, ipo}, new int[]{1, 1, ny, nx}).reduce();
+        } else {
+            array = ncvar.read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
+        }
+        double[][] field = new double[ny][nx];
+        Index index = array.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j, i);
+                field[j][i] = array.getDouble(index);
+            }
+        }
+        return field;
     }
 
     /**
