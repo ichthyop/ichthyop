@@ -26,7 +26,8 @@ public enum ParticleMortality {
     DEAD_COLD(1),
     OUT_OF_DOMAIN(2),
     BEACHED(4),
-    OLD(3);
+    OLD(3),
+    ERROR(5);
     
     private int code = 0;
 
