@@ -110,4 +110,34 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         getSimulationManager().getActionManager().executeActions(this);
         getSimulationManager().getActionManager().executeSysActions(this);
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("Particle ");
+        str.append(getIndex());
+        str.append('\n');
+        str.append("  lat: ");
+        str.append((float) getLat());
+        str.append(" lon: ");
+        str.append((float) getLon());
+        if (is3D()) {
+            str.append(" depth: ");
+            str.append((float) getDepth());
+        }
+        str.append('\n');
+        str.append("  x: ");
+        str.append((float) getX());
+        str.append(" y: ");
+        str.append((float) getY());
+        if (is3D()) {
+            str.append(" z: ");
+            str.append((float) getZ());
+        }
+        str.append('\n');
+        str.append("  status: ");
+        str.append(getDeathCause().toString());
+        str.append('\n');
+        return str.toString();
+    }
 }
