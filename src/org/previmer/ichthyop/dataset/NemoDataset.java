@@ -18,6 +18,7 @@ import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
@@ -449,10 +450,11 @@ public class NemoDataset extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    x = 0.d;
-                    x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1]
-                            + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                    du += x * co / e2u[j + jj][i + ii - 1];
+                    if (!Float.isNaN(u_tp0[k + kk][j + jj][i + ii - 1])) {
+                        x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1]
+                                + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                        du += x * co / e2u[j + jj][i + ii - 1];
+                    }
                 }
             }
         }
@@ -488,7 +490,6 @@ public class NemoDataset extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (.5d - (double) kk - dz));
                     CO += co;
-                    x = 0.d;
                     x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii]
                             + x_euler * w_tp1[k + kk][j + jj][i + ii];
                     dw += 2.d * x * co
@@ -573,10 +574,11 @@ public class NemoDataset extends AbstractDataset {
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    x = 0.d;
-                    x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii]
-                            + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                    dv += x * co / e1v[j + jj - 1][i + ii];
+                    if (!Float.isNaN(v_tp0[k + kk][j + jj - 1][i + ii])) {
+                        x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii]
+                                + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                        dv += x * co / e1v[j + jj - 1][i + ii];
+                    }
                 }
             }
         }
@@ -635,16 +637,18 @@ public class NemoDataset extends AbstractDataset {
         for (int k = nz; k-- > 0;) {
             for (int i = 0; i < nx - 1; i++) {
                 for (int j = 0; j < ny; j++) {
-//                    Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i]
-//                            * Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
-                    Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i] * e3u[k][j][i];
+//                    Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i] * Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
+                    Huon[k][j][i] = Float.isNaN(u_tp1[k][j][i])
+                            ? 0.f
+                            : u_tp1[k][j][i] * e2u[j][i] * e3u[k][j][i];
                 }
             }
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny - 1; j++) {
-//                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i]
-//                            * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * e3v[k][j][i];
+//                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
+                    Hvom[k][j][i] = Float.isNaN(v_tp1[k][j][i])
+                            ? 0.f
+                            : v_tp1[k][j][i] * e1v[j][i] * e3v[k][j][i];
                 }
             }
         }
@@ -705,7 +709,9 @@ public class NemoDataset extends AbstractDataset {
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = (float) (w_double[k][j][i] / (e1t[j][i] * e2t[j][i]));
+                    w[k][j][i] = (Double.isNaN(e1t[j][i]) || Double.isNaN(e2t[j][i]))
+                            ? 0.f
+                            : (float) (w_double[k][j][i] / (e1t[j][i] * e2t[j][i]));
                 }
             }
         }
