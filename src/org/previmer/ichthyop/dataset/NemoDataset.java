@@ -450,7 +450,7 @@ public class NemoDataset extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!Float.isNaN(u_tp0[k + kk][j + jj][i + ii - 1])) {
+                    if (!(Float.isNaN(u_tp0[k + kk][j + jj][i + ii - 1]))) {
                         x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1]
                                 + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                         du += x * co / e2u[j + jj][i + ii - 1];
@@ -709,9 +709,9 @@ public class NemoDataset extends AbstractDataset {
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = (Double.isNaN(e1t[j][i]) || Double.isNaN(e2t[j][i]))
-                            ? 0.f
-                            : (float) (w_double[k][j][i] / (e1t[j][i] * e2t[j][i]));
+                    w[k][j][i] = isInWater(i, j, k)
+                            ? (float) (w_double[k][j][i] / (e1t[j][i] * e2t[j][i]))
+                            : 0.f;
                 }
             }
         }

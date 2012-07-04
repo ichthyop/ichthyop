@@ -199,7 +199,7 @@ public abstract class MarsCommon extends AbstractDataset {
         /* Compute mask */
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                maskRho[j][i] = (hRho[j][i] < 0)
+                maskRho[j][i] = (Double.isNaN(hRho[j][i]) || (hRho[j][i] < 0))
                         ? (byte) 0
                         : (byte) 1;
             }
