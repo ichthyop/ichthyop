@@ -19,6 +19,7 @@ package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.arch.IBasicParticle;
 import java.util.Iterator;
+import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
@@ -43,10 +44,21 @@ public class LengthTracker extends AbstractTracker {
     public void track() {
         IBasicParticle particle;
         Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        boolean isLinearGrowth=false;
+        if (getSimulationManager().getActionManager().isEnabled("action.growth")){
+                isLinearGrowth=true;
+            }
         while (iter.hasNext()) {
             particle = iter.next();
-            GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
-            getArray().set(0, particle.getIndex(), (float) gParticle.getLength());
+            if (isLinearGrowth){
+                GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
+                getArray().set(0, particle.getIndex(), (float) gParticle.getLength());
+            }
+            else {
+                DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
+                getArray().set(0, particle.getIndex(), (float) gParticle.getLength());
+            }
+
         }
     }
 
