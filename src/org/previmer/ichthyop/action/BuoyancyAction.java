@@ -4,7 +4,16 @@
  */
 package org.previmer.ichthyop.action;
 
+import au.com.bytecode.opencsv.CSVReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
 
@@ -49,7 +58,7 @@ public class BuoyancyAction extends AbstractAction {
     /**
      * Egg density [g/cm3], a key parameter to calculate the egg buoyancy.
      */
-    private static float particleDensity;
+    private float particleDensity;
     /**
      * Sea water density at particle location.
      */
@@ -57,7 +66,11 @@ public class BuoyancyAction extends AbstractAction {
     private String salinity_field;
     private String temperature_field;
     private boolean isGrowth;
+    private float[] particleDensities;
+    private float[] ages;
+    private BuoyancyModel buoyancyModel;
 
+    @Override
     public void loadParameters() throws Exception {
         particleDensity = Float.valueOf(getParameter("particle_density"));
         salinity_field = getParameter("salinity_field");
@@ -73,11 +86,55 @@ public class BuoyancyAction extends AbstractAction {
         }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
+        buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
+        /*
+         * Check whether there is a density CSV file
+         */
+        String density_file;
+        try {
+            density_file = getParameter("density_file");
+        } catch (Exception ex) {
+            density_file = null;
+        }
+        if (null != density_file && !density_file.isEmpty()) {
+            String pathname = IOTools.resolveFile(density_file);
+            File f = new File(pathname);
+            if (!f.isFile()) {
+                throw new FileNotFoundException("Density file " + pathname + " not found.");
+            }
+            if (!f.canRead()) {
+                throw new IOException("Density file " + pathname + " cannot be read.");
+            }
+            loadDensities(pathname);
+            buoyancyModel = BuoyancyModel.DENSITY_AS_AGE_FUNCTION;
+        }
     }
 
+    private void loadDensities(String csvFile) {
+        try {
+            // open densities csv file
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ',');
+            List<String[]> lines = reader.readAll();
+
+            // init arrays
+            ages = new float[lines.size() - 1];
+            particleDensities = new float[ages.length];
+
+            // read ages (hours converted to seconds) and densities
+            for (int i = 0; i < ages.length; i++) {
+                String[] line = lines.get(i + 1);
+                ages[i] = Float.valueOf(line[0]) * 3600.f;
+                particleDensities[i] = Float.valueOf(line[1]);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(BuoyancyAction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
     public void execute(IBasicParticle particle) {
 
-        boolean canApplyBuoyancy = false;
+        boolean canApplyBuoyancy;
         if (isGrowth) {
             canApplyBuoyancy = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
         } else {
@@ -85,6 +142,20 @@ public class BuoyancyAction extends AbstractAction {
         }
 
         if (canApplyBuoyancy) {
+            /*
+             * For case of particle density varying with particle age, we
+             * determine what is current density for the particle
+             */
+            if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
+                float age = particle.getAge();
+                for (int i = 0; i < ages.length; i++) {
+                    if (ages[i] > age) {
+                        particleDensity = particleDensities[Math.max(i - 1, 0)];
+                        break;
+                    }
+                }
+            }
+            //System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: " + particleDensity);
             double time = getSimulationManager().getTimeManager().getTime();
             double dt = getSimulationManager().getTimeManager().get_dt();
             double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
@@ -95,9 +166,8 @@ public class BuoyancyAction extends AbstractAction {
     }
 
     /**
-     * Given the density of the water, the salinity and the temperature,
-     * the function returns the vertical movement due to the bouyancy,
-     * in meter.
+     * Given the density of the water, the salinity and the temperature, the
+     * function returns the vertical movement due to the bouyancy, in meter.
      * <pre>
      * dw = vertical velocity [cm/second] due to buoyancy
      * g = acceleration of gravity [cm.s-2]
@@ -118,14 +188,14 @@ public class BuoyancyAction extends AbstractAction {
     private double move(double sal, double tp, double dt) {
 
         /* Methodology:
-        waterDensity = waterDensity(salt, temperature);
-        deltaDensity = (waterDensity - eggDensity);
-        quotient = (2 * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS);
-        logn = Math.log(quotient);
-        buoyancyEgg = (g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f
-        MOLECULAR_VISCOSITY * waterDensity) * (logn + 0.5f) * deltaDensity); //cms-1
-        buoyancyMeters = (buoyancyEgg / 100.0f); //m.s-1
-        return (buoyancyMeters * dt_sec); //meter
+         waterDensity = waterDensity(salt, temperature);
+         deltaDensity = (waterDensity - eggDensity);
+         quotient = (2 * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS);
+         logn = Math.log(quotient);
+         buoyancyEgg = (g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f
+         MOLECULAR_VISCOSITY * waterDensity) * (logn + 0.5f) * deltaDensity); //cms-1
+         buoyancyMeters = (buoyancyEgg / 100.0f); //m.s-1
+         return (buoyancyMeters * dt_sec); //meter
          */
 
         waterDensity = waterDensity(sal, tp);
@@ -147,20 +217,20 @@ public class BuoyancyAction extends AbstractAction {
     public static double waterDensity(double sal, double tp) {
 
         /* Methodology
-        1.Estimating water density according with Unesco equation
-        S = waterSalinity;
-        T = waterTemperature;
-        SR = Math.sqrt(Math.abs(S));
-        2. Pure water density at atmospheric pressure
-        R1 = ( ( ( (C2 * T - C3) * T + C4) * T - C5) * T + C6) * T - C7;
-        R2 = ( ( (C8 * T - C9) * T + C10) * T - C11) * T + C12;
-        R3 = ( -C13 * T + C14) * T - C15;
-        3. International one-atmosphere equation of state of water
-        SIG = (C1 * S + R3 * SR + R2) * S + R1;
-        4. Estimating SIGMA
-        SIGMA = SIG + DR350;
-        RHO1 = 1000.0f + SIGMA;
-        waterDensity = (RHO1 / 1000.f); in [gr.cm-3]
+         1.Estimating water density according with Unesco equation
+         S = waterSalinity;
+         T = waterTemperature;
+         SR = Math.sqrt(Math.abs(S));
+         2. Pure water density at atmospheric pressure
+         R1 = ( ( ( (C2 * T - C3) * T + C4) * T - C5) * T + C6) * T - C7;
+         R2 = ( ( (C8 * T - C9) * T + C10) * T - C11) * T + C12;
+         R3 = ( -C13 * T + C14) * T - C15;
+         3. International one-atmosphere equation of state of water
+         SIG = (C1 * S + R3 * SR + R2) * S + R1;
+         4. Estimating SIGMA
+         SIGMA = SIG + DR350;
+         RHO1 = 1000.0f + SIGMA;
+         waterDensity = (RHO1 / 1000.f); in [gr.cm-3]
          */
 
         double R1, R2, R3;
@@ -173,5 +243,12 @@ public class BuoyancyAction extends AbstractAction {
                 (-C13 * tp + C14) * tp - C15;
 
         return ((1000.d + (C1 * sal + R3 * Math.sqrt(Math.abs(sal)) + R2) * sal + R1 + DR350) / 1000.d);
-    }    //---------- End of class
+    }
+
+    public enum BuoyancyModel {
+
+        CONSTANT_DENSITY,
+        DENSITY_AS_AGE_FUNCTION;
+    }
+    //---------- End of class
 }
