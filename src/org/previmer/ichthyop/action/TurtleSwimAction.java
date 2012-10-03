@@ -74,7 +74,7 @@ public class TurtleSwimAction extends AbstractAction {
                 double newLon = particle.getLon() + getdlon(particle, speed, orientation);
                 double newLat = particle.getLat() + getdlat(speed, orientation);
                 //System.out.println(getLon() + " " + newLon + " - " + getLat() + " " + newLat);
-                double[] newPos = getSimulationManager().getDataset().lonlat2xy(newLon, newLat);
+                double[] newPos = getSimulationManager().getDataset().latlon2xy(newLon, newLat);
             double[] move = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
             particle.increment(move);
             } else {
