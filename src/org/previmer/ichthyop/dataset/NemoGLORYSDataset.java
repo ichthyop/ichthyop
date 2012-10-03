@@ -25,7 +25,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class NemoSWIO12Dataset extends AbstractDataset {
+public class NemoGLORYSDataset extends AbstractDataset {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -103,9 +103,8 @@ public class NemoSWIO12Dataset extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    // modif spous
-    static float[] gdepT;
-    //static double[] gdepT;
+  // modif spous
+    static double[] gdepT;
     /**
      * Depth at w point at current time.
      * Takes account of free surface elevation.
@@ -119,9 +118,8 @@ public class NemoSWIO12Dataset extends AbstractDataset {
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    // modif spous
-    static float[] gdepW;
-    //static double[] gdepW;
+  // modif spous
+    static double[] gdepW;
     /**
      * Geographical boundary of the domain
      */
@@ -171,7 +169,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      */
     // modif spous
     // static float[][][] e3t, e3u, e3v;
-    static double[][][] e3t, e3u, e3v;
+    static double[][][]  e3t, e3u, e3v;
     static double[][] e1t, e2t, e1v, e2u;
     static String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     static String strueiv, strveiv, strweiv;
@@ -207,87 +205,62 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
                     0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
-        /*masku = (byte[][][]) nc.findVariable("umask").read(new int[]{0,
-        0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-        copyToNDJavaArray();
+        masku = (byte[][][]) nc.findVariable("umask").read(new int[]{0,
+                    0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+                copyToNDJavaArray();
         maskv = (byte[][][]) nc.findVariable("vmask").read(new int[]{0,
-        0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-        copyToNDJavaArray();*/
+                    0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+            copyToNDJavaArray();
 
-        if (!isGridInfoInOneFile) {
+            if (!isGridInfoInOneFile) {
+                nc.close();
+                nc = NetcdfDataset.openFile(file_zgr, null);
+            }
+            System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
+            //fichier *mesh*z*
+            System.out.println("read bathy gdept" + nc.getLocation());
+            gdepT = (double[]) nc.findVariable(str_gdepT).read(new int[]{0, 0}
+                       , new int[]{1, nz}).flip(1).reduce().
+                    copyTo1DJavaArray();
+            System.out.println("read bathy gdepw" + nc.getLocation());
+            gdepW = (double[]) nc.findVariable(str_gdepW).read(new int[]{0, 0}
+                       , new int[]{1, nz + 1}).flip(1).reduce().
+                    copyTo1DJavaArray();
+            System.out.println("read bathy gdept gdepw e3t 2" + nc.getLocation());
+//modif pous
+            System.out.println("lecture e3t: ");
+            e3t = (double[][][]) nc.findVariable(stre3t).read(new int[]{0, jpo,
+                        ipo}, new int[]{nz, ny, nx}).flip(0).
+                    copyToNDJavaArray();            
+             System.out.println("e3t: " + e3t[10][10][10]);
+//modif pous
+            e3u = (double[][][]) nc.findVariable(stre3u).read(new int[]{0, jpo,
+                        ipo}, new int[]{nz, ny, nx}).flip(0).
+                    copyToNDJavaArray();            
+//modif pous
+            e3v = (double[][][]) nc.findVariable(stre3v).read(new int[]{0, jpo,
+                        ipo}, new int[]{nz, ny, nx}).flip(0).
+                    copyToNDJavaArray();            
+            if (!isGridInfoInOneFile) {
+                nc.close();
+                nc = NetcdfDataset.openFile(file_hgr, null);
+            }
+            //System.out.println("read e1t e2t " + nc.getLocation());
+            // fichier *mesh*h*
+            // modif spous
+            e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0,
+                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
+                    copyToNDJavaArray();
+            e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0,
+                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
+                    copyToNDJavaArray();
+            e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0,
+                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
+                    copyToNDJavaArray();
+            e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0,
+                        jpo, ipo}, new int[]{1, ny, nx}).reduce().
+                    copyToNDJavaArray();
             nc.close();
-            nc = NetcdfDataset.openFile(file_zgr, null);
-        }
-        //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
-        //fichier *mesh*z*
-        //System.out.println("read bathy gdept" + nc.getLocation());
-        gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
-                    0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().
-                copyTo1DJavaArray();
-        //System.out.println("read bathy gdepw" + nc.getLocation());
-        gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
-                    0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
-                copyTo1DJavaArray();
-//            System.out.println("read bathy gdept" + nc.getLocation());
-//            gdepT = (float[]) nc.findVariable(str_gdepT).read(new int[]{0,
-//                        0, 0, 0}, new int[]{1, nz, 1, 1}).flip(1).reduce().
-//                    copyTo1DJavaArray();
-//            System.out.println("read bathy gdepw" + nc.getLocation());
-//            gdepW = (float[]) nc.findVariable(str_gdepW).read(new int[]{0, 0,
-//                        0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce().
-//                    copyTo1DJavaArray();
-        //System.out.println("read bathy gdept gdepw e3t 2" + nc.getLocation());
-//modif pous
-        //System.out.println("lecture e3t: ");
-//            e3t = (float[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, 0, 
-        e3t = (double[][][]) nc.findVariable(stre3t).read(new int[]{0, 0, jpo,
-                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
-        //System.out.println("e3t: " + e3t[10][10][10]);
-//modif pous
-//            e3u = (float[][][]) nc.findVariable(stre3u).read(new int[]{0, 0, 0,
-        e3u = (double[][][]) nc.findVariable(stre3u).read(new int[]{0, 0, jpo,
-                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
-//modif pous
-//            e3v = (float[][][]) nc.findVariable(stre3v).read(new int[]{0, 0, 0,
-        e3v = (double[][][]) nc.findVariable(stre3v).read(new int[]{0, 0, jpo,
-                    ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
-        if (!isGridInfoInOneFile) {
-            nc.close();
-            nc = NetcdfDataset.openFile(file_hgr, null);
-        }
-        //System.out.println("read e1t e2t " + nc.getLocation());
-        // fichier *mesh*h*
-        // modif spous
-        /**
-        e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0, 0,
-        jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-        copyToNDJavaArray();
-        e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0, 0,
-        jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-        copyToNDJavaArray();
-        e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0, 0,
-        jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-        copyToNDJavaArray();
-        e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0, 0,
-        jpo, ipo}, new int[]{1, 1, ny, nx}).reduce().
-        copyToNDJavaArray();
-         */
-        e1t = (double[][]) nc.findVariable(stre1t).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                copyToNDJavaArray();
-        e2t = (double[][]) nc.findVariable(stre2t).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                copyToNDJavaArray();
-        e1v = (double[][]) nc.findVariable(stre1v).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                copyToNDJavaArray();
-        e2u = (double[][]) nc.findVariable(stre2u).read(new int[]{0, 0,
-                    jpo, ipo}, new int[]{1, ny, nx}).reduce().
-                copyToNDJavaArray();
-        nc.close();
     }
 
     /**
@@ -357,7 +330,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (int) Math.round(ix);
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int j = (int) jy;
         int k = (int) kz;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
@@ -373,8 +346,11 @@ public class NemoSWIO12Dataset extends AbstractDataset {
                             * (1.d - (double) kk - dz));
                     CO += co;
                     x = 0.d;
+                   // System.out.println("lecture u_tp0: "+ u_tp0[k + kk][j + jj][i + ii - 1]);
+                   // System.out.println("lecture u_tp0: "+ u_tp1[k + kk][j + jj][i + ii - 1]);
+                   // System.out.println("lecture u_tp0: "+ e2u[j + jj][i + ii - 1]);
                     x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1]
-                            + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                              + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
                     du += x * co / e2u[j + jj][i + ii - 1];
                 }
             }
@@ -395,8 +371,8 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int i = (int) ix;
+        int j = (int) jy;
         int k = (int) Math.round(kz);
         double dx = ix - (double) i;
         double dy = jy - (double) j;
@@ -480,7 +456,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
+        int i = (int) ix;
         int j = (int) Math.round(jy);
         int k = (int) kz;
         double dx = ix - (double) i;
@@ -632,7 +608,12 @@ public class NemoSWIO12Dataset extends AbstractDataset {
                 }
             }
         }
-
+        /*     System.out.println("u,e2u,e3u: " + u_tp1[70][114][121] + " " + e2u[114][121] + " " + e3u[70][114][121]);
+             System.out.println("v,e1v,e3v: " + v_tp1[70][114][121] + " " + e1v[114][121] + " " + e3v[70][114][121]);
+             System.out.println("e1t: " + e1t[114][121]);
+             System.out.println("e2t: " + e2t[114][121]);
+             System.out.println("e3t: " + e3t[70][114][121]); 
+             System.out.println("w: " + w[70][114][121]);   */          
         //---------------------------------------------------
         // Return w
         return w;
@@ -740,7 +721,9 @@ public class NemoSWIO12Dataset extends AbstractDataset {
                 float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
-                range(lat1, lon1, lat2, lon2);
+                float[] p1 = new float[]{lon1, lat1};
+                float[] p2 = new float[]{lon2, lat2};
+                range(p1, p2);
             } catch (Exception ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
@@ -827,15 +810,15 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      * @throws an IOException if the new domain is not strictly nested
      * within the NetCDF dataset domain.
      */
-    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
+    private void range(float[] pGeog1, float[] pGeog2) throws IOException {
 
         double[] pGrid1, pGrid2;
         int ipn, jpn;
 
         readLonLat();
 
-        pGrid1 = latlon2xy(lat1, lon1);
-        pGrid2 = latlon2xy(lat2, lon2);
+        pGrid1 = latlon2xy(pGeog1[0], pGeog1[1]);
+        pGrid2 = latlon2xy(pGeog2[0], pGeog2[1]);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
             throw new IOException(
                     "Impossible to proportion the simulation area : points out of domain");
@@ -934,13 +917,23 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      * de voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-
+//    void setAllFieldsTp1AtTime(int rank) throws IOException {
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
-
+        short[][][] temp;
+        
         try {
             u_tp1 = (float[][][]) ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).
                     flip(1).reduce().copyToNDJavaArray();
+            for (int i = nx - 1; i-- > 0;) {
+                for (int j = ny; j-- > 0;) {
+                    for (int k = nz; k-- > 0;) {
+                    //    u_tp1[k][j][i] *= maskRho[k][j][i];
+                        u_tp1[k][j][i] *= masku[k][j][i];
+                    }
+                }
+            }    
+            
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -950,6 +943,14 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         try {
             v_tp1 = (float[][][]) ncV.findVariable(strV).read(origin, new int[]{1, nz, ny - 1, nx}).
                     flip(1).reduce().copyToNDJavaArray();
+            for (int i = nx; i-- > 0;) {
+                for (int j = ny - 1; j-- > 0;) {
+                    for (int k = nz; k-- > 0;) {
+                        //v_tp1[k][j][i] *= maskRho[k][j][i];
+                        v_tp1[k][j][i] *= maskv[k][j][i];
+                    }
+                }
+            }       
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -970,6 +971,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
             variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
+           // variable.nextStep(ncT, rank, ipo, jpo, time_tp1, dt_HyMo);
         }
         /*try {
         wr_tp1 = (float[][][]) ncW.findVariable("vovecrtz").read(origin, new int[]{1, nz + 1, ny, nx}).
@@ -1003,7 +1005,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      *         <code>false</code> otherwise.
      */
     private boolean isInWater(int i, int j, int k) {
-        // System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
+       // System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
         try {
             return (maskRho[k][j][i] > 0);
         } catch (ArrayIndexOutOfBoundsException ex) {
@@ -1032,24 +1034,29 @@ public class NemoSWIO12Dataset extends AbstractDataset {
 
     /**
      * Determines whether or not the specified grid point is close to cost line.
-     * The method first determines in which quater of the cell the grid point is
-     * located, and then checks wether or not its cell and the three adjacent
-     * cells to the quater are in water.
      *
      * @param pGrid a double[] the coordinates of the grid point
      * @return <code>true</code> if the grid point is close to cost,
      *         <code>false</code> otherwise.
      */
-    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, k, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         k = (int) (Math.round(pGrid[2]));
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
+        boolean isAllWater = isInWater(i, j, k);
+        for (ii = -1; ii <= 1; ii++) {
+            for (jj = -1; jj <= 1; jj++) {
+                isAllWater &= isInWater(i + ii, j + jj, k);
+                if (!isAllWater) {
+                    /* no need to continue as soon as one surrounding cell
+                     * is not in water */
+                    return true;
+                }
+            }
+        }
+        return !isAllWater;
     }
 
     /**
@@ -1141,7 +1148,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      * @param yRho a double, the y-coordinate
      * @return a double[], the corresponding geographical coordinates
      * (latitude, longitude)
-    
+
      * @param xRho double
      * @param yRho double
      * @return double[]
@@ -1187,13 +1194,13 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      *  it belongs by successively dividing the domain by a half (binary
      *  search).
      * </pre>
-    
+
      * @param lon a double, the longitude of the geographical point
      * @param lat a double, the latitude of the geographical point
      * @return a double[], the corresponding grid coordinates (x, y)
      * @see #isInsidePolygone
      */
-    public double[] latlon2xy(double lat, double lon) {
+    public double[] latlon2xy(double lon, double lat) {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
@@ -1505,20 +1512,28 @@ public class NemoSWIO12Dataset extends AbstractDataset {
      */
     private void open(int index) throws IOException {
 
+        boolean enhance = true;
+                
         getLogger().info("Opening NEMO dataset");
         if (ncU != null) {
             ncU.close();
         }
         ncU = NetcdfDataset.openFile(listUFiles.get(index), null);
+   //     ncU = NetcdfDataset.openDataset(listUFiles.get(index),enhance,null);
+        
         if (ncV != null) {
             ncV.close();
         }
         ncV = NetcdfDataset.openFile(listVFiles.get(index), null);
+    //    ncV = NetcdfDataset.openDataset(listVFiles.get(index),enhance,null);
+        
         //ncW = NetcdfDataset.openFile(listWFiles.get(index), null);
+        
         if (ncT != null) {
             ncT.close();
         }
         ncT = NetcdfDataset.openFile(listTFiles.get(index), null);
+        
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
     }
 
@@ -1787,8 +1802,8 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         double bathy = 0.d;
         if (isInWater(i, j, nz - 1)) {
             for (int k = 0; k < nz; k++) {
-                // System.out.println("k: " + k + " " + maskRho[k][j][i]);
-                // System.out.println("k: " + k + " " + e3t[k][j][i]);
+               // System.out.println("k: " + k + " " + maskRho[k][j][i]);
+               // System.out.println("k: " + k + " " + e3t[k][j][i]);
                 bathy += maskRho[k][j][i] * e3t[k][j][i];
                 //System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + bathy);
             }
@@ -1839,7 +1854,7 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         setAllFieldsTp1AtTime(rank);
 
     }
-
+    
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         Variable variable = nc.findVariable(name);
         int[] origin = null, shape = null;

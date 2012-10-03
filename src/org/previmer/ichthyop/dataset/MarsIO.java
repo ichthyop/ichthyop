@@ -118,7 +118,7 @@ public class MarsIO extends SimulationManagerAccessor {
         long time_r0, time_rf;
 
         filename = listInputFiles.get(index);
-        nc = NetcdfDataset.openFile(filename, null);
+        nc = NetcdfDataset.openDataset(filename);
         timeArr = nc.findVariable(strTime).read();
         time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
         time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
@@ -174,7 +174,7 @@ public class MarsIO extends SimulationManagerAccessor {
     static NetcdfFile openFile(String filename) throws IOException {
         NetcdfFile nc;
         try {
-            nc = NetcdfDataset.openFile(filename, null);
+            nc = NetcdfDataset.openDataset(filename);
             getLogger().info("{Dataset} Open " + filename);
             return nc;
         } catch (Exception e) {
@@ -192,7 +192,7 @@ public class MarsIO extends SimulationManagerAccessor {
     static NetcdfFile openURL(String opendapURL) throws IOException {
         NetcdfFile ncIn;
         try {
-            ncIn = NetcdfDataset.openFile(opendapURL, null);
+            ncIn = NetcdfDataset.openDataset(opendapURL);
             getLogger().info("{Dataset} Open remote " + opendapURL);
             return ncIn;
         } catch (Exception e) {

@@ -56,9 +56,9 @@ public class StainRelease extends AbstractReleaseProcess {
 
     public int release(ReleaseEvent event) throws Exception {
 
-        boolean isStainInWater = getSimulationManager().getDataset().isInWater(getSimulationManager().getDataset().lonlat2xy(lon_stain, lat_stain));
+        boolean isStainInWater = getSimulationManager().getDataset().isInWater(getSimulationManager().getDataset().latlon2xy(lat_stain, lon_stain));
         if (!isStainInWater) {
-            throw new IOException("{Release stain} Center of the stain [lon: " + lon_stain + "; lat: " + lat_stain + "] is not in water or out of the domain. Fixed that in section Release stain.");
+            throw new IOException("{Release stain} Center of the stain [lat: " + lat_stain + "; lon: " + lon_stain + "] is not in water or out of the domain. Fixed that in section Release stain.");
         }
 
         int DROP_MAX = 2000;

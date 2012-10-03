@@ -23,10 +23,10 @@ public class GridPoint extends SimulationManagerAccessor {
     private double x, y, z;
     private double dx, dy, dz;
     /** Geographical coordinate */
-    private double lon, lat, depth;
+    private double lat, lon, depth;
     /** <code>true</code> if 3 dimensions point false otherwise */
     private static boolean is3D;
-    private boolean lonlatHaveChanged, depthHasChanged;
+    private boolean latlonHaveChanged, depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
     private boolean exclusivityH, exclusivityV;
     private static int nz;
@@ -42,7 +42,7 @@ public class GridPoint extends SimulationManagerAccessor {
      */
     public GridPoint(boolean bln3D) {
         is3D = bln3D;
-        lonlatHaveChanged = false;
+        latlonHaveChanged = false;
         depthHasChanged = false;
         xyHaveChanged = false;
         zHasChanged = false;
@@ -50,7 +50,7 @@ public class GridPoint extends SimulationManagerAccessor {
         x = y = z = -1;
         lon = lat = depth = Double.NaN;
         try {
-        nz = getSimulationManager().getDataset().get_nz();
+            nz = getSimulationManager().getDataset().get_nz();
         } catch (Exception ex) {
             nz = -1;
         }
@@ -69,11 +69,11 @@ public class GridPoint extends SimulationManagerAccessor {
      */
     public void geo2Grid() {
 
-        if (lonlatHaveChanged) {
-            double[] pGrid = getSimulationManager().getDataset().lonlat2xy(lon, lat);
+        if (latlonHaveChanged) {
+            double[] pGrid = getSimulationManager().getDataset().latlon2xy(lat, lon);
             x = pGrid[0];
             y = pGrid[1];
-            lonlatHaveChanged = false;
+            latlonHaveChanged = false;
         }
         if (is3D && depthHasChanged) {
             z = getSimulationManager().getDataset().depth2z(x, y, depth);
@@ -91,8 +91,8 @@ public class GridPoint extends SimulationManagerAccessor {
 
         if (xyHaveChanged) {
             double[] pGeog = getSimulationManager().getDataset().xy2latlon(x, y);
-            lon = pGeog[1];
             lat = pGeog[0];
+            lon = pGeog[1];
             xyHaveChanged = false;
         }
         if (is3D && zHasChanged) {
@@ -102,7 +102,7 @@ public class GridPoint extends SimulationManagerAccessor {
     }
 
     public void applyMove() {
-        
+
         setX(x + dx);
         dx = 0.d;
         setY(y + dy);
@@ -259,7 +259,7 @@ public class GridPoint extends SimulationManagerAccessor {
             zHasChanged = true;
         }
     }
-    
+
     private double bound(double z) {
 
         return Math.max(Math.min(nz - 1, z), 0.f);
@@ -274,21 +274,15 @@ public class GridPoint extends SimulationManagerAccessor {
     public void setLon(double lon) {
         if (this.lon != lon) {
             this.lon = lon;
-            lonlatHaveChanged = true;
+            latlonHaveChanged = true;
         }
     }
 
     public void setLat(double lat) {
         if (this.lat != lat) {
             this.lat = lat;
-            lonlatHaveChanged = true;
+            latlonHaveChanged = true;
         }
-    }
-
-    public double[] getGeoCoordinates() {
-        return is3D
-                ? new double[]{lon, lat, depth}
-                : new double[]{lon, lat};
     }
 
     @Override
@@ -310,8 +304,8 @@ public class GridPoint extends SimulationManagerAccessor {
     @Override
     public String toString() {
         return is3D
-                ? "(" + lon + ", " + lat + ", " + depth + ")"
-                : "(" + lon + ", " + lat + ")";
+                ? "(" + lat + ", " + lon + ", " + depth + ")"
+                : "(" + lat + ", " + lon + ")";
     }
 
     public boolean isInWater() {

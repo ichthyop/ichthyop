@@ -96,8 +96,6 @@ public interface IBasicParticle {
 
     public double[] getGridCoordinates();
 
-    public double[] getGeoCoordinates();
-
     public void increment(double[] move);
 
     public void increment(double[] move, boolean exclusivityH, boolean exclusivityV);

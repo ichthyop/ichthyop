@@ -219,9 +219,7 @@ abstract class RomsCommon extends AbstractDataset {
                 float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
-                float[] p1 = new float[]{lon1, lat1};
-                float[] p2 = new float[]{lon2, lat2};
-                range(p1, p2);
+                range(lat1, lon1, lat2, lon2);
             } catch (Exception ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain", ex);
             }
@@ -246,6 +244,23 @@ abstract class RomsCommon extends AbstractDataset {
         checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
+    }
+
+    private void test() {
+
+        for (int i = 0; i < 100; i++) {
+            double x0 = Math.random() * (nx - 2);
+            double y0 = Math.random() * (ny - 2);
+            double[] latlon = xy2latlon(x0, y0);
+            double[] xy = null;
+            for (int j = 0; j < 200; j++) {
+                xy = latlon2xy(latlon[1], latlon[0]);
+                latlon = this.xy2latlon(xy[0], xy[1]);
+            }
+            double errx = (xy[0] - x0) / x0;
+            double erry = (xy[1] - y0) / y0;
+            System.out.println("x: " + x0 + " errx: " + errx + " y: " + y0 + " erry: " + erry);
+        }
     }
 
     private int findCurrentRank(long time) throws Exception {
@@ -492,7 +507,7 @@ abstract class RomsCommon extends AbstractDataset {
         ipo = jpo = 0;
     }
 
-    public double[] lonlat2xy(double lon, double lat) {
+    public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
@@ -801,15 +816,15 @@ abstract class RomsCommon extends AbstractDataset {
      * @throws an IOException if the new domain is not strictly nested
      * within the NetCDF dataset domain.
      */
-    private void range(float[] pGeog1, float[] pGeog2) throws IOException {
+    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
 
         double[] pGrid1, pGrid2;
         int ipn, jpn;
 
         readLonLat(gridFile);
 
-        pGrid1 = lonlat2xy(pGeog1[0], pGeog1[1]);
-        pGrid2 = lonlat2xy(pGeog2[0], pGeog2[1]);
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
             throw new IOException("Impossible to proportion the simulation area : points out of domain");
         }

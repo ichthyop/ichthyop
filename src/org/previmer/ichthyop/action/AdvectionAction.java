@@ -4,7 +4,7 @@
  */
 package org.previmer.ichthyop.action;
 
-import java.util.logging.Logger;
+import java.util.logging.Level;
 import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
@@ -21,6 +21,7 @@ public class AdvectionAction extends AbstractAction {
     // Threshold for CFL error message
     public static final float THRESHOLD_CFL = 1.0f;
 
+    @Override
     public void loadParameters() throws Exception {
 
         /* numerical scheme */
@@ -32,7 +33,7 @@ public class AdvectionAction extends AbstractAction {
              */
             isEuler = false;
             // print the info in the log
-            getLogger().info("Failed to read the advection numerical scheme. Set by default to " + AdvectionScheme.RUNGE_KUTTA_4.getName());
+            getLogger().log(Level.INFO, "Failed to read the advection numerical scheme. Set by default to {0}", AdvectionScheme.RUNGE_KUTTA_4.getName());
         }
 
         /* time direction */
@@ -53,6 +54,7 @@ public class AdvectionAction extends AbstractAction {
         }
     }
 
+    @Override
     public void execute(IBasicParticle particle) {
         if (isForward) {
             advectForward(particle, getSimulationManager().getTimeManager().getTime());
@@ -83,24 +85,21 @@ public class AdvectionAction extends AbstractAction {
         int dim = pGrid.length;
         double[] dU = new double[dim];
 
-        dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time);
+        dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
         if (Math.abs(dU[0]) > THRESHOLD_CFL) {
-            getLogger().warning("CFL broken for U " + (float) dU[0]);
+            getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
         }
-        dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time);
+        dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
         if (Math.abs(dU[1]) > THRESHOLD_CFL) {
-            getLogger().warning("CFL broken for V " + (float) dU[1]);
+            getLogger().log(Level.WARNING, "CFL broken for V {0}", (float) dU[1]);
         }
         if (dim > 2) {
-            dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time);
+            dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time) * dt;
             if (Math.abs(dU[2]) > THRESHOLD_CFL) {
-                getLogger().warning("CFL broken for W " + (float) dU[2]);
+                getLogger().log(Level.WARNING, "CFL broken for W {0}", (float) dU[2]);
             }
         }
 
-        for (int i = 0; i < dim; i++) {
-            dU[i] *= dt;
-        }
         return dU;
     }
 

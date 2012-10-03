@@ -114,27 +114,43 @@ public class UpdateManager extends AbstractManager {
          * Update MARS Generelized Sigma parameters
          */
         if (null != getXBlock(BlockType.DATASET, "dataset.mars_3d")) {
-            getXBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_hc"));
-            getXBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_a"));
-            getXBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_b"));
+            if (null == getXBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_hc")) {
+                getXBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_hc"));
+            }
+            if (null == getXBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_a")) {
+                getXBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_a"));
+            }
+            if (null == getXBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_b")) {
+                getXBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_b"));
+            }
         }
         if (null != getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap")) {
-            getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_hc"));
-            getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_a"));
-            getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_b"));
+            if (null == getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_hc")) {
+                getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_hc"));
+            }
+            if (null == getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_a")) {
+                getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_a"));
+            }
+            if (null == getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_b")) {
+                getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_b"));
+            }
         }
         /*
          * Update OPA NEMO parameters
          */
         if (null != getXBlock(BlockType.DATASET, "dataset.nemo")) {
-            getXBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3u"));
-            getXBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3v"));
+            if (null == getXBlock(BlockType.DATASET, "dataset.nemo").getXParameter("field_var_e3u")) {
+                getXBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3u"));
+            }
+            if (null == getXBlock(BlockType.DATASET, "dataset.nemo").getXParameter("field_var_e3v")) {
+                getXBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3v"));
+            }
         }
         /*
          * Add skip_sorting option in Dataset blocks
          */
         for (XBlock xblock : getConfigurationFile().getBlocks(BlockType.DATASET)) {
-            if (null != cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting")) {
+            if (null == xblock.getXParameter("skip_sorting")) {
                 xblock.addXParameter(cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting"));
             }
         }
@@ -146,6 +162,19 @@ public class UpdateManager extends AbstractManager {
                 float f = Float.valueOf(getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
             } catch (NumberFormatException ex) {
                 getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").setValue("12.0");
+            }
+        }
+        /*
+         * Add grid_file parameter in ROMS configuration
+         */
+        if (null != getXBlock(BlockType.DATASET, "dataset.roms_2d")) {
+            if (null == getXBlock(BlockType.DATASET, "dataset.roms_2d").getXParameter("grid_file")) {
+                getXBlock(BlockType.DATASET, "dataset.roms_2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_2d", "grid_file"));
+            }
+        }
+        if (null != getXBlock(BlockType.DATASET, "dataset.roms_3d")) {
+            if (null == getXBlock(BlockType.DATASET, "dataset.roms_3d").getXParameter("grid_file")) {
+                getXBlock(BlockType.DATASET, "dataset.roms_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_3d", "grid_file"));
             }
         }
         /*
@@ -177,8 +206,12 @@ public class UpdateManager extends AbstractManager {
         Version appVersion = getApplicationVersion();
         Version cfgVersion = getConfigurationVersion();
         validateVersion(cfgVersion);
-        return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
-                || !(appVersion.getDate().equals(cfgVersion.getDate()));
+        try {
+            return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
+                    || !(appVersion.getDate().equals(cfgVersion.getDate()));
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     public Version getApplicationVersion() {
@@ -194,13 +227,13 @@ public class UpdateManager extends AbstractManager {
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
     }
-    
+
     public void initializePerformed(InitializeEvent e) throws Exception {
         // does nothing
     }
 
     private void validateVersion(Version testedVersion) {
-        
+
         for (Version version : Version.values()) {
             if (version.getNumber().equals(testedVersion.getNumber())) {
                 return;

@@ -4,30 +4,30 @@
  */
 package org.previmer.ichthyop.manager;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.event.InitializeEvent;
-import org.previmer.ichthyop.event.SetupEvent;
-import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.action.AbstractAction;
-import org.previmer.ichthyop.event.SetupListener;
-import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.action.SysActionAgeMonitoring;
 import org.previmer.ichthyop.action.SysActionMove;
 import org.previmer.ichthyop.arch.IAction;
+import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IMasterParticle;
 import org.previmer.ichthyop.arch.ISysAction;
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.io.BlockType;
+import org.previmer.ichthyop.io.XBlock;
 
 /**
  *
  * @author pverley
  */
-public class ActionManager extends AbstractManager implements SetupListener {
+public class ActionManager extends AbstractManager {
 
     final private static ActionManager actionManager = new ActionManager();
     private HashMap<String, IAction> actionMap;
@@ -48,9 +48,9 @@ public class ActionManager extends AbstractManager implements SetupListener {
                     IAction action = createAction(actionClass);
                     action.loadParameters();
                     actionMap.put(xaction.getKey(), action);
-                    getLogger().info("Instantiated action \"" + xaction.getTreePath() + "\"");
+                    getLogger().log(Level.INFO, "Instantiated action \"{0}\"", xaction.getTreePath());
                 } catch (Exception ex) {
-                    StringBuffer msg = new StringBuffer();
+                    StringBuilder msg = new StringBuilder();
                     msg.append("Failed to setup action ");
                     msg.append(xaction.getTreePath());
                     msg.append("\n");
@@ -73,9 +73,9 @@ public class ActionManager extends AbstractManager implements SetupListener {
         for (ISysAction sysaction : sysActionList) {
             try {
                 sysaction.loadParameters();
-                getLogger().info("Instantiated system action \"" + sysaction.getClass().getCanonicalName() + "\"");
+                getLogger().log(Level.INFO, "Instantiated system action \"{0}\"", sysaction.getClass().getCanonicalName());
             } catch (Exception ex) {
-                StringBuffer msg = new StringBuffer();
+                StringBuilder msg = new StringBuilder();
                 msg.append("Failed to setup system action ");
                 msg.append(sysaction.getClass().getCanonicalName());
                 msg.append("\n");
@@ -111,12 +111,14 @@ public class ActionManager extends AbstractManager implements SetupListener {
         }
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         loadActions();
         implementSysActions();
         getLogger().info("Action manager setup [OK]");
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) {
         // nothing to do
     }
@@ -131,6 +133,7 @@ public class ActionManager extends AbstractManager implements SetupListener {
 
     private class ActionComparator implements Comparator<IAction> {
 
+        @Override
         public int compare(IAction action1, IAction action2) {
             return action2.getPriority().rank().compareTo(action1.getPriority().rank());
         }
