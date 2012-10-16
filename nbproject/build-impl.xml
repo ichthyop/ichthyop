@@ -220,27 +220,6 @@ is divided into following sections:
         <condition else="" property="testng.debug.mode" value="-mixed">
             <istrue value="${junit+testng.available}"/>
         </condition>
-        <condition property="junit.available">
-            <or>
-                <available classname="org.junit.Test" classpath="${run.test.classpath}"/>
-                <available classname="junit.framework.Test" classpath="${run.test.classpath}"/>
-            </or>
-        </condition>
-        <condition property="testng.available">
-            <available classname="org.testng.annotations.Test" classpath="${run.test.classpath}"/>
-        </condition>
-        <condition property="junit+testng.available">
-            <and>
-                <istrue value="${junit.available}"/>
-                <istrue value="${testng.available}"/>
-            </and>
-        </condition>
-        <condition else="testng" property="testng.mode" value="mixed">
-            <istrue value="${junit+testng.available}"/>
-        </condition>
-        <condition else="" property="testng.debug.mode" value="-mixed">
-            <istrue value="${junit+testng.available}"/>
-        </condition>
     </target>
     <target name="-post-init">
         <!-- Empty placeholder for easier customization. -->
@@ -389,29 +368,6 @@ is divided into following sections:
         </condition>
     </target>
     <target if="${nb.junit.single}" name="-init-macrodef-junit-single" unless="${nb.junit.batch}">
-        <macrodef name="junit" uri="http://www.netbeans.org/ns/j2se-project/3">
-            <attribute default="${includes}" name="includes"/>
-            <attribute default="${excludes}" name="excludes"/>
-            <attribute default="**" name="testincludes"/>
-            <attribute default="" name="testmethods"/>
-            <element name="customize" optional="true"/>
-            <sequential>
-                <property name="junit.forkmode" value="perTest"/>
-                <junit dir="${work.dir}" errorproperty="tests.failed" failureproperty="tests.failed" fork="true" forkmode="${junit.forkmode}" showoutput="true" tempdir="${build.dir}">
-                    <test methods="@{testmethods}" name="@{testincludes}" todir="${build.test.results.dir}"/>
-                    <syspropertyset>
-                        <propertyref prefix="test-sys-prop."/>
-                        <mapper from="test-sys-prop.*" to="*" type="glob"/>
-                    </syspropertyset>
-                    <formatter type="brief" usefile="false"/>
-                    <formatter type="xml"/>
-                    <jvmarg value="-ea"/>
-                    <customize/>
-                </junit>
-            </sequential>
-        </macrodef>
-    </target>
-    <target if="${nb.junit.batch}" name="-init-macrodef-junit-batch" unless="${nb.junit.single}">
         <macrodef name="junit" uri="http://www.netbeans.org/ns/j2se-project/3">
             <attribute default="${includes}" name="includes"/>
             <attribute default="${excludes}" name="excludes"/>
