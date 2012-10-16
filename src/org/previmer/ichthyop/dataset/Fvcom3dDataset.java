@@ -2,6 +2,8 @@
 package org.previmer.ichthyop.dataset;
 
 import org.previmer.ichthyop.event.NextStepEvent;
+import ucar.ma2.Array;
+import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -18,11 +20,13 @@ public class Fvcom3dDataset extends AbstractDataset {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public double[] lonlat2xy(double lon, double lat) {
+    @Override
+    public double[] latlon2xy(double lat, double lon) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public double[] xy2lonlat(double xRho, double yRho) {
+    @Override
+    public double[] xy2latlon(double xRho, double yRho) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -123,6 +127,11 @@ public class Fvcom3dDataset extends AbstractDataset {
     }
 
     public void nextStepTriggered(NextStepEvent e) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    @Override
+    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
