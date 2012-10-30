@@ -468,13 +468,22 @@
         <tree_path>Advanced/Transport/Buoyancy</tree_path>
         <enabled>false</enabled>
         <parameters>
-            <parameter type="serial">
+                     <parameter type="serial">
                 <key>particle_density</key>
                 <long_name>Particle density [g/cm3]</long_name>
                 <value>1.025</value>
                 <format>float</format>
                 <default>1.025</default>
-                <description>Particle density [g/cm3]. Basically, if density is superior to sea water density, particle will sink, if density is inferior to sea water density, particle will go up to the surface. If you want to force particles to keep close surface, take density = 0.9, for instance.</description>
+                <description>Particle density [g/cm3]. Basically, if density is superior to sea water density, particle will sink, if density is inferior to sea water density, particle will go up to the surface. If you want to force particles to keep close surface, take density = 0.9, for instance. This parameter is ignored when a density file (density as age function, refer to next parameter for details) is provided.</description>
+            </parameter>
+            <parameter>
+                <key>density_file</key>
+                <long_name>Density file</long_name>
+                <value />
+                <format>textfile</format>
+                <default />
+                <template>density_function.csv</template>
+                <description>Particle density as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Time(hour);Density(g/cm3). If this parameter is left void, ichthyop assumes constant particle density.</description>
             </parameter>
             <parameter>
                 <key>age_max</key>
