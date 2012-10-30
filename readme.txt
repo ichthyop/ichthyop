@@ -14,12 +14,12 @@ Feedback & Bug reports: info@previmer.org
 ===========
 Requirement
 
-Get latest Java installed, at least JRE 1.6 Update 35, recommended JRE 1.7
+Get latest Java installed, at least JRE 1.6 Update 37, recommended JRE 1.7
 
 For most users, Java is already installed and up-to-date. Skip this
 step and go to the start-up instructions.
 
-Latest version of JRE (at least 1.6 Update 35) can be download at http://www.java.com/en/download/manual.jsp
+Latest version of JRE (at least 1.6 Update 37) can be download at http://www.java.com/en/download/manual.jsp
 
 =======
 Startup
