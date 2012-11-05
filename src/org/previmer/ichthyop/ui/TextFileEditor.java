@@ -16,16 +16,11 @@
  */
 package org.previmer.ichthyop.ui;
 
-import java.util.logging.Level;
-import javax.swing.AbstractCellEditor;
-import javax.swing.table.TableCellEditor;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JTable;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.MouseInfo;
 import java.awt.event.ActionEvent;
@@ -36,11 +31,17 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import javax.swing.AbstractCellEditor;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.table.TableCellEditor;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.io.IOTools;
@@ -94,6 +95,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         optionPane.addPropertyChangeListener(
                 new PropertyChangeListener() {
 
+                    @Override
                     public void propertyChange(PropertyChangeEvent e) {
                         String prop = e.getPropertyName();
                         if (dialog.isVisible()
@@ -139,13 +141,13 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         textField = new JTextField();
         textField.setEditable(true);
         JButton btnOpen = new JButton(EDIT);
-        btnOpen.setToolTipText("Edit an existing drifter file");
+        btnOpen.setToolTipText("Edit an existing file");
         //btnOpen.setBorderPainted(false);
         btnOpen.setFont(btnOpen.getFont().deriveFont(Font.PLAIN, 10));
         btnOpen.setActionCommand(EDIT);
         btnOpen.addActionListener(this);
         JButton btnNew = new JButton(NEW);
-        btnNew.setToolTipText("Create a new drifter file");
+        btnNew.setToolTipText("Create a new file from template");
         //btnNew.setBorderPainted(false);
         btnNew.setFont(btnOpen.getFont().deriveFont(Font.PLAIN, 10));
         btnNew.setActionCommand(NEW);
@@ -160,6 +162,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
      * Handles events from the editor button and from
      * the dialog's OK button.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
 
         try {
@@ -241,11 +244,13 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         dialog.setVisible(true);
     }
 
+    @Override
     public Object getCellEditorValue() {
         return textField.getText();
     }
 
     //Implement the one method defined by TableCellEditor.
+    @Override
     public Component getTableCellEditorComponent(JTable table,
             Object value,
             boolean isSelected,

@@ -68,6 +68,15 @@ public class UpdateManager extends AbstractManager {
         ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
         String treepath, newTreepath;
         /*
+         * Add the density_file parameter in the action.buoyancy block
+         */
+        if (null != getXBlock(BlockType.ACTION, "action.buoyancy")) {
+            if (null == getXBlock(BlockType.ACTION, "action.buoyancy").getXParameter("density_file")) {
+                getXBlock(BlockType.ACTION, "action.buoyancy").addXParameter(cfg31.getXParameter(BlockType.ACTION, "action.buoyancy", "density_file"));
+            }
+        }
+        
+        /*
          * Update the recruitment in zone block
          */
         if (null != getXBlock(BlockType.ACTION, "action.recruitment")) {
