@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.arch.IBasicParticle;
@@ -111,9 +113,10 @@ public class BuoyancyAction extends AbstractAction {
     }
 
     private void loadDensities(String csvFile) {
+        Locale.setDefault(Locale.US);
         try {
             // open densities csv file
-            CSVReader reader = new CSVReader(new FileReader(csvFile), ',');
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
             List<String[]> lines = reader.readAll();
 
             // init arrays
@@ -147,10 +150,11 @@ public class BuoyancyAction extends AbstractAction {
              * determine what is current density for the particle
              */
             if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
+                particleDensity = particleDensities[ages.length - 1];
                 float age = particle.getAge();
-                for (int i = 0; i < ages.length; i++) {
-                    if (ages[i] > age) {
-                        particleDensity = particleDensities[Math.max(i - 1, 0)];
+                for (int i = 0; i < ages.length - 1; i++) {
+                    if (ages[i] <= age && age < ages[i + 1]) {
+                        particleDensity = particleDensities[i];
                         break;
                     }
                 }
