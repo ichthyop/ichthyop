@@ -75,7 +75,7 @@ public class UpdateManager extends AbstractManager {
                 getXBlock(BlockType.ACTION, "action.buoyancy").addXParameter(cfg31.getXParameter(BlockType.ACTION, "action.buoyancy", "density_file"));
             }
         }
-        
+
         /*
          * Update the recruitment in zone block
          */
@@ -160,7 +160,9 @@ public class UpdateManager extends AbstractManager {
          */
         for (XBlock xblock : getConfigurationFile().getBlocks(BlockType.DATASET)) {
             if (null == xblock.getXParameter("skip_sorting")) {
-                xblock.addXParameter(cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting"));
+                if (null != cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting")) {
+                    xblock.addXParameter(cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting"));
+                }
             }
         }
         /*
