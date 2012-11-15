@@ -131,7 +131,7 @@
             <parameter>
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
-                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
+                <value>http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
                 <description>Folder containing the MARS NetCDF files.</description>
             </parameter>
             <parameter>
