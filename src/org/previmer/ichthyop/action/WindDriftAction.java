@@ -34,7 +34,7 @@ public class WindDriftAction extends AbstractAction {
         strVW=getParameter("wind_v");
         
         depth_application = Float.valueOf(getParameter("depth_application"));
-        angle = Double.valueOf(getParameter("angle"))*Math.PI/180.0;
+        angle = Math.PI/2.0-Double.valueOf(getParameter("angle"))*Math.PI/180.0;
         getSimulationManager().getDataset().requireVariable(strUW, getClass());
         getSimulationManager().getDataset().requireVariable(strVW, getClass());
     }
@@ -45,16 +45,8 @@ public class WindDriftAction extends AbstractAction {
 
     @Override
     public void execute(IBasicParticle particle) {
-        System.out.println("***** dz : " + particle.getZ());
-        if (particle.getZ() >= 0) {
-            double depth = getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), particle.getZ());
-            System.out.println("depth " + depth);
-            if (- depth > depth_application) {
-                return;
-            }
-        }
         
-        double[] mvt = getDLonLat(particle.getGridCoordinates(),getSimulationManager().getTimeManager().getTime(),getSimulationManager().getTimeManager().get_dt());
+        double[] mvt = getDLonLat(particle.getGridCoordinates(),-particle.getDepth(),getSimulationManager().getTimeManager().getTime(),getSimulationManager().getTimeManager().get_dt());
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
         double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
@@ -64,8 +56,13 @@ public class WindDriftAction extends AbstractAction {
     }
    
     
-    private double[] getDLonLat(double[] pgrid, double time, double dt){
+    private double[] getDLonLat(double[] pgrid, double depth, double time, double dt){
         double[] dWi = new double[2];
+        if (depth > depth_application) {
+            dWi[0]=0;
+            dWi[1]=0;
+            return dWi;
+        }
         double dx,dy;
         double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
