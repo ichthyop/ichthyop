@@ -110,6 +110,8 @@ public class WindDriftFileAction extends WindDriftAction {
         openLocation(getParameter("input_path"));
 
         wind_factor=Double.valueOf(getParameter("wind_factor"));
+        depth_application = Float.valueOf(getParameter("depth_application"));
+        angle = Math.PI/2.0-Double.valueOf(getParameter("angle"))*Math.PI/180.0;
         strUW=getParameter("wind_u");
         strVW=getParameter("wind_v");
         strLon=getParameter("longitude");
@@ -121,29 +123,31 @@ public class WindDriftFileAction extends WindDriftAction {
 
         U_variable=new RequiredExternalVariable(latRho,lonRho,uw_tp0,uw_tp1,getSimulationManager().getDataset());
         V_variable=new RequiredExternalVariable(latRho,lonRho,vw_tp0,vw_tp1,getSimulationManager().getDataset());
-        System.out.println("LonRho dims : " + lonRho.length + " " + lonRho[0].length);
+        
     }
     
     public Array readVariable(String name) throws Exception {
         try {
         Variable variable = ncIn.findVariable(name);
-        return variable.read().reduce();
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length){
+            case 4:
+                origin = new int[]{rank, 0, 0, 0};
+                shape = new int[]{1, 1, ny, nx};
+                break;
+            case 3:
+                origin = new int[]{rank, 0, 0};
+                shape = new int[]{1, ny, nx};
+                break;
+        }
+        return variable.read(origin, shape).reduce();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading UW wind velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
     }   
-    /*
-    public void setUp() throws Exception {
 
-        //loadParameters();
-        System.out.println("***********DANS LE SETUP DE WINDATION");
-        openLocation(getParameter("input_path"));
-        getDimNC();
-        //readConstantField(gridFile);
-        //getDimGeogArea();
-    } */
     
     private void openLocation(String rawPath) throws IOException {
 
@@ -195,13 +199,13 @@ public class WindDriftFileAction extends WindDriftAction {
         return list;
     }
     
-    void open(String filename) throws IOException {
+    private void open(String filename) throws IOException {
         if (ncIn == null || (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
             if (ncIn != null) {
                 ncIn.close();
             }
             try {
-                ncIn = NetcdfDataset.openFile(filename, null);
+                ncIn = NetcdfDataset.openDataset(filename);
             } catch (Exception ex) {
                 IOException ioex = new IOException("Error opening dataset " + filename + " ==> " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());
@@ -237,11 +241,10 @@ public class WindDriftFileAction extends WindDriftAction {
         }
     }
     
-    public void nextStepTriggered() throws Exception {
-        System.out.println("########## YEHHHHH on est dans le nextStepTriggered! :D ");
+    private void nextStepTriggered() throws Exception {
         long time = getSimulationManager().getTimeManager().getTime();
         time_current=time;
-        //Logger.getAnonymousLogger().info("set fields at time " + time);
+
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
 
         if (time_arrow * time < time_arrow * time_tp1) {
@@ -250,9 +253,7 @@ public class WindDriftFileAction extends WindDriftAction {
         
         uw_tp0 = uw_tp1;
         vw_tp0 = vw_tp1;
-        //System.out.println("rank : " + rank);
-        //System.out.println("time_arrow : " + time_arrow);
-        //System.out.println("record : " + nbTimeRecords);
+        
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             ncIn.close();
@@ -264,7 +265,7 @@ public class WindDriftFileAction extends WindDriftAction {
 
     }
     
-    void setOnFirstTime() throws Exception {
+    private void setOnFirstTime() throws Exception {
 
         long t0 = getSimulationManager().getTimeManager().get_tO();
         open(getFile(t0));
@@ -356,8 +357,6 @@ public class WindDriftFileAction extends WindDriftAction {
             if (time >= time_nc[0] && time < time_nc[1]) {
                 return true;
             }
-            //} catch (IOException e) {
-            //throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
             throw new IOException("{Wind dataset} Unable to read " + strTime
                     + " variable in file " + filename + " : " + e.getCause());
@@ -384,9 +383,7 @@ public class WindDriftFileAction extends WindDriftAction {
             INPUT_DATE_FORMAT.setCalendar(calendartmp);
             String origin_hydro=getSimulationManager().getParameterManager().getParameter("app.time", "time_origin");
             calendartmp.setTime(INPUT_DATE_FORMAT.parse(origin_hydro));
-            System.out.println(calendartmp.getTimeInMillis() / 1000L);
-            origin= - calendartmp.getTimeInMillis() / 1000L;
-            System.out.println("origin de hydrodynamique!! : " + origin);           
+            origin= - calendartmp.getTimeInMillis() / 1000L;      
         }
         switch(units) {
             case "seconds":
@@ -469,11 +466,9 @@ public class WindDriftFileAction extends WindDriftAction {
         return listInputFiles.get(indexFile);
     }
     
-    void setAllFieldsTp1AtTime(int i_time) throws Exception {
+    private void setAllFieldsTp1AtTime(int i_time) throws Exception {
 
         int[] origin = new int[]{i_time, 0, 0};
-        //u_tp1 = new float[ny][nx - 1];
-        //v_tp1 = new float[ny - 1][nx];
         double time_tp0 = time_tp1;
 
 
@@ -494,15 +489,10 @@ public class WindDriftFileAction extends WindDriftAction {
 
         
         dt_wind = Math.abs(time_tp1 - time_tp0);
-        /*
-        for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
-        }*/
     }
     
     @Override
     public void execute(IBasicParticle particle) {
-        System.out.println("%%%%%% ON EST DANS LE EXECUTE !!!!!");
         if(time_current!=getSimulationManager().getTimeManager().getTime()){
             try {
                 nextStepTriggered();
@@ -510,26 +500,12 @@ public class WindDriftFileAction extends WindDriftAction {
                 Logger.getLogger(WindDriftAction.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        //System.out.println("Time de timemanager : " + getSimulationManager().getTimeManager().getTime());
-        //System.out.println("Time current : " + time_current);
-        //System.out.println("Time tp1 : " + time_tp1);
         
         U_variable.nextStep(uw_tp1, time_tp1, dt_wind);
         V_variable.nextStep(vw_tp1, time_tp1, dt_wind);
-        try {
-            U_variable.meteo2courant();
-        } catch (IOException ex) {
-            Logger.getLogger(WindDriftFileAction.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        if (particle.getZ() >= 0) {
-            double dz = Math.abs(particle.getZ() - (getSimulationManager().getDataset().get_nz() - 1));
-            if (dz > 0.01) {
-                return;
-            }
-        }
+       
 
-        double[] mvt = getDLonLat(particle.getGridCoordinates(),getSimulationManager().getTimeManager().getTime(),getSimulationManager().getTimeManager().get_dt());
+        double[] mvt = getDLonLat(particle.getGridCoordinates(),-particle.getDepth(),getSimulationManager().getTimeManager().getTime(),getSimulationManager().getTimeManager().get_dt());
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
         double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
@@ -538,8 +514,13 @@ public class WindDriftFileAction extends WindDriftAction {
         
     }
    
-   public double[] getDLonLat(double[] pgrid, double time, double dt){
+   public double[] getDLonLat(double[] pgrid, double depth, double time, double dt){
         double[] dWi = new double[2];
+        if (depth > depth_application) {
+            dWi[0]=0;
+            dWi[1]=0;
+            return dWi;
+        }
         double dx,dy;
         double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
