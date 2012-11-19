@@ -2,7 +2,7 @@
 <icstructure>
     <long_name>MARS 2D Opendap Manga Ichthyop configuration file</long_name>
     <description>Predefined parameters to connect MARS dataset with OpenDAP for the Bay of Biscay http://www.previmer.org/previsions/courants/modele_mars3d_manche_gascogne</description>
-    <version date="2011/12/23">3.1</version>
+    <version date="2012/10/30">3.1</version>
     <block type="option">
         <tree_path>Main/Time</tree_path>
         <key>app.time</key>
@@ -132,8 +132,8 @@
             <parameter>
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
-                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
-                <default>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</default>
+                <value>http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
+                <default>http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</default>
                 <description>OpenDAP URL of the MARS dataset. You can check the validity of the given URL by typing it in the URL adress bar of your web browser and appending ".html" at the end of the URL. Preset URL is a Bay of Biscay model centered above the Iroise sea.</description>
             </parameter>
             <parameter>
