@@ -4,8 +4,8 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.IOException;
+import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -44,7 +44,7 @@ public class Roms3dDataset extends RomsCommon {
      */
     private float[][][] v_tp0;
     /**
-     *  Meridional component of the velocity field at time t + dt
+     * Meridional component of the velocity field at time t + dt
      */
     private float[][][] v_tp1;
     /**
@@ -60,13 +60,12 @@ public class Roms3dDataset extends RomsCommon {
      */
     private double[][][] z_rho_cst;
     /**
-     * Depth at w point at current time.
-     * Takes account of free surface elevation.
+     * Depth at w point at current time. Takes account of free surface
+     * elevation.
      */
     private double[][][] z_w_tp0;
     /**
-     * Depth at w point at time t + dt
-     * Takes account of free surface elevation.
+     * Depth at w point at time t + dt Takes account of free surface elevation.
      */
     private double[][][] z_w_tp1;
     /**
@@ -179,6 +178,7 @@ public class Roms3dDataset extends RomsCommon {
 
     /**
      * Reads the dimensions of the NetCDF dataset
+     *
      * @throws an IOException if an error occurs while reading the dimensions.
      */
     @Override
@@ -209,23 +209,22 @@ public class Roms3dDataset extends RomsCommon {
     }
 
     /**
-     * Computes the depth at sigma levels disregarding the free
-     * surface elevation.
+     * Computes the depth at sigma levels disregarding the free surface
+     * elevation.
      */
     private void getCstSigLevels() throws IOException {
 
         double hc;
         double[] sc_r = new double[nz];
-        double[] Cs_r = new double[nz];
+        double[] Cs_r;
         double[] sc_w = new double[nz + 1];
-        double[] Cs_w = new double[nz + 1];
+        double[] Cs_w;
 
         //-----------------------------------------------------------
         // Read hc, Cs_r and Cs_w in the NetCDF file.
         hc = getHc();
         Cs_r = getCs_r();
         Cs_w = getCs_w();
-
 
         //-----------------------------------------------------------
         // Calculation of sc_r and sc_w, the sigma levels
@@ -318,7 +317,7 @@ public class Roms3dDataset extends RomsCommon {
 
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
-        double z = 0.d;
+        double z;
         int lk = nz - 1;
         while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
             lk--;
@@ -345,7 +344,7 @@ public class Roms3dDataset extends RomsCommon {
         final double dx = x - (double) i;
         final double dy = y - (double) j;
         final double dz = kz - (double) k;
-        double co = 0.d;
+        double co;
         double z_r;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
@@ -383,8 +382,8 @@ public class Roms3dDataset extends RomsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co;
+        double x;
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -418,8 +417,8 @@ public class Roms3dDataset extends RomsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co;
+        double x;
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
@@ -427,8 +426,10 @@ public class Roms3dDataset extends RomsCommon {
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                    dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                    if (!Float.isNaN(v_tp0[k + kk][j + jj - 1][i + ii])) {
+                        x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                        dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                    }
                 }
             }
         }
@@ -456,8 +457,8 @@ public class Roms3dDataset extends RomsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co;
+        double x;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -465,8 +466,10 @@ public class Roms3dDataset extends RomsCommon {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                    du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                    if (!(Float.isNaN(u_tp0[k + kk][j + jj][i + ii - 1]))) {
+                        x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                        du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                    }
                 }
             }
         }
@@ -483,16 +486,13 @@ public class Roms3dDataset extends RomsCommon {
         double hh = 0.d;
         final double dx = (xRho - i);
         final double dy = (yRho - j);
-        double co = 0.d;
+        double co;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 if (isInWater(i + ii, j + jj)) {
                     co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                    double z_r = 0.d;
-                    z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j
-                            + jj][i + ii]
-                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i
-                            + ii]);
+                    double z_r = z_rho_cst[k][j + jj][i + ii] + (double) zeta_tp0[j + jj][i + ii]
+                            * (1.d + z_rho_cst[k][j + jj][i + ii] / hRho[j + jj][i + ii]);
                     hh += co * z_r;
                 }
             }
@@ -568,7 +568,7 @@ public class Roms3dDataset extends RomsCommon {
 
         try {
             zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
-                    new int[]{rank, 0, 0},
+                    new int[]{rank, jpo, ipo},
                     new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset ocean free surface elevation. " + ex.toString());
@@ -602,6 +602,10 @@ public class Roms3dDataset extends RomsCommon {
                             - z_w_tmp[k][j][i - 1]))
                             / (pn[j][i] + pn[j][i - 1]))
                             * u_tp1[k][j][i - 1];
+                    if (Double.isNaN(Huon[k][j][i])) {
+                        Huon[k][j][i] = 0.d;
+
+                    }
                 }
             }
             for (int i = nx; i-- > 0;) {
@@ -612,6 +616,10 @@ public class Roms3dDataset extends RomsCommon {
                             - z_w_tmp[k][j - 1][i]))
                             / (pm[j][i] + pm[j - 1][i]))
                             * v_tp1[k][j - 1][i];
+                    if (Double.isNaN(Hvom[k][j][i])) {
+                        Hvom[k][j][i] = 0.d;
+
+                    }
                 }
             }
         }
@@ -683,11 +691,7 @@ public class Roms3dDataset extends RomsCommon {
 
         //-----------------------------------------------------
         // Daily recalculation of z_w and z_r with zeta
-
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
-        double[][][] z_w_cst_tmp = z_w_cst;
-
-        //System.out.print("Calculation of the s-levels\n");
 
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
@@ -695,12 +699,13 @@ public class Roms3dDataset extends RomsCommon {
                     zeta_tp1[j][i] = 0.f;
                 }
                 for (int k = 0; k < nz + 1; k++) {
-                    z_w_tmp[k][j][i] = z_w_cst_tmp[k][j][i] + zeta_tp1[j][i]
-                            * (1.f + z_w_cst_tmp[k][j][i] / hRho[j][i]);
+                    z_w_tmp[k][j][i] = Float.isNaN(zeta_tp1[j][i])
+                            ? z_w_cst[k][j][i]
+                            : z_w_cst[k][j][i] + zeta_tp1[j][i] * (1.f + z_w_cst[k][j][i] / hRho[j][i]);
                 }
             }
         }
-        z_w_cst_tmp = null;
+        
         return z_w_tmp;
     }
 

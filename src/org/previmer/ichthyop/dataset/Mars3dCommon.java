@@ -622,7 +622,6 @@ abstract class Mars3dCommon extends MarsCommon {
                     w[k][j][i] = isInWater(i, j)
                             ? (float) (w_double[k][j][i] / (dxu[j][i] * dyv[j][i]))
                             : 0.f;
-                    if (Float.isNaN(w[k][j][i])) System.out.println(" ùùùùùùùùùùùùùùùùù " + w_double[k][j][i]);
                 }
             }
         }
