@@ -22,7 +22,7 @@ public class RequiredExternalVariable {
     private double[][] latRho;
     private double[][] lonRho;
     
-    public RequiredExternalVariable(double[][] lat, double[][] lon,Array variable0, Array variable1,IDataset dataset_hydro) {
+    public RequiredExternalVariable(double[][] lat, double[][] lon,Array variable0, Array variable1,IDataset dataset_hydro) throws IOException {
         this.dataset = dataset_hydro;
         latRho=lat;
         lonRho=lon;
@@ -30,6 +30,14 @@ public class RequiredExternalVariable {
         array_tp1=variable1;
         nx_file=lonRho[0].length;
         ny_file=lonRho.length;
+        if (!isInto(dataset)) {
+            throw new IOException("!! WARNING : please use option Dataset/Shrink Domain "
+                    + "to ensure that your ichthyop domain is contained within the new grid. \n"
+                    + "Min and max longitude : " +lonRho[0][0] + " " + lonRho[0][nx_file-1] 
+                    + " Min an max latitude : " + latRho[0][0] + " " + latRho[ny_file-1][0] 
+                    + ". \nActual domain (longitude latitude) : " + dataset.getLonMin() + " " 
+                    + dataset.getLonMax() + "     " + dataset.getLatMin() + " " + dataset.getLatMax());
+        }
     }
     
     public double[][] meteo2courant() throws IOException{
@@ -41,13 +49,14 @@ public class RequiredExternalVariable {
         double lonij,latij;
         String variable="UWND";
 
-        boolean coco=isInto(dataset);
-        double tmp[]= new double[]{30,52};
+        
+        double tmp[]= new double[]{60,52};
         System.out.println("%%%%%%" + computeVariable(tmp));
-        double[] ttmmpp;
-        ttmmpp = latlon2xy(dataset.getLat(30,52),dataset.getLon(30,52));
-        System.out.println("lat lon : " + dataset.getLat(30,52) + " " + dataset.getLon(30,52));
-        System.out.println("le xy : " + ttmmpp[0] + " " + ttmmpp[1]);
+        double ttmmpp[] = new double[]{30,52};
+        System.out.println("%%%%%%" + computeVariable(ttmmpp));
+        //ttmmpp = latlon2xy(dataset.getLat(60,52),dataset.getLon(60,52));
+        //System.out.println("lat lon : " + dataset.getLat(60,52) + " " + dataset.getLon(60,52));
+        //System.out.println("le xy : " + ttmmpp[0] + " " + ttmmpp[1]);
         
         /*for(int i=0; i<=nx; i++){
             for(int j=0; j<=ny; j++){
@@ -75,8 +84,6 @@ public class RequiredExternalVariable {
         double lat_max = dataset.getLatMax();
         double lon_min = dataset.getLonMin();
         double lat_min = dataset.getLatMin();
-        System.out.println("lon meteo : " + lon_min_meteo + " " + lon_max_meteo);
-        System.out.println("lon : " + lon_min + " " + lon_max);
         
         if (lon_max>lon_max_meteo){
             isInto=false;
@@ -96,8 +103,7 @@ public class RequiredExternalVariable {
                 }
             }
         }
-        System.out.println("$$$$$$$$$$$ is Into : ");
-        System.out.println(isInto);
+        
         return isInto;
     }
     
@@ -109,6 +115,7 @@ public class RequiredExternalVariable {
         int[] shape = null;
         double[] latlon = dataset.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
         double[] pGrid=latlon2xy(latlon[0],latlon[1]);
+
         int n = dataset.isCloseToCost(pGrid_hydro) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
@@ -168,7 +175,6 @@ public class RequiredExternalVariable {
                 value += array.getFloat(array.getIndex().set(jj, ii)) * co;
             }
         }
-
         if (CO != 0) {
             value /= CO;
         }
