@@ -2,7 +2,7 @@
 <icstructure>
     <long_name>Generic Ichthyop configuration file</long_name>
     <description>The file has few pre-defined parameters.</description>
-    <version date="2012/10/30">3.1</version>
+    <version date="2012/11/19">3.1</version>
     <block type="option">
         <tree_path>Time/General time options</tree_path>
         <key>app.time</key>
