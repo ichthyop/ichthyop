@@ -4,9 +4,9 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import org.previmer.ichthyop.event.NextStepEvent;
 import java.io.IOException;
 import org.previmer.ichthyop.dataset.MarsCommon.ErrorMessage;
+import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -34,22 +34,27 @@ public class Roms2dDataset extends RomsCommon {
      */
     static float[][] v_tp1;
 
+    @Override
     public boolean is3D() {
         return false;
     }
 
+    @Override
     public double depth2z(double x, double y, double depth) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
+    @Override
     public double z2depth(double x, double y, double z) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
+    @Override
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
+    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy;
@@ -63,8 +68,8 @@ public class Roms2dDataset extends RomsCommon {
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co;
+        double x;
 
         for (int jj = 0; jj < 2; jj++) {
             for (int ii = 0; ii < n; ii++) {
@@ -82,6 +87,7 @@ public class Roms2dDataset extends RomsCommon {
         return dv;
     }
 
+    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
@@ -96,8 +102,8 @@ public class Roms2dDataset extends RomsCommon {
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co;
+        double x;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
 
@@ -114,10 +120,12 @@ public class Roms2dDataset extends RomsCommon {
         return du;
     }
 
+    @Override
     public int get_nz() {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         long time = e.getSource().getTime();
@@ -138,6 +146,7 @@ public class Roms2dDataset extends RomsCommon {
         setAllFieldsTp1AtTime(rank);
     }
 
+    @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
@@ -164,7 +173,6 @@ public class Roms2dDataset extends RomsCommon {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
             time_tp1 -= time_tp1 % 100;
-            xTimeTp1 = null;
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -177,6 +185,7 @@ public class Roms2dDataset extends RomsCommon {
         }
     }
 
+    @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         Variable variable = nc.findVariable(name);
         int[] origin = null, shape = null;

@@ -16,8 +16,6 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +24,8 @@ import java.util.logging.Level;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
+import org.previmer.ichthyop.util.MetaFilenameFilter;
+import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
@@ -121,6 +121,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
 
+    @Override
     void loadParameters() {
 
         strXiDim = getParameter("field_dim_xi");
@@ -180,7 +181,7 @@ abstract class RomsCommon extends AbstractDataset {
             list.add(file.toString());
         }
         if (list.size() > 1) {
-            boolean skipSorting = false;
+            boolean skipSorting;
             try {
                 skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
             } catch (Exception ex) {
@@ -205,7 +206,7 @@ abstract class RomsCommon extends AbstractDataset {
     }
 
     public void shrinkGrid() {
-        boolean isParamDefined = false;
+        boolean isParamDefined;
         try {
             Boolean.valueOf(getParameter("shrink_domain"));
             isParamDefined = true;
@@ -226,6 +227,7 @@ abstract class RomsCommon extends AbstractDataset {
         }
     }
 
+    @Override
     public void setUp() throws Exception {
 
         loadParameters();
@@ -237,6 +239,7 @@ abstract class RomsCommon extends AbstractDataset {
         getDimGeogArea();
     }
 
+    @Override
     public void init() throws Exception {
 
         long t0 = getSimulationManager().getTimeManager().get_tO();
@@ -381,7 +384,7 @@ abstract class RomsCommon extends AbstractDataset {
         Array arrLon, arrLat, arrMask, arrH, arrZeta, arrPm, arrPn;
         Index index;
 
-        NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
+        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
         try {
             arrLon = ncGrid.findVariable(strLon).read(origin, size);
         } catch (Exception e) {
@@ -507,6 +510,7 @@ abstract class RomsCommon extends AbstractDataset {
         ipo = jpo = 0;
     }
 
+    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
@@ -570,6 +574,7 @@ abstract class RomsCommon extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
+    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -584,7 +589,7 @@ abstract class RomsCommon extends AbstractDataset {
         double longitude = 0.d;
         final double dx = ix - (double) i;
         final double dy = jy - (double) j;
-        double co = 0.d;
+        double co;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
@@ -595,10 +600,12 @@ abstract class RomsCommon extends AbstractDataset {
         return (new double[]{latitude, longitude});
     }
 
+    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
+    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 2.0f))
                 || (pGrid[0] < 1.0f)
@@ -606,6 +613,7 @@ abstract class RomsCommon extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
+    @Override
     public double getBathy(int i, int j) {
         if (isInWater(i, j)) {
             return hRho[j][i];
@@ -613,18 +621,22 @@ abstract class RomsCommon extends AbstractDataset {
         return Double.NaN;
     }
 
+    @Override
     public int get_nx() {
         return nx;
     }
 
+    @Override
     public int get_ny() {
         return ny;
     }
 
+    @Override
     public double getdxi(int j, int i) {
         return (pm[j][i] != 0) ? (1 / pm[j][i]) : 0.d;
     }
 
+    @Override
     public double getdeta(int j, int i) {
         return (pn[j][i] != 0) ? (1 / pn[j][i]) : 0.d;
     }
@@ -700,6 +712,7 @@ abstract class RomsCommon extends AbstractDataset {
         return (isInPolygone);
     }
 
+    @Override
     public boolean isInWater(int i, int j) {
         try {
             return (maskRho[j][i] > 0);
@@ -746,7 +759,7 @@ abstract class RomsCommon extends AbstractDataset {
                 ncIn.close();
             }
             try {
-                ncIn = NetcdfDataset.openFile(filename, null);
+                ncIn = NetcdfDataset.openDataset(filename);
             } catch (Exception ex) {
                 IOException ioex = new IOException("Error opening dataset " + filename + " ==> " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());
@@ -769,7 +782,7 @@ abstract class RomsCommon extends AbstractDataset {
     void readLonLat(String gridFile) throws IOException {
 
         Array arrLon, arrLat;
-        NetcdfFile ncGrid = NetcdfDataset.openFile(gridFile, null);
+        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
         try {
             arrLon = ncIn.findVariable(strLon).read();
         } catch (Exception ex) {
@@ -801,8 +814,6 @@ abstract class RomsCommon extends AbstractDataset {
                 }
             }
         }
-        arrLon = null;
-        arrLat = null;
     }
 
     /**
@@ -857,7 +868,7 @@ abstract class RomsCommon extends AbstractDataset {
         latMax = -latMin;
         depthMax = 0.d;
         int i = nx;
-        int j = 0;
+        int j;
 
         while (i-- > 0) {
             j = ny;
@@ -900,6 +911,7 @@ abstract class RomsCommon extends AbstractDataset {
      * Gets domain minimum latitude.
      * @return a double, the domain minimum latitude [north degree]
      */
+    @Override
     public double getLatMin() {
         return latMin;
     }
@@ -908,6 +920,7 @@ abstract class RomsCommon extends AbstractDataset {
      * Gets domain maximum latitude.
      * @return a double, the domain maximum latitude [north degree]
      */
+    @Override
     public double getLatMax() {
         return latMax;
     }
@@ -916,6 +929,7 @@ abstract class RomsCommon extends AbstractDataset {
      * Gets domain minimum longitude.
      * @return a double, the domain minimum longitude [east degree]
      */
+    @Override
     public double getLonMin() {
         return lonMin;
     }
@@ -924,6 +938,7 @@ abstract class RomsCommon extends AbstractDataset {
      * Gets domain maximum longitude.
      * @return a double, the domain maximum longitude [east degree]
      */
+    @Override
     public double getLonMax() {
         return lonMax;
     }
@@ -932,6 +947,7 @@ abstract class RomsCommon extends AbstractDataset {
      * Gets domain maximum depth.
      * @return a float, the domain maximum depth [meter]
      */
+    @Override
     public double getDepthMax() {
         return depthMax;
     }
@@ -942,6 +958,7 @@ abstract class RomsCommon extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
+    @Override
     public double getLat(int i, int j) {
         return latRho[j][i];
     }
@@ -952,6 +969,7 @@ abstract class RomsCommon extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
+    @Override
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
