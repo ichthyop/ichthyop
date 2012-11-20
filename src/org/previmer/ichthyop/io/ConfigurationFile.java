@@ -190,7 +190,7 @@ public class ConfigurationFile {
         return list;
     }
 
-    public void updateKey(String newKey, XBlock xblock) {
+    public void updateBlockKey(String newKey, XBlock xblock) {
         map.remove(xblock.getKey());
         xblock.setKey(newKey);
         map.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
@@ -209,6 +209,11 @@ public class ConfigurationFile {
         block.prepairForWriting();
         structure.getRootElement().addContent(block);
         map.put(new BlockId(block.getType(), block.getKey()).toString(), block);
+    }
+    
+    public void removeBlock(final BlockType type, final String key) {
+        map.remove(key);
+        structure.getRootElement().removeContent(getBlock(type, key));
     }
 }
 

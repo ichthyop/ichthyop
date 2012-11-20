@@ -17,14 +17,14 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import org.jdesktop.application.Application;
-import org.jdesktop.swingx.JXImagePanel;
+import org.jdesktop.swingx.JXImageView;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 
 /**
  *
  * @author pverley
  */
-public class ReplayPanel extends JXImagePanel {
+public class ReplayPanel extends JXImageView {
 
     private List<BufferedImage> pictures = null;
     private List<String> pictureNames = null;
@@ -36,7 +36,6 @@ public class ReplayPanel extends JXImagePanel {
 
     public ReplayPanel() {
         setOpaque(false);
-        setStyle(JXImagePanel.Style.CENTERED);
         pictures = new ArrayList();
         pictureNames = new ArrayList();
         setFolder(null);
@@ -81,7 +80,7 @@ public class ReplayPanel extends JXImagePanel {
             String date = tokens[tokens.length - 1];
             date = date.substring(0, date.indexOf(".png"));
             String[] dateToken = date.split("-");
-            StringBuffer time = new StringBuffer("Year ");
+            StringBuilder time = new StringBuilder("Year ");
             time.append(dateToken[0].substring(3));
             time.append(" Month ");
             time.append(dateToken[1]);
@@ -111,6 +110,7 @@ public class ReplayPanel extends JXImagePanel {
             this.folder = folder;
         }
 
+        @Override
         public void run() {
 
             try {
