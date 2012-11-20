@@ -47,8 +47,11 @@ public class UpdateManager extends AbstractManager {
         /*
          * Upgrade the configuration file to latest version
          */
-        if (getConfigurationVersion().priorTo(getApplicationVersion())) {
+        if (getConfigurationVersion().priorTo(Version.v3_1)) {
             u30bTo31();
+        }
+        if (getConfigurationVersion().priorTo(getApplicationVersion())) {
+            u31To32();
         }
         /*
          * Save the updated configuration file
@@ -60,12 +63,43 @@ public class UpdateManager extends AbstractManager {
         }
         getSimulationManager().getParameterManager().save();
     }
+    
+    /*
+     * Upgrade the 3.1 configuration file to 3.2
+     */
+    private void u31To32() throws Exception {
+        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        String treepath, newTreepath;
+        /*
+         * Update block action.lethal_temp
+         */
+        if (null != getXBlock(BlockType.ACTION, "action.lethal_temp")) {
+            treepath = getXBlock(BlockType.ACTION, "action.lethal_temp").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Lethal temperatures"
+                    : "Biology/Lethal temperatures";
+            getConfigurationFile().removeBlock(BlockType.ACTION, "action.lethal_temp");
+            getConfigurationFile().addBlock(cfg32.getBlock(BlockType.ACTION, "action.lethal_temp"));
+            getXBlock(BlockType.ACTION, "action.lethal_temp").setTreePath(newTreepath);
+        }
+        /*
+         * Update version number and date
+         */
+        getConfigurationFile().setVersion(getApplicationVersion());
+        StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
+        str.append("  --@@@--  ");
+        str.append((new GregorianCalendar()).getTime());
+        str.append(" File updated to version ");
+        str.append(getApplicationVersion());
+        str.append('.');
+        getConfigurationFile().setDescription(str.toString());
+    }
 
     /*
      * Upgrade the 3.0b configuration file to 3.1
      */
     private void u30bTo31() throws Exception {
-        ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
         String treepath, newTreepath;
         /*
          * Add the density_file parameter in the action.buoyancy block
@@ -86,7 +120,7 @@ public class UpdateManager extends AbstractManager {
                     ? "Advanced/Biology/Recruitment/In zones"
                     : "Biology/Recruitment/In zones";
             getXBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
-            getConfigurationFile().updateKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
+            getConfigurationFile().updateBlockKey("action.recruitment.zone", getXBlock(BlockType.ACTION, "action.recruitment"));
         }
         /*
          * Add the recruitment in stain block
@@ -114,10 +148,10 @@ public class UpdateManager extends AbstractManager {
          * Update MARS OpendDAP URL
          */
         if (null != getXBlock(BlockType.DATASET, "dataset.mars_2d_opendap")) {
-            getXParameter(BlockType.DATASET, "dataset.mars_2d_opendap", "opendap_url").setValue("http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
+            getXParameter(BlockType.DATASET, "dataset.mars_2d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
         }
         if (null != getXBlock(BlockType.DATASET, "dataset.mars_3d_opendap")) {
-            getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "opendap_url").setValue("http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
+            getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
         }
         /*
          * Update MARS Generelized Sigma parameters
@@ -191,12 +225,12 @@ public class UpdateManager extends AbstractManager {
         /*
          * Update version number and date
          */
-        getConfigurationFile().setVersion(getApplicationVersion());
+        getConfigurationFile().setVersion(Version.v3_1);
         StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
         str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
         str.append(" File updated to version ");
-        str.append(getApplicationVersion());
+        str.append(Version.v3_1);
         str.append('.');
         getConfigurationFile().setDescription(str.toString());
     }
@@ -235,17 +269,19 @@ public class UpdateManager extends AbstractManager {
         return getSimulationManager().getParameterManager().getConfigurationVersion();
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
         // does nothing
     }
 
     private void validateVersion(Version testedVersion) {
 
-        for (Version version : Version.values()) {
+        for (Version version : Version.values) {
             if (version.getNumber().equals(testedVersion.getNumber())) {
                 return;
             }

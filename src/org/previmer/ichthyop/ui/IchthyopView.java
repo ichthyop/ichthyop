@@ -18,6 +18,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.text.NumberFormat;
@@ -49,6 +50,7 @@ import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.Version;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.manager.UpdateManager;
 import org.previmer.ichthyop.ui.logging.LogLevel;
@@ -619,7 +621,7 @@ public class IchthyopView extends FrameView
                 sb.append(" ");
                 sb.append(file.getName());
                 getLogger().info(sb.toString());
-                return loadConfigurationFile(file);
+                return loadConfigurationFile(file, null);
             } catch (IOException ex) {
                 getLogger().log(Level.SEVERE, getResourceMap().getString("saveAsConfigurationFile.msg.failed"), ex);
             }
@@ -782,7 +784,7 @@ public class IchthyopView extends FrameView
                             try {
                                 getUpdateManager().upgrade();
                                 getLogger().info(resourceMap.getString("updateConfigurationFile.uptodate") + " " + getUpdateManager().getApplicationVersion().toString());
-                                loadConfigurationFile(file).execute();
+                                loadConfigurationFile(file, null).execute();
                             } catch (Exception ex) {
                                 getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
                             }
@@ -791,7 +793,7 @@ public class IchthyopView extends FrameView
                     }
                 });
             } else {
-                loadConfigurationFile(file).execute();
+                loadConfigurationFile(file, null).execute();
             }
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
@@ -827,7 +829,7 @@ public class IchthyopView extends FrameView
         return SimulationManager.getLogger();
     }
 
-    public Task loadConfigurationFile(File file) {
+    public Task loadConfigurationFile(File file, Version version) {
         try {
             getSimulationManager().setConfigurationFile(file);
         } catch (Exception e) {
@@ -838,6 +840,14 @@ public class IchthyopView extends FrameView
                 return new FailedTask(getApplication(), eclone);
             } catch (Exception ex) {
                 return new FailedTask(getApplication(), e);
+            }
+        }
+        if (null != version) {
+            getSimulationManager().getParameterManager().setConfigurationVersion(version);
+            try {
+                getSimulationManager().getParameterManager().save();
+            } catch (IOException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         getLogger().info(getResourceMap().getString("openConfigurationFile.msg.opened") + " " + file.toString());

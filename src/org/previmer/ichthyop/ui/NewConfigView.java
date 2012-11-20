@@ -28,6 +28,7 @@ import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.manager.SimulationManager;
+import org.previmer.ichthyop.manager.UpdateManager;
 
 /**
  * The application's main frame.
@@ -103,9 +104,13 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         if (cfgFile != null) {
             getLogger().log(Level.INFO, resourceMap.getString("save.msg.created") + " " + cfgFile.getPath());
             cancel(); // close the view
-            return IchthyopApp.getIchthyopView().loadConfigurationFile(cfgFile);
+            return IchthyopApp.getIchthyopView().loadConfigurationFile(cfgFile, getUpdateManager().getApplicationVersion());
         }
         return null;
+    }
+    
+    private UpdateManager getUpdateManager() {
+        return UpdateManager.getInstance();
     }
 
     public void valueChanged(TreeSelectionEvent e) {
