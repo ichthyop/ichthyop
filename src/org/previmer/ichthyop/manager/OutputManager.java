@@ -155,7 +155,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
-                    zoneEdges.add(iZone, makeZoneEdge(zone));
+                    try {
+                        zoneEdges.add(iZone, makeZoneEdge(zone));
+                    } catch (Exception ex) {
+                        getLogger().log(Level.WARNING, "Problem occured defining the contour of zone " + zone.getKey() + ". It will not be drawn on the map.");
+                        continue;
+                    }
                     Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneEdges.get(iZone).size());
                     ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
                     ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getKey());
@@ -410,7 +415,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     continue;
                 }
                 /* tracker is only added to the list if addition in the
-                NetCDF output file succedeed */
+                 NetCDF output file succedeed */
                 trackers.add(tracker);
             }
         }
@@ -460,8 +465,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
      *
      * @param field a Field, the variable to be written
      * @param origin an int[], the offset within the variable to start writing.
-     * @param array the Array that will be written; must be same type and
-     * rank as Field
+     * @param array the Array that will be written; must be same type and rank
+     * as Field
      */
     private boolean writeTrackerToNetCDF(ITracker tracker, int index) {
         try {
