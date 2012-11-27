@@ -89,7 +89,7 @@ public class LethalTempAction extends AbstractAction {
         try {
             // open densities csv file
             CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
-            List<String[]> lines = reader.readAll();            
+            List<String[]> lines = reader.readAll();
 
             // init arrays
             ages = new float[lines.size() - 1];
@@ -123,19 +123,21 @@ public class LethalTempAction extends AbstractAction {
         double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         int iAge = ages.length - 1;
         if (FLAG_LETHAL_TEMP_FUNCTION) {
-                float age = particle.getAge();
-                for (int i = 0; i < ages.length - 1; i++) {
-                    if (ages[i] <= age && age < ages[i + 1]) {
-                        iAge = i;
-                        break;
-                    }
+            float age = particle.getAge();
+            for (int i = 0; i < ages.length - 1; i++) {
+                if (ages[i] <= age && age < ages[i + 1]) {
+                    iAge = i;
+                    break;
                 }
-                
+            }
+
         }
         //System.out.println("I am " + (particle.getAge() / 3600) + " hours old, lethal tp cold: " + coldLethalTp[iAge] + " & hot: " + hotLethalTp[iAge]);
-        if (temperature <= coldLethalTp[iAge] || temperature >= hotLethalTp[iAge]) {
-                particle.kill(ParticleMortality.DEAD_COLD);
-            }
+        if (temperature <= coldLethalTp[iAge]) {
+            particle.kill(ParticleMortality.DEAD_COLD);
+        } else if (temperature >= hotLethalTp[iAge]) {
+            particle.kill(ParticleMortality.DEAD_HOT);
+        }
     }
 
     private void checkTpGrowingParticle(IBasicParticle particle) {
@@ -144,8 +146,10 @@ public class LethalTempAction extends AbstractAction {
         Stage stage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage();
         boolean frozen = ((stage == Stage.EGG) && (temperature <= coldLethalTp[0])) || ((stage != Stage.EGG) && (temperature <= coldLethalTp[1]));
         boolean heated = ((stage == Stage.EGG) && (temperature >= hotLethalTp[0])) || ((stage != Stage.EGG) && (temperature >= hotLethalTp[1]));
-        if (frozen || heated) {
+        if (frozen) {
             particle.kill(ParticleMortality.DEAD_COLD);
+        } else if (heated) {
+            particle.kill(ParticleMortality.DEAD_HOT);
         }
     }
 }

@@ -27,7 +27,8 @@ public enum ParticleMortality {
     OUT_OF_DOMAIN(2),
     BEACHED(4),
     OLD(3),
-    STARVATION(5);
+    STARVATION(5),
+    DEAD_HOT(6);
     
     private int code = 0;
 
