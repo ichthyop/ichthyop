@@ -30,6 +30,13 @@ public class WaveDriftURLAction extends WaveDriftFileAction{
         strVW=getParameter("stokes_v");
         strLon=getParameter("longitude");
         strLat=getParameter("latitude");
+        depth_application=Double.valueOf(getParameter("depth_application"));
+        if(depth_application==-10){
+            exponential_decrease=true;
+        }
+        else{
+            exponential_decrease=false;
+        }
         
         getDimNC();
         setOnFirstTime();
@@ -38,10 +45,11 @@ public class WaveDriftURLAction extends WaveDriftFileAction{
 
         U_variable=new RequiredExternalVariable(latRho,lonRho,uw_tp0,uw_tp1,getSimulationManager().getDataset());
         V_variable=new RequiredExternalVariable(latRho,lonRho,vw_tp0,vw_tp1,getSimulationManager().getDataset());
-        wave_period=new RequiredExternalVariable(latRho,lonRho,wave_period_tp0,wave_period_tp1,getSimulationManager().getDataset());
-        wave_speed_u=new RequiredExternalVariable(latRho,lonRho,wave_speed_u_tp0,wave_speed_u_tp1,getSimulationManager().getDataset());
-        wave_speed_v=new RequiredExternalVariable(latRho,lonRho,wave_speed_v_tp0,wave_speed_v_tp1,getSimulationManager().getDataset());
-        
+        if(exponential_decrease){
+            wave_period=new RequiredExternalVariable(latRho,lonRho,wave_period_tp0,wave_period_tp1,getSimulationManager().getDataset());
+            wave_speed_u=new RequiredExternalVariable(latRho,lonRho,wave_speed_u_tp0,wave_speed_u_tp1,getSimulationManager().getDataset());
+            wave_speed_v=new RequiredExternalVariable(latRho,lonRho,wave_speed_v_tp0,wave_speed_v_tp1,getSimulationManager().getDataset());
+        }
     }
   
     static void openURL(String opendapURL) throws IOException {
@@ -98,7 +106,12 @@ public class WaveDriftURLAction extends WaveDriftFileAction{
 
         uw_tp0 = uw_tp1;
         vw_tp0 = vw_tp1;
-
+        if(exponential_decrease){
+            wave_period_tp0 = wave_period_tp1;
+            wave_speed_u_tp0 = wave_speed_u_tp1;
+            wave_speed_v_tp0 = wave_speed_v_tp1;
+        }
+        
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             throw new IndexOutOfBoundsException("Time out of wave dataset range");
@@ -115,7 +128,12 @@ public class WaveDriftURLAction extends WaveDriftFileAction{
         
         uw_tp1 = readVariable(strUW);
         vw_tp1 = readVariable(strVW);
-
+        if(exponential_decrease){
+            wave_period_tp1 = readVariable(str_wave_period);
+            wave_speed_u_tp1 = readVariable(str_wave_speed_u);
+            wave_speed_v_tp1 = readVariable(str_wave_speed_v);
+        }
+        
         try {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = conversion2seconds(xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank)));
