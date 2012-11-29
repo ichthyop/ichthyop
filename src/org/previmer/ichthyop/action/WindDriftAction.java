@@ -25,10 +25,13 @@ public class WindDriftAction extends AbstractAction {
      * Angle deviation imposed by wind 
      */
     static double angle;
+    /**
+     * Wind convention used
+     */
+    static double convention;
     
     @Override
     public void loadParameters() throws Exception {
-        System.out.println("*****************LOAD PARAMMMMMM");
         wind_factor=Double.valueOf(getParameter("wind_factor"));
         strUW=getParameter("wind_u");
         strVW=getParameter("wind_v");
@@ -37,6 +40,7 @@ public class WindDriftAction extends AbstractAction {
         angle = Math.PI/2.0-Double.valueOf(getParameter("angle"))*Math.PI/180.0;
         getSimulationManager().getDataset().requireVariable(strUW, getClass());
         getSimulationManager().getDataset().requireVariable(strVW, getClass());
+        convention = getParameter("wind_convention")=="wind to"? 1 : -1;
     }
 
     
@@ -58,18 +62,20 @@ public class WindDriftAction extends AbstractAction {
     
     private double[] getDLonLat(double[] pgrid, double depth, double time, double dt){
         double[] dWi = new double[2];
-        if (depth > depth_application) {
-            dWi[0]=0;
-            dWi[1]=0;
-            return dWi;
+        if (getSimulationManager().getDataset().is3D()){
+            if (depth > depth_application) {
+                dWi[0]=0;
+                dWi[1]=0;
+                return dWi;
+            }
         }
         double dx,dy;
         double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
         dx = dt*getSimulationManager().getDataset().get(strUW, pgrid, time).doubleValue()/one_deg_lon_meter;
         dy = dt*getSimulationManager().getDataset().get(strVW, pgrid, time).doubleValue()/ ONE_DEG_LATITUDE_IN_METER;
-        dWi[0] = wind_factor*(dx*Math.cos(angle)-dy*Math.sin(angle));
-        dWi[1] = wind_factor*(dx*Math.sin(angle)+dy*Math.cos(angle));
+        dWi[0] = convention*wind_factor*(dx*Math.cos(angle)-dy*Math.sin(angle));
+        dWi[1] = convention*wind_factor*(dx*Math.sin(angle)+dy*Math.cos(angle));
         return dWi;
     }
 
