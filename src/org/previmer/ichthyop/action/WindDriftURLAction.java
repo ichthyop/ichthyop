@@ -32,7 +32,6 @@ public class WindDriftURLAction extends WindDriftFileAction {
         
     @Override
     public void loadParameters() throws Exception {
-        System.out.println("*****************LOAD PARAMMMMMM URL");
         strTime = getParameter("field_time");
         time_current=getSimulationManager().getTimeManager().getTime();
         openURL(getParameter("wind_url"));
@@ -42,6 +41,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
         strVW=getParameter("wind_v");
         strLon=getParameter("longitude");
         strLat=getParameter("latitude");
+        convention = getParameter("wind_convention")=="wind to"? 1 : -1;
         
         getDimNC();
         setOnFirstTime();
@@ -97,9 +97,9 @@ public class WindDriftURLAction extends WindDriftFileAction {
         }
     }
     
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
-        long time = e.getSource().getTime();
-        int time_arrow = (int) Math.signum(e.getSource().get_dt());
+    public void nextStepTriggered() throws Exception {
+        long time = getSimulationManager().getTimeManager().getTime();
+        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
