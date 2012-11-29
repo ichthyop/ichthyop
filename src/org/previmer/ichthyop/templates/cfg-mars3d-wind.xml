@@ -569,7 +569,7 @@
         <key>action.windDrift</key>
         <tree_path>Advanced/Transport/Wind drift/Data from Netcdf current file</tree_path>
         <enabled>false</enabled>
-        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read any realistic wind field which are included in current files. Deplacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read any realistic wind field which are included in current files. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
         <parameters>
             <parameter>
                 <key>wind_factor</key>
@@ -610,6 +610,16 @@
                 <description> Depth under which wind drift is not taking into account.</description>
             </parameter>
             <parameter hidden="true">
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <format>class</format>
@@ -636,7 +646,7 @@
         <key>action.windDriftFile</key>
         <tree_path>Advanced/Transport/Wind drift/Data from Netcdf wind file</tree_path>
         <enabled>false</enabled>
-        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from files. Deplacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from files. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
         <parameters>
             <parameter>
                 <key>input_path</key>
@@ -719,6 +729,16 @@
                 <description> Depth under which wind drift is not taking into account.</description>
             </parameter>
             <parameter hidden="true">
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
                 <key>time_unit</key>
                 <long_name>Unit of time</long_name>
                 <value>seconds</value>
@@ -765,7 +785,7 @@
         <key>action.windDriftURL</key>
         <tree_path>Advanced/Transport/Wind drift/Data from OpenDAP wind file</tree_path>
         <enabled>false</enabled>
-        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from OpenDAP. Deplacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from OpenDAP. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
         <parameters>
             <parameter>
                 <key>wind_url</key>
@@ -833,6 +853,16 @@
                 <description> Depth under which wind drift is not taking into account.</description>
             </parameter>
             <parameter hidden="true">
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
                 <key>time_unit</key>
                 <long_name>Unit of time</long_name>
                 <value>seconds</value>
@@ -879,7 +909,8 @@
         <key>action.waveDriftFile</key>
         <tree_path>Advanced/Transport/Wave drift/Data from Netcdf wave file</tree_path>
         <enabled>false</enabled>
-        <description>Block of options to implement particle drift due to waves (Stokes drift). The application is able to read realistic wave datasets from files. Deplacement induced by waves (dXwave) is a function of Stokes drift (Ustokes) and depth : dXwave = wave_factor * Ustokes * exp(2 * wave_number * depth) . The wave number is compute thanks to wave speed and wave period : wave_number = 2 * Pi / (wave_speed * wave_period).</description>
+        <description>Block of options to implement particle drift due to waves (Stokes drift). The application is able to read realistic wave datasets from files. Displacement induced by waves (dXwave) is a function of Stokes drift (Ustokes) and depth : dXwave = wave_factor * Ustokes * exp(2 * wave_number * depth) . The wave number is compute thanks to wave speed and wave period : wave_number = 2 * Pi / (wave_speed * wave_period). 
+            If the wave number is not available, depth effect is not taken into acount in displacement computation : dXwave = wave_factor * Ustokes but a depth application can be fixed. </description>
         <parameters>
             <parameter>
                 <key>input_path</key>
@@ -946,6 +977,14 @@
                 <description>Wave factor value</description>
             </parameter>
             <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters, positive number)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account. Put the value -10.0 if you want to use exponential decrease.</description>
+            </parameter>
+            <parameter>
                 <key>wave_period</key>
                 <long_name>Wave period</long_name>
                 <value>t</value>
@@ -965,14 +1004,6 @@
                 <value>vubr</value>
                 <default>vubr</default>
                 <description>Wave speed name along y</description>
-            </parameter>
-            <parameter>
-                <key>depth_application</key>
-                <long_name>Depth application (in meters)</long_name>
-                <value>1</value>
-                <default>1</default>
-                <format>float</format>
-                <description> Depth under which wave drift is not taking into account.</description>
             </parameter>
             <parameter hidden="true">
                 <key>time_unit</key>
@@ -1018,10 +1049,11 @@
         </parameters>
     </block>
     <block type="action">
-        <key>action.windDriftURL</key>
+        <key>action.waveDriftURL</key>
         <tree_path>Advanced/Transport/Wave drift/Data from OpenDAP wave file</tree_path>
         <enabled>false</enabled>
-        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wave datasets from OpenDAP. Deplacement induced by waves (dXwave) is a function of Stokes drift (Ustokes) and depth : dXwave = wave_factor * Ustokes * exp(2 * wave_number * depth) . The wave number is compute thanks to wave speed and wave period : wave_number = 2 * Pi / (wave_speed * wave_period).</description>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wave datasets from OpenDAP. Displacement induced by waves (dXwave) is a function of Stokes drift (Ustokes) and depth : dXwave = wave_factor * Ustokes * exp(2 * wave_number * depth) . The wave number is compute thanks to wave speed and wave period : wave_number = 2 * Pi / (wave_speed * wave_period).
+            If the wave number is not available, depth effect is not taken into acount in displacement computation : dXwave = wave_factor * Ustokes but a depth application can be fixed.</description>
         <parameters>
             <parameter>
                 <key>wave_url</key>
@@ -1079,6 +1111,14 @@
                 <description>Wave factor value</description>
             </parameter>
             <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters, positive number)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account. Put the value -10.0 if you want to use exponential decrease.</description>
+            </parameter>
+            <parameter>
                 <key>wave_period</key>
                 <long_name>Wave period</long_name>
                 <value>t</value>
@@ -1098,14 +1138,6 @@
                 <value>vubr</value>
                 <default>vubr</default>
                 <description>Wave speed name along y</description>
-            </parameter>
-            <parameter>
-                <key>depth_application</key>
-                <long_name>Depth application (in meters)</long_name>
-                <value>1</value>
-                <default>1</default>
-                <format>float</format>
-                <description> Depth under which wave drift is not taking into account.</description>
             </parameter>
             <parameter hidden="true">
                 <key>time_unit</key>
@@ -1131,8 +1163,8 @@
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <format>class</format>
-                <value>org.previmer.ichthyop.action.WaveDriftFileAction</value>
-                <default>org.previmer.ichthyop.action.WaveDriftFileAction</default>
+                <value>org.previmer.ichthyop.action.WaveDriftURLAction</value>
+                <default>org.previmer.ichthyop.action.WaveDriftURLAction</default>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
             <parameter hidden="true">
