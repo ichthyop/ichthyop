@@ -104,7 +104,6 @@ public class WindDriftFileAction extends WindDriftAction {
     
     @Override
     public void loadParameters() throws Exception {
-        System.out.println("*****************LOAD PARAMMMMMM WIND FILE ***********");
         strTime = getParameter("field_time");
         time_current=getSimulationManager().getTimeManager().getTime();
         openLocation(getParameter("input_path"));
@@ -116,6 +115,8 @@ public class WindDriftFileAction extends WindDriftAction {
         strVW=getParameter("wind_v");
         strLon=getParameter("longitude");
         strLat=getParameter("latitude");
+        convention = getParameter("wind_convention").equals("wind to") ? 1 : -1;
+        
         getDimNC();
         setOnFirstTime();
         setAllFieldsTp1AtTime(rank);
@@ -212,7 +213,6 @@ public class WindDriftFileAction extends WindDriftAction {
                 throw ioex;
             }
             try {
-                System.out.println("*** time : " + strTime);
                 nbTimeRecords = ncIn.findDimension(strTime).getLength();
             } catch (Exception ex) {
                 IOException ioex = new IOException("Error dataset time dimension ==> " + ex.toString());
@@ -321,14 +321,11 @@ public class WindDriftFileAction extends WindDriftAction {
         long time_r0, time_rf;
 
         filename = listInputFiles.get(index);
-        System.out.println("....... " + filename);
         nc = NetcdfDataset.openDataset(filename);
         timeArr = nc.findVariable(strTime).read();
         time_r0 = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
         time_rf = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(
                 timeArr.getShape()[0] - 1))));
-        System.out.println("temps en jours :" + timeArr.getFloat(timeArr.getIndex().set(0)));
-        System.out.println("time dep et time fin : " + time_r0 + " " + time_rf);
         nc.close();
         timeArr = null;
         nc = null;
@@ -516,18 +513,20 @@ public class WindDriftFileAction extends WindDriftAction {
    
    public double[] getDLonLat(double[] pgrid, double depth, double time, double dt){
         double[] dWi = new double[2];
-        if (depth > depth_application) {
-            dWi[0]=0;
-            dWi[1]=0;
-            return dWi;
+        if (getSimulationManager().getDataset().is3D()){
+            if (depth > depth_application) {
+                dWi[0]=0;
+                dWi[1]=0;
+                return dWi;
+            }
         }
         double dx,dy;
         double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
         dx = dt*U_variable.getVariable(pgrid, time) /one_deg_lon_meter;
         dy = dt*V_variable.getVariable(pgrid, time) / ONE_DEG_LATITUDE_IN_METER;
-        dWi[0] = wind_factor*(dx*Math.cos(angle)-dy*Math.sin(angle));
-        dWi[1] = wind_factor*(dx*Math.sin(angle)+dy*Math.cos(angle));
+        dWi[0] = convention*wind_factor*(dx*Math.cos(angle)-dy*Math.sin(angle));
+        dWi[1] = convention*wind_factor*(dx*Math.sin(angle)+dy*Math.cos(angle));
         return dWi;
     } 
     
