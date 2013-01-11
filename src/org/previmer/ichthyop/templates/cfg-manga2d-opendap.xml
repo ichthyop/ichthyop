@@ -343,7 +343,7 @@
     </block>
     <block type="action">
         <key>action.wind</key>
-        <tree_path>Advanced/Transport/Wind drift</tree_path>
+        <tree_path>Advanced/Transport/Wind drift/Scenario</tree_path>
         <enabled>false</enabled>
         <description>Block of options to implement particle drift due to sea surface wind. The application is not able yet to read any realistic wind datasets. You will have to build your own wind scenarii, providing parameters such as wind direction and intensity, windage, etc. in a separate textfile. For 2D simulations, every particle is exposed to surface wind. For 3D simulations, the application only applies wind drift to close-surface particles (technically, particles that reach the top grid level). First time you enable the wind action, do not forget to create a new wind file (the filename is preset but the file may not exist yet on your disk).</description>
         <parameters>
@@ -362,6 +362,623 @@
                 <format>class</format>
                 <value>org.previmer.ichthyop.action.WindAction</value>
                 <default>org.previmer.ichthyop.action.WindAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.windDrift</key>
+        <tree_path>Advanced/Transport/Wind drift/Data from Netcdf current file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read any realistic wind field which are included in current files. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <parameters>
+            <parameter>
+                <key>wind_factor</key>
+                <long_name>Wind factor</long_name>
+                <value>0.03</value>
+                <default>0.03</default>
+                <format>float</format>
+                <description>Wind factor value</description>
+            </parameter>
+            <parameter>
+                <key>angle</key>
+                <long_name>Angle deviation (in degree)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description> Constant angle deviation imposed by wind. 0° is Eastward (wind blows toward East), 90° is a Northward (wind blows toward North).</description>
+            </parameter>
+            <parameter>
+                <key>wind_u</key>
+                <long_name>U wind speed</long_name>
+                <value>UWND</value>
+                <default>UWND</default>
+                <description>Wind speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wind_v</key>
+                <long_name>V wind speed</long_name>
+                <value>VWND</value>
+                <default>VWND</default>
+                <description>Wind speed name along y</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.action.WindDriftAction</value>
+                <default>org.previmer.ichthyop.action.WindDriftAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.windDriftFile</key>
+        <tree_path>Advanced/Transport/Wind drift/Data from Netcdf wind file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from files. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <parameters>
+            <parameter>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>/home/gwendo/NetBeansProjects/stable-3/input/Manga4000/</value>
+                <format>path</format>
+                <default>input</default>
+                <description>Folder containing the wind NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>file_filter</key>
+                <long_name>File filter</long_name>
+                <value>*.nc</value>
+                <default>*.nc</default>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>field_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time</value>
+                <default>time</default><parameter type="serial">
+                <key>initial_time</key>
+                <long_name>Beginning of simulation</long_name>
+                <value>year 2010 month 05 day 13 at 10:00</value>
+                <format>date</format>
+                <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
+            </parameter>
+                <description>Name of the NetCDF variable in the wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>longitude</key>
+                <long_name>longitude field</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the longitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>latitude</key>
+                <long_name>latitude field</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the latitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>wind_u</key>
+                <long_name>U wind speed</long_name>
+                <value>UWND</value>
+                <default>UWND</default>
+                <description>Wind speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wind_v</key>
+                <long_name>V wind speed</long_name>
+                <value>VWND</value>
+                <default>VWND</default>
+                <description>Wind speed name along y</description>
+            </parameter>
+            <parameter>
+                <key>wind_factor</key>
+                <long_name>Wind factor</long_name>
+                <value>0.03</value>
+                <default>0.03</default>
+                <format>float</format>
+                <description>Wind factor value</description>
+            </parameter>
+            <parameter>
+                <key>angle</key>
+                <long_name>Angle deviation (in degree)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description> Constant angle deviation imposed by wind.0° is Eastward (wind blows toward East), 90° is a Northward (wind blows toward North).</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_unit</key>
+                <long_name>Unit of time</long_name>
+                <value>seconds</value>
+                <format>combo</format>
+                <accepted>seconds</accepted>
+                <accepted>minutes</accepted>
+                <accepted>hours</accepted>
+                <accepted>days</accepted>
+                <default>seconds</default>
+                <description>Unit of time in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_origin</key>
+                <long_name>Origin of time</long_name>
+                <value>year 1900 month 01 day 01 at 00:00</value>
+                <format>date</format>
+                <default>year 1900 month 01 day 01 at 00:00</default>
+                <description> For wind models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.action.WindDriftFileAction</value>
+                <default>org.previmer.ichthyop.action.WindDriftFileAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.windDriftURL</key>
+        <tree_path>Advanced/Transport/Wind drift/Data from OpenDAP wind file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from OpenDAP. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <parameters>
+            <parameter>
+                <key>wind_url</key>
+                <long_name>OpenDAP URL</long_name>
+                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
+                <description>Folder containing the wind NetCDF files.</description>
+            </parameter>
+            <parameter>
+                <key>field_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF variable in the wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>longitude</key>
+                <long_name>longitude field</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the longitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>latitude</key>
+                <long_name>latitude field</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the latitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>wind_u</key>
+                <long_name>U wind speed</long_name>
+                <value>UWND</value>
+                <default>UWND</default>
+                <description>Wind speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wind_v</key>
+                <long_name>V wind speed</long_name>
+                <value>VWND</value>
+                <default>VWND</default>
+                <description>Wind speed name along y</description>
+            </parameter>
+            <parameter>
+                <key>wind_factor</key>
+                <long_name>Wind factor</long_name>
+                <value>0.03</value>
+                <default>0.03</default>
+                <format>float</format>
+                <description>Wind factor value</description>
+            </parameter>
+            <parameter>
+                <key>angle</key>
+                <long_name>Angle deviation (in degree)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description> Constant angle deviation imposed by wind.0° is Eastward (wind blows toward East), 90° is a Northward (wind blows toward North).</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_unit</key>
+                <long_name>Unit of time</long_name>
+                <value>seconds</value>
+                <format>combo</format>
+                <accepted>seconds</accepted>
+                <accepted>minutes</accepted>
+                <accepted>hours</accepted>
+                <accepted>days</accepted>
+                <default>seconds</default>
+                <description>Unit of time in wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_origin</key>
+                <long_name>Origin of time</long_name>
+                <value>year 1900 month 01 day 01 at 00:00</value>
+                <format>date</format>
+                <default>year 1900 month 01 day 01 at 00:00</default>
+                <description> For wind models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.action.WindDriftURLAction</value>
+                <default>org.previmer.ichthyop.action.WindDriftURLAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.waveDriftFile</key>
+        <tree_path>Advanced/Transport/Wave drift/Data from Netcdf wave file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to waves (Stokes drift). The application is able to read realistic wave datasets from files. Displacement induced by waves (dXwave) is a function of Stokes drift (Ustokes) and depth : dXwave = wave_factor * Ustokes * exp(2 * wave_number * depth) . The wave number is compute thanks to wave speed and wave period : wave_number = 2 * Pi / (wave_speed * wave_period). 
+            If the wave number is not available, depth effect is not taken into acount in displacement computation : dXwave = wave_factor * Ustokes but a depth application can be fixed. </description>
+        <parameters>
+            <parameter>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>/home/gwendo/NetBeansProjects/stable-3/input/Manga4000/</value>
+                <format>path</format>
+                <default>input</default>
+                <description>Folder containing the wave NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>file_filter</key>
+                <long_name>File filter</long_name>
+                <value>*.nc</value>
+                <default>*.nc</default>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>field_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time</value>
+                <default>time</default><parameter type="serial">
+                <key>initial_time</key>
+                <long_name>Beginning of simulation</long_name>
+                <value>year 2010 month 05 day 13 at 10:00</value>
+                <format>date</format>
+                <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
+            </parameter>
+                <description>Name of the NetCDF variable in the wave dataset.</description>
+            </parameter>
+            <parameter>
+                <key>longitude</key>
+                <long_name>longitude field</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the longitude field in wave dataset</description>
+            </parameter>
+            <parameter>
+                <key>latitude</key>
+                <long_name>latitude field</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the latitude field in wave dataset</description>
+            </parameter>
+            <parameter>
+                <key>stokes_u</key>
+                <long_name>U stokes drift</long_name>
+                <value>uuss</value>
+                <default>uuss</default>
+                <description>Stokes drift name along x</description>
+            </parameter>
+            <parameter>
+                <key>stokes_v</key>
+                <long_name>V stokes drift</long_name>
+                <value>vuss</value>
+                <default>vuss</default>
+                <description>Stokes drift name along y</description>
+            </parameter>
+            <parameter>
+                <key>wave_factor</key>
+                <long_name>Wave factor</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description>Wave factor value</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters, positive number)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wave drift is not taking into account. Put the value -10.0 if you want to use exponential decrease.</description>
+            </parameter>
+            <parameter>
+                <key>wave_period</key>
+                <long_name>Wave period</long_name>
+                <value>t</value>
+                <default>t</default>
+                <description>Wave period name</description>
+            </parameter>
+            <parameter>
+                <key>wave_u</key>
+                <long_name>U wave speed</long_name>
+                <value>uubr</value>
+                <default>uubr</default>
+                <description>Wave speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wave_v</key>
+                <long_name>V wave speed</long_name>
+                <value>vubr</value>
+                <default>vubr</default>
+                <description>Wave speed name along y</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_unit</key>
+                <long_name>Unit of time</long_name>
+                <value>seconds</value>
+                <format>combo</format>
+                <accepted>seconds</accepted>
+                <accepted>minutes</accepted>
+                <accepted>hours</accepted>
+                <accepted>days</accepted>
+                <default>seconds</default>
+                <description>Unit of time in wave dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_origin</key>
+                <long_name>Origin of time</long_name>
+                <value>year 1900 month 01 day 01 at 00:00</value>
+                <format>date</format>
+                <default>year 1900 month 01 day 01 at 00:00</default>
+                <description> For wave models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.action.WaveDriftFileAction</value>
+                <default>org.previmer.ichthyop.action.WaveDriftFileAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.waveDriftURL</key>
+        <tree_path>Advanced/Transport/Wave drift/Data from OpenDAP wave file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to waves (Stokes drift). The application is able to read realistic wave datasets from OpenDAP. Displacement induced by waves (dXwave) is a function of Stokes drift (Ustokes) and depth : dXwave = wave_factor * Ustokes * exp(2 * wave_number * depth) . The wave number is compute thanks to wave speed and wave period : wave_number = 2 * Pi / (wave_speed * wave_period).
+            If the wave number is not available, depth effect is not taken into acount in displacement computation : dXwave = wave_factor * Ustokes but a depth application can be fixed.</description>
+        <parameters>
+            <parameter>
+                <key>wave_url</key>
+                <long_name>OpenDAP URL</long_name>
+                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
+                <description>Folder containing the wave NetCDF files.</description>
+            </parameter>
+            <parameter>
+                <key>field_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time</value>
+                <default>time</default><parameter type="serial">
+                <key>initial_time</key>
+                <long_name>Beginning of simulation</long_name>
+                <value>year 2010 month 05 day 13 at 10:00</value>
+                <format>date</format>
+                <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
+            </parameter>
+                <description>Name of the NetCDF variable in the wave dataset.</description>
+            </parameter>
+            <parameter>
+                <key>longitude</key>
+                <long_name>longitude field</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the longitude field in wave dataset</description>
+            </parameter>
+            <parameter>
+                <key>latitude</key>
+                <long_name>latitude field</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the latitude field in wave dataset</description>
+            </parameter>
+            <parameter>
+                <key>stokes_u</key>
+                <long_name>U stokes drift</long_name>
+                <value>uuss</value>
+                <default>uuss</default>
+                <description>Stokes drift name along x</description>
+            </parameter>
+            <parameter>
+                <key>stokes_v</key>
+                <long_name>V stokes drift</long_name>
+                <value>vuss</value>
+                <default>vuss</default>
+                <description>Stokes drift name along y</description>
+            </parameter>
+            <parameter>
+                <key>wave_factor</key>
+                <long_name>Wave factor</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description>Wave factor value</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters, positive number)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wave drift is not taking into account. Put the value -10.0 if you want to use exponential decrease.</description>
+            </parameter>
+            <parameter>
+                <key>wave_period</key>
+                <long_name>Wave period</long_name>
+                <value>t</value>
+                <default>t</default>
+                <description>Wave period name</description>
+            </parameter>
+            <parameter>
+                <key>wave_u</key>
+                <long_name>U wave speed</long_name>
+                <value>uubr</value>
+                <default>uubr</default>
+                <description>Wave speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wave_v</key>
+                <long_name>V wave speed</long_name>
+                <value>vubr</value>
+                <default>vubr</default>
+                <description>Wave speed name along y</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_unit</key>
+                <long_name>Unit of time</long_name>
+                <value>seconds</value>
+                <format>combo</format>
+                <accepted>seconds</accepted>
+                <accepted>minutes</accepted>
+                <accepted>hours</accepted>
+                <accepted>days</accepted>
+                <default>seconds</default>
+                <description>Unit of time in wave dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>time_origin</key>
+                <long_name>Origin of time</long_name>
+                <value>year 1900 month 01 day 01 at 00:00</value>
+                <format>date</format>
+                <default>year 1900 month 01 day 01 at 00:00</default>
+                <description> For wave models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the wind dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.previmer.ichthyop.action.WaveDriftURLAction</value>
+                <default>org.previmer.ichthyop.action.WaveDriftURLAction</default>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
             <parameter hidden="true">
