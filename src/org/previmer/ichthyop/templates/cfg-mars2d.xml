@@ -668,7 +668,7 @@
        </block>
        <block type="action">
         <key>action.lethal_temp</key>
-        <tree_path>Biology/Lethal temperature</tree_path>
+        <tree_path>Advanced/Biology/Lethal temperature</tree_path>
         <enabled>false</enabled>
         <description>Block of option for setting up the lower lethal water temperature for the particles. The tool distinguishes between eggs and larvae lethal temperatures when the growth process is activated.</description>
         <parameters>
