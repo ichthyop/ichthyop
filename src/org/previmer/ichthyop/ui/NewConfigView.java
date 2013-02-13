@@ -185,6 +185,11 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OPA3D_NEMO);
         treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
+        
+        treeNode2 = new DefaultMutableTreeNode("SYMPHONIE");
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.SYMPHONIE);
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
 
         treeNode2 = new DefaultMutableTreeNode("Miscellaneous");
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.GENERIC);
@@ -476,6 +481,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         ROMS2D,
         ROMS3D,
         OPA3D_NEMO,
+        SYMPHONIE,
         GENERIC;
         /* variables */
         private String longName;
