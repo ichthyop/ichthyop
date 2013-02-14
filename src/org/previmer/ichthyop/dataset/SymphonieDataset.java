@@ -23,10 +23,12 @@ import java.util.Collections;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 
 /**
@@ -165,26 +167,7 @@ public class SymphonieDataset extends AbstractDataset {
 
     @Override
     void loadParameters() {
-        // Dimensions
-        strDim_nj_t = "nj_t";
-        strDim_ni_t = "ni_t";
-        strDim_nk_t = "nk_t";
-        strDim_time = "time";
-        // Variables
-        strVar_longitude_t = "longitude_t";
-        strVar_latitude_t = "latitude_t";
-        strVar_mask_t = "mask_t";
-        strVar_hm_w = "hm_w";
-        strVar_dx_v = "dx_v";
-        strVar_dy_u = "dy_u";
-        strVar_dxdy_t = "dxdy_t";
-        strVar_time = "time";
-        strVar_ssh_ib = "ssh-ib";
-        strVar_depth_t = "depth_t";
-        strVar_depth_w = "depth_w";
-        strVar_u = "u";
-        strVar_v = "v";
-        
+
         // Dimensions
         strDim_nj_t = getParameter("field_dim_nj");
         strDim_ni_t = getParameter("field_dim_ni");
@@ -214,7 +197,7 @@ public class SymphonieDataset extends AbstractDataset {
         open(listInputFiles.get(0));
         openGridFile(getParameter("grid_file"));
         getDimNC();
-//        shrinkGrid();
+        shrinkGrid();
         readConstantField();
         getDimGeogArea();
     }
@@ -227,6 +210,78 @@ public class SymphonieDataset extends AbstractDataset {
         checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
+    }
+    
+    public void shrinkGrid() {
+        boolean isParamDefined;
+        try {
+            Boolean.valueOf(getParameter("shrink_domain"));
+            isParamDefined = true;
+        } catch (NullPointerException ex) {
+            isParamDefined = false;
+        }
+
+        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+            try {
+                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+                range(lat1, lon1, lat2, lon2);
+            } catch (Exception ex) {
+                getLogger().log(Level.WARNING, "Failed to resize domain", ex);
+            }
+        }
+    }
+    
+    /**
+     * Resizes the domain and determines the range of the grid indexes
+     * taht will be used in the simulation.
+     * The new domain is limited by the Northwest and the Southeast corners.
+     * @param pGeog1 a float[], the geodesic coordinates of the domain
+     * Northwest corner
+     * @param pGeog2  a float[], the geodesic coordinates of the domain
+     * Southeast corner
+     * @throws an IOException if the new domain is not strictly nested
+     * within the NetCDF dataset domain.
+     */
+    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        try {
+            longitude_t = (double[][]) ncGrid.findVariable(strVar_longitude_t).read().copyToNDJavaArray();
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset longitude_t. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            latitude_t = (double[][]) ncGrid.findVariable(strVar_latitude_t).read().copyToNDJavaArray();
+        } catch (Exception e) {
+            IOException ioex = new IOException("Problem reading dataset latitude_t. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
+        }
+        longitude_t = null;
+        latitude_t = null;
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        ni = Math.min(ni, ipn - ipo + 1);
+        nj = Math.min(nj, jpn - jpo + 1);
+        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 
     void setAllFieldsTp1AtTime(int rank) throws Exception {
@@ -281,8 +336,8 @@ public class SymphonieDataset extends AbstractDataset {
     }
 
     float[][][] computeW() {
-        
-        
+
+
 
         double[][][] Huon = new double[nk][nj][ni];
         double[][][] Hvom = new double[nk][nj][ni];
@@ -501,7 +556,7 @@ public class SymphonieDataset extends AbstractDataset {
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
-        
+
         try {
             dxdy_t = (float[][]) ncGrid.findVariable(strVar_dxdy_t).read(origin2d, size2d).copyToNDJavaArray();
         } catch (Exception e) {
@@ -843,7 +898,7 @@ public class SymphonieDataset extends AbstractDataset {
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nk - 1.00001f));
-        
+
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
@@ -852,7 +907,7 @@ public class SymphonieDataset extends AbstractDataset {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-     
+
         for (int jj = 0; jj < 2; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -892,7 +947,7 @@ public class SymphonieDataset extends AbstractDataset {
         double dz = kz - (double) k;
         double CO = 0.d;
         for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {     
+            for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
                     double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
@@ -1041,7 +1096,30 @@ public class SymphonieDataset extends AbstractDataset {
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length) {
+            case 4:
+                origin = new int[]{rank, 0, jpo, ipo};
+                shape = new int[]{1, nk, nj, ni};
+                break;
+            case 2:
+                origin = new int[]{jpo, ipo};
+                shape = new int[]{nj, ni};
+                break;
+            case 3:
+                if (!variable.isUnlimited()) {
+                    origin = new int[]{0, jpo, ipo};
+                    shape = new int[]{nk, nj, ni};
+                } else {
+                    origin = new int[]{rank, jpo, ipo};
+                    shape = new int[]{1, nj, ni};
+                }
+                break;
+        }
+
+        return variable.read(origin, shape).reduce();
     }
 
     @Override
