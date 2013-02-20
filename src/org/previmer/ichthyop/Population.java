@@ -41,7 +41,7 @@ public class Population extends ArrayList implements IPopulation {
 ///////////////
 
     public Population() {
-        getSimulationManager().addSetupListener(population);
+        getSimulationManager().addSetupListener(this);
     }
 
 ////////////////////////////
