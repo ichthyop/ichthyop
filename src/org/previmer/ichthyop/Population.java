@@ -1,10 +1,10 @@
 package org.previmer.ichthyop;
 
 /** import java.util */
-import org.previmer.ichthyop.arch.IPopulation;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
 import org.previmer.ichthyop.arch.IMasterParticle;
+import org.previmer.ichthyop.arch.IPopulation;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.manager.SimulationManager;
 
@@ -22,11 +22,11 @@ import org.previmer.ichthyop.manager.SimulationManager;
  * particle. The <code>step</code> function appears in the 3 core classes
  * (see above) of the model. It handles the march of the model through time.</p>
  *
- * @see {@link java.util.HashSet} for more details about the HashSet class.
+ * @see {@link java.util.ArrayList} for more details about the ArrayList class.
  *
  * @author P.Verley
  */
-public class Population extends HashSet implements IPopulation {
+public class Population extends ArrayList implements IPopulation {
 
 ////////////////
 // Debug purpose
@@ -41,7 +41,7 @@ public class Population extends HashSet implements IPopulation {
 ///////////////
 
     public Population() {
-        getSimulationManager().addSetupListener(this);
+        getSimulationManager().addSetupListener(population);
     }
 
 ////////////////////////////
@@ -52,6 +52,7 @@ public class Population extends HashSet implements IPopulation {
         return population;
     }
 
+    @Override
     public void step() {
 
         Iterator<IMasterParticle> iter = iterator();
@@ -64,6 +65,7 @@ public class Population extends HashSet implements IPopulation {
         }
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) {
         population.clear();
     }
