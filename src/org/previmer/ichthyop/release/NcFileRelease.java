@@ -6,10 +6,10 @@ package org.previmer.ichthyop.release;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.logging.Level;
-import org.previmer.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
+import java.util.logging.Level;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.particle.ParticleMortality;
@@ -46,7 +46,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
     public int release(ReleaseEvent event) throws Exception {
 
         double time = event.getSource().getTime();
-        int index = 0;
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
 
         NetcdfFile nc = NetcdfDataset.openFile(filename, null);
         ArrayDouble.D1 timeArr = (ArrayDouble.D1) nc.findVariable("time").read();
@@ -113,14 +113,11 @@ public class NcFileRelease extends AbstractReleaseProcess {
             index++;
         }
 
-        lonArr = null;
-        latArr = null;
-        depthArr = null;
-        mortalityArr = null;
         nc.close();
         return index;
     }
 
+    @Override
     public int getNbParticles() {
 
         try {

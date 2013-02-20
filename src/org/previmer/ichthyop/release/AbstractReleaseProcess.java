@@ -4,8 +4,8 @@
  */
 package org.previmer.ichthyop.release;
 
-import org.previmer.ichthyop.arch.IReleaseProcess;
 import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.arch.IReleaseProcess;
 
 /**
  *

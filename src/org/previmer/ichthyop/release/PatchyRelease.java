@@ -4,12 +4,12 @@
  */
 package org.previmer.ichthyop.release;
 
-import org.previmer.ichthyop.event.ReleaseEvent;
-import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.ZoneTracker;
+import org.previmer.ichthyop.particle.ParticleFactory;
 
 /**
  *
@@ -68,7 +68,7 @@ public class PatchyRelease extends AbstractReleaseProcess {
             }
         }
 
-        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         for (int p = 0; p < nb_patches; p++) {
             /** Instantiate a new Particle */
             int DROP_MAX = 2000;

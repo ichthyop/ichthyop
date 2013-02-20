@@ -4,18 +4,18 @@
  */
 package org.previmer.ichthyop.release;
 
-import java.text.ParseException;
-import org.previmer.ichthyop.event.ReleaseEvent;
-import org.previmer.ichthyop.particle.ParticleFactory;
-import org.previmer.ichthyop.arch.IBasicParticle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
+import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.particle.ParticleFactory;
 
 /**
  *
@@ -51,7 +51,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     @Override
     public int release(ReleaseEvent event) throws IOException {
 
-        int index = 0;
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
@@ -108,6 +108,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         return index;
     }
 
+    @Override
     public int getNbParticles() {
         return nbParticles;
     }

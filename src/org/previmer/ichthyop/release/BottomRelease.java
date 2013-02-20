@@ -17,11 +17,11 @@
 
 package org.previmer.ichthyop.release;
 
-import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.io.ZoneTracker;
 import org.previmer.ichthyop.event.ReleaseEvent;
+import org.previmer.ichthyop.io.ZoneTracker;
+import org.previmer.ichthyop.particle.ParticleFactory;
 
 /**
  *
@@ -29,13 +29,14 @@ import org.previmer.ichthyop.event.ReleaseEvent;
  */
 public class BottomRelease extends AbstractReleaseProcess {
 
- private int nbReleaseZones, nbParticles;
+ private int nbReleaseZones, nParticles;
     private boolean is3D;
 
+    @Override
     public void loadParameters() throws Exception {
 
         /* Get number of particles to release */
-        nbParticles = Integer.valueOf(getParameter("number_particles"));
+        nParticles = Integer.valueOf(getParameter("number_particles"));
 
         /* Check whether 2D or 3D simulation */
         is3D = true;
@@ -48,6 +49,7 @@ public class BottomRelease extends AbstractReleaseProcess {
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
     }
 
+    @Override
     public int release(ReleaseEvent event) throws Exception {
 
         double xmin, xmax, ymin, ymax;
@@ -65,8 +67,8 @@ public class BottomRelease extends AbstractReleaseProcess {
             ymax = Math.max(ymax, zone.getYmax());
         }
 
-        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
-        for (int p = 0; p < nbParticles; p++) {
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
+        for (int p = 0; p < nParticles; p++) {
             /** Instantiate a new Particle */
             int DROP_MAX = 2000;
             IBasicParticle particle = null;
@@ -86,7 +88,8 @@ public class BottomRelease extends AbstractReleaseProcess {
         return index;
     }
 
+    @Override
     public int getNbParticles() {
-        return nbParticles;
+        return nParticles;
     }
 }

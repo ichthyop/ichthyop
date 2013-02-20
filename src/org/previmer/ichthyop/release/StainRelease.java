@@ -38,6 +38,7 @@ public class StainRelease extends AbstractReleaseProcess {
     private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
+    @Override
     public void loadParameters() throws Exception {
 
         /* Check whether 2D or 3D simulation */
@@ -54,6 +55,7 @@ public class StainRelease extends AbstractReleaseProcess {
         }
     }
 
+    @Override
     public int release(ReleaseEvent event) throws Exception {
 
         boolean isStainInWater = getSimulationManager().getDataset().isInWater(getSimulationManager().getDataset().latlon2xy(lat_stain, lon_stain));
@@ -62,7 +64,7 @@ public class StainRelease extends AbstractReleaseProcess {
         }
 
         int DROP_MAX = 2000;
-        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         for (int p = 0; p < nb_particles; p++) {
             IBasicParticle particlePatch = null;
             int counter = 0;
@@ -99,6 +101,7 @@ public class StainRelease extends AbstractReleaseProcess {
         }
     }
 
+    @Override
     public int getNbParticles() {
         return Integer.valueOf(getParameter("number_particles"));
     }
