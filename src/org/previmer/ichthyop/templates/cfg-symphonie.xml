@@ -426,7 +426,7 @@
         <tree_path>Advanced/Transport/Buoyancy</tree_path>
         <enabled>false</enabled>
         <parameters>
-             <parameter type="serial">
+            <parameter type="serial">
                 <key>particle_density</key>
                 <long_name>Particle density [g/cm3]</long_name>
                 <value>1.025</value>
@@ -867,7 +867,7 @@
             </parameter>
         </parameters>
     </block>
-        <block type="action">
+    <block type="action">
         <key>action.lethal_temp</key>
         <tree_path>Advanced/Biology/Lethal temperature</tree_path>
         <enabled>false</enabled>
@@ -936,6 +936,161 @@
                 <default>org.previmer.ichthyop.action.LethalTempAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>low</value>
+                <default>low</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.growthDeb</key>
+        <tree_path>Advanced/Biology/DebGrowth</tree_path>
+        <enabled>true</enabled>
+        <description>Block of options for setting up the growth model. It simulates the growth in length of particles depending on water temperature and food. Dynamic Energy Budget is used to compute length.</description>
+        <parameters>
+            <parameter>
+                <key>shape</key>
+                <long_name>Shape coefficient 1</long_name>
+                <value>0.152</value>
+                <default>0.152</default>
+                <format>float</format>
+                <description>Value of the shape coefficient enable to convert volumetric length  (DEB length) in real length</description>
+            </parameter>
+            <parameter>
+                <key>initial_reserve</key>
+                <long_name>Initial reserve [J]</long_name>
+                <value>0.99</value>
+                <default>0.63</default>
+                <format>float</format>
+                <description>Value of the reserve (E) [J]</description>
+            </parameter>
+            <parameter>
+                <key>assimilation_efficiency</key>
+                <long_name>Assimilation efficiency</long_name>
+                <value>0.71</value>
+                <default>0.71</default>
+                <format>float</format>
+                <description>Assimilation food efficiency</description>
+            </parameter>
+            <parameter>
+                <key>half_saturation</key>
+                <long_name>Half saturation constante [mg m3]</long_name>
+                <value>0.1</value>
+                <default>0.1</default>
+                <format>float</format>
+                <description>Half saturation constant (XK) [mg m3]</description>
+            </parameter>
+            <parameter>
+                <key>allocation_rule</key>
+                <long_name>Allocation rule</long_name>
+                <value>0.7</value>
+                <default>0.7</default>
+                <format>float</format>
+                <description>Energy allocation rule (Kappa)</description>
+            </parameter>
+            <parameter>
+                <key>food_field</key>
+                <long_name>Food variable name</long_name>
+                <value>zoo_COP_cell</value>
+                <default>zoo</default>
+                <description>The name of the food variable (case sensitive) in the bioenergetic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>TEMP</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>ingestion_rate</key>
+                <long_name>Ingestion rate [J cm-2 d-1]</long_name>
+                <value>325</value>
+                <default>325</default>
+                <format>float</format>
+                <description>Surface specific ingestion rate (P_Xm)[J cm-2 d-1]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>reserve_capacity</key>
+                <long_name>Reserve capacity [J cm3]</long_name>
+                <value>2700</value>
+                <default>2700</default>
+                <format>float</format>
+                <description>Reserve capacity (Em) [J cm3]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>cost_growth</key>
+                <long_name>Cost for growth [J cm-3]</long_name>
+                <value>4000</value>
+                <default>4000</default>
+                <format>float</format>
+                <description>Cost for growth (Eg) [J cm-3]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>volume_cost_maintenance</key>
+                <long_name>Maintenance cost [J cm-3 d-1]</long_name>
+                <value>49</value>
+                <default>49</default>
+                <format>float</format>
+                <description>Volume specific maintenance cost (p_M) [J cm-3 d-1]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>arrhenius</key>
+                <long_name>Arrhenius temperature [K]</long_name>
+                <value>9800</value>
+                <default>9800</default>
+                <format>float</format>
+                <description>Arrhenius temperature (TA) [K]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>ref_temp</key>
+                <long_name>Reference temperature [K]</long_name>
+                <value>289</value>
+                <default>289</default>
+                <format>float</format>
+                <description>Reference temperature (T1) [K]</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>length_tracker</key>
+                <long_name>Track particle length</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "length" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>stage_tracker</key>
+                <long_name>Track particle biological stage</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "stage" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.DebGrowthAction</value>
+                <default>org.previmer.ichthyop.action.DebGrowthAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>E_tracker</key>
+                <long_name>Track E, the particle energy reserve</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "E" variable in the NetCDF output file.</description>
             </parameter>
             <parameter hidden="true">
                 <key>priority</key>
