@@ -60,6 +60,7 @@ public class LethalTempAction extends AbstractAction {
                 /*
                  * If not just load constant lethal temperature egg
                  */
+                ages = new float[1];
                 coldLethalTp = new float[]{Float.valueOf(getParameter("cold_lethal_temperature_egg"))};
                 hotLethalTp = new float[]{Float.valueOf(getParameter("hot_lethal_temperature_egg"))};
                 FLAG_LETHAL_TEMP_FUNCTION = false;
