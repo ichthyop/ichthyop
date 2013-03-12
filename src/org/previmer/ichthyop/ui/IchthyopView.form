@@ -459,10 +459,10 @@
                                           <Properties>
                                             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                                               <StringArray count="4">
-                                                <StringItem index="0" value="http://www.openstreetmap.org/"/>
-                                                <StringItem index="1" value="http://www.marine-geo.org/services/wms?"/>
-                                                <StringItem index="2" value="http://www2.demis.nl/wms/wms.asp?wms=WorldMap&amp;"/>
-                                                <StringItem index="3" value="None"/>
+                                                <StringItem index="0" value="Offline"/>
+                                                <StringItem index="1" value="http://www.openstreetmap.org/"/>
+                                                <StringItem index="2" value="http://www.marine-geo.org/services/wms?"/>
+                                                <StringItem index="3" value="http://www2.demis.nl/wms/wms.asp?wms=WorldMap&amp;"/>
                                               </StringArray>
                                             </Property>
                                             <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
