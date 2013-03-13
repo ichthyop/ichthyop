@@ -154,7 +154,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             deactivate all the others blocks with same type */
             if (selectedBlock.isEnabled()) {
                 for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
-                    if (!block.getKey().matches(selectedBlock.getKey())) {
+                    if (!block.getKey().equals(selectedBlock.getKey())) {
                         blockTree.get(block.getTreePath()).setEnabled(false);
                     }
                 }

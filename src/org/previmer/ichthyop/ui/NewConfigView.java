@@ -534,7 +534,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         public static TEMPLATE getTemplate(String name) {
             for (TEMPLATE template : TEMPLATE.values()) {
-                if (template.toString().matches(name)) {
+                if (template.toString().equals(name)) {
                     return template;
                 }
             }

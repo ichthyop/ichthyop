@@ -176,7 +176,7 @@ public class ConfigurationFile {
                     return false;
                 }
                 Element element = (Element) obj;
-                if (element.getAttributeValue(XBlock.TYPE).matches(type.toString())) {
+                if (element.getAttributeValue(XBlock.TYPE).equals(type.toString())) {
                     return true;
                 } else {
                     return false;

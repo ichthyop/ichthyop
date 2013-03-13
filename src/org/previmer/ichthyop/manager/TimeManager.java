@@ -95,7 +95,7 @@ public class TimeManager extends AbstractManager {
         dt = Integer.valueOf(getParameter("time_step"));
 
         /* time direction */
-        boolean isForward = getParameter("time_arrow").matches(TimeDirection.FORWARD.toString());
+        boolean isForward = getParameter("time_arrow").equals(TimeDirection.FORWARD.toString());
         if (!isForward) {
             dt *= -1;
         }
@@ -112,7 +112,7 @@ public class TimeManager extends AbstractManager {
         /* keep drifting ?*/
         keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
 
-        if (getParameter("calendar_type").matches(TypeCalendar.CLIMATO.toString())) {
+        if (getParameter("calendar_type").equals(TypeCalendar.CLIMATO.toString())) {
             calendar = new ClimatoCalendar();
         } else {
             calendar = new InterannualCalendar(getParameter("time_origin"), INPUT_DATE_FORMAT);

@@ -218,12 +218,12 @@ public class NemoDataset extends AbstractDataset {
         read_gdep_fields(nc);
         
         e3t = read_e3_field(nc, stre3t);
-        if (stre3u.matches(stre3t) || (null == nc.findVariable(stre3u))) {
+        if (stre3u.equals(stre3t) || (null == nc.findVariable(stre3u))) {
             e3u = compute_e3u(e3t);
         } else {
             e3u = read_e3_field(nc, stre3u);
         }
-        if (stre3v.matches(stre3t) || (null == nc.findVariable(stre3v))) {
+        if (stre3v.equals(stre3t) || (null == nc.findVariable(stre3v))) {
             e3v = compute_e3v(e3t);
         } else {
             e3v = read_e3_field(nc, stre3v);

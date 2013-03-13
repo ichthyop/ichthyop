@@ -20,7 +20,7 @@ public enum ParamType {
 
     public static ParamType getType(String typeStr) {
         for (ParamType type : values()) {
-            if (type.toString().matches(typeStr))
+            if (type.toString().equals(typeStr))
                 return type;
         }
         return null;

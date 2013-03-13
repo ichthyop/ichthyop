@@ -100,7 +100,7 @@ public class XZone extends org.jdom.Element {
     public TypeZone getTypeZone() {
 
         for (TypeZone type : TypeZone.values()) {
-            if (type.toString().matches(getChildTextNormalize(TYPE_ZONE))) {
+            if (type.toString().equals(getChildTextNormalize(TYPE_ZONE))) {
                 return type;
             }
         }

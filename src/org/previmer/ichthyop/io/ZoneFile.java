@@ -144,7 +144,7 @@ public class ZoneFile {
                     return false;
                 }
                 Element element = (Element) obj;
-                if (element.getChildTextNormalize(XZone.TYPE_ZONE).matches(type.toString())) {
+                if (element.getChildTextNormalize(XZone.TYPE_ZONE).equals(type.toString())) {
                     return true;
                 } else {
                     return false;

@@ -201,7 +201,7 @@ public class WMSMapper extends JXMapKit {
         vlat = nc.findVariable("lat");
         vmortality = nc.findVariable("mortality");
         vtime = nc.findVariable("time");
-        if (vtime.findAttribute("calendar").getStringValue().matches("climato")) {
+        if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
             calendar = new ClimatoCalendar();
         } else {
             try {
@@ -262,7 +262,7 @@ public class WMSMapper extends JXMapKit {
                 if (null != getSimulationManager().getConfigurationFile() && getSimulationManager().isSetup()) {
                     if (null != nc.findGlobalAttribute("xml_file")) {
                         String xml = nc.findGlobalAttribute("xml_file").getStringValue();
-                        if (getSimulationManager().getConfigurationFile().getPath().matches(xml)) {
+                        if (getSimulationManager().getConfigurationFile().getPath().equals(xml)) {
                             gridVisible = true;
                         }
                     }
@@ -289,7 +289,7 @@ public class WMSMapper extends JXMapKit {
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
             if (!excluded) {
-                excluded = !(dimensions.get(0).getName().matches("time") && dimensions.get(1).getName().matches("drifter"));
+                excluded = !(dimensions.get(0).getName().equals("time") && dimensions.get(1).getName().equals("drifter"));
             }
             if (!excluded) {
                 list.add(variable.getName());
@@ -304,8 +304,7 @@ public class WMSMapper extends JXMapKit {
 
 
         float[] dataset = (float[]) array.get1DJavaArray(Float.class);
-        if (variable.matches(
-                "time")) {
+        if (variable.equals("time")) {
             if (dataset[0] > dataset[dataset.length - 1]) {
                 return new float[]{dataset[dataset.length - 1], dataset[0]};
             } else {
@@ -817,7 +816,7 @@ public class WMSMapper extends JXMapKit {
                     List<Attribute> attributes = pcolorVariable.getAttributes();
 
                     for (Attribute attribute : attributes) {
-                        if (attribute.getName().matches("unit")) {
+                        if (attribute.getName().equals("unit")) {
                             vname += " (" + attribute.getStringValue() + ")";
                             break;
                         }
@@ -897,7 +896,7 @@ public class WMSMapper extends JXMapKit {
             ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                if (pcolorVariable.getName().matches("time")) {
+                if (pcolorVariable.getName().equals("time")) {
                     arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
                 } else {
                     arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();

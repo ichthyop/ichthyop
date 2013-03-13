@@ -132,7 +132,7 @@ public class SimulationManager {
 
     private boolean isValidConfigFile(File file) {
         try {
-            return new SAXBuilder().build(file).getRootElement().getName().matches("icstructure");
+            return new SAXBuilder().build(file).getRootElement().getName().equals("icstructure");
 
         } catch (JDOMException ex) {
             return false;

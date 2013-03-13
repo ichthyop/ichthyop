@@ -26,7 +26,7 @@ public class AdvectionAction extends AbstractAction {
 
         /* numerical scheme */
         try {
-            isEuler = getParameter("scheme").matches(AdvectionScheme.FORWARD_EULER.getName());
+            isEuler = getParameter("scheme").equals(AdvectionScheme.FORWARD_EULER.getName());
         } catch (Exception ex) {
             /*  set RK4 as default in case could not determine the scheme
              * defined by user.

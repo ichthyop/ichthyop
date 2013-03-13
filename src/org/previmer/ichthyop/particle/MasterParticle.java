@@ -28,7 +28,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
 
     public ParticleLayer getLayer(Class layerClass) {
         for (ParticleLayer layer : layers) {
-            if (layer.getClass().getCanonicalName().matches(layerClass.getCanonicalName())) {
+            if (layer.getClass().getCanonicalName().equals(layerClass.getCanonicalName())) {
                 return layer;
             }
         }

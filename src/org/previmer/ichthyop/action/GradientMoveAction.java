@@ -58,7 +58,7 @@ public class GradientMoveAction extends AbstractAction {
         double val1 = getValue(cell, time);
         double dval = 0.d;
         Cell attractiveCell = null;
-        int sign = direction.matches("\\+")
+        int sign = direction.equals("\\+")
                 ? 1
                 : -1;
         for (Cell ncell : cells) {

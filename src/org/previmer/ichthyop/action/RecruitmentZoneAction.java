@@ -38,7 +38,7 @@ public class RecruitmentZoneAction extends AbstractAction {
 
         timeInZone = 0;
         durationMinInRecruitArea = (int) (Float.valueOf(getParameter("duration_min")) * 24.f * 3600.f);
-        isAgeCriterion = getParameter("criterion").matches(Criterion.AGE.toString());
+        isAgeCriterion = getParameter("criterion").equals(Criterion.AGE.toString());
         boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");

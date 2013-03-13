@@ -320,17 +320,17 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     public void propertyChange(PropertyChangeEvent evt) {
         //System.out.println(evt.getSource().getClass().getSimpleName() + " " + evt.getPropertyName());
         String prop = evt.getPropertyName();
-        if (prop.matches("enabled")
-                || prop.matches("value")
-                || prop.matches("tableCellEditor")
-                || prop.matches("color")
-                || prop.matches("point")
-                || prop.matches("format")) {
+        if (prop.equals("enabled")
+                || prop.equals("value")
+                || prop.equals("tableCellEditor")
+                || prop.equals("color")
+                || prop.equals("point")
+                || prop.equals("format")) {
             hasZoneChanged = true;
             btnSave.setEnabled(true);
         }
 
-        if (evt.getSource().equals(tableZone) && prop.matches("tableCellEditor")) {
+        if (evt.getSource().equals(tableZone) && prop.equals("tableCellEditor")) {
             zoneFile.updateKey(zone.getKey(), (String) tableZone.getModel().getValueAt(tableZone.getSelectedRow(), 0));
         }
     }

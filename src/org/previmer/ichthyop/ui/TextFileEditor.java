@@ -168,7 +168,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         try {
             String path = IOTools.resolveFile(textField.getText());
 
-            if (e.getActionCommand().matches(EDIT)) {
+            if (e.getActionCommand().equals(EDIT)) {
                 fileChooser.setSelectedFile(new File(path));
                 int answer = fileChooser.showOpenDialog(panel);
                 if (answer == JFileChooser.APPROVE_OPTION) {
@@ -192,7 +192,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
                     fileEditor.editFile(textField.getText());
                     dialog.setVisible(true);
                 }
-            } else if (e.getActionCommand().matches(NEW)) {
+            } else if (e.getActionCommand().equals(NEW)) {
                 File f = new File(path);
                 if (f.isFile()) {
                     f = f.getParentFile();

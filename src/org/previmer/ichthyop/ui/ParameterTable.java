@@ -102,7 +102,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
 
-        if (block.getKey().matches("app.time")) {
+        if (block.getKey().equals("app.time")) {
             setupDateEditor(block);
         }
 
@@ -231,7 +231,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     private void setupDateEditor(XBlock block) {
         Calendar calendar;
-        if (block.getXParameter("calendar_type").getValue().matches("climato")) {
+        if (block.getXParameter("calendar_type").getValue().equals("climato")) {
             calendar = new ClimatoCalendar();
         } else {
             calendar = new InterannualCalendar();
@@ -264,8 +264,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
         if (null != model) {
             try {
-                if (getParameterKey(e.getLastRow()).matches("calendar_type")
-                        || getParameterKey(e.getLastRow()).matches("time_origin")) {
+                if (getParameterKey(e.getLastRow()).equals("calendar_type")
+                        || getParameterKey(e.getLastRow()).equals("time_origin")) {
                     if (null != model.block) {
                         setupDateEditor(model.block);
                     }

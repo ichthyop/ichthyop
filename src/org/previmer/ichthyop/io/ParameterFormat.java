@@ -40,7 +40,7 @@ public enum ParameterFormat {
 
     public static ParameterFormat getFormat(String formatStr) {
         for (ParameterFormat type : values()) {
-            if (type.toString().matches(formatStr))
+            if (type.toString().equals(formatStr))
                 return type;
         }
         return null;

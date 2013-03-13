@@ -26,7 +26,7 @@ public abstract class AbstractAction extends SimulationManagerAccessor implement
     public ActionPriority getPriority() {
         String priority = getParameter("priority");
         for (ActionPriority actionPriority : ActionPriority.values()) {
-            if (priority.matches(actionPriority.toString())) {
+            if (priority.equals(actionPriority.toString())) {
                 return actionPriority;
             }
         }
