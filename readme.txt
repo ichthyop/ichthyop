@@ -5,39 +5,38 @@ http://www.previmer.org/ichthyop
 
 Ichthtyop is an individual based model that simulates Lagrangian transport of particles.
 
-Copyright (c) Philippe VERLEY 2006-2010
+Copyright (c) Philippe VERLEY 2006-2013
 
-Release: 3.0b (2010/07/08)
-
-++ For the next couple of months, Ichthyop will remain on beta version.
-++ It means the tool has been fully tested by the programmers and it would be now greatly
-++ appreciated having you as beta-tester. Please email any feedback, bug report, comment,
-++ congratulation, criticism, etc.
+Release: 3.2b (2013/03/14)
 
 Feedback & Bug reports: info@previmer.org
 
 ===========
 Requirement
 
-Get latest Java installed, at least JRE 1.6.
+Get latest Java installed, at least JRE 1.6 update 43 (1.7 recommended).
 
 For most users, Java is already installed and up-to-date. Skip this
 step and go to the start-up instructions.
 
-Latest version of JRE (at least 1.6) can be download at http://www.java.com/en/download/manual.jsp
+Latest version of JRE (1.7 recommended) can be download at http://www.java.com/en/download/manual.jsp
 
 =======
 Startup
 
-Double click on ichthyop-3.0b.jar
+Double click on ichthyop-3.2b.jar
 
 Or from a command line, go to the ichthyop/ folder and type the following:
 
-java -jar ichthyop-3.0b.jar
+java -jar ichthyop-3.2b.jar
 
 To avoid any heap memory problem, you'd rather type:
 
-java -Xms512m -Xmx1024m -jar ichthyop-3.0b.jar
+java -Xms512m -Xmx1024m -jar ichthyop-3.2b.jar
+
+If you work behind a proxy:
+
+java -jar -Dhttp.proxyHost=your.proxy.com -Dhttp.proxyPort=8080 ichthyop-3.2b.jar
 
 =========
 First Run
@@ -59,7 +58,7 @@ For details about the GNU General Public License, please see http://www.gnu.org/
 Description of files and folders
 
 % Files
-ichthyop-3.0beta.jar --> Ichthyop executable file
+ichthyop-3.2b.jar --> Ichthyop executable file
 readme.txt --> this document
 
 % Directories
