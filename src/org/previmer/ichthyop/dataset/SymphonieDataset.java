@@ -344,10 +344,10 @@ public class SymphonieDataset extends AbstractDataset {
 
         //---------------------------------------------------
         // Calculation Coeff Huon & Hvom
-        for (int k = nk; k-- > 0;) {
-            for (int i = 0; i++ < ni - 1;) {
-                for (int j = nj; j-- > 0;) {
-                    Huon[k][j][i] = .25d * ((depth_w_tp1[k + 1][j][i] - depth_w_tp1[k][j][i])
+        for (int k = 0; k < nk; k++) {
+            for (int i = 1; i < ni; i++) {
+                for (int j = 0; j < nj; j++) {
+                    Huon[k][j][i] = .5d * ((depth_w_tp1[k + 1][j][i] - depth_w_tp1[k][j][i])
                             + (depth_w_tp1[k + 1][j][i - 1] - depth_w_tp1[k][j][i - 1]))
                             * dy_u[j][i - 1] * u_tp1[k][j][i - 1];
                     if (Double.isNaN(Huon[k][j][i])) {
@@ -356,9 +356,9 @@ public class SymphonieDataset extends AbstractDataset {
                     }
                 }
             }
-            for (int i = ni; i-- > 0;) {
-                for (int j = 0; j++ < nj - 1;) {
-                    Hvom[k][j][i] = .25d * (((depth_w_tp1[k + 1][j][i] - depth_w_tp1[k][j][i])
+            for (int i = 0; i < ni; i++) {
+                for (int j = 1; j < nj; j++) {
+                    Hvom[k][j][i] = .5d * (((depth_w_tp1[k + 1][j][i] - depth_w_tp1[k][j][i])
                             + (depth_w_tp1[k + 1][j - 1][i] - depth_w_tp1[k][j - 1][i]))
                             * dx_v[j - 1][i]) * v_tp1[k][j - 1][i];
                     if (Double.isNaN(Hvom[k][j][i])) {
@@ -371,25 +371,25 @@ public class SymphonieDataset extends AbstractDataset {
 
         //---------------------------------------------------
         // Calcultaion of w(i, j, k)
-        double[] wrk = new double[ni];
         double[][][] w_double = new double[nk + 1][nj][ni];
 
-        for (int j = nj - 1; j-- > 0;) {
-            for (int i = ni; i-- > 0;) {
+        for (int j = 0; j < nj - 1; j++) {
+            for (int i = 0; i < ni; i++) {
                 w_double[0][j][i] = 0.f;
             }
-            for (int k = 0; k++ < nk;) {
-                for (int i = ni - 1; i-- > 0;) {
+            for (int k = 1; k < nk + 1; k++) {
+                for (int i = 0; i < ni - 1; i++) {
                     w_double[k][j][i] = w_double[k - 1][j][i]
-                            + (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1] + Hvom[k - 1][j][i] - Hvom[k - 1][j + 1][i]);
+                            + (Huon[k - 1][j][i] - Huon[k - 1][j][i + 1]
+                            + Hvom[k - 1][j][i] - Hvom[k - 1][j + 1][i]);
                 }
             }
-            for (int i = ni; i-- > 0;) {
-                wrk[i] = w_double[nk][j][i] / (depth_w_tp1[nk][j][i] - depth_w_tp1[0][j][i]);
-            }
-            for (int k = nk; k-- >= 2;) {
-                for (int i = ni; i-- > 0;) {
-                    w_double[k][j][i] += -wrk[i] * (depth_w_tp1[k][j][i] - depth_w_tp1[0][j][i]);
+           
+            for (int k = 1; k < nk; k++) {
+                for (int i = 0; i < ni; i++) {
+                    w_double[k][j][i] -= w_double[nk][j][i]
+                            * (depth_w_tp1[k][j][i] - depth_w_tp1[0][j][i])
+                            / (depth_w_tp1[nk][j][i] - depth_w_tp1[0][j][i]);
                 }
             }
 
@@ -400,25 +400,25 @@ public class SymphonieDataset extends AbstractDataset {
 
         //---------------------------------------------------
         // Boundary Conditions
-        for (int k = nk + 1; k-- > 0;) {
-            for (int j = nj; j-- > 0;) {
+        for (int k = 0; k < nk + 1; k++) {
+            for (int j = 0; j < nj; j++) {
                 w_double[k][j][0] = w_double[k][j][1];
                 w_double[k][j][ni - 1] = w_double[k][j][ni - 2];
             }
         }
-        for (int k = nk + 1; k-- > 0;) {
-            for (int i = ni; i-- > 0;) {
+        for (int k = 0; k < nk + 1; k++) {
+            for (int i = 0; i < ni; i++) {
                 w_double[k][0][i] = w_double[k][1][i];
                 w_double[k][nj - 1][i] = w_double[k][nj - 2][i];
             }
         }
 
         //---------------------------------------------------
-        // w * dx_v * dy_u
+        // w / (dx_v * dy_u)
         float[][][] w = new float[nk + 1][nj][ni];
-        for (int i = ni; i-- > 0;) {
-            for (int j = nj; j-- > 0;) {
-                for (int k = nk + 1; k-- > 0;) {
+        for (int i = 0; i < ni; i++) {
+            for (int j = 0; j < nj; j++) {
+                for (int k = 0; k < nk + 1; k++) {
                     w[k][j][i] = isInWater(i, j)
                             ? (float) (w_double[k][j][i] / dxdy_t[j][i])
                             : 0.f;
