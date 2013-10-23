@@ -764,7 +764,7 @@ public class Mercator2dDataset extends AbstractDataset {
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                 latitude += co * latRho[j + jj][cii];
-                if (Math.abs(lonRho[j + jj][cii] - lonRho[j][ci]) < 358) {
+                if (Math.abs(lonRho[j + jj][cii] - lonRho[j][ci]) < 180) {
                     longitude += co * lonRho[j + jj][cii];
                 } else {
                     double dlon = Math.abs(360.d - Math.abs(lonRho[j + jj][cii] - lonRho[j][ci]));
@@ -851,7 +851,29 @@ public class Mercator2dDataset extends AbstractDataset {
         }
 
         // Try to refine within cell (ci, cj)
-        return (new double[]{ci, cj});
+        int cip1 = ci + 1 > nx - 1 ? 0 : ci + 1;
+        //--------------------------------------------
+        // Trilinear interpolation
+        double dy1 = latRho[cj + 1][ci] - latRho[cj][ci];
+        double dx1 = lonRho[cj + 1][ci] - lonRho[cj][ci];
+        double dy2 = latRho[cj][cip1] - latRho[cj][ci];
+        double dx2 = (Math.abs(lonRho[cj][cip1] - lonRho[cj][ci]) > 180.d)
+                ? 360.d + (lonRho[cj][cip1] - lonRho[cj][ci])
+                : lonRho[cj][cip1] - lonRho[cj][ci];
+
+        double c1 = lon * dy1 - lat * dx1;
+        double c2 = lonRho[cj][ci] * dy2 - latRho[cj][ci] * dx2;
+        double deltax = (c1 * dx2 - c2 * dx1) / (dx2 * dy1 - dy2 * dx1);
+        deltax = (deltax - lonRho[cj][ci]) / dx2;
+        double xgrid = (double) ci + Math.min(Math.max(0.d, deltax), 1.d);
+
+        c1 = lonRho[cj][ci] * dy1 - latRho[cj][ci] * dx1;
+        c2 = lon * dy2 - lat * dx2;
+        double deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1 - dy2 * dx1);
+        deltay = (deltay - latRho[cj][ci]) / dy1;
+        double ygrid = (double) cj + Math.min(Math.max(0.d, deltay), 1.d);
+
+        return (new double[]{xgrid, ygrid});
     }
 
     /**
