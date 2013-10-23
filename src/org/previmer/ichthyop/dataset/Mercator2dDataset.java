@@ -149,17 +149,6 @@ public class Mercator2dDataset extends AbstractDataset {
         latRho = (float[][]) nc.findVariable(strLat).read(origin, size).
                 copyToNDJavaArray();
 
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                if (lonRho[j][i] < 0.d) {
-                    lonRho[j][i] += 360.d;
-                }
-//                if (Math.abs(lonRho[j][i] - lonRho[j][i + 1]) > 180) {
-//                    System.out.println(j + " " + i + " " + lonRho[j][i] + " " + lonRho[j][i + 1] + " " + latRho[j][i]);
-//                }
-            }
-        }
-
         maskRho = (byte[][]) nc.findVariable(strMask).
                 read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
 
@@ -650,8 +639,12 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public boolean isInWater(int i, int j) {
         int ci = i;
-        if (ci < 0) ci = nx - 1;
-        if (ci > nx - 1) ci = 0;
+        if (ci < 0) {
+            ci = nx - 1;
+        }
+        if (ci > nx - 1) {
+            ci = 0;
+        }
         return (maskRho[j][ci] > 0);
     }
 
@@ -746,33 +739,42 @@ public class Mercator2dDataset extends AbstractDataset {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-        final double ix = Math.max(0.00001f,
-                Math.min(xRho, (double) nx - 1.00001f));
         final double jy = Math.max(0.00001f,
                 Math.min(yRho, (double) ny - 1.00001f));
 
-        final int i = (int) Math.floor(ix);
+        final int i = (int) Math.floor(xRho);
         final int j = (int) Math.floor(jy);
         double latitude = 0.d;
         double longitude = 0.d;
-        final double dx = ix - (double) i;
+        final double dx = xRho - (double) i;
         final double dy = jy - (double) j;
         double co;
-        double CO = 0.d;
         for (int ii = 0; ii < 2; ii++) {
+            int ci = i;
+            if (i < 0) {
+                ci = nx - 1;
+            }
+            int cii = i + ii;
+            if (cii > nx - 1) {
+                cii = 0;
+            }
+            if (cii < 0) {
+                cii = nx - 1;
+            }
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                latitude += co * latRho[j + jj][i + ii];
-                if (Math.abs(lonRho[j + jj][i + ii] - lonRho[j][i]) < 358) {
-                    CO += co;
-                    longitude += co * lonRho[j + jj][i + ii];
+                latitude += co * latRho[j + jj][cii];
+                if (Math.abs(lonRho[j + jj][cii] - lonRho[j][ci]) < 358) {
+                    longitude += co * lonRho[j + jj][cii];
+                } else {
+                    double dlon = Math.abs(360.d - Math.abs(lonRho[j + jj][cii] - lonRho[j][ci]));
+                    if (lonRho[j][ci] < 0) {
+                        longitude += co * (lonRho[j][ci] - dlon);
+                    } else {
+                        longitude += co * (lonRho[j][ci] + dlon);
+                    }
                 }
             }
-        }
-        if (CO > 0) {
-            longitude /= CO;
-        } else {
-            longitude = lonRho[j][i];
         }
 
         return (new double[]{latitude, longitude});
