@@ -286,7 +286,7 @@ public class Mercator2dDataset extends AbstractDataset {
         if (CO != 0) {
             du /= CO;
         }
-        return Math.random() * 0.00001;
+        return du;
     }
 
     @Override
