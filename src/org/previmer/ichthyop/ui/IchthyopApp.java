@@ -3,19 +3,10 @@
  */
 package org.previmer.ichthyop.ui;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import javax.swing.JFrame;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.previmer.ichthyop.IchthyopBatch;
-import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.manager.SimulationManager;
-import org.previmer.ichthyop.ui.logging.SystemOutHandler;
+import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 
 /**
  * The main class of the application.
@@ -25,7 +16,7 @@ public class IchthyopApp extends SingleFrameApplication {
     private boolean shouldRestorePreferences = true;
 
     /**
-     * At startup create and show the main frame of the application.
+     * At startup creates and shows the main frame of the application.
      */
     @Override
     protected void startup() {
@@ -37,6 +28,8 @@ public class IchthyopApp extends SingleFrameApplication {
      * This method is to initialize the specified window by injecting resources.
      * Windows shown in our application come fully initialized from the GUI
      * builder, so this additional configuration is not needed.
+     *
+     * @param root
      */
     @Override
     protected void configureWindow(java.awt.Window root) {
@@ -54,6 +47,7 @@ public class IchthyopApp extends SingleFrameApplication {
 
     /**
      * A convenient static getter for the application instance.
+     *
      * @return the instance of IchthyopApp
      */
     public static IchthyopApp getApplication() {
@@ -64,37 +58,23 @@ public class IchthyopApp extends SingleFrameApplication {
         return (IchthyopView) getApplication().getMainView();
     }
 
-    private static void initLogging() {
-
-        /* Create a FileHandler (logs will be recorded in a file */
-        try {
-            String logPath = System.getProperty("user.dir") + File.separator + "ichthyop-log.txt";
-            IOTools.makeDirectories(logPath.toString());
-            FileHandler fh = new FileHandler(logPath.toString());
-            getLogger().addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
-            fh.setFormatter(formatter);
-            getLogger().info("Created log file " + logPath);
-        } catch (IOException ex) {
-        } catch (SecurityException ex) {
-        }
-
-        /* Connect to the java console */
-        getLogger().addHandler(new SystemOutHandler());
-    }
-
-    private static Logger getLogger() {
-        return SimulationManager.getLogger();
-    }
-
     /**
      * Main method launching the application.
+     *
+     * @param args, list of input arguments. It only takes one argument, the
+     * path of the configuration file
      */
     public static void main(String[] args) {
-        initLogging();
+
+        // Initialize the logger
+        getSimulationManager().setupLogger();
+
+        // Check for input arguments
         if (args.length > 0) {
+            // The configuration file is provided, Ichthyop goes into batch mode
             new Thread(new IchthyopBatch(args[0])).start();
         } else {
+            // No argument, open the GUI
             launch(IchthyopApp.class, args);
         }
     }

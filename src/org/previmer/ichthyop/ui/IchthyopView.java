@@ -18,7 +18,6 @@ import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.text.NumberFormat;

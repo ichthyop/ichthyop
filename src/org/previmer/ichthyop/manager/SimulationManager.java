@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.jdom.input.SAXBuilder;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
+import org.previmer.ichthyop.ui.logging.SystemOutHandler;
+import org.previmer.ichthyop.util.IchthyopLogFormatter;
 
 /**
  *
@@ -36,14 +38,15 @@ public class SimulationManager {
      * Index of the current simulation (always 0 for SINGLE mode)
      */
     private int i_simulation;
-    /***
+    /**
+     * *
      * Number of simulations (always 1 for SINGLE mode)
      */
     private int nb_simulations = 1;
     /**
      * Listeners list for SetupEvent and InitializeEvent.
      */
-    private EventListenerList listeners = new EventListenerList();
+    private final EventListenerList listeners = new EventListenerList();
     /**
      * Computer time when the current simulation starts [millisecond]
      */
@@ -53,8 +56,8 @@ public class SimulationManager {
      */
     private long cpu_start_global;
     /**
-     * A flag indicating wheter the simulation has been interrupted
-     * or completed.
+     * A flag indicating wheter the simulation has been interrupted or
+     * completed.
      */
     private boolean flagStop = false;
     /*
@@ -68,19 +71,19 @@ public class SimulationManager {
     /**
      * The date format used for generating the id of the simulation
      */
-    private static SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
+    private static final SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
     /*
      * The simulation logger that should be used by all the classes that
      * are allowed to dialog with the SimulationManager
      */
-    private static final Logger logger = Logger.getLogger(SimulationManager.class.getName());
+    private static final Logger logger = Logger.getAnonymousLogger();
     /*
      * Whether the simulation has been setup or not 
      */
     private boolean isSetup;
 
     /**
-     * 
+     *
      * @return
      */
     public static SimulationManager getInstance() {
@@ -89,6 +92,16 @@ public class SimulationManager {
 
     public static Logger getLogger() {
         return logger;
+    }
+
+    public void setupLogger() {
+
+        // setup the logger
+        logger.setUseParentHandlers(false);
+        IchthyopLogFormatter formatter = new IchthyopLogFormatter();
+        SystemOutHandler sh = new SystemOutHandler();
+        sh.setFormatter(formatter);
+        getLogger().addHandler(sh);
     }
 
     public void setConfigurationFile(File file) throws Exception {
@@ -163,7 +176,7 @@ public class SimulationManager {
     }
 
     private static String newId() {
-        StringBuffer strBfRunId = new StringBuffer("ichthyop-run");
+        StringBuilder strBfRunId = new StringBuilder("ichthyop-run");
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
         dtformatterId.setCalendar(calendar);
@@ -179,6 +192,7 @@ public class SimulationManager {
     /**
      * Checks for the existence of a new set of parameters. Systematically
      * returns false for SINGLE mode.
+     *
      * @return <code>true</code> if a new set of parameters is available;
      * <code>false</code> otherwise
      */
@@ -203,6 +217,7 @@ public class SimulationManager {
     /**
      * Gets the number of simulations (which equals the number of sets of
      * parameters predefined by the user). Returns 1 for SINGLE mode.
+     *
      * @return the number of simulations.
      */
     public int getNumberOfSimulations() {
@@ -218,6 +233,7 @@ public class SimulationManager {
 
     /**
      * Calculates the progress of the current simulation
+     *
      * @return the progress of the current simulation as a percent
      */
     public float progressCurrent() {
@@ -228,6 +244,7 @@ public class SimulationManager {
     /**
      * Calculates the progress of the current simulation compared to the whole
      * sets of simulations.
+     *
      * @return the progress of the whole sets of simulations as a percent
      */
     public float progressGlobal() {
@@ -290,24 +307,24 @@ public class SimulationManager {
      */
     private void mobiliseManagers() {
         /* the very first one, since most of the other managers will need it
-        later on */
+         later on */
         getDatasetManager();
 
         /* Time manager must come after the release manager because the 
-        calculation of the simulation duration required the release schedule */
+         calculation of the simulation duration required the release schedule */
         getReleaseManager();
         getTimeManager();
 
         /* It'd better come after TimeManager in case some actions need to
-        access some time information */
+         access some time information */
         getActionManager();
 
         /* Zone manager must be called  after the action manager and the
-        release manager */
+         release manager */
         getZoneManager();
 
         /* the very last one, because it sums up all the setup info in order
-        to record it in the NetCDF output file */
+         to record it in the NetCDF output file */
         getOutputManager();
     }
 
@@ -325,7 +342,7 @@ public class SimulationManager {
         fireSetupPerformed();
         isSetup = true;
     }
-    
+
     public boolean isSetup() {
         return isSetup;
     }

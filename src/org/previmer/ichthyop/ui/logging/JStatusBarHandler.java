@@ -38,11 +38,11 @@ public class JStatusBarHandler extends ConsoleHandler {
     /**
      * Publish a <tt>LogRecord</tt>.
      * <p>
-     * The logging request was made initially to a <tt>Logger</tt> object,
-     * which initialized the <tt>LogRecord</tt> and forwarded it here.
+     * The logging request was made initially to a <tt>Logger</tt> object, which
+     * initialized the <tt>LogRecord</tt> and forwarded it here.
      * <p>
-     * @param  record  description of the log event. A null record is
-     *                 silently ignored and is not published
+     * @param record description of the log event. A null record is silently
+     * ignored and is not published
      */
     @Override
     public void publish(LogRecord record) {

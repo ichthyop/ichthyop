@@ -30,6 +30,7 @@ public class JStatusBarOutputStream extends OutputStream {
 
     /**
      * Method JTextAreaOutputStream.
+     *
      * @param statusBar le JTextArea qui recevra les caractères.
      */
     public JStatusBarOutputStream(JStatusBar statusBar) {
@@ -37,10 +38,13 @@ public class JStatusBarOutputStream extends OutputStream {
     }
 
     /**
-     * Écrit un caractère dans le JTextArea.
-     * Si le caractère est un retour chariot, scrolling.
+     * Écrit un caractère dans le JTextArea. Si le caractère est un retour
+     * chariot, scrolling.
+     *
+     * @throws java.io.IOException
      * @see java.io.OutputStream#write(int)
      */
+    @Override
     public void write(int b) throws IOException {
         byte[] bytes = new byte[1];
         bytes[0] = (byte) b;
@@ -48,14 +52,19 @@ public class JStatusBarOutputStream extends OutputStream {
     }
 
     /**
-     * Écrit un tableau de bytes dans le JTextArea.
-     * Scrolling du JTextArea à la fin du texte ajouté.
+     * Écrit un tableau de bytes dans le JTextArea. Scrolling du JTextArea à la
+     * fin du texte ajouté.
+     *
+     * @param arg0
+     * @throws java.io.IOException
      * @see java.io.OutputStream#write(byte[])
      */
     @Override
     public final void write(byte[] arg0) throws IOException {
-        StringBuffer txt = new StringBuffer();
-        if (!statusBar.getMessage().endsWith("\n")) txt.append(statusBar.getMessage());
+        StringBuilder txt = new StringBuilder();
+        if (!statusBar.getMessage().endsWith("\n")) {
+            txt.append(statusBar.getMessage());
+        }
         txt.append(new String(arg0));
         statusBar.setMessage(txt.toString());
     }
