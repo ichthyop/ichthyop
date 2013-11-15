@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
@@ -110,7 +110,7 @@ public class LethalTempAction extends AbstractAction {
     }
 
     @Override
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         if (FLAG_GROWTH) {
             checkTpGrowingParticle(particle);
@@ -120,7 +120,7 @@ public class LethalTempAction extends AbstractAction {
 
     }
 
-    private void checkTp(IBasicParticle particle) {
+    private void checkTp(IParticle particle) {
         double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         int iAge = ages.length - 1;
         if (FLAG_LETHAL_TEMP_FUNCTION) {
@@ -141,7 +141,7 @@ public class LethalTempAction extends AbstractAction {
         }
     }
 
-    private void checkTpGrowingParticle(IBasicParticle particle) {
+    private void checkTpGrowingParticle(IParticle particle) {
 
         double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         Stage stage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage();

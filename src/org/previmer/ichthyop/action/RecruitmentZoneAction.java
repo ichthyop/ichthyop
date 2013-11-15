@@ -6,7 +6,7 @@ package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.RecruitmentZoneTracker;
 import org.previmer.ichthyop.io.ZoneTracker;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
@@ -70,7 +70,7 @@ public class RecruitmentZoneAction extends AbstractAction {
         }
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         //@todo
         // catch cast exception
@@ -94,7 +94,7 @@ public class RecruitmentZoneAction extends AbstractAction {
         }
     }
 
-    private boolean satisfyRecruitmentCriterion(IBasicParticle particle) {
+    private boolean satisfyRecruitmentCriterion(IParticle particle) {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {

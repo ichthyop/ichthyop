@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.MTRandom;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.arch.IDataset;
 
 /**
@@ -23,7 +23,7 @@ public class VDispAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(kv_field, getClass());
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
         particle.increment(getVDispersion(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt()));
     }
 

@@ -2,7 +2,7 @@ package org.previmer.ichthyop;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.arch.IDataset;
 
 /**
@@ -210,7 +210,7 @@ public class Zone extends SimulationManagerAccessor {
         polygon.add((GridPoint) polygon.get(0).clone());
     }
 
-    public boolean isParticleInZone(IBasicParticle particle) {
+    public boolean isParticleInZone(IParticle particle) {
 
         boolean isInZone = true;
         if (!getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {

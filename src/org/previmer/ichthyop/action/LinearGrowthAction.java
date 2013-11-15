@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.Constant;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
@@ -51,7 +51,7 @@ public class LinearGrowthAction extends AbstractAction {
         }
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
         GrowingParticleLayer growthLayer = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
         growthLayer.setLength(grow(growthLayer.getLength(), getSimulationManager().getDataset().get(temperature_field, growthLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue()));
     }

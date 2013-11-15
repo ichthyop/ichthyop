@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.particle.ZoneParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
@@ -53,9 +53,9 @@ public class ZoneTracker extends AbstractTracker {
     }
 
     public void track() {
-        IBasicParticle particle;
+        IParticle particle;
         ZoneParticleLayer zparticle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);

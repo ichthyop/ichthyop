@@ -19,7 +19,7 @@ package org.previmer.ichthyop.action;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *
@@ -38,7 +38,7 @@ public class SnoozeAction extends AbstractAction {
         wakeup = hourFormat.parse(getParameter("stop_snooze"));
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
         calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));
         long timeDay = getSecondsOfDay(calendar);
         calendar.setTime(snooze);

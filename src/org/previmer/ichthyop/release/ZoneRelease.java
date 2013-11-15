@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.release;
 
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.ReleaseZoneTracker;
 import org.previmer.ichthyop.io.ZoneTracker;
@@ -15,7 +15,7 @@ import org.previmer.ichthyop.particle.ParticleFactory;
  *
  * @author pverley
  */
-public class ZoneRelease extends AbstractReleaseProcess {
+public class ZoneRelease extends AbstractRelease {
 
     private int nbReleaseZones, nParticles;
     private boolean is3D;
@@ -66,7 +66,7 @@ public class ZoneRelease extends AbstractReleaseProcess {
         for (int p = 0; p < nParticles; p++) {
             /** Instantiate a new Particle */
             int DROP_MAX = 2000;
-            IBasicParticle particle = null;
+            IParticle particle = null;
             int counter = 0;
             while (null == particle) {
                 if (counter++ > DROP_MAX) {

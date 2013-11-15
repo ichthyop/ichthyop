@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
@@ -135,7 +135,7 @@ public class BuoyancyAction extends AbstractAction {
     }
 
     @Override
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         boolean canApplyBuoyancy;
         if (isGrowth) {

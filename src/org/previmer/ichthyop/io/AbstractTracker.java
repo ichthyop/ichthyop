@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.arch.ITracker;
 import org.previmer.ichthyop.manager.OutputManager.NCDimFactory;
 import org.previmer.ichthyop.manager.PropertyManager;
 import org.previmer.ichthyop.SimulationManagerAccessor;
@@ -20,17 +19,19 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public abstract class AbstractTracker extends SimulationManagerAccessor implements ITracker {
+public abstract class AbstractTracker extends SimulationManagerAccessor {
 
-    private ArrayList<Dimension> dimensions = new ArrayList();
-    final private DataType type;
-    private PropertyManager propertyManager = PropertyManager.getInstance(getClass());
-    private Array array;
-    private NCDimFactory dimFactory = getSimulationManager().getOutputManager().getDimensionFactory();
+    private final ArrayList<Dimension> dimensions = new ArrayList();
+    private final DataType type;
+    private final PropertyManager propertyManager = PropertyManager.getInstance(getClass());
+    private final Array array;
+    private final NCDimFactory dimFactory = getSimulationManager().getOutputManager().getDimensionFactory();
 
     abstract void setDimensions();
 
     abstract Array createArray();
+    
+    public abstract void track();
 
     public AbstractTracker(DataType type) {
         this.type = type;

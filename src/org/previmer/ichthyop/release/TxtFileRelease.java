@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.ParticleFactory;
@@ -21,7 +21,7 @@ import org.previmer.ichthyop.particle.ParticleFactory;
  *
  * @author pverley
  */
-public class TxtFileRelease extends AbstractReleaseProcess {
+public class TxtFileRelease extends AbstractRelease {
 
     private File textFile;
     private boolean is3D;
@@ -71,7 +71,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                         throw ioex;
                     }
                 }
-                IBasicParticle particle;
+                IParticle particle;
                 if (is3D) {
                     double depth = coord.length > 2
                             ? coord[2]

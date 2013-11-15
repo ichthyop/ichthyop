@@ -17,7 +17,7 @@
 package org.previmer.ichthyop.io;
 
 import java.util.Iterator;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
@@ -49,8 +49,8 @@ public class ETracker extends AbstractTracker{
 
     @Override
     public void track() {
-        IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        IParticle particle;
+        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);

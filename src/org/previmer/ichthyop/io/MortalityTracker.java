@@ -16,7 +16,7 @@
  */
 package org.previmer.ichthyop.io;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import java.util.Iterator;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import ucar.ma2.Array;
@@ -41,8 +41,8 @@ public class MortalityTracker extends AbstractTracker {
     }
 
     public void track() {
-        IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        IParticle particle;
+        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             getArray().set(0, particle.getIndex(), particle.getDeathCause().getCode());

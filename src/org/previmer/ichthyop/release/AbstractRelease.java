@@ -5,17 +5,23 @@
 package org.previmer.ichthyop.release;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
-import org.previmer.ichthyop.arch.IReleaseProcess;
+import org.previmer.ichthyop.event.ReleaseEvent;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractReleaseProcess extends SimulationManagerAccessor implements IReleaseProcess {
+public abstract class AbstractRelease extends SimulationManagerAccessor {
 
-    private String releaseKey;
+    private final String releaseKey;
+    
+    abstract public void loadParameters() throws Exception;
 
-    public AbstractReleaseProcess() {
+    abstract public int release(ReleaseEvent event) throws Exception;
+
+    abstract public int getNbParticles();
+
+    public AbstractRelease() {
         releaseKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
     }
 

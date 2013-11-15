@@ -20,7 +20,7 @@ import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.io.RecruitmentStainTracker;
 import org.previmer.ichthyop.ui.LonLatConverter;
@@ -84,7 +84,7 @@ public class RecruitmentStainAction extends AbstractAction {
         }
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         //@todo
         // catch cast exception
@@ -101,7 +101,7 @@ public class RecruitmentStainAction extends AbstractAction {
         }
     }
 
-    private boolean isParticleInsideStain(IBasicParticle particle) {
+    private boolean isParticleInsideStain(IParticle particle) {
 
         boolean isInside = false;
         double distance = DatasetUtil.geodesicDistance(lat_stain, lon_stain, particle.getLat(), particle.getLon());
@@ -113,7 +113,7 @@ public class RecruitmentStainAction extends AbstractAction {
         return isInside;
     }
 
-    private boolean satisfyRecruitmentCriterion(IBasicParticle particle) {
+    private boolean satisfyRecruitmentCriterion(IParticle particle) {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {

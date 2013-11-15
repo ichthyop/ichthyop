@@ -359,6 +359,20 @@
                 <default>vomecrty</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
+            <parameter>
+                <key>gridw_pattern</key>
+                <long_name>gridW file pattern</long_name>
+                <value>*gridW*.nc</value>
+                <default>*gridW*.nc</default>
+                <description>Filename filter for identifying the "gridW" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the meridional velocity variable.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_w</key>
+                <long_name>Vertical velocity</long_name>
+                <value>vovecrtz</value>
+                <default>vovecrtz</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>

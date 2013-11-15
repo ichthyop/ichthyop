@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import java.util.logging.Level;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -55,7 +55,7 @@ public class AdvectionAction extends AbstractAction {
     }
 
     @Override
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
         if (isForward) {
             advectForward(particle, getSimulationManager().getTimeManager().getTime());
         } else {
@@ -63,7 +63,7 @@ public class AdvectionAction extends AbstractAction {
         }
     }
 
-    private void advectForward(IBasicParticle particle, double time) throws
+    private void advectForward(IParticle particle, double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt = isEuler
@@ -114,7 +114,7 @@ public class AdvectionAction extends AbstractAction {
      * With Ua the input model velocity vector.
      * </pre>
      */
-    private void advectBackward(IBasicParticle particle, double time) throws
+    private void advectBackward(IParticle particle, double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt, pgrid;

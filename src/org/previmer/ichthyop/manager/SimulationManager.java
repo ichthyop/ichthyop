@@ -7,7 +7,6 @@ package org.previmer.ichthyop.manager;
 import org.jdom.JDOMException;
 import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.arch.IDataset;
-import org.previmer.ichthyop.arch.ISimulation;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.InitializeListener;
 import org.previmer.ichthyop.event.SetupEvent;
@@ -368,7 +367,7 @@ public class SimulationManager {
         cpu_start_global = System.currentTimeMillis();
     }
 
-    public ISimulation getSimulation() {
+    public Simulation getSimulation() {
         return Simulation.getInstance();
     }
 

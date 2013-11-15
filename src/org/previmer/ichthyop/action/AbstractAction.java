@@ -4,16 +4,20 @@
  */
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.arch.IAction;
 import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractAction extends SimulationManagerAccessor implements IAction {
+public abstract class AbstractAction extends SimulationManagerAccessor {
 
-    private String actionKey;
+    private final String actionKey;
+    
+    abstract public void loadParameters() throws Exception;
+
+    abstract public void execute(IParticle particle);
 
     public AbstractAction() {
         actionKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
@@ -36,4 +40,6 @@ public abstract class AbstractAction extends SimulationManagerAccessor implement
     public boolean isEnabled() {
         return getSimulationManager().getActionManager().isEnabled(actionKey);
     }
+
+    
 }

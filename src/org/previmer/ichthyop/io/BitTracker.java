@@ -17,7 +17,7 @@
 package org.previmer.ichthyop.io;
 
 import java.util.Iterator;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.particle.BitParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
@@ -54,8 +54,8 @@ public class BitTracker extends AbstractTracker {
     }
 
     public void track() {
-        IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        IParticle particle;
+        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             int bit = ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).getBit();

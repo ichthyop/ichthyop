@@ -16,7 +16,7 @@
  */
 package org.previmer.ichthyop.particle;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.manager.ParameterManager;
 
@@ -61,7 +61,7 @@ public class DebParticleLayer extends ParticleLayer {
 
     
 
-    public DebParticleLayer(IBasicParticle particle) {
+    public DebParticleLayer(IParticle particle) {
         super(particle);
     }
     @Override

@@ -4,36 +4,32 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import java.util.Iterator;
-import org.previmer.ichthyop.SimulationManagerAccessor;
-import org.previmer.ichthyop.arch.ITracker;
-import org.previmer.ichthyop.manager.OutputManager.NCDimFactory;
+import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
-import ucar.nc2.Dimension;
 
 /**
  *
  * @author pverley
  */
-public class CustomTracker extends SimulationManagerAccessor implements ITracker {
+public class CustomTracker extends AbstractTracker {
 
-    private String variableName;
+    private final String variableName;
     private ArrayFloat.D2 array;
 
     public CustomTracker(String variableName) {
+        super(DataType.FLOAT);
         this.variableName = variableName;
-        array = new ArrayFloat.D2(1, getSimulationManager().getOutputManager().getDimensionFactory().getDrifterDimension().getLength());
         getSimulationManager().getDataset().requireVariable(variableName, getClass());
     }
 
+    @Override
     public void track() {
-        IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        IParticle particle;
+        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             float valueTracked = getSimulationManager().getDataset().get(variableName, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).floatValue();
@@ -46,35 +42,36 @@ public class CustomTracker extends SimulationManagerAccessor implements ITracker
         return array;
     }
 
-    public int[] origin(int index_record) {
-        return new int[]{index_record, 0};
-    }
-
+    @Override
     public String short_name() {
         return variableName;
     }
 
+    @Override
     public String long_name() {
         return null;
     }
 
+    @Override
     public String unit() {
         return null;
     }
 
+    @Override
     public Attribute[] attributes() {
         return null;
     }
+    
 
-    public DataType type() {
-        return DataType.FLOAT;
+    @Override
+    void setDimensions() {
+        addTimeDimension();
+        addDrifterDimension();
     }
 
-    public List<Dimension> dimensions() {
-        List<Dimension> list = new ArrayList(2);
-        NCDimFactory dimFactory = getSimulationManager().getOutputManager().getDimensionFactory();
-        list.add(dimFactory.getTimeDimension());
-        list.add(dimFactory.getDrifterDimension());
-        return list;
+    @Override
+    Array createArray() {
+        return new ArrayFloat.D2(1, getSimulationManager().getOutputManager().getDimensionFactory().getDrifterDimension().getLength());
+
     }
 }

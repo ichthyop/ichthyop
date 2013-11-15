@@ -5,9 +5,7 @@
 package org.previmer.ichthyop;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.previmer.ichthyop.io.IOTools;
 
 /**
@@ -16,39 +14,45 @@ import org.previmer.ichthyop.io.IOTools;
  */
 public class IchthyopBatch extends SimulationManagerAccessor implements Runnable {
 
-    private String pathname;
+    /**
+     * The path of the configuration file.
+     */
+    private final String filename;
 
-    public IchthyopBatch(String pathname) {
-
-        this.pathname = pathname;
+    /**
+     * Creates a new run in batch mode with the specified configuration file.
+     *
+     * @param filename, the path of the configuration file
+     */
+    public IchthyopBatch(String filename) {
+        this.filename = filename;
     }
 
+    /**
+     * Runs the simulation.
+     */
+    @Override
     public void run() {
 
         try {
-            File file = new File(IOTools.resolveFile(pathname));
+            File file = new File(IOTools.resolveFile(filename));
             getSimulationManager().setConfigurationFile(file);
-            getLogger().info("Opened configuration file " + file.getPath());
-            /* */
+            getLogger().log(Level.INFO, "Opened configuration file {0}", file.getPath());
             getLogger().info("===== Simulation started =====");
             getSimulationManager().resetId();
             getSimulationManager().resetTimerGlobal();
             /* */
             do {
-                getLogger().info("++++ Run " + getSimulationManager().indexSimulationToString());
+                getLogger().log(Level.INFO, "++++ Run {0}", getSimulationManager().indexSimulationToString());
                 /* setup */
                 getLogger().info("Setting up...");
                 getSimulationManager().setup();
-                getLogger().info("Setup [OK]");
                 /* initialization */
                 getLogger().info("Initializing...");
                 getSimulationManager().init();
-                getLogger().info("Initialization [OK]");
-                /* */
+                /* first time step */
                 getSimulationManager().getTimeManager().firstStepTriggered();
                 getSimulationManager().resetTimerCurrent();
-                StringBuffer msg = new StringBuffer();
-                int lengthMsg = 0;
                 do {
                     /* check whether the simulation has been interrupted by user */
                     if (getSimulationManager().isStopped()) {
@@ -56,36 +60,37 @@ public class IchthyopBatch extends SimulationManagerAccessor implements Runnable
                     }
                     /* step simulation */
                     getSimulationManager().getSimulation().step();
-                    /* Print message progress */
-                    for (int i = 0; i < lengthMsg + 10; i++) {
-                        msg.append('.');
-                    }
-                    //System.out.print("\r" + msg.toString());
-                    msg = new StringBuffer();
-                    msg.append(getSimulationManager().getTimeManager().stepToString());
-                    msg.append(" Time ");
-                    msg.append(getSimulationManager().getTimeManager().timeToString());
-                    msg.append(" ");
-                    int percent = (int) (getSimulationManager().progressCurrent() * 100);
-                    msg.append(percent);
-                    msg.append("% - Run ");
-                    msg.append(getSimulationManager().indexSimulationToString());
-                    msg.append(" ");
-                    msg.append(getSimulationManager().timeLeftCurrent());
-                    msg.append(" - ");
-                    msg.append("Simulation ");
-                    percent = (int) (getSimulationManager().progressGlobal() * 100);
-                    msg.append(percent);
-                    msg.append("% ");
-                    msg.append(getSimulationManager().timeLeftGlobal());
-                    //System.out.print("\r" + msg.toString());
-                    getLogger().info(msg.toString());
-                    lengthMsg = msg.length();
+                    progress();
                 } while (getSimulationManager().getTimeManager().hasNextStep());
             } while (getSimulationManager().hasNextSimulation());
             getLogger().info("===== Simulation completed =====");
         } catch (Exception ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "An error occured while running the simulation", ex);
         }
+    }
+
+    /**
+     * Logs the progress of the simulation.
+     */
+    private void progress() {
+
+        StringBuilder msg = new StringBuilder();
+        msg.append(getSimulationManager().getTimeManager().stepToString());
+        msg.append(" Time ");
+        msg.append(getSimulationManager().getTimeManager().timeToString());
+        msg.append(" ");
+        int percent = (int) (getSimulationManager().progressCurrent() * 100);
+        msg.append(percent);
+        msg.append("% - Run ");
+        msg.append(getSimulationManager().indexSimulationToString());
+        msg.append(" ");
+        msg.append(getSimulationManager().timeLeftCurrent());
+        msg.append(" - ");
+        msg.append("Simulation ");
+        percent = (int) (getSimulationManager().progressGlobal() * 100);
+        msg.append(percent);
+        msg.append("% ");
+        msg.append(getSimulationManager().timeLeftGlobal());
+        getLogger().info(msg.toString());
     }
 }

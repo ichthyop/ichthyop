@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.IOTools;
 
 /**
@@ -48,7 +48,7 @@ public class WindAction extends AbstractAction {
 
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         /* for 3D simulation, ckeck whether the particle is close surface */
         if (particle.getZ() >= 0) {

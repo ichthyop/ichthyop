@@ -5,8 +5,7 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IMasterParticle;
+import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *
@@ -14,9 +13,9 @@ import org.previmer.ichthyop.arch.IMasterParticle;
  */
 public class ParticleFactory extends SimulationManagerAccessor {
 
-    public static IBasicParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
+    public static IParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
 
-        IMasterParticle particle = new MasterParticle();
+        MasterParticle particle = new MasterParticle();
         particle.setIndex(index);
         boolean living = mortality.equals(ParticleMortality.ALIVE);
         if (living) {
@@ -41,16 +40,16 @@ public class ParticleFactory extends SimulationManagerAccessor {
         return particle;
     }
 
-    public static IBasicParticle createGeoParticle(int index, double lon, double lat, double depth) {
+    public static IParticle createGeoParticle(int index, double lon, double lat, double depth) {
         return createGeoParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
     }
 
-    public static IBasicParticle createGeoParticle(int index, double lon, double lat) {
+    public static IParticle createGeoParticle(int index, double lon, double lat) {
         return createGeoParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
     }
 
-    public static IBasicParticle createSurfaceParticle(int index, double x, double y, boolean is3D) {
-        IMasterParticle particle = new MasterParticle();
+    public static IParticle createSurfaceParticle(int index, double x, double y, boolean is3D) {
+        MasterParticle particle = new MasterParticle();
         particle.setIndex(index);
         particle.setX(x);
         particle.setY(y);
@@ -66,8 +65,8 @@ public class ParticleFactory extends SimulationManagerAccessor {
         return particle;
     }
 
-    public static IBasicParticle createZoneParticle(int index, double x, double y, double depth) {
-        IMasterParticle particle = new MasterParticle();
+    public static IParticle createZoneParticle(int index, double x, double y, double depth) {
+        MasterParticle particle = new MasterParticle();
         particle.setIndex(index);
         particle.setX(x);
         particle.setY(y);
@@ -98,9 +97,9 @@ public class ParticleFactory extends SimulationManagerAccessor {
         return particle;
     }
 
-    public static IBasicParticle createBottomParticle(int index, double x, double y) {
+    public static IParticle createBottomParticle(int index, double x, double y) {
 
-        IMasterParticle particle = new MasterParticle();
+        MasterParticle particle = new MasterParticle();
         particle.setIndex(index);
         particle.setX(x);
         particle.setY(y);

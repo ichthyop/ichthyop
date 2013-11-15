@@ -17,7 +17,7 @@
 
 package org.previmer.ichthyop.particle;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *
@@ -27,7 +27,7 @@ public class BitParticleLayer extends ParticleLayer {
 
     private int bit;
 
-    public BitParticleLayer(IBasicParticle particle) {
+    public BitParticleLayer(IParticle particle) {
         super(particle);
     }
 

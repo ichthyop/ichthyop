@@ -16,7 +16,7 @@
  */
 package org.previmer.ichthyop.release;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 
@@ -24,7 +24,7 @@ import org.previmer.ichthyop.particle.ParticleFactory;
  *
  * @author pverley
  */
-public class SurfaceRelease extends AbstractReleaseProcess {
+public class SurfaceRelease extends AbstractRelease {
     
     private int nParticles;
     private boolean is3D;
@@ -45,7 +45,7 @@ public class SurfaceRelease extends AbstractReleaseProcess {
         System.out.println("nx " + nx + " ny " + ny);
         
         for (int p = 0; p < nParticles; p++) {
-            IBasicParticle particle = null;
+            IParticle particle = null;
             int counter = 0;
             while (null == particle) {
 

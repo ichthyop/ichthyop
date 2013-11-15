@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.ParticleFactory;
@@ -23,7 +23,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class NcFileRelease extends AbstractReleaseProcess {
+public class NcFileRelease extends AbstractRelease {
 
     private String filename;
 
@@ -86,7 +86,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
             depthArr = (ArrayFloat.D2) nc.findVariable("depth").read();
         }
         double lon, lat, depth = Double.NaN;
-        IBasicParticle particle;
+        IParticle particle;
         int nb_particles = lonArr.getShape()[1];
 
         for (int i = 0; i < nb_particles; i++) {

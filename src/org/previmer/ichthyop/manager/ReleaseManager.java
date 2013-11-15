@@ -11,7 +11,6 @@ import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.event.ReleaseEvent;
-import org.previmer.ichthyop.arch.IReleaseProcess;
 import org.previmer.ichthyop.event.ReleaseListener;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
 import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.release.AbstractRelease;
 
 /**
  *
@@ -27,7 +27,7 @@ import org.previmer.ichthyop.event.NextStepListener;
 public class ReleaseManager extends AbstractManager implements ReleaseListener, NextStepListener {
 
     private static final ReleaseManager releaseManager = new ReleaseManager();
-    private IReleaseProcess releaseProcess;
+    private AbstractRelease releaseProcess;
     /**
      * Stores time of the release events
      */
@@ -41,8 +41,9 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
      */
     private boolean isAllReleased;
     /**
-     *      */
-    private EventListenerList listeners = new EventListenerList();
+     *
+     */
+    private final EventListenerList listeners = new EventListenerList();
 
     public static ReleaseManager getInstance() {
         return releaseManager;
@@ -53,7 +54,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         XBlock releaseBlock = findActiveReleaseProcess();
         String className = getParameter(releaseBlock.getKey(), "class_name");
         try {
-            releaseProcess = (IReleaseProcess) Class.forName(className).newInstance();
+            releaseProcess = (AbstractRelease) Class.forName(className).newInstance();
             releaseProcess.loadParameters();
         } catch (Exception ex) {
             StringBuilder sb = new StringBuilder();
@@ -63,10 +64,6 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
             ieex.setStackTrace(ex.getStackTrace());
             throw ieex;
         }
-    }
-
-    private IReleaseProcess getReleaseProcess() {
-        return releaseProcess;
     }
 
     public String getParameter(String releaseKey, String key) {
@@ -91,7 +88,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
 
     @Override
     public void releaseTriggered(ReleaseEvent event) throws Exception {
-        int nbReleased = getReleaseProcess().release(event);
+        int nbReleased = releaseProcess.release(event);
         StringBuilder sb = new StringBuilder();
         sb.append("Release event (");
         sb.append(getClass().getSimpleName());
@@ -104,7 +101,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     }
 
     public int getNbParticles() {
-        return getNbReleaseEvents() * getReleaseProcess().getNbParticles();
+        return getNbReleaseEvents() * releaseProcess.getNbParticles();
     }
 
     @Override
@@ -221,7 +218,6 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     private void fireReleaseTriggered() throws Exception {
 
         //Logger.getLogger(getClass().getName()).info("Triggered release event " + indexEvent);
-
         ReleaseListener[] listenerList = (ReleaseListener[]) listeners.getListeners(ReleaseListener.class);
 
         for (ReleaseListener listener : listenerList) {

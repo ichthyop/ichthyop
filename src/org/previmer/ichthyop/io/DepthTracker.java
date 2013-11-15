@@ -5,7 +5,7 @@
 
 package org.previmer.ichthyop.io;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import java.util.Iterator;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
@@ -28,8 +28,8 @@ public class DepthTracker extends AbstractTracker {
     }
 
     public void track() {
-        IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        IParticle particle;
+        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             getArray().set(0, particle.getIndex(), (float) particle.getDepth());

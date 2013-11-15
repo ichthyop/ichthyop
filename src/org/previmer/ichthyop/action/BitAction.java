@@ -17,7 +17,7 @@
 
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.BitTracker;
 import org.previmer.ichthyop.particle.BitParticleLayer;
 
@@ -31,7 +31,7 @@ public class BitAction extends AbstractAction {
         getSimulationManager().getOutputManager().addPredefinedTracker(BitTracker.class);
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
         ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).setBit((int) Math.round(Math.random()));
     }
 

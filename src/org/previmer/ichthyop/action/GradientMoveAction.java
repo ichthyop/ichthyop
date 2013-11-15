@@ -19,7 +19,7 @@ package org.previmer.ichthyop.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 
 /**
@@ -46,7 +46,7 @@ public class GradientMoveAction extends AbstractAction {
         dt = getSimulationManager().getTimeManager().get_dt();
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         int i = (int) Math.round(particle.getX());
         int j = (int) Math.round(particle.getY());

@@ -4,7 +4,7 @@
  */
 package org.previmer.ichthyop.particle;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.manager.ParameterManager;
 
 /**
@@ -30,7 +30,7 @@ public class GrowingParticleLayer extends ParticleLayer {
      */
     private static double yolk_to_feeding_length;// = 4.5d; //mm
 
-    public GrowingParticleLayer(IBasicParticle particle) {
+    public GrowingParticleLayer(IParticle particle) {
         super(particle);
     }
 

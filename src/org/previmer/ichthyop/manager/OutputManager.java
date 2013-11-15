@@ -16,15 +16,15 @@ import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.util.logging.Level;
 import ucar.nc2.NetcdfFileWriteable;
-import org.previmer.ichthyop.arch.ITracker;
 import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.io.AbstractTracker;
 import org.previmer.ichthyop.io.DepthTracker;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.LatTracker;
@@ -63,7 +63,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     /**
      *
      */
-    private List<ITracker> trackers;
+    private List<AbstractTracker> trackers;
     private List<Class> predefinedTrackers;
     private List<String> customTrackers;
     private String basename;
@@ -344,10 +344,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (null != predefinedTrackers) {
             for (Class trackerClass : predefinedTrackers) {
                 try {
-                    ITracker tracker = (ITracker) trackerClass.newInstance();
+                    AbstractTracker tracker = (AbstractTracker) trackerClass.newInstance();
                     trackers.add(tracker);
                 } catch (Exception ex) {
-                    StringBuffer msg = new StringBuffer();
+                    StringBuilder msg = new StringBuilder();
                     msg.append("Error instanciating application tracker \"");
                     msg.append(trackerClass.getCanonicalName());
                     msg.append("\" == >");
@@ -358,11 +358,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
             }
         }
-        for (ITracker tracker : trackers) {
+        for (AbstractTracker tracker : trackers) {
             try {
                 addVar2NcOut(tracker);
             } catch (Exception ex) {
-                StringBuffer msg = new StringBuffer();
+                StringBuilder msg = new StringBuilder();
                 msg.append("Error adding application tracker \"");
                 msg.append(tracker.short_name());
                 msg.append("\" in the NetCDF output file == >");
@@ -394,12 +394,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         if (null != variables) {
             for (String variable : variables) {
-                ITracker tracker = new CustomTracker(variable);
+                AbstractTracker tracker = new CustomTracker(variable);
                 try {
                     addVar2NcOut(tracker);
                 } catch (Exception ex) {
                     getSimulationManager().getDataset().removeRequiredVariable(variable, tracker.getClass());
-                    StringBuffer msg = new StringBuffer();
+                    StringBuilder msg = new StringBuilder();
                     msg.append("Error adding custom tracker \"");
                     msg.append(tracker.short_name());
                     msg.append("\" in the NetCDF output file == >");
@@ -416,6 +416,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
     }
 
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         if (e.isInterrupted()) {
@@ -428,15 +429,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private void writeToNetCDF(int i_record) {
-        getLogger().info("NetCDF output file, writing record " + i_record + " - time " + getSimulationManager().getTimeManager().timeToString());
-        List<ITracker> errTrackers = new ArrayList();
-        for (ITracker tracker : trackers) {
+        getLogger().log(Level.INFO, "NetCDF output file, writing record {0} - time {1}", new Object[]{i_record, getSimulationManager().getTimeManager().timeToString()});
+        List<AbstractTracker> errTrackers = new ArrayList();
+        for (AbstractTracker tracker : trackers) {
             try {
                 tracker.track();
             } catch (Exception ex) {
                 errTrackers.add(tracker);
                 getSimulationManager().getDataset().removeRequiredVariable(tracker.short_name(), tracker.getClass());
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append("Error tracking variable \"");
                 sb.append(tracker.short_name());
                 sb.append("\" == >");
@@ -463,12 +464,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
      * @param array the Array that will be written; must be same type and
      * rank as Field
      */
-    private boolean writeTrackerToNetCDF(ITracker tracker, int index) {
+    private boolean writeTrackerToNetCDF(AbstractTracker tracker, int index) {
         try {
             ncOut.write(tracker.short_name(), tracker.origin(index), tracker.getArray());
         } catch (Exception ex) {
             getSimulationManager().getDataset().removeRequiredVariable(tracker.short_name(), tracker.getClass());
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("Error writing ");
             sb.append(tracker.short_name());
             sb.append(" in the NetCDF output file == >");
@@ -486,7 +487,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
      *
      * @param field a Field, the variable to be added in the file.
      */
-    private void addVar2NcOut(ITracker tracker) {
+    private void addVar2NcOut(AbstractTracker tracker) {
 
         ncOut.addVariable(tracker.short_name(), tracker.type(), tracker.dimensions());
         try {
@@ -506,6 +507,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
     }
 
+    @Override
     public void lastStepOccurred(LastStepEvent e) {
         if (!e.isInterrupted()) {
             writeToNetCDF(i_record);
@@ -519,6 +521,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
 
         /* Create the NetCDF writeable object */
@@ -553,6 +556,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         getLogger().info("Output manager setup [OK]");
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
         /* add the zones
@@ -582,7 +586,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         try {
             writeRegion();
         } catch (Exception ex) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("Problem occured writing the simulation area in the NetCDF output file == >");
             sb.append(ex.toString());
             sb.append("\n");
@@ -594,7 +598,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         try {
             writeZones();
         } catch (Exception ex) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("Problem occured writing the zones in the NetCDF output file == >");
             sb.append(ex.toString());
             sb.append("\n");
@@ -603,15 +607,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         /* initialization completed */
-        getLogger().info("Created output file " + ncOut.getLocation());
+        getLogger().log(Level.INFO, "Created output file {0}", ncOut.getLocation());
         getLogger().info("Output manager initialization [OK]");
     }
 
     public class NCDimFactory {
 
         private Dimension time, drifter;
-        private Hashtable<TypeZone, Dimension> zoneDimension;
-        private Hashtable<String, Dimension> dimensions;
+        private HashMap<TypeZone, Dimension> zoneDimension;
+        private HashMap<String, Dimension> dimensions;
 
         public Dimension createDimension(Dimension dim) {
             if (dimensions.containsKey(dim.getName())) {
@@ -645,7 +649,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         public Dimension getZoneDimension(TypeZone type) {
             if (null == zoneDimension) {
-                zoneDimension = new Hashtable();
+                zoneDimension = new HashMap();
             }
             if (null == zoneDimension.get(type)) {
                 String name = type.toString() + "_zone";
@@ -660,7 +664,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             time = null;
             drifter = null;
             zoneDimension = null;
-            dimensions = new Hashtable();
+            dimensions = new HashMap();
         }
     }
 }

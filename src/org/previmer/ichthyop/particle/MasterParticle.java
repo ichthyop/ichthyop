@@ -10,22 +10,22 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IMasterParticle;
+import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *
  * @author pverley
  */
-public class MasterParticle extends GridPoint implements IMasterParticle {
+public class MasterParticle extends GridPoint implements IParticle {
 
     private int index;
     private long age = 0;
     private ParticleMortality deathCause;
     private boolean living = true;
     private boolean locked = false;
-    private List<ParticleLayer> layers = new ArrayList();
+    private final List<ParticleLayer> layers = new ArrayList();
 
+    @Override
     public ParticleLayer getLayer(Class layerClass) {
         for (ParticleLayer layer : layers) {
             if (layer.getClass().getCanonicalName().equals(layerClass.getCanonicalName())) {
@@ -33,7 +33,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
             }
         }
         try {
-            ParticleLayer layer = (ParticleLayer) layerClass.getConstructor(IBasicParticle.class).newInstance(this);
+            ParticleLayer layer = (ParticleLayer) layerClass.getConstructor(IParticle.class).newInstance(this);
             layers.add(layer);
             return layer;
         } catch (InstantiationException ex) {
@@ -52,10 +52,12 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         return null;
     }
 
+    @Override
     public boolean isLiving() {
         return living;
     }
 
+    @Override
     public int getIndex() {
         return index;
     }
@@ -64,6 +66,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         this.index = index;
     }
 
+    @Override
     public long getAge() {
         return age;
     }
@@ -72,6 +75,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         age += getSimulationManager().getTimeManager().get_dt();
     }
 
+    @Override
     public void kill(ParticleMortality cause) {
 
         /* The method is only called once per time-step.
@@ -85,6 +89,7 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         living = false;
     }
 
+    @Override
     public ParticleMortality getDeathCause() {
         if (deathCause != null) {
             return deathCause;
@@ -93,24 +98,32 @@ public class MasterParticle extends GridPoint implements IMasterParticle {
         }
     }
 
+    @Override
     public boolean isLocked() {
         return locked;
     }
 
+    @Override
     public void lock() {
         locked = true;
     }
 
+    @Override
     public void unlock() {
         locked = false;
     }
 
+    /**
+     * Applies all the user defined actions
+     * ({@link org.previmer.ichthyop.arch.IAction}) and then applies all the
+     * system actions ({@link org.previmer.ichthyop.arch.ISysAction})
+     */
     public void step() {
 
         getSimulationManager().getActionManager().executeActions(this);
         getSimulationManager().getActionManager().executeSysActions(this);
     }
-    
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();

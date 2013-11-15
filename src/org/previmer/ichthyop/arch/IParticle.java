@@ -16,7 +16,7 @@ import org.previmer.ichthyop.particle.ParticleMortality;
  * @author P.Verley
  * @see ichthyop.core.Particle that implements IParticle
  */
-public interface IBasicParticle {
+public interface IParticle {
 
 /////////////////////////////
 // Declaration of the methods

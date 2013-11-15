@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import java.text.SimpleDateFormat;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.arch.IParticle;
 import java.util.Calendar;
 import java.util.Date;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
@@ -46,7 +46,7 @@ public class MigrationAction extends AbstractAction {
         isodepth = (depthDay == depthNight);
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         /** Ensures larva stage */
         boolean isSatisfiedCriterion = false;
