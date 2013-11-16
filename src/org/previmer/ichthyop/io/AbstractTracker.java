@@ -33,7 +33,7 @@ public abstract class AbstractTracker extends SimulationManagerAccessor {
     abstract void setDimensions();
 
     abstract Array createArray();
-    
+
     abstract void addRuntimeAttributes();
 
     public abstract void track();
@@ -46,16 +46,23 @@ public abstract class AbstractTracker extends SimulationManagerAccessor {
     public void init() {
         setDimensions();
         array = createArray();
+        String value;
+        // add compulsory attributes
+        value = propertyManager.getProperty("tracker.longname");
+        if (null != value) {
+            addAttribute(new Attribute("long_name", value));
+        }
+        value = propertyManager.getProperty("tracker.unit");
+        if (null != value) {
+            addAttribute(new Attribute("unit", value));
+        }
         // add pre-defined attributes
-        int i = 0;
         String name;
-        try {
-            while ((name = propertyManager.getProperty("tracker.attribute[" + i + "].name")) != null) {
-                String value = propertyManager.getProperty("tracker.attribute[" + i + "].value");
-                addAttribute(new Attribute(name, value));
-                i++;
-            }
-        } catch (java.util.MissingResourceException ex) {
+        int i = 0;
+        while ((name = propertyManager.getProperty("tracker.attribute[" + i + "].name")) != null) {
+            value = propertyManager.getProperty("tracker.attribute[" + i + "].value");
+            addAttribute(new Attribute(name, value));
+            i++;
         }
     }
 
@@ -108,16 +115,8 @@ public abstract class AbstractTracker extends SimulationManagerAccessor {
         return origin;
     }
 
-    public String short_name() {
+    public String getName() {
         return propertyManager.getProperty("tracker.shortname");
-    }
-
-    public String long_name() {
-        return propertyManager.getProperty("tracker.longname");
-    }
-
-    public String unit() {
-        return propertyManager.getProperty("tracker.unit");
     }
 
     void addAttribute(Attribute attribute) {

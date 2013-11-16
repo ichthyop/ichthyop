@@ -20,7 +20,7 @@ public class CustomTracker extends FloatTracker {
     }
 
     @Override
-    public String short_name() {
+    public String getName() {
         return variableName;
     }
 
