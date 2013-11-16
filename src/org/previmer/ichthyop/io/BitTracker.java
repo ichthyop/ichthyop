@@ -16,50 +16,17 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.util.Iterator;
 import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.particle.BitParticleLayer;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayInt;
-import ucar.ma2.DataType;
 
 /**
  *
  * @author pverley
  */
-public class BitTracker extends AbstractTracker {
-
-    public BitTracker() {
-        super(DataType.INT);
-    }
+public class BitTracker extends IntegerTracker {
 
     @Override
-    void setDimensions() {
-        addTimeDimension();
-        addDrifterDimension();
-    }
-
-    @Override
-    Array createArray() {
-        ArrayInt.D2 array = new ArrayInt.D2(1, dimensions().get(1).getLength());
-        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
-            array.set(0, i, -1);
-        }
-        return array;
-    }
-
-    @Override
-    public ArrayInt.D2 getArray() {
-        return (ArrayInt.D2) super.getArray();
-    }
-
-    public void track() {
-        IParticle particle;
-        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        while (iter.hasNext()) {
-            particle = iter.next();
-            int bit = ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).getBit();
-            getArray().set(0, particle.getIndex(), bit);
-        }
+    int getValue(IParticle particle) {
+        return ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).getBit();
     }
 }

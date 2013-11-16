@@ -18,7 +18,6 @@ package org.previmer.ichthyop.io;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.arch.IParticle;
@@ -48,9 +47,10 @@ public class RecruitmentZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayInt.D3(1, dimensions().get(1).getLength(), dimensions().get(2).getLength());
+        return new ArrayInt.D3(1, getNParticle(), getZones().size());
     }
 
+    @Override
     public void track() {
         IParticle particle;
         RecruitableParticleLayer rparticle;
@@ -59,7 +59,7 @@ public class RecruitmentZoneTracker extends AbstractTracker {
             particle = iter.next();
             rparticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
             Index index = getArray().getIndex();
-            for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
+            for (Zone zone : getZones()) {
                 index.set(0, particle.getIndex(), zone.getIndex());
                 int recruited = rparticle.isRecruited(zone.getIndex())
                         ? 1
@@ -70,14 +70,13 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     }
 
     @Override
-    public Attribute[] attributes() {
-        List<Attribute> listAttributes = new ArrayList();
-        for (Attribute attr : super.attributes()) {
-            listAttributes.add(attr);
+    public void addRuntimeAttributes() {
+        for (Zone zone : getZones()) {
+            addAttribute(new Attribute("recruitment zone " + zone.getIndex(), zone.getKey()));
         }
-        for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT)) {
-            listAttributes.add(new Attribute("recruitment zone " + zone.getIndex(), zone.getKey()));
-        }
-        return listAttributes.toArray(new Attribute[listAttributes.size()]);
+    }
+
+    private ArrayList<Zone> getZones() {
+        return getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT);
     }
 }

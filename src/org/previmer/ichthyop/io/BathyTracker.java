@@ -16,53 +16,18 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.util.Iterator;
+import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.arch.IParticle;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.DataType;
 
 /**
  *
  * @author gandres
  */
-public class BathyTracker extends AbstractTracker {
-
-    public BathyTracker() {
-        super(DataType.FLOAT);
-    }
-    
-    @Override
-    void setDimensions() {
-        addTimeDimension();
-        addDrifterDimension();
-    }
+public class BathyTracker extends FloatTracker {
 
     @Override
-    Array createArray() {
-        ArrayFloat.D2 array = new ArrayFloat.D2(1, dimensions().get(1).getLength());
-        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
-            array.set(0, i, -1);
-        }
-        return array;
+    float getValue(IParticle particle) {
+        double[] pGrid = {particle.getX(), particle.getY(), particle.getZ()};
+        return (float) getSimulationManager().getDataset().getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
-
-    @Override
-    public void track() {
-        IParticle particle;
-        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        while (iter.hasNext()) {
-            particle = iter.next();
-            double[] pGrid={particle.getX(),particle.getY(),particle.getZ() };
-            double bathy= getSimulationManager().getDataset().getBathy((int) Math.round(pGrid[0]), (int)  Math.round(pGrid[1]));
-            getArray().set(0, particle.getIndex(), (float) bathy);
-        }
-        
-    }
-    
-    @Override
-    public ArrayFloat.D2 getArray() {
-        return (ArrayFloat.D2) super.getArray();
-    }
-    
 }

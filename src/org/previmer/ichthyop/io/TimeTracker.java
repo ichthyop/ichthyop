@@ -27,7 +27,7 @@ public class TimeTracker extends AbstractTracker {
     }
 
     @Override
-    public Attribute[] attributes() {
+    public Attribute[] getAttributes() {
         List<Attribute> listAttributes = new ArrayList();
         String calendarName = getSimulationManager().getTimeManager().getCalendar().getClass().getSimpleName();
         if (calendarName.toLowerCase().contains("interannual")) {
@@ -44,7 +44,13 @@ public class TimeTracker extends AbstractTracker {
         return new ArrayDouble.D1(1);
     }
 
+    @Override
     public void track() {
         getArray().setDouble(0, getSimulationManager().getTimeManager().getTime());
+    }
+    
+    @Override
+    void addRuntimeAttributes() {
+        // no runtime attribute
     }
 }

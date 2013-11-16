@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 pverley
+ * Copyright (C) 2013 pverley
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,65 +16,53 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.Zone;
+import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.arch.IParticle;
-import org.previmer.ichthyop.particle.ZoneParticleLayer;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayInt;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
-import ucar.ma2.Index;
-import ucar.nc2.Attribute;
 
 /**
  *
  * @author pverley
  */
-public class ReleaseZoneTracker extends AbstractTracker {
-
-    public ReleaseZoneTracker() {
-        super(DataType.INT);
+public abstract class FloatTracker extends AbstractTracker {
+    
+    abstract float getValue(IParticle particle);
+    
+    FloatTracker() {
+        super(DataType.FLOAT);
     }
 
     @Override
     void setDimensions() {
+        addTimeDimension();
         addDrifterDimension();
     }
-
+    
     @Override
     Array createArray() {
-        return new ArrayInt.D1(getNParticle());
+        ArrayFloat.D2 array = new ArrayFloat.D2(1, getNParticle());
+        for (int i = 0; i < getNParticle(); i++) {
+            array.set(0, i, Float.NaN);
+        }
+        return array;
     }
-
+    
     @Override
     void addRuntimeAttributes() {
-
-        List<Zone> zones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE);
-        if (null != zones) {
-            for (Zone zone : zones) {
-                addAttribute(new Attribute("release_zone " + zone.getIndex(), zone.getKey()));
-            }
-        }
+        // no runtime attribute
     }
-
+    
     @Override
     public void track() {
-
         IParticle particle;
-        ZoneParticleLayer zparticle;
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);
-            getArray().setInt(getIndex().set(particle.getIndex()), zparticle.getNumZone(TypeZone.RELEASE));
+            getArray().setFloat(getIndex().set(0, particle.getIndex()), getValue(particle));
         }
-
-        // The variable is only written once, at first time step
-        disable();
     }
+    
 }

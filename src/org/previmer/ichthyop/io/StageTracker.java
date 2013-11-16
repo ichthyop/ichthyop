@@ -17,72 +17,29 @@
 package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.arch.IParticle;
-import java.util.Iterator;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
-import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayInt;
-import ucar.ma2.DataType;
-import ucar.nc2.Attribute;
 
 /**
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
-public class StageTracker extends AbstractTracker {
+public class StageTracker extends IntegerTracker {
+
+    private final boolean isLinearGrowth;
 
     public StageTracker() {
-        super(DataType.INT);
+        isLinearGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
     }
 
     @Override
-    void setDimensions() {
-        addTimeDimension();
-        addDrifterDimension();
-    }
-
-    public void track() {
-        IParticle particle;
-        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        boolean isLinearGrowth=false;
-        if (getSimulationManager().getActionManager().isEnabled("action.growth")){
-                isLinearGrowth=true;
-            }
-        while (iter.hasNext()) {
-            particle = iter.next();
-            if (isLinearGrowth){
-                GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
-                getArray().set(0, particle.getIndex(), gParticle.getStage().getCode());
-            }
-            else {
-                DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-                getArray().set(0, particle.getIndex(), gParticle.getStage().getCode());
-            }
+    int getValue(IParticle particle) {
+        if (isLinearGrowth) {
+            GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
+            return gParticle.getStage().getCode();
+        } else {
+            DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
+            return gParticle.getStage().getCode();
         }
-    }
-
-    @Override
-    public ArrayInt.D2 getArray() {
-        return (ArrayInt.D2) super.getArray();
-    }
-
-    @Override
-    Array createArray() {
-        ArrayInt.D2 array = new ArrayInt.D2(1, dimensions().get(1).getLength());
-        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
-            array.set(0, i, -99);
-        }
-        return array;
-    }
-
-    @Override
-    public Attribute[] attributes() {
-        Attribute[] attributes = new Attribute[Stage.values().length];
-        int i = 0;
-        for (Stage stage : Stage.values()) {
-            attributes[i++] = new Attribute(stage.toString(), stage.getCode());
-        }
-        return attributes;
     }
 }

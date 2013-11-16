@@ -14,66 +14,33 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.arch.IParticle;
-import java.util.Iterator;
+import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.DataType;
 
 /**
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
-public class LengthTracker extends AbstractTracker {
+public class LengthTracker extends FloatTracker {
+
+    private final boolean isLinearGrowth;
 
     public LengthTracker() {
-        super(DataType.FLOAT);
+        isLinearGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
     }
 
     @Override
-    void setDimensions() {
-        addTimeDimension();
-        addDrifterDimension();
-    }
-
-    public void track() {
-        IParticle particle;
-        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        boolean isLinearGrowth=false;
-        if (getSimulationManager().getActionManager().isEnabled("action.growth")){
-                isLinearGrowth=true;
-            }
-        while (iter.hasNext()) {
-            particle = iter.next();
-            if (isLinearGrowth){
-                GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
-                getArray().set(0, particle.getIndex(), (float) gParticle.getLength());
-            }
-            else {
-                DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-                getArray().set(0, particle.getIndex(), (float) gParticle.getLength());
-            }
-
+    float getValue(IParticle particle) {
+        if (isLinearGrowth) {
+            GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
+            return (float) gParticle.getLength();
+        } else {
+            DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
+            return (float) gParticle.getLength();
         }
     }
-
-    @Override
-    public ArrayFloat.D2 getArray() {
-        return (ArrayFloat.D2) super.getArray();
-    }
-
-    @Override
-    Array createArray() {
-        ArrayFloat.D2 array = new ArrayFloat.D2(1, dimensions().get(1).getLength());
-        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
-            array.set(0, i, Float.NaN);
-        }
-        return array;
-    }
-
 }

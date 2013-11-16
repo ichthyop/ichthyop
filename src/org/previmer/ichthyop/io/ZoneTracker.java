@@ -16,7 +16,6 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.previmer.ichthyop.TypeZone;
@@ -49,9 +48,10 @@ public class ZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayInt.D3(1, dimensions().get(1).getLength(), dimensions().get(2).getLength());
+        return new ArrayInt.D3(1, getNParticle(), TypeZone.values().length);
     }
 
+    @Override
     public void track() {
         IParticle particle;
         ZoneParticleLayer zparticle;
@@ -68,22 +68,18 @@ public class ZoneTracker extends AbstractTracker {
     }
 
     @Override
-    public Attribute[] attributes() {
-        List<Attribute> listAttributes = new ArrayList();
-        for (Attribute attr : super.attributes()) {
-            listAttributes.add(attr);
-        }
+    void addRuntimeAttributes() {
+
         for (TypeZone type : TypeZone.values()) {
-            listAttributes.add(new Attribute("type_zone " + type.getCode(), type.toString()));
+            addAttribute(new Attribute("type_zone " + type.getCode(), type.toString()));
             List<Zone> zones = getSimulationManager().getZoneManager().getZones(type);
             if (null != zones) {
                 for (Zone zone : zones) {
-                    listAttributes.add(new Attribute(type.toString() + "_zone " + zone.getIndex(), zone.getKey()));
+                    addAttribute(new Attribute(type.toString() + "_zone " + zone.getIndex(), zone.getKey()));
                 }
             } else {
-                listAttributes.add(new Attribute(type.toString() + "_zone", "none for this run"));
+                addAttribute(new Attribute(type.toString() + "_zone", "none for this run"));
             }
         }
-        return listAttributes.toArray(new Attribute[listAttributes.size()]);
     }
 }
