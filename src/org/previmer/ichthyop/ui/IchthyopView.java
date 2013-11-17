@@ -1079,12 +1079,15 @@ public class IchthyopView extends FrameView
                     /* step simulation */
                     getSimulationManager().getSimulation().step();
                     /* Print message progress */
-                    StringBuffer msg = new StringBuffer();
+                    StringBuilder msg = new StringBuilder();
                     msg.append(getSimulationManager().getTimeManager().stepToString());
-                    msg.append(" - ");
-                    msg.append(resourceMap.getString("simulationRun.msg.time"));
-                    msg.append(" ");
-                    msg.append(getSimulationManager().getTimeManager().timeToString());
+                    if (getSimulationManager().getTimeManager().index() % 10 == 0) {
+                        msg.append(" (");
+                        msg.append(resourceMap.getString("simulationRun.msg.time"));
+                        msg.append(" ");
+                        msg.append(getSimulationManager().getTimeManager().timeToString());
+                        msg.append(")");
+                    }
                     setMessage(msg.toString());
                     setProgress(getSimulationManager().progressCurrent());
                     publish(getSimulationManager().progressCurrent());
