@@ -20,7 +20,7 @@ import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.io.RecruitmentStainTracker;
 import org.previmer.ichthyop.ui.LonLatConverter;

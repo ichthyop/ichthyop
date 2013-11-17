@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.release;
 
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.ReleaseZoneTracker;
 import org.previmer.ichthyop.io.ZoneTracker;

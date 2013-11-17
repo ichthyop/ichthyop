@@ -1,7 +1,7 @@
 package org.previmer.ichthyop.action;
 
 import java.util.logging.Level;
-import org.previmer.ichthyop.particle.MasterParticle;
+import org.previmer.ichthyop.particle.Particle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -22,7 +22,7 @@ public class SysActionMove extends AbstractSysAction {
     }
 
     @Override
-    public void execute(MasterParticle particle) {
+    public void execute(Particle particle) {
         if (!particle.isLocked()) {
             checkCoastlineAndMove(particle);
             if (particle.isOnEdge()) {
@@ -38,7 +38,7 @@ public class SysActionMove extends AbstractSysAction {
      * Implements specific behaviours in case the current move take the particle
      * inland.
      */
-    private void checkCoastlineAndMove(MasterParticle particle) {
+    private void checkCoastlineAndMove(Particle particle) {
 
         double[] move;
         switch (coastlineBehavior) {

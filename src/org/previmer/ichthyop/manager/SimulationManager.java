@@ -6,7 +6,7 @@ package org.previmer.ichthyop.manager;
 
 import org.jdom.JDOMException;
 import org.previmer.ichthyop.Simulation;
-import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.InitializeListener;
 import org.previmer.ichthyop.event.SetupEvent;

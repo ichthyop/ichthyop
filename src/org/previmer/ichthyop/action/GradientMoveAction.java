@@ -19,7 +19,7 @@ package org.previmer.ichthyop.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 
 /**

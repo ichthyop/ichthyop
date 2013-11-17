@@ -16,7 +16,7 @@
  */
 package org.previmer.ichthyop.io;
 
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 import ucar.nc2.Attribute;
 

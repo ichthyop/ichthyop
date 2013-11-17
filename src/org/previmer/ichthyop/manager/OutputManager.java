@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.io.AbstractTracker;
 import org.previmer.ichthyop.io.DepthTracker;

@@ -16,7 +16,7 @@
  */
 package org.previmer.ichthyop.io;
 
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;

@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *

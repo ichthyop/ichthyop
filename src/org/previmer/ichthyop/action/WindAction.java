@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.io.IOTools;
 
 /**

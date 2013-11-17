@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.Constant;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.GrowingParticleLayer;

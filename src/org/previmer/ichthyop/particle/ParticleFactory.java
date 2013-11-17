@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
-import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *
@@ -15,7 +14,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
 
     public static IParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
 
-        MasterParticle particle = new MasterParticle();
+        Particle particle = new Particle();
         particle.setIndex(index);
         boolean living = mortality.equals(ParticleMortality.ALIVE);
         if (living) {
@@ -49,7 +48,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
     }
 
     public static IParticle createSurfaceParticle(int index, double x, double y, boolean is3D) {
-        MasterParticle particle = new MasterParticle();
+        Particle particle = new Particle();
         particle.setIndex(index);
         particle.setX(x);
         particle.setY(y);
@@ -66,7 +65,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
     }
 
     public static IParticle createZoneParticle(int index, double x, double y, double depth) {
-        MasterParticle particle = new MasterParticle();
+        Particle particle = new Particle();
         particle.setIndex(index);
         particle.setX(x);
         particle.setY(y);
@@ -99,7 +98,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
 
     public static IParticle createBottomParticle(int index, double x, double y) {
 
-        MasterParticle particle = new MasterParticle();
+        Particle particle = new Particle();
         particle.setIndex(index);
         particle.setX(x);
         particle.setY(y);

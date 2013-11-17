@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 
 /**
  *

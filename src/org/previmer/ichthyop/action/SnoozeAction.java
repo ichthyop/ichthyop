@@ -19,7 +19,7 @@ package org.previmer.ichthyop.action;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 
 /**
  *

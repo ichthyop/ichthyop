@@ -15,12 +15,12 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.action.AbstractSysAction;
 import org.previmer.ichthyop.action.SysActionAgeMonitoring;
 import org.previmer.ichthyop.action.SysActionMove;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
-import org.previmer.ichthyop.particle.MasterParticle;
+import org.previmer.ichthyop.particle.Particle;
 
 /**
  *
@@ -104,7 +104,7 @@ public class ActionManager extends AbstractManager {
         }
     }
 
-    public void executeSysActions(MasterParticle particle) {
+    public void executeSysActions(Particle particle) {
         for (AbstractSysAction sysaction : sysActionList) {
             sysaction.execute(particle);
         }

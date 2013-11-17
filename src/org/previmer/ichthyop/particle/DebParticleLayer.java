@@ -16,7 +16,6 @@
  */
 package org.previmer.ichthyop.particle;
 
-import org.previmer.ichthyop.arch.IParticle;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.manager.ParameterManager;
 

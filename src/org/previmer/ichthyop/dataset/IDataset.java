@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.previmer.ichthyop.arch;
+package org.previmer.ichthyop.dataset;
 
 import org.previmer.ichthyop.event.NextStepListener;
 import ucar.ma2.Array;

@@ -1,7 +1,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
-import org.previmer.ichthyop.particle.MasterParticle;
+import org.previmer.ichthyop.particle.Particle;
 
 /**
  *
@@ -11,7 +11,7 @@ public abstract class AbstractSysAction extends SimulationManagerAccessor {
     
     abstract public void loadParameters() throws Exception;
 
-    abstract public void execute(MasterParticle particle);
+    abstract public void execute(Particle particle);
 
     public String getParameter(String block, String key) {
         return getSimulationManager().getParameterManager().getParameter(block, key);

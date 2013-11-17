@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
-import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.io.XBlock;
 import java.util.ArrayList;
 import java.util.List;

@@ -6,7 +6,6 @@ package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.*;
 import java.util.Iterator;
-import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *

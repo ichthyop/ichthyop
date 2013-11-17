@@ -18,7 +18,7 @@ package org.previmer.ichthyop.io;
 
 import java.util.Iterator;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;

@@ -2,8 +2,8 @@ package org.previmer.ichthyop;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import org.previmer.ichthyop.arch.IParticle;
-import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.dataset.IDataset;
 
 /**
  * <p>

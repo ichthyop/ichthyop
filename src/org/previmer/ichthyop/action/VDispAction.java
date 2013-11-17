@@ -5,8 +5,8 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.MTRandom;
-import org.previmer.ichthyop.arch.IParticle;
-import org.previmer.ichthyop.arch.IDataset;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.dataset.IDataset;
 
 /**
  *

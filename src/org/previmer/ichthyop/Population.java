@@ -6,7 +6,7 @@ import java.util.concurrent.RecursiveAction;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.manager.SimulationManager;
-import org.previmer.ichthyop.particle.MasterParticle;
+import org.previmer.ichthyop.particle.Particle;
 
 /**
  * The Population is the intermediate level of the hierarchy of the IBM:
@@ -101,7 +101,7 @@ public class Population extends ArrayList implements SetupListener {
          */
         private void processDirectly() {
             for (int iParticle = iStart; iParticle < iEnd; iParticle++) {
-                ((MasterParticle) get(iParticle)).step();
+                ((Particle) get(iParticle)).step();
             }
         }
 

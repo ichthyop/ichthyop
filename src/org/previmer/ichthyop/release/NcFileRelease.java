@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.ParticleFactory;

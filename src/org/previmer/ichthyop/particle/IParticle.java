@@ -1,7 +1,4 @@
-package org.previmer.ichthyop.arch;
-
-import org.previmer.ichthyop.particle.ParticleLayer;
-import org.previmer.ichthyop.particle.ParticleMortality;
+package org.previmer.ichthyop.particle;
 
 /**
  * Public interface that lists the methods a Particle of the model will have

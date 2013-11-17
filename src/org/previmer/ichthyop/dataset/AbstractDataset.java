@@ -7,7 +7,6 @@ package org.previmer.ichthyop.dataset;
 import java.util.HashMap;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepListener;
-import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import ucar.nc2.NetcdfFile;
 
@@ -33,6 +32,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
     }
 
+    @Override
     public Number get(String variableName, double[] pGrid, double time) {
         if (null != requiredVariables.get(variableName)) {
             return requiredVariables.get(variableName).get(pGrid, time);
@@ -40,6 +40,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return Float.NaN;
     }
 
+    @Override
     public void requireVariable(String name, Class requiredBy) {
         if (!requiredVariables.containsKey(name)) {
             requiredVariables.put(name, new RequiredVariable(name, requiredBy));
@@ -56,6 +57,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         }
     }
 
+    @Override
     public void removeRequiredVariable(String name, Class requiredBy) {
         RequiredVariable var = requiredVariables.get(name);
         if (null != var) {
@@ -75,7 +77,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
                 variable.checked(nc);
             } catch (Exception ex) {
                 requiredVariables.remove(variable.getName());
-                StringBuffer msg = new StringBuffer();
+                StringBuilder msg = new StringBuilder();
                 msg.append("Failed to read dataset variable ");
                 msg.append(variable.getName());
                 msg.append(" ==> ");

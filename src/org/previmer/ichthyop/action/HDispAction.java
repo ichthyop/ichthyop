@@ -1,7 +1,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.MTRandom;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 
 /**
  * Simulates horizontal dispersion.

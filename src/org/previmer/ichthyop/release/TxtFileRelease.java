@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.ParticleFactory;

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;

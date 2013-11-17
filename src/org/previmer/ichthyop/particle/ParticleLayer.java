@@ -6,7 +6,6 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
-import org.previmer.ichthyop.arch.IParticle;
 
 /**
  *

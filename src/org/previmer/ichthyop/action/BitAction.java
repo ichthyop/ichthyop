@@ -17,7 +17,7 @@
 
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.arch.IParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.io.BitTracker;
 import org.previmer.ichthyop.particle.BitParticleLayer;
 
