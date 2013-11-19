@@ -338,29 +338,26 @@ public class Mercator2dDataset extends AbstractDataset {
 
         NetcdfFile nc;
         Array arrLon, arrLat;
-        try {
-            nc = NetcdfDataset.openDataset(file_mask);
-            arrLon = nc.findVariable(strLon).read();
-            arrLat = nc.findVariable(strLat).read();
-            if (arrLon.getElementType() == float.class) {
-                lonRho = (float[][]) arrLon.copyToNDJavaArray();
-                latRho = (float[][]) arrLat.copyToNDJavaArray();
-            } else {
-                lonRho = new float[ny][nx];
-                latRho = new float[ny][nx];
-                Index index = arrLon.getIndex();
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        index.set(j, i);
-                        lonRho[j][i] = arrLon.getFloat(index);
-                        latRho[j][i] = arrLat.getFloat(index);
-                    }
+
+        nc = NetcdfDataset.openDataset(file_mask);
+        arrLon = nc.findVariable(strLon).read();
+        arrLat = nc.findVariable(strLat).read();
+        if (arrLon.getElementType() == float.class) {
+            lonRho = (float[][]) arrLon.copyToNDJavaArray();
+            latRho = (float[][]) arrLat.copyToNDJavaArray();
+        } else {
+            lonRho = new float[ny][nx];
+            latRho = new float[ny][nx];
+            Index index = arrLon.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    index.set(j, i);
+                    lonRho[j][i] = arrLon.getFloat(index);
+                    latRho[j][i] = arrLat.getFloat(index);
                 }
             }
-            nc.close();
-        } catch (Exception e) {
-            throw new IOException(e);
         }
+        nc.close();
     }
 
     /**
@@ -368,6 +365,9 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans
      * la définition de e1t et e2t
+     * @param j
+     * @param i
+     * @return 
      */
     @Override
     public double getdxi(int j, int i) {
@@ -377,6 +377,9 @@ public class Mercator2dDataset extends AbstractDataset {
 
     /**
      * Gets cell dimension [meter] in the ETA-direction.
+     * @param j
+     * @param i
+     * @return 
      */
     @Override
     public double getdeta(int j, int i) {
@@ -390,8 +393,7 @@ public class Mercator2dDataset extends AbstractDataset {
      * non-dependant information, such as grid dimensions, geographical
      * boundaries, depth at sigma levels.
      *
-     * @throws an IOException if an error occurs while setting up the
-     * {@code Dataset}
+     * @throws java.lang.Exception
      */
     @Override
     public void setUp() throws Exception {
@@ -421,7 +423,7 @@ public class Mercator2dDataset extends AbstractDataset {
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
-            } catch (Exception ex) {
+            } catch (IOException | NumberFormatException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
         }
@@ -580,7 +582,7 @@ public class Mercator2dDataset extends AbstractDataset {
      * the simulation. Checks out the existence of the fields required by the
      * current simulation. Sets all fields at time for the first time step.
      *
-     * @throws an IOException if a required field cannot be found in the NetCDF
+     * @throws Exception if a required field cannot be found in the NetCDF
      * dataset.
      */
     @Override
@@ -609,7 +611,7 @@ public class Mercator2dDataset extends AbstractDataset {
 
         try {
             u_tp1 = (float[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx - 1}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -617,7 +619,7 @@ public class Mercator2dDataset extends AbstractDataset {
 
         try {
             v_tp1 = (float[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny - 1, nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -627,7 +629,7 @@ public class Mercator2dDataset extends AbstractDataset {
             Array xTimeTp1 = ncU.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
             time_tp1 -= time_tp1 % 100;
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -651,7 +653,7 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Determines whether the specified {@code RohPoint} is in water.
      *
-     * @param ptRho the RhoPoint
+     * @param pGrid the RhoPoint
      * @return <code>true</code> if the {@code RohPoint} is in water,
      * <code>false</code> otherwise.
      * @see #isInWater(int i, int j)
@@ -692,8 +694,8 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Transforms the depth at specified x-y particle location into z coordinate
      *
-     * @param xRho a double, the x-coordinate
-     * @param yRho a double, the y-coordinate
+     * @param x a double, the x-coordinate
+     * @param y a double, the y-coordinate
      * @param depth a double, the depth of the particle
      * @return a double, the z-coordinate corresponding to the depth
      *
@@ -729,10 +731,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @param yRho a double, the y-coordinate
      * @return a double[], the corresponding geographical coordinates (latitude,
      * longitude)
-     *
-     * @param xRho double
-     * @param yRho double
-     * @return double[]
      */
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
@@ -877,165 +875,6 @@ public class Mercator2dDataset extends AbstractDataset {
     }
 
     /**
-     * Determines whether the specified geographical point (lon, lat) belongs to
-     * the is inside the polygon defined by (imin, jmin) & (imin, jmax) & (imax,
-     * jmax) & (imax, jmin).
-     *
-     * <p>
-     * The algorithm has been adapted from a function in ROMS/UCLA code,
-     * originally written by Alexander F. Shchepetkin and Hernan G. Arango.
-     * Please find below an extract of the ROMS/UCLA documention.
-     * </p>
-     * <pre>
-     * Given the vectors Xb and Yb of size Nb, defining the coordinates
-     * of a closed polygon,  this function find if the point (Xo,Yo) is
-     * inside the polygon.  If the point  (Xo,Yo)  falls exactly on the
-     * boundary of the polygon, it still considered inside.
-     * This algorithm does not rely on the setting of  Xb(Nb)=Xb(1) and
-     * Yb(Nb)=Yb(1).  Instead, it assumes that the last closing segment
-     * is (Xb(Nb),Yb(Nb)) --> (Xb(1),Yb(1)).
-     *
-     * Reference:
-     * Reid, C., 1969: A long way from Euclid. Oceanography EMR,
-     * page 174.
-     *
-     * Algorithm:
-     *
-     * The decision whether the point is  inside or outside the polygon
-     * is done by counting the number of crossings from the ray (Xo,Yo)
-     * to (Xo,-infinity), hereafter called meridian, by the boundary of
-     * the polygon.  In this counting procedure,  a crossing is counted
-     * as +2 if the crossing happens from "left to right" or -2 if from
-     * "right to left". If the counting adds up to zero, then the point
-     * is outside.  Otherwise,  it is either inside or on the boundary.
-     *
-     * This routine is a modified version of the Reid (1969) algorithm,
-     * where all crossings were counted as positive and the decision is
-     * made  based on  whether the  number of crossings is even or odd.
-     * This new algorithm may produce different results  in cases where
-     * Xo accidentally coinsides with one of the (Xb(k),k=1:Nb) points.
-     * In this case, the crossing is counted here as +1 or -1 depending
-     * of the sign of (Xb(k+1)-Xb(k)).  Crossings  are  not  counted if
-     * Xo=Xb(k)=Xb(k+1).  Therefore, if Xo=Xb(k0) and Yo>Yb(k0), and if
-     * Xb(k0-1) < Xb(k0) < Xb(k0+1),  the crossing is counted twice but
-     * with weight +1 (for segments with k=k0-1 and k=k0). Similarly if
-     * Xb(k0-1) > Xb(k0) > Xb(k0+1), the crossing is counted twice with
-     * weight -1 each time.  If,  on the other hand,  the meridian only
-     * touches the boundary, that is, for example, Xb(k0-1) < Xb(k0)=Xo
-     * and Xb(k0+1) < Xb(k0)=Xo, then the crossing is counted as +1 for
-     * segment k=k0-1 and -1 for segment k=k0, resulting in no crossing.
-     *
-     * Note 1: (Explanation of the logical condition)
-     *
-     * Suppose  that there exist two points  (x1,y1)=(Xb(k),Yb(k))  and
-     * (x2,y2)=(Xb(k+1),Yb(k+1)),  such that,  either (x1 < Xo < x2) or
-     * (x1 > Xo > x2).  Therefore, meridian x=Xo intersects the segment
-     * (x1,y1) -> (x2,x2) and the ordinate of the point of intersection
-     * is:
-     *                y1*(x2-Xo) + y2*(Xo-x1)
-     *            y = -----------------------
-     *                         x2-x1
-     * The mathematical statement that point  (Xo,Yo)  either coinsides
-     * with the point of intersection or lies to the north (Yo>=y) from
-     * it is, therefore, equivalent to the statement:
-     *
-     *      Yo*(x2-x1) >= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 > 0
-     * or
-     *      Yo*(x2-x1) <= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 < 0
-     *
-     * which, after noting that  Yo*(x2-x1) = Yo*(x2-Xo + Xo-x1) may be
-     * rewritten as:
-     *
-     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) >= 0,   if   x2-x1 > 0
-     * or
-     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) <= 0,   if   x2-x1 < 0
-     *
-     * and both versions can be merged into  essentially  the condition
-     * that (Yo-y1)*(x2-Xo)+(Yo-y2)*(Xo-x1) has the same sign as x2-x1.
-     * That is, the product of these two must be positive or zero.
-     * </pre>
-     *
-     * @param imin an int, i-coordinate of the area left corners
-     * @param imax an int, i-coordinate of the area right corners
-     * @param jmin an int, j-coordinate of the area left corners
-     * @param jmax an int, j-coordinate of the area right corners
-     * @param lon a double, the longitude of the geographical point
-     * @param lat a double, the latitude of the geographical point
-     * @return <code>true</code> if (lon, lat) belongs to the polygon,
-     * <code>false</code>otherwise.
-     */
-    public static boolean isInsidePolygone(int imin, int imax, int jmin,
-            int jmax, double lon, double lat) {
-
-        //--------------------------------------------------------------
-        // Return true if (lon, lat) is insidide the polygon defined by
-        // (imin, jmin) & (imin, jmax) & (imax, jmax) & (imax, jmin)
-        //-----------------------------------------
-        // Build the polygone
-        int nb, shft;
-        double[] xb, yb;
-        boolean isInPolygone = true;
-
-        nb = 2 * (jmax - jmin + imax - imin);
-        xb = new double[nb + 1];
-        yb = new double[nb + 1];
-        shft = 0 - imin;
-        for (int i = imin; i <= (imax - 1); i++) {
-            xb[i + shft] = lonRho[jmin][i];
-            yb[i + shft] = latRho[jmin][i];
-        }
-        shft = 0 - jmin + imax - imin;
-        for (int j = jmin; j <= (jmax - 1); j++) {
-            xb[j + shft] = lonRho[j][imax];
-            yb[j + shft] = latRho[j][imax];
-        }
-        shft = jmax - jmin + 2 * imax - imin;
-        for (int i = imax; i >= (imin + 1); i--) {
-            xb[shft - i] = lonRho[jmax][i];
-            yb[shft - i] = latRho[jmax][i];
-        }
-        shft = 2 * jmax - jmin + 2 * (imax - imin);
-        for (int j = jmax; j >= (jmin + 1); j--) {
-            xb[shft - j] = lonRho[j][imin];
-            yb[shft - j] = latRho[j][imin];
-        }
-        xb[nb] = xb[0];
-        yb[nb] = yb[0];
-
-        //---------------------------------------------
-        //Check if {lon, lat} is inside polygone
-        int inc, crossings;
-        double dx1, dx2, dxy;
-        crossings = 0;
-
-        for (int k = 0; k < nb; k++) {
-            if (xb[k] != xb[k + 1]) {
-                dx1 = lon - xb[k];
-                dx2 = xb[k + 1] - lon;
-                dxy = dx2 * (lat - yb[k]) - dx1 * (yb[k + 1] - lat);
-                inc = 0;
-                if ((xb[k] == lon) & (yb[k] == lat)) {
-                    crossings = 1;
-                } else if (((dx1 == 0.) & (lat >= yb[k]))
-                        | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
-                    inc = 1;
-                } else if ((dx1 * dx2 > 0.) & ((xb[k + 1] - xb[k]) * dxy >= 0.)) {
-                    inc = 2;
-                }
-                if (xb[k + 1] > xb[k]) {
-                    crossings += inc;
-                } else {
-                    crossings -= inc;
-                }
-            }
-        }
-        if (crossings == 0) {
-            isInPolygone = false;
-        }
-        return (isInPolygone);
-    }
-
-    /**
      * Gets the list of NetCDF input files that satisfy the file filter and
      * sorts them according to the chronological order induced by the
      * {@code NCComparator}.
@@ -1048,15 +887,13 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     private ArrayList<String> getInputList(String path, String fileMask) throws IOException {
 
-        ArrayList<String> list = null;
-
         File inputPath = new File(path);
         //String fileMask = Configuration.getFileMask();
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
         if (listFile.length == 0) {
             throw new IOException(path + " contains no file matching mask " + fileMask);
         }
-        list = new ArrayList<String>(listFile.length);
+        ArrayList<String> list = new ArrayList(listFile.length);
         for (File file : listFile) {
             list.add(file.toString());
         }
