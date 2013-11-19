@@ -101,7 +101,7 @@ public class Population extends ArrayList implements SetupListener {
          */
         private void processDirectly() {
             for (int iParticle = iStart; iParticle < iEnd; iParticle++) {
-                ((Particle) get(iParticle)).step();
+                ((Particle) Population.this.get(iParticle)).step();
             }
         }
 
