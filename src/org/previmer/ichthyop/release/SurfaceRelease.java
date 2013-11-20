@@ -42,7 +42,6 @@ public class SurfaceRelease extends AbstractRelease {
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         int nx = getSimulationManager().getDataset().get_nx();
         int ny = getSimulationManager().getDataset().get_ny();
-        System.out.println("nx " + nx + " ny " + ny);
         
         for (int p = 0; p < nParticles; p++) {
             IParticle particle = null;
