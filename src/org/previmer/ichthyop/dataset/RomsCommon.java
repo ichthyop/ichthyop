@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
@@ -28,6 +29,7 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
@@ -76,7 +78,7 @@ abstract class RomsCommon extends AbstractDataset {
     /**
      * List on NetCDF input files in which dataset is read.
      */
-    ArrayList<String> listInputFiles;
+    List<String> listInputFiles;
     /**
      * Index of the current file read in the {@code listInputFiles}
      */
@@ -176,7 +178,7 @@ abstract class RomsCommon extends AbstractDataset {
         if (listFile.length == 0) {
             throw new IOException(path + " contains no file matching mask " + fileMask);
         }
-        list = new ArrayList<String>(listFile.length);
+        list = new ArrayList(listFile.length);
         for (File file : listFile) {
             list.add(file.toString());
         }
@@ -221,7 +223,7 @@ abstract class RomsCommon extends AbstractDataset {
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
-            } catch (Exception ex) {
+            } catch (IOException | NumberFormatException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain", ex);
             }
         }
@@ -381,41 +383,41 @@ abstract class RomsCommon extends AbstractDataset {
 
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
-        Array arrLon, arrLat, arrMask, arrH, arrZeta, arrPm, arrPn;
+        Array arrLon, arrLat, arrMask, arrH, arrPm, arrPn;
         Index index;
 
         NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
         try {
             arrLon = ncGrid.findVariable(strLon).read(origin, size);
-        } catch (Exception e) {
+        } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset longitude. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
             arrLat = ncGrid.findVariable(strLat).read(origin, size);
-        } catch (Exception e) {
+        } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset latitude. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
             arrMask = ncGrid.findVariable(strMask).read(origin, size);
-        } catch (Exception e) {
+        } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset mask. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
             arrH = ncGrid.findVariable(strBathy).read(origin, size);
-        } catch (Exception e) {
+        } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset bathymetry. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
             arrPm = ncGrid.findVariable(strPm).read(origin, size);
-        } catch (Exception e) {
+        } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset pm metrics. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
@@ -423,7 +425,7 @@ abstract class RomsCommon extends AbstractDataset {
 
         try {
             arrPn = ncGrid.findVariable(strPn).read(origin, size);
-        } catch (Exception e) {
+        } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset pn metrics. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
@@ -760,7 +762,7 @@ abstract class RomsCommon extends AbstractDataset {
             }
             try {
                 ncIn = NetcdfDataset.openDataset(filename);
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 IOException ioex = new IOException("Error opening dataset " + filename + " ==> " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());
                 throw ioex;
@@ -785,14 +787,14 @@ abstract class RomsCommon extends AbstractDataset {
         NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
         try {
             arrLon = ncIn.findVariable(strLon).read();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading dataset longitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
             arrLat = ncIn.findVariable(strLat).read();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading dataset latitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;

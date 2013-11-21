@@ -6,6 +6,7 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import ucar.ma2.Array;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -113,6 +114,8 @@ public abstract class Mars2dCommon extends MarsCommon {
      */
     @Override
     void setAllFieldsTp1AtTime(int i_time) throws Exception {
+        
+        getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{i_time, jpo, ipo};
         u_tp1 = new float[ny][nx - 1];
@@ -122,7 +125,7 @@ public abstract class Mars2dCommon extends MarsCommon {
         try {
             u_tp1 = (float[][]) ncIn.findVariable(strU).read(origin,
                     new int[]{1, ny, (nx - 1)}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -130,7 +133,7 @@ public abstract class Mars2dCommon extends MarsCommon {
         try {
             v_tp1 = (float[][]) ncIn.findVariable(strV).read(origin,
                     new int[]{1, (ny - 1), nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -141,7 +144,7 @@ public abstract class Mars2dCommon extends MarsCommon {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
             time_tp1 -= time_tp1 % 100;
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -168,9 +171,6 @@ public abstract class Mars2dCommon extends MarsCommon {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
-    /**
-     * Does nothing. Vertical dimension disregarded for 2D simulation.
-     */
     @Override
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());

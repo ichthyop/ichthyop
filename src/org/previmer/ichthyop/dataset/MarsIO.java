@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.io.IOTools;
 import ucar.ma2.Array;
@@ -25,7 +27,7 @@ public class MarsIO extends SimulationManagerAccessor {
     /**
      * List on NetCDF input files in which dataset is read.
      */
-    private static ArrayList<String> listInputFiles;
+    private static List<String> listInputFiles;
     /**
      * Index of the current file read in the {@code listInputFiles}
      */
@@ -50,16 +52,16 @@ public class MarsIO extends SimulationManagerAccessor {
         return openFile(listInputFiles.get(0));
     }
 
-    private static ArrayList<String> getInputList(String path, String fileMask, boolean skipSorting) throws IOException {
+    private static List<String> getInputList(String path, String fileMask, boolean skipSorting) throws IOException {
 
-        ArrayList<String> list = null;
+        ArrayList<String> list;
 
         File inputPath = new File(path);
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
         if (listFile.length == 0) {
             throw new IOException("{Dataset} " + path + " contains no file matching mask " + fileMask);
         }
-        list = new ArrayList<String>(listFile.length);
+        list = new ArrayList(listFile.length);
         for (File file : listFile) {
             list.add(file.toString());
         }
@@ -101,7 +103,7 @@ public class MarsIO extends SimulationManagerAccessor {
             indexFile = indexLast;
             return listInputFiles.get(indexLast);
         }
-        StringBuffer msg = new StringBuffer();
+        StringBuilder msg = new StringBuilder();
         msg.append("{Dataset} Time value ");
         msg.append(getSimulationManager().getTimeManager().timeToString());
         msg.append(" (");
@@ -112,7 +114,7 @@ public class MarsIO extends SimulationManagerAccessor {
 
     static boolean isTimeIntoFile(long time, int index) throws IOException {
 
-        String filename = "";
+        String filename;
         NetcdfFile nc;
         Array timeArr;
         long time_r0, time_rf;
@@ -124,8 +126,6 @@ public class MarsIO extends SimulationManagerAccessor {
         time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
                 timeArr.getShape()[0] - 1)));
         nc.close();
-        timeArr = null;
-        nc = null;
 
         return (time >= time_r0 && time < time_rf);
     }
@@ -144,9 +144,7 @@ public class MarsIO extends SimulationManagerAccessor {
                 timeArr = nc.findVariable(strTime).read();
                 time_nc[i] = DatasetUtil.skipSeconds(
                         timeArr.getLong(timeArr.getIndex().set(0)));
-                timeArr = null;
                 nc.close();
-                nc = null;
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
                 return true;
@@ -175,9 +173,9 @@ public class MarsIO extends SimulationManagerAccessor {
         NetcdfFile nc;
         try {
             nc = NetcdfDataset.openDataset(filename);
-            getLogger().info("{Dataset} Open " + filename);
+            getLogger().log(Level.INFO, "'{'Dataset'}' Open {0}", filename);
             return nc;
-        } catch (Exception e) {
+        } catch (IOException e) {
             IOException ioex = new IOException("{Dataset} Problem opening dataset " + filename + " - " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
@@ -193,9 +191,9 @@ public class MarsIO extends SimulationManagerAccessor {
         NetcdfFile ncIn;
         try {
             ncIn = NetcdfDataset.openDataset(opendapURL);
-            getLogger().info("{Dataset} Open remote " + opendapURL);
+            getLogger().log(Level.INFO, "'{'Dataset'}' Open remote {0}", opendapURL);
             return ncIn;
-        } catch (Exception e) {
+        } catch (IOException e) {
             IOException ioex = new IOException("{Dataset} Problem opening " + opendapURL + " ==> " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
@@ -208,7 +206,7 @@ public class MarsIO extends SimulationManagerAccessor {
         Array timeArr = null;
         try {
             timeArr = nc.findVariable(strTime).read();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("{Dataset} Failed to read time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -217,12 +215,13 @@ public class MarsIO extends SimulationManagerAccessor {
         long time0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
         long timeN = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1)));
         if (time < time0 || time > timeN) {
-            StringBuffer msg = new StringBuffer();
+            StringBuilder msg = new StringBuilder();
             msg.append("{Dataset} Time value ");
             msg.append(getSimulationManager().getTimeManager().timeToString());
             msg.append(" (");
             msg.append(time);
-            msg.append(" seconds) not contained in dataset " + nc.getLocation());
+            msg.append(" seconds) not contained in dataset ");
+            msg.append(nc.getLocation());
             throw new IndexOutOfBoundsException(msg.toString());
         }
     }

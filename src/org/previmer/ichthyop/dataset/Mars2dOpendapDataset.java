@@ -5,9 +5,7 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
-import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
-import ucar.ma2.InvalidRangeException;
 
 /**
  *
@@ -20,11 +18,13 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
      * @param opendapURL a String that can be a local pathname or an OPeNDAP URL.
      * @throws IOException
      */
+    @Override
     void openDataset() throws Exception {
         ncIn = MarsIO.openURL(getParameter("opendap_url"));
         readTimeLength();
     }
 
+    @Override
     void setOnFirstTime() throws Exception {
         long t0 = getSimulationManager().getTimeManager().get_tO();
         MarsIO.checkInitTime(ncIn, strTime);
@@ -32,6 +32,7 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
         time_tp1 = t0;
     }
 
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);

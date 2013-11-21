@@ -12,9 +12,10 @@ import org.previmer.ichthyop.event.NextStepEvent;
  */
 public class Mars2dDataset extends Mars2dCommon {
 
+    @Override
     void openDataset() throws Exception {
         MarsIO.setTimeField(strTime);
-        boolean skipSorting = false;
+        boolean skipSorting;
             try {
                 skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
             } catch (Exception ex) {
@@ -24,6 +25,7 @@ public class Mars2dDataset extends Mars2dCommon {
         readTimeLength();
     }
 
+    @Override
     void setOnFirstTime() throws Exception {
 
         long t0 = getSimulationManager().getTimeManager().get_tO();
@@ -33,6 +35,7 @@ public class Mars2dDataset extends Mars2dCommon {
         time_tp1 = t0;
     }
 
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);

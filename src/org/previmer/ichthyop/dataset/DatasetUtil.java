@@ -12,6 +12,8 @@ public class DatasetUtil {
 
     /**
      * Computes the Hyperbolic Sinus of x
+     * @param x
+     * @return 
      */
     public static double sinh(double x) {
         return ((Math.exp(x) - Math.exp(-x)) / 2.d);
@@ -19,6 +21,8 @@ public class DatasetUtil {
 
     /**
      * Computes the Hyperbolic Cosinus of x
+     * @param x
+     * @return 
      */
     public static double cosh(double x) {
         return ((Math.exp(x) + Math.exp(-x)) / 2.d);
@@ -26,6 +30,8 @@ public class DatasetUtil {
 
     /**
      * Computes the Hyperbolic Tangent of x
+     * @param x
+     * @return 
      */
     public static double tanh(double x) {
         return (sinh(x) / cosh(x));
@@ -46,13 +52,12 @@ public class DatasetUtil {
      */
     public static double geodesicDistance(double lat1, double lon1, double lat2, double lon2) {
 
-        double d = 0.d;
         double lat1_rad = Math.PI * lat1 / 180.d;
         double lat2_rad = Math.PI * lat2 / 180.d;
         double lon1_rad = Math.PI * lon1 / 180.d;
         double lon2_rad = Math.PI * lon2 / 180.d;
 
-        d = 2 * 6367000.d
+        double d = 2 * 6367000.d
                 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
                 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
 
@@ -63,8 +68,8 @@ public class DatasetUtil {
      * <p>The functions computes the 2nd order approximate
      * derivative at index i</p>
      * <code>diff2(X, i) == diff(diff(X), i) == diff(diff(X))[i]</code>
-     * @param x double[]
-     * @param i int
+     * @param X double[]
+     * @param k
      * @return double
      */
     public static double diff2(double[] X, int k) {

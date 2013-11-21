@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -292,7 +293,7 @@ public class Roms3dDataset extends RomsCommon {
 
         try {
             arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
-        } catch (Exception e) {
+        } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset ocean free surface elevation. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
@@ -533,6 +534,8 @@ public class Roms3dDataset extends RomsCommon {
 
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
+        
+        getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -540,7 +543,7 @@ public class Roms3dDataset extends RomsCommon {
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
 
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -548,7 +551,7 @@ public class Roms3dDataset extends RomsCommon {
         try {
             v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
                     new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -558,8 +561,7 @@ public class Roms3dDataset extends RomsCommon {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
             time_tp1 -= time_tp1 % 100;
-            xTimeTp1 = null;
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -570,7 +572,7 @@ public class Roms3dDataset extends RomsCommon {
             zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
                     new int[]{rank, jpo, ipo},
                     new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset ocean free surface elevation. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;

@@ -725,7 +725,7 @@ public class NemoDataset extends AbstractDataset {
                 }
             }
             nc.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new IOException(e);
         }
     }
@@ -786,7 +786,7 @@ public class NemoDataset extends AbstractDataset {
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
-            } catch (Exception ex) {
+            } catch (IOException | NumberFormatException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
         }
@@ -982,6 +982,8 @@ public class NemoDataset extends AbstractDataset {
      * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
+        
+        getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -989,7 +991,7 @@ public class NemoDataset extends AbstractDataset {
         try {
             u_tp1 = (float[][][]) ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).
                     flip(1).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -998,7 +1000,7 @@ public class NemoDataset extends AbstractDataset {
         try {
             v_tp1 = (float[][][]) ncV.findVariable(strV).read(origin, new int[]{1, nz, ny - 1, nx}).
                     flip(1).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -1008,8 +1010,7 @@ public class NemoDataset extends AbstractDataset {
             Array xTimeTp1 = ncU.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
             time_tp1 -= time_tp1 % 100;
-            xTimeTp1 = null;
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -1022,7 +1023,7 @@ public class NemoDataset extends AbstractDataset {
         try {
             w_tp1 = (float[][][]) ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).
                     flip(1).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading W variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -1491,7 +1492,7 @@ public class NemoDataset extends AbstractDataset {
         if (listFile.length == 0) {
             throw new IOException(path + " contains no file matching mask " + fileMask);
         }
-        list = new ArrayList<String>(listFile.length);
+        list = new ArrayList(listFile.length);
         for (File file : listFile) {
             list.add(file.toString());
         }

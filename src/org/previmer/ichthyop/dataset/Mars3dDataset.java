@@ -12,9 +12,10 @@ import org.previmer.ichthyop.event.NextStepEvent;
  */
 public class Mars3dDataset extends Mars3dCommon {
 
+    @Override
     void openDataset() throws Exception {
         MarsIO.setTimeField(strTime);
-        boolean skipSorting = false;
+        boolean skipSorting;
         try {
             skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
         } catch (Exception ex) {
@@ -24,6 +25,7 @@ public class Mars3dDataset extends Mars3dCommon {
         readTimeLength();
     }
 
+    @Override
     void setOnFirstTime() throws Exception {
         long t0 = getSimulationManager().getTimeManager().get_tO();
         ncIn = MarsIO.openFile(MarsIO.getFile(t0));
@@ -32,6 +34,7 @@ public class Mars3dDataset extends Mars3dCommon {
         time_tp1 = t0;
     }
 
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         long time = e.getSource().getTime();

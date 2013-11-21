@@ -102,8 +102,8 @@ public class RequiredVariable {
 
     public Number get(double[] pGrid, double time) {
 
-        int[] origin = null;
-        int[] shape = null;
+        int[] origin;
+        int[] shape;
         int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];

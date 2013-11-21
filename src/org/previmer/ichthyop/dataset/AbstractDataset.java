@@ -16,7 +16,7 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class AbstractDataset extends SimulationManagerAccessor implements IDataset, NextStepListener {
 
-    private String datasetKey;
+    private final String datasetKey;
     /*
      *
      */
@@ -75,7 +75,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         for (RequiredVariable variable : requiredVariables.values()) {
             try {
                 variable.checked(nc);
-            } catch (Exception ex) {
+            } catch (NullPointerException | NumberFormatException ex) {
                 requiredVariables.remove(variable.getName());
                 StringBuilder msg = new StringBuilder();
                 msg.append("Failed to read dataset variable ");

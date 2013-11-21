@@ -22,6 +22,7 @@ import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -105,6 +106,7 @@ public abstract class MarsCommon extends AbstractDataset {
 
     abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
 
+    @Override
     public void setUp() throws Exception {
         loadParameters();
         clearRequiredVariables();
@@ -115,6 +117,7 @@ public abstract class MarsCommon extends AbstractDataset {
         getDimGeogArea();
     }
 
+    @Override
     public void init() throws Exception {
         setOnFirstTime();
         checkRequiredVariable(ncIn);
@@ -183,7 +186,7 @@ public abstract class MarsCommon extends AbstractDataset {
         /* Read bathymetry */
         try {
             arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("{Dataset} Error reading bathymetry variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -237,7 +240,7 @@ public abstract class MarsCommon extends AbstractDataset {
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         long time_rank;
-        Array timeArr = null;
+        Array timeArr;
         try {
             timeArr = ncIn.findVariable(strTime).read();
             time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
@@ -256,19 +259,18 @@ public abstract class MarsCommon extends AbstractDataset {
         return lrank;
     }
 
-    /**
-     * Adimensionalizes the given magnitude at the specified grid location.
-     */
     public double adimensionalize(double number, double xRho, double yRho) {
         int i = (int) Math.round(xRho);
         int j = (int) Math.round(yRho);
         return 2.d * number / (dyv[j][i] + dxu[j][i]);
     }
 
+    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
+    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 2.0f))
                 || (pGrid[0] < 1.0f)
@@ -276,6 +278,7 @@ public abstract class MarsCommon extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
+    @Override
     public double getBathy(int i, int j) {
         if (isInWater(i, j)) {
             return hRho[j][i];
@@ -283,6 +286,7 @@ public abstract class MarsCommon extends AbstractDataset {
         return Double.NaN;
     }
 
+    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
@@ -346,6 +350,7 @@ public abstract class MarsCommon extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
+    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -360,10 +365,9 @@ public abstract class MarsCommon extends AbstractDataset {
         double longitude = 0.d;
         final double dx = ix - (double) i;
         final double dy = jy - (double) j;
-        double co = 0.d;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
-                co = Math.abs((1 - ii - dx) * (1 - jj - dy));
+                double co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                 latitude += co * latRho[j + jj][i + ii];
                 longitude += co * lonRho[j + jj][i + ii];
             }
@@ -442,6 +446,7 @@ public abstract class MarsCommon extends AbstractDataset {
         return (isInPolygone);
     }
 
+    @Override
     public boolean isInWater(int i, int j) {
         try {
             return (maskRho[j][i] > 0);
@@ -471,18 +476,22 @@ public abstract class MarsCommon extends AbstractDataset {
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
+    @Override
     public int get_nx() {
         return nx;
     }
 
+    @Override
     public int get_ny() {
         return ny;
     }
 
+    @Override
     public double getdxi(int j, int i) {
         return dxu[j][i];
     }
 
+    @Override
     public double getdeta(int j, int i) {
         return dyv[j][i];
     }
@@ -502,10 +511,9 @@ public abstract class MarsCommon extends AbstractDataset {
         latMax = -latMin;
         depthMax = 0.d;
         int i = nx;
-        int j = 0;
 
         while (i-- > 0) {
-            j = ny;
+            int j = ny;
             while (j-- > 0) {
                 if (lonRho[j][i] >= lonMax) {
                     lonMax = lonRho[j][i];
@@ -542,7 +550,7 @@ public abstract class MarsCommon extends AbstractDataset {
     }
 
     public void shrinkGrid() {
-        boolean isParamDefined = false;
+        boolean isParamDefined;
         try {
             Boolean.valueOf(getParameter("shrink_domain"));
             isParamDefined = true;
@@ -557,7 +565,7 @@ public abstract class MarsCommon extends AbstractDataset {
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
-            } catch (Exception ex) {
+            } catch (IOException | NumberFormatException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
         }
@@ -612,7 +620,7 @@ public abstract class MarsCommon extends AbstractDataset {
             } else {
                 arrLon = ncIn.findVariable(strLon).read(new int[]{ipo}, new int[]{nx});
             }
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset longitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -623,7 +631,7 @@ public abstract class MarsCommon extends AbstractDataset {
             } else {
                 arrLat = ncIn.findVariable(strLat).read(new int[]{jpo}, new int[]{ny});
             }
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset latitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -658,14 +666,13 @@ public abstract class MarsCommon extends AbstractDataset {
                 }
             }
         }
-        arrLon = null;
-        arrLat = null;
     }
 
     /**
      * Gets domain minimum latitude.
      * @return a double, the domain minimum latitude [north degree]
      */
+    @Override
     public double getLatMin() {
         return latMin;
     }
@@ -674,6 +681,7 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain maximum latitude.
      * @return a double, the domain maximum latitude [north degree]
      */
+    @Override
     public double getLatMax() {
         return latMax;
     }
@@ -682,6 +690,7 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain minimum longitude.
      * @return a double, the domain minimum longitude [east degree]
      */
+    @Override
     public double getLonMin() {
         return lonMin;
     }
@@ -690,6 +699,7 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain maximum longitude.
      * @return a double, the domain maximum longitude [east degree]
      */
+    @Override
     public double getLonMax() {
         return lonMax;
     }
@@ -698,6 +708,7 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain maximum depth.
      * @return a float, the domain maximum depth [meter]
      */
+    @Override
     public double getDepthMax() {
         return depthMax;
     }
@@ -708,6 +719,7 @@ public abstract class MarsCommon extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
+    @Override
     public double getLat(int i, int j) {
         return latRho[j][i];
     }
@@ -718,6 +730,7 @@ public abstract class MarsCommon extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
+    @Override
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
@@ -728,7 +741,7 @@ public abstract class MarsCommon extends AbstractDataset {
         NEXT_STEP("Error reading dataset variables for next timestep"),
         NOT_IN_2D("Method not supported in 2D"),
         TIME_OUTOF_BOUND("Time out of dataset range");
-        private String msg;
+        private final String msg;
 
         ErrorMessage(String msg) {
             this.msg = msg;

@@ -605,7 +605,9 @@ public class Mercator2dDataset extends AbstractDataset {
      * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-
+        
+        getLogger().info("Reading NetCDF variables...");
+    
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
