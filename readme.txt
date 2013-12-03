@@ -7,14 +7,14 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2013
 
-Release: 3.2b (2013/03/14)
+Release: 3.2 (2013/04/10)
 
 Feedback & Bug reports: info@previmer.org
 
 ===========
 Requirement
 
-Get latest Java installed, at least JRE 1.6 update 43 (1.7 recommended).
+Get latest Java installed, at least JRE 1.6 update 45 (1.7 recommended).
 
 For most users, Java is already installed and up-to-date. Skip this
 step and go to the start-up instructions.
@@ -24,15 +24,15 @@ Latest version of JRE (1.7 recommended) can be download at http://www.java.com/e
 =======
 Startup
 
-Double click on ichthyop-3.2b.jar
+Double click on ichthyop-3.2.jar
 
 Or from a command line, go to the ichthyop/ folder and type the following:
 
-java -jar ichthyop-3.2b.jar
+java -jar ichthyop-3.2.jar
 
 To avoid any heap memory problem, you'd rather type:
 
-java -Xms512m -Xmx1024m -jar ichthyop-3.2b.jar
+java -Xms512m -Xmx1024m -jar ichthyop-3.2.jar
 
 If you work behind a proxy:
 
@@ -58,7 +58,7 @@ For details about the GNU General Public License, please see http://www.gnu.org/
 Description of files and folders
 
 % Files
-ichthyop-3.2b.jar --> Ichthyop executable file
+ichthyop-3.2.jar --> Ichthyop executable file
 readme.txt --> this document
 
 % Directories
