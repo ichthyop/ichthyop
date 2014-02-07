@@ -119,7 +119,6 @@ public class WMSMapper extends JXMapKit {
 
     public WMSMapper() {
 
-
         setTileFactory(new OfflineTileFactory());
         setMiniMapVisible(false);
         setZoomButtonsVisible(true);
@@ -302,7 +301,6 @@ public class WMSMapper extends JXMapKit {
 
         Array array = nc.findVariable(variable).read();
 
-
         float[] dataset = (float[]) array.get1DJavaArray(Float.class);
         if (variable.equals("time")) {
             if (dataset[0] > dataset[dataset.length - 1]) {
@@ -441,7 +439,6 @@ public class WMSMapper extends JXMapKit {
             for (int i = 0; i < regionEdge.getShape()[0]; i++) {
                 lregion.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
 
-
             }
         } catch (IOException ex) {
             Logger.getLogger(WMSMapper.class
@@ -455,18 +452,17 @@ public class WMSMapper extends JXMapKit {
         if (null != nc.findGlobalAttribute("nb_zones")) {
             int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
             for (int iZone = 0; iZone < nbZones; iZone++) {
-                List<GeoPosition> edge = new ArrayList<GeoPosition>();
+                List<Point2D.Float> points = new ArrayList<>();
                 try {
                     Variable varZone = nc.findVariable("zone" + iZone);
                     ArrayFloat.D2 zoneEdge = (D2) varZone.read();
                     String type = varZone.findAttribute("type").getStringValue();
                     String color = varZone.findAttribute("color").getStringValue();
                     for (int i = 0; i < zoneEdge.getShape()[0]; i++) {
-                        edge.add(new GeoPosition(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
+                        points.add(new Point2D.Float(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
                     }
-                    WMSMapper.DrawableZone zone = new WMSMapper.DrawableZone(edge, color);
+                    WMSMapper.DrawableZone zone = new WMSMapper.DrawableZone(points, color);
                     lzones.put(type + "_zone" + iZone, zone);
-
 
                 } catch (IOException ex) {
                     Logger.getLogger(WMSMapper.class
@@ -479,33 +475,39 @@ public class WMSMapper extends JXMapKit {
 
     private void drawZone(WMSMapper.DrawableZone zone, Graphics2D g, JXMapViewer map) {
 
-        Polygon polygon = new Polygon();
-        for (GeoPosition gp : zone.getEdge()) {
-            //convert geo to world bitmap pixel
-            Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
-            polygon.addPoint((int) pt.getX(), (int) pt.getY());
-        }
-        //do the drawing
         Color color = zone.getColor();
         Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 30);
-        g.setColor(fillColor);
-        g.fill(polygon);
         Color edgeColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 70);
-        g.setColor(edgeColor);
-        g.draw(polygon);
+        for (Point2D pt : zone.getPoints()) {
+            Polygon polygon = new Polygon();
+            addCellPoint(map, polygon, pt.getX() - 0.5, pt.getY() - 0.5);
+            addCellPoint(map, polygon, pt.getX() + 0.5, pt.getY() - 0.5);
+            addCellPoint(map, polygon, pt.getX() + 0.5, pt.getY() + 0.5);
+            addCellPoint(map, polygon, pt.getX() - 0.5, pt.getY() + 0.5);
+            g.setColor(fillColor);
+            g.fill(polygon);
+            g.setColor(edgeColor);
+            g.draw(polygon);
+        }
     }
 
     private void drawZones(Graphics2D g, JXMapViewer map) {
-        for (WMSMapper.DrawableZone zone : getZones().values()) {
-            drawZone(zone, g, map);
+
+        if (null != getSimulationManager().getDataset()) {
+            for (WMSMapper.DrawableZone zone : getZones().values()) {
+                drawZone(zone, g, map);
+            }
         }
+    }
+
+    private void addGeoPoint(JXMapViewer map, Polygon polygon, GeoPosition gp) {
+        Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
+        polygon.addPoint((int) pt.getX(), (int) pt.getY());
     }
 
     private void addCellPoint(JXMapViewer map, Polygon polygon, double x, double y) {
         double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
-        GeoPosition gp = new GeoPosition(pos[0], pos[1]);
-        Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
-        polygon.addPoint((int) pt.getX(), (int) pt.getY());
+        addGeoPoint(map, polygon, new GeoPosition(pos[0], pos[1]));
     }
 
     private Point2D getPoint(JXMapViewer map, double x, double y) {
@@ -877,7 +879,6 @@ public class WMSMapper extends JXMapKit {
             ArrayDouble.D0 arrTime = (D0) vtime.read(new int[]{index}, new int[]{1}).reduce();
             timeD = arrTime.get();
 
-
         } catch (IOException ex) {
             Logger.getLogger(WMSMapper.class
                     .getName()).log(Level.SEVERE, null, ex);
@@ -917,7 +918,6 @@ public class WMSMapper extends JXMapKit {
                     }
                 } else {
                     list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i)));
-
 
                 }
             }
@@ -1037,7 +1037,6 @@ public class WMSMapper extends JXMapKit {
         }
         return calendar.getTime();
 
-
     }
 
     private class ImageWriter implements Runnable {
@@ -1106,7 +1105,7 @@ public class WMSMapper extends JXMapKit {
                     true, true, // x/y orientation is normal
                     "file:/home/pverley/downloads/world.topo.bathy.", // base url
                     "x", "y", "z" // url args for x, y & z
-                    ) {
+            ) {
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
                     return baseURL + x + "x" + y + "x" + "z" + ".jpg";
@@ -1255,11 +1254,11 @@ public class WMSMapper extends JXMapKit {
 
     class DrawableZone {
 
-        private List<GeoPosition> edge;
+        private List<Point2D.Float> points;
         private Color color;
 
-        DrawableZone(List<GeoPosition> edge, String color) {
-            this.edge = edge;
+        DrawableZone(List<Point2D.Float> points, String color) {
+            this.points = points;
             this.color = getColor(color);
         }
 
@@ -1267,8 +1266,8 @@ public class WMSMapper extends JXMapKit {
             return color;
         }
 
-        public List<GeoPosition> getEdge() {
-            return edge;
+        public List<Point2D.Float> getPoints() {
+            return points;
         }
 
         private Color getColor(String strColor) {

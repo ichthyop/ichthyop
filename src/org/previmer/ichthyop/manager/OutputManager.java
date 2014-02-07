@@ -52,7 +52,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private int i_record;
     private int record_frequency;
     private List<GeoPosition> region;
-    private List<List<GeoPosition>> zoneEdges;
+    private List<List<Point2D>> zoneAreas;
     private Dimension latlonDim;
     private boolean clearPredefinedTrackerList = false;
     private boolean clearCustomTrackerList = false;
@@ -151,15 +151,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void addZones() {
 
         int iZone = 0;
-        zoneEdges = new ArrayList();
+        zoneAreas = new ArrayList();
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
-                    zoneEdges.add(iZone, makeZoneEdge(zone));
-                    Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneEdges.get(iZone).size());
+                    zoneAreas.add(iZone, makeZoneArea(zone));
+                    Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
                     ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
                     ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getKey());
-                    ncOut.addVariableAttribute("zone" + iZone, "unit", "lat degree north lon degree east");
+                    ncOut.addVariableAttribute("zone" + iZone, "unit", "x and y coordinates of the center of the cells in the zone");
                     ncOut.addVariableAttribute("zone" + iZone, "type", zone.getType().toString());
                     String color = zone.getColor().toString();
                     color = color.substring(color.lastIndexOf("["));
@@ -174,15 +174,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void writeZones() throws IOException, InvalidRangeException {
 
         int iZone = 0;
-        for (List<GeoPosition> zoneEdge : zoneEdges) {
-            ArrayFloat.D2 zoneGp = new ArrayFloat.D2(zoneEdge.size(), 2);
+        for (List<Point2D> zoneArea : zoneAreas) {
+            ArrayFloat.D2 arrZoneArea = new ArrayFloat.D2(zoneArea.size(), 2);
             int i = 0;
-            for (GeoPosition gp : zoneEdge) {
-                zoneGp.set(i, 0, (float) gp.getLatitude());
-                zoneGp.set(i, 1, (float) gp.getLongitude());
+            for (Point2D xy : zoneArea) {
+                arrZoneArea.set(i, 0, (float) xy.getX());
+                arrZoneArea.set(i, 1, (float) xy.getY());
                 i++;
             }
-            ncOut.write("zone" + iZone, zoneGp);
+            ncOut.write("zone" + iZone, arrZoneArea);
             iZone++;
         }
     }
@@ -216,61 +216,23 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         ncOut.addGlobalAttribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath());
     }
 
-    private List<GeoPosition> makeZoneEdge(Zone zone) {
-        List<GeoPosition> list = new ArrayList();
+    private List<Point2D> makeZoneArea(Zone zone) {
+        List<Point2D> list = new ArrayList();
+
         int xmin = (int) Math.floor(zone.getXmin());
         int xmax = (int) Math.ceil(zone.getXmax());
         int ymin = (int) Math.floor(zone.getYmin());
         int ymax = (int) Math.ceil(zone.getYmax());
-        IDataset dataset = getSimulationManager().getDataset();
-        int refinement = 5;
-        float incr = 1 / (float) refinement;
-        int nx = (xmax - xmin + 1) * refinement;
-        int ny = (ymax - ymin + 1) * refinement;
-        boolean[][] bzone = new boolean[nx][ny];
-        boolean[][] ezone = new boolean[nx][ny];
-        for (float i = xmin; i < xmax; i += incr) {
-            for (float j = ymin; j < ymax; j += incr) {
-                int ii = (int) Math.round((i - xmin) * refinement);
-                int jj = (int) Math.round((j - ymin) * refinement);
-                bzone[ii][jj] = zone.isGridPointInZone(i, j);
-            }
-        }
-        List<Point2D.Float> listPt = new ArrayList();
-        for (int i = 0; i < nx; i++) {
-            for (int j = 0; j < ny; j++) {
-                int im1 = Math.max(i - 1, 0);
-                int ip1 = Math.min(i + 1, nx - 1);
-                int jm1 = Math.max(j - 1, 0);
-                int jp1 = Math.min(j + 1, ny - 1);
-                ezone[i][j] = bzone[i][j] && !(bzone[im1][j] && bzone[ip1][j] && bzone[i][jm1] && bzone[i][jp1]);
-                if (ezone[i][j]) {
-                    listPt.add(new Point2D.Float(xmin + i * incr, ymin + j * incr));
+
+        for (float i = xmin; i < xmax; i++) {
+            for (float j = ymin; j < ymax; j++) {
+                if (zone.isGridPointInZone(i, j)) {
+                    Point2D xy = new Point2D.Float(i, j);
+                    list.add(xy);
                 }
             }
         }
 
-        Point2D.Float pt1 = listPt.get(0);
-        double[] lonlat = dataset.xy2latlon(pt1.x, pt1.y);
-        GeoPosition gp = new GeoPosition(lonlat[0], lonlat[1]);
-        list.add(gp);
-        listPt.remove(pt1);
-        while (!listPt.isEmpty()) {
-            Point2D.Float closestToP1 = new Point2D.Float(Integer.MAX_VALUE, Integer.MAX_VALUE);
-            double distMin = getDistance(pt1, closestToP1);
-            for (Point2D.Float pt2 : listPt) {
-                double dist = Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
-                if (dist < distMin) {
-                    closestToP1 = pt2;
-                    distMin = dist;
-                }
-            }
-            lonlat = dataset.xy2latlon(closestToP1.x, closestToP1.y);
-            gp = new GeoPosition(lonlat[0], lonlat[1]);
-            list.add(gp);
-            listPt.remove(closestToP1);
-            pt1 = closestToP1;
-        }
         return list;
     }
 
@@ -280,7 +242,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     private List<GeoPosition> makeRegion() {
 
-        final List<GeoPosition> lregion = new ArrayList<GeoPosition>();
+        final List<GeoPosition> lregion = new ArrayList<>();
         IDataset dataset = getSimulationManager().getDataset();
         for (int i = 1; i < dataset.get_nx(); i++) {
             if (!Double.isNaN(dataset.getLat(i, 0)) && !Double.isNaN(dataset.getLon(i, 0))) {
