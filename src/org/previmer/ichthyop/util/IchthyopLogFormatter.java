@@ -26,16 +26,32 @@ import java.util.logging.LogRecord;
  */
 public class IchthyopLogFormatter extends Formatter {
 
+    final private boolean printStack;
+
+    public IchthyopLogFormatter(boolean printStack) {
+        this.printStack = printStack;
+    }
+
+    public IchthyopLogFormatter() {
+        this(false);
+    }
+
     @Override
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
-        builder.append("ichthyop[").append(record.getLevel().toString().toLowerCase()).append("] - ");
+        builder.append("ichthyop[").append(record.getLevel().toString().toLowerCase()).append("] ");
         builder.append(formatMessage(record));
         if (null != record.getThrown()) {
             builder.append(" | ");
-            builder.append(record.getThrown().toString());
+            builder.append(record.getThrown().toString()).append('\n');
+            if (printStack) {
+                for (StackTraceElement ste : record.getThrown().getStackTrace()) {
+                    builder.append("  ").append(ste.toString()).append('\n');
+                }
+            }
+        } else {
+            builder.append("\n");
         }
-        builder.append("\n");
         return builder.toString();
     }
 

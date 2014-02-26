@@ -97,7 +97,7 @@ public class SimulationManager {
 
         // setup the logger
         logger.setUseParentHandlers(false);
-        IchthyopLogFormatter formatter = new IchthyopLogFormatter();
+        IchthyopLogFormatter formatter = new IchthyopLogFormatter(true);
         SystemOutHandler sh = new SystemOutHandler();
         sh.setFormatter(formatter);
         getLogger().addHandler(sh);

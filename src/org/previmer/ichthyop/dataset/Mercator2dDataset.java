@@ -852,10 +852,11 @@ public class Mercator2dDataset extends AbstractDataset {
 
         // Try to refine within cell (ci, cj)
         int cip1 = ci + 1 > nx - 1 ? 0 : ci + 1;
+        int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
         //--------------------------------------------
         // Trilinear interpolation
-        double dy1 = latRho[cj + 1][ci] - latRho[cj][ci];
-        double dx1 = lonRho[cj + 1][ci] - lonRho[cj][ci];
+        double dy1 = latRho[cjp1][ci] - latRho[cj][ci];
+        double dx1 = lonRho[cjp1][ci] - lonRho[cj][ci];
         double dy2 = latRho[cj][cip1] - latRho[cj][ci];
         double dx2 = (Math.abs(lonRho[cj][cip1] - lonRho[cj][ci]) > 180.d)
                 ? 360.d + (lonRho[cj][cip1] - lonRho[cj][ci])

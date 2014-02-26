@@ -75,10 +75,10 @@ public class ParticleFactory extends SimulationManagerAccessor {
          * phv 2011/09/25: wondering wether the make2D should not occur before
          * the geo2grid, to be checked...
          */
-        particle.geo2Grid();
         if (Double.isNaN(depth)) {
             particle.make2D();
         }
+        particle.geo2Grid();
         if (!particle.isInWater() || particle.isOnEdge()) {
             return null;
         }
