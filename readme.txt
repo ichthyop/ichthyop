@@ -5,13 +5,13 @@ TimeConverter readme file
 
 TimeConverter is a handy tool to convert elapsed seconds since a time orgin into a human readable date and reciprocally.
 It is part of the Ichthyop project.
-http://www.previmer.org/ichthyop
+http://www.ichthyop.org
 
 Copyright (c) Philippe VERLEY 2011
 
 Release: 1.0 (2011/03/11)
 
-Feedback & Bug reports: info@previmer.org
+Feedback & Bug reports: contact@ichthyop.org
 
 ===========
 Requirement
