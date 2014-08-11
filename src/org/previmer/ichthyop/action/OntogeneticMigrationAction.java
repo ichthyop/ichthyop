@@ -18,17 +18,10 @@ package org.previmer.ichthyop.action;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StreamTokenizer;
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
 
@@ -58,9 +51,10 @@ import org.previmer.ichthyop.particle.IParticle;
  */
 public class OntogeneticMigrationAction extends AbstractAction {
 
-    private int[] depth;
+    private float[] depth;
     private long[] time;
-    private int[][] probability;
+    private float[][] probability;
+    private float[] maxProbability;
 
     @Override
     public void loadParameters() throws Exception {
@@ -93,19 +87,21 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 // Line 2: number of depth levels in the probability vector
                 int nDepth = Integer.valueOf(bfIn.readLine().trim());
                 // Line 3: depth levels in meter
-                depth = new int[nDepth];
+                depth = new float[nDepth];
                 String[] sDepth = bfIn.readLine().trim().split(" ");
                 for (int iDepth = 0; iDepth < nDepth; iDepth++) {
                     depth[iDepth] = Integer.parseInt(sDepth[iDepth]);
                 }
                 // Line 4: time steps in second since the beginning of transport
                 time = new long[nTime];
+                long cumulatedTime = getSimulationManager().getTimeManager().get_tO();
                 String[] sTime = bfIn.readLine().trim().split(" ");
                 for (int iTime = 0; iTime < nTime; iTime++) {
-                    time[iTime] = Long.parseLong(sTime[iTime]);
+                    cumulatedTime += Long.parseLong(sTime[iTime]);
+                    time[iTime] = cumulatedTime;
                 }
                 // Line 5 to EOF: matrix probability of presence
-                probability = new int[nTime][nDepth];
+                probability = new float[nTime][nDepth];
                 for (int iDepth = 0; iDepth < nDepth; iDepth++) {
                     String[] sProba = bfIn.readLine().trim().split(" ");
                     for (int iTime = 0; iTime < nTime; iTime++) {
@@ -130,6 +126,15 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 getLogger().log(Level.WARNING, "Ontogenetic Vertical Migration: the sum of probability for time step {0} equals {1}.", new Object[]{time[iTime], sum});
             }
         }
+
+        // For every time step, determines the biggest probability
+        maxProbability = new float[time.length];
+        for (int iTime = 0; iTime < time.length; iTime++) {
+            maxProbability[iTime] = 0;
+            for (int iDepth = 0; iDepth < depth.length; iDepth++) {
+                maxProbability[iTime] = Math.max(probability[iTime][iDepth], maxProbability[iTime]);
+            }
+        }
     }
 
     /**
@@ -144,7 +149,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
         sb.append("Number of depth levels: ");
         sb.append((probability[0].length));
         sb.append('\n');
-        sb.append("Time values: ");
+        sb.append("Time values (converted to Ichthyop time): ");
         for (int iTime = 0; iTime < time.length; iTime++) {
             sb.append(time[iTime]);
             sb.append(' ');
@@ -171,8 +176,37 @@ public class OntogeneticMigrationAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        long elapsed = getSimulationManager().getTimeManager().getTime() - getSimulationManager().getTimeManager().get_tO();
-        
+        // 1. Find the corresponding time step in the matrix of probability
+        int iTime = 0;
+        long currentTime = getSimulationManager().getTimeManager().getTime();
+        for (long lTime : time) {
+            if (currentTime >= lTime) {
+                iTime++;
+            } else {
+                break;
+            }
+        }
+
+        // 2. Set a depth level, depending of the probability vector of the
+        // water column at this time step.
+        float proba;
+        int iDepth;
+        do {
+            iDepth = (int) Math.round((depth.length - 1) * Math.random());
+            proba = probability[iTime][iDepth];
+        } while (proba <= 0 || proba < (Math.random() * maxProbability[iTime]));
+
+        // 3. Set the depth of the particle, around the selected depth level
+        double depthAbove = (iDepth > 0) ? depth[iDepth - 1] : 0;
+        double depthUnder = depth[iDepth];
+        double newDepth = -1.d * (depthAbove + (depthUnder - depthAbove) * Math.random());
+        System.out.println(depthUnder);
+        double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), newDepth) - particle.getZ();
+        // the second boolean argument, set to true, means that the other processes
+        // won't be able to change the depth of the particle (e.g. advection).
+        // For combining effects of vertical advection and migration, set it to
+        // false.
+        particle.increment(new double[]{0.d, 0.d, dz}, false, true);
     }
 
 }

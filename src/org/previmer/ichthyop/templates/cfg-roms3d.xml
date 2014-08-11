@@ -558,6 +558,43 @@
         </parameters>
     </block>
     <block type="action">
+        <key>action.migration.ontogenetic</key>
+        <description>Block of options to control the Ontogenetic Vertical Migration (OVM) process of larvae. Only operate for 3D simulation. Based on CMS.</description>
+            <tree_path>Advanced/Transport/Ontogenetic migration</tree_path>
+            <enabled>false</enabled>
+            <parameters>
+                <parameter>
+                    <key>cms_ovm_config_file</key>
+                    <long_name>Path of the CMS Ontogenetic migration configuration file</long_name>
+                    <value></value>
+                    <default></default>
+                    <format>file</format>
+                    <description>Select the CSM Ontogenetic migration configuration file.</description>
+                </parameter>
+                <parameter hidden="true">
+                    <key>class_name</key>
+                    <long_name>Java Class file</long_name>
+                    <value>org.previmer.ichthyop.action.OntogeneticMigrationAction</value>
+                    <default>org.previmer.ichthyop.action.ntogeneticMigrationAction</default>
+                    <format>class</format>
+                    <description>The Java class called by the application to implement this action.</description>
+                </parameter>
+                <parameter hidden="true">
+                    <key>priority</key>
+                    <long_name>priority</long_name>
+                    <value>normal</value>
+                    <default>normal</default>
+                    <format>combo</format>
+                    <accepted>lowest</accepted>
+                    <accepted>low</accepted>
+                    <accepted>normal</accepted>
+                    <accepted>high</accepted>
+                    <accepted>highest</accepted>
+                    <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                </parameter>
+            </parameters>
+    </block>
+    <block type="action">
         <key>action.wind</key>
         <tree_path>Advanced/Transport/Wind drift</tree_path>
         <enabled>false</enabled>
@@ -908,7 +945,7 @@
             </parameter>
         </parameters>
     </block>
-        <block type="action">
+    <block type="action">
         <key>action.lethal_temp</key>
         <tree_path>Advanced/Biology/Lethal temperature</tree_path>
         <enabled>false</enabled>
