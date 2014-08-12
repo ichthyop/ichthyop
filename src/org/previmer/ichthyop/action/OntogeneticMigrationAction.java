@@ -51,9 +51,20 @@ import org.previmer.ichthyop.particle.IParticle;
  */
 public class OntogeneticMigrationAction extends AbstractAction {
 
+    // The depth vector as provided in the CMS configuration file
     private float[] depth;
+    // The time vector transformed in Ichthyop time
+    // Let's say that CMS config file provide a vector such as [dt1 dt2 ... dtn]
+    // time = [t0+dt1 t0+dt1+dt2 ... t0+sum(dt1:dtn)] with t0 the initial time
+    // of the simulation. That way time can be easily compared to the current
+    // time of the simulation
     private long[] time;
+    // The probability matrix as provided in the CMS configuration file
+    // probability[nTime][nDepth]
     private float[][] probability;
+    // The maximum of probability of the matrix for every time step
+    // maxProbability[nTime]
+    // maxProbability[iTime] = max(probability[iTime][:])
     private float[] maxProbability;
 
     @Override
@@ -68,6 +79,8 @@ public class OntogeneticMigrationAction extends AbstractAction {
             throw new IOException("CMS Ontogenetic Vertical Migration configuration file " + pathname + " cannot be read.");
         }
         readCMSInputFile(file);
+        // Uncomment this function to display in the console how Ichthyop loaded
+        // the CMS configuration file.
         //printCMSInputFile();
     }
 
@@ -123,6 +136,8 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 sum += probability[iTime][iDepth];
             }
             if (sum != 100) {
+                // I set a warning. It could be as well Level.SEVERE to generate
+                // an error that would stop the simulation.
                 getLogger().log(Level.WARNING, "Ontogenetic Vertical Migration: the sum of probability for time step {0} equals {1}.", new Object[]{time[iTime], sum});
             }
         }
@@ -176,7 +191,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        // 1. Find the corresponding time step in the matrix of probability
+        // Find the corresponding time step in the matrix of probability
         int iTime = 0;
         long currentTime = getSimulationManager().getTimeManager().getTime();
         for (long lTime : time) {
@@ -186,9 +201,22 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 break;
             }
         }
+        
+        // @Lysel You must perform a time check. Does currentTime take you to
+        // another column of your matrix ? Yes ==> you must set a new depth for
+        // this new matrix time. No ? The particle is already in the matrix time
+        // and at the right depth ==> no need to set a new depth, just exit the
+        // function.
+        
 
-        // 2. Set a depth level, depending of the probability vector of the
+        // Set a depth level, depending of the probability vector of the
         // water column at this time step.
+        // @Lysel You will have to perform some tests, but I hope this short
+        // algorithm will ensure that you have an overall vertical distribution
+        // of your particles that is consistent with the probability vector.
+        // This is something you must analyse on post-processing by writting 
+        // a code in R or Matlab that will check for a given time-step how
+        // many particles are in each depth level.
         float proba;
         int iDepth;
         do {
@@ -196,13 +224,9 @@ public class OntogeneticMigrationAction extends AbstractAction {
             proba = probability[iTime][iDepth];
         } while (proba <= 0 || proba < (Math.random() * maxProbability[iTime]));
 
-        // 3. Set the depth of the particle, around the selected depth level
-        double depthAbove = (iDepth > 0) ? depth[iDepth - 1] : 0;
-        double depthUnder = depth[iDepth];
-        double newDepth = -1.d * (depthAbove + (depthUnder - depthAbove) * Math.random());
-        System.out.println(depthUnder);
-        double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), newDepth) - particle.getZ();
-        // the second boolean argument, set to true, means that the other processes
+        // Set the depth of the particle, around the selected depth level
+        double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), -depth[iDepth]) - particle.getZ();
+        // The second boolean argument, set to true, means that the other processes
         // won't be able to change the depth of the particle (e.g. advection).
         // For combining effects of vertical advection and migration, set it to
         // false.
