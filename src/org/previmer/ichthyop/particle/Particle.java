@@ -33,6 +33,7 @@ public class Particle extends GridPoint implements IParticle {
         }
         try {
             ParticleLayer layer = (ParticleLayer) layerClass.getConstructor(IParticle.class).newInstance(this);
+            layer.init();
             layers.add(layer);
             return layer;
         } catch (InstantiationException ex) {

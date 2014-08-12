@@ -17,7 +17,6 @@ public abstract class ParticleLayer extends SimulationManagerAccessor {
 
     public ParticleLayer(IParticle particle) {
         this.linkedParticle = particle;
-        init();
     }
 
     abstract public void init();
