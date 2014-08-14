@@ -171,14 +171,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
             String isScheduleEnabled = getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled");
             boolean isEnabled = Boolean.valueOf(isScheduleEnabled);
             if (isEnabled) {
-                String[] tokens = getSimulationManager().getParameterManager().getParameter("release.schedule", "events").split("\"");
-                List<String> events = new ArrayList();
-                for (String token : tokens) {
-                    if (!token.trim().isEmpty()) {
-                        events.add(token.trim());
-                    }
-                }
-                return events.toArray(new String[events.size()]);
+                return getSimulationManager().getParameterManager().getListParameter(BlockType.OPTION, "release.schedule", "events");
             }
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Failed to read the release schedule. By default, particles will all be released at simulation initial time. {0}", ex.toString());

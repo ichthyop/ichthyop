@@ -13,11 +13,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
-import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
+import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
  *
@@ -84,6 +83,11 @@ public class LethalTempAction extends AbstractAction {
             getSimulationManager().getOutputManager().addCustomTracker(temperature_field);
         }
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
     private void loadLethalTemperatures(String csvFile) {
         Locale.setDefault(Locale.US);
@@ -144,9 +148,10 @@ public class LethalTempAction extends AbstractAction {
     private void checkTpGrowingParticle(IParticle particle) {
 
         double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        Stage stage = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage();
-        boolean frozen = ((stage == Stage.EGG) && (temperature <= coldLethalTp[0])) || ((stage != Stage.EGG) && (temperature <= coldLethalTp[1]));
-        boolean heated = ((stage == Stage.EGG) && (temperature >= hotLethalTp[0])) || ((stage != Stage.EGG) && (temperature >= hotLethalTp[1]));
+        int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+        // stage == 0 means egg, stage > 0 means larvae
+        boolean frozen = ((stage == 0) && (temperature <= coldLethalTp[0])) || ((stage != 0) && (temperature <= coldLethalTp[1]));
+        boolean heated = ((stage == 0) && (temperature >= hotLethalTp[0])) || ((stage != 0) && (temperature >= hotLethalTp[1]));
         if (frozen) {
             particle.kill(ParticleMortality.DEAD_COLD);
         } else if (heated) {

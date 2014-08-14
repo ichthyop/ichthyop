@@ -11,13 +11,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
-import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
  *
@@ -112,6 +110,11 @@ public class BuoyancyAction extends AbstractAction {
         }
     }
 
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
+
     private void loadDensities(String csvFile) {
         Locale.setDefault(Locale.US);
         try {
@@ -139,7 +142,9 @@ public class BuoyancyAction extends AbstractAction {
 
         boolean canApplyBuoyancy;
         if (isGrowth) {
-            canApplyBuoyancy = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
+            // Egg stage only
+            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+            canApplyBuoyancy = (stage == 0);
         } else {
             canApplyBuoyancy = particle.getAge() < maximumAge;
         }
@@ -201,7 +206,6 @@ public class BuoyancyAction extends AbstractAction {
          buoyancyMeters = (buoyancyEgg / 100.0f); //m.s-1
          return (buoyancyMeters * dt_sec); //meter
          */
-
         waterDensity = waterDensity(sal, tp);
 
         return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
@@ -211,10 +215,9 @@ public class BuoyancyAction extends AbstractAction {
     /**
      * Calculates the water density according with the Unesco equation.
      *
-     * @param waterSalinity a double, the sea water salinity [psu] at particle
-     * location.
-     * @param waterTemperature a double, the sea water temperature [celsius] at
-     * particle location
+     * @param sal a double, the sea water salinity [psu] at particle location.
+     * @param tp a double, the sea water temperature [celsius] at particle
+     * location
      * @return double waterDensity, the sea water density [g.cm-3] at the
      * particle location.
      */
@@ -236,15 +239,14 @@ public class BuoyancyAction extends AbstractAction {
          RHO1 = 1000.0f + SIGMA;
          waterDensity = (RHO1 / 1000.f); in [gr.cm-3]
          */
-
         double R1, R2, R3;
 
-        R1 =
-                ((((C2 * tp - C3) * tp + C4) * tp - C5) * tp + C6) * tp - C7;
-        R2 =
-                (((C8 * tp - C9) * tp + C10) * tp - C11) * tp + C12;
-        R3 =
-                (-C13 * tp + C14) * tp - C15;
+        R1
+                = ((((C2 * tp - C3) * tp + C4) * tp - C5) * tp + C6) * tp - C7;
+        R2
+                = (((C8 * tp - C9) * tp + C10) * tp - C11) * tp + C12;
+        R3
+                = (-C13 * tp + C14) * tp - C15;
 
         return ((1000.d + (C1 * sal + R3 * Math.sqrt(Math.abs(sal)) + R2) * sal + R1 + DR350) / 1000.d);
     }

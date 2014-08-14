@@ -77,7 +77,7 @@ public interface IParticle {
      * Kills the particle and specify the cause of the death.
      * Sets <code>living</code> status to <code>false</code>.
      * And sets longitude, latitude and depth to NaN.
-     * @param the cause of death.
+     * @param cause the cause of death.
      */
     public void kill(ParticleMortality cause);
 
@@ -96,6 +96,8 @@ public interface IParticle {
     public void increment(double[] move);
 
     public void increment(double[] move, boolean exclusivityH, boolean exclusivityV);
+    
+    public void init();
     
     //---------- End of interface
 }

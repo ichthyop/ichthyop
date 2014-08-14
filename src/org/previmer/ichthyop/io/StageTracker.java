@@ -17,29 +17,16 @@
 package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.DebParticleLayer;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author Philippe Verley
  */
 public class StageTracker extends IntegerTracker {
 
-    private final boolean isLinearGrowth;
-
-    public StageTracker() {
-        isLinearGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
-    }
-
     @Override
     int getValue(IParticle particle) {
-        if (isLinearGrowth) {
-            GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
-            return gParticle.getStage().getCode();
-        } else {
-            DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-            return gParticle.getStage().getCode();
-        }
+        return ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
     }
 }

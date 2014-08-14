@@ -53,6 +53,11 @@ public class AdvectionAction extends AbstractAction {
             vertical = true;
         }
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
     @Override
     public void execute(IParticle particle) {

@@ -17,30 +17,17 @@
 package org.previmer.ichthyop.io;
 
 import org.previmer.ichthyop.particle.IParticle;
-import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
-import org.previmer.ichthyop.particle.DebParticleLayer;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 
 /**
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author Philippe Verley
  */
 public class LengthTracker extends FloatTracker {
 
-    private final boolean isLinearGrowth;
-
-    public LengthTracker() {
-        isLinearGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
-    }
 
     @Override
     float getValue(IParticle particle) {
-        if (isLinearGrowth) {
-            GrowingParticleLayer gParticle = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
-            return (float) gParticle.getLength();
-        } else {
-            DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-            return (float) gParticle.getLength();
-        }
+            return (float) ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength();
     }
 }

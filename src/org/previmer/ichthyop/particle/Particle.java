@@ -119,9 +119,12 @@ public class Particle extends GridPoint implements IParticle {
      * system actions ({@link org.previmer.ichthyop.arch.ISysAction})
      */
     public void step() {
-
         getSimulationManager().getActionManager().executeActions(this);
-        getSimulationManager().getActionManager().executeSysActions(this);
+    }
+    
+    @Override
+    public void init() {
+        getSimulationManager().getActionManager().initActions(this);
     }
 
     @Override

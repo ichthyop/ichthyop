@@ -43,6 +43,11 @@ public class WindDriftAction extends AbstractAction {
     }
 
     @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
+
+    @Override
     public void execute(IParticle particle) {
 
         double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt());

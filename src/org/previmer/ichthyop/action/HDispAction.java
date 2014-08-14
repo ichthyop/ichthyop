@@ -42,12 +42,19 @@ public class HDispAction extends AbstractAction {
      */
     private MTRandom random;
 
+    @Override
     public void loadParameters() throws Exception {
         random = new MTRandom(true);
         epsilon = Double.valueOf(getParameter("epsilon"));
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
+    @Override
     public void execute(IParticle particle) {
         particle.increment(getHDispersion(particle.getGridCoordinates(), getSimulationManager().getTimeManager().get_dt()));
     }

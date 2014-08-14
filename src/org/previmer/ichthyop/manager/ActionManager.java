@@ -15,7 +15,6 @@ import org.previmer.ichthyop.action.AbstractAction;
 import org.previmer.ichthyop.action.AbstractSysAction;
 import org.previmer.ichthyop.action.SysActionAgeMonitoring;
 import org.previmer.ichthyop.action.SysActionMove;
-import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
@@ -96,17 +95,24 @@ public class ActionManager extends AbstractManager {
         return (AbstractAction) actionClass.newInstance();
     }
 
-    public void executeActions(IParticle particle) {
+    public void executeActions(Particle particle) {
+        // Pre-defined actions
         for (AbstractAction action : getSortedActions()) {
             if (!particle.isLocked()) {
                 action.execute(particle);
             }
         }
-    }
-
-    public void executeSysActions(Particle particle) {
+        
+        // System actions
         for (AbstractSysAction sysaction : sysActionList) {
             sysaction.execute(particle);
+        }
+    }
+    
+    public void initActions(Particle particle) {
+        // Pre-defined actions
+        for (AbstractAction action : getSortedActions()) {
+                action.init(particle);
         }
     }
 
@@ -124,10 +130,6 @@ public class ActionManager extends AbstractManager {
 
     public boolean isEnabled(String actionKey) {
         return getSimulationManager().getParameterManager().isBlockEnabled(BlockType.ACTION, actionKey);
-    }
-
-    public String getParameter(String actionKey, String key) {
-        return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
     }
 
     private class ActionComparator implements Comparator<AbstractAction> {

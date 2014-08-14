@@ -9,7 +9,7 @@ import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.io.RecruitmentZoneTracker;
 import org.previmer.ichthyop.io.ZoneTracker;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import org.previmer.ichthyop.particle.ZoneParticleLayer;
 
@@ -25,8 +25,8 @@ public class RecruitmentZoneAction extends AbstractAction {
      */
     private static int durationMinInRecruitArea;
     /**
-     * Duration [second] presently spent by the particule within the
-     * current zone.
+     * Duration [second] presently spent by the particle within the current
+     * zone.
      */
     private int timeInZone;
     private float ageMinAtRecruitment;
@@ -34,11 +34,12 @@ public class RecruitmentZoneAction extends AbstractAction {
     private boolean isAgeCriterion;
     private boolean stopMovingOnceRecruited;
 
+    @Override
     public void loadParameters() throws Exception {
 
         timeInZone = 0;
         durationMinInRecruitArea = (int) (Float.valueOf(getParameter("duration_min")) * 24.f * 3600.f);
-        isAgeCriterion = getParameter("criterion").equals(Criterion.AGE.toString());
+        isAgeCriterion = getParameter("criterion").equals("Age criterion");
         boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
@@ -70,6 +71,12 @@ public class RecruitmentZoneAction extends AbstractAction {
         }
     }
 
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
+
+    @Override
     public void execute(IParticle particle) {
 
         //@todo
@@ -98,27 +105,11 @@ public class RecruitmentZoneAction extends AbstractAction {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
-            return (((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
+            return (((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
         }
     }
 
     public boolean isStopMoving() {
         return stopMovingOnceRecruited;
-    }
-
-    public enum Criterion {
-
-        LENGTH("Length criterion"),
-        AGE("Age criterion");
-        private String name;
-
-        Criterion(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
     }
 }

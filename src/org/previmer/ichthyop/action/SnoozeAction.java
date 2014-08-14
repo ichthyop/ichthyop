@@ -37,6 +37,11 @@ public class SnoozeAction extends AbstractAction {
         snooze = hourFormat.parse(getParameter("start_snooze"));
         wakeup = hourFormat.parse(getParameter("stop_snooze"));
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
     public void execute(IParticle particle) {
         calendar.setTimeInMillis((long) (getSimulationManager().getTimeManager().getTime() * 1e3));

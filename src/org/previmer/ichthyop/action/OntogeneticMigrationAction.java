@@ -83,6 +83,11 @@ public class OntogeneticMigrationAction extends AbstractAction {
         // the CMS configuration file.
         //printCMSInputFile();
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
     /**
      * Reads the CMS Ontogenetic Vertical Migration configuration file.

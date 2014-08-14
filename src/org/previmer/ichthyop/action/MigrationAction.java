@@ -8,8 +8,7 @@ import java.text.SimpleDateFormat;
 import org.previmer.ichthyop.particle.IParticle;
 import java.util.Calendar;
 import java.util.Date;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
-import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
+import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
  *
@@ -26,6 +25,7 @@ public class MigrationAction extends AbstractAction {
     private long minimumAge;
     private boolean isGrowth;
 
+    @Override
     public void loadParameters() throws Exception {
 
         if (!getSimulationManager().getDataset().is3D()) {
@@ -45,19 +45,27 @@ public class MigrationAction extends AbstractAction {
         sunrise = hourFormat.parse(getParameter("sunrise"));
         isodepth = (depthDay == depthNight);
     }
+    
+     @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
+    @Override
     public void execute(IParticle particle) {
 
         /** Ensures larva stage */
-        boolean isSatisfiedCriterion = false;
+        boolean isSatisfiedCriterion;
         if (!isGrowth) {
             isSatisfiedCriterion = particle.getAge() > minimumAge;
         } else {
-            isSatisfiedCriterion = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() != Stage.EGG;
+            // stage == 0 means egg, stage > 0 means larvae
+            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+            isSatisfiedCriterion = stage > 0;
         }
 
         if (isSatisfiedCriterion) {
-            double depth = 0.d;
+            double depth;
             if (isodepth) {
                 /** isodepth migration */
                 depth = depthDay;
@@ -102,20 +110,5 @@ public class MigrationAction extends AbstractAction {
 
     private long getSecondsOfDay(Calendar calendar) {
         return calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60;
-    }
-
-    enum Criterion {
-
-        AGE("Age criterion"),
-        LENGTH("Length criterion");
-        private String name;
-
-        Criterion(String name) {
-            this.name = name;
-        }
-
-        String getName() {
-            return name;
-        }
     }
 }

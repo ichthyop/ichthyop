@@ -45,6 +45,11 @@ public class GradientMoveAction extends AbstractAction {
         getSimulationManager().getOutputManager().addCustomTracker(varName);
         dt = getSimulationManager().getTimeManager().get_dt();
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
     public void execute(IParticle particle) {
 

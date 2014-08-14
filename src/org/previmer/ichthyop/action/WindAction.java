@@ -29,7 +29,7 @@ public class WindAction extends AbstractAction {
 
         windprop = new Properties();
         scenarios = new HashMap();
-        
+
         String filename = IOTools.resolveFile(getParameter("wind_file"));
         File file = new File(filename);
         if (!file.isFile()) {
@@ -46,6 +46,11 @@ public class WindAction extends AbstractAction {
             rank++;
         }
 
+    }
+
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
     }
 
     public void execute(IParticle particle) {
@@ -105,8 +110,8 @@ public class WindAction extends AbstractAction {
         }
         dlat = windage * speed * sin / ONE_DEG_LATITUDE_IN_METER * dt;
         /*System.out.println(speed + " " + direction);
-        System.out.println("sin(alpha): " + sin);
-        System.out.println("dlat(m): " + (speed * sin) + " dlat(°): " + dlat);*/
+         System.out.println("sin(alpha): " + sin);
+         System.out.println("dlat(m): " + (speed * sin) + " dlat(°): " + dlat);*/
         //System.out.println("dlat " + (float) dlat);
         return dlat;
     }
@@ -122,8 +127,8 @@ public class WindAction extends AbstractAction {
         }
         dlon = windage * speed * cos / one_deg_lon_meter * dt;
         /*System.out.println(speed + " " + direction);
-        System.out.println("cos(alpha): " + cos);
-        System.out.println("dlon(m): " + (speed * cos) + " dlon(°): " + dlon + " lon: " + (float) getLon());*/
+         System.out.println("cos(alpha): " + cos);
+         System.out.println("dlon(m): " + (speed * cos) + " dlon(°): " + dlon + " lon: " + (float) getLon());*/
         //System.out.println("dlon " + (float) dlon);
         return dlon;
     }

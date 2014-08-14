@@ -52,6 +52,11 @@ public class Population extends ArrayList implements SetupListener {
         return population;
     }
 
+    public boolean add(IParticle particle) {
+        particle.init();
+        return super.add(particle);
+    }
+
     /**
      * Applies a step on the {@code Population} at current time step. It
      * implements a Fork/Join algorithm for splitting the {@code Population} in

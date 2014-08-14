@@ -27,10 +27,17 @@ import org.previmer.ichthyop.particle.BitParticleLayer;
  */
 public class BitAction extends AbstractAction {
 
+    @Override
     public void loadParameters() throws Exception {
         getSimulationManager().getOutputManager().addPredefinedTracker(BitTracker.class);
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
+    @Override
     public void execute(IParticle particle) {
         ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).setBit((int) Math.round(Math.random()));
     }

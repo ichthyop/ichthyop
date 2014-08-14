@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 gandres
+ * Copyright (C) 2014 pverley
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,50 +18,31 @@ package org.previmer.ichthyop.particle;
 
 /**
  *
- * @author gandres
+ * @author pverley
  */
-public class DebParticleLayer extends ParticleLayer {
+public class LengthParticleLayer extends ParticleLayer {
 
-    /*
-     * DEB PARAMETERS
-     */
-    // Variables
-    private double E; // Réserve
-    private double V; // Structure
-    private double E_R; // Maturité
+    private double length;
 
-    public DebParticleLayer(IParticle particle) {
+    public LengthParticleLayer(IParticle particle) {
         super(particle);
     }
 
     @Override
     public void init() {
-       // Nothing to do
+        length = 0;
     }
 
-    public double getE() {
-        return E;
+    public double getLength() {
+        return length;
     }
 
-    public void setE(double E) {
-        this.E = E;
+    public void setLength(double length) {
+        this.length = length;
     }
 
-    public double getV() {
-
-        return V;
+    public void incrementLength(double dlength) {
+        length += dlength;
     }
 
-    public void setV(double V) {
-        this.V = V;
-    }
-
-    public double getE_R() {
-        return E_R;
-    }
-
-    public void setE_R(double E_R) {
-
-        this.E_R = E_R;
-    }
 }

@@ -22,6 +22,11 @@ public class VDispAction extends AbstractAction {
         kv_field = getParameter("kv_field");
         getSimulationManager().getDataset().requireVariable(kv_field, getClass());
     }
+    
+     @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
     public void execute(IParticle particle) {
         particle.increment(getVDispersion(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt()));
