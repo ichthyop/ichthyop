@@ -83,7 +83,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
         // the CMS configuration file.
         //printCMSInputFile();
     }
-    
+
     @Override
     public void init(IParticle particle) {
         // Nothing to do
@@ -206,14 +206,28 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 break;
             }
         }
-        
+
         // @Lysel You must perform a time check. Does currentTime take you to
         // another column of your matrix ? Yes ==> you must set a new depth for
         // this new matrix time. No ? The particle is already in the matrix time
         // and at the right depth ==> no need to set a new depth, just exit the
         // function.
+        long previousTime = currentTime - getSimulationManager().getTimeManager().get_dt();
+        int iPreviousTime = 0;
+        for (long lTime : time) {
+            if (previousTime >= lTime) {
+                iPreviousTime++;
+            } else {
+                break;
+            }
+        }
+        long t0 = getSimulationManager().getTimeManager().get_tO();
+        // The particle is in the same CMS time step, nothing to do
+        if ((previousTime >= t0) && (iPreviousTime == iTime)) {
+            return;
+        }
         
-
+        // The particle just arrived in a new CMS time step. Set a new depth.
         // Set a depth level, depending of the probability vector of the
         // water column at this time step.
         // @Lysel You will have to perform some tests, but I hope this short
