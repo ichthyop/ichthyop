@@ -1,6 +1,7 @@
 package org.previmer.ichthyop;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import org.previmer.ichthyop.event.SetupEvent;
@@ -25,6 +26,10 @@ public class Population extends ArrayList implements SetupListener {
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
+    /**
+     * Use multi-thread environment for running a step.
+     */
+    private final boolean MULTITHREAD  = true;
     /**
      * The minimal number of particles for splitting the step in concurrent
      * pools of particles. Less than {@code THRESHOLD} particles, the simulation
@@ -64,9 +69,20 @@ public class Population extends ArrayList implements SetupListener {
      */
     public void step() {
 
-        ForkStep step = new ForkStep(0, size());
-        ForkJoinPool pool = new ForkJoinPool();
-        pool.invoke(step);
+        if (MULTITHREAD) {
+            ForkStep step = new ForkStep(0, size());
+            ForkJoinPool pool = new ForkJoinPool();
+            pool.invoke(step);
+        } else {
+            Iterator<Particle> iter = iterator();
+            Particle particle;
+            while (iter.hasNext()) {
+                particle = iter.next();
+                if (particle.isLiving()) {
+                    particle.step();
+                }
+            }
+        }
     }
 
     /**
