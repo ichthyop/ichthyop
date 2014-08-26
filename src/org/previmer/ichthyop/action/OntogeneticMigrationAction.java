@@ -206,6 +206,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 break;
             }
         }
+        iTime = Math.min(iTime, time.length - 1);
 
         // @Lysel You must perform a time check. Does currentTime take you to
         // another column of your matrix ? Yes ==> you must set a new depth for
@@ -221,12 +222,13 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 break;
             }
         }
+        iPreviousTime = Math.min(iPreviousTime, time.length - 1);
         long t0 = getSimulationManager().getTimeManager().get_tO();
         // The particle is in the same CMS time step, nothing to do
         if ((previousTime >= t0) && (iPreviousTime == iTime)) {
             return;
         }
-        
+
         // The particle just arrived in a new CMS time step. Set a new depth.
         // Set a depth level, depending of the probability vector of the
         // water column at this time step.
