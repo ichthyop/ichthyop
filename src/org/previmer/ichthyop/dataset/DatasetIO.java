@@ -190,6 +190,7 @@ public class DatasetIO extends SimulationManagerAccessor {
     static NetcdfFile openURL(String opendapURL) throws IOException {
         NetcdfFile ncIn;
         try {
+            getLogger().info("Opening remote "+opendapURL+" Please wait...");
             ncIn = NetcdfDataset.openDataset(opendapURL);
             getLogger().log(Level.INFO, "'{'Dataset'}' Open remote {0}", opendapURL);
             return ncIn;
