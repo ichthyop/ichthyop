@@ -174,6 +174,7 @@ public class NemoDataset extends AbstractDataset {
     private static NetcdfFile ncU, ncV, ncW, ncT;
     private static String file_hgr, file_zgr, file_mask;
     private static boolean isGridInfoInOneFile;
+    private boolean readW;
 
 ////////////////////////////
 // Definition of the methods
@@ -812,7 +813,15 @@ public class NemoDataset extends AbstractDataset {
         strMask = getParameter("field_var_mask");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
-        strW = getParameter("field_var_w");
+        try {
+            readW = Boolean.valueOf(getParameter("read_var_w"));
+        } catch (NullPointerException ex) {
+            readW = false;
+            getLogger().warning("Ichthyop will recalculate W variable from U and V");
+        }
+        if (readW) {
+            strW = getParameter("field_var_w");
+        }
         strTime = getParameter("field_var_time");
         stre3t = getParameter("field_var_e3t");
         stre3u = getParameter("field_var_e3u");
@@ -982,7 +991,7 @@ public class NemoDataset extends AbstractDataset {
      * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-        
+
         getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
@@ -1020,15 +1029,18 @@ public class NemoDataset extends AbstractDataset {
         for (RequiredVariable variable : requiredVariables.values()) {
             variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
         }
-        try {
-            w_tp1 = (float[][][]) ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).
-                    flip(1).reduce().copyToNDJavaArray();
-        } catch (IOException | InvalidRangeException ex) {
-            IOException ioex = new IOException("Error reading W variable. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
+        if (readW) {
+            try {
+                w_tp1 = (float[][][]) ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).
+                        flip(1).reduce().copyToNDJavaArray();
+            } catch (IOException | InvalidRangeException ex) {
+                IOException ioex = new IOException("Error reading W variable. " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
+            }
+        } else {
+            w_tp1 = computeW();
         }
-        //w_tp1 = computeW();
     }
 
     /*
@@ -1535,7 +1547,9 @@ public class NemoDataset extends AbstractDataset {
         listUFiles = getInputList(path, getParameter("gridu_pattern"));
         listVFiles = getInputList(path, getParameter("gridv_pattern"));
         listTFiles = getInputList(path, getParameter("gridt_pattern"));
-        listWFiles = getInputList(path, getParameter("gridw_pattern"));
+        if (readW) {
+            listWFiles = getInputList(path, getParameter("gridw_pattern"));
+        }
     }
 
     private String checkExistenceAndUnicity(File file, String pattern) throws IOException {
@@ -1569,7 +1583,9 @@ public class NemoDataset extends AbstractDataset {
             ncV.close();
         }
         ncV = NetcdfDataset.openDataset(listVFiles.get(index));
-        ncW = NetcdfDataset.openDataset(listWFiles.get(index));
+        if (readW) {
+            ncW = NetcdfDataset.openDataset(listWFiles.get(index));
+        }
         if (ncT != null) {
             ncT.close();
         }
