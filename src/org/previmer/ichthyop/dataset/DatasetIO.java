@@ -22,7 +22,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class MarsIO extends SimulationManagerAccessor {
+public class DatasetIO extends SimulationManagerAccessor {
 
     /**
      * List on NetCDF input files in which dataset is read.

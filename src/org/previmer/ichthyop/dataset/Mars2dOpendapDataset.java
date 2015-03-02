@@ -20,14 +20,14 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
      */
     @Override
     void openDataset() throws Exception {
-        ncIn = MarsIO.openURL(getParameter("opendap_url"));
+        ncIn = DatasetIO.openURL(getParameter("opendap_url"));
         readTimeLength();
     }
 
     @Override
     void setOnFirstTime() throws Exception {
         long t0 = getSimulationManager().getTimeManager().get_tO();
-        MarsIO.checkInitTime(ncIn, strTime);
+        DatasetIO.checkInitTime(ncIn, strTime);
         rank = findCurrentRank(t0);
         time_tp1 = t0;
     }

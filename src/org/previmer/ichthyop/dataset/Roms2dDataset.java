@@ -6,7 +6,10 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import org.previmer.ichthyop.dataset.MarsCommon.ErrorMessage;
+import static org.previmer.ichthyop.dataset.RomsCommon.strTime;
 import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.io.IOTools;
+import static org.previmer.ichthyop.io.IOTools.isDirectory;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -31,7 +34,7 @@ public class Roms2dDataset extends RomsCommon {
      */
     static float[][] v_tp0;
     /**
-     *  Meridional component of the velocity field at time t + dt
+     * Meridional component of the velocity field at time t + dt
      */
     static float[][] v_tp1;
 
@@ -141,7 +144,7 @@ public class Roms2dDataset extends RomsCommon {
         v_tp0 = v_tp1;
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(getNextFile(time_arrow));
+            ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
         setAllFieldsTp1AtTime(rank);
@@ -149,7 +152,7 @@ public class Roms2dDataset extends RomsCommon {
 
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-        
+
         getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
@@ -207,5 +210,41 @@ public class Roms2dDataset extends RomsCommon {
         }
 
         return variable.read(origin, shape).reduce();
+    }
+
+    @Override
+    void openDataset() throws Exception {
+
+        DatasetIO.setTimeField(strTime);
+        boolean skipSorting;
+        try {
+            skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
+        } catch (Exception ex) {
+            skipSorting = false;
+        }
+        ncIn = DatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"), skipSorting);
+        readTimeLength();
+
+        try {
+            if (!getParameter("grid_file").isEmpty()) {
+                String path = IOTools.resolvePath(getParameter("grid_file"));
+                if (!isDirectory(path)) {
+                    throw new IOException("{Dataset} " + getParameter("grid_file") + " is not a valid directory.");
+                }
+            } else {
+                gridFile = ncIn.getLocation();
+            }
+        } catch (NullPointerException ex) {
+            gridFile = ncIn.getLocation();
+        }
+    }
+
+    @Override
+    void setOnFirstTime() throws Exception {
+        long t0 = getSimulationManager().getTimeManager().get_tO();
+        ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
+        readTimeLength();
+        rank = findCurrentRank(t0);
+        time_tp1 = t0;
     }
 }

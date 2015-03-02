@@ -16,17 +16,11 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
-import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -76,14 +70,6 @@ abstract class RomsCommon extends AbstractDataset {
      */
     static double dt_HyMo;
     /**
-     * List on NetCDF input files in which dataset is read.
-     */
-    List<String> listInputFiles;
-    /**
-     * Index of the current file read in the {@code listInputFiles}
-     */
-    int indexFile;
-    /**
      * Time t + dt expressed in seconds
      */
     static double time_tp1;
@@ -115,13 +101,17 @@ abstract class RomsCommon extends AbstractDataset {
      * Determines whether or not the turbulent diffusivity should be read in the
      * NetCDF file, function of the user's options.
      */
-    private String gridFile;
+    String gridFile;
     /**
      * Geographical boundary of the domain
      */
     private double latMin, lonMin, latMax, lonMax, depthMax;
 
     abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
+
+    abstract void openDataset() throws Exception;
+
+    abstract void setOnFirstTime() throws Exception;
 
     @Override
     void loadParameters() {
@@ -138,73 +128,6 @@ abstract class RomsCommon extends AbstractDataset {
         strTime = getParameter("field_var_time");
         strPn = getParameter("field_var_pn");
         strPm = getParameter("field_var_pm");
-    }
-
-    private void openLocation(String rawPath) throws IOException {
-
-        String path = IOTools.resolvePath(rawPath);
-
-        if (isDirectory(path)) {
-            listInputFiles = getInputList(path);
-            try {
-                if (!getParameter("grid_file").isEmpty()) {
-                    gridFile = getGridFile(getParameter("grid_file"));
-                } else {
-                    gridFile = listInputFiles.get(0);
-                }
-            } catch (NullPointerException ex) {
-                gridFile = listInputFiles.get(0);
-            }
-        }
-        open(listInputFiles.get(0));
-    }
-
-    private String getGridFile(String rawFile) throws IOException {
-
-        File filename = new File(IOTools.resolveFile(rawFile));
-        if (!filename.exists()) {
-            throw new IOException("Grid file " + filename + " does not exist");
-        }
-        return filename.toString();
-    }
-
-    private ArrayList<String> getInputList(String path) throws IOException {
-
-        ArrayList<String> list = null;
-
-        File inputPath = new File(path);
-        String fileMask = getParameter("file_filter");
-        File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
-        if (listFile.length == 0) {
-            throw new IOException(path + " contains no file matching mask " + fileMask);
-        }
-        list = new ArrayList(listFile.length);
-        for (File file : listFile) {
-            list.add(file.toString());
-        }
-        if (list.size() > 1) {
-            boolean skipSorting;
-            try {
-                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-            } catch (Exception ex) {
-                skipSorting = false;
-            }
-            if (skipSorting) {
-                Collections.sort(list);
-            } else {
-                Collections.sort(list, new NCComparator(strTime));
-            }
-        }
-        return list;
-    }
-
-    private boolean isDirectory(String location) throws IOException {
-
-        File f = new File(location);
-        if (!f.isDirectory()) {
-            throw new IOException(location + " is not a valid directory.");
-        }
-        return f.isDirectory();
     }
 
     public void shrinkGrid() {
@@ -234,7 +157,8 @@ abstract class RomsCommon extends AbstractDataset {
 
         loadParameters();
         clearRequiredVariables();
-        openLocation(getParameter("input_path"));
+        openDataset();
+        //openLocation(getParameter("input_path"));
         getDimNC();
         shrinkGrid();
         readConstantField(gridFile);
@@ -244,11 +168,9 @@ abstract class RomsCommon extends AbstractDataset {
     @Override
     public void init() throws Exception {
 
-        long t0 = getSimulationManager().getTimeManager().get_tO();
-        open(getFile(t0));
+        setOnFirstTime();
         checkRequiredVariable(ncIn);
-        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
-        time_tp1 = t0;
+        setAllFieldsTp1AtTime(rank);
     }
 
     private void test() {
@@ -268,7 +190,7 @@ abstract class RomsCommon extends AbstractDataset {
         }
     }
 
-    private int findCurrentRank(long time) throws Exception {
+    int findCurrentRank(long time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -290,93 +212,6 @@ abstract class RomsCommon extends AbstractDataset {
         lrank = lrank - (time_arrow + 1) / 2;
 
         return lrank;
-    }
-
-    private String getFile(long time) throws IOException {
-
-        int indexLast = listInputFiles.size() - 1;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                indexFile = i;
-                return listInputFiles.get(i);
-            } else if (isTimeBetweenFile(time, i)) {
-                indexFile = i - (time_arrow - 1) / 2;
-                return listInputFiles.get(indexFile);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            indexFile = indexLast;
-            return listInputFiles.get(indexLast);
-        }
-
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
-    }
-
-    private boolean isTimeIntoFile(long time, int index) throws IOException {
-
-        String filename = "";
-        NetcdfFile nc;
-        Array timeArr;
-        long time_r0, time_rf;
-
-        try {
-            filename = listInputFiles.get(index);
-            nc = NetcdfDataset.openFile(filename, null);
-            timeArr = nc.findVariable(strTime).read();
-            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
-            nc.close();
-
-            return (time >= time_r0 && time < time_rf);
-            /*switch (time_arrow) {
-            case 1:
-            return (time >= time_r0 && time < time_rf);
-            case -1:
-            return (time > time_r0 && time <= time_rf);
-            }*/
-        } catch (IOException e) {
-            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        } catch (NullPointerException e) {
-            IOException ioex = new IOException("Unable to read " + strTime + " variable in file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        }
-
-    }
-
-    private boolean isTimeBetweenFile(long time, int index) throws IOException {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        long[] time_nc = new long[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listInputFiles.get(index + i);
-                nc = NetcdfDataset.openFile(filename, null);
-                timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-                nc.close();
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-        } catch (IOException e) {
-            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        } catch (NullPointerException e) {
-            IOException ioex = new IOException("Unable to read " + strTime + " variable in file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        }
-        return false;
     }
 
     void readConstantField(String gridFile) throws IOException {
@@ -491,6 +326,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Reads the dimensions of the NetCDF dataset
+     *
      * @throws an IOException if an error occurs while reading the dimensions.
      */
     void getDimNC() throws Exception {
@@ -517,7 +353,6 @@ abstract class RomsCommon extends AbstractDataset {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
-
         boolean found;
         int imin, imax, jmin, jmax, i0, j0;
         double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
@@ -581,7 +416,6 @@ abstract class RomsCommon extends AbstractDataset {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-
         final double ix = Math.max(0.00001f, Math.min(xRho, (double) nx - 1.00001f));
         final double jy = Math.max(0.00001f, Math.min(yRho, (double) ny - 1.00001f));
 
@@ -648,7 +482,6 @@ abstract class RomsCommon extends AbstractDataset {
         //--------------------------------------------------------------
         // Return true if (lon, lat) is insidide the polygon defined by
         // (imin, jmin) & (imin, jmax) & (imax, jmax) & (imax, jmin)
-
         //-----------------------------------------
         // Build the polygone
         int nb, shft;
@@ -731,7 +564,7 @@ abstract class RomsCommon extends AbstractDataset {
      *
      * @param pGrid a double[] the coordinates of the grid point
      * @return <code>true</code> if the grid point is close to cost,
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      */
     @Override
     public boolean isCloseToCost(double[] pGrid) {
@@ -743,39 +576,15 @@ abstract class RomsCommon extends AbstractDataset {
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
-
-    String getNextFile(int time_arrow) throws IOException {
-
-        int index = indexFile - (1 - time_arrow) / 2;
-        boolean noNext = (listInputFiles.size() == 1) || (index < 0) || (index >= listInputFiles.size() - 1);
-        if (noNext) {
-            throw new IOException("Unable to find any file following " + listInputFiles.get(indexFile));
+    
+    void readTimeLength() throws IOException {
+        try {
+            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Failed to read dataset time dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
         }
-        indexFile += time_arrow;
-        return listInputFiles.get(indexFile);
-    }
-
-    void open(String filename) throws IOException {
-        if (ncIn == null || (new File(ncIn.getLocation()).compareTo(new File(filename)) != 0)) {
-            if (ncIn != null) {
-                ncIn.close();
-            }
-            try {
-                ncIn = NetcdfDataset.openDataset(filename);
-            } catch (IOException ex) {
-                IOException ioex = new IOException("Error opening dataset " + filename + " ==> " + ex.toString());
-                ioex.setStackTrace(ex.getStackTrace());
-                throw ioex;
-            }
-            try {
-                nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            } catch (Exception ex) {
-                IOException ioex = new IOException("Error dataset time dimension ==> " + ex.toString());
-                ioex.setStackTrace(ex.getStackTrace());
-                throw ioex;
-            }
-        }
-        getLogger().log(Level.INFO, "Opened dataset {0}", filename);
     }
 
     /**
@@ -819,15 +628,16 @@ abstract class RomsCommon extends AbstractDataset {
     }
 
     /**
-     * Resizes the domain and determines the range of the grid indexes
-     * taht will be used in the simulation.
-     * The new domain is limited by the Northwest and the Southeast corners.
-     * @param pGeog1 a float[], the geodesic coordinates of the domain
-     * Northwest corner
-     * @param pGeog2  a float[], the geodesic coordinates of the domain
-     * Southeast corner
-     * @throws an IOException if the new domain is not strictly nested
-     * within the NetCDF dataset domain.
+     * Resizes the domain and determines the range of the grid indexes taht will
+     * be used in the simulation. The new domain is limited by the Northwest and
+     * the Southeast corners.
+     *
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     * corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     * corner
+     * @throws an IOException if the new domain is not strictly nested within
+     * the NetCDF dataset domain.
      */
     private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
 
@@ -863,7 +673,6 @@ abstract class RomsCommon extends AbstractDataset {
 
         //--------------------------------------
         // Calculate the Physical Space extrema
-
         lonMin = Double.MAX_VALUE;
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
@@ -911,6 +720,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Gets domain minimum latitude.
+     *
      * @return a double, the domain minimum latitude [north degree]
      */
     @Override
@@ -920,6 +730,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Gets domain maximum latitude.
+     *
      * @return a double, the domain maximum latitude [north degree]
      */
     @Override
@@ -929,6 +740,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Gets domain minimum longitude.
+     *
      * @return a double, the domain minimum longitude [east degree]
      */
     @Override
@@ -938,6 +750,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Gets domain maximum longitude.
+     *
      * @return a double, the domain maximum longitude [east degree]
      */
     @Override
@@ -947,6 +760,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Gets domain maximum depth.
+     *
      * @return a float, the domain maximum depth [meter]
      */
     @Override
@@ -956,6 +770,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Gets the latitude at (i, j) grid point.
+     *
      * @param i an int, the i-ccordinate
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
@@ -967,6 +782,7 @@ abstract class RomsCommon extends AbstractDataset {
 
     /**
      * Gets the longitude at (i, j) grid point.
+     *
      * @param i an int, the i-ccordinate
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
