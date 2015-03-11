@@ -10,7 +10,6 @@ import java.text.ParseException;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.LastStepListener;
@@ -18,6 +17,7 @@ import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.event.EventListenerList;
+import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.util.Constant;
 
 /**
@@ -76,7 +76,7 @@ public class TimeManager extends AbstractManager {
      * The simple date format parses and formats dates in human readable format.
      */
     private SimpleDateFormat outputDateFormat;
-    private EventListenerList listeners = new EventListenerList();
+    private final EventListenerList listeners = new EventListenerList();
 
 ////////////////////////////
 // Definition of the methods
@@ -113,7 +113,7 @@ public class TimeManager extends AbstractManager {
         keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
 
         if (getParameter("calendar_type").equals(TypeCalendar.CLIMATO.toString())) {
-            calendar = new ClimatoCalendar();
+            calendar = new Day360Calendar(getParameter("time_origin"), INPUT_DATE_FORMAT);
         } else {
             calendar = new InterannualCalendar(getParameter("time_origin"), INPUT_DATE_FORMAT);
         }
@@ -144,9 +144,10 @@ public class TimeManager extends AbstractManager {
      * 
      * @param duration format: getInputDurationFormat()
      * @return
+     * @throws java.text.ParseException
      */
     public long duration2seconds(String duration) throws ParseException {
-        long seconds = 0L;
+        long seconds;
         NumberFormat nbFormat = NumberFormat.getInstance();
         nbFormat.setParseIntegerOnly(true);
         nbFormat.setGroupingUsed(false);
@@ -179,7 +180,7 @@ public class TimeManager extends AbstractManager {
      *
      * @return <code>true</code> if the incremented time is still smaller than
      * the end time of the simulation; <code>false</code> otherwise.
-     */
+     * @throws java.lang.Exception */
     public boolean hasNextStep() throws Exception {
 
         time += dt;
@@ -210,7 +211,7 @@ public class TimeManager extends AbstractManager {
     }
 
     public String stepToString() {
-        StringBuffer strBf = new StringBuffer("Step ");
+        StringBuilder strBf = new StringBuilder("Step ");
         strBf.append(index() + 1);
         strBf.append(" / ");
         strBf.append(getNumberOfSteps());
@@ -332,6 +333,7 @@ public class TimeManager extends AbstractManager {
         }
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         cleanNextStepListener();
         cleanLastStepListener();
@@ -339,6 +341,7 @@ public class TimeManager extends AbstractManager {
         getLogger().info("Time manager setup [OK]");
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
         simuDuration = transportDuration + getSimulationManager().getReleaseManager().getReleaseDuration();
         i_step = 0;
@@ -371,7 +374,7 @@ public class TimeManager extends AbstractManager {
 
         CLIMATO("Climatology calendar"),
         GREGORIAN("Gregorian calendar");
-        private String name;
+        private final String name;
 
         TypeCalendar(String name) {
             this.name = name;

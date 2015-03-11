@@ -36,7 +36,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 import java.awt.event.ActionEvent;
@@ -52,6 +51,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.manager.TimeManager;
 
 /**
@@ -219,7 +219,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     false, false, 0, 0);
             headerWidth = comp.getPreferredSize().width;
             try {
-            comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
+                comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
             } catch (Exception ex) {
                 java.util.logging.Logger.getAnonymousLogger().log(Level.WARNING, ex.toString());
             }
@@ -231,18 +231,24 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     private void setupDateEditor(XBlock block) {
         Calendar calendar;
+
+        String origin = "1900/01/01 00:00";
+        if (null != model.block) {
+            if (null != block.getXParameter("time_origin")) {
+                origin = block.getXParameter("time_origin").getValue();
+            }
+        }
         if (block.getXParameter("calendar_type").getValue().equals("climato")) {
-            calendar = new ClimatoCalendar();
-        } else {
-            calendar = new InterannualCalendar();
             try {
-                if (null != model.block) {
-                    if (null != block.getXParameter("time_origin")) {
-                        calendar = new InterannualCalendar(block.getXParameter("time_origin").getValue(), TimeManager.INPUT_DATE_FORMAT);
-                    }
-                }
+                calendar = new Day360Calendar(origin, TimeManager.INPUT_DATE_FORMAT);
             } catch (Exception ex) {
-                // does nothing. Use default time origin.
+                calendar = new Day360Calendar();
+            }
+        } else {
+            try {
+                calendar = new InterannualCalendar(origin, TimeManager.INPUT_DATE_FORMAT);
+            } catch (Exception ex) {
+                calendar = new InterannualCalendar();
             }
         }
         for (int i = 0; i < getRowCount() - 1; i++) {

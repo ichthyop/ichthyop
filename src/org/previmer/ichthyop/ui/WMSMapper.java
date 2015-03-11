@@ -53,8 +53,8 @@ import org.jdesktop.swingx.mapviewer.empty.EmptyTileFactory;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
+import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.dataset.IDataset;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
@@ -201,7 +201,11 @@ public class WMSMapper extends JXMapKit {
         vmortality = nc.findVariable("mortality");
         vtime = nc.findVariable("time");
         if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
-            calendar = new ClimatoCalendar();
+            try {
+                calendar = new Day360Calendar(vtime.findAttribute("origin").getStringValue(), TimeManager.INPUT_DATE_FORMAT);
+            } catch (ParseException ex) {
+                calendar = new Day360Calendar();
+            }
         } else {
             try {
                 calendar = new InterannualCalendar(vtime.findAttribute("origin").getStringValue(), TimeManager.INPUT_DATE_FORMAT);

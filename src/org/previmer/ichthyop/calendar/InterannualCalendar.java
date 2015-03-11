@@ -58,6 +58,8 @@ public class InterannualCalendar extends Calendar {
      * @param year an int, the year origin
      * @param month an int, the month origin
      * @param day an int, the day origin
+     * @param hour an int, the hour origin
+     * @param minute an int, the minute origin
      */
     public InterannualCalendar(int year, int month, int day, int hour, int minute) {
 
@@ -98,7 +100,7 @@ public class InterannualCalendar extends Calendar {
      * @param value an int, the value of the given field.
      * @see java.util.Calendar for details about the available fields.
      */
-    public void setEpoch(int field, int value) {
+    private void setEpoch(int field, int value) {
         epoch_fields[field] = value;
     }
 
@@ -108,7 +110,7 @@ public class InterannualCalendar extends Calendar {
      * @param millis a long, the time in millisecond
      * @return long, the floor of the quotient millis / (24 * 3600 * 1000)
      */
-    private static final long millisToDay(long millis) {
+    private static long millisToDay(long millis) {
         return (millis / ONE_DAY);
     }
 
@@ -118,13 +120,14 @@ public class InterannualCalendar extends Calendar {
      * @param day a long, the time in day
      * @return long the time in millisecond
      */
-    private static final long dayToMillis(long day) {
+    private static long dayToMillis(long day) {
         return day * ONE_DAY;
     }
 
     /**
      * Converts time as milliseconds to time field values.
      */
+    @Override
     protected void computeFields() {
         int rawYear, year, month, dayOfMonth, dayOfYear;
         boolean isLeap;
@@ -201,6 +204,7 @@ public class InterannualCalendar extends Calendar {
     /**
      * Converts time field values to milliseconds.
      */
+    @Override
     protected void computeTime() {
 
         int yearOn = fields[YEAR];
@@ -236,25 +240,31 @@ public class InterannualCalendar extends Calendar {
 //////////////////////////////////
 // Inherited methods not redefined
 //////////////////////////////////
+    @Override
     public int getGreatestMinimum(int field) {
         return 0;
     }
 
+    @Override
     public int getLeastMaximum(int field) {
         return 0;
     }
 
+    @Override
     public int getMaximum(int field) {
         return 0;
     }
 
+    @Override
     public int getMinimum(int field) {
         return 0;
     }
 
+    @Override
     public void add(int field, int amount) {
     }
 
+    @Override
     public void roll(int field, boolean up) {
     }
     //---------- End of class
