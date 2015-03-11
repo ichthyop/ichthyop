@@ -174,7 +174,10 @@ public class NemoDataset extends AbstractDataset {
     private static NetcdfFile ncU, ncV, ncW, ncT;
     private static String file_hgr, file_zgr, file_mask;
     private static boolean isGridInfoInOneFile;
+    // Whether vertical velocity should be read from NetCDF or calculated from U & V
     private boolean readW;
+    // Whether the NetCDF files should be opened with enhanced mode (scale/offet/missing)
+    private boolean enhanced;
 
 ////////////////////////////
 // Definition of the methods
@@ -192,14 +195,14 @@ public class NemoDataset extends AbstractDataset {
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
         NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(file_hgr);
+        nc = NetcdfDataset.openDataset(file_hgr, enhanced, null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
         //fichier *byte*mask*
         lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
                 copyToNDJavaArray();
         latRho = (float[][]) nc.findVariable(strLat).read(origin, size).
                 copyToNDJavaArray();
-        nc = NetcdfDataset.openDataset(file_mask);
+        nc = NetcdfDataset.openDataset(file_mask, enhanced, null);
         maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
             0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
@@ -211,7 +214,7 @@ public class NemoDataset extends AbstractDataset {
          copyToNDJavaArray();*/
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_zgr);
+            nc = NetcdfDataset.openDataset(file_zgr, enhanced, null);
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
@@ -231,7 +234,7 @@ public class NemoDataset extends AbstractDataset {
 
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_hgr);
+            nc = NetcdfDataset.openDataset(file_hgr, enhanced, null);
         }
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
@@ -707,7 +710,7 @@ public class NemoDataset extends AbstractDataset {
         NetcdfFile nc;
         Array arrLon, arrLat;
         try {
-            nc = NetcdfDataset.openDataset(listTFiles.get(0));
+            nc = NetcdfDataset.openDataset(listTFiles.get(0), enhanced, null);
             arrLon = nc.findVariable(strLon).read();
             arrLat = nc.findVariable(strLat).read();
             if (arrLon.getElementType() == float.class) {
@@ -832,6 +835,13 @@ public class NemoDataset extends AbstractDataset {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
+        
+        try {
+            enhanced = Boolean.valueOf("enhanced_mode");
+        } catch (NullPointerException ex) {
+            enhanced = true;
+            getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced mode (scale,offset,missing).");
+        }
     }
 
     /**
@@ -846,8 +856,7 @@ public class NemoDataset extends AbstractDataset {
      */
     private void getDimNC() throws IOException {
 
-        NetcdfFile nc = new NetcdfDataset();
-        nc = NetcdfDataset.openDataset(file_mask);
+        NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced, null);
         try {
             nx = nc.findDimension(strXDim).getLength();
         } catch (Exception ex) {
@@ -1496,7 +1505,7 @@ public class NemoDataset extends AbstractDataset {
      */
     private ArrayList<String> getInputList(String path, String fileMask) throws IOException {
 
-        ArrayList<String> list = null;
+        ArrayList<String> list;
 
         File inputPath = new File(path);
         //String fileMask = Configuration.getFileMask();
@@ -1578,18 +1587,18 @@ public class NemoDataset extends AbstractDataset {
         if (ncU != null) {
             ncU.close();
         }
-        ncU = NetcdfDataset.openDataset(listUFiles.get(index));
+        ncU = NetcdfDataset.openDataset(listUFiles.get(index), enhanced, null);
         if (ncV != null) {
             ncV.close();
         }
-        ncV = NetcdfDataset.openDataset(listVFiles.get(index));
+        ncV = NetcdfDataset.openDataset(listVFiles.get(index), enhanced, null);
         if (readW) {
-            ncW = NetcdfDataset.openDataset(listWFiles.get(index));
+            ncW = NetcdfDataset.openDataset(listWFiles.get(index), enhanced, null);
         }
         if (ncT != null) {
             ncT.close();
         }
-        ncT = NetcdfDataset.openDataset(listTFiles.get(index));
+        ncT = NetcdfDataset.openDataset(listTFiles.get(index), enhanced, null);
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
     }
 
@@ -1647,7 +1656,7 @@ public class NemoDataset extends AbstractDataset {
 
         try {
             filename = listUFiles.get(index);
-            nc = NetcdfDataset.openDataset(filename);
+            nc = NetcdfDataset.openDataset(filename, enhanced, null);
             timeArr = nc.findVariable(strTime).read();
             time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
             time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
@@ -1662,12 +1671,10 @@ public class NemoDataset extends AbstractDataset {
              return (time > time_r0 && time <= time_rf);
              }*/
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                    + e.getCause());
+            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
             throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : "
-                    + e.getCause());
+                    + " variable in file " + filename + " : " + e.getCause());
         }
         //return false;
 
@@ -1693,7 +1700,7 @@ public class NemoDataset extends AbstractDataset {
         try {
             for (int i = 0; i < 2; i++) {
                 filename = listUFiles.get(index + i);
-                nc = NetcdfDataset.openDataset(filename);
+                nc = NetcdfDataset.openDataset(filename, enhanced, null);
                 timeArr = nc.findVariable(strTime).read();
                 time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
                         0)));
