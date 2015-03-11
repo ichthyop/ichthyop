@@ -3,7 +3,7 @@ package org.previmer.ichthyop.util;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.calendar.FlawedCalendar;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 
@@ -29,11 +29,11 @@ public class TimeConverter {
         Calendar calendar = isGregorian
                 ? new InterannualCalendar(1900, Calendar.JANUARY, 1, 0, 0)
                 //? new InterannualCalendar(1858, Calendar.NOVEMBER, 17, 0, 0)
-                : new ClimatoCalendar();
+                : new Day360Calendar(1900, Calendar.JANUARY, 1, 0, 0);
 
         String typeDate = isGregorian
                 ? "gregorian"
-                : "climato";
+                : "360_day";
 
         dateFormat.setCalendar(calendar);
         calendar.setTime(dateFormat.parse(date));
@@ -62,11 +62,11 @@ public class TimeConverter {
         Calendar calendar = isGregorian
                 ? new InterannualCalendar(1900, Calendar.JANUARY, 1, 0, 0)
                 //? new InterannualCalendar(1858, Calendar.NOVEMBER, 17, 0, 0)
-                : new ClimatoCalendar();
+                : new Day360Calendar(1900, Calendar.JANUARY, 1, 0, 0);
 
         String typeDate = isGregorian
                 ? "gregorian"
-                : "climato";
+                : "360_day";
 
         dateFormat.setCalendar(calendar);
         calendar.setTimeInMillis(time * 1000L);
