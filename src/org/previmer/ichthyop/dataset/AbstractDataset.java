@@ -32,6 +32,18 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
     }
 
+    public boolean findParameter(String key) {
+        // Check whether the parameter can be retrieved
+        try {
+            getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
+        } catch (NullPointerException ex) {
+            // Tue parameter does not exist
+            return false;
+        }
+        // The parameter does exist
+        return true;
+    }
+
     @Override
     public Number get(String variableName, double[] pGrid, double time) {
         if (null != requiredVariables.get(variableName)) {
@@ -63,7 +75,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         if (null != var) {
             if (var.getRequiredBy().size() > 1) {
                 /* just remove the reference but dont remove the
-                variable because other classes might need it */
+                 variable because other classes might need it */
                 var.getRequiredBy().remove(requiredBy);
             } else if (var.getRequiredBy().get(0).equals(requiredBy)) {
                 requiredVariables.remove(name);

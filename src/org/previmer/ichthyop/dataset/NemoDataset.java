@@ -775,15 +775,8 @@ public class NemoDataset extends AbstractDataset {
     }
 
     public void shrinkGrid() {
-        boolean isParamDefined;
-        try {
-            Boolean.valueOf(getParameter("shrink_domain"));
-            isParamDefined = true;
-        } catch (NullPointerException ex) {
-            isParamDefined = false;
-        }
-
-        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+        
+        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
             try {
                 float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
@@ -816,9 +809,9 @@ public class NemoDataset extends AbstractDataset {
         strMask = getParameter("field_var_mask");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
-        try {
+        if (findParameter("read_var_w")) {
             readW = Boolean.valueOf(getParameter("read_var_w"));
-        } catch (NullPointerException ex) {
+        } else {
             readW = false;
             getLogger().warning("Ichthyop will recalculate W variable from U and V");
         }
@@ -835,10 +828,9 @@ public class NemoDataset extends AbstractDataset {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
-        
-        try {
+        if (findParameter("enhanced_mode")) {
             enhanced = Boolean.valueOf("enhanced_mode");
-        } catch (NullPointerException ex) {
+        } else {
             enhanced = true;
             getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced mode (scale,offset,missing).");
         }
@@ -1667,7 +1659,7 @@ public class NemoDataset extends AbstractDataset {
             /*switch (time_arrow) {
              case 1:
              return (time >= time_r0 && time < time_rf);
-             case -1:
+             case -t1:
              return (time > time_r0 && time <= time_rf);
              }*/
         } catch (IOException e) {
