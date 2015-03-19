@@ -3,8 +3,6 @@ package org.previmer.ichthyop.calendar;
 /**
  * Import the abstract class Calendar
  */
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.DAY_OF_YEAR;
@@ -38,7 +36,7 @@ public class Day360Calendar extends Calendar {
      * Origin of time
      */
     final private long time_o;
-    
+
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
@@ -52,43 +50,30 @@ public class Day360Calendar extends Calendar {
 // Constructors
 ///////////////
     /**
-     * Constructs a Gregorian Calendar with origin of time January 1, 1900
+     * Constructs a 360_day Calendar with origin of time January 1, 1900
      * 00:00:00.000 GMT.
      */
     public Day360Calendar() {
-        this(1900, JANUARY, 1, 0, 0);
+        this(1, JANUARY, 1, 0, 0);
     }
 
     /**
-     * Constructs a Gregorian Calendar with origin of time set by parameters.
+     * Constructs a 360_day Calendar with origin of time set by parameters.
      * Hours, minutes, seconds are automatically set to 00:00:00.000
      *
-     * @param year an int, the year origin
-     * @param month an int, the month origin
-     * @param day an int, the day origin
-     * @param hour an int, the hour origin
-     * @param minute an int, the minute origin
+     * @param year_o an int, the year origin
+     * @param month_o an int, the month origin
+     * @param day_o an int, the day origin
+     * @param hour_o an int, the hour origin
+     * @param minute_o an int, the minute origin
      */
-    public Day360Calendar(int year, int month, int day, int hour, int minute) {
+    public Day360Calendar(int year_o, int month_o, int day_o, int hour_o, int minute_o) {
 
         fields = new int[FIELD_COUNT];
-        long time2Day_o = (long) (day - 1 + month * 30 + (year - 1) * 360);
+        long time2Day_o = (long) (day_o - 1 + month_o * 30 + (year_o - 1) * 360);
         long millis_o = dayToMillis(time2Day_o);
-        int millisInDay_o = 1000 * (60 * (minute + 60 * hour));
+        int millisInDay_o = 1000 * (60 * (minute_o + 60 * hour_o));
         time_o = millis_o + millisInDay_o;
-        setTimeInMillis(0);
-    }
-
-    public Day360Calendar(String origin, SimpleDateFormat dateFormat) throws ParseException {
-
-        Calendar cld = new InterannualCalendar();
-        dateFormat.setCalendar(cld);
-        cld.setTime(dateFormat.parse(origin));
-        long time2Day_o = (long) (cld.get(Calendar.DAY_OF_MONTH) - 1 + cld.get(Calendar.MONTH) * 30 + (cld.get(Calendar.YEAR) - 1) * 360);
-        long millis_o = dayToMillis(time2Day_o);
-        int millisInDay_o = 1000 * (60 * (cld.get(Calendar.MINUTE) + 60 * cld.get(Calendar.HOUR_OF_DAY)));
-        time_o = millis_o + millisInDay_o;
-        fields = new int[FIELD_COUNT];
         setTimeInMillis(0);
     }
 
@@ -120,7 +105,7 @@ public class Day360Calendar extends Calendar {
      */
     @Override
     protected void computeFields() {
-        
+
         int year, month, dayOfMonth, dayOfYear;
         long timeInDay = millisToDay(time + time_o);
         //System.out.println("cf timeInDay " + timeInDay);
@@ -165,7 +150,7 @@ public class Day360Calendar extends Calendar {
                 + 60 * (fields[MINUTE] + 60 * fields[HOUR_OF_DAY]));
         time = millis + millisInDay - time_o;
     }
-
+    
 //////////////////////////////////
 // Inherited methods not redefined
 //////////////////////////////////

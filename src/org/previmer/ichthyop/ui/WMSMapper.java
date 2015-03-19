@@ -200,18 +200,32 @@ public class WMSMapper extends JXMapKit {
         vlat = nc.findVariable("lat");
         vmortality = nc.findVariable("mortality");
         vtime = nc.findVariable("time");
+        // Set origin of time
+        Calendar calendar_o = Calendar.getInstance();
+        int year_o = 1;
+        int month_o = Calendar.JANUARY;
+        int day_o = 1;
+        int hour_o = 0;
+        int minute_o = 0;
+        if (null != vtime.findAttribute("origin")) {
+            try {
+                SimpleDateFormat dFormat = TimeManager.INPUT_DATE_FORMAT;
+                dFormat.setCalendar(calendar_o);
+                calendar_o.setTime(dFormat.parse(vtime.findAttribute("origin").getStringValue()));
+                year_o = calendar_o.get(Calendar.YEAR);
+                month_o = calendar_o.get(Calendar.MONTH);
+                day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
+                hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
+                minute_o = calendar_o.get(Calendar.MINUTE);
+            } catch (ParseException ex) {
+                // Something went wrong, default origin of time
+                // set to 0001/01/01 00:00
+            }
+        }
         if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
-            try {
-                calendar = new Day360Calendar(vtime.findAttribute("origin").getStringValue(), TimeManager.INPUT_DATE_FORMAT);
-            } catch (ParseException ex) {
-                calendar = new Day360Calendar();
-            }
+            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
         } else {
-            try {
-                calendar = new InterannualCalendar(vtime.findAttribute("origin").getStringValue(), TimeManager.INPUT_DATE_FORMAT);
-            } catch (ParseException ex) {
-                calendar = new InterannualCalendar();
-            }
+            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
 
         time = new double[nbSteps];

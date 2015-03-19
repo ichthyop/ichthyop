@@ -353,7 +353,14 @@ public class WindDriftFileAction extends WindDriftAction {
         if (origin == 0) {
             Calendar calendartmp;
             SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-            calendartmp = new InterannualCalendar(time_origin, INPUT_DATE_FORMAT);
+            Calendar calendar_o = Calendar.getInstance();
+            calendar_o.setTime(INPUT_DATE_FORMAT.parse(time_origin));
+            int year_o = calendar_o.get(Calendar.YEAR);
+            int month_o = calendar_o.get(Calendar.MONTH);
+            int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
+            int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
+            int min_o = calendar_o.get(Calendar.MINUTE);
+            calendartmp = new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o);
             INPUT_DATE_FORMAT.setCalendar(calendartmp);
             String origin_hydro = getSimulationManager().getParameterManager().getParameter("app.time", "time_origin");
             calendartmp.setTime(INPUT_DATE_FORMAT.parse(origin_hydro));

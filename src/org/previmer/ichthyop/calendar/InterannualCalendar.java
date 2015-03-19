@@ -1,8 +1,6 @@
 package org.previmer.ichthyop.calendar;
 
 /** Import the abstract class Calendar */
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -70,22 +68,6 @@ public class InterannualCalendar extends Calendar {
         setEpoch(DAY_OF_MONTH, day);
         setEpoch(HOUR_OF_DAY, hour);
         setEpoch(MINUTE, minute);
-        setEpoch(SECOND, 0);
-        setTimeInMillis(0);
-    }
-
-    public InterannualCalendar(String origin, SimpleDateFormat dateFormat) throws ParseException {
-
-        Calendar cld = new InterannualCalendar();
-        dateFormat.setCalendar(cld);
-        cld.setTime(dateFormat.parse(origin));
-        epoch_fields = new int[FIELD_COUNT];
-        fields = new int[FIELD_COUNT];
-        setEpoch(YEAR, cld.get(Calendar.YEAR));
-        setEpoch(MONTH, cld.get(Calendar.MONTH));
-        setEpoch(DAY_OF_MONTH, cld.get(Calendar.DAY_OF_MONTH));
-        setEpoch(HOUR_OF_DAY, cld.get(Calendar.HOUR_OF_DAY));
-        setEpoch(MINUTE, cld.get(Calendar.MINUTE));
         setEpoch(SECOND, 0);
         setTimeInMillis(0);
     }

@@ -39,7 +39,9 @@ import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 import java.awt.event.ActionEvent;
+import java.text.ParseException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
@@ -238,18 +240,21 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 origin = block.getXParameter("time_origin").getValue();
             }
         }
+        Calendar calendar_o = Calendar.getInstance();
+        try {
+            calendar_o.setTime(TimeManager.INPUT_DATE_FORMAT.parse(origin));
+        } catch (ParseException ex) {
+            calendar_o.setTimeInMillis(0);
+        }
+        int year_o = calendar_o.get(Calendar.YEAR);
+        int month_o = calendar_o.get(Calendar.MONTH);
+        int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
+        int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
+        int minute_o = calendar_o.get(Calendar.MINUTE);
         if (block.getXParameter("calendar_type").getValue().equals("climato")) {
-            try {
-                calendar = new Day360Calendar(origin, TimeManager.INPUT_DATE_FORMAT);
-            } catch (Exception ex) {
-                calendar = new Day360Calendar();
-            }
+            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
         } else {
-            try {
-                calendar = new InterannualCalendar(origin, TimeManager.INPUT_DATE_FORMAT);
-            } catch (Exception ex) {
-                calendar = new InterannualCalendar();
-            }
+            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
         for (int i = 0; i < getRowCount() - 1; i++) {
             TableCellEditor editor = getRowEditorModel().getEditor(i);
