@@ -220,7 +220,13 @@ public class NemoDataset extends AbstractDataset {
         //fichier *mesh*z*
         read_gdep_fields(nc);
 
-        e3t = read_e3_field(nc, stre3t);
+        // phv 20150319 - patch for e3t that can be found in NEMO output spread
+        // into three variables e3t_0, e3t_ps and mbathy
+        if (findParameter("field_var_e3t0") && findParameter("field_var_e3tps") && findParameter("field_var_mbathy")) {
+            compute_e3t();
+        } else {
+            e3t = read_e3_field(nc, stre3t);
+        }
         if (stre3u.equals(stre3t) || (null == nc.findVariable(stre3u))) {
             e3u = compute_e3u(e3t);
         } else {
@@ -243,6 +249,55 @@ public class NemoDataset extends AbstractDataset {
         e1v = read_e1_e2_field(nc, stre1v);
         e2u = read_e1_e2_field(nc, stre2u);
         nc.close();
+    }
+
+    private void compute_e3t() {
+
+        double[] e3t_0 = new double[nz];
+        double[][] e3t_ps = new double[ny][nx];
+        int[][] mbathy = new int[ny][nx];
+
+        String str_e3t0 = getParameter("field_var_e3t0");
+        String str_e3tps = getParameter("field_var_e3tps");
+        String str_mbathy = getParameter("field_var_mbathy");
+        
+        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[] {str_e3t0, str_e3tps, str_mbathy});
+
+        try {
+            // Open NetCDF file
+            NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced, null);
+
+            // Read e3t_0
+            e3t_0 = (double[]) nc.findVariable(str_e3t0).read(new int[]{0, 0}, new int[]{1, nz}).flip(1).reduce().copyToNDJavaArray();
+
+            // Read e3t_ps
+            e3t_ps = (double[][]) nc.findVariable(str_e3tps).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+
+            // Read mbathy
+            mbathy = (int[][]) nc.findVariable(str_mbathy).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, "Error while reconstructing e3t[][][] from e3t_0, e3t_ps and mbathy...", ex);
+        }
+
+        // Reconstruct e3t_ps
+        e3t = new double[nz][ny][nx];
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                // First we initialize e3t with e3t_0
+                for (int k = 0; k < nz; k++) {
+                    e3t[k][j][i] = e3t_0[k];
+                }
+                // From NEMO to Ichthyop grid, we remove the deepest z level
+                // as it is always ocean bottom in NEMO and we flip z-axis
+                // So the index of mbathy must be converted into Ichthyop grid
+                int km = nz - mbathy[j][i] - 1;
+                // Next we correct the depth of the layer adjacent to the ocean
+                // bottom with e3t_ps
+                e3t[km][j][i] = e3t_ps[j][i];
+            }
+        }
+
     }
 
     private double[][][] compute_e3u(double[][][] e3t) {
@@ -775,7 +830,7 @@ public class NemoDataset extends AbstractDataset {
     }
 
     public void shrinkGrid() {
-        
+
         if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
             try {
                 float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
