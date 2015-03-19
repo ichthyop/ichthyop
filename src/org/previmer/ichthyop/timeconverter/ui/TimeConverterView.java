@@ -30,9 +30,6 @@ import org.previmer.ichthyop.calendar.InterannualCalendar;
  */
 public class TimeConverterView extends FrameView {
 
-    private Calendar calendar;
-    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-
     public TimeConverterView(SingleFrameApplication app) {
         super(app);
 
@@ -121,6 +118,7 @@ public class TimeConverterView extends FrameView {
 
     @Action
     public void convert() {
+        String origin = textFieldOrigin.getText().trim();
         String value = textFieldValue.getText().trim();
         String result = "Unable to convert " + value;
 
@@ -128,18 +126,28 @@ public class TimeConverterView extends FrameView {
             return;
         }
 
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+
         try {
+            calendar.setTime(dateFormat.parse(origin));
+            int year_o = calendar.get(Calendar.YEAR);
+            int month_o = calendar.get(Calendar.MONTH);
+            int day_o = calendar.get(Calendar.DAY_OF_MONTH);
+            int hour_o = calendar.get(Calendar.HOUR_OF_DAY);
+            int min_o = calendar.get(Calendar.MINUTE);
             calendar = radioButtonGregorian.isSelected()
-                    ? new InterannualCalendar(textFieldOrigin.getText(), dateFormat)
-                    : new Day360Calendar(textFieldOrigin.getText(), dateFormat);
+                    ? new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o)
+                    : new Day360Calendar(year_o, month_o, day_o, hour_o, min_o);
             btnConvert.getAction().setEnabled(true);
         } catch (ParseException ex) {
             Logger.getLogger(TimeConverterView.class.getName()).log(Level.SEVERE, null, ex);
-            result = "Error parsing origin date " + textFieldOrigin.getText();
+            result = "Error parsing origin date " + origin;
             btnConvert.getAction().setEnabled(false);
         }
 
         if (btnConvert.getAction().isEnabled()) {
+            dateFormat.setCalendar(calendar);
             if (value.split("/").length > 1) {
                 try {
                     calendar.setTime(dateFormat.parse(value));
@@ -150,7 +158,6 @@ public class TimeConverterView extends FrameView {
                 }
             } else {
                 try {
-                    dateFormat.setCalendar(calendar);
                     long seconds = Long.valueOf(value);
                     calendar.setTimeInMillis(seconds * 1000L);
                     result = dateFormat.format(calendar.getTime());

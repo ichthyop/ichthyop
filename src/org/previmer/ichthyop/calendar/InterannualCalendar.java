@@ -1,8 +1,6 @@
 package org.previmer.ichthyop.calendar;
 
 /** Import the abstract class Calendar */
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -58,6 +56,8 @@ public class InterannualCalendar extends Calendar {
      * @param year an int, the year origin
      * @param month an int, the month origin
      * @param day an int, the day origin
+     * @param hour an int, the hour origin
+     * @param minute an int, the minute origin
      */
     public InterannualCalendar(int year, int month, int day, int hour, int minute) {
 
@@ -72,22 +72,6 @@ public class InterannualCalendar extends Calendar {
         setTimeInMillis(0);
     }
 
-    public InterannualCalendar(String origin, SimpleDateFormat dateFormat) throws ParseException {
-
-        Calendar cld = new InterannualCalendar();
-        dateFormat.setCalendar(cld);
-        cld.setTime(dateFormat.parse(origin));
-        epoch_fields = new int[FIELD_COUNT];
-        fields = new int[FIELD_COUNT];
-        setEpoch(YEAR, cld.get(Calendar.YEAR));
-        setEpoch(MONTH, cld.get(Calendar.MONTH));
-        setEpoch(DAY_OF_MONTH, cld.get(Calendar.DAY_OF_MONTH));
-        setEpoch(HOUR_OF_DAY, cld.get(Calendar.HOUR_OF_DAY));
-        setEpoch(MINUTE, cld.get(Calendar.MINUTE));
-        setEpoch(SECOND, 0);
-        setTimeInMillis(0);
-    }
-
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -98,7 +82,7 @@ public class InterannualCalendar extends Calendar {
      * @param value an int, the value of the given field.
      * @see java.util.Calendar for details about the available fields.
      */
-    public void setEpoch(int field, int value) {
+    private void setEpoch(int field, int value) {
         epoch_fields[field] = value;
     }
 
@@ -108,7 +92,7 @@ public class InterannualCalendar extends Calendar {
      * @param millis a long, the time in millisecond
      * @return long, the floor of the quotient millis / (24 * 3600 * 1000)
      */
-    private static final long millisToDay(long millis) {
+    private static long millisToDay(long millis) {
         return (millis / ONE_DAY);
     }
 
@@ -118,13 +102,14 @@ public class InterannualCalendar extends Calendar {
      * @param day a long, the time in day
      * @return long the time in millisecond
      */
-    private static final long dayToMillis(long day) {
+    private static long dayToMillis(long day) {
         return day * ONE_DAY;
     }
 
     /**
      * Converts time as milliseconds to time field values.
      */
+    @Override
     protected void computeFields() {
         int rawYear, year, month, dayOfMonth, dayOfYear;
         boolean isLeap;
@@ -201,6 +186,7 @@ public class InterannualCalendar extends Calendar {
     /**
      * Converts time field values to milliseconds.
      */
+    @Override
     protected void computeTime() {
 
         int yearOn = fields[YEAR];
@@ -236,25 +222,31 @@ public class InterannualCalendar extends Calendar {
 //////////////////////////////////
 // Inherited methods not redefined
 //////////////////////////////////
+    @Override
     public int getGreatestMinimum(int field) {
         return 0;
     }
 
+    @Override
     public int getLeastMaximum(int field) {
         return 0;
     }
 
+    @Override
     public int getMaximum(int field) {
         return 0;
     }
 
+    @Override
     public int getMinimum(int field) {
         return 0;
     }
 
+    @Override
     public void add(int field, int amount) {
     }
 
+    @Override
     public void roll(int field, boolean up) {
     }
     //---------- End of class
