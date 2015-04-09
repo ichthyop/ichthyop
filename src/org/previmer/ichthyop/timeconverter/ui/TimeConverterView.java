@@ -158,7 +158,8 @@ public class TimeConverterView extends FrameView {
                 }
             } else {
                 try {
-                    long seconds = Long.valueOf(value);
+                    long seconds = Double.valueOf(value).longValue();
+                    value = String.valueOf(seconds);
                     calendar.setTimeInMillis(seconds * 1000L);
                     result = dateFormat.format(calendar.getTime());
                 } catch (NumberFormatException ex) {
