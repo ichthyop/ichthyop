@@ -1,49 +1,44 @@
 ====================
 ICHTHYOP readme file
 ================================
-http://www.previmer.org/ichthyop
+http://www.ichthyop.org
 
 Ichthtyop is an individual based model that simulates Lagrangian transport of particles.
 
-Copyright (c) Philippe VERLEY 2006-2011
+Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.1 (2011/1?/??)
+Release: 3.3alpha (2015/05/21) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r844
 
-Feedback & Bug reports: info@previmer.org
+Feedback & Bug reports: www.ichthyop.org/forum
+
+=============
+Alpha version
+
+This alpha version of Ichthyop gathers the latest developments and bug fixes since the previous release. It has not go through full testing yest and might be unstable. This alpha release will keep changing (new features and more bug fixing) until the developer consider it is feature complete and ready for a new release.
+No JAR (Java executable file) is provided for the alpha version, the source code is distributed as a Netbeans project.
+
+==========================
+Changes since Ichthyop 3.2
+
+Bug fixes:
+* Multi release events works in backward mode
+* NaN values for U and V velocities are handled with Mars2d
+* Zone display in Step 3 Mapper has been improved. A zone is now drawed cell by cell, as it is done in the preview. The approach has a few inconvinients though (i) when zones overlap the last one drawn will cover the other ones; (ii) the zone defined in the output NetCDF files prior to this commit will not be drawable anymore; (iii) the WMSMapper.java needs the Dataset to be initialized to be able to draw the zones. Which is fine if the user draw the zones just after running the simulation. It will be an issue when the mapping is down at an other time. Nonetheless the user can still load the corresponding configuration file and click on Preview to initialize the dataset.
+* Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
+
+New features:
+* Multithread option in Population.java can be set to TRUE. Experimental feature though, might not work satisfactorily yet.
+* New growth function SoleGrowthAction.java dlength = c1[stage] * Math.pow(temperature, c2[stage]) * dt_day. c1 and c2 are user defined and depend on user defined length stages
+* NemoDataset, new parameter read_var_w = true/false whether the W variable should be read or recalculated
+* Replaced ClimatoCalendar by Day360Calendar which takes into account an Origin of time (same parameter used for the Gregorian Calendar).
+* NemoDataset, added new function to reconstruct three-dimensional e3t field from e3t_0, e3t_ps and mbathy
 
 ===========
 Requirement
 
-Get latest Java installed, at least JRE 1.6 update 43 (1.7 recommended).
-
-For most users, Java is already installed and up-to-date. Skip this
-step and go to the start-up instructions.
-
-Latest version of JRE (1.7 recommended) can be download at http://www.java.com/en/download/manual.jsp
-
-=======
-Startup
-
-Double click on ichthyop-3.#.jar
-
-Or from a command line, go to the ichthyop/ folder and type the following:
-
-java -jar ichthyop-3.#.jar
-
-To avoid any heap memory problem, you'd rather type:
-
-java -Xms512m -Xmx1024m -jar ichthyop-3.#.jar
-
-If you work behind a proxy:
-
-java -jar -Dhttp.proxyHost=your.proxy.com -Dhttp.proxyPort=8080 ichthyop-3.2b.jar
-
-=========
-First Run
-
-Step 1 - Configuration > New
-Select one of the templates and save the configuration file.
-Step 2 - Simulation. Click "Preview" then "Run simulation".
+JDK 1.7
+Netbeans 8.02
 
 ===================
 License information
