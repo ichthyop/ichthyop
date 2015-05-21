@@ -29,7 +29,7 @@ public class Population extends ArrayList implements SetupListener {
     /**
      * Use multi-thread environment for running a step.
      */
-    private final boolean MULTITHREAD  = true;
+    private final boolean MULTITHREAD  = false;
     /**
      * The minimal number of particles for splitting the step in concurrent
      * pools of particles. Less than {@code THRESHOLD} particles, the simulation
