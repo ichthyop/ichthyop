@@ -113,6 +113,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         return UpdateManager.getInstance();
     }
 
+    @Override
     public void valueChanged(TreeSelectionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) templateTree.getLastSelectedPathComponent();
         if (node != null && node.isLeaf()) {
@@ -133,7 +134,6 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         //getLogger().info(resourceMap.getString("view.close.text"));
         try {
             getFrame().setVisible(false);
-            finalize();
         } catch (Throwable ex) {
         }
     }
@@ -193,6 +193,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         treeNode2 = new DefaultMutableTreeNode("Miscellaneous");
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.GENERIC);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OSCAR);
         treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
         templateTree.setModel(new DefaultTreeModel(treeNode1));
@@ -426,6 +428,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 String name = textFieldName.getText();
                 if (!verifyName(name)) {
@@ -467,8 +470,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private javax.swing.JTextField textFieldTemplate;
     // End of variables declaration//GEN-END:variables
     private File location = new File(getDefaultPath());
-    private ResourceMap resourceMap;
-    private JStatusBar statusBar = new JStatusBar();
+    private final ResourceMap resourceMap;
+    private final JStatusBar statusBar = new JStatusBar();
 
     private enum TEMPLATE {
 
@@ -480,15 +483,17 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         MARS3D,
         ROMS2D,
         ROMS3D,
+        ROMS3D_OPENDAP,
         OPA3D_NEMO,
         SYMPHONIE,
-        GENERIC;
+        GENERIC,
+        OSCAR;
         /* variables */
-        private String longName;
-        private String description;
-        private String filename;
-        private String cfgname;
-        private ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(NewConfigView.class);
+        private final String longName;
+        private final String description;
+        private final String filename;
+        private final String cfgname;
+        private final ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(NewConfigView.class);
 
         TEMPLATE() {
             longName = resourceMap.getString(name() + ".title");
@@ -515,7 +520,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             Calendar calendar = new GregorianCalendar();
             calendar.setTimeInMillis(System.currentTimeMillis());
             dtFormat.setCalendar(calendar);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(dtFormat.format(calendar.getTime()));
             sb.append("_");
             String username = System.getProperty("user.name");
