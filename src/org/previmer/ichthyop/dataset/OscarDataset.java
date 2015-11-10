@@ -99,6 +99,8 @@ public class OscarDataset extends AbstractDataset {
 
     private boolean opendap;
 
+    private double[] dlon, dlat;
+
     @Override
     void loadParameters() {
 
@@ -128,6 +130,25 @@ public class OscarDataset extends AbstractDataset {
         getDimNC();
         readLonLat();
         loadMask();
+
+        // Cell longitudinal dimension (metre)
+        dlon = new double[nlon];
+        for (int i = 0; i < nlon; i++) {
+            double lat1 = getLat(Math.max(i - 1, 0), 0);
+            double lat2 = getLat(Math.min(i + 1, nlon - 1), 0);
+            double lon1 = getLon(Math.max(i - 1, 0), 0);
+            double lon2 = getLon(Math.min(i + 1, nlon - 1), 0);
+            dlon[i] = 0.5d * DatasetUtil.geodesicDistance(lat1, lon1, lat2, lon2);
+        }
+        // Cell latitudinal dimension (metre)
+        dlat = new double[nlat];
+        for (int j = 0; j < nlat; j++) {
+            double lat1 = getLat(0, Math.max(j - 1, 0));
+            double lat2 = getLat(0, Math.min(j + 1, nlat - 1));
+            double lon1 = getLon(0, Math.max(j - 1, 0));
+            double lon2 = getLon(0, Math.min(j + 1, nlat - 1));
+            dlat[j] = 0.5d * DatasetUtil.geodesicDistance(lat1, lon1, lat2, lon2);
+        }
     }
 
     /**
@@ -235,12 +256,56 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        return 0.d;
+
+        double du = 0.d;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
+        double CO = 0.d;
+        double x;
+        for (int jj = 0; jj < n; jj++) {
+            for (int ii = 0; ii < n; ii++) {
+                double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
+                CO += co;
+                x = (1.d - x_euler) * u_tp0[j + jj][i + ii] + x_euler * u_tp1[j + jj][i + ii];
+                du += x * co / dlon[i + ii];
+            }
+        }
+
+        if (CO != 0) {
+            du /= CO;
+        }
+        return du;
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        return 0.d;
+        
+        double dv = 0.d;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
+        double CO = 0.d;
+        double x;
+        for (int jj = 0; jj < n; jj++) {
+            for (int ii = 0; ii < n; ii++) {
+                double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
+                CO += co;
+                x = (1.d - x_euler) * v_tp0[j + jj][i + ii] + x_euler * v_tp1[j + jj][i + ii];
+                dv += x * co / dlat[j + jj];
+            }
+        }
+
+        if (CO != 0) {
+            dv /= CO;
+        }
+        return dv;
     }
 
     @Override
@@ -307,20 +372,12 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public double getdxi(int j, int i) {
-        double lat1 = getLat(Math.max(i - 1, 0), j);
-        double lat2 = getLat(Math.min(i + 1, nlat - 1), j);
-        double lon1 = getLat(Math.max(i - 1, 0), j);
-        double lon2 = getLat(Math.min(i + 1, nlat - 1), j);
-        return 0.5d * DatasetUtil.geodesicDistance(lat1, lon1, lat2, lon2);
+        return dlon[i];
     }
 
     @Override
     public double getdeta(int j, int i) {
-        double lat1 = getLat(i, Math.max(j - 1, 0));
-        double lat2 = getLat(i, Math.min(j + 1, nlat - 1));
-        double lon1 = getLat(i, Math.max(j - 1, 0));
-        double lon2 = getLat(i, Math.min(j + 1, nlat - 1));
-        return 0.5d * DatasetUtil.geodesicDistance(lat1, lon1, lat2, lon2);
+        return dlat[j];
     }
 
     @Override
