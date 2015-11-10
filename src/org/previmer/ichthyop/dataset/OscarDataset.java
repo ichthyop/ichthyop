@@ -97,6 +97,8 @@ public class OscarDataset extends AbstractDataset {
 
     private NetcdfFile ncIn;
 
+    private boolean opendap;
+
     @Override
     void loadParameters() {
 
@@ -116,7 +118,13 @@ public class OscarDataset extends AbstractDataset {
         loadParameters();
         clearRequiredVariables();
         DatasetIO.setTimeField(strTime);
-        ncIn = DatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"), false);
+        if (getParameter("source").toLowerCase().contains("opendap")) {
+            opendap = true;
+            ncIn = DatasetIO.openURL(getParameter("opendap_url"));
+        } else {
+            opendap = false;
+            ncIn = DatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"), false);
+        }
         getDimNC();
         readLonLat();
         loadMask();
@@ -384,7 +392,17 @@ public class OscarDataset extends AbstractDataset {
         long t0 = getSimulationManager().getTimeManager().get_tO();
         // Time is expressed as number of days since origin in Oscar
         t0 /= (3600 * 24);
-        ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
+        if (!opendap) {
+            ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
+        } else {
+            Array timeArr = ncIn.findVariable(strTime).read();
+            int ntime = timeArr.getShape()[0];
+            long time0 = timeArr.getLong(timeArr.getIndex().set(0));
+            long timeN = timeArr.getLong(timeArr.getIndex().set(ntime - 1));
+            if (t0 < time0 || t0 > timeN) {
+                throw new IndexOutOfBoundsException("Time value " + t0 + " not contained among dataset.");
+            }
+        }
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
         rank = findCurrentRank(t0);
         time_tp1 = getSimulationManager().getTimeManager().get_tO();
@@ -495,12 +513,16 @@ public class OscarDataset extends AbstractDataset {
         v_tp0 = v_tp1;
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            try {
-                ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
-            } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
+            if (opendap) {
+                throw new IndexOutOfBoundsException("Time out of dataset range");
+            } else {
+                try {
+                    ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
+                } catch (IOException ex) {
+                    getLogger().log(Level.SEVERE, null, ex);
+                }
+                rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
             }
-            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
         setAllFieldsTp1AtTime(rank);
     }
