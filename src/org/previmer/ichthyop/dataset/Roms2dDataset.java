@@ -11,6 +11,7 @@ import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import static org.previmer.ichthyop.io.IOTools.isDirectory;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -157,18 +158,34 @@ public class Roms2dDataset extends RomsCommon {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
+        Array arr;
+        Index index;
 
         try {
-            u_tp1 = (float[][]) ncIn.findVariable(strU).read(origin, new int[]{1, ny, (nx - 1)}).reduce().copyToNDJavaArray();
-
+            arr = ncIn.findVariable(strU).read(origin, new int[]{1, ny, (nx - 1)}).reduce();
+            u_tp1 = new float[ny][nx - 1];
+            index = arr.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx - 1; i++) {
+                    index.set(j, i);
+                    u_tp1[j][i] = arr.getFloat(index);
+                }
+            }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
-            v_tp1 = (float[][]) ncIn.findVariable(strV).read(origin,
-                    new int[]{1, (ny - 1), nx}).reduce().copyToNDJavaArray();
+            arr = ncIn.findVariable(strV).read(origin, new int[]{1, (ny - 1), nx}).reduce();
+            v_tp1 = new float[ny - 1][nx];
+            index = arr.getIndex();
+            for (int j = 0; j < ny - 1; j++) {
+                for (int i = 0; i < nx; i++) {
+                    index.set(j, i);
+                    v_tp1[j][i] = arr.getFloat(index);
+                }
+            }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());

@@ -17,8 +17,6 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
-import static org.previmer.ichthyop.dataset.RomsCommon.ncIn;
-import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -31,7 +29,7 @@ import ucar.nc2.Variable;
  * @author pverley
  */
 abstract public class Roms3dCommon extends RomsCommon {
-    
+
     /**
      * Vertical grid dimension
      */
@@ -127,7 +125,7 @@ abstract public class Roms3dCommon extends RomsCommon {
             Array arr_cs_r = ncIn.findVariable(strCs_r).read();
             double[] Cs_r = new double[arr_cs_r.getShape()[0]];
             for (int k = 0; k < Cs_r.length - 1; k++) {
-                Cs_r[k] = arr_cs_r.getFloat(k);
+                Cs_r[k] = arr_cs_r.getDouble(k);
             }
             return Cs_r;
         } else {
@@ -150,7 +148,7 @@ abstract public class Roms3dCommon extends RomsCommon {
             Array arr_cs_w = ncIn.findVariable(strCs_w).read();
             double[] Cs_w = new double[arr_cs_w.getShape()[0]];
             for (int k = 0; k < Cs_w.length - 1; k++) {
-                Cs_w[k] = arr_cs_w.getFloat(k);
+                Cs_w[k] = arr_cs_w.getDouble(k);
             }
             return Cs_w;
         } else {
@@ -312,15 +310,11 @@ abstract public class Roms3dCommon extends RomsCommon {
             throw ioex;
         }
 
-        if (arrZeta.getElementType() == float.class) {
-            zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
-        } else {
-            zeta_tp0 = new float[ny][nx];
-            index = arrZeta.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    zeta_tp0[j][i] = arrZeta.getFloat(index.set(j, i));
-                }
+        zeta_tp0 = new float[ny][nx];
+        index = arrZeta.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                zeta_tp0[j][i] = arrZeta.getFloat(index.set(j, i));
             }
         }
         zeta_tp1 = zeta_tp0;
@@ -521,23 +515,41 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-        
+
         getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
+        Array arr;
+        Index index;
 
         try {
-            u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
-
+            arr = ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce();
+            u_tp1 = new float[nz][ny][nx - 1];
+            index = arr.getIndex();
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx - 1; i++) {
+                        u_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
+                    }
+                }
+            }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
-            v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin,
-                    new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
+            arr = ncIn.findVariable(strV).read(origin, new int[]{1, nz, (ny - 1), nx}).reduce();
+            v_tp1 = new float[nz][ny - 1][nx];
+            index = arr.getIndex();
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny - 1; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        v_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
+                    }
+                }
+            }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -554,11 +566,15 @@ abstract public class Roms3dCommon extends RomsCommon {
             throw ioex;
         }
 
-
         try {
-            zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(
-                    new int[]{rank, jpo, ipo},
-                    new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+            arr = ncIn.findVariable(strZeta).read(new int[]{rank, jpo, ipo}, new int[]{1, ny, nx}).reduce();
+            index = arr.getIndex();
+            zeta_tp1 = new float[ny][nx];
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    zeta_tp1[j][i] = arr.getFloat(index.set(j, i));
+                }
+            }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset ocean free surface elevation. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -694,7 +710,7 @@ abstract public class Roms3dCommon extends RomsCommon {
                 }
             }
         }
-        
+
         return z_w_tmp;
     }
 
@@ -730,5 +746,5 @@ abstract public class Roms3dCommon extends RomsCommon {
 
         return variable.read(origin, shape).reduce();
     }
-    
+
 }

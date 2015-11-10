@@ -267,59 +267,41 @@ abstract class RomsCommon extends AbstractDataset {
         }
         ncGrid.close();
 
-        if (arrLon.getElementType() == double.class) {
-            lonRho = (double[][]) arrLon.copyToNDJavaArray();
-            latRho = (double[][]) arrLat.copyToNDJavaArray();
-        } else {
-            lonRho = new double[ny][nx];
-            latRho = new double[ny][nx];
-            index = arrLon.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    index.set(j, i);
-                    lonRho[j][i] = arrLon.getDouble(index);
-                    latRho[j][i] = arrLat.getDouble(index);
-                }
+        lonRho = new double[ny][nx];
+        latRho = new double[ny][nx];
+        index = arrLon.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j, i);
+                lonRho[j][i] = arrLon.getDouble(index);
+                latRho[j][i] = arrLat.getDouble(index);
             }
         }
 
-        if (arrMask.getElementType() != byte.class) {
-            maskRho = new byte[ny][nx];
-            index = arrMask.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    maskRho[j][i] = arrMask.getByte(index.set(j, i));
-                }
-            }
-        } else {
-            maskRho = (byte[][]) arrMask.copyToNDJavaArray();
-        }
-
-        if (arrPm.getElementType() == double.class) {
-            pm = (double[][]) arrPm.copyToNDJavaArray();
-            pn = (double[][]) arrPn.copyToNDJavaArray();
-        } else {
-            pm = new double[ny][nx];
-            pn = new double[ny][nx];
-            index = arrPm.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    index.set(j, i);
-                    pm[j][i] = arrPm.getDouble(index);
-                    pn[j][i] = arrPn.getDouble(index);
-                }
+        maskRho = new byte[ny][nx];
+        index = arrMask.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                maskRho[j][i] = arrMask.getByte(index.set(j, i));
             }
         }
 
-        if (arrH.getElementType() == double.class) {
-            hRho = (double[][]) arrH.copyToNDJavaArray();
-        } else {
-            hRho = new double[ny][nx];
-            index = arrH.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    hRho[j][i] = arrH.getDouble(index.set(j, i));
-                }
+        pm = new double[ny][nx];
+        pn = new double[ny][nx];
+        index = arrPm.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j, i);
+                pm[j][i] = arrPm.getDouble(index);
+                pn[j][i] = arrPn.getDouble(index);
+            }
+        }
+
+        hRho = new double[ny][nx];
+        index = arrH.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                hRho[j][i] = arrH.getDouble(index.set(j, i));
             }
         }
     }
@@ -576,7 +558,7 @@ abstract class RomsCommon extends AbstractDataset {
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
-    
+
     void readTimeLength() throws IOException {
         try {
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
@@ -610,19 +592,14 @@ abstract class RomsCommon extends AbstractDataset {
         }
         ncGrid.close();
 
-        if (arrLon.getElementType() == double.class) {
-            lonRho = (double[][]) arrLon.copyToNDJavaArray();
-            latRho = (double[][]) arrLat.copyToNDJavaArray();
-        } else {
-            lonRho = new double[ny][nx];
-            latRho = new double[ny][nx];
-            Index index = arrLon.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    index.set(j, i);
-                    lonRho[j][i] = arrLon.getDouble(index);
-                    latRho[j][i] = arrLat.getDouble(index);
-                }
+        lonRho = new double[ny][nx];
+        latRho = new double[ny][nx];
+        Index index = arrLon.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j, i);
+                lonRho[j][i] = arrLon.getDouble(index);
+                latRho[j][i] = arrLat.getDouble(index);
             }
         }
     }
