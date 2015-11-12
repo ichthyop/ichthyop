@@ -49,7 +49,7 @@
             <parameter hidden="true">
                 <key>time_origin</key>
                 <long_name>Origin of time</long_name>
-                <value>year 1900 month 01 day 01 at 00:00</value>
+                <value>year 0000 month 01 day 01 at 00:00</value>
                 <format>date</format>
                 <default>year 1900 month 01 day 01 at 00:00</default>
                 <description>This parameter comes with Gregorian type of calendar only. For hydrodynamic models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the hydrodynamic dataset.</description>
@@ -470,6 +470,54 @@
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.action.BuoyancyAction</value>
                 <default>org.previmer.ichthyop.action.BuoyancyAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.swimming</key>
+        <description>Block of options that control the random swimming process. Swimming velocities are provided in a CSV file as an age function of the particle.</description>
+        <tree_path>Advanced/Transport/Swimming</tree_path>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>velocity_file</key>
+                <long_name>Swimming velocity file</long_name>
+                <value />
+                <format>textfile</format>
+                <default />
+                <template>velocity_function.csv</template>
+                <description>Particle swimming velocity as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Velocity(m/s).</description>
+            </parameter>
+            <parameter>
+                <key>velocity_type</key>
+                <long_name>Swiming velocity type</long_name>
+                <value>cruising</value>
+                <default>cruising</default>
+                <format>combo</format>
+                <accepted>cruising</accepted>
+                <accepted>maximal</accepted>
+                <description>It controls the meaning of the swimming velocity provided in the CSV file. CRUISING means that the particles will swim at the velocity defined in the CSV file. MAXIMAL means that the particles will swim with random velocity between zero and maximal velocity.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.SwimmingAction</value>
+                <default>org.previmer.ichthyop.action.SwimmingAction</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
