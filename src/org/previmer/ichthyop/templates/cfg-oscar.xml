@@ -129,6 +129,16 @@
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for OSCAR model</description>
         <parameters>
             <parameter>
+                <key>source</key>
+                <long_name>Source of the dataset</long_name>
+                <value>OpenDAP URL</value>
+                <format>combo</format>
+                <accepted>Local NetCDF files</accepted>
+                <accepted>OpenDAP URL</accepted>
+                <default>OpenDAP URL</default>
+                <description>Select whether the Oscar dataset must be read from local NetCDF files (parameters Input path and File filter) or remote OpenDAP URL (parameter OpenDAP URL)</description>
+            </parameter>
+            <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
                 <value>input</value>
@@ -142,6 +152,13 @@
                 <value>*.nc</value>
                 <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>opendap_url</key>
+                <long_name>OpenDAP URL</long_name>
+                <value>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/FOR_LAS_ALL_OSCAR_L4_OC_third-deg_FOR_LAS.nc</value>
+                <default>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/FOR_LAS_ALL_OSCAR_L4_OC_third-deg_FOR_LAS.nc</default>
+                <description>OpenDAP URL of the OSCAR dataset. You can check the validity of the given URL by typing it in the URL adress bar of your web browser and appending ".html" at the end of the URL.</description>
             </parameter>
             <parameter>
                 <key>field_dim_lat</key>

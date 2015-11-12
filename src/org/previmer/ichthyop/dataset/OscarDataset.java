@@ -134,20 +134,16 @@ public class OscarDataset extends AbstractDataset {
         // Cell longitudinal dimension (metre)
         dlon = new double[nlon];
         for (int i = 0; i < nlon; i++) {
-            double lat1 = getLat(Math.max(i - 1, 0), 0);
-            double lat2 = getLat(Math.min(i + 1, nlon - 1), 0);
             double lon1 = getLon(Math.max(i - 1, 0), 0);
             double lon2 = getLon(Math.min(i + 1, nlon - 1), 0);
-            dlon[i] = 0.5d * DatasetUtil.geodesicDistance(lat1, lon1, lat2, lon2);
+            dlon[i] = 0.5d * DatasetUtil.geodesicDistance(0, lon1, 0, lon2);
         }
         // Cell latitudinal dimension (metre)
         dlat = new double[nlat];
         for (int j = 0; j < nlat; j++) {
             double lat1 = getLat(0, Math.max(j - 1, 0));
             double lat2 = getLat(0, Math.min(j + 1, nlat - 1));
-            double lon1 = getLon(0, Math.max(j - 1, 0));
-            double lon2 = getLon(0, Math.min(j + 1, nlat - 1));
-            dlat[j] = 0.5d * DatasetUtil.geodesicDistance(lat1, lon1, lat2, lon2);
+            dlat[j] = 0.5d * DatasetUtil.geodesicDistance(lat1, 0, lat2, 0);
         }
     }
 
@@ -182,7 +178,7 @@ public class OscarDataset extends AbstractDataset {
                 break;
             }
         }
-
+        
         return new double[]{x, y};
     }
 
