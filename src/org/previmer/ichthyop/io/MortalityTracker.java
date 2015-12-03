@@ -27,7 +27,7 @@ import ucar.nc2.Attribute;
 public class MortalityTracker extends IntegerTracker {
 
     @Override
-    void addRuntimeAttributes() {
+    public void addRuntimeAttributes() {
         for (ParticleMortality cause : ParticleMortality.values()) {
             addAttribute(new Attribute(cause.toString(), cause.getCode()));
         }

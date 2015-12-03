@@ -381,25 +381,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         trackers.removeAll(errTrackers);
     }
 
-    /**
-     * Adds the specified variable to the NetCDF file.
-     *
-     * @param field a Field, the variable to be added in the file.
-     */
-    private void addVar2NcOut(AbstractTracker tracker) {
-
-        ncOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
-        try {
-            if (tracker.getAttributes() != null) {
-                for (Attribute attribute : tracker.getAttributes()) {
-                    ncOut.addVariableAttribute(tracker.getName(), attribute);
-                }
-            }
-        } catch (Exception ex) {
-            // do nothing, attributes have minor importance
-        }
-    }
-
     @Override
     public void lastStepOccurred(LastStepEvent e) {
         if (!e.isInterrupted()) {
@@ -442,7 +423,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         for (AbstractTracker tracker : trackers) {
             try {
                 tracker.init();
-                addVar2NcOut(tracker);
+                ncOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
             } catch (Exception ex) {
                 errTrackers.add(tracker);
                 getLogger().log(Level.WARNING, "Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
@@ -470,6 +451,20 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
          * requires that dataset has been initialized first.
          */
         addZones();
+
+        // Add attributes
+        for (AbstractTracker tracker : trackers) {
+            tracker.addRuntimeAttributes();
+            try {
+                if (tracker.getAttributes() != null) {
+                    for (Attribute attribute : tracker.getAttributes()) {
+                        ncOut.addVariableAttribute(tracker.getName(), attribute);
+                    }
+                }
+            } catch (Exception ex) {
+                // do nothing, attributes have minor importance
+            }
+        }
 
         /* add listeners */
         getSimulationManager().getTimeManager().addNextStepListener(this);

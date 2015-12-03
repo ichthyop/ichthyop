@@ -50,7 +50,7 @@ public class TimeTracker extends AbstractTracker {
     }
     
     @Override
-    void addRuntimeAttributes() {
+    public void addRuntimeAttributes() {
         // no runtime attribute
     }
 }

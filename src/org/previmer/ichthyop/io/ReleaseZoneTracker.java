@@ -16,10 +16,6 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
@@ -28,7 +24,6 @@ import org.previmer.ichthyop.particle.ZoneParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
-import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 
 /**
@@ -37,8 +32,11 @@ import ucar.nc2.Attribute;
  */
 public class ReleaseZoneTracker extends AbstractTracker {
 
+    private int nPopTm1;
+
     public ReleaseZoneTracker() {
         super(DataType.INT);
+        nPopTm1 = 0;
     }
 
     @Override
@@ -48,11 +46,16 @@ public class ReleaseZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayInt.D1(getNParticle());
+        Array array = new ArrayInt.D1(getNParticle());
+        // Particle not released yet set to -99
+        for (int i = 0; i < getNParticle(); i++) {
+            array.setInt(i, -99);
+        }
+        return array;
     }
 
     @Override
-    void addRuntimeAttributes() {
+    public void addRuntimeAttributes() {
 
         List<Zone> zones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE);
         if (null != zones) {
@@ -60,21 +63,31 @@ public class ReleaseZoneTracker extends AbstractTracker {
                 addAttribute(new Attribute("release_zone " + zone.getIndex(), zone.getKey()));
             }
         }
+        // Particle not released yet set to -99
+        addAttribute(new Attribute("not_released_yet", -99));
     }
 
     @Override
     public void track() {
 
-        IParticle particle;
-        ZoneParticleLayer zparticle;
-        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        while (iter.hasNext()) {
-            particle = iter.next();
-            zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);
+        int nNow = getSimulationManager().getSimulation().getPopulation().size();
+        // Only write release zone when particle is released
+        for (int i = nPopTm1; i < nNow; i++) {
+            IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
+            ZoneParticleLayer zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);
             getArray().setInt(getIndex().set(particle.getIndex()), zparticle.getNumZone(TypeZone.RELEASE));
         }
+        nPopTm1 = nNow;
 
-        // The variable is only written once, at first time step
-        disable();
+        // Disable variable when all particles have been released
+        if (nPopTm1 == getNParticle()) {
+            disable();
+        }
+    }
+    
+    @Override
+    public int[] origin(int index_record) {
+        // No time dimension, only drifter dimension that starts at zero
+        return new int[] {0};
     }
 }

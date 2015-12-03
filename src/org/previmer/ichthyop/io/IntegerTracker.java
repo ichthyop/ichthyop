@@ -61,7 +61,7 @@ public abstract class IntegerTracker extends AbstractTracker {
     }
     
     @Override
-    void addRuntimeAttributes() {
+    public void addRuntimeAttributes() {
         // no runtime atributes
     }
 }

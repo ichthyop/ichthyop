@@ -34,7 +34,7 @@ public abstract class AbstractTracker extends SimulationManagerAccessor {
 
     abstract Array createArray();
 
-    abstract void addRuntimeAttributes();
+    public abstract void addRuntimeAttributes();
 
     public abstract void track();
 

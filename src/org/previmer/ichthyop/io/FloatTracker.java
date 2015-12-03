@@ -51,7 +51,7 @@ public abstract class FloatTracker extends AbstractTracker {
     }
     
     @Override
-    void addRuntimeAttributes() {
+    public void addRuntimeAttributes() {
         // no runtime attribute
     }
     

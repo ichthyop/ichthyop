@@ -31,7 +31,7 @@ import ucar.nc2.Dimension;
 
 /**
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author P. VERLEY (philippe.verley@ird.fr)
  */
 public class ZoneTracker extends AbstractTracker {
 
@@ -48,7 +48,14 @@ public class ZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayInt.D3(1, getNParticle(), TypeZone.values().length);
+        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), TypeZone.values().length);
+        // Initialises zone array with -99
+        for (int iZone = 0; iZone < TypeZone.values().length; iZone++) {
+            for (int iP = 0; iP < getNParticle(); iP++) {
+                array.set(0, iP, iZone, -99);
+            }
+        }
+        return array;
     }
 
     @Override
@@ -68,7 +75,7 @@ public class ZoneTracker extends AbstractTracker {
     }
 
     @Override
-    void addRuntimeAttributes() {
+    public void addRuntimeAttributes() {
 
         for (TypeZone type : TypeZone.values()) {
             addAttribute(new Attribute("type_zone " + type.getCode(), type.toString()));
@@ -81,5 +88,9 @@ public class ZoneTracker extends AbstractTracker {
                 addAttribute(new Attribute(type.toString() + "_zone", "none for this run"));
             }
         }
+        // Particle not released yet set to -99
+        addAttribute(new Attribute("not_released_yet", -99));
+        // Particle out of zone set to -1
+        addAttribute(new Attribute("out_of_zone", -1));
     }
 }
