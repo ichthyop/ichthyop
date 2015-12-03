@@ -384,6 +384,54 @@
         </parameters>
     </block>
     <block type="action">
+        <key>action.swimming</key>
+        <description>Block of options that control the random swimming process. Swimming velocities are provided in a CSV file as an age function of the particle.</description>
+        <tree_path>Advanced/Transport/Swimming</tree_path>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>velocity_file</key>
+                <long_name>Swimming velocity file</long_name>
+                <value />
+                <format>textfile</format>
+                <default />
+                <template>velocity_function.csv</template>
+                <description>Particle swimming velocity as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Velocity(m/s).</description>
+            </parameter>
+            <parameter>
+                <key>velocity_type</key>
+                <long_name>Swiming velocity type</long_name>
+                <value>cruising</value>
+                <default>cruising</default>
+                <format>combo</format>
+                <accepted>cruising</accepted>
+                <accepted>maximal</accepted>
+                <description>It controls the meaning of the swimming velocity provided in the CSV file. CRUISING means that the particles will swim at the velocity defined in the CSV file. MAXIMAL means that the particles will swim with random velocity between zero and maximal velocity.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.SwimmingAction</value>
+                <default>org.previmer.ichthyop.action.SwimmingAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
         <key>action.hdisp</key>
         <description>Block of options that control the horizontal dispersion process. Horizontal dispersion has been implemented following Peliz et al. (2007)</description>
         <tree_path>Advanced/Transport/Horizontal dispersion</tree_path>
