@@ -7,8 +7,8 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.3alpha (2015/05/21) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r844
+Release: 3.3alpha (2015/12/16) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r857
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
@@ -28,6 +28,7 @@ Bug fixes:
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* Vertical migration: user can define depth at day and depth at night as functions of age, provided in CSV files.
 * Multithread option in Population.java can be set to TRUE. Experimental feature though, might not work satisfactorily yet.
 * New growth function SoleGrowthAction.java dlength = c1[stage] * Math.pow(temperature, c2[stage]) * dt_day. c1 and c2 are user defined and depend on user defined length stages
 * NemoDataset, new parameter read_var_w = true/false whether the W variable should be read or recalculated
