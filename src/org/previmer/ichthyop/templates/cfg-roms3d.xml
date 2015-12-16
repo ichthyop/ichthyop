@@ -551,12 +551,30 @@
                 <description>Set the depth [meter] of the particle during daytime. Daytime period starts at sunrise and ends at sunset. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
             </parameter>
             <parameter>
+                <key>daytime_depth_file</key>
+                <long_name>Depth at daytime as function of age</long_name>
+                <value />
+                <default>depth_day.csv</default>
+                <format>textfile</format>
+                <template>depth_function.csv</template>
+                <description>Depth at day time as a function of age. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Depth(metre). Depth is negative number. If this parameter is left void, ichthyop assumes constant daytime depth, defined by parameter "Depth at daytime".</description>
+            </parameter>
+            <parameter>
                 <key>nighttime_depth</key>
                 <long_name>Depth at nighttime [meter]</long_name>
                 <value>-10</value>
                 <default>-10</default>
                 <format>float</format>
                 <description>Set the depth [meter] of the particle during nighttime. Nighttime. period starts at sunset and ends at sunrise. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
+            </parameter>
+            <parameter>
+                <key>nighttime_depth_file</key>
+                <long_name>Depth at nighttime as function of age</long_name>
+                <value />
+                <default>depth_night.csv</default>
+                <format>textfile</format>
+                <template>depth_function.csv</template>
+                <description>Depth at night as a function of age. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Depth(metre). Depth is negative number. If this parameter is left void, ichthyop assumes constant nighttime depth, defined by parameter "Depth at nighttime".</description>
             </parameter>
             <parameter>
                 <key>sunrise</key>

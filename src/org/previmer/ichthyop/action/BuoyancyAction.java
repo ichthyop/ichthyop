@@ -90,14 +90,8 @@ public class BuoyancyAction extends AbstractAction {
         /*
          * Check whether there is a density CSV file
          */
-        String density_file;
-        try {
-            density_file = getParameter("density_file");
-        } catch (Exception ex) {
-            density_file = null;
-        }
-        if (null != density_file && !density_file.isEmpty()) {
-            String pathname = IOTools.resolveFile(density_file);
+        if (!isNull("density_file")) {
+            String pathname = IOTools.resolveFile(getParameter("density_file"));
             File f = new File(pathname);
             if (!f.isFile()) {
                 throw new FileNotFoundException("Density file " + pathname + " not found.");

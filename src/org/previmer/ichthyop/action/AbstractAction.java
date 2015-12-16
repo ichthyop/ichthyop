@@ -34,6 +34,25 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
         return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
     }
     
+    /**
+     * Check whether parameter 'key' has 'null' value. The function returns
+     * {@code true} in several cases: the parameter does not exist, the value of
+     * the parameter is empty or the value of the parameter is set to "null".
+     *
+     * @param key, the key of the parameter
+     * @return {@code true} if the parameter is either null, empty or does not
+     * exist
+     */
+    public boolean isNull(String key) {
+        String value;
+        try {
+            value = getParameter(key).trim();
+        } catch (Exception ex) {
+            return true;
+        }
+        return (null == value) || value.isEmpty() ||  value.equalsIgnoreCase("null");
+    }
+    
     public String[] getListParameter(String key) {
         return getSimulationManager().getParameterManager().getListParameter(BlockType.ACTION, actionKey, key);
     }
