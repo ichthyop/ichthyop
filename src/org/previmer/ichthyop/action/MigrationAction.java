@@ -123,7 +123,6 @@ public class MigrationAction extends AbstractAction {
                 String[] line = lines.get(i + 1);
                 agesDepthDay[i] = Float.valueOf(line[0]) * 24.f * 3600.f;
                 depthsDay[i] = Float.valueOf(line[1]);
-                System.out.println("age " + agesDepthDay[i] + " depth " + depthsDay[i]);
             }
         } else {
             // Constant daytime depth if no CSV file is provided
