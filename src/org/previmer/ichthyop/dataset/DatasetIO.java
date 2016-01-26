@@ -33,9 +33,11 @@ public class DatasetIO extends SimulationManagerAccessor {
      */
     private static int indexFile;
     /**
-     * 
+     *
      */
     private static String strTime;
+
+    public static boolean skipSeconds = true;
 
     static void setTimeField(String timeField) {
         strTime = timeField;
@@ -122,9 +124,12 @@ public class DatasetIO extends SimulationManagerAccessor {
         filename = listInputFiles.get(index);
         nc = NetcdfDataset.openDataset(filename);
         timeArr = nc.findVariable(strTime).read();
-        time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-        time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                timeArr.getShape()[0] - 1)));
+        time_r0 = skipSeconds
+                ? DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)))
+                : timeArr.getLong(timeArr.getIndex().set(0));
+        time_rf = skipSeconds
+                ? DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)))
+                : timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1));
         nc.close();
 
         return (time >= time_r0 && time < time_rf);
@@ -142,8 +147,9 @@ public class DatasetIO extends SimulationManagerAccessor {
                 filename = listInputFiles.get(index + i);
                 nc = NetcdfDataset.openFile(filename, null);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds(
-                        timeArr.getLong(timeArr.getIndex().set(0)));
+                time_nc[i] = skipSeconds
+                        ? DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)))
+                        : timeArr.getLong(timeArr.getIndex().set(0));
                 nc.close();
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
@@ -184,13 +190,15 @@ public class DatasetIO extends SimulationManagerAccessor {
 
     /**
      * Loads the NetCDF dataset from the specified filename.
-     * @param opendapURL a String that can be a local pathname or an OPeNDAP URL.
+     *
+     * @param opendapURL a String that can be a local pathname or an OPeNDAP
+     * URL.
      * @throws IOException
      */
     static NetcdfFile openURL(String opendapURL) throws IOException {
         NetcdfFile ncIn;
         try {
-            getLogger().info("Opening remote "+opendapURL+" Please wait...");
+            getLogger().info("Opening remote " + opendapURL + " Please wait...");
             ncIn = NetcdfDataset.openDataset(opendapURL);
             getLogger().log(Level.INFO, "'{'Dataset'}' Open remote {0}", opendapURL);
             return ncIn;
@@ -213,8 +221,12 @@ public class DatasetIO extends SimulationManagerAccessor {
             throw ioex;
         }
         int ntime = timeArr.getShape()[0];
-        long time0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-        long timeN = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1)));
+        long time0 = skipSeconds
+                ? DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)))
+                : timeArr.getLong(timeArr.getIndex().set(0));
+        long timeN = skipSeconds
+                ? DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1)))
+                : timeArr.getLong(timeArr.getIndex().set(ntime - 1));
         if (time < time0 || time > timeN) {
             StringBuilder msg = new StringBuilder();
             msg.append("{Dataset} Time value ");

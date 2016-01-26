@@ -120,6 +120,7 @@ public class OscarDataset extends AbstractDataset {
         loadParameters();
         clearRequiredVariables();
         DatasetIO.setTimeField(strTime);
+        DatasetIO.skipSeconds = false;
         if (getParameter("source").toLowerCase().contains("opendap")) {
             opendap = true;
             ncIn = DatasetIO.openURL(getParameter("opendap_url"));
@@ -164,7 +165,7 @@ public class OscarDataset extends AbstractDataset {
         // latitude to y
         double y = 0.d;
         for (int j = 0; j < nlat - 1; j++) {
-            if (lat <= latitude[j] && lat > latitude[j + 1]) {
+            if (lat >= latitude[j] && lat < latitude[j + 1]) {
                 y = j + (lat - latitude[j]) / (latitude[j + 1] - latitude[j]);
                 break;
             }
@@ -178,49 +179,41 @@ public class OscarDataset extends AbstractDataset {
                 break;
             }
         }
-        
+
         return new double[]{x, y};
     }
 
-    private void loadMask() {
+    private void loadMask() throws IOException, InvalidRangeException {
 
         water = new boolean[nlat][nlon];
-        try {
-            // There is no mask variable in OSCAR.
-            // Must be extracted from U or V velocity
-            Array arr = ncIn.findVariable(strU).read(new int[]{0, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce();
-            Index index = arr.getIndex();
-            for (int i = 0; i < nlon; i++) {
-                for (int j = 0; j < nlat; j++) {
-                    water[j][i] = !Float.isNaN(arr.getFloat(index.set(j, i)));
-                }
+        // There is no mask variable in OSCAR.
+        // Must be extracted from U or V velocity
+        Array arr = ncIn.findVariable(strU).read(new int[]{0, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce();
+        Index index = arr.getIndex();
+        for (int i = 0; i < nlon; i++) {
+            for (int j = 0; j < nlat; j++) {
+                water[j][i] = !Float.isNaN(arr.getFloat(index.set(j, i)));
             }
-        } catch (IOException | InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
-    private void readLonLat() {
+    private void readLonLat() throws IOException {
 
         Array arr;
         Index index;
-        try {
-            // longitude
-            arr = ncIn.findVariable(strLon).read();
-            index = arr.getIndex();
-            longitude = new double[nlon];
-            for (int i = 0; i < nlon; i++) {
-                longitude[i] = arr.getDouble(index.set(i));
-            }
-            // latitude
-            arr = ncIn.findVariable(strLat).read();
-            index = arr.getIndex();
-            latitude = new double[nlat];
-            for (int j = 0; j < nlat; j++) {
-                latitude[j] = arr.getDouble(index.set(j));
-            }
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+        // longitude
+        arr = ncIn.findVariable(strLon).read();
+        index = arr.getIndex();
+        longitude = new double[nlon];
+        for (int i = 0; i < nlon; i++) {
+            longitude[i] = arr.getDouble(index.set(i));
+        }
+        // latitude (flip latitude in order to have cell(0, 0) bottom left
+        arr = ncIn.findVariable(strLat).read().flip(0);
+        index = arr.getIndex();
+        latitude = new double[nlat];
+        for (int j = 0; j < nlat; j++) {
+            latitude[j] = arr.getDouble(index.set(j));
         }
     }
 
@@ -279,7 +272,7 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        
+
         double dv = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
@@ -383,9 +376,9 @@ public class OscarDataset extends AbstractDataset {
         setAllFieldsTp1AtTime(rank);
     }
 
-    private void setAllFieldsTp1AtTime(int rank) {
+    private void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        getLogger().info("Reading NetCDF variables...");
+        getLogger().log(Level.INFO, "Reading NetCDF variables from {0} at rank {1}", new Object[]{ncIn.getLocation(), rank});
 
         int[] origin = new int[]{rank, 0, 0, 0};
         int[] shape = new int[]{1, 1, nlat, nlon};
@@ -393,51 +386,38 @@ public class OscarDataset extends AbstractDataset {
         Array arr;
         Index index;
 
-        try {
-            arr = ncIn.findVariable(strU).read(origin, shape).reduce();
-            index = arr.getIndex();
-            u_tp1 = new double[nlat][nlon];
-            for (int j = 0; j < nlat; j++) {
-                for (int i = 0; i < nlon; i++) {
-                    u_tp1[j][i] = arr.getDouble(index.set(j, i));
-                }
+        // Flip(0) for flipping latitude axis
+        arr = ncIn.findVariable(strU).read(origin, shape).reduce().flip(0);
+        index = arr.getIndex();
+        u_tp1 = new double[nlat][nlon];
+        for (int j = 0; j < nlat; j++) {
+            for (int i = 0; i < nlon; i++) {
+                u_tp1[j][i] = arr.getDouble(index.set(j, i));
             }
-        } catch (IOException | InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
         }
 
-        try {
-            arr = ncIn.findVariable(strV).read(origin, shape).reduce();
-            index = arr.getIndex();
-            v_tp1 = new double[nlat][nlon];
-            for (int j = 0; j < nlat; j++) {
-                for (int i = 0; i < nlon; i++) {
-                    v_tp1[j][i] = arr.getDouble(index.set(j, i));
-                }
+        // Flip(0) for flipping latitude axis
+        arr = ncIn.findVariable(strV).read(origin, shape).reduce().flip(0);
+        index = arr.getIndex();
+        v_tp1 = new double[nlat][nlon];
+        for (int j = 0; j < nlat; j++) {
+            for (int i = 0; i < nlon; i++) {
+                v_tp1[j][i] = arr.getDouble(index.set(j, i));
             }
-        } catch (IOException | InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
         }
 
         Array xTimeTp1;
-        try {
-            xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            // Time is expressed in days in Oscar and seconds in Ichthyop
-            time_tp1 *= 24 * 3600;
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-        }
+
+        xTimeTp1 = ncIn.findVariable(strTime).read();
+        time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
+        // Time is expressed in days in Oscar and seconds in Ichthyop
+        time_tp1 *= 24 * 3600;
 
         // Time step of the Oscar dataset
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
 
         for (RequiredVariable variable : requiredVariables.values()) {
-            try {
-                variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
-            } catch (Exception ex) {
-                getLogger().log(Level.SEVERE, null, ex);
-            }
+            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
     }
 
@@ -461,7 +441,7 @@ public class OscarDataset extends AbstractDataset {
         time_tp1 = getSimulationManager().getTimeManager().get_tO();
     }
 
-    private int findCurrentRank(float time) {
+    private int findCurrentRank(float time) throws IOException {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -479,8 +459,6 @@ public class OscarDataset extends AbstractDataset {
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
         }
         lrank = lrank - (time_arrow + 1) / 2;
 
@@ -565,19 +543,21 @@ public class OscarDataset extends AbstractDataset {
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         rank += time_arrow;
-        if (rank > (nbTimeRecords - 1) || rank < 0) {
-            if (opendap) {
-                throw new IndexOutOfBoundsException("Time out of dataset range");
-            } else {
-                try {
+        try {
+            if (rank > (nbTimeRecords - 1) || rank < 0) {
+                if (opendap) {
+                    throw new IndexOutOfBoundsException("Time out of dataset range");
+                } else {
                     ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
-                } catch (IOException ex) {
-                    getLogger().log(Level.SEVERE, null, ex);
+                    rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
                 }
-                rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
             }
+
+            setAllFieldsTp1AtTime(rank);
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, null, ex);
+            System.out.println(1);
         }
-        setAllFieldsTp1AtTime(rank);
     }
 
 }

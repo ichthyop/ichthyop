@@ -121,9 +121,13 @@ public class NcFileRelease extends AbstractRelease {
     public int getNbParticles() {
 
         try {
-            return NetcdfDataset.open(filename).findDimension("drifter").getLength();
+            NetcdfFile nc = NetcdfDataset.open(filename);
+            int nParticle = nc.findDimension("drifter").getLength();
+            nc.close();
+            return nParticle;
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, null, ex);
+            System.exit(1);
         }
         return -1;
     }

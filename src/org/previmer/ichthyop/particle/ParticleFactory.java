@@ -17,14 +17,15 @@ public class ParticleFactory extends SimulationManagerAccessor {
         Particle particle = new Particle();
         particle.setIndex(index);
         boolean living = mortality.equals(ParticleMortality.ALIVE);
+
+        particle.setLon(lon);
+        particle.setLat(lat);
+        particle.setDepth(depth);
+        if (Double.isNaN(depth)) {
+            particle.make2D();
+        }
+        particle.geo2Grid();
         if (living) {
-            particle.setLon(lon);
-            particle.setLat(lat);
-            particle.setDepth(depth);
-            if (Double.isNaN(depth)) {
-                particle.make2D();
-            }
-            particle.geo2Grid();
             if (!particle.isInWater() || particle.isOnEdge()) {
                 return null;
             }
