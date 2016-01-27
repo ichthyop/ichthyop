@@ -205,7 +205,7 @@ public class OscarDataset extends AbstractDataset {
         water = new boolean[nlat][nlon];
         // There is no mask variable in OSCAR.
         // Must be extracted from U or V velocity
-        Array arr = ncIn.findVariable(strU).read(new int[]{0, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce();
+        Array arr = ncIn.findVariable(strU).read(new int[]{0, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce().flip(0);
         Index index = arr.getIndex();
         for (int i = 0; i < nlon; i++) {
             for (int j = 0; j < nlat; j++) {
@@ -488,7 +488,7 @@ public class OscarDataset extends AbstractDataset {
      */
     @Override
     public double getLatMin() {
-        return latitude[nlat - 1];
+        return latitude[0];
     }
 
     /**
@@ -498,7 +498,7 @@ public class OscarDataset extends AbstractDataset {
      */
     @Override
     public double getLatMax() {
-        return latitude[0];
+        return latitude[nlat - 1];
     }
 
     /**
