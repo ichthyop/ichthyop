@@ -110,7 +110,7 @@ public class OscarDataset extends AbstractDataset {
     private boolean opendap;
 
     private double[] dlon, dlat;
-    
+
     /**
      * List on NetCDF input files in which dataset is read.
      */
@@ -245,8 +245,15 @@ public class OscarDataset extends AbstractDataset {
         // x to longitude
         final int i = (int) Math.floor(x);
         final double dx = x - i;
-        double lon = (1 - dx) * longitude[i] + dx * longitude[i + 1];
-
+        int ci = i;
+        if (i < 0) {
+            ci = i + 1080;
+        }
+        if (i > nlon - 2) {
+            ci = i - 1080;
+        }
+        double lon = (1 - dx) * longitude[ci] + dx * longitude[ci + 1];
+        
         return new double[]{lat, lon};
     }
 
@@ -274,10 +281,17 @@ public class OscarDataset extends AbstractDataset {
         double x;
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
+                int ci = i + ii;
+                if (ci < 0) {
+                    ci += 1080;
+                }
+                if (ci > nlon - 2) {
+                    ci -= 1080;
+                }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                x = (1.d - x_euler) * u_tp0[j + jj][i + ii] + x_euler * u_tp1[j + jj][i + ii];
-                du += x * co / dlon[i + ii];
+                x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
+                du += x * co / dlon[ci];
             }
         }
 
@@ -301,9 +315,16 @@ public class OscarDataset extends AbstractDataset {
         double x;
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
+                int ci = i + ii;
+                if (ci < 0) {
+                    ci += 1080;
+                }
+                if (ci > nlon - 2) {
+                    ci -= 1080;
+                }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                x = (1.d - x_euler) * v_tp0[j + jj][i + ii] + x_euler * v_tp1[j + jj][i + ii];
+                x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
                 dv += x * co / dlat[j + jj];
             }
         }
@@ -326,7 +347,14 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public boolean isInWater(int i, int j) {
-        return water[j][i];
+        int ci = i;
+        if (ci < 0) {
+            ci += 1080;
+        }
+        if (ci > nlon - 1) {
+            ci -= 1080;
+        }
+        return water[j][ci];
     }
 
     @Override
@@ -350,9 +378,7 @@ public class OscarDataset extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[0] > (nlon - 2.0f))
-                || (pGrid[0] < 1.0f)
-                || (pGrid[1] > (nlat - 2.0f))
+        return ((pGrid[1] > (nlat - 2.0f))
                 || (pGrid[1] < 1.0f));
     }
 
@@ -440,7 +466,7 @@ public class OscarDataset extends AbstractDataset {
 
     void setOnFirstTime() throws Exception {
         // Time is expressed as number of days since origin in Oscar
-        double t0 = (double)getSimulationManager().getTimeManager().get_tO() / (3600.d * 24.d);
+        double t0 = (double) getSimulationManager().getTimeManager().get_tO() / (3600.d * 24.d);
         if (!opendap) {
             ncIn = openFile(getFile(t0));
         } else {
@@ -575,7 +601,7 @@ public class OscarDataset extends AbstractDataset {
             System.exit(1);
         }
     }
-    
+
     private NetcdfFile openLocation(String rawPath, String fileMask, boolean skipSorting) throws IOException {
 
         String path = IOTools.resolvePath(rawPath);
