@@ -61,10 +61,6 @@ public class OscarDataset extends AbstractDataset {
      */
     private double[] latitude;
     /**
-     * Mask at centre of the cell.
-     */
-    private boolean[][] water;
-    /**
      * Zonal component of the velocity field at current time
      */
     private double[][] u_tp0;
@@ -202,14 +198,16 @@ public class OscarDataset extends AbstractDataset {
 
     private void loadMask() throws IOException, InvalidRangeException {
 
-        water = new boolean[nlat][nlon];
         // There is no mask variable in OSCAR.
         // Must be extracted from U or V velocity
-        Array arr = ncIn.findVariable(strU).read(new int[]{0, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce().flip(0);
+        int tn = ncIn.findDimension(strTimeDim).getLength();
+        // Flip(0) for flipping latitude axis
+        Array arr = ncIn.findVariable(strU).read(new int[]{tn - 1, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce().flip(0);
         Index index = arr.getIndex();
-        for (int i = 0; i < nlon; i++) {
-            for (int j = 0; j < nlat; j++) {
-                water[j][i] = !Float.isNaN(arr.getFloat(index.set(j, i)));
+        u_tp1 = new double[nlat][nlon];
+        for (int j = 0; j < nlat; j++) {
+            for (int i = 0; i < nlon; i++) {
+                u_tp1[j][i] = arr.getDouble(index.set(j, i));
             }
         }
     }
@@ -354,7 +352,7 @@ public class OscarDataset extends AbstractDataset {
         if (ci > nlon - 1) {
             ci -= 1080;
         }
-        return water[j][ci];
+        return !Double.isNaN(u_tp1[j][ci]);
     }
 
     @Override
@@ -384,7 +382,7 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public double getBathy(int i, int j) {
-        return water[j][i] ? 0.d : Double.NaN;
+        return isInWater(i, j) ? 0.d : Double.NaN;
     }
 
     @Override
@@ -712,7 +710,7 @@ public class OscarDataset extends AbstractDataset {
             //throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
         } catch (NullPointerException e) {
             throw new IOException("{Dataset} Unable to read " + strTime
-                    + " variable in file " + filename + " : " + e.getCause());
+                    + " variable in file " + filename, e.getCause());
         }
         return false;
     }
@@ -749,12 +747,12 @@ public class OscarDataset extends AbstractDataset {
      * @throws IOException
      */
     private NetcdfFile openURL(String opendapURL) throws IOException {
-        NetcdfFile ncIn;
+        NetcdfFile ncf;
         try {
-            getLogger().info("Opening remote " + opendapURL + " Please wait...");
-            ncIn = NetcdfDataset.openDataset(opendapURL);
+            getLogger().log(Level.INFO, "Opening remote {0} Please wait...", opendapURL);
+            ncf = NetcdfDataset.openDataset(opendapURL);
             getLogger().log(Level.INFO, "'{'Dataset'}' Open remote {0}", opendapURL);
-            return ncIn;
+            return ncf;
         } catch (IOException e) {
             IOException ioex = new IOException("{Dataset} Problem opening " + opendapURL + " ==> " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
