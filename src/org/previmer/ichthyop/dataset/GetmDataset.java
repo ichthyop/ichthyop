@@ -90,7 +90,7 @@ public class GetmDataset extends AbstractDataset {
      */
     static String strLonDim, strLatDim, strTimeDim, strZDim;
     /**
-     * __________________________________SPECIFICITE GETM 
+     * __________________________________SPECIFICITE GETM
      */
     static String strh, strW, strElev;
     /**
@@ -104,7 +104,7 @@ public class GetmDataset extends AbstractDataset {
     /**
      *
      */
-    double[][] dxu; 
+    double[][] dxu;
     /**
      *
      */
@@ -264,7 +264,7 @@ public class GetmDataset extends AbstractDataset {
             /*
              * switch (time_arrow) { case 1: return (time >= time_r0 && time <
              * time_rf); case -1: return (time > time_r0 && time <= time_rf);
-            }
+             }
              */
         } catch (IOException e) {
             IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
@@ -529,26 +529,26 @@ public class GetmDataset extends AbstractDataset {
          */
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                maskRho[j][i] = (hRho[j][i] <0) 
+                maskRho[j][i] = (hRho[j][i] < 0)
                         ? (byte) 0
                         : (byte) 1;
-                
+
             }
         }
-  /*      
-        int tempX = 0;
-        int tempY = 0;
-        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
-        tempX = 0;
-        tempY = 40;
-        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
-        tempX = 40;
-        tempY = 0;
-        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
-        tempX = 100;
-        tempY = 100;
-        System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
-*/
+        /*      
+         int tempX = 0;
+         int tempY = 0;
+         System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+         tempX = 0;
+         tempY = 40;
+         System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+         tempX = 40;
+         tempY = 0;
+         System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+         tempX = 100;
+         tempY = 100;
+         System.out.print(tempY);System.out.print(" : ");System.out.print(hRho[tempY][tempX]);System.out.print("  et mask : ");System.out.println(maskRho[tempY][tempX]);
+         */
         /*
          * Compute metrics dxu & dyv
          */
@@ -657,7 +657,6 @@ public class GetmDataset extends AbstractDataset {
 
         //--------------------------------------
         // Calculate the Physical Space extrema
-
         lonMin = Double.MAX_VALUE;
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
@@ -707,7 +706,6 @@ public class GetmDataset extends AbstractDataset {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
-
         boolean found;
         int imin, imax, jmin, jmax, i0, j0;
         double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
@@ -771,7 +769,6 @@ public class GetmDataset extends AbstractDataset {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-
         final double ix = Math.max(0.00001f, Math.min(xRho, (double) nx - 1.00001f));
         final double jy = Math.max(0.00001f, Math.min(yRho, (double) ny - 1.00001f));
 
@@ -797,7 +794,6 @@ public class GetmDataset extends AbstractDataset {
         //--------------------------------------------------------------
         // Return true if (lon, lat) is insidide the polygon defined by
         // (imin, jmin) & (imin, jmax) & (imax, jmax) & (imax, jmin)
-
         //-----------------------------------------
         // Build the polygone
         int nb, shft;
@@ -977,14 +973,14 @@ public class GetmDataset extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    if(isInWater(i + ii, j + jj)){                       
-                    co = Math.abs((.5d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
-                    x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
-                    du += 2.d * x * co / (dxu[j + jj][i + ii - 1] + dxu[j + jj][i + ii]);
-                }
+                    if (isInWater(i + ii, j + jj)) {
+                        co = Math.abs((.5d - (double) ii - dx)
+                                * (1.d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
+                        CO += co;
+                        x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                        du += 2.d * x * co / (dxu[j + jj][i + ii - 1] + dxu[j + jj][i + ii]);
+                    }
                 }
             }
         }
@@ -1016,14 +1012,15 @@ public class GetmDataset extends AbstractDataset {
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
-                    if(isInWater(i + ii, j + jj)){
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (.5d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
-                    x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
-                    dv += 2.d * x * co / (dyv[j + jj - 1][i + ii] + dyv[j + jj][i + ii]);
-                }}
+                    if (isInWater(i + ii, j + jj)) {
+                        co = Math.abs((1.d - (double) ii - dx)
+                                * (.5d - (double) jj - dy)
+                                * (1.d - (double) kk - dz));
+                        CO += co;
+                        x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                        dv += 2.d * x * co / (dyv[j + jj - 1][i + ii] + dyv[j + jj][i + ii]);
+                    }
+                }
             }
         }
         if (CO != 0) {
@@ -1054,20 +1051,19 @@ public class GetmDataset extends AbstractDataset {
         double co = 0.d;
         double x = 0.d;
 
-
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    if (isInWater(i + ii, j + jj)){
-                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
-                    CO += co;
-                    x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                    dzw = (1.d - x_euler) * 0.5 * (h_tp0[Math.min(k + kk, nz - 1)][j + jj][i + ii] 
-                            + h_tp0[Math.min(k + kk + 1, nz - 1)][j + jj][i + ii])
-                            + x_euler * 0.5 * (h_tp1[Math.min(k + kk, nz - 1)][j + jj][i + ii] 
-                            + h_tp1[Math.min(k + kk + 1, nz - 1)][j + jj][i + ii]);
+                    if (isInWater(i + ii, j + jj)) {
+                        co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                        CO += co;
+                        x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
+                        dzw = (1.d - x_euler) * 0.5 * (h_tp0[Math.min(k + kk, nz - 1)][j + jj][i + ii]
+                                + h_tp0[Math.min(k + kk + 1, nz - 1)][j + jj][i + ii])
+                                + x_euler * 0.5 * (h_tp1[Math.min(k + kk, nz - 1)][j + jj][i + ii]
+                                + h_tp1[Math.min(k + kk + 1, nz - 1)][j + jj][i + ii]);
 
-                    dw += x * co / dzw;
+                        dw += x * co / dzw;
                     }
                 }
             }
@@ -1092,12 +1088,12 @@ public class GetmDataset extends AbstractDataset {
         cDepth -= h[k] / 2;   // on enleve la moitié de la hauteur de la derniere cellule (qui n'était pas ds la boucle) pour avoir la profondeur
         // au centre de la cellule et non pas à l'entre cellule
 
-        return cDepth; 
+        return cDepth;
     }
-    
+
     double computeLocalDepth(int i, int j, float[] h, int k) {
         // double cDepth = 0;
-        double cDepth = -1.0 * hRho[j][i]; 
+        double cDepth = -1.0 * hRho[j][i];
 
         for (int kk = 0; kk < k; kk++) {
             cDepth += h[kk];
@@ -1105,7 +1101,7 @@ public class GetmDataset extends AbstractDataset {
         cDepth += h[k] / 2;   // on enleve la moitié de la hauteur de la derniere cellule (qui n'était pas ds la boucle) pour avoir la profondeur
         // au centre de la cellule et non pas à l'entre cellule
 
-        return cDepth; 
+        return cDepth;
     }
 
     @Override
@@ -1131,8 +1127,7 @@ public class GetmDataset extends AbstractDataset {
      * @param pGrid a double[] the coordinates of the grid point -> HERE AS MARS
      * IN 2D... BUT IN 3D IN NEMO - OK faire comme mars car toutes les cellules
      * sont de l'eau
-     * @return
-     * <code>true</code> if the grid point is close to cost,
+     * @return <code>true</code> if the grid point is close to cost,
      * <code>false</code> otherwise.
      */
     @Override
@@ -1147,22 +1142,23 @@ public class GetmDataset extends AbstractDataset {
     }
 
     @Override
-     public boolean isOnEdge(double[] pGrid) {
+    public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 2.0f))
                 || (pGrid[0] < 1.0f)
                 || (pGrid[1] > (ny - 2.0f))
                 || (pGrid[1] < 1.0f));
     }
-   /*
-   public boolean isOnEdge(double[] pGrid) {    // version de NEMO
-        return ((pGrid[0] > (nx - 3.0f))
-                || (pGrid[0] < 2.0f)
-                || (pGrid[1] > (ny - 3.0f))
-                || (pGrid[1] < 2.0f));
-    }
-   */ 
+    /*
+     public boolean isOnEdge(double[] pGrid) {    // version de NEMO
+     return ((pGrid[0] > (nx - 3.0f))
+     || (pGrid[0] < 2.0f)
+     || (pGrid[1] > (ny - 3.0f))
+     || (pGrid[1] < 2.0f));
+     }
+     */
+
     @Override
-    public double getBathy(int i, int j) {      
+    public double getBathy(int i, int j) {
         if (isInWater(i, j)) {
             return hRho[j][i];
         }
@@ -1285,7 +1281,6 @@ public class GetmDataset extends AbstractDataset {
             variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
 
-
         try {
             w_tp1 = (float[][][]) ncIn.findVariable(strW).read(originW, new int[]{1, nz + 1, ny, nx}).
                     flip(1).reduce().copyToNDJavaArray();               // ---------------> different origin
@@ -1390,7 +1385,6 @@ public class GetmDataset extends AbstractDataset {
         return variable.read(origin, shape).reduce();
     }
 
-    
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         long time = e.getSource().getTime();
@@ -1413,5 +1407,16 @@ public class GetmDataset extends AbstractDataset {
         }
 
         setAllFieldsTp1AtTime(rank);
+    }
+
+    @Override
+    public double xTore(double x) {
+        return x;
+    }
+
+    
+    @Override
+    public double yTore(double y) {
+        return y;
     }
 }

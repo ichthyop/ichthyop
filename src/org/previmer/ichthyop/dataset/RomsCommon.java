@@ -768,4 +768,15 @@ abstract class RomsCommon extends AbstractDataset {
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
+    
+    @Override
+    public double xTore(double x) {
+        return x;
+    }
+
+    
+    @Override
+    public double yTore(double y) {
+        return y;
+    }
 }

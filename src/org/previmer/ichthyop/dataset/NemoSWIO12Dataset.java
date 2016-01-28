@@ -1872,4 +1872,15 @@ public class NemoSWIO12Dataset extends AbstractDataset {
         }
         return array;
     }
+    
+      @Override
+    public double xTore(double x) {
+        return x;
+    }
+
+    
+    @Override
+    public double yTore(double y) {
+        return y;
+    }
 }

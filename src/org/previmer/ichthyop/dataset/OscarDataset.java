@@ -253,7 +253,7 @@ public class OscarDataset extends AbstractDataset {
             ci = i - 1080;
         }
         double lon = (1 - dx) * longitude[ci] + dx * longitude[ci + 1];
-        
+
         return new double[]{lat, lon};
     }
 
@@ -760,6 +760,22 @@ public class OscarDataset extends AbstractDataset {
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
+    }
+
+    @Override
+    public double xTore(double x) {
+        if (x < 0) {
+            return x + 1080.d;
+        }
+        if (x > nlon - 1) {
+            return x - 1080.d;
+        }
+        return x;
+    }
+
+    @Override
+    public double yTore(double y) {
+        return y;
     }
 
 }

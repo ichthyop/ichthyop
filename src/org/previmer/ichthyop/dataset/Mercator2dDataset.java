@@ -365,9 +365,10 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans
      * la définition de e1t et e2t
+     *
      * @param j
      * @param i
-     * @return 
+     * @return
      */
     @Override
     public double getdxi(int j, int i) {
@@ -377,9 +378,10 @@ public class Mercator2dDataset extends AbstractDataset {
 
     /**
      * Gets cell dimension [meter] in the ETA-direction.
+     *
      * @param j
      * @param i
-     * @return 
+     * @return
      */
     @Override
     public double getdeta(int j, int i) {
@@ -605,9 +607,9 @@ public class Mercator2dDataset extends AbstractDataset {
      * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-        
+
         getLogger().info("Reading NetCDF variables...");
-    
+
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
@@ -1315,5 +1317,21 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+    }
+
+    @Override
+    public double xTore(double x) {
+        if (x < -0.5d) {
+            return nx + x;
+        }
+        if (x > nx - 0.5d) {
+            return x - nx;
+        }
+        return x;
+    }
+
+    @Override
+    public double yTore(double y) {
+        return y;
     }
 }

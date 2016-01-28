@@ -1245,4 +1245,15 @@ public class NoveltisDataset extends AbstractDataset {
             return msg;
         }
     }
+     
+     @Override
+    public double xTore(double x) {
+        return x;
+    }
+
+    
+    @Override
+    public double yTore(double y) {
+        return y;
+    }
 }

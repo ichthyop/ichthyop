@@ -75,4 +75,8 @@ public interface IDataset extends NextStepListener {
     public boolean is3D();
     
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception;
+    
+    public double xTore(double x);
+    
+    public double yTore(double y);
 }

@@ -249,8 +249,9 @@ public class GridPoint extends SimulationManagerAccessor {
 
     public void setX(double x) {
         if (this.x != x) {
-            this.x = x;
+            this.x = getSimulationManager().getDataset().xTore(x);
             xyHaveChanged = true;
+            
             if (x < -0.5d) {
                 this.x = getSimulationManager().getDataset().get_nx() + x;
             }
@@ -262,7 +263,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     public void setY(double y) {
         if (this.y != y) {
-            this.y = y;
+            this.y = getSimulationManager().getDataset().yTore(y);
             xyHaveChanged = true;
         }
     }
