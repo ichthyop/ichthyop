@@ -269,7 +269,7 @@ public class OscarDataset extends AbstractDataset {
         }
         double lon = (1 - dx) * longitude[ci] + dx * longitude[ci + 1];
 
-        return new double[]{lat, lon};
+        return new double[]{lat, lon>180?lon-360.d:lon};
     }
 
     @Override
