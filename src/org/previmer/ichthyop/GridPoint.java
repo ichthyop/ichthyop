@@ -251,13 +251,6 @@ public class GridPoint extends SimulationManagerAccessor {
         if (this.x != x) {
             this.x = getSimulationManager().getDataset().xTore(x);
             xyHaveChanged = true;
-            
-            if (x < -0.5d) {
-                this.x = getSimulationManager().getDataset().get_nx() + x;
-            }
-            if (x > getSimulationManager().getDataset().get_nx() - 0.5d) {
-                this.x = x - getSimulationManager().getDataset().get_nx();
-            }
         }
     }
 
