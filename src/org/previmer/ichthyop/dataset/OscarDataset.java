@@ -185,13 +185,30 @@ public class OscarDataset extends AbstractDataset {
         }
 
         // longitude to x
-        double x = 0.d;
-        for (int i = 0; i < nlon - 1; i++) {
-            if (lon >= longitude[i] && lon < longitude[i + 1]) {
-                x = i + (lon - longitude[i]) / (longitude[i + 1] - longitude[i]);
-                break;
+        // Find the grid longitude index closest to lon
+        double dlonMin = Double.MAX_VALUE;
+        int iclosest = -1;
+        for (int i = 0; i < nlon; i++) {
+            if (Math.abs(lon%360 - longitude[i]%360) < dlonMin) {
+                dlonMin = Math.abs(lon%360 - longitude[i]%360);
+                iclosest = i;
             }
         }
+        // Handle special case iclosest == nlon - 1
+        if (lon >= longitude[iclosest]) {
+            if (iclosest == nlon - 1) {
+                iclosest -= 1080;
+            }
+
+        }
+        // Handle special case iclosest = 0
+        if (lon < longitude[iclosest]) {
+            iclosest -= 1;
+            if (iclosest < 0) {
+                iclosest += 1080;
+            }
+        }
+        double x = iclosest + (lon - longitude[iclosest]) / (longitude[iclosest + 1] - longitude[iclosest]);
 
         return new double[]{x, y};
     }
