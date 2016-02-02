@@ -14,6 +14,7 @@ public class LonTracker extends FloatTracker {
 
     @Override
     float getValue(IParticle particle) {
-        return (float) particle.getLon();
+        float lon = (float) particle.getLon();
+        return lon > 180 ? lon - 360.f : lon;
     }
 }

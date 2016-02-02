@@ -10,14 +10,14 @@
             <parameter type="serial">
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
-                <value>year 2010 month 05 day 13 at 10:00</value>
+                <value>year 2013 month 05 day 13 at 12:00</value>
                 <format>date</format>
                 <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
             <parameter type="serial">
                 <key>transport_duration</key>
                 <long_name>Transport duration</long_name>
-                <value>0000 day(s) 12 hour(s) 00 minute(s)</value>
+                <value>0050 day(s) 00 hour(s) 00 minute(s)</value>
                 <format>duration</format>
                 <description>Set the duration of particle transport. Format: #### day(s) ## hour(s) ## minute(s)</description>
             </parameter>
@@ -32,7 +32,7 @@
             <parameter type="serial">
                 <key>time_step</key>
                 <long_name>Time step [second]</long_name>
-                <value>600</value>
+                <value>7200</value>
                 <format>integer</format>
                 <description>The computational time step (dt) expressed in seconds. Take great care for setting this parameter. Simulation must not break the CFL criterion: (U * dt) / dX inferior to 1 with U the velocity and dX the move. An acceptable estimation could be dt = 0.7 * dGrid / Umax with dGrid the average length of the grid cells and Umax the order of magnitude of the fastest current velocities in the hydrodynamic model.</description>
             </parameter>
@@ -49,10 +49,10 @@
             <parameter hidden="true">
                 <key>time_origin</key>
                 <long_name>Origin of time</long_name>
-                <value>year 1900 month 01 day 01 at 00:00</value>
+                <value>year 1992 month 10 day 05 at 00:00</value>
                 <format>date</format>
-                <default>year 1900 month 01 day 01 at 00:00</default>
-                <description>This parameter comes with Gregorian type of calendar only. For hydrodynamic models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the hydrodynamic dataset.</description>
+                <default>year 1992 month 10 day 05 at 00:00</default>
+                <description>Origin of time of the calendar. The value must match the origin of time of the hydrodynamic dataset. This origin is usually defined as an attribute of the time variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter hidden="true">
                 <key>time_arrow</key>
@@ -108,7 +108,7 @@
             <parameter>
                 <key>record_frequency</key>
                 <long_name>Record frequency</long_name>
-                <value>2</value>
+                <value>6</value>
                 <format>integer</format>
                 <default>4</default>
                 <description>Lagrangian model runs with its own computational time-step, set in the 'time option block'. You may not need to record every step of the simulation in the NetCDF output file. Set the record frequency as a number of computational time-steps. For instance, let's take dt = 1800s and record frequency = 6. Particle positions will be recorded every 3 hours (1800 * 6 = 10800s = 3h) in the NetCDF output file.</description>
@@ -163,15 +163,15 @@
             <parameter>
                 <key>field_dim_lat</key>
                 <long_name>Dimension in the latitudinal direction</long_name>
-                <value>lat</value>
-                <default>lat</default>
+                <value>latitude</value>
+                <default>latitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_dim_lon</key>
                 <long_name>Dimension in the longitudinal direction</long_name>
-                <value>lon</value>
-                <default>lon</default>
+                <value>longitude</value>
+                <default>longitude</default>
                 <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
@@ -184,15 +184,15 @@
             <parameter>
                 <key>field_var_lat</key>
                 <long_name>Latitude of Rho points</long_name>
-                <value>lat</value>
-                <default>lat</default>
+                <value>latitude</value>
+                <default>latitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_lon</key>
                 <long_name>Longitude of Rho points</long_name>
-                <value>lon</value>
-                <default>lon</default>
+                <value>longitude</value>
+                <default>longitude</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
@@ -598,8 +598,8 @@
             <parameter>
                 <key>lon_stain</key>
                 <long_name>Longitude [East degree]</long_name>
-                <value>-5.5</value>
-                <default>-5.5</default>
+                <value>-20</value>
+                <default>-20</default>
                 <format>lonlat</format>
                 <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
@@ -612,28 +612,12 @@
                 <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
             </parameter>
             <parameter>
-                <key>depth_stain</key>
-                <long_name>Depth [meter]</long_name>
-                <value>-20.0</value>
-                <default>-20.0</default>
-                <format>float</format>
-                <description>Depth [meter] of the stain. The parameter is ignored for 2D simulation. Positive depth is automatically converted by the application (depth = -depth)</description>
-            </parameter>
-            <parameter>
                 <key>radius_stain</key>
                 <long_name>Radius of the stain [meter]</long_name>
-                <value>2000.0</value>
-                <default>2000.0</default>
+                <value>200000.0</value>
+                <default>200000.0</default>
                 <format>float</format>
                 <description>Radius [meter] of the stain. Particles are randomly released (for homogeneous distribution) within the circle defined by this radius.</description>
-            </parameter>
-            <parameter>
-                <key>thickness_stain</key>
-                <long_name>Thickness of the stain [meter]</long_name>
-                <value>10.0</value>
-                <default>10.0</default>
-                <format>float</format>
-                <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
