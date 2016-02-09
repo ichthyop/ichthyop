@@ -216,15 +216,26 @@ public class OscarDataset extends AbstractDataset {
     private void loadMask() throws IOException, InvalidRangeException {
 
         // There is no mask variable in OSCAR.
-        // Must be extracted from U or V velocity
+        // Must be extracted from both U and V velocity (indeed Umask and Vmask
+        // may differ slightly)
         int tn = ncIn.findDimension(strTimeDim).getLength();
         // Flip(0) for flipping latitude axis
+        // Read U variable
         Array arr = ncIn.findVariable(strU).read(new int[]{tn - 1, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce().flip(0);
         Index index = arr.getIndex();
         u_tp1 = new double[nlat][nlon];
         for (int j = 0; j < nlat; j++) {
             for (int i = 0; i < nlon; i++) {
                 u_tp1[j][i] = arr.getDouble(index.set(j, i));
+            }
+        }
+        // Read V variable
+        arr = ncIn.findVariable(strV).read(new int[]{tn - 1, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce().flip(0);
+        index = arr.getIndex();
+        v_tp1 = new double[nlat][nlon];
+        for (int j = 0; j < nlat; j++) {
+            for (int i = 0; i < nlon; i++) {
+                v_tp1[j][i] = arr.getDouble(index.set(j, i));
             }
         }
     }
@@ -369,7 +380,7 @@ public class OscarDataset extends AbstractDataset {
         if (ci > nlon - 1) {
             ci -= 1080;
         }
-        return !Double.isNaN(u_tp1[j][ci]);
+        return !Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]);
     }
 
     @Override
