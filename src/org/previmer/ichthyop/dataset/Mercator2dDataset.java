@@ -12,12 +12,9 @@ import java.util.logging.Level;
 import org.previmer.ichthyop.dataset.MarsCommon.ErrorMessage;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.ui.LonLatConverter;
-import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
-import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -35,59 +32,43 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Grid dimension
      */
-    static int nx, ny;
-    /**
-     * Origin for grid index
-     */
-    static int ipo, jpo;
+    private int nx, ny;
     /**
      * Number of time records in current NetCDF file
      */
-    private static int nbTimeRecords;
+    private int nbTimeRecords;
     /**
      * Longitude at rho point.
      */
-    static float[][] lonRho;
+    private float[] longitude;
     /**
      * Latitude at rho point.
      */
-    static float[][] latRho;
-    /**
-     * Mask: water = 1, cost = 0
-     */
-    static byte[][] maskRho;
+    private float[] latitude;
     /**
      * Zonal component of the velocity field at current time
      */
-    static float[][] u_tp0;
+    private double[][] u_tp0;
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    static float[][] u_tp1;
+    private double[][] u_tp1;
     /**
      * Meridional component of the velocity field at current time
      */
-    static float[][] v_tp0;
+    private double[][] v_tp0;
     /**
      * Meridional component of the velocity field at time t + dt
      */
-    static float[][] v_tp1;
+    private double[][] v_tp1;
     /**
      * Geographical boundary of the domain
      */
-    private static double latMin, lonMin, latMax, lonMax;
-    /**
-     * Maximum depth [meter] of the domain
-     */
-    private static double depthMax;
+    private double latMin, lonMin, latMax, lonMax;
     /**
      * Time step [second] between two records in NetCDF dataset
      */
-    static double dt_HyMo;
-    /**
-     * List on NetCDF input files in which dataset is read.
-     */
-    //private ArrayList<String> listInputFiles;
+    private double dt_HyMo;
     /**
      * Index of the current file read in the {@code listInputFiles}
      */
@@ -95,35 +76,30 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Time t + dt expressed in seconds
      */
-    static double time_tp1;
+    private double time_tp1;
     /**
      * Current rank in NetCDF dataset
      */
-    private static int rank;
+    private int rank;
     /**
      * Time arrow: forward = +1, backward = -1
      */
-    private static int time_arrow;
-    /**
-     * Name of the Dimension in NetCDF file
-     */
-    static String strXDim, strYDim, strZDim, strTimeDim;
+    private int time_arrow;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strU, strV, strTime;
+    private String strU, strV, strTime;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strLon, strLat, strMask;
+    private String strLon, strLat;
     /**
      *
      */
-    static double[][] e1t, e2t, e1v, e2u;
-    static String stre1t, stre2t, stre1v, stre2u;
+    private double[] dxu;
+    private double dyv;
     private ArrayList<String> listUFiles, listVFiles;
-    private static NetcdfFile ncU, ncV;
-    private static String file_mask;
+    private NetcdfFile ncU, ncV;
 
 ////////////////////////////
 // Definition of the methods
@@ -138,47 +114,18 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     private void readConstantField() throws Exception {
 
-        int[] origin = new int[]{jpo, ipo};
-        int[] size = new int[]{ny, nx};
-        NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(file_mask);
-        getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
-        //fichier *byte*mask*
-        lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
-                copyToNDJavaArray();
-        latRho = (float[][]) nc.findVariable(strLat).read(origin, size).
-                copyToNDJavaArray();
+        getLogger().log(Level.INFO, "Read longitude and latitude from {0}", ncU.getLocation());
+        longitude = (float[]) ncU.findVariable(strLon).read().copyToNDJavaArray();
+        latitude = (float[]) ncU.findVariable(strLat).read().copyToNDJavaArray();
+        nx = longitude.length;
+        ny = latitude.length;
 
-        maskRho = (byte[][]) nc.findVariable(strMask).
-                read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
-
-        //System.out.println("read e1t e2t " + nc.getLocation());
-        // fichier *mesh*h*
-        e1t = read_e1_e2_field(nc, stre1t);
-        e2t = read_e1_e2_field(nc, stre2t);
-        e1v = read_e1_e2_field(nc, stre1v);
-        e2u = read_e1_e2_field(nc, stre2u);
-        nc.close();
-    }
-
-    private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-
-        Variable ncvar = nc.findVariable(varname);
-        Array array;
-        if (ncvar.getShape().length > 2) {
-            array = ncvar.read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
-        } else {
-            array = ncvar.read(new int[]{jpo, ipo}, new int[]{ny, nx}).reduce();
-        }
-        double[][] field = new double[ny][nx];
-        Index index = array.getIndex();
+        // scale factors
+        dyv = 111138.d * (latitude[1] - latitude[0]);
+        dxu = new double[ny];
         for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                index.set(j, i);
-                field[j][i] = array.getDouble(index);
-            }
+            dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
         }
-        return field;
     }
 
     /*
@@ -234,41 +181,34 @@ public class Mercator2dDataset extends AbstractDataset {
      * x(t + dt) = x(t) + Ua(t) * dt
      * </pre>
      *
-     * pverley pour chourdin: ici il faudra revoir les adimensionalisations de u
-     * et v par e2u et e1v
      */
     @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
-        double ix, jy;
         int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
-
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) Math.round(ix);
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
         double CO = 0.d;
-        double co, x;
-        for (int ii = 0; ii < 2; ii++) {
-            int ci = i + ii - 1;
-            if (ci < 0) {
-                ci = nx - 2;
-            }
-            if (ci > nx - 2) {
-                ci = 0;
-            }
-            for (int jj = 0; jj < n; jj++) {
-                co = Math.abs((.5d - (double) ii - dx)
-                        * (1.d - (double) jj - dy));
-                CO += co;
-                if (!(Float.isNaN(u_tp0[j + jj][ci]))) {
-                    x = (1.d - x_euler) * u_tp0[j + jj][ci]
-                            + x_euler * u_tp1[j + jj][ci];
-                    du += x * co / e2u[j + jj][ci];
+        double x;
+        for (int jj = 0; jj < n; jj++) {
+            for (int ii = 0; ii < n; ii++) {
+                {
+                    int ci = i + ii - 1;
+                    if (ci < 0) {
+                        ci = nx - 2;
+                    }
+                    if (ci > nx - 2) {
+                        ci = 0;
+                    }
+
+                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
+                    CO += co;
+                    x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
+                    du += x * co / dxu[j + jj];
                 }
             }
         }
@@ -280,33 +220,26 @@ public class Mercator2dDataset extends AbstractDataset {
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        double dv = 0.d;
-        double ix, jy;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
 
+        double dv = 0.d;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (int) Math.round(jy);
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
         double CO = 0.d;
-        double co, x;
-        for (int jj = 0; jj < 2; jj++) {
+        double x;
+        for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 int ci = i + ii;
                 if (ci > nx - 2) {
                     ci = 0;
                 }
-                co = Math.abs((1.d - (double) ii - dx)
-                        * (.5d - (double) jj - dy));
+                double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                if (!Float.isNaN(v_tp0[j + jj - 1][ci])) {
-                    x = (1.d - x_euler) * v_tp0[j + jj - 1][ci]
-                            + x_euler * v_tp1[j + jj - 1][ci];
-                    dv += x * co / e1v[j + jj - 1][ci];
-                }
+                x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
+                dv += x * co / dyv;
             }
         }
 
@@ -321,50 +254,12 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     public double adimensionalize(double number, double xRho, double yRho) {
 
-        int i = (int) Math.round(xRho);
         int j = (int) Math.round(yRho);
-        return 2.d * number / (e1t[j][i] + e2t[j][i]);
-    }
-
-    /**
-     * Reads longitude and latitude fields in NetCDF dataset
-     *
-     * pverley pour chourdin: même remarque que chaque fois. Les infos dans OPA
-     * se trouvent dans différents fichiers, donc selon la méthode appelée, je
-     * dois recharger le fichier NetCDF correspondant. Au lieu d'utiliser la
-     * variable ncIn globale.
-     */
-    private void readLonLat() throws IOException {
-
-        NetcdfFile nc;
-        Array arrLon, arrLat;
-
-        nc = NetcdfDataset.openDataset(file_mask);
-        arrLon = nc.findVariable(strLon).read();
-        arrLat = nc.findVariable(strLat).read();
-        if (arrLon.getElementType() == float.class) {
-            lonRho = (float[][]) arrLon.copyToNDJavaArray();
-            latRho = (float[][]) arrLat.copyToNDJavaArray();
-        } else {
-            lonRho = new float[ny][nx];
-            latRho = new float[ny][nx];
-            Index index = arrLon.getIndex();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    index.set(j, i);
-                    lonRho[j][i] = arrLon.getFloat(index);
-                    latRho[j][i] = arrLat.getFloat(index);
-                }
-            }
-        }
-        nc.close();
+        return 2.d * number / (dxu[j] + dyv);
     }
 
     /**
      * Gets cell dimension [meter] in the XI-direction.
-     *
-     * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans
-     * la définition de e1t et e2t
      *
      * @param j
      * @param i
@@ -373,7 +268,7 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public double getdxi(int j, int i) {
 
-        return e1t[j][i];
+        return dxu[j];
     }
 
     /**
@@ -386,7 +281,7 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public double getdeta(int j, int i) {
 
-        return e2t[j][i];
+        return dyv;
     }
 
     /**
@@ -403,136 +298,30 @@ public class Mercator2dDataset extends AbstractDataset {
         loadParameters();
         clearRequiredVariables();
         sortInputFiles();
-        getDimNC();
-        shrinkGrid();
+        open(0);
         readConstantField();
         getDimGeogArea();
-    }
-
-    public void shrinkGrid() {
-        boolean isParamDefined;
-        try {
-            Boolean.valueOf(getParameter("shrink_domain"));
-            isParamDefined = true;
-        } catch (NullPointerException ex) {
-            isParamDefined = false;
-        }
-
-        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
-            try {
-                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
-                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
-                range(lat1, lon1, lat2, lon2);
-            } catch (IOException | NumberFormatException ex) {
-                getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
-            }
-        }
+        setAllFieldsTp1AtTime(0);
     }
 
     /**
      * Gets the names of the NetCDF variables from the configuration file.
-     *
-     * pverley pour chourdin : "Configuration" c'est la classe qui lit le
-     * fichier de configuration. Tu vois que normallement, le nom des variables
-     * est lu dans le fichier cfg. Temporairement je courcircuite cette
-     * opération et je renseigne à la main le nom des variables des sorties OPA.
      */
     @Override
     public void loadParameters() {
 
-        strXDim = getParameter("field_dim_x");
-        strYDim = getParameter("field_dim_y");
-        strZDim = getParameter("field_dim_z");
-        strTimeDim = getParameter("field_dim_time");
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
-        strMask = getParameter("field_var_mask");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strTime = getParameter("field_var_time");
-        stre1t = getParameter("field_var_e1t");
-        stre2t = getParameter("field_var_e2t");
-        stre1v = getParameter("field_var_e1v");
-        stre2u = getParameter("field_var_e2u");
-    }
-
-    /**
-     * Reads the dimensions of the NetCDF dataset
-     *
-     * @throws an IOException if an error occurs while reading the dimensions.
-     *
-     * pverley pour chourdin: Pour ROMS ou MARS je lisais les dimensions à
-     * partir de la variable ncIn qui est le premier fichier sortie qui me tombe
-     * sous la main. Avec OPA, les dimensions se lisent dans un fichier
-     * particulier *byte*mask*. A déterminer si toujours vrai ?
-     */
-    private void getDimNC() throws IOException {
-
-        NetcdfFile nc = new NetcdfDataset();
-        nc = NetcdfDataset.openDataset(file_mask);
-        try {
-            nx = nc.findDimension(strXDim).getLength();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("Error reading dataset X dimension. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        try {
-            ny = nc.findDimension(strYDim).getLength();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("Error reading dataset Y dimension. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        ipo = jpo = 0;
-    }
-
-    /**
-     * Resizes the domain and determines the range of the grid indexes taht will
-     * be used in the simulation. The new domain is limited by the Northwest and
-     * the Southeast corners.
-     *
-     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
-     * corner
-     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
-     * corner
-     * @throws an IOException if the new domain is not strictly nested within
-     * the NetCDF dataset domain.
-     */
-    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
-
-        double[] pGrid1, pGrid2;
-        int ipn, jpn;
-
-        readLonLat();
-
-        pGrid1 = latlon2xy(lat1, lon1);
-        pGrid2 = latlon2xy(lat2, lon2);
-        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            throw new IOException(
-                    "Impossible to proportion the simulation area : points out of domain");
-        }
-        lonRho = null;
-        latRho = null;
-
-        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
-        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
-        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
-        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
-        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
-
-        nx = Math.min(nx, ipn - ipo + 1);
-        ny = Math.min(ny, jpn - jpo + 1);
-        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 
     /**
      * Determines the geographical boundaries of the domain in longitude,
      * latitude and depth.
      */
-    private void getDimGeogArea() {
+    void getDimGeogArea() {
 
         //--------------------------------------
         // Calculate the Physical Space extrema
@@ -540,31 +329,27 @@ public class Mercator2dDataset extends AbstractDataset {
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
         latMax = -latMin;
-        depthMax = 0.d;
-        int i = nx;
 
+        int i = nx;
         while (i-- > 0) {
-            int j = ny;
-            while (j-- > 0) {
-                if (lonRho[j][i] >= lonMax) {
-                    lonMax = lonRho[j][i];
-                }
-                if (lonRho[j][i] <= lonMin) {
-                    lonMin = lonRho[j][i];
-                }
-                if (latRho[j][i] >= latMax) {
-                    latMax = latRho[j][i];
-                }
-                if (latRho[j][i] <= latMin) {
-                    latMin = latRho[j][i];
-                }
-                double depth = getBathy(i, j);
-                if (depth > depthMax) {
-                    depthMax = depth;
-                }
+            if (longitude[i] >= lonMax) {
+                lonMax = longitude[i];
+            }
+            if (longitude[i] <= lonMin) {
+                lonMin = longitude[i];
+            }
+        }
+        int j = ny;
+        while (j-- > 0) {
+            if (latitude[j] >= latMax) {
+                latMax = latitude[j];
+            }
+            if (latitude[j] <= latMin) {
+                latMin = latitude[j];
             }
         }
 
+        //System.out.println("lonmin " + lonMin + " lonmax " + lonMax + " latmin " + latMin + " latmax " + latMax);
         double double_tmp;
         if (lonMin > lonMax) {
             double_tmp = lonMin;
@@ -580,7 +365,7 @@ public class Mercator2dDataset extends AbstractDataset {
     }
 
     /**
-     * Initializes the {@code Dataset}. Opens the file holding the first time of
+     * Initialises the {@code Dataset}. Opens the file holding the first time of
      * the simulation. Checks out the existence of the fields required by the
      * current simulation. Sets all fields at time for the first time step.
      *
@@ -603,18 +388,16 @@ public class Mercator2dDataset extends AbstractDataset {
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
      * @throws an IOException if an error occurs while reading the variables.
      *
-     * pverley pour chourdin: la aussi je fais du provisoire en attendant de
-     * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, 0, jpo, ipo};
+        int[] origin = new int[]{rank, 0, 0, 0};
         double time_tp0 = time_tp1;
 
         try {
-            u_tp1 = (float[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx - 1}).reduce().copyToNDJavaArray();
+            u_tp1 = (double[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -622,7 +405,7 @@ public class Mercator2dDataset extends AbstractDataset {
         }
 
         try {
-            v_tp1 = (float[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny - 1, nx}).reduce().copyToNDJavaArray();
+            v_tp1 = (double[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -632,7 +415,8 @@ public class Mercator2dDataset extends AbstractDataset {
         try {
             Array xTimeTp1 = ncU.findVariable(strTime).read();
             time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 100;
+            // Converts time from hours to seconds
+            time_tp1 *= 3600.d;
         } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -651,7 +435,7 @@ public class Mercator2dDataset extends AbstractDataset {
         if (ci > nx - 1) {
             ci = 0;
         }
-        return (maskRho[j][ci] > 0);
+        return !Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]);
     }
 
     /**
@@ -680,7 +464,7 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public boolean isCloseToCost(double[] pGrid) {
 
-        int i, j, k, ii, jj;
+        int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
@@ -695,32 +479,11 @@ public class Mercator2dDataset extends AbstractDataset {
         return !(isInWater(ci, j) && isInWater(ci, j + jj) && isInWater(i, j + jj));
     }
 
-    /**
-     * Transforms the depth at specified x-y particle location into z coordinate
-     *
-     * @param x a double, the x-coordinate
-     * @param y a double, the y-coordinate
-     * @param depth a double, the depth of the particle
-     * @return a double, the z-coordinate corresponding to the depth
-     *
-     * pverley pour chourdin: méthode à tester.
-     */
     @Override
     public double depth2z(double x, double y, double depth) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
-    /**
-     * Transdorms the specified z-location into depth
-     *
-     * pverley pour chourdin: j'ai testé z2depth et depth2z, ça à l'air de
-     * marcher mais il faudra faire une validation plus sérieuse.
-     *
-     * @param x double
-     * @param y double
-     * @param z double
-     * @return double
-     */
     @Override
     public double z2depth(double x, double y, double z) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
@@ -746,8 +509,8 @@ public class Mercator2dDataset extends AbstractDataset {
 
         final int i = (int) Math.floor(xRho);
         final int j = (int) Math.floor(jy);
-        double latitude = 0.d;
-        double longitude = 0.d;
+        double lat = 0.d;
+        double lon = 0.d;
         final double dx = xRho - (double) i;
         final double dy = jy - (double) j;
         double co;
@@ -765,21 +528,21 @@ public class Mercator2dDataset extends AbstractDataset {
             }
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                latitude += co * latRho[j + jj][cii];
-                if (Math.abs(lonRho[j + jj][cii] - lonRho[j][ci]) < 180) {
-                    longitude += co * lonRho[j + jj][cii];
+                lat += co * latitude[j + jj];
+                if (Math.abs(longitude[cii] - longitude[ci]) < 180) {
+                    lon += co * longitude[cii];
                 } else {
-                    double dlon = Math.abs(360.d - Math.abs(lonRho[j + jj][cii] - lonRho[j][ci]));
-                    if (lonRho[j][ci] < 0) {
-                        longitude += co * (lonRho[j][ci] - dlon);
+                    double dlon = Math.abs(360.d - Math.abs(longitude[cii] - longitude[ci]));
+                    if (longitude[ci] < 0) {
+                        lon += co * (longitude[ci] - dlon);
                     } else {
-                        longitude += co * (lonRho[j][ci] + dlon);
+                        lon += co * (longitude[ci] + dlon);
                     }
                 }
             }
         }
 
-        return (new double[]{latitude, longitude});
+        return (new double[]{lat, lon});
     }
 
     /**
@@ -819,10 +582,10 @@ public class Mercator2dDataset extends AbstractDataset {
         while (!(found1 && found2)) {
             int i = ci;
             int j = cj;
-            double dmin = DatasetUtil.geodesicDistance(lat, lon, latRho[j][i], lonRho[j][i]);
+            double dmin = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i]);
             for (int ii = -di; ii <= di; ii += di) {
                 if ((i + ii >= 0) && (i + ii < nx)) {
-                    double d = DatasetUtil.geodesicDistance(lat, lon, latRho[j][i + ii], lonRho[j][i + ii]);
+                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i + ii]);
                     if (d < dmin) {
                         dmin = d;
                         ci = i + ii;
@@ -832,7 +595,7 @@ public class Mercator2dDataset extends AbstractDataset {
             }
             for (int jj = -dj; jj <= dj; jj += dj) {
                 if ((j + jj >= 0) && (j + jj < ny)) {
-                    double d = DatasetUtil.geodesicDistance(lat, lon, latRho[j + jj][i], lonRho[j + jj][i]);
+                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j + jj], longitude[i]);
                     if (d < dmin) {
                         dmin = d;
                         ci = i;
@@ -857,23 +620,21 @@ public class Mercator2dDataset extends AbstractDataset {
         int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
         //--------------------------------------------
         // Trilinear interpolation
-        double dy1 = latRho[cjp1][ci] - latRho[cj][ci];
-        double dx1 = lonRho[cjp1][ci] - lonRho[cj][ci];
-        double dy2 = latRho[cj][cip1] - latRho[cj][ci];
-        double dx2 = (Math.abs(lonRho[cj][cip1] - lonRho[cj][ci]) > 180.d)
-                ? 360.d + (lonRho[cj][cip1] - lonRho[cj][ci])
-                : lonRho[cj][cip1] - lonRho[cj][ci];
+        double dy1 = latitude[cjp1] - latitude[cj];
+        double dy2 = latitude[cj] - latitude[cj];
+        double dx2 = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
+                ? 360.d + (longitude[cip1] - longitude[ci])
+                : longitude[cip1] - longitude[ci];
 
-        double c1 = lon * dy1 - lat * dx1;
-        double c2 = lonRho[cj][ci] * dy2 - latRho[cj][ci] * dx2;
-        double deltax = (c1 * dx2 - c2 * dx1) / (dx2 * dy1 - dy2 * dx1);
-        deltax = (deltax - lonRho[cj][ci]) / dx2;
+        double c1 = lon * dy1;
+        double deltax = (c1 * dx2) / (dx2 * dy1);
+        deltax = (deltax - longitude[ci]) / dx2;
         double xgrid = (double) ci + Math.min(Math.max(0.d, deltax), 1.d);
 
-        c1 = lonRho[cj][ci] * dy1 - latRho[cj][ci] * dx1;
-        c2 = lon * dy2 - lat * dx2;
-        double deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1 - dy2 * dx1);
-        deltay = (deltay - latRho[cj][ci]) / dy1;
+        c1 = longitude[ci] * dy1;
+        double c2 = lon * dy2 - lat * dx2;
+        double deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1);
+        deltay = (deltay - latitude[cj]) / dy1;
         double ygrid = (double) cj + Math.min(Math.max(0.d, deltay), 1.d);
 
         return (new double[]{xgrid, ygrid});
@@ -929,9 +690,6 @@ public class Mercator2dDataset extends AbstractDataset {
     private void sortInputFiles() throws IOException {
 
         String path = IOTools.resolvePath(getParameter("input_path"));
-        File file = new File(path);
-
-        file_mask = checkExistenceAndUnicity(file, getParameter("byte_mask_pattern"));
         listUFiles = getInputList(path, getParameter("gridu_pattern"));
         listVFiles = getInputList(path, getParameter("gridv_pattern"));
     }
@@ -968,7 +726,7 @@ public class Mercator2dDataset extends AbstractDataset {
         }
         ncV = NetcdfDataset.openDataset(listVFiles.get(index));
 
-        nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
+        nbTimeRecords = ncU.findVariable(strTime).getShape(0);
     }
 
     private int getIndexNextFile(long time, int indexCurrent) throws IOException {
@@ -1021,34 +779,22 @@ public class Mercator2dDataset extends AbstractDataset {
         String filename = "";
         NetcdfFile nc;
         Array timeArr;
-        long time_r0, time_rf;
+        double time_r0, time_rf;
 
         try {
             filename = listUFiles.get(index);
             nc = NetcdfDataset.openDataset(filename);
             timeArr = nc.findVariable(strTime).read();
-            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                    timeArr.getShape()[0] - 1)));
+            time_r0 = timeArr.getDouble(timeArr.getIndex().set(0))*3600.d;
+            time_rf = timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1))*3600.d;
             nc.close();
 
             return (time >= time_r0 && time < time_rf);
-            /*switch (time_arrow) {
-             case 1:
-             return (time >= time_r0 && time < time_rf);
-             case -1:
-             return (time > time_r0 && time <= time_rf);
-             }*/
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                    + e.getCause());
+            throw new IOException("Problem reading file " + filename, e);
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : "
-                    + e.getCause());
+            throw new IOException("Unable to read " + strTime + " variable in file " + filename, e);
         }
-        //return false;
-
     }
 
     /**
@@ -1066,27 +812,23 @@ public class Mercator2dDataset extends AbstractDataset {
         NetcdfFile nc;
         String filename = "";
         Array timeArr;
-        long[] time_nc = new long[2];
+        double[] time_nc = new double[2];
 
         try {
             for (int i = 0; i < 2; i++) {
                 filename = listUFiles.get(index + i);
                 nc = NetcdfDataset.openDataset(filename);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                        0)));
+                time_nc[i] = timeArr.getDouble(timeArr.getIndex().set(0))*3600.d;
                 nc.close();
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
                 return true;
             }
         } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                    + e.getCause());
+            throw new IOException("Problem reading file " + filename, e);
         } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : "
-                    + e.getCause());
+            throw new IOException("Unable to read " + strTime + " variable in file " + filename, e);
         }
         return false;
     }
@@ -1098,22 +840,21 @@ public class Mercator2dDataset extends AbstractDataset {
      * @return an int, the current rank of the NetCDF dataset for time dimension
      * @throws an IOException if an error occurs while reading the input file
      *
-     * pverley pour chourdin: remplacer ncIn par le fichier OPA concerné.
      */
-    int findCurrentRank(long time) throws Exception {
+    private int findCurrentRank(long time) throws Exception {
 
         int lrank = 0;
-        long time_rank;
+        double time_rank;
         Array timeArr;
         try {
             timeArr = ncU.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+            time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank))*3600.d;
             while (time >= time_rank) {
                 if (time_arrow < 0 && time == time_rank) {
                     break;
                 }
                 lrank++;
-                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
+                time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank))*3600.d;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
@@ -1230,7 +971,7 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     @Override
     public double getLat(int i, int j) {
-        return latRho[j][i];
+        return latitude[j];
     }
 
     /**
@@ -1242,7 +983,7 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     @Override
     public double getLon(int i, int j) {
-        return lonRho[j][i];
+        return longitude[i];
     }
 
     /**
@@ -1287,21 +1028,21 @@ public class Mercator2dDataset extends AbstractDataset {
         boolean hasVerticalDim = false;
         switch (variable.getShape().length) {
             case 4:
-                origin = new int[]{rank, 0, jpo, ipo};
+                origin = new int[]{rank, 0, 0, 0};
                 shape = new int[]{1, 1, ny, nx};
                 hasVerticalDim = true;
                 break;
             case 2:
-                origin = new int[]{jpo, ipo};
+                origin = new int[]{0, 0};
                 shape = new int[]{ny, nx};
                 break;
             case 3:
                 if (!variable.isUnlimited()) {
-                    origin = new int[]{0, jpo, ipo};
+                    origin = new int[]{0, 0, 0};
                     shape = new int[]{1, ny, nx};
                     hasVerticalDim = true;
                 } else {
-                    origin = new int[]{rank, jpo, ipo};
+                    origin = new int[]{rank, 0, 0};
                     shape = new int[]{1, ny, nx};
                 }
                 break;

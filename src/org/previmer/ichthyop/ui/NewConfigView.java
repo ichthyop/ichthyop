@@ -196,6 +196,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode2.add(treeNode3);
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OSCAR);
         treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MERCATOR2D);
+        treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
         templateTree.setModel(new DefaultTreeModel(treeNode1));
     }
@@ -487,7 +489,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         OPA3D_NEMO,
         SYMPHONIE,
         GENERIC,
-        OSCAR;
+        OSCAR,
+        MERCATOR2D;
         /* variables */
         private final String longName;
         private final String description;

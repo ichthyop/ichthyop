@@ -439,11 +439,11 @@ public class WMSMapper extends JXMapKit {
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
 
-                drawRegion(g, map);
-                drawZones(g, map);
-                if (gridVisible) {
-                    drawGrid(g, map);
-                }
+//                drawRegion(g, map);
+//                drawZones(g, map);
+//                if (gridVisible) {
+//                    drawGrid(g, map);
+//                }
                 g.dispose();
             }
         };
