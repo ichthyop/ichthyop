@@ -440,7 +440,7 @@ public class WMSMapper extends JXMapKit {
                 g.translate(-rect.x, -rect.y);
 
 //                drawRegion(g, map);
-//                drawZones(g, map);
+                drawZones(g, map);
 //                if (gridVisible) {
 //                    drawGrid(g, map);
 //                }
