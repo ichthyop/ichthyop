@@ -189,8 +189,8 @@ public class OscarDataset extends AbstractDataset {
         double dlonMin = Double.MAX_VALUE;
         int iclosest = -1;
         for (int i = 0; i < nlon; i++) {
-            if (Math.abs(lon%360 - longitude[i]%360) < dlonMin) {
-                dlonMin = Math.abs(lon%360 - longitude[i]%360);
+            if (Math.abs(lon % 360 - longitude[i] % 360) < dlonMin) {
+                dlonMin = Math.abs(lon % 360 - longitude[i] % 360);
                 iclosest = i;
             }
         }
@@ -229,6 +229,7 @@ public class OscarDataset extends AbstractDataset {
                 u_tp1[j][i] = arr.getDouble(index.set(j, i));
             }
         }
+        u_tp0 = u_tp1;
         // Read V variable
         arr = ncIn.findVariable(strV).read(new int[]{tn - 1, 0, 0, 0}, new int[]{1, 1, nlat, nlon}).reduce().flip(0);
         index = arr.getIndex();
@@ -238,6 +239,7 @@ public class OscarDataset extends AbstractDataset {
                 v_tp1[j][i] = arr.getDouble(index.set(j, i));
             }
         }
+        v_tp0 = v_tp1;
     }
 
     private void readLonLat() throws IOException {
@@ -285,12 +287,12 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public double depth2z(double x, double y, double depth) {
-        throw new UnsupportedOperationException(MarsCommon.ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     @Override
     public double z2depth(double x, double y, double z) {
-        throw new UnsupportedOperationException(MarsCommon.ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     @Override
@@ -304,7 +306,6 @@ public class OscarDataset extends AbstractDataset {
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
         double CO = 0.d;
-        double x;
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 int ci = i + ii;
@@ -316,8 +317,10 @@ public class OscarDataset extends AbstractDataset {
                 }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
-                du += x * co / dlon[ci];
+                double x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
+                if (!Double.isNaN(x)) {
+                    du += x * co / dlon[ci];
+                }
             }
         }
 
@@ -338,7 +341,6 @@ public class OscarDataset extends AbstractDataset {
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
         double CO = 0.d;
-        double x;
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 int ci = i + ii;
@@ -350,8 +352,10 @@ public class OscarDataset extends AbstractDataset {
                 }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
-                x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
-                dv += x * co / dlat[j + jj];
+                double x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
+                if (!Double.isNaN(x)) {
+                    dv += x * co / dlat[j + jj];
+                }
             }
         }
 
@@ -363,7 +367,7 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException(MarsCommon.ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     @Override
@@ -425,7 +429,7 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public int get_nz() {
-        throw new UnsupportedOperationException(MarsCommon.ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     @Override

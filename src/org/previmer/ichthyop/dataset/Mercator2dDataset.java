@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
-import org.previmer.ichthyop.dataset.MarsCommon.ErrorMessage;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
@@ -208,7 +207,9 @@ public class Mercator2dDataset extends AbstractDataset {
                     double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                     CO += co;
                     x = (1.d - x_euler) * u_tp0[j + jj][ci] + x_euler * u_tp1[j + jj][ci];
-                    du += x * co / dxu[j + jj];
+                    if (!Double.isNaN(x)) {
+                        du += x * co / dxu[j + jj];
+                    }
                 }
             }
         }
@@ -239,7 +240,9 @@ public class Mercator2dDataset extends AbstractDataset {
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
                 x = (1.d - x_euler) * v_tp0[j + jj][ci] + x_euler * v_tp1[j + jj][ci];
-                dv += x * co / dyv;
+                if (!Double.isNaN(x)) {
+                    dv += x * co / dyv;
+                }
             }
         }
 
@@ -481,12 +484,12 @@ public class Mercator2dDataset extends AbstractDataset {
 
     @Override
     public double depth2z(double x, double y, double depth) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     @Override
     public double z2depth(double x, double y, double z) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     /**
@@ -785,8 +788,8 @@ public class Mercator2dDataset extends AbstractDataset {
             filename = listUFiles.get(index);
             nc = NetcdfDataset.openDataset(filename);
             timeArr = nc.findVariable(strTime).read();
-            time_r0 = timeArr.getDouble(timeArr.getIndex().set(0))*3600.d;
-            time_rf = timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1))*3600.d;
+            time_r0 = timeArr.getDouble(timeArr.getIndex().set(0)) * 3600.d;
+            time_rf = timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1)) * 3600.d;
             nc.close();
 
             return (time >= time_r0 && time < time_rf);
@@ -819,7 +822,7 @@ public class Mercator2dDataset extends AbstractDataset {
                 filename = listUFiles.get(index + i);
                 nc = NetcdfDataset.openDataset(filename);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = timeArr.getDouble(timeArr.getIndex().set(0))*3600.d;
+                time_nc[i] = timeArr.getDouble(timeArr.getIndex().set(0)) * 3600.d;
                 nc.close();
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
@@ -848,13 +851,13 @@ public class Mercator2dDataset extends AbstractDataset {
         Array timeArr;
         try {
             timeArr = ncU.findVariable(strTime).read();
-            time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank))*3600.d;
+            time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank)) * 3600.d;
             while (time >= time_rank) {
                 if (time_arrow < 0 && time == time_rank) {
                     break;
                 }
                 lrank++;
-                time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank))*3600.d;
+                time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank)) * 3600.d;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
@@ -909,7 +912,7 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     @Override
     public int get_nz() {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     /**
@@ -1057,7 +1060,7 @@ public class Mercator2dDataset extends AbstractDataset {
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     @Override
