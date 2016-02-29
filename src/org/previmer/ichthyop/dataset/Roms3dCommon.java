@@ -390,15 +390,15 @@ abstract public class Roms3dCommon extends RomsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co;
-        double x;
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
-                    x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                    dw += 2.d * x * co / (z_w_tp0[Math.min(k + kk + 1, nz)][j + jj][i + ii] - z_w_tp0[Math.max(k + kk - 1, 0)][j + jj][i + ii]);
+                    double x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
+                    if (!Double.isNaN(x)) {
+                        dw += 2.d * x * co / (z_w_tp0[Math.min(k + kk + 1, nz)][j + jj][i + ii] - z_w_tp0[Math.max(k + kk - 1, 0)][j + jj][i + ii]);
+                    }
                 }
             }
         }
@@ -425,19 +425,18 @@ abstract public class Roms3dCommon extends RomsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co;
-        double x;
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
-                    co = Math.abs((1.d - (double) ii - dx)
+                    double co = Math.abs((1.d - (double) ii - dx)
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!Float.isNaN(v_tp0[k + kk][j + jj - 1][i + ii])) {
-                        x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                    double x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                    if (!Double.isNaN(x)) {
                         dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
                     }
+
                 }
             }
         }
@@ -465,19 +464,18 @@ abstract public class Roms3dCommon extends RomsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co;
-        double x;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((.5d - (double) ii - dx)
+                    double co = Math.abs((.5d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Float.isNaN(u_tp0[k + kk][j + jj][i + ii - 1]))) {
-                        x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                    double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                    if (!Double.isNaN(x)) {
                         du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
                     }
+
                 }
             }
         }

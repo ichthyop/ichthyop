@@ -108,7 +108,8 @@ public class HDispAction extends AbstractAction {
         double Rx = 2.d * random.nextDouble() - 1.d;
         double Ry = 2.d * random.nextDouble() - 1.d;
         double dL = 0.5d * (getSimulationManager().getDataset().getdxi(j, i) + getSimulationManager().getDataset().getdeta(j, i));
-        double cff = Math.sqrt(2.d * dt) * epsilon16 * Math.pow(dL, 2.d / 3.d);
+        // abs(dt) because it is negative integer in backward simulation
+        double cff = Math.sqrt(2.d * Math.abs(dt)) * epsilon16 * Math.pow(dL, 2.d / 3.d);
         double dx = Rx * cff / getSimulationManager().getDataset().getdxi(j, i);
         double dy = Ry * cff / getSimulationManager().getDataset().getdeta(j, i);
         return new double[]{dx, dy};

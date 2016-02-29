@@ -1076,8 +1076,6 @@ public class IchthyopView extends FrameView
                     if (getSimulationManager().isStopped()) {
                         break;
                     }
-                    /* step simulation */
-                    getSimulationManager().getSimulation().step();
                     /* Print message progress */
                     StringBuilder msg = new StringBuilder();
                     msg.append(getSimulationManager().getTimeManager().stepToString());
@@ -1088,7 +1086,11 @@ public class IchthyopView extends FrameView
                         msg.append(getSimulationManager().getTimeManager().timeToString());
                         msg.append(")");
                     }
+                    // Display current step 
                     setMessage(msg.toString());
+                    /* step simulation */
+                    getSimulationManager().getSimulation().step();
+                    // Publish progress when current step is over
                     setProgress(getSimulationManager().progressCurrent());
                     publish(getSimulationManager().progressCurrent());
 
