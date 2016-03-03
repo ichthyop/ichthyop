@@ -36,6 +36,7 @@ public class Roms3dDataset extends Roms3dCommon {
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
+            readTimeLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
         setAllFieldsTp1AtTime(rank);
