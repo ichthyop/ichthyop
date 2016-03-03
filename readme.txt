@@ -22,12 +22,15 @@ No JAR (Java executable file) is provided for the alpha version, the source code
 Changes since Ichthyop 3.2
 
 Bug fixes:
+* Horizontal dispersion now works in backward mode
 * Multi release events works in backward mode
 * NaN values for U and V velocities are handled with Mars2d
 * Zone display in Step 3 Mapper has been improved. A zone is now drawed cell by cell, as it is done in the preview. The approach has a few inconvinients though (i) when zones overlap the last one drawn will cover the other ones; (ii) the zone defined in the output NetCDF files prior to this commit will not be drawable anymore; (iii) the WMSMapper.java needs the Dataset to be initialized to be able to draw the zones. Which is fine if the user draw the zones just after running the simulation. It will be an issue when the mapping is down at an other time. Nonetheless the user can still load the corresponding configuration file and click on Preview to initialize the dataset.
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* New plugin for Mercator2D data (from local NetCDF files)
+* New plugin for OSCAR data (from local NetCDF files and from OpenDAP)
 * Vertical migration: user can define depth at day and depth at night as functions of age, provided in CSV files.
 * Multithread option in Population.java can be set to TRUE. Experimental feature though, might not work satisfactorily yet.
 * New growth function SoleGrowthAction.java dlength = c1[stage] * Math.pow(temperature, c2[stage]) * dt_day. c1 and c2 are user defined and depend on user defined length stages
