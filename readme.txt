@@ -7,8 +7,8 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.3alpha (2015/12/16) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r857
+Release: 3.3alpha (2016/03/25) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r878
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
@@ -29,6 +29,7 @@ Bug fixes:
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* New plugin for NOVELTIS data (from local NetCDF files)
 * New plugin for Mercator2D data (from local NetCDF files)
 * New plugin for OSCAR data (from local NetCDF files and from OpenDAP)
 * Vertical migration: user can define depth at day and depth at night as functions of age, provided in CSV files.
