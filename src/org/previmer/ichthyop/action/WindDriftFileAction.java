@@ -304,8 +304,8 @@ public class WindDriftFileAction extends WindDriftAction {
         String filename = listInputFiles.get(index);
         NetcdfFile nc = NetcdfDataset.openDataset(filename);
         Array timeArr = nc.findVariable(strTime).read();
-        double time_r0 = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
-        double time_rf = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(
+        double time_r0 = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
+        double time_rf = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(
                 timeArr.getShape()[0] - 1))));
         nc.close();
 
@@ -324,7 +324,7 @@ public class WindDriftFileAction extends WindDriftAction {
                 filename = listInputFiles.get(index + i);
                 nc = NetcdfDataset.openFile(filename, null);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds(conversion2seconds(
+                time_nc[i] = skipSeconds(conversion2seconds(
                         timeArr.getDouble(timeArr.getIndex().set(0))));
                 nc.close();
             }
@@ -419,13 +419,13 @@ public class WindDriftFileAction extends WindDriftAction {
         double time_rank;
         try {
             Array timeArr = ncIn.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
+            time_rank = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
             while (time >= time_rank) {
                 if (time_arrow < 0 && time == time_rank) {
                     break;
                 }
                 lrank++;
-                time_rank = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
+                time_rank = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;

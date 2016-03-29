@@ -70,8 +70,8 @@ public class WindDriftURLAction extends WindDriftFileAction {
             throw ioex;
         }
         int ntime = timeArr.getShape()[0];
-        double time0 = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(0))));
-        double timeN = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1))));
+        double time0 = skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(0))));
+        double timeN = skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1))));
         if (time < time0 || time > timeN) {
             StringBuilder msg = new StringBuilder();
             msg.append("{Wind dataset} Time value ");

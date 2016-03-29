@@ -77,4 +77,8 @@ public class WindDriftAction extends AbstractAction {
         dWi[1] = convention * wind_factor * (dx * Math.sin(angle) + dy * Math.cos(angle));
         return dWi;
     }
+    
+    double skipSeconds(double time) {
+        return 100.d * Math.floor(time / 100.d);
+    }
 }
