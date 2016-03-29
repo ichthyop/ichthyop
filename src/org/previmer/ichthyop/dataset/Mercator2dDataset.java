@@ -4,20 +4,14 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
-import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  *
@@ -97,7 +91,7 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     private double[] dxu;
     private double dyv;
-    private ArrayList<String> listUFiles, listVFiles;
+    private List<String> listUFiles, listVFiles;
     private NetcdfFile ncU, ncV;
 
 ////////////////////////////
@@ -300,7 +294,16 @@ public class Mercator2dDataset extends AbstractDataset {
 
         loadParameters();
         clearRequiredVariables();
-        sortInputFiles();
+        // List U and V files
+        listUFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridu_pattern"));
+        if (!skipSorting()) {
+            DatasetUtil.sort(listUFiles, strTime, timeArrow());
+        }
+        listVFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridv_pattern"));
+        if (!skipSorting()) {
+            DatasetUtil.sort(listVFiles, strTime, timeArrow());
+        }
+        // Open first file
         open(0);
         readConstantField();
         getDimGeogArea();
@@ -313,11 +316,14 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public void loadParameters() {
 
+        // Variable names
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strTime = getParameter("field_var_time");
+        // Time arrow
+        time_arrow = timeArrow();
     }
 
     /**
@@ -378,10 +384,9 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public void init() throws Exception {
 
-        time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        open(indexFile = getIndexFile(t0));
-        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
+        open(indexFile = DatasetUtil.index(listUFiles, t0, time_arrow, strTime));
+        setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncU, strTime, time_arrow));
         time_tp1 = t0;
     }
 
@@ -644,74 +649,6 @@ public class Mercator2dDataset extends AbstractDataset {
     }
 
     /**
-     * Gets the list of NetCDF input files that satisfy the file filter and
-     * sorts them according to the chronological order induced by the
-     * {@code NCComparator}.
-     *
-     * @param path a String, the path of the folder that contains the model
-     * input files.
-     * @return an ArrayList, the list of the input files sorted in time.
-     * @throws an IOException if an exception occurs while scanning the input
-     * files.
-     */
-    private ArrayList<String> getInputList(String path, String fileMask) throws IOException {
-
-        File inputPath = new File(path);
-        //String fileMask = Configuration.getFileMask();
-        File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
-        if (listFile.length == 0) {
-            throw new IOException(path + " contains no file matching mask " + fileMask);
-        }
-        ArrayList<String> list = new ArrayList(listFile.length);
-        for (File file : listFile) {
-            list.add(file.toString());
-        }
-        if (list.size() > 1) {
-            boolean skipSorting;
-            try {
-                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-            } catch (Exception ex) {
-                skipSorting = false;
-            }
-            if (skipSorting) {
-                Collections.sort(list);
-            } else {
-                Collections.sort(list, new NCComparator(strTime));
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Sort OPA input files. First make sure that there is at least and only one
-     * file matching the hgr, zgr and byte mask patterns. Then list the gridU,
-     * gridV and gridT files.
-     *
-     * @param path
-     * @throws java.io.IOException
-     */
-    private void sortInputFiles() throws IOException {
-
-        String path = IOTools.resolvePath(getParameter("input_path"));
-        listUFiles = getInputList(path, getParameter("gridu_pattern"));
-        listVFiles = getInputList(path, getParameter("gridv_pattern"));
-    }
-
-    private String checkExistenceAndUnicity(File file, String pattern) throws IOException {
-
-        File[] listFiles = file.listFiles(new MetaFilenameFilter(pattern));
-        int nbFiles = listFiles.length;
-
-        if (nbFiles == 0) {
-            throw new IOException("No file matching pattern " + pattern);
-        } else if (nbFiles > 1) {
-            throw new IOException("More than one file matching pattern " + pattern);
-        }
-
-        return listFiles[0].toString();
-    }
-
-    /**
      * Loads the NetCDF dataset from the specified filename.
      *
      * @param filename a String that can be a local pathname or an OPeNDAP URL.
@@ -719,152 +656,17 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     private void open(int index) throws IOException {
 
-        getLogger().info("Opening NEMO dataset");
+        
         if (ncU != null) {
             ncU.close();
         }
-        ncU = NetcdfDataset.openDataset(listUFiles.get(index));
+        ncU = DatasetUtil.openFile(listUFiles.get(index), true);
         if (ncV != null) {
             ncV.close();
         }
-        ncV = NetcdfDataset.openDataset(listVFiles.get(index));
+        ncV = DatasetUtil.openFile(listVFiles.get(index), true);
 
         nbTimeRecords = ncU.findVariable(strTime).getShape(0);
-    }
-
-    private int getIndexNextFile(double time, int indexCurrent) throws IOException {
-
-        int index = indexCurrent - (1 - time_arrow) / 2;
-        boolean noNext = (listUFiles.size() == 1) || (index < 0)
-                || (index >= listUFiles.size() - 1);
-        if (noNext) {
-            throw new IOException("Unable to find any file following "
-                    + listUFiles.get(indexCurrent));
-        }
-        if (isTimeBetweenFile(time, index)) {
-            return indexCurrent + time_arrow;
-        }
-        throw new IOException("Unable to find any file following "
-                + listUFiles.get(indexCurrent));
-    }
-
-    private int getIndexFile(double time) throws IOException {
-
-        int indexLast = listUFiles.size() - 1;
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                return i;
-            } else if (isTimeBetweenFile(time, i)) {
-                return (i - (time_arrow - 1) / 2);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            return indexLast;
-        }
-
-        throw new IOException("Time value " + time + " not contained among NetCDF files");
-    }
-
-    /**
-     * Determines whether or not the specified time is contained within the ith
-     * input file.
-     *
-     * @param time a double, the current time [second] of the simulation
-     * @param index an int, the index of the file in the {@code listInputFiles}
-     * @return <code>true</code> if time is contained within the file
-     * <code>false</code>
-     * @throws an IOException if an error occurs while reading the input file
-     */
-    private boolean isTimeIntoFile(double time, int index) throws IOException {
-
-        String filename = "";
-        NetcdfFile nc;
-        Array timeArr;
-        double time_r0, time_rf;
-
-        try {
-            filename = listUFiles.get(index);
-            nc = NetcdfDataset.openDataset(filename);
-            timeArr = nc.findVariable(strTime).read();
-            time_r0 = timeArr.getDouble(timeArr.getIndex().set(0)) * 3600.d;
-            time_rf = timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1)) * 3600.d;
-            nc.close();
-
-            return (time >= time_r0 && time < time_rf);
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename, e);
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime + " variable in file " + filename, e);
-        }
-    }
-
-    /**
-     * Determines whether or not the specified time is contained between the ith
-     * and the (i+1)th input files.
-     *
-     * @param time a double, the current time [second] of the simulation
-     * @param index an int, the index of the file in the {@code listInputFiles}
-     * @return <code>true</code> if time is contained between the two files
-     * <code>false</code> otherwise.
-     * @throws an IOException if an error occurs while reading the input files
-     */
-    private boolean isTimeBetweenFile(double time, int index) throws IOException {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        double[] time_nc = new double[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listUFiles.get(index + i);
-                nc = NetcdfDataset.openDataset(filename);
-                timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = timeArr.getDouble(timeArr.getIndex().set(0)) * 3600.d;
-                nc.close();
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename, e);
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime + " variable in file " + filename, e);
-        }
-        return false;
-    }
-
-    /**
-     * Finds the index of the dataset time variable such as      <code>time(rank) <= time < time(rank + 1)
-     *
-     * @param time a double, the current time [second] of the simulation
-     * @return an int, the current rank of the NetCDF dataset for time dimension
-     * @throws an IOException if an error occurs while reading the input file
-     *
-     */
-    private int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        double time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncU.findVariable(strTime).read();
-            time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank)) * 3600.d;
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank)) * 3600.d;
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
     }
 
     /*
@@ -1016,7 +818,7 @@ public class Mercator2dDataset extends AbstractDataset {
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(indexFile = getIndexNextFile(time, indexFile));
+            open(indexFile = DatasetUtil.next(listUFiles, indexFile, time_arrow));
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
 

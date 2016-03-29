@@ -5,6 +5,7 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.List;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import static org.previmer.ichthyop.io.IOTools.isDirectory;
@@ -14,6 +15,9 @@ import static org.previmer.ichthyop.io.IOTools.isDirectory;
  * @author pverley
  */
 public class Roms3dDataset extends Roms3dCommon {
+    
+    private List<String> ncfiles;
+    private int ncindex;
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
@@ -35,7 +39,8 @@ public class Roms3dDataset extends Roms3dCommon {
         }
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
+            ncindex = DatasetUtil.next(ncfiles, ncindex, time_arrow);
+            ncIn = DatasetUtil.openFile(ncfiles.get(ncindex), true);
             readTimeLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
@@ -45,14 +50,11 @@ public class Roms3dDataset extends Roms3dCommon {
     @Override
     void openDataset() throws Exception {
 
-        DatasetIO.setTimeField(strTime);
-        boolean skipSorting;
-        try {
-            skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-        } catch (Exception ex) {
-            skipSorting = false;
+        ncfiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        if (!skipSorting()) {
+            DatasetUtil.sort(ncfiles, strTime, timeArrow());
         }
-        ncIn = DatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"), skipSorting);
+        ncIn = DatasetUtil.openFile(ncfiles.get(0), true);
         readTimeLength();
 
         try {
@@ -72,9 +74,10 @@ public class Roms3dDataset extends Roms3dCommon {
     @Override
     void setOnFirstTime() throws Exception {
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
+        ncindex = DatasetUtil.index(ncfiles, t0, timeArrow(), strTime);
+        ncIn = DatasetUtil.openFile(ncfiles.get(ncindex), true);
         readTimeLength();
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
 }

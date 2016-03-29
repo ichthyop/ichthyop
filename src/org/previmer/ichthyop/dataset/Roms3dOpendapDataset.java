@@ -26,15 +26,14 @@ public class Roms3dOpendapDataset extends Roms3dCommon {
 
     @Override
     void openDataset() throws Exception {
-        ncIn = DatasetIO.openURL(getParameter("opendap_url"));
+        ncIn = DatasetUtil.openURL(getParameter("opendap_url"), true);
         readTimeLength();
     }
 
     @Override
     void setOnFirstTime() throws Exception {
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        DatasetIO.checkInitTime(ncIn, strTime);
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
 

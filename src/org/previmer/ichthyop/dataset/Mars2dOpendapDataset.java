@@ -20,15 +20,14 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
      */
     @Override
     void openDataset() throws Exception {
-        ncIn = DatasetIO.openURL(getParameter("opendap_url"));
+        ncIn = DatasetUtil.openURL(getParameter("opendap_url"), true);
         readTimeLength();
     }
 
     @Override
     void setOnFirstTime() throws Exception {
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        DatasetIO.checkInitTime(ncIn, strTime);
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow);
         time_tp1 = t0;
     }
 
@@ -36,15 +35,14 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         double time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
-        int time_arrow = (int) Math.signum(e.getSource().get_dt());
 
-        if (time_arrow * time < time_arrow * time_tp1) {
+        if (timeArrow * time < timeArrow * time_tp1) {
             return;
         }
 
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
-        rank += time_arrow;
+        rank += timeArrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             throw new IndexOutOfBoundsException(ErrorMessage.TIME_OUTOF_BOUND.message());
         }

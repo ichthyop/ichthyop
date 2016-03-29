@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.manager.TimeManager;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -105,5 +106,17 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
                 getLogger().log(Level.WARNING, msg.toString(), ex);
             }
         }
+    }
+
+    boolean skipSorting() {
+        try {
+            return Boolean.valueOf(getParameter("skip_sorting"));
+        } catch (NullPointerException ex ) {
+            return false;
+        }
+    }
+    
+    int timeArrow() {
+        return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
     }
 }

@@ -6,15 +6,13 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -151,7 +149,7 @@ public class NemoDataset extends AbstractDataset {
     private double[][] e1t, e2t, e1v, e2u;
     private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     private String str_gdepT, str_gdepW;
-    private ArrayList<String> listUFiles, listVFiles, listWFiles, listTFiles;
+    private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
     private String file_hgr, file_zgr, file_mask;
     private boolean isGridInfoInOneFile;
@@ -397,12 +395,12 @@ public class NemoDataset extends AbstractDataset {
         } else {
             // Compute gdepw (approximation)
             for (int k = 1; k < nz; k++) {
-                gdepW[k] = 0.5 * (gdepT[k-1] + gdepT[k]);
+                gdepW[k] = 0.5 * (gdepT[k - 1] + gdepT[k]);
             }
             gdepW[0] = gdepT[0];
-            gdepW[nz] = 0.; 
+            gdepW[nz] = 0.;
         }
-        
+
     }
 
     private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
@@ -888,6 +886,7 @@ public class NemoDataset extends AbstractDataset {
             enhanced = true;
             getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced mode (scale,offset,missing).");
         }
+        time_arrow = timeArrow();
     }
 
     /**
@@ -1028,11 +1027,10 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public void init() throws Exception {
 
-        time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        open(indexFile = getIndexFile(t0));
+        open(indexFile = DatasetUtil.index(listUFiles, t0, time_arrow, strTime));
         checkRequiredVariable(ncT);
-        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
+        setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncU, strTime, time_arrow));
         time_tp1 = t0;
     }
 
@@ -1071,8 +1069,7 @@ public class NemoDataset extends AbstractDataset {
         }
 
         try {
-            Array xTimeTp1 = ncU.findVariable(strTime).read();
-            time_tp1 = DatasetUtil.skipSeconds(xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank)));
+            time_tp1 = DatasetUtil.timeAtRank(ncU, strTime, rank);
         } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -1538,47 +1535,6 @@ public class NemoDataset extends AbstractDataset {
     }
 
     /**
-     * Gets the list of NetCDF input files that satisfy the file filter and
-     * sorts them according to the chronological order induced by the
-     * {@code NCComparator}.
-     *
-     * @param path a String, the path of the folder that contains the model
-     * input files.
-     * @return an ArrayList, the list of the input files sorted in time.
-     * @throws an IOException if an exception occurs while scanning the input
-     * files.
-     */
-    private ArrayList<String> getInputList(String path, String fileMask) throws IOException {
-
-        ArrayList<String> list;
-
-        File inputPath = new File(path);
-        //String fileMask = Configuration.getFileMask();
-        File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
-        if (listFile.length == 0) {
-            getLogger().log(Level.WARNING, "Folder {0} contains no file matching mask {1}", new Object[]{path, fileMask});
-        }
-        list = new ArrayList(listFile.length);
-        for (File file : listFile) {
-            list.add(file.toString());
-        }
-        if (list.size() > 1) {
-            boolean skipSorting;
-            try {
-                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-            } catch (Exception ex) {
-                skipSorting = false;
-            }
-            if (skipSorting) {
-                Collections.sort(list);
-            } else {
-                Collections.sort(list, new NCComparator(strTime));
-            }
-        }
-        return list;
-    }
-
-    /**
      * Sort OPA input files. First make sure that there is at least and only one
      * file matching the hgr, zgr and byte mask patterns. Then list the gridU,
      * gridV and gridT files.
@@ -1598,11 +1554,28 @@ public class NemoDataset extends AbstractDataset {
         isGridInfoInOneFile = (new File(file_mask).equals(new File(file_hgr)))
                 && (new File(file_mask).equals(new File(file_zgr)));
 
-        listUFiles = getInputList(path, getParameter("gridu_pattern"));
-        listVFiles = getInputList(path, getParameter("gridv_pattern"));
-        listTFiles = getInputList(path, getParameter("gridt_pattern"));
+        listUFiles = DatasetUtil.list(path, getParameter("gridu_pattern"));
+        if (listUFiles.isEmpty()) {
+            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridu_pattern"));
+        }
+        listVFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridv_pattern"));
+        if (listVFiles.isEmpty()) {
+            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridv_pattern"));
+        }
+        listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
         if (readW) {
-            listWFiles = getInputList(path, getParameter("gridw_pattern"));
+            listWFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridw_pattern"));
+            if (listWFiles.isEmpty()) {
+                throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridw_pattern"));
+            }
+        }
+        if (!skipSorting()) {
+            DatasetUtil.sort(listUFiles, strTime, time_arrow);
+            DatasetUtil.sort(listVFiles, strTime, time_arrow);
+            DatasetUtil.sort(listTFiles, strTime, time_arrow);
+            if (readW) {
+                DatasetUtil.sort(listWFiles, strTime, time_arrow);
+            }
         }
     }
 
@@ -1632,169 +1605,33 @@ public class NemoDataset extends AbstractDataset {
         if (ncU != null) {
             ncU.close();
         }
-        ncU = NetcdfDataset.openDataset(listUFiles.get(index), enhanced, null);
+        ncU = DatasetUtil.openFile(listUFiles.get(index), enhanced);
         if (ncV != null) {
             ncV.close();
         }
-        ncV = NetcdfDataset.openDataset(listVFiles.get(index), enhanced, null);
+        if (listUFiles.get(index).equals(listVFiles.get(index))) {
+            ncV = ncU;
+        } else {
+            ncV = DatasetUtil.openFile(listVFiles.get(index), enhanced);
+        }
         if (readW) {
-            ncW = NetcdfDataset.openDataset(listWFiles.get(index), enhanced, null);
+            if (listUFiles.get(index).equals(listWFiles.get(index))) {
+                ncW = ncU;
+            } else {
+                ncW = DatasetUtil.openFile(listWFiles.get(index), enhanced);
+            }
         }
         if (ncT != null) {
             ncT.close();
         }
         if (!listTFiles.isEmpty()) {
-            ncT = NetcdfDataset.openDataset(listTFiles.get(index), enhanced, null);
+            if (listUFiles.get(index).equals(listTFiles.get(index))) {
+                ncT = ncU;
+            } else {
+                ncT = DatasetUtil.openFile(listTFiles.get(index), enhanced);
+            }
         }
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
-    }
-
-    private int getIndexNextFile(double time, int indexCurrent) throws IOException {
-
-        int index = indexCurrent - (1 - time_arrow) / 2;
-        boolean noNext = (listUFiles.size() == 1) || (index < 0)
-                || (index >= listUFiles.size() - 1);
-        if (noNext) {
-            throw new IOException("Unable to find any file following "
-                    + listUFiles.get(indexCurrent));
-        }
-        if (isTimeBetweenFile(time, index)) {
-            return indexCurrent + time_arrow;
-        }
-        throw new IOException("Unable to find any file following "
-                + listUFiles.get(indexCurrent));
-    }
-
-    private int getIndexFile(double time) throws IOException {
-
-        int indexLast = listUFiles.size() - 1;
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                return i;
-            } else if (isTimeBetweenFile(time, i)) {
-                return (i - (time_arrow - 1) / 2);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            return indexLast;
-        }
-
-        throw new IOException("Time value " + time + " not contained among NetCDF files");
-    }
-
-    /**
-     * Determines whether or not the specified time is contained within the ith
-     * input file.
-     *
-     * @param time a double, the current time [second] of the simulation
-     * @param index an int, the index of the file in the {@code listInputFiles}
-     * @return <code>true</code> if time is contained within the file
-     * <code>false</code>
-     * @throws an IOException if an error occurs while reading the input file
-     */
-    private boolean isTimeIntoFile(double time, int index) throws IOException {
-
-        String filename = "";
-        NetcdfFile nc;
-        Array timeArr;
-        double time_r0, time_rf;
-
-        try {
-            filename = listUFiles.get(index);
-            nc = NetcdfDataset.openDataset(filename, enhanced, null);
-            timeArr = nc.findVariable(strTime).read();
-            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
-            nc.close();
-
-            return (time >= time_r0 && time < time_rf);
-            /*switch (time_arrow) {
-             case 1:
-             return (time >= time_r0 && time < time_rf);
-             case -t1:
-             return (time > time_r0 && time <= time_rf);
-             }*/
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : " + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : " + e.getCause());
-        }
-        //return false;
-
-    }
-
-    /**
-     * Determines whether or not the specified time is contained between the ith
-     * and the (i+1)th input files.
-     *
-     * @param time a double, the current time [second] of the simulation
-     * @param index an int, the index of the file in the {@code listInputFiles}
-     * @return <code>true</code> if time is contained between the two files
-     * <code>false</code> otherwise.
-     * @throws an IOException if an error occurs while reading the input files
-     */
-    private boolean isTimeBetweenFile(double time, int index) throws IOException {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        double[] time_nc = new double[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listUFiles.get(index + i);
-                nc = NetcdfDataset.openDataset(filename, enhanced, null);
-                timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-                nc.close();
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                    + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : "
-                    + e.getCause());
-        }
-        return false;
-    }
-
-    /**
-     * Finds the index of the dataset time variable such as      <code>time(rank) <= time < time(rank + 1)
-     *
-     * @param time a double, the current time [second] of the simulation
-     * @return an int, the current rank of the NetCDF dataset for time dimension
-     * @throws an IOException if an error occurs while reading the input file
-     *
-     * pverley pour chourdin: remplacer ncIn par le fichier OPA concerné.
-     */
-    int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        double time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncU.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
     }
 
     /*
@@ -1959,7 +1796,7 @@ public class NemoDataset extends AbstractDataset {
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(indexFile = getIndexNextFile(time, indexFile));
+            open(indexFile = DatasetUtil.next(listUFiles, indexFile, time_arrow));
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
 

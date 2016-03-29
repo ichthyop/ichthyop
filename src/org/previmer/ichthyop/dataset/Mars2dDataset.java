@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.dataset;
 
+import java.util.List;
 import org.previmer.ichthyop.event.NextStepEvent;
 
 /**
@@ -11,17 +12,17 @@ import org.previmer.ichthyop.event.NextStepEvent;
  * @author pverley
  */
 public class Mars2dDataset extends Mars2dCommon {
+    
+    private List<String> files;
+    private int index;
 
     @Override
     void openDataset() throws Exception {
-        DatasetIO.setTimeField(strTime);
-        boolean skipSorting;
-            try {
-                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-            } catch (Exception ex) {
-                skipSorting = false;
-            }
-        ncIn = DatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"), skipSorting);
+        
+        files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        if (!skipSorting()) 
+            DatasetUtil.sort(files, strTime, timeArrow());
+        ncIn = DatasetUtil.openFile(files.get(0), true);
         readTimeLength();
     }
 
@@ -29,9 +30,10 @@ public class Mars2dDataset extends Mars2dCommon {
     void setOnFirstTime() throws Exception {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
+        index = DatasetUtil.index(files, t0, timeArrow, strTime);
+        ncIn = DatasetUtil.openFile(files.get(index), true);
         readTimeLength();
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow);
         time_tp1 = t0;
     }
 
@@ -39,20 +41,20 @@ public class Mars2dDataset extends Mars2dCommon {
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         double time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
-        int time_arrow = (int) Math.signum(e.getSource().get_dt());
 
-        if (time_arrow * time < time_arrow * time_tp1) {
+        if (timeArrow * time < timeArrow * time_tp1) {
             return;
         }
 
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
-        rank += time_arrow;
+        rank += timeArrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             ncIn.close();
-            ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
+            index = index = DatasetUtil.next(files, index, timeArrow);
+            ncIn = DatasetUtil.openFile(files.get(index), true);
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
+            rank = (1 - timeArrow) / 2 * (nbTimeRecords - 1);
         }
         setAllFieldsTp1AtTime(rank);
 

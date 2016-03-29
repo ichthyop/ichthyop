@@ -16,23 +16,16 @@
  */
 package org.previmer.ichthyop.dataset;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.event.NextStepEvent;
-import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  *
@@ -136,10 +129,11 @@ public class OscarDataset extends AbstractDataset {
         clearRequiredVariables();
         if (getParameter("source").toLowerCase().contains("opendap")) {
             opendap = true;
-            ncIn = openURL(getParameter("opendap_url"));
+            ncIn = DatasetUtil.openURL(getParameter("opendap_url"), true);
         } else {
             opendap = false;
-            ncIn = openLocation(getParameter("input_path"), getParameter("file_filter"), false);
+            listInputFiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+            ncIn = DatasetUtil.openFile(listInputFiles.get(0), true);
         }
         getDimNC();
         readLonLat();
@@ -496,45 +490,14 @@ public class OscarDataset extends AbstractDataset {
 
     void setOnFirstTime() throws Exception {
         // Time is expressed as number of days since origin in Oscar
-        double t0 = (double) getSimulationManager().getTimeManager().get_tO() / (3600.d * 24.d);
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         if (!opendap) {
-            ncIn = openFile(getFile(t0));
-        } else {
-            Array timeArr = ncIn.findVariable(strTime).read();
-            int ntime = timeArr.getShape()[0];
-            double time0 = timeArr.getDouble(timeArr.getIndex().set(0));
-            double timeN = timeArr.getDouble(timeArr.getIndex().set(ntime - 1));
-            if (t0 < time0 || t0 > timeN) {
-                throw new IndexOutOfBoundsException("Time value " + t0 + " not contained among dataset.");
-            }
+            indexFile = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
+            ncIn = DatasetUtil.openFile(listInputFiles.get(indexFile), true);
         }
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = getSimulationManager().getTimeManager().get_tO();
-    }
-
-    private int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        double time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncIn.findVariable(strTime).read();
-            time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = timeArr.getDouble(timeArr.getIndex().set(lrank));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
     }
 
     /**
@@ -606,189 +569,29 @@ public class OscarDataset extends AbstractDataset {
     public void nextStepTriggered(NextStepEvent e) {
 
         double time = e.getSource().getTime();
-        int time_arrow = (int) Math.signum(e.getSource().get_dt());
+        int timeArrow = timeArrow();
 
-        if (time_arrow * time < time_arrow * time_tp1) {
+        if (timeArrow * time < timeArrow * time_tp1) {
             return;
         }
 
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
-        rank += time_arrow;
+        rank += timeArrow;
         try {
             if (rank > (nbTimeRecords - 1) || rank < 0) {
                 if (opendap) {
                     throw new IndexOutOfBoundsException("Time out of dataset range");
                 } else {
-                    ncIn = openFile(getNextFile(time_arrow));
-                    rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
+                    indexFile = DatasetUtil.next(listInputFiles, indexFile, timeArrow);
+                    ncIn = DatasetUtil.openFile(listInputFiles.get(indexFile), true);
+                    rank = (1 - timeArrow) / 2 * (nbTimeRecords - 1);
                 }
             }
-
             setAllFieldsTp1AtTime(rank);
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, null, ex);
             System.exit(1);
-        }
-    }
-
-    private NetcdfFile openLocation(String rawPath, String fileMask, boolean skipSorting) throws IOException {
-
-        String path = IOTools.resolvePath(rawPath);
-
-        if (!isDirectory(path)) {
-            throw new IOException("{Dataset} " + rawPath + " is not a valid directory.");
-        }
-        listInputFiles = getInputList(path, fileMask, skipSorting);
-        return openFile(listInputFiles.get(0));
-    }
-
-    private List<String> getInputList(String path, String fileMask, boolean skipSorting) throws IOException {
-
-        ArrayList<String> list;
-
-        File inputPath = new File(path);
-        File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
-        if (listFile.length == 0) {
-            throw new IOException("{Dataset} " + path + " contains no file matching mask " + fileMask);
-        }
-        list = new ArrayList(listFile.length);
-        for (File file : listFile) {
-            list.add(file.toString());
-        }
-        if (list.size() > 1) {
-            if (skipSorting) {
-                Collections.sort(list);
-            } else {
-                Collections.sort(list, new NCComparator(strTime));
-            }
-        }
-        return list;
-    }
-
-    private boolean isDirectory(String location) throws IOException {
-
-        File f = new File(location);
-        if (!f.isDirectory()) {
-            throw new IOException("{Dataset} " + location + " is not a valid directory.");
-        }
-        return f.isDirectory();
-    }
-
-    private String getFile(double time) throws IOException {
-
-        int indexLast = listInputFiles.size() - 1;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                indexFile = i;
-                return listInputFiles.get(i);
-            } else if (isTimeBetweenFile(time, i)) {
-                indexFile = i - (time_arrow - 1) / 2;
-                return listInputFiles.get(indexFile);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            indexFile = indexLast;
-            return listInputFiles.get(indexLast);
-        }
-        StringBuilder msg = new StringBuilder();
-        msg.append("{Dataset} Time value ");
-        msg.append(getSimulationManager().getTimeManager().timeToString());
-        msg.append(" (");
-        msg.append(time);
-        msg.append(" seconds) not contained among NetCDF files.");
-        throw new IndexOutOfBoundsException(msg.toString());
-    }
-
-    private boolean isTimeIntoFile(double time, int index) throws IOException {
-
-        String filename;
-        NetcdfFile nc;
-        Array timeArr;
-        double time_r0, time_rf;
-
-        filename = listInputFiles.get(index);
-        nc = NetcdfDataset.openDataset(filename);
-        timeArr = nc.findVariable(strTime).read();
-        time_r0 = timeArr.getDouble(timeArr.getIndex().set(0));
-        time_rf = timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1));
-        nc.close();
-
-        return (time >= time_r0 && time < time_rf);
-    }
-
-    private boolean isTimeBetweenFile(double time, int index) throws IOException {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        double[] time_nc = new double[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listInputFiles.get(index + i);
-                nc = NetcdfDataset.openFile(filename, null);
-                timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = timeArr.getDouble(timeArr.getIndex().set(0));
-                nc.close();
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-            //} catch (IOException e) {
-            //throw new IOException("{Dataset} Problem reading file " + filename + " : " + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("{Dataset} Unable to read " + strTime
-                    + " variable in file " + filename, e.getCause());
-        }
-        return false;
-    }
-
-    private String getNextFile(int time_arrow) throws IOException {
-
-        int index = indexFile - (1 - time_arrow) / 2;
-        boolean noNext = (listInputFiles.size() == 1) || (index < 0) || (index >= listInputFiles.size() - 1);
-        if (noNext) {
-            throw new IOException("{Dataset} Unable to find any file following " + listInputFiles.get(indexFile));
-        }
-        indexFile += time_arrow;
-        return listInputFiles.get(indexFile);
-    }
-
-    private NetcdfFile openFile(String filename) throws IOException {
-        NetcdfFile nc;
-        try {
-            nc = NetcdfDataset.openDataset(filename);
-            getLogger().log(Level.INFO, "'{'Dataset'}' Open {0}", filename);
-            return nc;
-        } catch (IOException e) {
-            IOException ioex = new IOException("{Dataset} Problem opening dataset " + filename + " - " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        }
-    }
-
-    /**
-     * Loads the NetCDF dataset from the specified filename.
-     *
-     * @param opendapURL a String that can be a local pathname or an OPeNDAP
-     * URL.
-     * @throws IOException
-     */
-    private NetcdfFile openURL(String opendapURL) throws IOException {
-        NetcdfFile ncf;
-        try {
-            getLogger().log(Level.INFO, "Opening remote {0} Please wait...", opendapURL);
-            ncf = NetcdfDataset.openDataset(opendapURL);
-            getLogger().log(Level.INFO, "'{'Dataset'}' Open remote {0}", opendapURL);
-            return ncf;
-        } catch (IOException e) {
-            IOException ioex = new IOException("{Dataset} Problem opening " + opendapURL + " ==> " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
         }
     }
 

@@ -98,8 +98,12 @@ public abstract class MarsCommon extends AbstractDataset {
     /**
      * Current rank in NetCDF dataset
      */
-    static int rank;
-
+    int rank;
+    /**
+     * Time arrow, 1 forward, -1 backward
+     */
+    int timeArrow;
+    
     abstract void openDataset() throws Exception;
 
     abstract void setOnFirstTime() throws Exception;
@@ -135,6 +139,7 @@ public abstract class MarsCommon extends AbstractDataset {
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strTime = getParameter("field_var_time");
+        timeArrow = timeArrow();
     }
 
     /**
@@ -233,30 +238,6 @@ public abstract class MarsCommon extends AbstractDataset {
             dyv[0][i] = dyv[1][i];
             dyv[ny - 1][i] = dyv[ny - 2][i];
         }
-    }
-
-    int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        double time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncIn.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
     }
 
     public double adimensionalize(double number, double xRho, double yRho) {

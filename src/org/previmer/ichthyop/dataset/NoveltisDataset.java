@@ -17,6 +17,7 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.ui.LonLatConverter;
@@ -139,6 +140,14 @@ public class NoveltisDataset extends AbstractDataset {
      * Name of the Dimension in NetCDF file
      */
     static String strZDim, strSigma;
+    /**
+     * List of the NOVELTIS NetCDF files
+     */
+    private List<String> files;
+    /**
+     * Index of current NetCDF file
+     */
+    private int index;
 
     @Override
     public void setUp() throws Exception {
@@ -284,30 +293,6 @@ public class NoveltisDataset extends AbstractDataset {
             dyv[0][i] = dyv[1][i];
             dyv[ny - 1][i] = dyv[ny - 2][i];
         }
-    }
-
-    int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        double time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncIn.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
     }
 
     /*
@@ -1186,22 +1171,19 @@ public class NoveltisDataset extends AbstractDataset {
     }
 
     void openDataset() throws Exception {
-        DatasetIO.setTimeField(strTime);
-        boolean skipSorting;
-        try {
-            skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-        } catch (Exception ex) {
-            skipSorting = false;
-        }
-        ncIn = DatasetIO.openLocation(getParameter("input_path"), getParameter("file_filter"), skipSorting);
+        files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        if (!skipSorting()) 
+            DatasetUtil.sort(files, strTime, timeArrow());
+        ncIn = DatasetUtil.openFile(files.get(0), true);
         readTimeLength();
     }
 
     void setOnFirstTime() throws Exception {
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
+        index = DatasetUtil.index(files, t0, timeArrow(), strTime);
+        ncIn = DatasetUtil.openFile(files.get(index), true);
         readTimeLength();
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
 
@@ -1210,7 +1192,7 @@ public class NoveltisDataset extends AbstractDataset {
 
         double time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
-        int time_arrow = (int) Math.signum(e.getSource().get_dt());
+        int time_arrow = timeArrow();
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
@@ -1222,7 +1204,8 @@ public class NoveltisDataset extends AbstractDataset {
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             ncIn.close();
-            ncIn = DatasetIO.openFile(DatasetIO.getNextFile(time_arrow));
+            index = DatasetUtil.next(files, index, time_arrow);
+            ncIn = DatasetUtil.openFile(files.get(index), true);
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }

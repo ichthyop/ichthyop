@@ -190,30 +190,6 @@ abstract class RomsCommon extends AbstractDataset {
         }
     }
 
-    int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        double time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncIn.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
-    }
-
     void readConstantField(String gridFile) throws IOException {
 
         int[] origin = new int[]{jpo, ipo};

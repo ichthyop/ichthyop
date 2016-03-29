@@ -18,14 +18,11 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
-import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -84,7 +81,7 @@ public class SymphonieDataset extends AbstractDataset {
     /**
      * List on NetCDF input files in which dataset is read.
      */
-    private ArrayList<String> listInputFiles;
+    private List<String> listInputFiles;
     /**
      * Index of the current file read in the {@code listInputFiles}
      */
@@ -193,7 +190,10 @@ public class SymphonieDataset extends AbstractDataset {
     public void setUp() throws Exception {
         loadParameters();
         clearRequiredVariables();
-        listInputFiles = getInputList(getParameter("input_path"));
+        listInputFiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        if (!skipSorting()) {
+            DatasetUtil.sort(listInputFiles, strVar_time, timeArrow());
+        }
         open(listInputFiles.get(0));
         openGridFile(getParameter("grid_file"));
         getDimNC();
@@ -206,9 +206,10 @@ public class SymphonieDataset extends AbstractDataset {
     public void init() throws Exception {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        open(getFile(t0));
+        indexFile = DatasetUtil.index(listInputFiles, t0, timeArrow(), strDim_time);
+        open(listInputFiles.get(indexFile));
         checkRequiredVariable(ncIn);
-        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
+        setAllFieldsTp1AtTime(rank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strDim_time));
         time_tp1 = t0;
     }
     
@@ -659,38 +660,6 @@ public class SymphonieDataset extends AbstractDataset {
         getLogger().log(Level.INFO, "Opened dataset {0}", filename);
     }
 
-    private ArrayList<String> getInputList(String rawPath) throws IOException {
-
-        String path = IOTools.resolvePath(rawPath);
-
-        ArrayList<String> list = null;
-
-        File inputPath = new File(path);
-        String fileMask = getParameter("file_filter");
-        File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
-        if (listFile.length == 0) {
-            throw new IOException(path + " contains no file matching mask " + fileMask);
-        }
-        list = new ArrayList<String>(listFile.length);
-        for (File file : listFile) {
-            list.add(file.toString());
-        }
-        if (list.size() > 1) {
-            boolean skipSorting;
-            try {
-                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-            } catch (Exception ex) {
-                skipSorting = false;
-            }
-            if (skipSorting) {
-                Collections.sort(list);
-            } else {
-                Collections.sort(list, new NCComparator(strVar_time));
-            }
-        }
-        return list;
-    }
-
     @Override
     public double[] latlon2xy(double lat, double lon) {
         //--------------------------------------------------------------------
@@ -1126,7 +1095,7 @@ public class SymphonieDataset extends AbstractDataset {
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         double time = e.getSource().getTime();
         //Logger.getAnonjmousLogger().info("set fields at time " + time);
-        int time_arrow = (int) Math.signum(e.getSource().get_dt());
+        int time_arrow = timeArrow();
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
@@ -1141,132 +1110,11 @@ public class SymphonieDataset extends AbstractDataset {
         }
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(getNextFile(time_arrow));
+            indexFile = DatasetUtil.next(listInputFiles, indexFile, time_arrow);
+            open(listInputFiles.get(indexFile));
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
         setAllFieldsTp1AtTime(rank);
-    }
-
-    private String getFile(double time) throws IOException {
-
-        int indexLast = listInputFiles.size() - 1;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                indexFile = i;
-                return listInputFiles.get(i);
-            } else if (isTimeBetweenFile(time, i)) {
-                indexFile = i - (time_arrow - 1) / 2;
-                return listInputFiles.get(indexFile);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            indexFile = indexLast;
-            return listInputFiles.get(indexLast);
-        }
-
-        throw new IOException("Time value " + time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
-    }
-
-    String getNextFile(int time_arrow) throws IOException {
-
-        int index = indexFile - (1 - time_arrow) / 2;
-        boolean noNext = (listInputFiles.size() == 1) || (index < 0) || (index >= listInputFiles.size() - 1);
-        if (noNext) {
-            throw new IOException("Unable to find anj file following " + listInputFiles.get(indexFile));
-        }
-        indexFile += time_arrow;
-        return listInputFiles.get(indexFile);
-    }
-
-    private boolean isTimeIntoFile(double time, int index) throws IOException {
-
-        String filename = "";
-        NetcdfFile nc;
-        Array timeArr;
-        double time_r0, time_rf;
-
-        try {
-            filename = listInputFiles.get(index);
-            nc = NetcdfDataset.openFile(filename, null);
-            timeArr = nc.findVariable(strVar_time).read();
-            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
-            nc.close();
-
-            return (time >= time_r0 && time < time_rf);
-            /*switch (time_arrow) {
-             case 1:
-             return (time >= time_r0 && time < time_rf);
-             case -1:
-             return (time > time_r0 && time <= time_rf);
-             }*/
-        } catch (IOException e) {
-            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        } catch (NullPointerException e) {
-            IOException ioex = new IOException("Unable to read " + strVar_time + " variable in file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        }
-
-    }
-
-    private boolean isTimeBetweenFile(double time, int index) throws IOException {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        double[] time_nc = new double[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listInputFiles.get(index + i);
-                nc = NetcdfDataset.openFile(filename, null);
-                timeArr = nc.findVariable(strVar_time).read();
-                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-                nc.close();
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-        } catch (IOException e) {
-            IOException ioex = new IOException("Problem reading file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        } catch (NullPointerException e) {
-            IOException ioex = new IOException("Unable to read " + strVar_time + " variable in file " + filename + " : " + e.toString());
-            ioex.setStackTrace(e.getStackTrace());
-            throw ioex;
-        }
-        return false;
-    }
-
-    private int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        double time_rank;
-        Array timeArr;
-        try {
-            timeArr = ncIn.findVariable(strVar_time).read();
-            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
     }
 
     private boolean isInsidePolygone(int imin, int imax, int jmin, int jmax, double lon, double lat) {
