@@ -22,6 +22,8 @@ No JAR (Java executable file) is provided for the alpha version, the source code
 Changes since Ichthyop 3.2
 
 Bug fixes:
+* The 'zone' output variable displays -99 for particles that have not been released yet (used to be zero, which is incorrect information)
+* The 'release_zone' output variable now works with multiple release events (only the first release event would be written in the variable and all other particle release zones were set to zero)
 * Horizontal dispersion now works in backward mode
 * Multi release events works in backward mode
 * NaN values for U and V velocities are handled with Mars2d
@@ -29,9 +31,10 @@ Bug fixes:
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* New module 'Active swimming'. Swimming velocity is provided as an age function in a separated CSV file. The module accepts two modes : the input swimming velocity can either be interpreted as cruising speed (the particle always swims at the defined velocity) or maximal speed (the particle swims at random velocity among [0, defined velocity]). Swimming is isotropic.
 * New plugin for NOVELTIS data (from local NetCDF files)
-* New plugin for Mercator2D data (from local NetCDF files)
-* New plugin for OSCAR data (from local NetCDF files and from OpenDAP)
+* New plugin for Mercator2D data (from local NetCDF files), regular grid
+* New plugin for OSCAR data (from local NetCDF files and from OpenDAP) http://www.oscar.noaa.gov/
 * Vertical migration: user can define depth at day and depth at night as functions of age, provided in CSV files.
 * Multithread option in Population.java can be set to TRUE. Experimental feature though, might not work satisfactorily yet.
 * New growth function SoleGrowthAction.java dlength = c1[stage] * Math.pow(temperature, c2[stage]) * dt_day. c1 and c2 are user defined and depend on user defined length stages
@@ -43,7 +46,18 @@ New features:
 Requirement
 
 JDK 1.7
-Netbeans 8.02
+Netbeans 8.0.2
+
+=============================
+Run Ichthyop from source code
+
+Install JDK and Netbeans
+Open Netbeans
+Netbeans Menu File > Open Project...
+  Go to folder ichthyop-3.3alpha_src and click on "Open Project". Project name is "Ichthyop stable 3"
+Two ways of running Ichthyop :
+* from Netbeans, Menu > Run > Run Project (Ichthyop stable 3)
+* Build the Ichthyop JAR from Netbeans by click on Menu > Run > Clean and Build Project (Ichthyop stable 3). It will create a JAR file in folder ichthyop-3.3alpha_src/dist/ You can double click on the JAR file or run it from commmand line 'java -jar dist/ichthyop-stable-3.jar'
 
 ===================
 License information
@@ -56,17 +70,22 @@ For details about the GNU General Public License, please see http://www.gnu.org/
 
 ================================
 Description of files and folders
+The folder is organized as a Netbeans Java project (www.netbeans.org).
 
 % Files
-ichthyop-3.#.jar --> Ichthyop executable file
+manifest.mf --> Manifest file to build the JAR file
+build.xml --> Ant build file
 readme.txt --> this document
 
 % Directories
+src --> Ichthyop source code
+cfg --> Ichthyop configuration folder
 lib --> Necessary libraries to run the program
 input --> Basic NetCDF input files used for the examples
+nbproject --> Netbeans configuration files
 
-===========
-Changes log
+=====================
+Changes log (history)
 
 % From 3.1 to 3.2
 Bug fixes:
