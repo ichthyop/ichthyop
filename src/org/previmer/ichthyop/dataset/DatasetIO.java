@@ -86,7 +86,7 @@ public class DatasetIO extends SimulationManagerAccessor {
         return f.isDirectory();
     }
 
-    static String getFile(long time) throws IOException {
+    static String getFile(double time) throws IOException {
 
         int indexLast = listInputFiles.size() - 1;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -114,12 +114,12 @@ public class DatasetIO extends SimulationManagerAccessor {
         throw new IndexOutOfBoundsException(msg.toString());
     }
 
-    static boolean isTimeIntoFile(long time, int index) throws IOException {
+    static boolean isTimeIntoFile(double time, int index) throws IOException {
 
         String filename;
         NetcdfFile nc;
         Array timeArr;
-        long time_r0, time_rf;
+        double time_r0, time_rf;
 
         filename = listInputFiles.get(index);
         nc = NetcdfDataset.openDataset(filename);
@@ -135,12 +135,12 @@ public class DatasetIO extends SimulationManagerAccessor {
         return (time >= time_r0 && time < time_rf);
     }
 
-    static boolean isTimeBetweenFile(long time, int index) throws IOException {
+    static boolean isTimeBetweenFile(double time, int index) throws IOException {
 
         NetcdfFile nc;
         String filename = "";
         Array timeArr;
-        long[] time_nc = new long[2];
+        double[] time_nc = new double[2];
 
         try {
             for (int i = 0; i < 2; i++) {
@@ -211,7 +211,7 @@ public class DatasetIO extends SimulationManagerAccessor {
 
     public static void checkInitTime(NetcdfFile nc, String strTime) throws IOException, IndexOutOfBoundsException {
 
-        long time = getSimulationManager().getTimeManager().get_tO();
+        double time = getSimulationManager().getTimeManager().get_tO();
         Array timeArr = null;
         try {
             timeArr = nc.findVariable(strTime).read();
@@ -221,10 +221,10 @@ public class DatasetIO extends SimulationManagerAccessor {
             throw ioex;
         }
         int ntime = timeArr.getShape()[0];
-        long time0 = skipSeconds
+        double time0 = skipSeconds
                 ? DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)))
                 : timeArr.getLong(timeArr.getIndex().set(0));
-        long timeN = skipSeconds
+        double timeN = skipSeconds
                 ? DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1)))
                 : timeArr.getLong(timeArr.getIndex().set(ntime - 1));
         if (time < time0 || time > timeN) {

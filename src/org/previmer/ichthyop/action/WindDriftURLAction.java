@@ -51,7 +51,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
     }
     
     void setOnFirstTime() throws Exception {
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         readTimeLength();
         checkInitTime(ncIn, strTime);
         rank = findCurrentRank(t0);
@@ -60,7 +60,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
 
     public void checkInitTime(NetcdfFile nc, String strTime) throws IOException, IndexOutOfBoundsException, Exception{
 
-        long time = getSimulationManager().getTimeManager().get_tO();
+        double time = getSimulationManager().getTimeManager().get_tO();
         Array timeArr = null;
         try {
             timeArr = nc.findVariable(strTime).read();
@@ -70,8 +70,8 @@ public class WindDriftURLAction extends WindDriftFileAction {
             throw ioex;
         }
         int ntime = timeArr.getShape()[0];
-        long time0 = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getLong(timeArr.getIndex().set(0))));
-        long timeN = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1))));
+        double time0 = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(0))));
+        double timeN = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1))));
         if (time < time0 || time > timeN) {
             StringBuilder msg = new StringBuilder();
             msg.append("{Wind dataset} Time value ");
@@ -85,7 +85,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
     }
     
     public void nextStepTriggered() throws Exception {
-        long time = getSimulationManager().getTimeManager().getTime();
+        double time = getSimulationManager().getTimeManager().getTime();
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
 
         if (time_arrow * time < time_arrow * time_tp1) {

@@ -58,7 +58,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
     // time = [t0+dt1 t0+dt1+dt2 ... t0+sum(dt1:dtn)] with t0 the initial time
     // of the simulation. That way time can be easily compared to the current
     // time of the simulation
-    private long[] time;
+    private double[] time;
     // The probability matrix as provided in the CMS configuration file
     // probability[nTime][nDepth]
     private float[][] probability;
@@ -111,8 +111,8 @@ public class OntogeneticMigrationAction extends AbstractAction {
                     depth[iDepth] = Integer.parseInt(sDepth[iDepth]);
                 }
                 // Line 4: time steps in second since the beginning of transport
-                time = new long[nTime];
-                long cumulatedTime = getSimulationManager().getTimeManager().get_tO();
+                time = new double[nTime];
+                double cumulatedTime = getSimulationManager().getTimeManager().get_tO();
                 String[] sTime = bfIn.readLine().trim().split(" ");
                 for (int iTime = 0; iTime < nTime; iTime++) {
                     cumulatedTime += Long.parseLong(sTime[iTime]);
@@ -198,8 +198,8 @@ public class OntogeneticMigrationAction extends AbstractAction {
 
         // Find the corresponding time step in the matrix of probability
         int iTime = 0;
-        long currentTime = getSimulationManager().getTimeManager().getTime();
-        for (long lTime : time) {
+        double currentTime = getSimulationManager().getTimeManager().getTime();
+        for (double lTime : time) {
             if (currentTime >= lTime) {
                 iTime++;
             } else {
@@ -213,9 +213,9 @@ public class OntogeneticMigrationAction extends AbstractAction {
         // this new matrix time. No ? The particle is already in the matrix time
         // and at the right depth ==> no need to set a new depth, just exit the
         // function.
-        long previousTime = currentTime - getSimulationManager().getTimeManager().get_dt();
+        double previousTime = currentTime - getSimulationManager().getTimeManager().get_dt();
         int iPreviousTime = 0;
-        for (long lTime : time) {
+        for (double lTime : time) {
             if (previousTime >= lTime) {
                 iPreviousTime++;
             } else {
@@ -223,7 +223,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
             }
         }
         iPreviousTime = Math.min(iPreviousTime, time.length - 1);
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         // The particle is in the same CMS time step, nothing to do
         if ((previousTime >= t0) && (iPreviousTime == iTime)) {
             return;

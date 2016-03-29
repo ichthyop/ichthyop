@@ -235,11 +235,11 @@ public abstract class MarsCommon extends AbstractDataset {
         }
     }
 
-    int findCurrentRank(long time) throws Exception {
+    int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long time_rank;
+        double time_rank;
         Array timeArr;
         try {
             timeArr = ncIn.findVariable(strTime).read();

@@ -379,7 +379,7 @@ public class Mercator2dDataset extends AbstractDataset {
     public void init() throws Exception {
 
         time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         open(indexFile = getIndexFile(t0));
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
@@ -732,7 +732,7 @@ public class Mercator2dDataset extends AbstractDataset {
         nbTimeRecords = ncU.findVariable(strTime).getShape(0);
     }
 
-    private int getIndexNextFile(long time, int indexCurrent) throws IOException {
+    private int getIndexNextFile(double time, int indexCurrent) throws IOException {
 
         int index = indexCurrent - (1 - time_arrow) / 2;
         boolean noNext = (listUFiles.size() == 1) || (index < 0)
@@ -748,7 +748,7 @@ public class Mercator2dDataset extends AbstractDataset {
                 + listUFiles.get(indexCurrent));
     }
 
-    private int getIndexFile(long time) throws IOException {
+    private int getIndexFile(double time) throws IOException {
 
         int indexLast = listUFiles.size() - 1;
 
@@ -764,20 +764,20 @@ public class Mercator2dDataset extends AbstractDataset {
             return indexLast;
         }
 
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files");
+        throw new IOException("Time value " + time + " not contained among NetCDF files");
     }
 
     /**
      * Determines whether or not the specified time is contained within the ith
      * input file.
      *
-     * @param time a long, the current time [second] of the simulation
+     * @param time a double, the current time [second] of the simulation
      * @param index an int, the index of the file in the {@code listInputFiles}
      * @return <code>true</code> if time is contained within the file
      * <code>false</code>
      * @throws an IOException if an error occurs while reading the input file
      */
-    private boolean isTimeIntoFile(long time, int index) throws IOException {
+    private boolean isTimeIntoFile(double time, int index) throws IOException {
 
         String filename = "";
         NetcdfFile nc;
@@ -804,13 +804,13 @@ public class Mercator2dDataset extends AbstractDataset {
      * Determines whether or not the specified time is contained between the ith
      * and the (i+1)th input files.
      *
-     * @param time a long, the current time [second] of the simulation
+     * @param time a double, the current time [second] of the simulation
      * @param index an int, the index of the file in the {@code listInputFiles}
      * @return <code>true</code> if time is contained between the two files
      * <code>false</code> otherwise.
      * @throws an IOException if an error occurs while reading the input files
      */
-    private boolean isTimeBetweenFile(long time, int index) throws IOException {
+    private boolean isTimeBetweenFile(double time, int index) throws IOException {
 
         NetcdfFile nc;
         String filename = "";
@@ -839,12 +839,12 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Finds the index of the dataset time variable such as      <code>time(rank) <= time < time(rank + 1)
      *
-     * @param time a long, the current time [second] of the simulation
+     * @param time a double, the current time [second] of the simulation
      * @return an int, the current rank of the NetCDF dataset for time dimension
      * @throws an IOException if an error occurs while reading the input file
      *
      */
-    private int findCurrentRank(long time) throws Exception {
+    private int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
         double time_rank;
@@ -1005,7 +1005,7 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;

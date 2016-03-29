@@ -39,19 +39,19 @@ public class TimeManager extends AbstractManager {
     /**
      * Current time of the simulation [second]
      */
-    private long time;
+    private double time;
     /**
-     * Begining of the simulation [second]
+     * Beginning of the simulation [second]
      */
-    private long t0;
+    private double t0;
     /**
      * Transport duration [second]
      */
-    private long transportDuration;
+    private double transportDuration;
     /**
      * Simulation duration [second]
      */
-    private long simuDuration;
+    private double simuDuration;
     /**
      * Simulation time step [second]
      */
@@ -136,7 +136,7 @@ public class TimeManager extends AbstractManager {
             pex.setStackTrace(ex.getStackTrace());
             throw pex;
         }
-        calendar.setTimeInMillis(t0 * 1000L);
+        calendar.setTimeInMillis((long) (t0 * 1000));
         
         /* output date format */
         outputDateFormat = new SimpleDateFormat(
@@ -156,8 +156,8 @@ public class TimeManager extends AbstractManager {
      * @return
      * @throws java.text.ParseException
      */
-    public long duration2seconds(String duration) throws ParseException {
-        long seconds;
+    public double duration2seconds(String duration) throws ParseException {
+        double seconds;
         NumberFormat nbFormat = NumberFormat.getInstance();
         nbFormat.setParseIntegerOnly(true);
         nbFormat.setGroupingUsed(false);
@@ -173,7 +173,7 @@ public class TimeManager extends AbstractManager {
         return seconds;
     }
 
-    public long date2seconds(String date) throws ParseException {
+    public double date2seconds(String date) throws ParseException {
         INPUT_DATE_FORMAT.setCalendar(calendar);
         calendar.setTime(INPUT_DATE_FORMAT.parse(date));
         return calendar.getTimeInMillis() / 1000L;
@@ -194,7 +194,7 @@ public class TimeManager extends AbstractManager {
     public boolean hasNextStep() throws Exception {
 
         time += dt;
-        calendar.setTimeInMillis(time * 1000L);
+        calendar.setTimeInMillis((long) (time * 1000));
         if (Math.abs(time - t0) < simuDuration) {
             fireNextStepTriggered();
             i_step++;
@@ -244,11 +244,11 @@ public class TimeManager extends AbstractManager {
      *
      * @return a long, the current time [second] of the simulation
      */
-    public long getTime() {
+    public double getTime() {
         return time;
     }
 
-    public long get_tO() {
+    public double get_tO() {
         return t0;
     }
 
@@ -266,7 +266,7 @@ public class TimeManager extends AbstractManager {
      *
      * @return a long, the simulation duration [second]
      */
-    public long getSimulationDuration() {
+    public double getSimulationDuration() {
         return simuDuration;
     }
 
@@ -279,7 +279,7 @@ public class TimeManager extends AbstractManager {
         return dt;
     }
 
-    public long getTransportDuration() {
+    public double getTransportDuration() {
         return transportDuration;
     }
 

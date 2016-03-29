@@ -54,7 +54,7 @@ public class BuoyancyAction extends AbstractAction {
      * Buoyuancy scheme only operates during the egg stage. But when the growth
      * of the particle is not simulated, it operates up to this age limit [day].
      */
-    public static long maximumAge;
+    public static double maximumAge;
     /**
      * Egg density [g/cm3], a key parameter to calculate the egg buoyancy.
      */
@@ -78,7 +78,7 @@ public class BuoyancyAction extends AbstractAction {
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth) {
             try {
-                maximumAge = (long) (Float.valueOf(getParameter("age_max")) * 24.f * 3600.f);
+                maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
             } catch (Exception ex) {
                 maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
                 getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");

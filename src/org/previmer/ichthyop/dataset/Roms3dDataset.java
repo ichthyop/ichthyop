@@ -18,7 +18,7 @@ public class Roms3dDataset extends Roms3dCommon {
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
 
@@ -71,7 +71,7 @@ public class Roms3dDataset extends Roms3dCommon {
 
     @Override
     void setOnFirstTime() throws Exception {
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
         readTimeLength();
         rank = findCurrentRank(t0);

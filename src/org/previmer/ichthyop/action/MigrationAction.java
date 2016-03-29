@@ -214,9 +214,9 @@ public class MigrationAction extends AbstractAction {
      * @return the depth (metre) of the particle at current time of the
      * simulation.
      */
-    private double getDepth(IParticle particle, long time) {
+    private double getDepth(IParticle particle, double time) {
         // Time in milliseconds
-        calendar.setTimeInMillis(time * 1000L);
+        calendar.setTimeInMillis((long) (time * 1000));
         long timeDay = getSecondsOfDay(calendar);
         calendar.setTime(sunrise);
         long timeSunrise = getSecondsOfDay(calendar);

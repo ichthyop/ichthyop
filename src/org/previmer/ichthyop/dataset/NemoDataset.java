@@ -69,15 +69,6 @@ public class NemoDataset extends AbstractDataset {
      */
     private byte[][][] maskRho;//, masku, maskv;
     /**
-     * Ocean free surface elevetation at current time
-     */
-    private float[][] zeta_tp0;
-    /**
-     * /**
-     * Ocean free surface elevetation at time t + dt
-     */
-    private float[][] zeta_tp1;
-    /**
      * Zonal component of the velocity field at current time
      */
     private float[][][] u_tp0;
@@ -208,7 +199,7 @@ public class NemoDataset extends AbstractDataset {
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
-        read_gdep_fields(nc);
+        get_gdep_fields(nc);
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
@@ -365,7 +356,7 @@ public class NemoDataset extends AbstractDataset {
         return field;
     }
 
-    private void read_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
+    private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
 
         Variable ncvar;
         Index index;
@@ -386,20 +377,32 @@ public class NemoDataset extends AbstractDataset {
             gdepT[k] = array.getDouble(index);
         }
         /*
-         * Read gdepw
+         * Read or compute gdepw
          */
-        ncvar = nc.findVariable(str_gdepW);
-        if (ncvar.getShape().length > 2) {
-            array = ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce();
-        } else {
-            array = ncvar.read(new int[]{0, 0}, new int[]{1, nz + 1}).flip(1).reduce();
-        }
-        index = array.getIndex();
         gdepW = new double[nz + 1];
-        for (int k = 0; k < nz + 1; k++) {
-            index.set(k);
-            gdepW[k] = array.getDouble(index);
+        ncvar = nc.findVariable(str_gdepW);
+        // Read gdepw
+        if (null != ncvar) {
+            if (ncvar.getShape().length > 2) {
+                array = ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce();
+            } else {
+                array = ncvar.read(new int[]{0, 0}, new int[]{1, nz + 1}).flip(1).reduce();
+            }
+            index = array.getIndex();
+
+            for (int k = 0; k < nz + 1; k++) {
+                index.set(k);
+                gdepW[k] = array.getDouble(index);
+            }
+        } else {
+            // Compute gdepw (approximation)
+            for (int k = 1; k < nz; k++) {
+                gdepW[k] = 0.5 * (gdepT[k-1] + gdepT[k]);
+            }
+            gdepW[0] = gdepT[0];
+            gdepW[nz] = 0.; 
         }
+        
     }
 
     private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
@@ -1026,7 +1029,7 @@ public class NemoDataset extends AbstractDataset {
     public void init() throws Exception {
 
         time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         open(indexFile = getIndexFile(t0));
         checkRequiredVariable(ncT);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
@@ -1048,7 +1051,7 @@ public class NemoDataset extends AbstractDataset {
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
-        
+
         try {
             u_tp1 = (float[][][]) ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).
                     flip(1).reduce().copyToNDJavaArray();
@@ -1069,8 +1072,7 @@ public class NemoDataset extends AbstractDataset {
 
         try {
             Array xTimeTp1 = ncU.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 100;
+            time_tp1 = DatasetUtil.skipSeconds(xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank)));
         } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -1647,7 +1649,7 @@ public class NemoDataset extends AbstractDataset {
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
     }
 
-    private int getIndexNextFile(long time, int indexCurrent) throws IOException {
+    private int getIndexNextFile(double time, int indexCurrent) throws IOException {
 
         int index = indexCurrent - (1 - time_arrow) / 2;
         boolean noNext = (listUFiles.size() == 1) || (index < 0)
@@ -1663,7 +1665,7 @@ public class NemoDataset extends AbstractDataset {
                 + listUFiles.get(indexCurrent));
     }
 
-    private int getIndexFile(long time) throws IOException {
+    private int getIndexFile(double time) throws IOException {
 
         int indexLast = listUFiles.size() - 1;
 
@@ -1679,33 +1681,32 @@ public class NemoDataset extends AbstractDataset {
             return indexLast;
         }
 
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files");
+        throw new IOException("Time value " + time + " not contained among NetCDF files");
     }
 
     /**
      * Determines whether or not the specified time is contained within the ith
      * input file.
      *
-     * @param time a long, the current time [second] of the simulation
+     * @param time a double, the current time [second] of the simulation
      * @param index an int, the index of the file in the {@code listInputFiles}
      * @return <code>true</code> if time is contained within the file
      * <code>false</code>
      * @throws an IOException if an error occurs while reading the input file
      */
-    private boolean isTimeIntoFile(long time, int index) throws IOException {
+    private boolean isTimeIntoFile(double time, int index) throws IOException {
 
         String filename = "";
         NetcdfFile nc;
         Array timeArr;
-        long time_r0, time_rf;
+        double time_r0, time_rf;
 
         try {
             filename = listUFiles.get(index);
             nc = NetcdfDataset.openDataset(filename, enhanced, null);
             timeArr = nc.findVariable(strTime).read();
             time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                    timeArr.getShape()[0] - 1)));
+            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(timeArr.getShape()[0] - 1)));
             nc.close();
 
             return (time >= time_r0 && time < time_rf);
@@ -1729,26 +1730,25 @@ public class NemoDataset extends AbstractDataset {
      * Determines whether or not the specified time is contained between the ith
      * and the (i+1)th input files.
      *
-     * @param time a long, the current time [second] of the simulation
+     * @param time a double, the current time [second] of the simulation
      * @param index an int, the index of the file in the {@code listInputFiles}
      * @return <code>true</code> if time is contained between the two files
      * <code>false</code> otherwise.
      * @throws an IOException if an error occurs while reading the input files
      */
-    private boolean isTimeBetweenFile(long time, int index) throws IOException {
+    private boolean isTimeBetweenFile(double time, int index) throws IOException {
 
         NetcdfFile nc;
         String filename = "";
         Array timeArr;
-        long[] time_nc = new long[2];
+        double[] time_nc = new double[2];
 
         try {
             for (int i = 0; i < 2; i++) {
                 filename = listUFiles.get(index + i);
                 nc = NetcdfDataset.openDataset(filename, enhanced, null);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                        0)));
+                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
                 nc.close();
             }
             if (time >= time_nc[0] && time < time_nc[1]) {
@@ -1768,16 +1768,16 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Finds the index of the dataset time variable such as      <code>time(rank) <= time < time(rank + 1)
      *
-     * @param time a long, the current time [second] of the simulation
+     * @param time a double, the current time [second] of the simulation
      * @return an int, the current rank of the NetCDF dataset for time dimension
      * @throws an IOException if an error occurs while reading the input file
      *
      * pverley pour chourdin: remplacer ncIn par le fichier OPA concerné.
      */
-    int findCurrentRank(long time) throws Exception {
+    int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
-        long time_rank;
+        double time_rank;
         Array timeArr;
         try {
             timeArr = ncU.findVariable(strTime).read();
@@ -1943,26 +1943,10 @@ public class NemoDataset extends AbstractDataset {
         return Double.NaN;
     }
 
-    //---------- End of class
-    private void test() {
-
-        double z = 23.d + Math.random();
-        double depth = -1.d * (400.d + 100.d * Math.random());
-        int i = 10;
-        int j = 10;
-
-        System.out.println("  Test 1 - z: " + z);
-        double result = depth2z(0, 0, z2depth(0, 0, z));
-        System.out.println("  Fin Test 1 - z: " + result);
-        System.out.println("  Test 2 - depth: " + depth);
-        result = z2depth(i, j, depth2z(i, j, depth));
-        System.out.println("  Fin Test 2 - depth: " + result);
-    }
-
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
@@ -1972,7 +1956,6 @@ public class NemoDataset extends AbstractDataset {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         //wr_tp0 = wr_tp1;
-        zeta_tp0 = zeta_tp1;
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
@@ -2017,13 +2000,12 @@ public class NemoDataset extends AbstractDataset {
         }
         return array;
     }
-    
-      @Override
+
+    @Override
     public double xTore(double x) {
         return x;
     }
 
-    
     @Override
     public double yTore(double y) {
         return y;

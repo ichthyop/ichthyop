@@ -286,11 +286,11 @@ public class NoveltisDataset extends AbstractDataset {
         }
     }
 
-    int findCurrentRank(long time) throws Exception {
+    int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long time_rank;
+        double time_rank;
         Array timeArr;
         try {
             timeArr = ncIn.findVariable(strTime).read();
@@ -1198,7 +1198,7 @@ public class NoveltisDataset extends AbstractDataset {
     }
 
     void setOnFirstTime() throws Exception {
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         ncIn = DatasetIO.openFile(DatasetIO.getFile(t0));
         readTimeLength();
         rank = findCurrentRank(t0);
@@ -1208,7 +1208,7 @@ public class NoveltisDataset extends AbstractDataset {
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
 

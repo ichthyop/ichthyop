@@ -31,7 +31,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     /**
      * Stores time of the release events
      */
-    private long[] timeEvent;
+    private double[] timeEvent;
     /**
      * Index of the current release event
      */
@@ -119,7 +119,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
 
     private boolean canRelease(NextStepEvent e) {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
         int dt = e.getSource().get_dt();
         boolean isForward = Math.signum(dt) > 0;
 
@@ -130,7 +130,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         return canRelease;
     }
 
-    private long get_t0() throws Exception {
+    private double get_t0() throws Exception {
         String iniTime = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
         try {
             return getSimulationManager().getTimeManager().date2seconds(iniTime);
@@ -147,8 +147,8 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     private void schedule() throws Exception {
 
         String[] events = getReleaseEvents();
-        timeEvent = new long[events.length];
-        long t0 = get_t0();
+        timeEvent = new double[events.length];
+        double t0 = get_t0();
         int arrow = (getSimulationManager().getTimeManager().get_dt()) > 0 ? 1 : -1;
         String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
         for (int i = 0; i < timeEvent.length; i++) {
@@ -236,7 +236,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
      *
      * @return a long, the release duration in seconds.
      */
-    public long getReleaseDuration() {
+    public double getReleaseDuration() {
         return timeEvent[getNbReleaseEvents() - 1] - getSimulationManager().getTimeManager().get_tO();
     }
 
@@ -246,7 +246,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         indexEvent = 0;
         isAllReleased = false;
         releaseProcess = null;
-        timeEvent = new long[getReleaseEvents().length];
+        timeEvent = new double[getReleaseEvents().length];
         instantiateReleaseProcess();
         getLogger().info("Release manager setup [OK]");
     }

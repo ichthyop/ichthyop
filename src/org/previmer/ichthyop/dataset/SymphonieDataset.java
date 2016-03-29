@@ -205,7 +205,7 @@ public class SymphonieDataset extends AbstractDataset {
     @Override
     public void init() throws Exception {
 
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         open(getFile(t0));
         checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
@@ -1124,7 +1124,7 @@ public class SymphonieDataset extends AbstractDataset {
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
         //Logger.getAnonjmousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
 
@@ -1147,7 +1147,7 @@ public class SymphonieDataset extends AbstractDataset {
         setAllFieldsTp1AtTime(rank);
     }
 
-    private String getFile(long time) throws IOException {
+    private String getFile(double time) throws IOException {
 
         int indexLast = listInputFiles.size() - 1;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -1167,7 +1167,7 @@ public class SymphonieDataset extends AbstractDataset {
             return listInputFiles.get(indexLast);
         }
 
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
+        throw new IOException("Time value " + time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
     }
 
     String getNextFile(int time_arrow) throws IOException {
@@ -1181,12 +1181,12 @@ public class SymphonieDataset extends AbstractDataset {
         return listInputFiles.get(indexFile);
     }
 
-    private boolean isTimeIntoFile(long time, int index) throws IOException {
+    private boolean isTimeIntoFile(double time, int index) throws IOException {
 
         String filename = "";
         NetcdfFile nc;
         Array timeArr;
-        long time_r0, time_rf;
+        double time_r0, time_rf;
 
         try {
             filename = listInputFiles.get(index);
@@ -1215,12 +1215,12 @@ public class SymphonieDataset extends AbstractDataset {
 
     }
 
-    private boolean isTimeBetweenFile(long time, int index) throws IOException {
+    private boolean isTimeBetweenFile(double time, int index) throws IOException {
 
         NetcdfFile nc;
         String filename = "";
         Array timeArr;
-        long[] time_nc = new long[2];
+        double[] time_nc = new double[2];
 
         try {
             for (int i = 0; i < 2; i++) {
@@ -1245,11 +1245,11 @@ public class SymphonieDataset extends AbstractDataset {
         return false;
     }
 
-    private int findCurrentRank(long time) throws Exception {
+    private int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long time_rank;
+        double time_rank;
         Array timeArr;
         try {
             timeArr = ncIn.findVariable(strVar_time).read();

@@ -222,7 +222,7 @@ public class GetmDataset extends AbstractDataset {
     }
 
     // vient de RomsCommon
-    private String getFile(long time) throws IOException {
+    private String getFile(double time) throws IOException {
 
         int indexLast = listInputFiles.size() - 1;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -245,12 +245,12 @@ public class GetmDataset extends AbstractDataset {
         throw new IOException("Time value " + (long) time + " not contained among NetCDF files " + getParameter("file_filter") + " of folder " + getParameter("input_path"));
     }
 
-    private boolean isTimeIntoFile(long time, int index) throws IOException {
+    private boolean isTimeIntoFile(double time, int index) throws IOException {
 
         String filename = "";
         NetcdfFile nc;
         Array timeArr;
-        long time_r0, time_rf;
+        double time_r0, time_rf;
 
         try {
             filename = listInputFiles.get(index);
@@ -278,12 +278,12 @@ public class GetmDataset extends AbstractDataset {
 
     }
 
-    private boolean isTimeBetweenFile(long time, int index) throws IOException {
+    private boolean isTimeBetweenFile(double time, int index) throws IOException {
 
         NetcdfFile nc;
         String filename = "";
         Array timeArr;
-        long[] time_nc = new long[2];
+        double[] time_nc = new double[2];
 
         try {
             for (int i = 0; i < 2; i++) {
@@ -1201,18 +1201,18 @@ public class GetmDataset extends AbstractDataset {
     @Override
     public void init() throws Exception {
         time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         open(getFile(t0));
         checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
         time_tp1 = t0;
     }
 
-    private int findCurrentRank(long time) throws Exception {
+    private int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long time_rank;
+        double time_rank;
         Array timeArr;
         try {
             timeArr = ncIn.findVariable(strTime).read();
@@ -1387,7 +1387,7 @@ public class GetmDataset extends AbstractDataset {
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;

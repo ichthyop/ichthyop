@@ -347,7 +347,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return;
         }
         TimeManager timeManager = e.getSource();
-        if (((timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
+        if (((long)(timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
             writeToNetCDF(i_record++);
         }
     }

@@ -34,6 +34,7 @@ public class GradientMoveAction extends AbstractAction {
     private String direction;
     private int stride;
 
+    @Override
     public void loadParameters() throws Exception {
 
         varName = getParameter("variable");
@@ -51,6 +52,7 @@ public class GradientMoveAction extends AbstractAction {
         // Nothing to do
     }
 
+    @Override
     public void execute(IParticle particle) {
 
         int i = (int) Math.round(particle.getX());
@@ -59,7 +61,7 @@ public class GradientMoveAction extends AbstractAction {
         Cell cell = new Cell(i, j, k);
 
         List<Cell> cells = getNeighborCells(cell);
-        long time = getSimulationManager().getTimeManager().getTime();
+        double time = getSimulationManager().getTimeManager().getTime();
         double val1 = getValue(cell, time);
         double dval = 0.d;
         Cell attractiveCell = null;
@@ -83,7 +85,7 @@ public class GradientMoveAction extends AbstractAction {
         }
     }
 
-    private double getValue(Cell cell, long time) {
+    private double getValue(Cell cell, double time) {
         return getSimulationManager().getDataset().get(varName, new double[]{cell.i, cell.j, cell.k}, time).doubleValue();
     }
 

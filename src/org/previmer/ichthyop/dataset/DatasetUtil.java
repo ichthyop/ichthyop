@@ -37,7 +37,7 @@ public class DatasetUtil {
         return (sinh(x) / cosh(x));
     }
 
-    public static long skipSeconds(long time) {
+    public static double skipSeconds(double time) {
         return time - time % 100L;
     }
 

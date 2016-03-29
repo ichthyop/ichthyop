@@ -69,7 +69,7 @@ public class WindDriftFileAction extends WindDriftAction {
     /**
      * Current time in NetCDF dataset
      */
-    static long time_current;
+    static double time_current;
     /**
      * latitude and longitude arrays
      */
@@ -158,7 +158,7 @@ public class WindDriftFileAction extends WindDriftAction {
 
     private ArrayList<String> getInputList(String path) throws IOException {
 
-        ArrayList<String> list = null;
+        ArrayList<String> list;
 
         File inputPath = new File(path);
         String fileMask = getParameter("file_filter");
@@ -228,7 +228,7 @@ public class WindDriftFileAction extends WindDriftAction {
     }
 
     private void nextStepTriggered() throws Exception {
-        long time = getSimulationManager().getTimeManager().getTime();
+        double time = getSimulationManager().getTimeManager().getTime();
         time_current = time;
 
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -253,7 +253,7 @@ public class WindDriftFileAction extends WindDriftAction {
 
     private void setOnFirstTime() throws Exception {
 
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         open(getFile(t0));
         readTimeLength();
         rank = findCurrentRank(t0);
@@ -270,7 +270,7 @@ public class WindDriftFileAction extends WindDriftAction {
         }
     }
 
-    private String getFile(long time) throws Exception {
+    private String getFile(double time) throws Exception {
 
         int indexLast = listInputFiles.size() - 1;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -299,32 +299,32 @@ public class WindDriftFileAction extends WindDriftAction {
         throw new IndexOutOfBoundsException(msg.toString());
     }
 
-    private boolean isTimeIntoFile(long time, int index) throws Exception {
+    private boolean isTimeIntoFile(double time, int index) throws Exception {
 
         String filename = listInputFiles.get(index);
         NetcdfFile nc = NetcdfDataset.openDataset(filename);
         Array timeArr = nc.findVariable(strTime).read();
-        long time_r0 = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
-        long time_rf = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(
+        double time_r0 = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
+        double time_rf = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(
                 timeArr.getShape()[0] - 1))));
         nc.close();
 
         return (time >= time_r0 && time < time_rf);
     }
 
-    private boolean isTimeBetweenFile(long time, int index) throws Exception {
+    private boolean isTimeBetweenFile(double time, int index) throws Exception {
 
         NetcdfFile nc;
         String filename = "";
         Array timeArr;
-        long[] time_nc = new long[2];
+        double[] time_nc = new double[2];
 
         try {
             for (int i = 0; i < 2; i++) {
                 filename = listInputFiles.get(index + i);
                 nc = NetcdfDataset.openFile(filename, null);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds((long) conversion2seconds(
+                time_nc[i] = DatasetUtil.skipSeconds(conversion2seconds(
                         timeArr.getDouble(timeArr.getIndex().set(0))));
                 nc.close();
             }
@@ -412,20 +412,20 @@ public class WindDriftFileAction extends WindDriftAction {
         }
     }
 
-    int findCurrentRank(long time) throws Exception {
+    int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long time_rank;
+        double time_rank;
         try {
             Array timeArr = ncIn.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
+            time_rank = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
             while (time >= time_rank) {
                 if (time_arrow < 0 && time == time_rank) {
                     break;
                 }
                 lrank++;
-                time_rank = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
+                time_rank = DatasetUtil.skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
