@@ -119,4 +119,12 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     int timeArrow() {
         return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
     }
+    
+    boolean enhanced() {
+        try {
+            return Boolean.valueOf(getParameter("enhanced_mode"));
+        } catch (NullPointerException ex ) {
+            return false;
+        }
+    }
 }

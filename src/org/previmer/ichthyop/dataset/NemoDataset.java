@@ -42,17 +42,6 @@ public class NemoDataset extends AbstractDataset {
      */
     private int nbTimeRecords;
     /**
-     * The NetCDF dataset
-     *
-     * pverley pour chourdin: avec ROMS ou MARS, je n'ai besoin de lire qu'un
-     * seul fichier à la fois. Je le lis grace à la variable ncIn. A priori pas
-     * possible de fonctionner comme ça avec OPA puiqu'il y a différents
-     * fichiers où puiser l'information. Donc une des étapes c'est de remplacer
-     * ncIn dans le code par le fichier spécifique à ouvrir. Au final cette
-     * variable va disparaitre, je pense.
-     */
-    //static NetcdfFile ncIn;
-    /**
      * Longitude at rho point.
      */
     private float[][] lonRho;
@@ -62,8 +51,6 @@ public class NemoDataset extends AbstractDataset {
     private float[][] latRho;
     /**
      * Mask: water = 1, cost = 0
-     *
-     * pverley pour chourdin: attention ici le masque devient 3D
      */
     private byte[][][] maskRho;//, masku, maskv;
     /**
@@ -155,8 +142,6 @@ public class NemoDataset extends AbstractDataset {
     private boolean isGridInfoInOneFile;
     // Whether vertical velocity should be read from NetCDF or calculated from U & V
     private boolean readW;
-    // Whether the NetCDF files should be opened with enhanced mode (scale/offet/missing)
-    private boolean enhanced;
 
 ////////////////////////////
 // Definition of the methods
@@ -174,14 +159,14 @@ public class NemoDataset extends AbstractDataset {
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
         NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(file_hgr, enhanced, null);
+        nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
         //fichier *byte*mask*
         lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
                 copyToNDJavaArray();
         latRho = (float[][]) nc.findVariable(strLat).read(origin, size).
                 copyToNDJavaArray();
-        nc = NetcdfDataset.openDataset(file_mask, enhanced, null);
+        nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
         maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
             0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
@@ -193,7 +178,7 @@ public class NemoDataset extends AbstractDataset {
          copyToNDJavaArray();*/
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_zgr, enhanced, null);
+            nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
@@ -219,7 +204,7 @@ public class NemoDataset extends AbstractDataset {
 
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_hgr, enhanced, null);
+            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         }
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
@@ -247,7 +232,7 @@ public class NemoDataset extends AbstractDataset {
 
         try {
             // Open NetCDF file
-            NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced, null);
+            NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
 
             // Read e3t_0
             e3t_0 = (double[]) nc.findVariable(str_e3t0).read(new int[]{0, 0}, new int[]{1, nz}).flip(1).reduce().copyToNDJavaArray();
@@ -762,7 +747,7 @@ public class NemoDataset extends AbstractDataset {
         NetcdfFile nc;
         Array arrLon, arrLat;
         try {
-            nc = NetcdfDataset.openDataset(file_hgr, enhanced, null);
+            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
             arrLon = nc.findVariable(strLon).read();
             arrLat = nc.findVariable(strLat).read();
             if (arrLon.getElementType() == float.class) {
@@ -880,11 +865,8 @@ public class NemoDataset extends AbstractDataset {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
-        if (findParameter("enhanced_mode")) {
-            enhanced = Boolean.valueOf("enhanced_mode");
-        } else {
-            enhanced = true;
-            getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced mode (scale,offset,missing).");
+        if (!findParameter("enhanced()_mode")) {
+            getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced() mode (scale,offset,missing).");
         }
         time_arrow = timeArrow();
     }
@@ -901,7 +883,7 @@ public class NemoDataset extends AbstractDataset {
      */
     private void getDimNC() throws IOException {
 
-        NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced, null);
+        NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
         try {
             nx = nc.findDimension(strXDim).getLength();
         } catch (Exception ex) {
@@ -1605,20 +1587,20 @@ public class NemoDataset extends AbstractDataset {
         if (ncU != null) {
             ncU.close();
         }
-        ncU = DatasetUtil.openFile(listUFiles.get(index), enhanced);
+        ncU = DatasetUtil.openFile(listUFiles.get(index), enhanced());
         if (ncV != null) {
             ncV.close();
         }
         if (listUFiles.get(index).equals(listVFiles.get(index))) {
             ncV = ncU;
         } else {
-            ncV = DatasetUtil.openFile(listVFiles.get(index), enhanced);
+            ncV = DatasetUtil.openFile(listVFiles.get(index), enhanced());
         }
         if (readW) {
             if (listUFiles.get(index).equals(listWFiles.get(index))) {
                 ncW = ncU;
             } else {
-                ncW = DatasetUtil.openFile(listWFiles.get(index), enhanced);
+                ncW = DatasetUtil.openFile(listWFiles.get(index), enhanced());
             }
         }
         if (ncT != null) {
@@ -1628,7 +1610,7 @@ public class NemoDataset extends AbstractDataset {
             if (listUFiles.get(index).equals(listTFiles.get(index))) {
                 ncT = ncU;
             } else {
-                ncT = DatasetUtil.openFile(listTFiles.get(index), enhanced);
+                ncT = DatasetUtil.openFile(listTFiles.get(index), enhanced());
             }
         }
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();

@@ -266,11 +266,11 @@ public class DatasetUtil {
         Attribute attrUnits = time.findAttributeIgnoreCase("units");
         if (null != attrUnits) {
             String units = attrUnits.getStringValue().toLowerCase();
-            if (units.contains("seconds")) {
+            if (units.contains("second")) {
                 // Seconds confirmed
                 return 1.d;
             }
-            if (units.contains("days")) {
+            if (units.contains("day")) {
                 // Days confirmed
                 return 3600.d * 24.d;
             }
