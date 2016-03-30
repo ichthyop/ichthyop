@@ -136,6 +136,7 @@ public class DatasetUtil {
     public static boolean isTimeIntoFile(double time, String file, String strTime, int time_arrow) throws IOException {
         double tf = timeFirst(file, strTime);
         double tl = timeLast(file, strTime);
+        //System.out.println("IF "+ file + " "+ time + " " + tf + " "+ tl);
         // Special case one time step per file
         if (tf == tl) {
             return time == tf;
@@ -164,7 +165,7 @@ public class DatasetUtil {
     public static boolean isTimeBetweenFile(double time, String file1, String file2, String strTime, int timeArrow) throws IOException {
         return (timeArrow > 0)
                 ? time >= timeLast(file1, strTime) && time < timeFirst(file2, strTime)
-                : time >= timeFirst(file1, strTime) && time < timeLast(file2, strTime);
+                : time <= timeFirst(file1, strTime) && time > timeLast(file2, strTime);
     }
 
     /**
@@ -176,7 +177,7 @@ public class DatasetUtil {
      * @throws IOException
      */
     public static int next(List<String> list, int index, int timeArrow) throws IOException {
-        if ((list.size() == 1) || ((index + 1) >= list.size() - 1)) {
+        if ((list.size() == 1) || ((index + 1) >= list.size())) {
             throw new IOException("{Dataset} Unable to find any file following " + list.get(index));
         }
         return index + 1;
@@ -214,16 +215,7 @@ public class DatasetUtil {
      * @throws an IOException if an error occurs while reading the input file
      *
      */
-    static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws Exception {
-
-        if (!isTimeIntoFile(time, nc.getLocation(), strTime, timeArrow)) {
-            StringBuilder msg = new StringBuilder();
-            msg.append("{Dataset} Time value ");
-            msg.append(time);
-            msg.append(" (in seconds) not contained in dataset ");
-            msg.append(nc.getLocation());
-            throw new IndexOutOfBoundsException(msg.toString());
-        }
+    static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws ArrayIndexOutOfBoundsException, IOException {
 
         int lrank = 0;
         double nctime;

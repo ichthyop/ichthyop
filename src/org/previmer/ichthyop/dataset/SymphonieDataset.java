@@ -308,9 +308,7 @@ public class SymphonieDataset extends AbstractDataset {
         }
 
         try {
-            Array xTimeTp1 = ncIn.findVariable(strVar_time).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 100;
+           time_tp1 = DatasetUtil.timeAtRank(ncIn, strVar_time, rank);
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());

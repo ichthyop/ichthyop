@@ -473,12 +473,7 @@ public class OscarDataset extends AbstractDataset {
             }
         }
 
-        Array xTimeTp1;
-
-        xTimeTp1 = ncIn.findVariable(strTime).read();
-        time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-        // Time is expressed in days in Oscar and seconds in Ichthyop
-        time_tp1 *= 24.d * 3600.d;
+        time_tp1 = DatasetUtil.timeAtRank(ncIn, strTime, rank);
 
         // Time step of the Oscar dataset
         dt_HyMo = Math.abs(time_tp1 - time_tp0);

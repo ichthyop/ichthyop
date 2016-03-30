@@ -1029,9 +1029,7 @@ public class NoveltisDataset extends AbstractDataset {
         }
 
         try {
-            Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 100;
+            time_tp1 = DatasetUtil.timeAtRank(ncIn, strTime, rank);
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());

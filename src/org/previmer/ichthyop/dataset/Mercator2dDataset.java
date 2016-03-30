@@ -421,10 +421,7 @@ public class Mercator2dDataset extends AbstractDataset {
         }
 
         try {
-            Array xTimeTp1 = ncU.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            // Converts time from hours to seconds
-            time_tp1 *= 3600.d;
+            time_tp1 = DatasetUtil.timeAtRank(ncU, strTime, rank);
         } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
