@@ -124,7 +124,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         try {
             return Boolean.valueOf(getParameter("enhanced_mode"));
         } catch (NullPointerException ex ) {
-            return false;
+            return true;
         }
     }
 }

@@ -210,8 +210,16 @@ public class NemoDataset extends AbstractDataset {
         // fichier *mesh*h*
         e1t = read_e1_e2_field(nc, stre1t);
         e2t = read_e1_e2_field(nc, stre2t);
-        e1v = read_e1_e2_field(nc, stre1v);
-        e2u = read_e1_e2_field(nc, stre2u);
+        if (stre1v.equals(stre1t) || (null == nc.findVariable(stre1v))) {
+            e1v = e1t;
+        } else {
+            e1v = read_e1_e2_field(nc, stre1v);
+        }
+        if (stre2u.equals(stre2t) || (null == nc.findVariable(stre2u))) {
+            e2u = e2t;
+        } else {
+            e2u = read_e1_e2_field(nc, stre2u);
+        }
         nc.close();
     }
 
@@ -545,7 +553,7 @@ public class NemoDataset extends AbstractDataset {
         if (CO != 0) {
             dw /= CO;
         }
-
+        
         /*double dwr = get_dWrz(pGrid, time);
          float err = (float) Math.abs((dwr - dw) / dwr);
          System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);*/
