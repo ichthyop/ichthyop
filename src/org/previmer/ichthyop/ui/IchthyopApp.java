@@ -3,10 +3,15 @@
  */
 package org.previmer.ichthyop.ui;
 
+import java.util.logging.Level;
+import ml.options.OptionSet;
+import ml.options.Options;
+import ml.options.Options.Multiplicity;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.previmer.ichthyop.IchthyopBatch;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  * The main class of the application.
@@ -71,11 +76,35 @@ public class IchthyopApp extends SingleFrameApplication {
 
         // Check for input arguments
         if (args.length > 0) {
-            // The configuration file is provided, Ichthyop goes into batch mode
-            new Thread(new IchthyopBatch(args[0])).start();
+            // Sets of command line options
+            Options opt = new Options(args);
+            // Default set: Ichthyop configuration file is given as argument
+            opt.addSet("Usage", 1, 1);
+            // For all sets, enable verbose output
+            opt.addOptionAllSets("verbose", Multiplicity.ZERO_OR_ONE);
+            // For all sets, enable quiet output (only error)
+            opt.addOptionAllSets("quiet", Multiplicity.ZERO_OR_ONE);
+
+            // Get the matching set and throw error if none found
+            OptionSet set = opt.getMatchingSet(false, false);
+            if (set == null) {
+                SimulationManager.getLogger().log(Level.SEVERE, "Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
+            } else {
+                if (set.isSet("verbose") && set.isSet("quiet")) {
+                    SimulationManager.getLogger().log(Level.SEVERE, "Invalid command usage, -verbose and -quiet options are exclusive", new IllegalArgumentException("Osmose logging cannot be both verbose and quiet."));
+                }
+                if (set.isSet("verbose")) {
+                    SimulationManager.getLogger().setLevel(Level.FINE);
+                }
+                if (set.isSet("quiet")) {
+                    SimulationManager.getLogger().setLevel(Level.SEVERE);
+                }
+                // The configuration file is provided, Ichthyop goes into batch mode
+                new Thread(new IchthyopBatch(set.getData().get(0))).start();
+            }
         } else {
             // No argument, open the GUI
-            launch(IchthyopApp.class, args);
+            launch(IchthyopApp.class, null);
         }
     }
 }

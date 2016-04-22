@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.jdom.input.SAXBuilder;
@@ -100,7 +101,8 @@ public class SimulationManager {
         IchthyopLogFormatter formatter = new IchthyopLogFormatter(true);
         SystemOutHandler sh = new SystemOutHandler();
         sh.setFormatter(formatter);
-        getLogger().addHandler(sh);
+        logger.addHandler(sh);
+        logger.setLevel(Level.INFO);
     }
 
     public void setConfigurationFile(File file) throws Exception {

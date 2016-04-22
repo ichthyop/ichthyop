@@ -7,8 +7,8 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.3alpha (2016/03/25) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r878
+Release: 3.3alpha (2016/04/22) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r888
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
@@ -31,6 +31,7 @@ Bug fixes:
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* Added command line option -quiet in the batch mode for printing only error message
 * New module 'Active swimming'. Swimming velocity is provided as an age function in a separated CSV file. The module accepts two modes : the input swimming velocity can either be interpreted as cruising speed (the particle always swims at the defined velocity) or maximal speed (the particle swims at random velocity among [0, defined velocity]). Swimming is isotropic.
 * New plugin for NOVELTIS data (from local NetCDF files)
 * New plugin for Mercator2D data (from local NetCDF files), regular grid
