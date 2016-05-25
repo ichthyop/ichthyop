@@ -245,9 +245,9 @@ public class DatasetUtil {
 
     /**
      * Guess whether time is expressed in seconds in the NetCDF file and if not
-     * return a conversion value to adjust it to seconds. So far it only detects
-     * seconds or days. The test rely on the netCDF variable attribute "units"
-     * (case insensitive).
+     * return a conversion value to adjust it to seconds. So far it detects
+     * seconds, hours or days. The test rely on the netCDF variable attribute
+     * "units" (case insensitive).
      *
      * @param time, the NetCDF time variable
      * @return a conversion factor for time in seconds. Return one if the time
@@ -261,6 +261,10 @@ public class DatasetUtil {
             if (units.contains("second")) {
                 // Seconds confirmed
                 return 1.d;
+            }
+            if (units.contains("hour")) {
+                // Hours confirmed
+                return 3600.d;
             }
             if (units.contains("day")) {
                 // Days confirmed
@@ -349,7 +353,7 @@ public class DatasetUtil {
 
         double d = 2 * 6367000.d
                 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
-                        + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
+                                + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
 
         return d;
     }
