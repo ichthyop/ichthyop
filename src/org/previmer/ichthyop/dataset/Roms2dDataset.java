@@ -85,7 +85,9 @@ public class Roms2dDataset extends RomsCommon {
                         * (.5d - (double) jj - dy));
                 CO += co;
                 x = (1.d - x_euler) * v_tp0[j + jj - 1][i + ii] + x_euler * v_tp1[j + jj - 1][i + ii];
-                dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                if (!Double.isNaN(x)) {
+                    dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                }
 
             }
         }
@@ -119,7 +121,9 @@ public class Roms2dDataset extends RomsCommon {
                         * (1.d - (double) jj - dy));
                 CO += co;
                 x = (1.d - x_euler) * u_tp0[j + jj][i + ii - 1] + x_euler * u_tp1[j + jj][i + ii - 1];
-                du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                if (!Double.isNaN(x)) {
+                    du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                }
             }
         }
         if (CO != 0) {
