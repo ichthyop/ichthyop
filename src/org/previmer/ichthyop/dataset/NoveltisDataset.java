@@ -23,6 +23,7 @@ import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -233,7 +234,6 @@ public class NoveltisDataset extends AbstractDataset {
     void readConstantField() throws Exception {
 
         Array arrH = null;
-        Index index;
         lonRho = new double[ny][nx];
         latRho = new double[ny][nx];
         maskRho = new byte[ny][nx];
@@ -246,16 +246,16 @@ public class NoveltisDataset extends AbstractDataset {
         /* Read bathymetry */
         try {
             arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("{Dataset} Error reading bathymetry variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         hRho = new double[ny][nx];
-        index = arrH.getIndex();
+        Index indexH = arrH.getIndex();
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                hRho[j][i] = -1. * arrH.getDouble(index.set(j, i));
+                hRho[j][i] = -1. * arrH.getDouble(indexH.set(j, i));
             }
         }
 
@@ -330,7 +330,6 @@ public class NoveltisDataset extends AbstractDataset {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
-
         boolean found;
         int imin, imax, jmin, jmax, i0, j0;
         double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
@@ -394,7 +393,6 @@ public class NoveltisDataset extends AbstractDataset {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-
         final double ix = Math.max(0.00001f, Math.min(xRho, (double) nx - 1.00001f));
         final double jy = Math.max(0.00001f, Math.min(yRho, (double) ny - 1.00001f));
 
@@ -420,7 +418,6 @@ public class NoveltisDataset extends AbstractDataset {
         //--------------------------------------------------------------
         // Return true if (lon, lat) is insidide the polygon defined by
         // (imin, jmin) & (imin, jmax) & (imax, jmax) & (imax, jmin)
-
         //-----------------------------------------
         // Build the polygone
         int nb, shft;
@@ -544,7 +541,6 @@ public class NoveltisDataset extends AbstractDataset {
 
         //--------------------------------------
         // Calculate the Physical Space extrema
-
         lonMin = Double.MAX_VALUE;
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
@@ -606,7 +602,7 @@ public class NoveltisDataset extends AbstractDataset {
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
-            } catch (Exception ex) {
+            } catch (NumberFormatException | IOException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
         }
@@ -662,7 +658,7 @@ public class NoveltisDataset extends AbstractDataset {
             } else {
                 arrLon = ncIn.findVariable(strLon).read(new int[]{ipo}, new int[]{nx});
             }
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset longitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -673,7 +669,7 @@ public class NoveltisDataset extends AbstractDataset {
             } else {
                 arrLat = ncIn.findVariable(strLat).read(new int[]{jpo}, new int[]{ny});
             }
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset latitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -682,15 +678,15 @@ public class NoveltisDataset extends AbstractDataset {
         lonRho = new double[ny][nx];
         latRho = new double[ny][nx];
         if (arrLon.getShape().length > 1) {
-            Index index = arrLon.getIndex();
+            Index indexL = arrLon.getIndex();
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    index.set(j, i);
-                    lonRho[j][i] = arrLon.getDouble(index);
+                    indexL.set(j, i);
+                    lonRho[j][i] = arrLon.getDouble(indexL);
                     if (Math.abs(lonRho[j][i]) > 360) {
                         lonRho[j][i] = Double.NaN;
                     }
-                    latRho[j][i] = arrLat.getDouble(index);
+                    latRho[j][i] = arrLat.getDouble(indexL);
                     if (Math.abs(latRho[j][i]) > 90) {
                         latRho[j][i] = Double.NaN;
                     }
@@ -794,8 +790,6 @@ public class NoveltisDataset extends AbstractDataset {
         return true;
     }
 
-   
-
     /**
      * Computes the depth at sigma levels disregarding the free surface
      * elevation.
@@ -810,9 +804,9 @@ public class NoveltisDataset extends AbstractDataset {
          */
         try {
             Array arrSrho = ncIn.findVariable(strSigma).read();
-            Index index = arrSrho.getIndex();
+            Index indexS = arrSrho.getIndex();
             for (int k = 0; k < nz; k++) {
-                s_rho[k] = arrSrho.getDouble(index.set(k));
+                s_rho[k] = arrSrho.getDouble(indexS.set(k));
             }
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading sigma levels. " + ex.toString());
@@ -830,7 +824,7 @@ public class NoveltisDataset extends AbstractDataset {
         }
         s_w[nz] = 0.d;
         s_w[0] = -1.d;
-        
+
         z_rho = new double[nz][ny][nx];
         z_w = new double[nz + 1][ny][nx];
 
@@ -913,7 +907,9 @@ public class NoveltisDataset extends AbstractDataset {
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        double dv = 0.d;
+        // V points are at the centre of the cells
+        
+                double dv = 0.d;
         double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
@@ -922,18 +918,17 @@ public class NoveltisDataset extends AbstractDataset {
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (int) Math.round(jy);
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) kz;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-
-        for (int jj = 0; jj < 2; jj++) {
+        for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
                     double co = Math.abs((1.d - (double) ii - dx)
-                            * (.5d - (double) jj - dy)
+                            * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
                     if (!(Float.isNaN(v_tp0[k + kk][j + jj - 1][i + ii]) || Float.isNaN(v_tp1[k + kk][j + jj - 1][i + ii]))) {
@@ -951,6 +946,7 @@ public class NoveltisDataset extends AbstractDataset {
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
+        // U points are at the centre of the cells
 
         double du = 0.d;
         double ix, jy, kz;
@@ -960,17 +956,17 @@ public class NoveltisDataset extends AbstractDataset {
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) Math.round(ix);
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) kz;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        for (int ii = 0; ii < 2; ii++) {
+        for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    double co = Math.abs((.5d - (double) ii - dx)
+                    double co = Math.abs((1.d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
@@ -1010,19 +1006,17 @@ public class NoveltisDataset extends AbstractDataset {
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
-
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
 
-
         try {
             v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin, new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -1035,7 +1029,6 @@ public class NoveltisDataset extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         for (RequiredVariable variable : requiredVariables.values()) {
@@ -1170,8 +1163,9 @@ public class NoveltisDataset extends AbstractDataset {
 
     void openDataset() throws Exception {
         files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
-        if (!skipSorting()) 
+        if (!skipSorting()) {
             DatasetUtil.sort(files, strTime, timeArrow());
+        }
         ncIn = DatasetUtil.openFile(files.get(0), true);
         readTimeLength();
     }
@@ -1209,30 +1203,12 @@ public class NoveltisDataset extends AbstractDataset {
         }
         setAllFieldsTp1AtTime(rank);
     }
-    
-     public enum ErrorMessage {
 
-        INIT("Error reading some dataset variables at initialization"),
-        NEXT_STEP("Error reading dataset variables for next timestep"),
-        NOT_IN_2D("Method not supported in 2D"),
-        TIME_OUTOF_BOUND("Time out of dataset range");
-        private String msg;
-
-        ErrorMessage(String msg) {
-            this.msg = msg;
-        }
-
-        String message() {
-            return msg;
-        }
-    }
-     
-     @Override
+    @Override
     public double xTore(double x) {
         return x;
     }
 
-    
     @Override
     public double yTore(double y) {
         return y;
