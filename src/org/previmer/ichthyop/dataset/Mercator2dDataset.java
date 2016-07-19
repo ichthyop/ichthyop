@@ -405,7 +405,11 @@ public class Mercator2dDataset extends AbstractDataset {
         double time_tp0 = time_tp1;
 
         try {
-            u_tp1 = (double[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+            if (ncU.findVariable(strU).getShape().length > 3) {
+                u_tp1 = (double[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+            } else {
+                u_tp1 = (double[][]) ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+            }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -413,7 +417,11 @@ public class Mercator2dDataset extends AbstractDataset {
         }
 
         try {
-            v_tp1 = (double[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+            if (ncV.findVariable(strU).getShape().length > 3) {
+                v_tp1 = (double[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
+            } else {
+                v_tp1 = (double[][]) ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+            }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -653,7 +661,6 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     private void open(int index) throws IOException {
 
-        
         if (ncU != null) {
             ncU.close();
         }
