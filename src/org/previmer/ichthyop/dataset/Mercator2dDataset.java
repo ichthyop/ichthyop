@@ -628,27 +628,37 @@ public class Mercator2dDataset extends AbstractDataset {
             }
         }
 
-        // Try to refine within cell (ci, cj)
+        // Refine within cell (ci, cj) by linear interpolation
         int cip1 = ci + 1 > nx - 1 ? 0 : ci + 1;
+        int cim1 = ci - 1 < 0 ? nx - 1 : ci - 1;
         int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
-        //--------------------------------------------
-        // Trilinear interpolation
-        double dy1 = latitude[cjp1] - latitude[cj];
-        double dy2 = latitude[cj] - latitude[cj];
-        double dx2 = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
+        int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
+        // xgrid
+        double xgrid;
+        if (lon >= longitude[ci]) {
+            double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
                 ? 360.d + (longitude[cip1] - longitude[ci])
                 : longitude[cip1] - longitude[ci];
-
-        double c1 = lon * dy1;
-        double deltax = (c1 * dx2) / (dx2 * dy1);
-        deltax = (deltax - longitude[ci]) / dx2;
-        double xgrid = (double) ci + Math.min(Math.max(0.d, deltax), 1.d);
-
-        c1 = longitude[ci] * dy1;
-        double c2 = lon * dy2 - lat * dx2;
-        double deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1);
-        deltay = (deltay - latitude[cj]) / dy1;
-        double ygrid = (double) cj + Math.min(Math.max(0.d, deltay), 1.d);
+            double deltax = (lon - longitude[ci]) / dx;
+            xgrid = xTore(ci + deltax);
+        } else {
+            double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d)
+                ? 360.d + (longitude[ci] - longitude[cim1])
+                : longitude[ci] - longitude[cim1];
+            double deltax = (lon - longitude[cim1]) / dx;
+            xgrid = xTore(cim1 + deltax);
+        }
+        // ygrid
+        double ygrid;
+        if (lat >= latitude[cj]) {
+            double dy = latitude[cjp1] - latitude[cj];
+            double deltay = (lat - latitude[cj]) / dy;
+            ygrid = (double) cj + deltay;
+        } else {
+            double dy = latitude[cj] - latitude[cjm1];
+            double deltay = (lat - latitude[cjm1]) / dy;
+            ygrid = (double) cjm1 + deltay;
+        }
 
         return (new double[]{xgrid, ygrid});
     }
