@@ -107,7 +107,8 @@ public class WindDriftFileAction extends WindDriftAction {
 
         wind_factor = Double.valueOf(getParameter("wind_factor"));
         depth_application = Float.valueOf(getParameter("depth_application"));
-        angle = Math.PI / 2.0 - Double.valueOf(getParameter("angle")) * Math.PI / 180.0;
+        //angle = Math.PI / 2.0 - Double.valueOf(getParameter("angle")) * Math.PI / 180.0;
+        angle = Double.valueOf(getParameter("angle")) * Math.PI / 180.0;
         strUW = getParameter("wind_u");
         strVW = getParameter("wind_v");
         strLon = getParameter("longitude");
