@@ -165,7 +165,7 @@ public class Roms2dDataset extends RomsCommon {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, 0, jpo, ipo};
+        int[] origin = new int[]{rank, jpo, ipo};
         double time_tp0 = time_tp1;
         Array arr;
         Index index;
