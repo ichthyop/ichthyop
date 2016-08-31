@@ -7,8 +7,8 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.3alpha (2016/04/22) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r888
+Release: 3.3alpha (2016/08/31) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r896
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
@@ -26,11 +26,13 @@ Bug fixes:
 * The 'release_zone' output variable now works with multiple release events (only the first release event would be written in the variable and all other particle release zones were set to zero)
 * Horizontal dispersion now works in backward mode
 * Multi release events works in backward mode
-* NaN values for U and V velocities are handled with Mars2d
+* NaN values for U and V velocities are handled with MARS2D and ROMS2D
 * Zone display in Step 3 Mapper has been improved. A zone is now drawed cell by cell, as it is done in the preview. The approach has a few inconvinients though (i) when zones overlap the last one drawn will cover the other ones; (ii) the zone defined in the output NetCDF files prior to this commit will not be drawable anymore; (iii) the WMSMapper.java needs the Dataset to be initialized to be able to draw the zones. Which is fine if the user draw the zones just after running the simulation. It will be an issue when the mapping is down at an other time. Nonetheless the user can still load the corresponding configuration file and click on Preview to initialize the dataset.
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* New plugin for ROMS3D OpenDAP
+* All the Dataset plugins detect automatically the unit of the time value by reading variable attribute "units". It can be either seconds or days, but can be easily extended to other units on demand.
 * Added command line option -quiet in the batch mode for printing only error message
 * New module 'Active swimming'. Swimming velocity is provided as an age function in a separated CSV file. The module accepts two modes : the input swimming velocity can either be interpreted as cruising speed (the particle always swims at the defined velocity) or maximal speed (the particle swims at random velocity among [0, defined velocity]). Swimming is isotropic.
 * New plugin for NOVELTIS data (from local NetCDF files)
@@ -46,8 +48,8 @@ New features:
 ===========
 Requirement
 
-JDK 1.7
-Netbeans 8.0.2
+JDK 1.8
+Netbeans 8.1
 
 =============================
 Run Ichthyop from source code
