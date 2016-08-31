@@ -179,6 +179,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode2.add(treeNode3);
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS3D);
         treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS3D_OPENDAP);
+        treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
 
         treeNode2 = new DefaultMutableTreeNode("OPA");

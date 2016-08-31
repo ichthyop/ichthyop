@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <icstructure>
     <long_name>ROMS 3D Ichthyop configuration file</long_name>
-    <description>Predefined parameters for ROMS dataset from NetCDF files.</description>
+    <description>Predefined parameters for ROMS 3D dataset from OpenDAP server.</description>
     <block type="option">
         <tree_path>Main/Time</tree_path>
         <key>app.time</key>
@@ -125,7 +125,7 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_3d_opendap</key>
-        <tree_path>Main/ROMS 3D</tree_path>
+        <tree_path>Main/ROMS 3D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 3D simulation and local NetCDF files.</description>
         <parameters>
              <parameter>
