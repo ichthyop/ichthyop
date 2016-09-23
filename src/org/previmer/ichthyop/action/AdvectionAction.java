@@ -181,7 +181,9 @@ public class AdvectionAction extends AbstractAction {
             pk[i] = p0[i] + .5d * k1[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return new double[]{.5d * k1[0], .5d * k1[1], 0};
+            return (dim > 2) 
+                    ? new double[]{.5d * k1[0], .5d * k1[1], 0}
+                    : new double[]{.5d * k1[0], .5d * k1[1]};
         }
 
         double[] k2 = advectEuler(pk, time + dt / 2, dt);
@@ -190,7 +192,9 @@ public class AdvectionAction extends AbstractAction {
             pk[i] = p0[i] + .5d * k2[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return new double[]{.5d * k2[0], .5d * k2[1], 0};
+            return (dim > 2)
+                    ? new double[]{.5d * k2[0], .5d * k2[1], 0}
+                    : new double[]{.5d * k2[0], .5d * k2[1]};
         }
 
         double[] k3 = advectEuler(pk, time + dt / 2, dt);
@@ -199,7 +203,9 @@ public class AdvectionAction extends AbstractAction {
             pk[i] = p0[i] + k3[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return new double[]{k3[0], k3[1], 0};
+            return (dim > 2)
+                    ? new double[]{k3[0], k3[1], 0}
+                    : new double[]{k3[0], k3[1]};
         }
 
         double[] k4 = advectEuler(pk, time + dt, dt);
@@ -209,7 +215,6 @@ public class AdvectionAction extends AbstractAction {
         }
 
         return (dU);
-
     }
 
     public enum AdvectionScheme {
