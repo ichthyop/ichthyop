@@ -8,7 +8,7 @@ import java.awt.Color;
 import org.previmer.ichthyop.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
@@ -16,7 +16,7 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
  *
  * @author pverley
  */
-public class XZone extends org.jdom.Element {
+public class XZone extends org.jdom2.Element {
 
     final public static String ZONE = "zone";
     final public static String TYPE_ZONE = "type";
@@ -253,7 +253,7 @@ public class XZone extends org.jdom.Element {
         getBathyMask().getChild(ENABLED).setText(String.valueOf(enabled));
     }
 
-    public class XPoint extends org.jdom.Element {
+    public class XPoint extends org.jdom2.Element {
 
         private static final String POINT = "point";
         private static final String LON = "lon";

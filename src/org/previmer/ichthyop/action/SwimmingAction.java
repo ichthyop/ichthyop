@@ -16,7 +16,7 @@
  */
 package org.previmer.ichthyop.action;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;

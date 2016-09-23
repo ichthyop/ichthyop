@@ -27,6 +27,7 @@ public class Roms3dOpendapDataset extends Roms3dCommon {
     @Override
     void openDataset() throws Exception {
         ncIn = DatasetUtil.openURL(getParameter("opendap_url"), true);
+        gridFile = ncIn.getLocation();
         readTimeLength();
     }
 

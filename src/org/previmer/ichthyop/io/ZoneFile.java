@@ -28,11 +28,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.filter.Filter;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.filter.Filter;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 public class ZoneFile {
@@ -76,7 +77,7 @@ public class ZoneFile {
             racine.detach();
             structure = new Document(racine);
             zones = createMap();
-        } catch (Exception e) {
+        } catch (JDOMException | IOException e) {
             SimulationManager.getLogger().log(Level.SEVERE, null, e);
         }
     }
@@ -91,7 +92,7 @@ public class ZoneFile {
     }
 
     private void write(OutputStream out) throws IOException {
-        org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
+        org.jdom2.output.Format format = org.jdom2.output.Format.getPrettyFormat();
         format.setEncoding(System.getProperty("file.encoding"));
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(structure, out);
@@ -139,16 +140,43 @@ public class ZoneFile {
 
         Filter filtre = new Filter() {
 
+            @Override
             public boolean matches(Object obj) {
                 if (!(obj instanceof Element)) {
                     return false;
                 }
                 Element element = (Element) obj;
-                if (element.getChildTextNormalize(XZone.TYPE_ZONE).equals(type.toString())) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return element.getChildTextNormalize(XZone.TYPE_ZONE).equals(type.toString());
+            }
+
+            @Override
+            public List filter(List list) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Object filter(Object o) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter negate() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter or(Filter filter) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter and(Filter filter) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter refine(Filter filter) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
         List<XZone> list = new ArrayList();

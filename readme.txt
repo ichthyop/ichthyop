@@ -7,8 +7,8 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.3alpha (2016/08/31) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r896
+Release: 3.3alpha (2016/09/23) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r899
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
@@ -22,6 +22,7 @@ No JAR (Java executable file) is provided for the alpha version, the source code
 Changes since Ichthyop 3.2
 
 Bug fixes:
+* RungeKutta scheme now works in backward for 2D simulations
 * The 'zone' output variable displays -99 for particles that have not been released yet (used to be zero, which is incorrect information)
 * The 'release_zone' output variable now works with multiple release events (only the first release event would be written in the variable and all other particle release zones were set to zero)
 * Horizontal dispersion now works in backward mode

@@ -4,7 +4,7 @@
  */
 package org.previmer.ichthyop.manager;
 
-import org.jdom.JDOMException;
+import org.jdom2.JDOMException;
 import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.event.InitializeEvent;
@@ -22,7 +22,7 @@ import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.input.SAXBuilder;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.ui.logging.SystemOutHandler;
 import org.previmer.ichthyop.util.IchthyopLogFormatter;
@@ -148,9 +148,7 @@ public class SimulationManager {
         try {
             return new SAXBuilder().build(file).getRootElement().getName().equals("icstructure");
 
-        } catch (JDOMException ex) {
-            return false;
-        } catch (IOException ex) {
+        } catch (JDOMException | IOException ex) {
             return false;
         }
     }
