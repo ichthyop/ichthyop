@@ -1,0 +1,57 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
+${licensePrefix}http://www.ichthyop.org
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-${date?date?string("yyyy")}
+${licensePrefix}http://www.ird.fr
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}Main developper: Philippe VERLEY (philippe.verley@ird.fr)
+${licensePrefix}Contributors (alphabetically sorted):
+${licensePrefix}Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+${licensePrefix}Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
+${licensePrefix}Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
+${licensePrefix}Stephane POUS, Nathan PUTMAN.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}Ichthyop is a free Java tool designed to study the effects of physical and
+${licensePrefix}biological factors on ichthyoplankton dynamics. It incorporates the most
+${licensePrefix}important processes involved in fish early life: spawning, movement, growth,
+${licensePrefix}mortality and recruitment. The tool uses as input time series of velocity,
+${licensePrefix}temperature and salinity fields archived from oceanic models such as NEMO,
+${licensePrefix}ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
+${licensePrefix}generates output files that can be post-processed easily using graphic and
+${licensePrefix}statistical software. 
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}To cite Ichthyop, please refer to Lett et al. 2008
+${licensePrefix}A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
+${licensePrefix}Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
+${licensePrefix}doi:10.1016/j.envsoft.2008.02.005
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}This software is governed by the CeCILL-B license under French law and
+${licensePrefix}abiding by the rules of distribution of free software. You can use, modify
+${licensePrefix}and/ or redistribute the software under the terms of the CeCILL-B license as
+${licensePrefix}circulated by CEA, CNRS and INRIA at the following URL
+${licensePrefix}"http://www.cecill.info".
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}As a counterpart to the access to the source code and rights to copy, modify
+${licensePrefix}and redistribute granted by the license, users are provided only with a
+${licensePrefix}limited warranty and the software's author, the holder of the economic
+${licensePrefix}rights, and the successive licensors have only limited liability.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}In this respect, the user's attention is drawn to the risks associated with
+${licensePrefix}loading, using, modifying and/or developing or reproducing the software by
+${licensePrefix}the user in light of its specific status of free software, that may mean that
+${licensePrefix}it is complicated to manipulate, and that also therefore means that it is
+${licensePrefix}reserved for developers and experienced professionals having in-depth
+${licensePrefix}computer knowledge. Users are therefore encouraged to load and test the
+${licensePrefix}software's suitability as regards their requirements in conditions enabling
+${licensePrefix}the security of their systems and/or data to be ensured and, more generally,
+${licensePrefix}to use and operate it in the same conditions as regards security.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}The fact that you are presently reading this means that you have had
+${licensePrefix}knowledge of the CeCILL-B license and that you accept its terms.
+<#if licenseLast??>
+${licenseLast}
+</#if>
+

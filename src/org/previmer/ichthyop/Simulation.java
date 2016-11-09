@@ -1,20 +1,16 @@
-/*
- * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics.
+/* 
+ * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2007-2013
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * http://www.ird.fr
  *
- * Contributors:
- * Gwendoline ANDRES (),
- * Sylvain BONHOMMEAU (sylvain.bonhommeau@ifremer.fr)
- * Bruno BLANKE (blanke@univ-brest.fr),
- * Timothée BROCHIER (timothee.brochier@ird.fr),
- * Fabrice LECORNU (fabrice.lecornu@ifremer.fr),
- * Christophe LETT (christophe.lett@ird.fr),
- * Christian MULLON (christian.mullon@ird.fr),
- * Carolina PARADA (cparada@inpesca.cl),
- * Pierrick PENVEN (pierrick.penven@ird.fr),
- * Philippe VERLEY (philippe.verley@ird.fr),
+ * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
+ * Contributors (alphabetically sorted):
+ * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+ * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
+ * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
+ * Stephane POUS, Nathan PUTMAN.
  *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
@@ -23,11 +19,12 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. It has been described in Lett, Christophe, Philippe
- * Verley, Christian Mullon, Carolina Parada, Timothée Brochier, Pierrick
- * Penven, and Bruno Blanke. “A Lagrangian Tool for Modelling Ichthyoplankton
- * Dynamics.” Environmental Modelling & Software 23, no. 9 (September 2008):
- * 1210–1214. doi:10.1016/j.envsoft.2008.02.005.
+ * statistical software. 
+ *
+ * To cite Ichthyop, please refer to Lett et al. 2008
+ * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
+ * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
+ * doi:10.1016/j.envsoft.2008.02.005
  *
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software. You can use, modify
@@ -53,6 +50,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package org.previmer.ichthyop;
 
 /**
