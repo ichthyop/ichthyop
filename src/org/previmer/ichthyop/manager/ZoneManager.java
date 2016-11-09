@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.io.ZoneFile;
 
 /**
@@ -69,9 +68,6 @@ public class ZoneManager extends AbstractManager {
                 zone.setColor(xzone.getColor());
                 for (XPoint point : xzone.getPolygon()) {
                     zone.addPoint(point.createRhoPoint());
-                }
-                for (XParameter xparam : xzone.getXParameters()) {
-                    zone.addParameter(xparam);
                 }
                 map.get(type).add(zone);
             }

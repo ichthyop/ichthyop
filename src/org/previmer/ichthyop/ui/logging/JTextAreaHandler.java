@@ -18,6 +18,7 @@ package org.previmer.ichthyop.ui.logging;
 
 import java.util.logging.ConsoleHandler;
 import javax.swing.JTextArea;
+import org.previmer.ichthyop.util.IchthyopLogFormatter;
 
 /**
  *
@@ -27,6 +28,6 @@ public class JTextAreaHandler extends ConsoleHandler {
 
     public JTextAreaHandler(JTextArea textArea) {
         setOutputStream(new JTextAreaOutputStream(textArea));
-        setFormatter(new JTextAreaFormatter());
+        setFormatter(new IchthyopLogFormatter());
     }
 }

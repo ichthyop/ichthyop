@@ -5,7 +5,7 @@
 package org.previmer.ichthyop.action;
 
 import java.util.logging.Level;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -26,7 +26,7 @@ public class AdvectionAction extends AbstractAction {
 
         /* numerical scheme */
         try {
-            isEuler = getParameter("scheme").matches(AdvectionScheme.FORWARD_EULER.getName());
+            isEuler = getParameter("scheme").equals(AdvectionScheme.FORWARD_EULER.getName());
         } catch (Exception ex) {
             /*  set RK4 as default in case could not determine the scheme
              * defined by user.
@@ -53,9 +53,14 @@ public class AdvectionAction extends AbstractAction {
             vertical = true;
         }
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
     @Override
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
         if (isForward) {
             advectForward(particle, getSimulationManager().getTimeManager().getTime());
         } else {
@@ -63,7 +68,7 @@ public class AdvectionAction extends AbstractAction {
         }
     }
 
-    private void advectForward(IBasicParticle particle, double time) throws
+    private void advectForward(IParticle particle, double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt = isEuler
@@ -114,7 +119,7 @@ public class AdvectionAction extends AbstractAction {
      * With Ua the input model velocity vector.
      * </pre>
      */
-    private void advectBackward(IBasicParticle particle, double time) throws
+    private void advectBackward(IParticle particle, double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt, pgrid;
@@ -176,7 +181,9 @@ public class AdvectionAction extends AbstractAction {
             pk[i] = p0[i] + .5d * k1[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return new double[]{.5d * k1[0], .5d * k1[1], 0};
+            return (dim > 2) 
+                    ? new double[]{.5d * k1[0], .5d * k1[1], 0}
+                    : new double[]{.5d * k1[0], .5d * k1[1]};
         }
 
         double[] k2 = advectEuler(pk, time + dt / 2, dt);
@@ -185,7 +192,9 @@ public class AdvectionAction extends AbstractAction {
             pk[i] = p0[i] + .5d * k2[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return new double[]{.5d * k2[0], .5d * k2[1], 0};
+            return (dim > 2)
+                    ? new double[]{.5d * k2[0], .5d * k2[1], 0}
+                    : new double[]{.5d * k2[0], .5d * k2[1]};
         }
 
         double[] k3 = advectEuler(pk, time + dt / 2, dt);
@@ -194,7 +203,9 @@ public class AdvectionAction extends AbstractAction {
             pk[i] = p0[i] + k3[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return new double[]{k3[0], k3[1], 0};
+            return (dim > 2)
+                    ? new double[]{k3[0], k3[1], 0}
+                    : new double[]{k3[0], k3[1]};
         }
 
         double[] k4 = advectEuler(pk, time + dt, dt);
@@ -204,7 +215,6 @@ public class AdvectionAction extends AbstractAction {
         }
 
         return (dU);
-
     }
 
     public enum AdvectionScheme {

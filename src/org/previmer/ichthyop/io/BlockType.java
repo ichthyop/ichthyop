@@ -18,7 +18,7 @@ public enum BlockType {
 
     static BlockType getType(String value) {
         for (BlockType type : values()) {
-            if (type.toString().matches(value))
+            if (type.toString().equals(value))
                 return type;
         }
         return null;

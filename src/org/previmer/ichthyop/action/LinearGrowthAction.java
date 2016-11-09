@@ -4,11 +4,14 @@
  */
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.util.Constant;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
+import org.previmer.ichthyop.particle.StageParticleLayer;
+import org.previmer.ichthyop.stage.LengthStage;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  *
@@ -17,20 +20,25 @@ import org.previmer.ichthyop.particle.GrowingParticleLayer;
 public class LinearGrowthAction extends AbstractAction {
 
     /**
-     * The growth function assumed the sea water temperature must not be
-     * be colder than this threshold. Temperature set in Celsius degree.
+     * The growth function assumed the sea water temperature must not be be
+     * colder than this threshold. Temperature set in Celsius degree.
      */
     private double tp_threshold;// = 10.d; //°C
     private double coeff1; //0.02d
     private double coeff2; //0.03d
     private String temperature_field;
+    private LengthStage lengthStage;
 
+    @Override
     public void loadParameters() throws Exception {
         tp_threshold = Float.valueOf(getParameter("threshold_temp"));
         coeff1 = Float.valueOf(getParameter("coeff1"));
         coeff2 = Float.valueOf(getParameter("coeff2"));
         temperature_field = getParameter("temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
+        lengthStage.init();
+        
         boolean addTracker = true;
         try {
             addTracker = Boolean.valueOf(getParameter("length_tracker"));
@@ -51,16 +59,26 @@ public class LinearGrowthAction extends AbstractAction {
         }
     }
 
-    public void execute(IBasicParticle particle) {
-        GrowingParticleLayer growthLayer = (GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class);
-        growthLayer.setLength(grow(growthLayer.getLength(), getSimulationManager().getDataset().get(temperature_field, growthLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue()));
+    @Override
+    public void init(IParticle particle
+    ) {
+        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
+        lengthLayer.setLength(lengthStage.getThreshold(0));
     }
 
-    private double grow(double length, double temperature) {
+    @Override
+    public void execute(IParticle particle
+    ) {
+        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
+        lengthLayer.incrementLength(grow(getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue()));
+        StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
+        stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
+    }
+
+    private double grow(double temperature) {
 
         double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
-        length += (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
-        return length;
+        return (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
 
     }
 }

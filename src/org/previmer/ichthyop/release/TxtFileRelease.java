@@ -4,24 +4,25 @@
  */
 package org.previmer.ichthyop.release;
 
-import java.text.ParseException;
-import org.previmer.ichthyop.event.ReleaseEvent;
-import org.previmer.ichthyop.particle.ParticleFactory;
-import org.previmer.ichthyop.arch.IBasicParticle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
+import java.util.logging.Level;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.particle.ParticleFactory;
 
 /**
  *
  * @author pverley
  */
-public class TxtFileRelease extends AbstractReleaseProcess {
+public class TxtFileRelease extends AbstractRelease {
 
     private File textFile;
     private boolean is3D;
@@ -51,13 +52,14 @@ public class TxtFileRelease extends AbstractReleaseProcess {
     @Override
     public int release(ReleaseEvent event) throws IOException {
 
-        int index = 0;
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
 
         BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
         String line;
+        int iline = 1;
         while ((line = bfIn.readLine()) != null) {
             if (!line.startsWith("#") & !(line.length() < 1)) {
                 strCoord = line.trim().split(" ");
@@ -71,7 +73,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                         throw ioex;
                     }
                 }
-                IBasicParticle particle;
+                IParticle particle;
                 if (is3D) {
                     double depth = coord.length > 2
                             ? coord[2]
@@ -88,9 +90,11 @@ public class TxtFileRelease extends AbstractReleaseProcess {
                     getSimulationManager().getSimulation().getPopulation().add(particle);
                     index++;
                 } else {
-                    throw new IOException("{Drifter release} Drifter at line " + (index + 1) + " is not in water");
+                    getLogger().log(Level.WARNING, "Drifter release - Drifter at line {0} ({1}) is not in water. Line ignored.", new Object[]{iline, line});
+                    //throw new IOException("{Drifter release} Drifter at line " + iline + " (" + line + ") is not in water");
                 }
             }
+            iline++;
         }
         return index;
     }
@@ -108,6 +112,7 @@ public class TxtFileRelease extends AbstractReleaseProcess {
         return index;
     }
 
+    @Override
     public int getNbParticles() {
         return nbParticles;
     }

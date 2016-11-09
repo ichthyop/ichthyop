@@ -19,7 +19,7 @@ package org.previmer.ichthyop.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 
 /**
@@ -34,6 +34,7 @@ public class GradientMoveAction extends AbstractAction {
     private String direction;
     private int stride;
 
+    @Override
     public void loadParameters() throws Exception {
 
         varName = getParameter("variable");
@@ -45,8 +46,14 @@ public class GradientMoveAction extends AbstractAction {
         getSimulationManager().getOutputManager().addCustomTracker(varName);
         dt = getSimulationManager().getTimeManager().get_dt();
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
-    public void execute(IBasicParticle particle) {
+    @Override
+    public void execute(IParticle particle) {
 
         int i = (int) Math.round(particle.getX());
         int j = (int) Math.round(particle.getY());
@@ -54,11 +61,11 @@ public class GradientMoveAction extends AbstractAction {
         Cell cell = new Cell(i, j, k);
 
         List<Cell> cells = getNeighborCells(cell);
-        long time = getSimulationManager().getTimeManager().getTime();
+        double time = getSimulationManager().getTimeManager().getTime();
         double val1 = getValue(cell, time);
         double dval = 0.d;
         Cell attractiveCell = null;
-        int sign = direction.matches("\\+")
+        int sign = direction.equals("\\+")
                 ? 1
                 : -1;
         for (Cell ncell : cells) {
@@ -78,7 +85,7 @@ public class GradientMoveAction extends AbstractAction {
         }
     }
 
-    private double getValue(Cell cell, long time) {
+    private double getValue(Cell cell, double time) {
         return getSimulationManager().getDataset().get(varName, new double[]{cell.i, cell.j, cell.k}, time).doubleValue();
     }
 

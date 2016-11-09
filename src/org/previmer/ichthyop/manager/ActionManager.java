@@ -12,16 +12,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.action.AbstractAction;
+import org.previmer.ichthyop.action.AbstractSysAction;
 import org.previmer.ichthyop.action.SysActionAgeMonitoring;
 import org.previmer.ichthyop.action.SysActionMove;
-import org.previmer.ichthyop.arch.IAction;
-import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.arch.IMasterParticle;
-import org.previmer.ichthyop.arch.ISysAction;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.particle.Particle;
 
 /**
  *
@@ -30,8 +28,8 @@ import org.previmer.ichthyop.io.XBlock;
 public class ActionManager extends AbstractManager {
 
     final private static ActionManager actionManager = new ActionManager();
-    private HashMap<String, IAction> actionMap;
-    private List<ISysAction> sysActionList;
+    private HashMap<String, AbstractAction> actionMap;
+    private List<AbstractSysAction> sysActionList;
 
     public static ActionManager getInstance() {
         return actionManager;
@@ -45,7 +43,7 @@ public class ActionManager extends AbstractManager {
             if (xaction.isEnabled()) {
                 try {
                     Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
-                    IAction action = createAction(actionClass);
+                    AbstractAction action = createAction(actionClass);
                     action.loadParameters();
                     actionMap.put(xaction.getKey(), action);
                     getLogger().log(Level.INFO, "Instantiated action \"{0}\"", xaction.getTreePath());
@@ -70,7 +68,7 @@ public class ActionManager extends AbstractManager {
         sysActionList.add(new SysActionAgeMonitoring());
         sysActionList.add(new SysActionMove());
 
-        for (ISysAction sysaction : sysActionList) {
+        for (AbstractSysAction sysaction : sysActionList) {
             try {
                 sysaction.loadParameters();
                 getLogger().log(Level.INFO, "Instantiated system action \"{0}\"", sysaction.getClass().getCanonicalName());
@@ -97,17 +95,24 @@ public class ActionManager extends AbstractManager {
         return (AbstractAction) actionClass.newInstance();
     }
 
-    public void executeActions(IBasicParticle particle) {
-        for (IAction action : getSortedActions()) {
+    public void executeActions(Particle particle) {
+        // Pre-defined actions
+        for (AbstractAction action : getSortedActions()) {
             if (!particle.isLocked()) {
                 action.execute(particle);
             }
         }
-    }
-
-    public void executeSysActions(IMasterParticle particle) {
-        for (ISysAction sysaction : sysActionList) {
+        
+        // System actions
+        for (AbstractSysAction sysaction : sysActionList) {
             sysaction.execute(particle);
+        }
+    }
+    
+    public void initActions(Particle particle) {
+        // Pre-defined actions
+        for (AbstractAction action : getSortedActions()) {
+                action.init(particle);
         }
     }
 
@@ -127,14 +132,10 @@ public class ActionManager extends AbstractManager {
         return getSimulationManager().getParameterManager().isBlockEnabled(BlockType.ACTION, actionKey);
     }
 
-    public String getParameter(String actionKey, String key) {
-        return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
-    }
-
-    private class ActionComparator implements Comparator<IAction> {
+    private class ActionComparator implements Comparator<AbstractAction> {
 
         @Override
-        public int compare(IAction action1, IAction action2) {
+        public int compare(AbstractAction action1, AbstractAction action2) {
             return action2.getPriority().rank().compareTo(action1.getPriority().rank());
         }
     }

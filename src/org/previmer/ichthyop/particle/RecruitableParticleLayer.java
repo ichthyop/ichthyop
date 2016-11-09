@@ -5,7 +5,6 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.TypeZone;
-import org.previmer.ichthyop.arch.IBasicParticle;
 
 /**
  *
@@ -13,7 +12,7 @@ import org.previmer.ichthyop.arch.IBasicParticle;
  */
     public class RecruitableParticleLayer extends ParticleLayer {
 
-    public RecruitableParticleLayer(IBasicParticle particle) {
+    public RecruitableParticleLayer(IParticle particle) {
         super(particle);
     }
 

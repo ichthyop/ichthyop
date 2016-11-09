@@ -1,75 +1,150 @@
 package org.previmer.ichthyop;
 
-/** import java.util */
-import org.previmer.ichthyop.arch.IPopulation;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
-import org.previmer.ichthyop.arch.IMasterParticle;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 import org.previmer.ichthyop.event.SetupEvent;
+import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.manager.SimulationManager;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.Particle;
 
 /**
- * <p> The Population is the intermediate level of the hierarchy of the IBM:
- * Simulation > Population > Individual (Particle). In accordance
- * with the name, this class manages a collection of particles. It is indeed
- * one of the core classes of the IBM (Simulation, Population and Particle).
- * The access to the particles always goes through this class.</p>
+ * The Population is the intermediate level of the hierarchy of the IBM:
+ * Simulation > Population > Individual (Particle). In accordance with the name,
+ * this class manages a collection of particles. It is one of the core classes
+ * of the IBM (Simulation, Population and Particle). The access to the particles
+ * always goes through this class.
  *
- * <p>The class extends a <code>HasSet</code> that contains Particle objects</p>
+ * @see java.util.ArrayList
  *
- * <p>In terms of proprer methods, this class mainly controls the release of
- * the particles. It also relays the <code>step</code> function to every
- * particle. The <code>step</code> function appears in the 3 core classes
- * (see above) of the model. It handles the march of the model through time.</p>
- *
- * @see {@link java.util.HashSet} for more details about the HashSet class.
- *
- * @author P.Verley
+ * @author P.Verley (philippe.verley@ird.fr)
  */
-public class Population extends HashSet implements IPopulation {
+public class Population extends ArrayList implements SetupListener {
 
-////////////////
-// Debug purpose
-////////////////
+///////////////////////////////
+// Declaration of the constants
+///////////////////////////////
+    /**
+     * Use multi-thread environment for running a step.
+     */
+    private final boolean MULTITHREAD  = false;
+    /**
+     * The minimal number of particles for splitting the step in concurrent
+     * pools of particles. Less than {@code THRESHOLD} particles, the simulation
+     * will run in sequential environment. More than {@code THRESHOLD}
+     * particles, the simulation will make use of the multi thread environment
+     * (if any).
+     */
+    private final int THRESHOLD = 1000;
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     private final static Population population = new Population();
-    
+
 ///////////////
 // Constructors
 ///////////////
-
     public Population() {
-        getSimulationManager().addSetupListener(this);
+        SimulationManager.getInstance().addSetupListener(Population.this);
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
     public static Population getInstance() {
         return population;
     }
 
+    public boolean add(IParticle particle) {
+        particle.init();
+        return super.add(particle);
+    }
+
+    /**
+     * Applies a step on the {@code Population} at current time step. It
+     * implements a Fork/Join algorithm for splitting the {@code Population} in
+     * subsets and run the current step in multi thread environment.
+     */
     public void step() {
 
-        Iterator<IMasterParticle> iter = iterator();
-        IMasterParticle particle;
-        while (iter.hasNext()) {
-            particle = iter.next();
-            if (particle.isLiving()) {
-                particle.step();
+        if (MULTITHREAD) {
+            ForkStep step = new ForkStep(0, size());
+            ForkJoinPool pool = new ForkJoinPool();
+            pool.invoke(step);
+        } else {
+            Iterator<Particle> iter = iterator();
+            Particle particle;
+            while (iter.hasNext()) {
+                particle = iter.next();
+                if (particle.isLiving()) {
+                    particle.step();
+                }
             }
         }
     }
 
+    /**
+     * Removes all school from the {@code Population}.
+     *
+     * @param e, the setup event thrown by the {@code SimulationManager} at
+     * setup.
+     */
+    @Override
     public void setupPerformed(SetupEvent e) {
         population.clear();
     }
 
-    private SimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
+    /**
+     * Implementation of the Fork/Join algorithm for splitting the set of
+     * particles in several subsets.
+     */
+    private class ForkStep extends RecursiveAction {
+
+        private final int iStart, iEnd;
+
+        /**
+         * Creates a new {@code ForkStep} that will handle a subset of
+         * particles.
+         *
+         * @param iStart, index of the first particle of the subset
+         * @param iEnd , index of the last particle of the subset
+         */
+        ForkStep(int iStart, int iEnd) {
+            this.iStart = iStart;
+            this.iEnd = iEnd;
+        }
+
+        /**
+         * Loop over the subset of particles and apply the
+         * {@link org.previmer.ichthyop.particle.MasterParticle#step()}
+         * function.
+         */
+        private void processDirectly() {
+            for (int iParticle = iStart; iParticle < iEnd; iParticle++) {
+                Particle particle = (Particle) Population.this.get(iParticle);
+                if (particle.isLiving()) {
+                    particle.step();
+                }
+            }
+        }
+
+        @Override
+        protected void compute() {
+
+            // Size of the subset
+            int nParticle = iEnd - iStart;
+            if (nParticle < THRESHOLD) {
+                // If the size of the subset is smaller than the THRESHOLD,
+                // process directly the whole subset
+                processDirectly();
+            } else {
+                // If the size of the subset is greater than the THRESHOLD,
+                // splits subset in two subsets
+                int iSplit = iStart + nParticle / 2;
+                invokeAll(new ForkStep(iStart, iSplit), new ForkStep(iSplit, iEnd));
+            }
+        }
     }
-    //------- End of class
 }

@@ -1,16 +1,15 @@
 package org.previmer.ichthyop;
 
 /**
- * Both ROMS and MARS use an Arakawa C grid.
- * The Rho point represents a 2D or 3D point within the C grid. It is referenced
- * by two sets of coordinates:
+ * Both ROMS and MARS use an Arakawa C grid. The Rho point represents a 2D or 3D
+ * point within the C grid. It is referenced by two sets of coordinates:
  * <ul>
  * <li>grid coordinates (x, y, z) if 3D, (x, y) if 2D
- * <li>geographical coordinates (longitude, latitude, depth) if 3D,
- * (longitude, latitude) if 2D
+ * <li>geographical coordinates (longitude, latitude, depth) if 3D, (longitude,
+ * latitude) if 2D
  * </ul>
- * The class provides methods to switch from grid coordinates (x, y, z)
- * to geographical coordinates (lon, lat, depth) and reciprocally.
+ * The class provides methods to switch from grid coordinates (x, y, z) to
+ * geographical coordinates (lon, lat, depth) and reciprocally.
  *
  * @author P.Verley
  */
@@ -19,12 +18,18 @@ public class GridPoint extends SimulationManagerAccessor {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    /** Grid coordinate */
+    /**
+     * Grid coordinate
+     */
     private double x, y, z;
     private double dx, dy, dz;
-    /** Geographical coordinate */
+    /**
+     * Geographical coordinate
+     */
     private double lat, lon, depth;
-    /** <code>true</code> if 3 dimensions point false otherwise */
+    /**
+     * <code>true</code> if 3 dimensions point false otherwise
+     */
     private static boolean is3D;
     private boolean latlonHaveChanged, depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
@@ -37,8 +42,8 @@ public class GridPoint extends SimulationManagerAccessor {
     /**
      * Constructs a new 2D or 3D point.
      *
-     * @param bln3D a boolean, <code>true</code> if 3 dimensions point,
-     * false otherwise
+     * @param bln3D a boolean, <code>true</code> if 3 dimensions point, false
+     * otherwise
      */
     public GridPoint(boolean bln3D) {
         is3D = bln3D;
@@ -64,8 +69,8 @@ public class GridPoint extends SimulationManagerAccessor {
 // Definition of the methods
 ////////////////////////////
     /**
-     * Transforms geographical coordinates into grid coordinates.
-     * (lon, lat, depth) ==> (x, y, z)
+     * Transforms geographical coordinates into grid coordinates. (lon, lat,
+     * depth) ==> (x, y, z)
      */
     public void geo2Grid() {
 
@@ -82,8 +87,8 @@ public class GridPoint extends SimulationManagerAccessor {
     }
 
     /**
-     * Transforms grid coordinates into geographical coordinates.
-     * (x, y, z) ==> (lon, lat, depth)
+     * Transforms grid coordinates into geographical coordinates. (x, y, z) ==>
+     * (lon, lat, depth)
      *
      * @see ichthyop.io.Dataset#grid2Geo()
      */
@@ -122,8 +127,8 @@ public class GridPoint extends SimulationManagerAccessor {
     }
 
     /**
-     * Increments (x, y, z) with (dx, dy, dz) if 3 dimensions move.
-     * Increments (x, y) with (dx, dy) if 2 dimensions move.
+     * Increments (x, y, z) with (dx, dy, dz) if 3 dimensions move. Increments
+     * (x, y) with (dx, dy) if 2 dimensions move.
      *
      * @param move a double[] array {dx, dy, dz} or {dx, dy}
      */
@@ -178,6 +183,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     /**
      * Gets x coordinate
+     *
      * @return double x, the x coordinate of the grid point
      */
     public double getX() {
@@ -186,6 +192,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     /**
      * Gets y coordinate
+     *
      * @return double y, the y coordinate of the grid point
      */
     public double getY() {
@@ -194,6 +201,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     /**
      * Gets z coordinate
+     *
      * @return double z, the z coordinate of the grid point
      */
     public double getZ() {
@@ -202,6 +210,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     /**
      * Gets longitude
+     *
      * @return double lon, the longitude of the point [degree East]
      */
     public double getLon() {
@@ -210,6 +219,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     /**
      * Gets latitude
+     *
      * @return double lat, the latitude of the point [degree North]
      */
     public double getLat() {
@@ -218,6 +228,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     /**
      * Gets depth
+     *
      * @return double depth, the depth of the point [meter]
      */
     public double getDepth() {
@@ -226,6 +237,7 @@ public class GridPoint extends SimulationManagerAccessor {
 
     /**
      * Sets the depth
+     *
      * @param depth a double, depth of the geographical point [meter]
      */
     public void setDepth(double depth) {
@@ -237,20 +249,21 @@ public class GridPoint extends SimulationManagerAccessor {
 
     public void setX(double x) {
         if (this.x != x) {
-            this.x = x;
+            this.x = getSimulationManager().getDataset().xTore(x);
             xyHaveChanged = true;
         }
     }
 
     public void setY(double y) {
         if (this.y != y) {
-            this.y = y;
+            this.y = getSimulationManager().getDataset().yTore(y);
             xyHaveChanged = true;
         }
     }
 
     /**
      * Sets the vertical coordinate
+     *
      * @param z a double, z coordinate of the grid point
      */
     public void setZ(double z) {

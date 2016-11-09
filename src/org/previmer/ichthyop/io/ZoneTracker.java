@@ -16,12 +16,11 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.ZoneParticleLayer;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
@@ -32,7 +31,7 @@ import ucar.nc2.Dimension;
 
 /**
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author P. VERLEY (philippe.verley@ird.fr)
  */
 public class ZoneTracker extends AbstractTracker {
 
@@ -49,13 +48,21 @@ public class ZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayInt.D3(1, dimensions().get(1).getLength(), dimensions().get(2).getLength());
+        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), TypeZone.values().length);
+        // Initialises zone array with -99
+        for (int iZone = 0; iZone < TypeZone.values().length; iZone++) {
+            for (int iP = 0; iP < getNParticle(); iP++) {
+                array.set(0, iP, iZone, -99);
+            }
+        }
+        return array;
     }
 
+    @Override
     public void track() {
-        IBasicParticle particle;
+        IParticle particle;
         ZoneParticleLayer zparticle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
             zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);
@@ -68,22 +75,22 @@ public class ZoneTracker extends AbstractTracker {
     }
 
     @Override
-    public Attribute[] attributes() {
-        List<Attribute> listAttributes = new ArrayList();
-        for (Attribute attr : super.attributes()) {
-            listAttributes.add(attr);
-        }
+    public void addRuntimeAttributes() {
+
         for (TypeZone type : TypeZone.values()) {
-            listAttributes.add(new Attribute("type_zone " + type.getCode(), type.toString()));
+            addAttribute(new Attribute("type_zone " + type.getCode(), type.toString()));
             List<Zone> zones = getSimulationManager().getZoneManager().getZones(type);
             if (null != zones) {
                 for (Zone zone : zones) {
-                    listAttributes.add(new Attribute(type.toString() + "_zone " + zone.getIndex(), zone.getKey()));
+                    addAttribute(new Attribute(type.toString() + "_zone " + zone.getIndex(), zone.getKey()));
                 }
             } else {
-                listAttributes.add(new Attribute(type.toString() + "_zone", "none for this run"));
+                addAttribute(new Attribute(type.toString() + "_zone", "none for this run"));
             }
         }
-        return listAttributes.toArray(new Attribute[listAttributes.size()]);
+        // Particle not released yet set to -99
+        addAttribute(new Attribute("not_released_yet", -99));
+        // Particle out of zone set to -1
+        addAttribute(new Attribute("out_of_zone", -1));
     }
 }

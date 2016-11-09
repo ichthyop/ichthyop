@@ -7,8 +7,8 @@ package org.previmer.ichthyop.dataset;
 import java.util.HashMap;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepListener;
-import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.manager.TimeManager;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -17,7 +17,7 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class AbstractDataset extends SimulationManagerAccessor implements IDataset, NextStepListener {
 
-    private String datasetKey;
+    private final String datasetKey;
     /*
      *
      */
@@ -33,6 +33,19 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
     }
 
+    public boolean findParameter(String key) {
+        // Check whether the parameter can be retrieved
+        try {
+            getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
+        } catch (NullPointerException ex) {
+            // Tue parameter does not exist
+            return false;
+        }
+        // The parameter does exist
+        return true;
+    }
+
+    @Override
     public Number get(String variableName, double[] pGrid, double time) {
         if (null != requiredVariables.get(variableName)) {
             return requiredVariables.get(variableName).get(pGrid, time);
@@ -40,6 +53,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return Float.NaN;
     }
 
+    @Override
     public void requireVariable(String name, Class requiredBy) {
         if (!requiredVariables.containsKey(name)) {
             requiredVariables.put(name, new RequiredVariable(name, requiredBy));
@@ -56,12 +70,13 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         }
     }
 
+    @Override
     public void removeRequiredVariable(String name, Class requiredBy) {
         RequiredVariable var = requiredVariables.get(name);
         if (null != var) {
             if (var.getRequiredBy().size() > 1) {
                 /* just remove the reference but dont remove the
-                variable because other classes might need it */
+                 variable because other classes might need it */
                 var.getRequiredBy().remove(requiredBy);
             } else if (var.getRequiredBy().get(0).equals(requiredBy)) {
                 requiredVariables.remove(name);
@@ -73,9 +88,9 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         for (RequiredVariable variable : requiredVariables.values()) {
             try {
                 variable.checked(nc);
-            } catch (Exception ex) {
+            } catch (NullPointerException | NumberFormatException ex) {
                 requiredVariables.remove(variable.getName());
-                StringBuffer msg = new StringBuffer();
+                StringBuilder msg = new StringBuilder();
                 msg.append("Failed to read dataset variable ");
                 msg.append(variable.getName());
                 msg.append(" ==> ");
@@ -90,6 +105,26 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
                 msg.append("Watch out, these classes might not work correctly.");
                 getLogger().log(Level.WARNING, msg.toString(), ex);
             }
+        }
+    }
+
+    boolean skipSorting() {
+        try {
+            return Boolean.valueOf(getParameter("skip_sorting"));
+        } catch (NullPointerException ex ) {
+            return false;
+        }
+    }
+    
+    int timeArrow() {
+        return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
+    }
+    
+    boolean enhanced() {
+        try {
+            return Boolean.valueOf(getParameter("enhanced_mode"));
+        } catch (NullPointerException ex ) {
+            return true;
         }
     }
 }

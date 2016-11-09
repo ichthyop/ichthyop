@@ -5,9 +5,15 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.List;
 import org.previmer.ichthyop.dataset.MarsCommon.ErrorMessage;
+import static org.previmer.ichthyop.dataset.RomsCommon.strTime;
 import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.io.IOTools;
+import static org.previmer.ichthyop.io.IOTools.isDirectory;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -30,9 +36,11 @@ public class Roms2dDataset extends RomsCommon {
      */
     static float[][] v_tp0;
     /**
-     *  Meridional component of the velocity field at time t + dt
+     * Meridional component of the velocity field at time t + dt
      */
     static float[][] v_tp1;
+    private List<String> ncfiles;
+    private int ncindex;
 
     @Override
     public boolean is3D() {
@@ -77,7 +85,9 @@ public class Roms2dDataset extends RomsCommon {
                         * (.5d - (double) jj - dy));
                 CO += co;
                 x = (1.d - x_euler) * v_tp0[j + jj - 1][i + ii] + x_euler * v_tp1[j + jj - 1][i + ii];
-                dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                if (!Double.isNaN(x)) {
+                    dv += .5d * x * co * (pn[Math.max(j + jj - 1, 0)][i + ii] + pn[j + jj][i + ii]);
+                }
 
             }
         }
@@ -111,7 +121,9 @@ public class Roms2dDataset extends RomsCommon {
                         * (1.d - (double) jj - dy));
                 CO += co;
                 x = (1.d - x_euler) * u_tp0[j + jj][i + ii - 1] + x_euler * u_tp1[j + jj][i + ii - 1];
-                du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                if (!Double.isNaN(x)) {
+                    du += .5d * x * co * (pm[j + jj][Math.max(i + ii - 1, 0)] + pm[j + jj][i + ii]);
+                }
             }
         }
         if (CO != 0) {
@@ -128,7 +140,7 @@ public class Roms2dDataset extends RomsCommon {
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = (int) Math.signum(e.getSource().get_dt());
 
@@ -140,7 +152,9 @@ public class Roms2dDataset extends RomsCommon {
         v_tp0 = v_tp1;
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(getNextFile(time_arrow));
+            ncindex = DatasetUtil.next(ncfiles, ncindex, time_arrow);
+            ncIn = DatasetUtil.openFile(ncfiles.get(ncindex), true);
+            readTimeLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
         setAllFieldsTp1AtTime(rank);
@@ -149,31 +163,47 @@ public class Roms2dDataset extends RomsCommon {
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        int[] origin = new int[]{rank, 0, jpo, ipo};
+        getLogger().info("Reading NetCDF variables...");
+
+        int[] origin = new int[]{rank, jpo, ipo};
         double time_tp0 = time_tp1;
+        Array arr;
+        Index index;
 
         try {
-            u_tp1 = (float[][]) ncIn.findVariable(strU).read(origin, new int[]{1, ny, (nx - 1)}).reduce().copyToNDJavaArray();
-
-        } catch (Exception ex) {
+            arr = ncIn.findVariable(strU).read(origin, new int[]{1, ny, (nx - 1)}).reduce();
+            u_tp1 = new float[ny][nx - 1];
+            index = arr.getIndex();
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx - 1; i++) {
+                    index.set(j, i);
+                    u_tp1[j][i] = arr.getFloat(index);
+                }
+            }
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
-            v_tp1 = (float[][]) ncIn.findVariable(strV).read(origin,
-                    new int[]{1, (ny - 1), nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+            arr = ncIn.findVariable(strV).read(origin, new int[]{1, (ny - 1), nx}).reduce();
+            v_tp1 = new float[ny - 1][nx];
+            index = arr.getIndex();
+            for (int j = 0; j < ny - 1; j++) {
+                for (int i = 0; i < nx; i++) {
+                    index.set(j, i);
+                    v_tp1[j][i] = arr.getFloat(index);
+                }
+            }
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
 
         try {
-            Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 100;
-        } catch (Exception ex) {
+            time_tp1 = DatasetUtil.timeAtRank(ncIn, strTime, rank);
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -204,5 +234,39 @@ public class Roms2dDataset extends RomsCommon {
         }
 
         return variable.read(origin, shape).reduce();
+    }
+
+    @Override
+    void openDataset() throws Exception {
+
+        ncfiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        if (!skipSorting()) {
+            DatasetUtil.sort(ncfiles, strTime, timeArrow());
+        }
+        ncIn = DatasetUtil.openFile(ncfiles.get(0), true);
+        readTimeLength();
+
+        try {
+            if (!getParameter("grid_file").isEmpty()) {
+                String path = IOTools.resolvePath(getParameter("grid_file"));
+                if (!isDirectory(path)) {
+                    throw new IOException("{Dataset} " + getParameter("grid_file") + " is not a valid directory.");
+                }
+            } else {
+                gridFile = ncIn.getLocation();
+            }
+        } catch (NullPointerException ex) {
+            gridFile = ncIn.getLocation();
+        }
+    }
+
+    @Override
+    void setOnFirstTime() throws Exception {
+        double t0 = getSimulationManager().getTimeManager().get_tO();
+        ncindex = DatasetUtil.index(ncfiles, t0, timeArrow(), strTime);
+        ncIn = DatasetUtil.openFile(ncfiles.get(ncindex), true);
+        readTimeLength();
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
+        time_tp1 = t0;
     }
 }

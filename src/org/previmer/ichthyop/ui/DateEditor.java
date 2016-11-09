@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DateFormatter;
 import javax.swing.text.DefaultFormatterFactory;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -39,7 +39,7 @@ public class DateEditor extends DefaultCellEditor {
     /**
      * The calendar to convert specific instant in time to date.
      */
-    private Calendar calendar = new ClimatoCalendar();
+    private Calendar calendar = new Day360Calendar();
     private JFormattedTextField ftf;
     private boolean DEBUG = false;
     public final static int DATE = 0;
@@ -67,6 +67,7 @@ public class DateEditor extends DefaultCellEditor {
         ftf.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "check");
         ftf.getActionMap().put("check", new AbstractAction() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (!ftf.isEditValid()) { //The text is invalid.
                     if (userSaysRevert()) { //reverted
@@ -119,6 +120,7 @@ public class DateEditor extends DefaultCellEditor {
      * bad. Returns true if the user elects to revert to
      * the last good value.  Otherwise, returns false,
      * indicating that the user wants to continue editing.
+     * @return true to revert to last good code
      */
     protected boolean userSaysRevert() {
         Toolkit.getDefaultToolkit().beep();

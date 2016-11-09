@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 /** local import */
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
@@ -131,7 +131,7 @@ public class SimulationUI extends JPanel {
             ParticleUI particleUI = new ParticleUI();
             Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();
             while (it.hasNext()) {
-                IBasicParticle particle = (IBasicParticle) it.next();
+                IParticle particle = (IParticle) it.next();
                 if (particle.isLiving()) {
                     particleUI.draw(particle.getGridCoordinates(), w, h);
                     g2.setColor(particleUI.getColor());

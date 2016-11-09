@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jdom.Content;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.filter.Filter;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Content;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.filter.Filter;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
 import org.previmer.ichthyop.Version;
 
 public class ConfigurationFile {
@@ -108,7 +108,7 @@ public class ConfigurationFile {
     }
 
     public void write(OutputStream out) throws IOException {
-        org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
+        org.jdom2.output.Format format = org.jdom2.output.Format.getPrettyFormat();
         format.setEncoding(System.getProperty("file.encoding"));
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(structure, out);
@@ -171,16 +171,43 @@ public class ConfigurationFile {
 
         Filter filtre = new Filter() {
 
+            @Override
             public boolean matches(Object obj) {
                 if (!(obj instanceof Element)) {
                     return false;
                 }
                 Element element = (Element) obj;
-                if (element.getAttributeValue(XBlock.TYPE).matches(type.toString())) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return element.getAttributeValue(XBlock.TYPE).equals(type.toString());
+            }
+
+            @Override
+            public List filter(List list) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Object filter(Object o) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter negate() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter or(Filter filter) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter and(Filter filter) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public Filter refine(Filter filter) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
         List<XBlock> list = new ArrayList();
@@ -190,7 +217,7 @@ public class ConfigurationFile {
         return list;
     }
 
-    public void updateKey(String newKey, XBlock xblock) {
+    public void updateBlockKey(String newKey, XBlock xblock) {
         map.remove(xblock.getKey());
         xblock.setKey(newKey);
         map.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
@@ -209,6 +236,11 @@ public class ConfigurationFile {
         block.prepairForWriting();
         structure.getRootElement().addContent(block);
         map.put(new BlockId(block.getType(), block.getKey()).toString(), block);
+    }
+    
+    public void removeBlock(final BlockType type, final String key) {
+        map.remove(key);
+        structure.getRootElement().removeContent(getBlock(type, key));
     }
 }
 

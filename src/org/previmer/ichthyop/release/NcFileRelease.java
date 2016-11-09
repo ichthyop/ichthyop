@@ -6,10 +6,10 @@ package org.previmer.ichthyop.release;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.logging.Level;
-import org.previmer.ichthyop.event.ReleaseEvent;
 import java.io.IOException;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import java.util.logging.Level;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.particle.ParticleMortality;
@@ -23,7 +23,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class NcFileRelease extends AbstractReleaseProcess {
+public class NcFileRelease extends AbstractRelease {
 
     private String filename;
 
@@ -46,7 +46,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
     public int release(ReleaseEvent event) throws Exception {
 
         double time = event.getSource().getTime();
-        int index = 0;
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
 
         NetcdfFile nc = NetcdfDataset.openFile(filename, null);
         ArrayDouble.D1 timeArr = (ArrayDouble.D1) nc.findVariable("time").read();
@@ -86,7 +86,7 @@ public class NcFileRelease extends AbstractReleaseProcess {
             depthArr = (ArrayFloat.D2) nc.findVariable("depth").read();
         }
         double lon, lat, depth = Double.NaN;
-        IBasicParticle particle;
+        IParticle particle;
         int nb_particles = lonArr.getShape()[1];
 
         for (int i = 0; i < nb_particles; i++) {
@@ -113,20 +113,21 @@ public class NcFileRelease extends AbstractReleaseProcess {
             index++;
         }
 
-        lonArr = null;
-        latArr = null;
-        depthArr = null;
-        mortalityArr = null;
         nc.close();
         return index;
     }
 
+    @Override
     public int getNbParticles() {
 
         try {
-            return NetcdfDataset.open(filename).findDimension("drifter").getLength();
+            NetcdfFile nc = NetcdfDataset.open(filename);
+            int nParticle = nc.findDimension("drifter").getLength();
+            nc.close();
+            return nParticle;
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, null, ex);
+            System.exit(1);
         }
         return -1;
     }

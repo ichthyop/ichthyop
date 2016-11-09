@@ -10,7 +10,6 @@ import java.text.ParseException;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.LastStepListener;
@@ -18,6 +17,7 @@ import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.event.EventListenerList;
+import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.util.Constant;
 
 /**
@@ -25,7 +25,7 @@ import org.previmer.ichthyop.util.Constant;
  * @author pverley
  */
 public class TimeManager extends AbstractManager {
-    
+
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
@@ -39,19 +39,19 @@ public class TimeManager extends AbstractManager {
     /**
      * Current time of the simulation [second]
      */
-    private long time;
+    private double time;
     /**
-     * Begining of the simulation [second]
+     * Beginning of the simulation [second]
      */
-    private long t0;
+    private double t0;
     /**
      * Transport duration [second]
      */
-    private long transportDuration;
+    private double transportDuration;
     /**
      * Simulation duration [second]
      */
-    private long simuDuration;
+    private double simuDuration;
     /**
      * Simulation time step [second]
      */
@@ -69,14 +69,15 @@ public class TimeManager extends AbstractManager {
      */
     private Calendar calendar;
     /**
-     * Determine whether particle should keep drifting when age exceeds transport duration
+     * Determine whether particle should keep drifting when age exceeds
+     * transport duration
      */
     private boolean keepDrifting;
     /**
      * The simple date format parses and formats dates in human readable format.
      */
     private SimpleDateFormat outputDateFormat;
-    private EventListenerList listeners = new EventListenerList();
+    private final EventListenerList listeners = new EventListenerList();
 
 ////////////////////////////
 // Definition of the methods
@@ -95,7 +96,7 @@ public class TimeManager extends AbstractManager {
         dt = Integer.valueOf(getParameter("time_step"));
 
         /* time direction */
-        boolean isForward = getParameter("time_arrow").matches(TimeDirection.FORWARD.toString());
+        boolean isForward = getParameter("time_arrow").equals(TimeDirection.FORWARD.toString());
         if (!isForward) {
             dt *= -1;
         }
@@ -112,10 +113,19 @@ public class TimeManager extends AbstractManager {
         /* keep drifting ?*/
         keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
 
-        if (getParameter("calendar_type").matches(TypeCalendar.CLIMATO.toString())) {
-            calendar = new ClimatoCalendar();
+        // Calendar en origin of time
+        Calendar calendar_o = Calendar.getInstance();
+        INPUT_DATE_FORMAT.setCalendar(calendar_o);
+        calendar_o.setTime(INPUT_DATE_FORMAT.parse(getParameter("time_origin")));
+        int year_o = calendar_o.get(Calendar.YEAR);
+        int month_o = calendar_o.get(Calendar.MONTH);
+        int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
+        int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
+        int minute_o = calendar_o.get(Calendar.MINUTE);
+        if (getParameter("calendar_type").equals(TypeCalendar.CLIMATO.toString())) {
+            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
         } else {
-            calendar = new InterannualCalendar(getParameter("time_origin"), INPUT_DATE_FORMAT);
+            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
 
         /* initial time */
@@ -126,13 +136,13 @@ public class TimeManager extends AbstractManager {
             pex.setStackTrace(ex.getStackTrace());
             throw pex;
         }
-        calendar.setTimeInMillis(t0 * 1000L);
-
+        calendar.setTimeInMillis((long) (t0 * 1000));
+        
         /* output date format */
         outputDateFormat = new SimpleDateFormat(
                 (calendar.getClass() == InterannualCalendar.class)
-                ? "yyyy/MM/dd HH:mm:ss"
-                : "yy/MM/dd HH:mm:ss");
+                        ? "yyyy/MM/dd HH:mm:ss"
+                        : "yy/MM/dd HH:mm:ss");
         outputDateFormat.setCalendar(calendar);
     }
 
@@ -141,12 +151,13 @@ public class TimeManager extends AbstractManager {
     }
 
     /**
-     * 
+     *
      * @param duration format: getInputDurationFormat()
      * @return
+     * @throws java.text.ParseException
      */
-    public long duration2seconds(String duration) throws ParseException {
-        long seconds = 0L;
+    public double duration2seconds(String duration) throws ParseException {
+        double seconds;
         NumberFormat nbFormat = NumberFormat.getInstance();
         nbFormat.setParseIntegerOnly(true);
         nbFormat.setGroupingUsed(false);
@@ -154,7 +165,7 @@ public class TimeManager extends AbstractManager {
         seconds = nbFormat.parse(duration.substring(duration.indexOf("hour") + 8, duration.indexOf("minute"))).longValue()
                 * Constant.ONE_MINUTE
                 + nbFormat.parse(duration.substring(duration.indexOf("day") + 7,
-                duration.indexOf("hour")).trim()).longValue()
+                                duration.indexOf("hour")).trim()).longValue()
                 * Constant.ONE_HOUR
                 + nbFormat.parse(duration.substring(0, duration.indexOf("day")).trim()).longValue()
                 * Constant.ONE_DAY;
@@ -162,11 +173,10 @@ public class TimeManager extends AbstractManager {
         return seconds;
     }
 
-    public long date2seconds(String date) throws ParseException {
-        Calendar lcalendar = (Calendar) calendar.clone();
-        INPUT_DATE_FORMAT.setCalendar(lcalendar);
-        lcalendar.setTime(INPUT_DATE_FORMAT.parse(date));
-        return lcalendar.getTimeInMillis() / 1000L;
+    public double date2seconds(String date) throws ParseException {
+        INPUT_DATE_FORMAT.setCalendar(calendar);
+        calendar.setTime(INPUT_DATE_FORMAT.parse(date));
+        return calendar.getTimeInMillis() / 1000L;
     }
 
     private String getParameter(String key) {
@@ -179,11 +189,12 @@ public class TimeManager extends AbstractManager {
      *
      * @return <code>true</code> if the incremented time is still smaller than
      * the end time of the simulation; <code>false</code> otherwise.
+     * @throws java.lang.Exception
      */
     public boolean hasNextStep() throws Exception {
 
         time += dt;
-        calendar.setTimeInMillis(time * 1000L);
+        calendar.setTimeInMillis((long) (time * 1000));
         if (Math.abs(time - t0) < simuDuration) {
             fireNextStepTriggered();
             i_step++;
@@ -195,6 +206,7 @@ public class TimeManager extends AbstractManager {
 
     /**
      * Gets the current time of the simulation as a String
+     *
      * @return the current time of the simulation, formatted in a String
      */
     public String timeToString() {
@@ -203,6 +215,7 @@ public class TimeManager extends AbstractManager {
 
     /**
      * Gets the index of the current step
+     *
      * @return the index of the current step
      */
     public int index() {
@@ -210,7 +223,7 @@ public class TimeManager extends AbstractManager {
     }
 
     public String stepToString() {
-        StringBuffer strBf = new StringBuffer("Step ");
+        StringBuilder strBf = new StringBuilder("Step ");
         strBf.append(index() + 1);
         strBf.append(" / ");
         strBf.append(getNumberOfSteps());
@@ -219,6 +232,7 @@ public class TimeManager extends AbstractManager {
 
     /**
      * The number of steps of the current simulation.
+     *
      * @return the number of steps of the current simulation.
      */
     public int getNumberOfSteps() {
@@ -227,18 +241,20 @@ public class TimeManager extends AbstractManager {
 
     /**
      * Gets the current time of the simulation
+     *
      * @return a long, the current time [second] of the simulation
      */
-    public long getTime() {
+    public double getTime() {
         return time;
     }
 
-    public long get_tO() {
+    public double get_tO() {
         return t0;
     }
 
     /**
      * Gets the calendar used for time management
+     *
      * @return the Calendar of the simulation
      */
     public Calendar getCalendar() {
@@ -247,21 +263,23 @@ public class TimeManager extends AbstractManager {
 
     /**
      * Gets the simulation duration
+     *
      * @return a long, the simulation duration [second]
      */
-    public long getSimulationDuration() {
+    public double getSimulationDuration() {
         return simuDuration;
     }
 
     /**
      * Gets the computational time step.
+     *
      * @return the time step [second] used in the model
      */
     public int get_dt() {
         return dt;
     }
 
-    public long getTransportDuration() {
+    public double getTransportDuration() {
         return transportDuration;
     }
 
@@ -271,6 +289,7 @@ public class TimeManager extends AbstractManager {
 
     /**
      * Removes the specified listener from the parameter
+     *
      * @param listener the ValueListener
      */
     public void removeNextListenerListener(NextStepListener listener) {
@@ -292,6 +311,7 @@ public class TimeManager extends AbstractManager {
 
     /**
      * Removes the specified listener from the parameter
+     *
      * @param listener the ValueListener
      */
     public void removeLastListenerListener(LastStepListener listener) {
@@ -310,7 +330,6 @@ public class TimeManager extends AbstractManager {
     private void fireNextStepTriggered() throws Exception {
 
         //Logger.getAnonymousLogger().info("-----< " + timeManager.timeToString() + " >-----");
-
         NextStepListener[] listenerList = (NextStepListener[]) listeners.getListeners(NextStepListener.class);
 
         for (int i = listenerList.length; i-- > 0;) {
@@ -332,6 +351,7 @@ public class TimeManager extends AbstractManager {
         }
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         cleanNextStepListener();
         cleanLastStepListener();
@@ -339,6 +359,7 @@ public class TimeManager extends AbstractManager {
         getLogger().info("Time manager setup [OK]");
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
         simuDuration = transportDuration + getSimulationManager().getReleaseManager().getReleaseDuration();
         i_step = 0;
@@ -371,7 +392,7 @@ public class TimeManager extends AbstractManager {
 
         CLIMATO("Climatology calendar"),
         GREGORIAN("Gregorian calendar");
-        private String name;
+        private final String name;
 
         TypeCalendar(String name) {
             this.name = name;

@@ -6,19 +6,16 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
-import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
@@ -35,103 +32,71 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Grid dimension
      */
-    static int nx, ny, nz;
+    private int nx, ny, nz;
     /**
      * Origin for grid index
      */
-    static int ipo, jpo;
+    private int ipo, jpo;
     /**
      * Number of time records in current NetCDF file
      */
-    private static int nbTimeRecords;
-    /**
-     * The NetCDF dataset
-     *
-     * pverley pour chourdin: avec ROMS ou MARS, je n'ai besoin de lire qu'un
-     * seul fichier à la fois. Je le lis grace à la variable ncIn. A priori pas
-     * possible de fonctionner comme ça avec OPA puiqu'il y a différents
-     * fichiers où puiser l'information. Donc une des étapes c'est de remplacer
-     * ncIn dans le code par le fichier spécifique à ouvrir. Au final cette
-     * variable va disparaitre, je pense.
-     */
-    //static NetcdfFile ncIn;
+    private int nbTimeRecords;
     /**
      * Longitude at rho point.
      */
-    static float[][] lonRho;
+    private float[][] lonRho;
     /**
      * Latitude at rho point.
      */
-    static float[][] latRho;
+    private float[][] latRho;
     /**
      * Mask: water = 1, cost = 0
-     *
-     * pverley pour chourdin: attention ici le masque devient 3D
      */
-    static byte[][][] maskRho, masku, maskv;
-    /**
-     * Ocean free surface elevetation at current time
-     */
-    static float[][] zeta_tp0;
-    /**
-     * /**
-     * Ocean free surface elevetation at time t + dt
-     */
-    static float[][] zeta_tp1;
+    private byte[][][] maskRho;//, masku, maskv;
     /**
      * Zonal component of the velocity field at current time
      */
-    static float[][][] u_tp0;
+    private float[][][] u_tp0;
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    static float[][][] u_tp1;
+    private float[][][] u_tp1;
     /**
      * Meridional component of the velocity field at current time
      */
-    static float[][][] v_tp0;
+    private float[][][] v_tp0;
     /**
-     *  Meridional component of the velocity field at time t + dt
+     * Meridional component of the velocity field at time t + dt
      */
-    static float[][][] v_tp1;
+    private float[][][] v_tp1;
     /**
      * Vertical component of the velocity field at current time
      */
-    static float[][][] w_tp0, wr_tp0;
+    private float[][][] w_tp0;
     /**
      * Vertical component of the velocity field at time t + dt
      */
-    static float[][][] w_tp1, wr_tp1;
+    private float[][][] w_tp1;
     /**
      * Depth at rho point
      */
-    static double[] gdepT;
-    /**
-     * Depth at w point at current time.
-     * Takes account of free surface elevation.
-     */
-    static double[][][] z_w_tp0;
-    /**
-     * Depth at w point at time t + dt
-     * Takes account of free surface elevation.
-     */
-    static double[][][] z_w_tp1;
+    private double[] gdepT;
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    static double[] gdepW;
+    private double[] gdepW;
     /**
      * Geographical boundary of the domain
      */
-    private static double latMin, lonMin, latMax, lonMax;
+    private double latMin, lonMin, latMax, lonMax;
     /**
      * Maximum depth [meter] of the domain
      */
-    private static double depthMax;
+    private double depthMax;
     /**
      * Time step [second] between two records in NetCDF dataset
      */
-    static double dt_HyMo;
+    private double dt_HyMo;
     /**
      * List on NetCDF input files in which dataset is read.
      */
@@ -143,43 +108,45 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Time t + dt expressed in seconds
      */
-    static double time_tp1;
+    private double time_tp1;
     /**
      * Current rank in NetCDF dataset
      */
-    private static int rank;
+    private int rank;
     /**
      * Time arrow: forward = +1, backward = -1
      */
-    private static int time_arrow;
+    private int time_arrow;
     /**
      * Name of the Dimension in NetCDF file
      */
-    static String strXDim, strYDim, strZDim, strTimeDim;
+    private String strXDim, strYDim, strZDim, strTimeDim;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strU, strV, strTime, strZeta;
+    private String strU, strV, strW, strTime;
     /**
      * Name of the Variable in NetCDF file
      */
-    static String strLon, strLat, strMask;
+    private String strLon, strLat, strMask;
     /**
      *
      */
-    static double[][][] e3t, e3u, e3v;
-    static double[][] e1t, e2t, e1v, e2u;
-    static String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
-    static String strueiv, strveiv, strweiv;
-    static String str_gdepT, str_gdepW;
-    private ArrayList<String> listUFiles, listVFiles, listWFiles, listTFiles;
-    private static NetcdfFile ncU, ncV, ncW, ncT;
-    private static String file_hgr, file_zgr, file_mask;
-    private static boolean isGridInfoInOneFile;
+    private double[][][] e3t, e3u, e3v;
+    private double[][] e1t, e2t, e1v, e2u;
+    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
+    private String str_gdepT, str_gdepW;
+    private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
+    private NetcdfFile ncU, ncV, ncW, ncT;
+    private String file_hgr, file_zgr, file_mask;
+    private boolean isGridInfoInOneFile;
+    // Whether vertical velocity should be read from NetCDF or calculated from U & V
+    private boolean readW;
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    @Override
     public boolean is3D() {
         return true;
     }
@@ -192,56 +159,125 @@ public class NemoDataset extends AbstractDataset {
         int[] origin = new int[]{jpo, ipo};
         int[] size = new int[]{ny, nx};
         NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(listTFiles.get(0));
-        //System.out.println("read lon lat mask " + nc.getLocation());
+        nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
+        getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
         //fichier *byte*mask*
         lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
                 copyToNDJavaArray();
         latRho = (float[][]) nc.findVariable(strLat).read(origin, size).
                 copyToNDJavaArray();
-        nc = NetcdfDataset.openDataset(file_mask);
+        nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
         maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
-                    0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+            0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
                 copyToNDJavaArray();
         /*masku = (byte[][][]) nc.findVariable("umask").read(new int[]{0,
-        0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-        copyToNDJavaArray();
-        maskv = (byte[][][]) nc.findVariable("vmask").read(new int[]{0,
-        0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-        copyToNDJavaArray();*/
+         0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+         copyToNDJavaArray();
+         maskv = (byte[][][]) nc.findVariable("vmask").read(new int[]{0,
+         0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
+         copyToNDJavaArray();*/
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_zgr);
+            nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
-        read_gdep_fields(nc);
-        
-        e3t = read_e3_field(nc, stre3t);
-        if (stre3u.matches(stre3t) || (null == nc.findVariable(stre3u))) {
+        get_gdep_fields(nc);
+
+        // phv 20150319 - patch for e3t that can be found in NEMO output spread
+        // into three variables e3t_0, e3t_ps and mbathy
+        if (findParameter("field_var_e3t0") && findParameter("field_var_e3tps") && findParameter("field_var_mbathy")) {
+            compute_e3t();
+        } else {
+            e3t = read_e3_field(nc, stre3t);
+        }
+        if (stre3u.equals(stre3t) || (null == nc.findVariable(stre3u))) {
             e3u = compute_e3u(e3t);
         } else {
             e3u = read_e3_field(nc, stre3u);
         }
-        if (stre3v.matches(stre3t) || (null == nc.findVariable(stre3v))) {
+        if (stre3v.equals(stre3t) || (null == nc.findVariable(stre3v))) {
             e3v = compute_e3v(e3t);
         } else {
             e3v = read_e3_field(nc, stre3v);
         }
-        
+
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_hgr);
+            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         }
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
         e1t = read_e1_e2_field(nc, stre1t);
         e2t = read_e1_e2_field(nc, stre2t);
-        e1v = read_e1_e2_field(nc, stre1v);
-        e2u = read_e1_e2_field(nc, stre2u);
+        if (stre1v.equals(stre1t) || (null == nc.findVariable(stre1v))) {
+            e1v = e1t;
+        } else {
+            e1v = read_e1_e2_field(nc, stre1v);
+        }
+        if (stre2u.equals(stre2t) || (null == nc.findVariable(stre2u))) {
+            e2u = e2t;
+        } else {
+            e2u = read_e1_e2_field(nc, stre2u);
+        }
         nc.close();
     }
-    
+
+    private void compute_e3t() {
+
+        // double[nz]
+        double[] e3t_0 = null;
+        // double[ny][nx]
+        double[][] e3t_ps = null;
+        // int[ny][nx]
+        short[][] mbathy = null;
+
+        String str_e3t0 = getParameter("field_var_e3t0");
+        String str_e3tps = getParameter("field_var_e3tps");
+        String str_mbathy = getParameter("field_var_mbathy");
+
+        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
+
+        try {
+            // Open NetCDF file
+            NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
+
+            // Read e3t_0
+            e3t_0 = (double[]) nc.findVariable(str_e3t0).read(new int[]{0, 0}, new int[]{1, nz}).flip(1).reduce().copyToNDJavaArray();
+
+            // Read e3t_ps
+            e3t_ps = (double[][]) nc.findVariable(str_e3tps).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+
+            // Read mbathy
+            mbathy = (short[][]) nc.findVariable(str_mbathy).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, "Error while reconstructing e3t[][][] from e3t_0, e3t_ps and mbathy...", ex);
+            System.exit(1);
+        }
+
+        // Reconstruct e3t_ps
+        e3t = new double[nz][ny][nx];
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                // First we initialize e3t with e3t_0
+                for (int k = 0; k < nz; k++) {
+                    e3t[k][j][i] = e3t_0[k];
+                }
+                // From NEMO to Ichthyop grid, we remove the deepest z level
+                // as it is always ocean bottom in NEMO and we flip z-axis
+                // So the index of mbathy must be converted into Ichthyop grid
+                int km = nz - (int) mbathy[j][i] - 1;
+                // Next we correct the depth of the layer adjacent to the ocean
+                // bottom with e3t_ps
+                if (km > 0) {
+                    e3t[km][j][i] = e3t_ps[j][i];
+                }
+            }
+        }
+
+    }
+
     private double[][][] compute_e3u(double[][][] e3t) {
 
         double[][][] e3u_calc = new double[nz][ny][nx];
@@ -281,13 +317,13 @@ public class NemoDataset extends AbstractDataset {
         }
         return e3v_calc;
     }
-    
+
     private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-        
+
         Variable ncvar;
         Index index;
         Array array;
-        
+
         ncvar = nc.findVariable(stre3t);
         switch (ncvar.getShape().length) {
             case 4:
@@ -310,9 +346,9 @@ public class NemoDataset extends AbstractDataset {
         }
         return field;
     }
-    
-    private void read_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
-        
+
+    private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
+
         Variable ncvar;
         Index index;
         Array array;
@@ -326,28 +362,40 @@ public class NemoDataset extends AbstractDataset {
             array = ncvar.read(new int[]{0, 0}, new int[]{1, nz}).flip(1).reduce();
         }
         index = array.getIndex();
-        gdepT = new double[nz ];
+        gdepT = new double[nz];
         for (int k = 0; k < nz; k++) {
             index.set(k);
             gdepT[k] = array.getDouble(index);
         }
         /*
-         * Read gdepw
+         * Read or compute gdepw
          */
-        ncvar = nc.findVariable(str_gdepW);
-        if (ncvar.getShape().length > 2) {
-            array = ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce();
-        } else {
-            array = ncvar.read(new int[]{0, 0}, new int[]{1, nz + 1}).flip(1).reduce();
-        }
-        index = array.getIndex();
         gdepW = new double[nz + 1];
-        for (int k = 0; k < nz + 1; k++) {
-            index.set(k);
-            gdepW[k] = array.getDouble(index);
+        ncvar = nc.findVariable(str_gdepW);
+        // Read gdepw
+        if (null != ncvar) {
+            if (ncvar.getShape().length > 2) {
+                array = ncvar.read(new int[]{0, 0, 0, 0}, new int[]{1, nz + 1, 1, 1}).flip(1).reduce();
+            } else {
+                array = ncvar.read(new int[]{0, 0}, new int[]{1, nz + 1}).flip(1).reduce();
+            }
+            index = array.getIndex();
+
+            for (int k = 0; k < nz + 1; k++) {
+                index.set(k);
+                gdepW[k] = array.getDouble(index);
+            }
+        } else {
+            // Compute gdepw (approximation)
+            for (int k = 1; k < nz; k++) {
+                gdepW[k] = 0.5 * (gdepT[k - 1] + gdepT[k]);
+            }
+            gdepW[0] = gdepT[0];
+            gdepW[nz] = 0.;
         }
+
     }
-    
+
     private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
 
         Variable ncvar = nc.findVariable(varname);
@@ -421,9 +469,14 @@ public class NemoDataset extends AbstractDataset {
      * x(t + dt) = x(t) + Ua(t) * dt
      * </pre>
      *
-     * pverley pour chourdin: ici il faudra revoir les adimensionalisations
-     * de u et v par e2u et e1v
+     * pverley pour chourdin: ici il faudra revoir les adimensionalisations de u
+     * et v par e2u et e1v
+     *
+     * @param pGrid
+     * @param time
+     * @return
      */
+    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
@@ -441,8 +494,7 @@ public class NemoDataset extends AbstractDataset {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co, x;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -464,6 +516,7 @@ public class NemoDataset extends AbstractDataset {
         return du;
     }
 
+    @Override
     public double get_dWz(double[] pGrid, double time) {
 
         double dw = 0.d;
@@ -481,8 +534,7 @@ public class NemoDataset extends AbstractDataset {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co, x;
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -501,54 +553,14 @@ public class NemoDataset extends AbstractDataset {
         if (CO != 0) {
             dw /= CO;
         }
-
+        
         /*double dwr = get_dWrz(pGrid, time);
-        float err = (float) Math.abs((dwr - dw) / dwr);
-        System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);*/
+         float err = (float) Math.abs((dwr - dw) / dwr);
+         System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);*/
         return dw;
     }
 
-    public double get_dWrz(double[] pGrid, double time) {
-
-        double dw = 0.d;
-        double ix, jy, kz;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) ix;
-        int j = (int) jy;
-        int k = (int) Math.round(kz);
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double dz = kz - (double) k;
-        double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (.5d - (double) kk - dz));
-                    CO += co;
-                    x = 0.d;
-                    x = (1.d - x_euler) * wr_tp0[k + kk][j + jj][i + ii]
-                            + x_euler * wr_tp1[k + kk][j + jj][i + ii];
-                    dw += 2.d * x * co
-                            / (gdepW[Math.max(k + kk - 1, 0)]
-                            - gdepW[Math.min(k + kk + 1, nz)]);
-                }
-            }
-        }
-        if (CO != 0) {
-            dw /= CO;
-        }
-        return dw;
-    }
-
+    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy, kz;
@@ -565,8 +577,7 @@ public class NemoDataset extends AbstractDataset {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        double co = 0.d;
-        double x = 0.d;
+        double co, x;
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
@@ -638,7 +649,7 @@ public class NemoDataset extends AbstractDataset {
             for (int i = 0; i < nx - 1; i++) {
                 for (int j = 0; j < ny; j++) {
 //                    Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i] * Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
-                    Huon[k][j][i] = Float.isNaN(u_tp1[k][j][i])
+                    Huon[k][j][i] = Double.isNaN(u_tp1[k][j][i])
                             ? 0.f
                             : u_tp1[k][j][i] * e2u[j][i] * e3u[k][j][i];
                 }
@@ -646,7 +657,7 @@ public class NemoDataset extends AbstractDataset {
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny - 1; j++) {
 //                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                    Hvom[k][j][i] = Float.isNaN(v_tp1[k][j][i])
+                    Hvom[k][j][i] = Double.isNaN(v_tp1[k][j][i])
                             ? 0.f
                             : v_tp1[k][j][i] * e1v[j][i] * e3v[k][j][i];
                 }
@@ -721,7 +732,7 @@ public class NemoDataset extends AbstractDataset {
         return w;
     }
 
-    /**
+    /*
      * Adimensionalizes the given magnitude at the specified grid location.
      */
     public double adimensionalize(double number, double xRho, double yRho) {
@@ -734,17 +745,17 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      *
-     * pverley pour chourdin: même remarque que chaque fois. Les infos dans
-     * OPA se trouvent dans différents fichiers, donc selon la méthode appelée,
-     * je dois recharger le fichier NetCDF correspondant. Au lieu d'utiliser
-     * la variable ncIn globale.
+     * pverley pour chourdin: même remarque que chaque fois. Les infos dans OPA
+     * se trouvent dans différents fichiers, donc selon la méthode appelée, je
+     * dois recharger le fichier NetCDF correspondant. Au lieu d'utiliser la
+     * variable ncIn globale.
      */
     private void readLonLat() throws IOException {
 
         NetcdfFile nc;
         Array arrLon, arrLat;
         try {
-            nc = NetcdfDataset.openDataset(listTFiles.get(0));
+            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
             arrLon = nc.findVariable(strLon).read();
             arrLat = nc.findVariable(strLat).read();
             if (arrLon.getElementType() == float.class) {
@@ -763,40 +774,40 @@ public class NemoDataset extends AbstractDataset {
                 }
             }
             nc.close();
-            arrLon = null;
-            arrLat = null;
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new IOException(e);
         }
     }
 
-    /**
+    /*
      * Gets cell dimension [meter] in the XI-direction.
      *
-     * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas
-     * dans la définition de e1t et e2t
+     * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans
+     * la définition de e1t et e2t
      */
+    @Override
     public double getdxi(int j, int i) {
-
         return e1t[j][i];
     }
 
-    /**
+    /*
      * Gets cell dimension [meter] in the ETA-direction.
      */
+    @Override
     public double getdeta(int j, int i) {
-
         return e2t[j][i];
     }
 
-    /**
+    /*
      * Sets up the {@code Dataset}. The method first sets the appropriate
      * variable names, loads the first NetCDF dataset and extract the time
      * non-dependant information, such as grid dimensions, geographical
      * boundaries, depth at sigma levels.
+     *
      * @throws an IOException if an error occurs while setting up the
      * {@code Dataset}
      */
+    @Override
     public void setUp() throws Exception {
 
         loadParameters();
@@ -809,36 +820,29 @@ public class NemoDataset extends AbstractDataset {
     }
 
     public void shrinkGrid() {
-        boolean isParamDefined = false;
-        try {
-            Boolean.valueOf(getParameter("shrink_domain"));
-            isParamDefined = true;
-        } catch (NullPointerException ex) {
-            isParamDefined = false;
-        }
 
-        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
             try {
                 float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
                 float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
-            } catch (Exception ex) {
+            } catch (IOException | NumberFormatException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
             }
         }
     }
 
-    /**
+    /*
      * Gets the names of the NetCDF variables from the configuration file.
      *
      * pverley pour chourdin : "Configuration" c'est la classe qui lit le
      * fichier de configuration. Tu vois que normallement, le nom des variables
-     * est lu dans le fichier cfg. Temporairement je courcircuite
-     * cette opération et je renseigne à la main le nom des variables
-     * des sorties OPA.
+     * est lu dans le fichier cfg. Temporairement je courcircuite cette
+     * opération et je renseigne à la main le nom des variables des sorties OPA.
      */
+    @Override
     public void loadParameters() {
 
         strXDim = getParameter("field_dim_x");
@@ -850,6 +854,15 @@ public class NemoDataset extends AbstractDataset {
         strMask = getParameter("field_var_mask");
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
+        if (findParameter("read_var_w")) {
+            readW = Boolean.valueOf(getParameter("read_var_w"));
+        } else {
+            readW = false;
+            getLogger().warning("Ichthyop will recalculate W variable from U and V");
+        }
+        if (readW) {
+            strW = getParameter("field_var_w");
+        }
         strTime = getParameter("field_var_time");
         stre3t = getParameter("field_var_e3t");
         stre3u = getParameter("field_var_e3u");
@@ -860,21 +873,25 @@ public class NemoDataset extends AbstractDataset {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
+        if (!findParameter("enhanced()_mode")) {
+            getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced() mode (scale,offset,missing).");
+        }
+        time_arrow = timeArrow();
     }
 
     /**
      * Reads the dimensions of the NetCDF dataset
+     *
      * @throws an IOException if an error occurs while reading the dimensions.
      *
      * pverley pour chourdin: Pour ROMS ou MARS je lisais les dimensions à
-     * partir de la variable ncIn qui est le premier fichier sortie qui
-     * me tombe sous la main. Avec OPA, les dimensions se lisent dans
-     * un fichier particulier *byte*mask*. A déterminer si toujours vrai ?
+     * partir de la variable ncIn qui est le premier fichier sortie qui me tombe
+     * sous la main. Avec OPA, les dimensions se lisent dans un fichier
+     * particulier *byte*mask*. A déterminer si toujours vrai ?
      */
     private void getDimNC() throws IOException {
 
-        NetcdfFile nc = new NetcdfDataset();
-        nc = NetcdfDataset.openDataset(file_mask);
+        NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
         try {
             nx = nc.findDimension(strXDim).getLength();
         } catch (Exception ex) {
@@ -900,15 +917,16 @@ public class NemoDataset extends AbstractDataset {
     }
 
     /**
-     * Resizes the domain and determines the range of the grid indexes
-     * taht will be used in the simulation.
-     * The new domain is limited by the Northwest and the Southeast corners.
-     * @param pGeog1 a float[], the geodesic coordinates of the domain
-     * Northwest corner
-     * @param pGeog2  a float[], the geodesic coordinates of the domain
-     * Southeast corner
-     * @throws an IOException if the new domain is not strictly nested
-     * within the NetCDF dataset domain.
+     * Resizes the domain and determines the range of the grid indexes taht will
+     * be used in the simulation. The new domain is limited by the Northwest and
+     * the Southeast corners.
+     *
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     * corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     * corner
+     * @throws an IOException if the new domain is not strictly nested within
+     * the NetCDF dataset domain.
      */
     private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
 
@@ -945,17 +963,15 @@ public class NemoDataset extends AbstractDataset {
 
         //--------------------------------------
         // Calculate the Physical Space extrema
-
         lonMin = Double.MAX_VALUE;
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
         latMax = -latMin;
         depthMax = 0.d;
         int i = nx;
-        int j = 0;
 
         while (i-- > 0) {
-            j = ny;
+            int j = ny;
             while (j-- > 0) {
                 if (lonRho[j][i] >= lonMax) {
                     lonMax = lonRho[j][i];
@@ -990,33 +1006,36 @@ public class NemoDataset extends AbstractDataset {
         }
     }
 
-    /**
-     * Initializes the {@code Dataset}. Opens the file holding the first time
-     * of the simulation. Checks out the existence of the fields required
-     * by the current simulation. Sets all fields at time for the first time
-     * step.
+    /*
+     * Initializes the {@code Dataset}. Opens the file holding the first time of
+     * the simulation. Checks out the existence of the fields required by the
+     * current simulation. Sets all fields at time for the first time step.
+     *
      * @throws an IOException if a required field cannot be found in the NetCDF
      * dataset.
      */
+    @Override
     public void init() throws Exception {
 
-        time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long t0 = getSimulationManager().getTimeManager().get_tO();
-        open(indexFile = getIndexFile(t0));
+        double t0 = getSimulationManager().getTimeManager().get_tO();
+        open(indexFile = DatasetUtil.index(listUFiles, t0, time_arrow, strTime));
         checkRequiredVariable(ncT);
-        setAllFieldsTp1AtTime(rank = findCurrentRank(t0));
+        setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncU, strTime, time_arrow));
         time_tp1 = t0;
     }
 
     /**
      * Reads time dependant variables in NetCDF dataset at specified rank.
+     *
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
      * @throws an IOException if an error occurs while reading the variables.
      *
-     * pverley pour chourdin: la aussi je fais du provisoire en attendant
-     * de voir si on peut dégager une structure systématique des input.
+     * pverley pour chourdin: la aussi je fais du provisoire en attendant de
+     * voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
+
+        getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -1024,7 +1043,7 @@ public class NemoDataset extends AbstractDataset {
         try {
             u_tp1 = (float[][][]) ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).
                     flip(1).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -1033,18 +1052,15 @@ public class NemoDataset extends AbstractDataset {
         try {
             v_tp1 = (float[][][]) ncV.findVariable(strV).read(origin, new int[]{1, nz, ny - 1, nx}).
                     flip(1).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
 
         try {
-            Array xTimeTp1 = ncU.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 100;
-            xTimeTp1 = null;
-        } catch (Exception ex) {
+            time_tp1 = DatasetUtil.timeAtRank(ncU, strTime, rank);
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -1054,20 +1070,24 @@ public class NemoDataset extends AbstractDataset {
         for (RequiredVariable variable : requiredVariables.values()) {
             variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
         }
-        /*try {
-        wr_tp1 = (float[][][]) ncW.findVariable("vovecrtz").read(origin, new int[]{1, nz + 1, ny, nx}).
-        flip(1).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
-        IOException ioex = new IOException("Error reading W variable. " + ex.toString());
-        ioex.setStackTrace(ex.getStackTrace());
-        throw ioex;
-        }*/
-        w_tp1 = computeW();
+        if (readW) {
+            try {
+                w_tp1 = (float[][][]) ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).
+                        flip(1).reduce().copyToNDJavaArray();
+            } catch (IOException | InvalidRangeException ex) {
+                IOException ioex = new IOException("Error reading W variable. " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
+            }
+        } else {
+            w_tp1 = computeW();
+        }
     }
 
-    /**
-     * Computes the depth  of the specified sigma level at the x-y particle
+    /*
+     * Computes the depth of the specified sigma level at the x-y particle
      * location.
+     *
      * @param xRho a double, x-coordinate of the grid point
      * @param yRho a double, y-coordinate of the grid point
      * @param k an int, the index of the sigma level
@@ -1080,10 +1100,11 @@ public class NemoDataset extends AbstractDataset {
 
     /**
      * Determines whether or not the specified grid cell(i, j) is in water.
+     *
      * @param i an int, i-coordinate of the cell
      * @param j an intn the j-coordinate of the cell
-     * @return <code>true</code> if cell(i, j) is in water,
-     *         <code>false</code> otherwise.
+     * @return <code>true</code> if cell(i, j) is in water, <code>false</code>
+     * otherwise.
      */
     private boolean isInWater(int i, int j, int k) {
         //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
@@ -1094,17 +1115,20 @@ public class NemoDataset extends AbstractDataset {
         }
     }
 
+    @Override
     public boolean isInWater(int i, int j) {
         return isInWater(i, j, nz - 1);
     }
 
-    /**
+    /*
      * Determines whether the specified {@code RohPoint} is in water.
+     *
      * @param ptRho the RhoPoint
      * @return <code>true</code> if the {@code RohPoint} is in water,
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      * @see #isInWater(int i, int j)
      */
+    @Override
     public boolean isInWater(double[] pGrid) {
         if (pGrid.length > 2) {
             return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
@@ -1121,7 +1145,7 @@ public class NemoDataset extends AbstractDataset {
      *
      * @param pGrid a double[] the coordinates of the grid point
      * @return <code>true</code> if the grid point is close to cost,
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      */
     @Override
     public boolean isCloseToCost(double[] pGrid) {
@@ -1135,7 +1159,7 @@ public class NemoDataset extends AbstractDataset {
         return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
     }
 
-    /**
+    /*
      * Transforms the depth at specified x-y particle location into z coordinate
      *
      * @param xRho a double, the x-coordinate
@@ -1145,6 +1169,7 @@ public class NemoDataset extends AbstractDataset {
      *
      * pverley pour chourdin: méthode à tester.
      */
+    @Override
     public double depth2z(double x, double y, double depth) {
 
         if (depth > 0) {
@@ -1174,7 +1199,7 @@ public class NemoDataset extends AbstractDataset {
                 zRho = k + 0.d
                         + 0.5d
                         * Math.abs((gdepT[k] - depth)
-                        / (gdepW[k + 1] - gdepT[k]));
+                                / (gdepW[k + 1] - gdepT[k]));
                 //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k + 1]: " + gdepW[k + 1] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
             }
@@ -1183,7 +1208,7 @@ public class NemoDataset extends AbstractDataset {
         return zRho;
     }
 
-    /**
+    /*
      * Transdorms the specified z-location into depth
      *
      * pverley pour chourdin: j'ai testé z2depth et depth2z, ça à l'air de
@@ -1194,9 +1219,10 @@ public class NemoDataset extends AbstractDataset {
      * @param z double
      * @return double
      */
+    @Override
     public double z2depth(double x, double y, double z) {
 
-        double depth = Double.NaN;
+        double depth;
         double dz;
 
         double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
@@ -1215,25 +1241,25 @@ public class NemoDataset extends AbstractDataset {
         return -depth;
     }
 
-    /**
+    /*
      * * Transforms the specified 2D grid coordinates into geographical
-     * coordinates.
-     * It merely does a bilinear spatial interpolation of the surrounding grid
-     * nods geographical coordinates.
+     * coordinates. It merely does a bilinear spatial interpolation of the
+     * surrounding grid nods geographical coordinates.
+     *
      * @param xRho a double, the x-coordinate
      * @param yRho a double, the y-coordinate
-     * @return a double[], the corresponding geographical coordinates
-     * (latitude, longitude)
-    
+     * @return a double[], the corresponding geographical coordinates (latitude,
+     * longitude)
+     *
      * @param xRho double
      * @param yRho double
      * @return double[]
      */
+    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-
         final double ix = Math.max(0.00001f,
                 Math.min(xRho, (double) nx - 1.00001f));
         final double jy = Math.max(0.00001f,
@@ -1245,7 +1271,7 @@ public class NemoDataset extends AbstractDataset {
         double longitude = 0.d;
         final double dx = ix - (double) i;
         final double dy = jy - (double) j;
-        double co = 0.d;
+        double co;
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
@@ -1270,17 +1296,17 @@ public class NemoDataset extends AbstractDataset {
      *  it belongs by successively dividing the domain by a half (binary
      *  search).
      * </pre>
-    
+     *
      * @param lon a double, the longitude of the geographical point
      * @param lat a double, the latitude of the geographical point
      * @return a double[], the corresponding grid coordinates (x, y)
      * @see #isInsidePolygone
      */
+    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
-
         boolean found;
         int imin, imax, jmin, jmax, i0, j0;
         double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
@@ -1340,11 +1366,11 @@ public class NemoDataset extends AbstractDataset {
     }
 
     /**
-     * Determines whether the specified geographical point (lon, lat) belongs
-     * to the is inside the polygon defined by (imin, jmin) & (imin, jmax) &
-     * (imax, jmax) & (imax, jmin).
+     * Determines whether the specified geographical point (lon, lat) belongs to
+     * the is inside the polygon defined by (imin, jmin) & (imin, jmax) & (imax,
+     * jmax) & (imax, jmin).
      *
-    <p>
+     * <p>
      * The algorithm has been adapted from a function in ROMS/UCLA code,
      * originally written by Alexander F. Shchepetkin and Hernan G. Arango.
      * Please find below an extract of the ROMS/UCLA documention.
@@ -1425,15 +1451,14 @@ public class NemoDataset extends AbstractDataset {
      * @param lon a double, the longitude of the geographical point
      * @param lat a double, the latitude of the geographical point
      * @return <code>true</code> if (lon, lat) belongs to the polygon,
-     *         <code>false</code>otherwise.
+     * <code>false</code>otherwise.
      */
-    public static boolean isInsidePolygone(int imin, int imax, int jmin,
+    private boolean isInsidePolygone(int imin, int imax, int jmin,
             int jmax, double lon, double lat) {
 
         //--------------------------------------------------------------
         // Return true if (lon, lat) is insidide the polygon defined by
         // (imin, jmin) & (imin, jmax) & (imax, jmax) & (imax, jmin)
-
         //-----------------------------------------
         // Build the polygone
         int nb, shft;
@@ -1500,56 +1525,14 @@ public class NemoDataset extends AbstractDataset {
     }
 
     /**
-     * Gets the list of NetCDF input files that satisfy the file filter and
-     * sorts them according to the chronological order induced by the
-     * {@code NCComparator}.
-     *
-     * @param path a String, the path of the folder that contains the model
-     * input files.
-     * @return an ArrayList, the list of the input files sorted in time.
-     * @throws an IOException if an exception occurs while scanning the input
-     * files.
-     */
-    private ArrayList<String> getInputList(String path, String fileMask) throws IOException {
-
-        ArrayList<String> list = null;
-
-        File inputPath = new File(path);
-        //String fileMask = Configuration.getFileMask();
-        File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
-        if (listFile.length == 0) {
-            throw new IOException(path + " contains no file matching mask " + fileMask);
-        }
-        list = new ArrayList<String>(listFile.length);
-        for (File file : listFile) {
-            list.add(file.toString());
-        }
-        if (list.size() > 1) {
-            boolean skipSorting = false;
-            try {
-                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-            } catch (Exception ex) {
-                skipSorting = false;
-            }
-            if (skipSorting) {
-                Collections.sort(list);
-            } else {
-                Collections.sort(list, new NCComparator(strTime));
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Sort OPA input files. First make sure that there is at least
-     * and only one file matching the hgr, zgr and byte mask patterns.
-     * Then list the gridU, gridV and gridT files.
+     * Sort OPA input files. First make sure that there is at least and only one
+     * file matching the hgr, zgr and byte mask patterns. Then list the gridU,
+     * gridV and gridT files.
      *
      * @param path
      * @throws java.io.IOException
      */
     private void sortInputFiles() throws IOException {
-
 
         String path = IOTools.resolvePath(getParameter("input_path"));
         File file = new File(path);
@@ -1561,10 +1544,29 @@ public class NemoDataset extends AbstractDataset {
         isGridInfoInOneFile = (new File(file_mask).equals(new File(file_hgr)))
                 && (new File(file_mask).equals(new File(file_zgr)));
 
-        listUFiles = getInputList(path, getParameter("gridu_pattern"));
-        listVFiles = getInputList(path, getParameter("gridv_pattern"));
-        listTFiles = getInputList(path, getParameter("gridt_pattern"));
-        //listWFiles = getInputList(path, getParameter("gridw_pattern"));
+        listUFiles = DatasetUtil.list(path, getParameter("gridu_pattern"));
+        if (listUFiles.isEmpty()) {
+            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridu_pattern"));
+        }
+        listVFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridv_pattern"));
+        if (listVFiles.isEmpty()) {
+            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridv_pattern"));
+        }
+        listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
+        if (readW) {
+            listWFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridw_pattern"));
+            if (listWFiles.isEmpty()) {
+                throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridw_pattern"));
+            }
+        }
+        if (!skipSorting()) {
+            DatasetUtil.sort(listUFiles, strTime, time_arrow);
+            DatasetUtil.sort(listVFiles, strTime, time_arrow);
+            DatasetUtil.sort(listTFiles, strTime, time_arrow);
+            if (readW) {
+                DatasetUtil.sort(listWFiles, strTime, time_arrow);
+            }
+        }
     }
 
     private String checkExistenceAndUnicity(File file, String pattern) throws IOException {
@@ -1583,6 +1585,7 @@ public class NemoDataset extends AbstractDataset {
 
     /**
      * Loads the NetCDF dataset from the specified filename.
+     *
      * @param filename a String that can be a local pathname or an OPeNDAP URL.
      * @throws IOException
      */
@@ -1592,178 +1595,45 @@ public class NemoDataset extends AbstractDataset {
         if (ncU != null) {
             ncU.close();
         }
-        ncU = NetcdfDataset.openDataset(listUFiles.get(index));
+        ncU = DatasetUtil.openFile(listUFiles.get(index), enhanced());
         if (ncV != null) {
             ncV.close();
         }
-        ncV = NetcdfDataset.openDataset(listVFiles.get(index));
-        //ncW = NetcdfDataset.openDataset(listWFiles.get(index), null);
+        if (listUFiles.get(index).equals(listVFiles.get(index))) {
+            ncV = ncU;
+        } else {
+            ncV = DatasetUtil.openFile(listVFiles.get(index), enhanced());
+        }
+        if (readW) {
+            if (listUFiles.get(index).equals(listWFiles.get(index))) {
+                ncW = ncU;
+            } else {
+                ncW = DatasetUtil.openFile(listWFiles.get(index), enhanced());
+            }
+        }
         if (ncT != null) {
             ncT.close();
         }
-        ncT = NetcdfDataset.openDataset(listTFiles.get(index));
+        if (!listTFiles.isEmpty()) {
+            if (listUFiles.get(index).equals(listTFiles.get(index))) {
+                ncT = ncU;
+            } else {
+                ncT = DatasetUtil.openFile(listTFiles.get(index), enhanced());
+            }
+        }
         nbTimeRecords = ncU.findDimension(strTimeDim).getLength();
     }
 
-    private int getIndexNextFile(long time, int indexCurrent) throws IOException {
-
-        int index = indexCurrent - (1 - time_arrow) / 2;
-        boolean noNext = (listUFiles.size() == 1) || (index < 0)
-                || (index >= listUFiles.size() - 1);
-        if (noNext) {
-            throw new IOException("Unable to find any file following "
-                    + listUFiles.get(indexCurrent));
-        }
-        if (isTimeBetweenFile(time, index)) {
-            return indexCurrent + time_arrow;
-        }
-        throw new IOException("Unable to find any file following "
-                + listUFiles.get(indexCurrent));
-    }
-
-    private int getIndexFile(long time) throws IOException {
-
-        int indexLast = listUFiles.size() - 1;
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                return i;
-            } else if (isTimeBetweenFile(time, i)) {
-                return (i - (time_arrow - 1) / 2);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            return indexLast;
-        }
-
-        throw new IOException("Time value " + (long) time + " not contained among NetCDF files");
-    }
-
-    /**
-     * Determines whether or not the specified time is contained within the ith
-     * input file.
-     * @param time a long, the current time [second] of the simulation
-     * @param index an int, the index of the file in the {@code listInputFiles}
-     * @return <code>true</code> if time is contained within the file
-     *         <code>false</code>
-     * @throws an IOException if an error occurs while reading the input file
-     */
-    private boolean isTimeIntoFile(long time, int index) throws IOException {
-
-        String filename = "";
-        NetcdfFile nc;
-        Array timeArr;
-        long time_r0, time_rf;
-
-        try {
-            filename = listUFiles.get(index);
-            nc = NetcdfDataset.openDataset(filename);
-            timeArr = nc.findVariable(strTime).read();
-            time_r0 = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(0)));
-            time_rf = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                    timeArr.getShape()[0] - 1)));
-            nc.close();
-
-            return (time >= time_r0 && time < time_rf);
-            /*switch (time_arrow) {
-            case 1:
-            return (time >= time_r0 && time < time_rf);
-            case -1:
-            return (time > time_r0 && time <= time_rf);
-            }*/
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                    + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : "
-                    + e.getCause());
-        }
-        //return false;
-
-    }
-
-    /**
-     * Determines whether or not the specified time is contained between the ith
-     * and the (i+1)th input files.
-     * @param time a long, the current time [second] of the simulation
-     * @param index an int, the index of the file in the {@code listInputFiles}
-     * @return <code>true</code> if time is contained between the two files
-     *         <code>false</code> otherwise.
-     * @throws an IOException if an error occurs while reading the input files
-     */
-    private boolean isTimeBetweenFile(long time, int index) throws IOException {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        long[] time_nc = new long[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listUFiles.get(index + i);
-                nc = NetcdfDataset.openDataset(filename);
-                timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(
-                        0)));
-                nc.close();
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-        } catch (IOException e) {
-            throw new IOException("Problem reading file " + filename + " : "
-                    + e.getCause());
-        } catch (NullPointerException e) {
-            throw new IOException("Unable to read " + strTime
-                    + " variable in file " + filename + " : "
-                    + e.getCause());
-        }
-        return false;
-    }
-
-    /**
-     * Finds the index of the dataset time variable such as
-     * <code>time(rank) <= time < time(rank + 1)
-     *
-     * @param time a long, the current time [second] of the simulation
-     * @return an int, the current rank of the NetCDF dataset for time dimension
-     * @throws an IOException if an error occurs while reading the input file
-     *
-     * pverley pour chourdin: remplacer ncIn par le fichier OPA concerné.
-     */
-    int findCurrentRank(long time) throws Exception {
-
-        int lrank = 0;
-        long time_rank;
-        Array timeArr = null;
-        try {
-            timeArr = ncU.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = DatasetUtil.skipSeconds(timeArr.getLong(timeArr.getIndex().set(lrank)));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
-    }
-
-    /**
+    /*
      * Determines whether or not the x-y particle location is on edge of the
      * domain.
+     *
      * @param x a double, the x-coordinate
      * @param y a double, the y-coordinate
      * @return <code>true</code> if the particle is on edge of the domain
-     *         <code>false</code> otherwise.
+     * <code>false</code> otherwise.
      */
+    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 3.0f))
                 || (pGrid[0] < 2.0f)
@@ -1776,95 +1646,117 @@ public class NemoDataset extends AbstractDataset {
 //////////
     /**
      * Gets the grid dimension in the XI-direction
+     *
      * @return an int, the grid dimension in the XI-direction (Zonal)
      */
+    @Override
     public int get_nx() {
         return nx;
     }
 
     /**
      * Gets the grid dimension in the ETA-direction
+     *
      * @return an int, the grid dimension in the ETA-direction (Meridional)
      */
+    @Override
     public int get_ny() {
         return ny;
     }
 
     /**
      * Gets the grid dimension in the vertical direction
+     *
      * @return an int, the grid dimension in the vertical direction
      */
+    @Override
     public int get_nz() {
         return nz;
     }
 
     /**
      * Gets domain minimum latitude.
+     *
      * @return a double, the domain minimum latitude [north degree]
      */
+    @Override
     public double getLatMin() {
         return latMin;
     }
 
     /**
      * Gets domain maximum latitude.
+     *
      * @return a double, the domain maximum latitude [north degree]
      */
+    @Override
     public double getLatMax() {
         return latMax;
     }
 
     /**
      * Gets domain minimum longitude.
+     *
      * @return a double, the domain minimum longitude [east degree]
      */
+    @Override
     public double getLonMin() {
         return lonMin;
     }
 
     /**
      * Gets domain maximum longitude.
+     *
      * @return a double, the domain maximum longitude [east degree]
      */
+    @Override
     public double getLonMax() {
         return lonMax;
     }
 
     /**
      * Gets domain maximum depth.
+     *
      * @return a float, the domain maximum depth [meter]
      */
+    @Override
     public double getDepthMax() {
         return depthMax;
     }
 
     /**
      * Gets the latitude at (i, j) grid point.
+     *
      * @param i an int, the i-ccordinate
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
+    @Override
     public double getLat(int i, int j) {
         return latRho[j][i];
     }
 
     /**
      * Gets the longitude at (i, j) grid point.
+     *
      * @param i an int, the i-ccordinate
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
+    @Override
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
 
     /**
      * Gets the bathymetry at (i, j) grid point.
+     *
      * @param i an int, the i-ccordinate
      * @param j an int, the j-coordinate
      * @return a double, the bathymetry [meter] at (i, j) grid point if is in
      * water, return NaN otherwise.
      */
+    @Override
     public double getBathy(int i, int j) {
 
         double bathy = 0.d;
@@ -1878,25 +1770,10 @@ public class NemoDataset extends AbstractDataset {
         return Double.NaN;
     }
 
-    //---------- End of class
-    private void test() {
-
-        double z = 23.d + Math.random();
-        double depth = -1.d * (400.d + 100.d * Math.random());
-        int i = 10;
-        int j = 10;
-
-        System.out.println("  Test 1 - z: " + z);
-        double result = depth2z(0, 0, z2depth(0, 0, z));
-        System.out.println("  Fin Test 1 - z: " + result);
-        System.out.println("  Test 2 - depth: " + depth);
-        result = z2depth(i, j, depth2z(i, j, depth));
-        System.out.println("  Fin Test 2 - depth: " + result);
-    }
-
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
@@ -1906,14 +1783,10 @@ public class NemoDataset extends AbstractDataset {
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
         //wr_tp0 = wr_tp1;
-        zeta_tp0 = zeta_tp1;
-        if (z_w_tp1 != null) {
-            z_w_tp0 = z_w_tp1;
-        }
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(indexFile = getIndexNextFile(time, indexFile));
+            open(indexFile = DatasetUtil.next(listUFiles, indexFile, time_arrow));
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
 
@@ -1921,6 +1794,7 @@ public class NemoDataset extends AbstractDataset {
 
     }
 
+    @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
         Variable variable = nc.findVariable(name);
         int[] origin = null, shape = null;
@@ -1952,5 +1826,15 @@ public class NemoDataset extends AbstractDataset {
             array = array.flip(0);
         }
         return array;
+    }
+
+    @Override
+    public double xTore(double x) {
+        return x;
+    }
+
+    @Override
+    public double yTore(double y) {
+        return y;
     }
 }

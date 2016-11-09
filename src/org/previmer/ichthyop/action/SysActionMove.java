@@ -1,6 +1,7 @@
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.arch.IMasterParticle;
+import java.util.logging.Level;
+import org.previmer.ichthyop.particle.Particle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -16,12 +17,12 @@ public class SysActionMove extends AbstractSysAction {
         try {
             coastlineBehavior = CoastlineBehavior.getBehavior(getParameter("app.transport", "coastline_behavior"));
         } catch (Exception ex) {
-            getLogger().warning("Defauly coastline behavior set as " + coastlineBehavior.name() + " since the parameter could not be found in the configuration file.");
+            getLogger().log(Level.WARNING, "Defauly coastline behavior set as {0} since the parameter could not be found in the configuration file.", coastlineBehavior.name());
         }
     }
 
     @Override
-    public void execute(IMasterParticle particle) {
+    public void execute(Particle particle) {
         if (!particle.isLocked()) {
             checkCoastlineAndMove(particle);
             if (particle.isOnEdge()) {
@@ -37,7 +38,7 @@ public class SysActionMove extends AbstractSysAction {
      * Implements specific behaviours in case the current move take the particle
      * inland.
      */
-    private void checkCoastlineAndMove(IMasterParticle particle) {
+    private void checkCoastlineAndMove(Particle particle) {
 
         double[] move;
         switch (coastlineBehavior) {
@@ -90,7 +91,7 @@ public class SysActionMove extends AbstractSysAction {
             double s = x;
             double ds = dx;
             double signum = 1.d;
-            double ys = y;
+            double ys;
             boolean bounceMeridional = false;
             boolean bounceZonal = false;
             int n = 0;

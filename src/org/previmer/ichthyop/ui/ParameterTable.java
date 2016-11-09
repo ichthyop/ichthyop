@@ -36,11 +36,12 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
 import java.awt.event.ActionEvent;
+import java.text.ParseException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
@@ -52,6 +53,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.manager.TimeManager;
 
 /**
@@ -102,7 +104,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
 
-        if (block.getKey().matches("app.time")) {
+        if (block.getKey().equals("app.time")) {
             setupDateEditor(block);
         }
 
@@ -219,7 +221,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     false, false, 0, 0);
             headerWidth = comp.getPreferredSize().width;
             try {
-            comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
+                comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
             } catch (Exception ex) {
                 java.util.logging.Logger.getAnonymousLogger().log(Level.WARNING, ex.toString());
             }
@@ -231,19 +233,28 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     private void setupDateEditor(XBlock block) {
         Calendar calendar;
-        if (block.getXParameter("calendar_type").getValue().matches("climato")) {
-            calendar = new ClimatoCalendar();
-        } else {
-            calendar = new InterannualCalendar();
-            try {
-                if (null != model.block) {
-                    if (null != block.getXParameter("time_origin")) {
-                        calendar = new InterannualCalendar(block.getXParameter("time_origin").getValue(), TimeManager.INPUT_DATE_FORMAT);
-                    }
-                }
-            } catch (Exception ex) {
-                // does nothing. Use default time origin.
+
+        String origin = "1900/01/01 00:00";
+        if (null != model.block) {
+            if (null != block.getXParameter("time_origin")) {
+                origin = block.getXParameter("time_origin").getValue();
             }
+        }
+        Calendar calendar_o = Calendar.getInstance();
+        try {
+            calendar_o.setTime(TimeManager.INPUT_DATE_FORMAT.parse(origin));
+        } catch (ParseException ex) {
+            calendar_o.setTimeInMillis(0);
+        }
+        int year_o = calendar_o.get(Calendar.YEAR);
+        int month_o = calendar_o.get(Calendar.MONTH);
+        int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
+        int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
+        int minute_o = calendar_o.get(Calendar.MINUTE);
+        if (block.getXParameter("calendar_type").getValue().equals("climato")) {
+            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
+        } else {
+            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
         for (int i = 0; i < getRowCount() - 1; i++) {
             TableCellEditor editor = getRowEditorModel().getEditor(i);
@@ -264,8 +275,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
         if (null != model) {
             try {
-                if (getParameterKey(e.getLastRow()).matches("calendar_type")
-                        || getParameterKey(e.getLastRow()).matches("time_origin")) {
+                if (getParameterKey(e.getLastRow()).equals("calendar_type")
+                        || getParameterKey(e.getLastRow()).equals("time_origin")) {
                     if (null != model.block) {
                         setupDateEditor(model.block);
                     }

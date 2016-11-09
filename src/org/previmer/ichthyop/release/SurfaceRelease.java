@@ -16,7 +16,7 @@
  */
 package org.previmer.ichthyop.release;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 
@@ -24,26 +24,27 @@ import org.previmer.ichthyop.particle.ParticleFactory;
  *
  * @author pverley
  */
-public class SurfaceRelease extends AbstractReleaseProcess {
+public class SurfaceRelease extends AbstractRelease {
     
-    private int nb_particles;
+    private int nParticles;
     private boolean is3D;
 
+    @Override
     public void loadParameters() throws Exception {
-        nb_particles = Integer.valueOf(getParameter("number_particles"));
+        nParticles = Integer.valueOf(getParameter("number_particles"));
         is3D = getSimulationManager().getDataset().is3D();
     }
 
+    @Override
     public int release(ReleaseEvent event) throws Exception {
         
         int DROP_MAX = 2000;
-        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size() - 1, 0);
+        int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         int nx = getSimulationManager().getDataset().get_nx();
         int ny = getSimulationManager().getDataset().get_ny();
-        System.out.println("nx " + nx + " ny " + ny);
         
-        for (int p = 0; p < nb_particles; p++) {
-            IBasicParticle particle = null;
+        for (int p = 0; p < nParticles; p++) {
+            IParticle particle = null;
             int counter = 0;
             while (null == particle) {
 
@@ -60,8 +61,9 @@ public class SurfaceRelease extends AbstractReleaseProcess {
         return index;
     }
 
+    @Override
     public int getNbParticles() {
-        return nb_particles;
+        return nParticles;
     }
     
 }

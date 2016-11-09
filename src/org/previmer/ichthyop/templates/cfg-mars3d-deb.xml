@@ -2,7 +2,6 @@
 <icstructure>
   <long_name>Generic Ichthyop configuration file</long_name>
   <description>The file has few pre-defined parameters. Mon Nov 07 15:55:10 CET 2011 File updated to version 3.1.</description>
-  <version date="2011/12/23">3.1</version>
   <block type="option">
     <tree_path>Main/Time</tree_path>
     <key>app.time</key>
@@ -435,6 +434,54 @@
     </parameters>
   </block>
   <block type="action">
+        <key>action.swimming</key>
+        <description>Block of options that control the random swimming process. Swimming velocities are provided in a CSV file as an age function of the particle.</description>
+        <tree_path>Advanced/Transport/Swimming</tree_path>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>velocity_file</key>
+                <long_name>Swimming velocity file</long_name>
+                <value />
+                <format>textfile</format>
+                <default />
+                <template>velocity_function.csv</template>
+                <description>Particle swimming velocity as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Velocity(m/s).</description>
+            </parameter>
+            <parameter>
+                <key>velocity_type</key>
+                <long_name>Swiming velocity type</long_name>
+                <value>cruising</value>
+                <default>cruising</default>
+                <format>combo</format>
+                <accepted>cruising</accepted>
+                <accepted>maximal</accepted>
+                <description>It controls the meaning of the swimming velocity provided in the CSV file. CRUISING means that the particles will swim at the velocity defined in the CSV file. MAXIMAL means that the particles will swim with random velocity between zero and maximal velocity.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.SwimmingAction</value>
+                <default>org.previmer.ichthyop.action.SwimmingAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+  <block type="action">
     <key>action.hdisp</key>
     <description>Block of options that control the horizontal dispersion process. Horizontal dispersion has been implemented following Peliz et al. (2007)</description>
     <tree_path>Advanced/Transport/Horizontal dispersion</tree_path>
@@ -845,66 +892,91 @@
       </parameter>
     </parameters>
   </block>
-  <block type="action">
-    <key>action.lethal_temp</key>
-    <tree_path>Advanced/Biology/Lethal temperature</tree_path>
-    <enabled>false</enabled>
-    <description>Block of option for setting up the lower lethal water temperature for the particles. The tool distinguishes between eggs and larvae lethal temperatures when the growth process is activated.</description>
-    <parameters>
-      <parameter>
-        <key>lethal_temperature_egg</key>
-        <long_name>Lethal temperature (egg) [Celsius degree]</long_name>
-        <value>14.0</value>
-        <default>14.0</default>
-        <format>float</format>
-        <description>Lower lethal water temperature [Celsius degree] for the particles. If the growth process is active, this parameter only affects particles at egg stage.</description>
-      </parameter>
-      <parameter>
-        <key>lethal_temperature_larva</key>
-        <long_name>Lethal temperature (larva) [Celsius degree]</long_name>
-        <value>12.0</value>
-        <default>12.0</default>
-        <format>float</format>
-        <description>Lower lethal water temperature [Celsius degree] for particles at larva stage (yolk-sac and feeding larva). This parameter is ignored by the application when the growth process is idle.</description>
-      </parameter>
-      <parameter>
-        <key>temperature_field</key>
-        <long_name>Temperature variable name</long_name>
-        <value>temp</value>
-        <default>temp</default>
-        <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>temp_tracker</key>
-        <long_name>Track temperature</long_name>
-        <value>true</value>
-        <default>true</default>
-        <format>boolean</format>
-        <description>If true the application adds a temperature variable in the NetCDF output file. Setting to false does not guarantee the temperature variable will not be recorded in the NetCDF output file because it migt be required by another module.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <value>org.previmer.ichthyop.action.LethalTempAction</value>
-        <default>org.previmer.ichthyop.action.LethalTempAction</default>
-        <format>class</format>
-        <description>The Java class called by the application to implement this action.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>priority</key>
-        <long_name>priority</long_name>
-        <value>low</value>
-        <default>low</default>
-        <format>combo</format>
-        <accepted>lowest</accepted>
-        <accepted>low</accepted>
-        <accepted>normal</accepted>
-        <accepted>high</accepted>
-        <accepted>highest</accepted>
-        <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
-      </parameter>
-    </parameters>
-  </block>
+      <block type="action">
+        <key>action.lethal_temp</key>
+        <tree_path>Advanced/Biology/Lethal temperature</tree_path>
+        <enabled>false</enabled>
+        <description>Block of option for setting up the lower lethal water temperature for the particles. The tool distinguishes between eggs and larvae lethal temperatures when the growth process is activated.</description>
+        <parameters>
+            <parameter>
+                <key>cold_lethal_temperature_egg</key>
+                <long_name>Cold lethal temperature (egg) [Celsius degree]</long_name>
+                <value>14.0</value>
+                <default>14.0</default>
+                <format>float</format>
+                <description>Lower lethal water temperature [Celsius degree] for the particles. If the growth process is active, this parameter only affects particles at egg stage. This parameter is ignored when a temperature file is provided.</description>
+            </parameter>
+            <parameter>
+                <key>hot_lethal_temperature_egg</key>
+                <long_name>Hot lethal temperature (egg) [Celsius degree]</long_name>
+                <value>22.0</value>
+                <default>22.0</default>
+                <format>float</format>
+                <description>Higher lethal water temperature [Celsius degree] for the particles. If the growth process is active, this parameter only affects particles at egg stage. This parameter is ignored when a temperature file is provided.</description>
+            </parameter>
+            <parameter>
+                <key>cold_lethal_temperature_larva</key>
+                <long_name>Cold lethal temperature (larva) [Celsius degree]</long_name>
+                <value>12.0</value>
+                <default>12.0</default>
+                <format>float</format>
+                <description>Lower lethal water temperature [Celsius degree] for particles at larva stage (yolk-sac and feeding larva). This parameter is ignored by the application when the growth process is idle or when a temperature file is provided.</description>
+            </parameter>
+            <parameter>
+                <key>hot_lethal_temperature_larva</key>
+                <long_name>Hot lethal temperature (larva) [Celsius degree]</long_name>
+                <value>22.0</value>
+                <default>22.0</default>
+                <format>float</format>
+                <description>Higher lethal water temperature [Celsius degree] for particles at larva stage (yolk-sac and feeding larva). This parameter is ignored by the application when the growth process is idle or when a temperature file is provided.</description>
+            </parameter>
+            <parameter>
+                <key>lethal_temp_file</key>
+                <long_name>Lethal temperature file</long_name>
+                <value />
+                <format>textfile</format>
+                <default />
+                <template>lethal_temperatures.csv</template>
+                <description>Lethal temperatures as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains three columns. Headers Time(hour);Cold temp;Hot temp(celsius). Click on new, type a new file name and Ichthyop will generate a CSV template. If this parameter is left void, ichthyop assumes constant lethal temperatures.</description>
+            </parameter>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>temp_tracker</key>
+                <long_name>Track temperature</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a temperature variable in the NetCDF output file. Setting to false does not guarantee the temperature variable will not be recorded in the NetCDF output file because it migt be required by another module.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.action.LethalTempAction</value>
+                <default>org.previmer.ichthyop.action.LethalTempAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>low</value>
+                <default>low</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
   <block type="action">
     <key>action.growth</key>
     <tree_path>Advanced/Biology/Growth</tree_path>

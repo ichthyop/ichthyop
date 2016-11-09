@@ -5,11 +5,10 @@
 package org.previmer.ichthyop.io;
 
 import java.awt.Color;
-import java.io.IOException;
 import org.previmer.ichthyop.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
@@ -17,13 +16,15 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
  *
  * @author pverley
  */
-public class XZone extends XBlock {
+public class XZone extends org.jdom2.Element {
 
     final public static String ZONE = "zone";
     final public static String TYPE_ZONE = "type";
     final public static String INDEX = "index";
     final public static String POLYGON = "polygon";
     final public static String COLOR = "color";
+    final public static String KEY = "key";
+    final public static String ENABLED = "enabled";
     private static final String THICKNESS = "thickness";
     private static final String LOWER_DEPTH = "lower_depth";
     private static final String UPPER_DEPTH = "upper_depth";
@@ -31,11 +32,14 @@ public class XZone extends XBlock {
     private static final String LINE_INSHORE = "line_inshore";
     private static final String LINE_OFFSHORE = "line_offshore";
 
-    public XZone(Element xzone) throws IOException {
-        super(xzone, ZONE);
+    public XZone(Element xzone) {
+        super(ZONE);
+        if (xzone != null) {
+            addContent(xzone.cloneContent());
+        }
     }
 
-    public XZone(String key) throws IOException {
+    public XZone(String key) {
         super(ZONE);
         setKey(key);
         setEnabled(true);
@@ -66,10 +70,37 @@ public class XZone extends XBlock {
         setLowerDepth(50.f);
     }
 
+    public String getKey() {
+        return getChildTextNormalize(KEY);
+    }
+
+    public void setKey(String key) {
+        if (null == getChild(KEY)) {
+            addContent(new Element(KEY));
+        }
+        getChild(KEY).setText(key);
+    }
+
+    public boolean isEnabled() {
+
+        if (null != getChild(ENABLED)) {
+            return Boolean.valueOf(getChildTextNormalize(ENABLED));
+        } else {
+            return true;
+        }
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (null == getChild(ENABLED)) {
+            addContent(new Element(ENABLED));
+        }
+        getChild(ENABLED).setText(String.valueOf(enabled));
+    }
+
     public TypeZone getTypeZone() {
 
         for (TypeZone type : TypeZone.values()) {
-            if (type.toString().matches(getChildTextNormalize(TYPE_ZONE))) {
+            if (type.toString().equals(getChildTextNormalize(TYPE_ZONE))) {
                 return type;
             }
         }
@@ -222,7 +253,7 @@ public class XZone extends XBlock {
         getBathyMask().getChild(ENABLED).setText(String.valueOf(enabled));
     }
 
-    public class XPoint extends org.jdom.Element {
+    public class XPoint extends org.jdom2.Element {
 
         private static final String POINT = "point";
         private static final String LON = "lon";

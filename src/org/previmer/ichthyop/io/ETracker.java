@@ -16,50 +16,18 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.util.Iterator;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.DebParticleLayer;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.DataType;
 
 /**
  *
  * @author gandres
  */
-public class ETracker extends AbstractTracker{
-     public ETracker() {
-        super(DataType.FLOAT);
-    }
-    
-    @Override
-    void setDimensions() {
-        addTimeDimension();
-        addDrifterDimension();
-    }
+public class ETracker extends FloatTracker {
 
     @Override
-    Array createArray() {
-        ArrayFloat.D2 array = new ArrayFloat.D2(1, dimensions().get(1).getLength());
-        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
-            array.set(0, i, -1);
-        }
-        return array;
-    }
-
-    @Override
-    public void track() {
-        IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        while (iter.hasNext()) {
-            particle = iter.next();
-            DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-            getArray().set(0, particle.getIndex(), (float) gParticle.getE());
-        }
-    }
-    
-    @Override
-    public ArrayFloat.D2 getArray() {
-        return (ArrayFloat.D2) super.getArray();
+    float getValue(IParticle particle) {
+        DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
+        return (float) gParticle.getE();
     }
 }

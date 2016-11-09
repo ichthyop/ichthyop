@@ -1,7 +1,7 @@
 
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.arch.IMasterParticle;
+import org.previmer.ichthyop.particle.Particle;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -13,7 +13,7 @@ public class SysActionAgeMonitoring extends AbstractSysAction {
     boolean keepDrifting;
 
     @Override
-    public void execute(IMasterParticle particle) {
+    public void execute(Particle particle) {
         if (!keepDrifting && particle.getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
             particle.kill(ParticleMortality.OLD);
             return;

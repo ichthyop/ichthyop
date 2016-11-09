@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.previmer.ichthyop.Version;
@@ -67,6 +68,17 @@ public class ParameterManager extends AbstractManager {
 
     public String getParameter(String blockKey, String key) {
         return getParameter(BlockType.OPTION, blockKey, key);
+    }
+
+    public String[] getListParameter(BlockType blockType, String blockKey, String key) {
+        String[] tokens = getParameter(blockType, blockKey, key).split("\"");
+        List<String> list = new ArrayList();
+        for (String token : tokens) {
+            if (!token.trim().isEmpty()) {
+                list.add(token.trim());
+            }
+        }
+        return list.toArray(new String[list.size()]);
     }
 
     public String getParameter(BlockType blockType, String blockKey, String key) {

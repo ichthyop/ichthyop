@@ -17,12 +17,12 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.Constant;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.io.RecruitmentStainTracker;
+import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
@@ -51,9 +51,10 @@ public class RecruitmentStainAction extends AbstractAction {
     private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
+    @Override
     public void loadParameters() throws Exception {
 
-        isAgeCriterion = getParameter("criterion").matches(Criterion.AGE.toString());
+        isAgeCriterion = getParameter("criterion").equals("Age criterion");
         boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
@@ -83,8 +84,14 @@ public class RecruitmentStainAction extends AbstractAction {
             getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentStainTracker.class);
         }
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
-    public void execute(IBasicParticle particle) {
+    @Override
+    public void execute(IParticle particle) {
 
         //@todo
         // catch cast exception
@@ -101,11 +108,10 @@ public class RecruitmentStainAction extends AbstractAction {
         }
     }
 
-    private boolean isParticleInsideStain(IBasicParticle particle) {
+    private boolean isParticleInsideStain(IParticle particle) {
 
-        boolean isInside = false;
         double distance = DatasetUtil.geodesicDistance(lat_stain, lon_stain, particle.getLat(), particle.getLon());
-        isInside = (distance <= radius_stain);
+        boolean isInside = (distance <= radius_stain);
         if (is3D && isInside) {
             distance = Math.abs((Math.abs(particle.getDepth()) - Math.abs(depth_stain)));
             isInside = (distance <= (0.5d * thickness_stain));
@@ -113,31 +119,15 @@ public class RecruitmentStainAction extends AbstractAction {
         return isInside;
     }
 
-    private boolean satisfyRecruitmentCriterion(IBasicParticle particle) {
+    private boolean satisfyRecruitmentCriterion(IParticle particle) {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
-            return (((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
+            return (((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
         }
     }
 
     public boolean isStopMoving() {
         return stopMovingOnceRecruited;
-    }
-
-    public enum Criterion {
-
-        LENGTH("Length criterion"),
-        AGE("Age criterion");
-        private String name;
-
-        Criterion(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
     }
 }

@@ -16,60 +16,25 @@
  */
 package org.previmer.ichthyop.io;
 
-import org.previmer.ichthyop.arch.IBasicParticle;
-import java.util.Iterator;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.ParticleMortality;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayInt;
-import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 
 /**
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
-public class MortalityTracker extends AbstractTracker {
-
-    public MortalityTracker() {
-        super(DataType.INT);
-    }
+public class MortalityTracker extends IntegerTracker {
 
     @Override
-    void setDimensions() {
-        addTimeDimension();
-        addDrifterDimension();
-    }
-
-    public void track() {
-        IBasicParticle particle;
-        Iterator<IBasicParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        while (iter.hasNext()) {
-            particle = iter.next();
-            getArray().set(0, particle.getIndex(), particle.getDeathCause().getCode());
-        }
-    }
-
-    @Override
-    public ArrayInt.D2 getArray() {
-        return (ArrayInt.D2) super.getArray();
-    }
-
-    @Override
-    Array createArray() {
-        ArrayInt.D2 array = new ArrayInt.D2(1, dimensions().get(1).getLength());
-        for (int i = 0; i < dimensions().get(1).getLength(); i++) {
-            array.set(0, i, -99);
-        }
-        return array;
-    }
-
-    @Override
-    public Attribute[] attributes() {
-        Attribute[] attributes = new Attribute[ParticleMortality.values().length];
-        int i = 0;
+    public void addRuntimeAttributes() {
         for (ParticleMortality cause : ParticleMortality.values()) {
-            attributes[i++] = new Attribute(cause.toString(), cause.getCode());
+            addAttribute(new Attribute(cause.toString(), cause.getCode()));
         }
-        return attributes;
+    }
+
+    @Override
+    int getValue(IParticle particle) {
+        return particle.getDeathCause().getCode();
     }
 }

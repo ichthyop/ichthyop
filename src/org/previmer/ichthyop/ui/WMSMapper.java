@@ -19,6 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.font.FontRenderContext;
@@ -45,13 +46,15 @@ import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.jdesktop.swingx.mapviewer.Tile;
 import org.jdesktop.swingx.mapviewer.TileFactory;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
+import org.jdesktop.swingx.mapviewer.empty.EmptyTileFactory;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.previmer.ichthyop.arch.IDataset;
-import org.previmer.ichthyop.calendar.ClimatoCalendar;
+import org.previmer.ichthyop.calendar.Day360Calendar;
+import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
@@ -75,9 +78,8 @@ import ucar.nc2.dataset.NetcdfDataset;
  */
 public class WMSMapper extends JXMapKit {
 
-    private TileFactory tileFactory = new MGDSTileFactory();
     private List<GeoPosition> region;
-    private HashMap<String, DrawableZone> zones;
+    private HashMap<String, WMSMapper.DrawableZone> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private NetcdfFile nc;
     private Variable vlon, vlat, pcolorVariable, vtime, vmortality;
@@ -116,7 +118,8 @@ public class WMSMapper extends JXMapKit {
     private boolean gridVisible = false;
 
     public WMSMapper() {
-        setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
+
+        setTileFactory(new OfflineTileFactory());
         setMiniMapVisible(false);
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
@@ -124,13 +127,20 @@ public class WMSMapper extends JXMapKit {
     }
 
     public void setWMS(String wmsURL) {
-        if (wmsURL.contains("marine")) {
+
+        String url = wmsURL.toLowerCase();
+        if (url.contains("offline")) {
+            setTileFactory(new OfflineTileFactory());
+        } else if (url.contains("marine")) {
             setTileFactory(new MGDSTileFactory());
-        } else if (wmsURL.contains("demis")) {
+        } else if (url.contains("demis")) {
             setTileFactory(new DemisTileFactory());
-        } else if (wmsURL.contains("street")) {
+        } else if (url.contains("street")) {
             setDefaultProvider(org.jdesktop.swingx.JXMapKit.DefaultProviders.OpenStreetMaps);
+        } else {
+            setTileFactory(new EmptyTileFactory());
         }
+
         setAddressLocation(new GeoPosition(defaultLat, defaultLon));
         setZoom(defaultZoom);
     }
@@ -190,14 +200,32 @@ public class WMSMapper extends JXMapKit {
         vlat = nc.findVariable("lat");
         vmortality = nc.findVariable("mortality");
         vtime = nc.findVariable("time");
-        if (vtime.findAttribute("calendar").getStringValue().matches("climato")) {
-            calendar = new ClimatoCalendar();
-        } else {
+        // Set origin of time
+        Calendar calendar_o = Calendar.getInstance();
+        int year_o = 1;
+        int month_o = Calendar.JANUARY;
+        int day_o = 1;
+        int hour_o = 0;
+        int minute_o = 0;
+        if (null != vtime.findAttribute("origin")) {
             try {
-                calendar = new InterannualCalendar(vtime.findAttribute("origin").getStringValue(), TimeManager.INPUT_DATE_FORMAT);
+                SimpleDateFormat dFormat = TimeManager.INPUT_DATE_FORMAT;
+                dFormat.setCalendar(calendar_o);
+                calendar_o.setTime(dFormat.parse(vtime.findAttribute("origin").getStringValue()));
+                year_o = calendar_o.get(Calendar.YEAR);
+                month_o = calendar_o.get(Calendar.MONTH);
+                day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
+                hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
+                minute_o = calendar_o.get(Calendar.MINUTE);
             } catch (ParseException ex) {
-                calendar = new InterannualCalendar();
+                // Something went wrong, default origin of time
+                // set to 0001/01/01 00:00
             }
+        }
+        if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
+            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
+        } else {
+            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
 
         time = new double[nbSteps];
@@ -251,7 +279,7 @@ public class WMSMapper extends JXMapKit {
                 if (null != getSimulationManager().getConfigurationFile() && getSimulationManager().isSetup()) {
                     if (null != nc.findGlobalAttribute("xml_file")) {
                         String xml = nc.findGlobalAttribute("xml_file").getStringValue();
-                        if (getSimulationManager().getConfigurationFile().getPath().matches(xml)) {
+                        if (getSimulationManager().getConfigurationFile().getPath().equals(xml)) {
                             gridVisible = true;
                         }
                     }
@@ -278,7 +306,7 @@ public class WMSMapper extends JXMapKit {
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
             if (!excluded) {
-                excluded = !(dimensions.get(0).getName().matches("time") && dimensions.get(1).getName().matches("drifter"));
+                excluded = !(dimensions.get(0).getName().equals("time") && dimensions.get(1).getName().equals("drifter"));
             }
             if (!excluded) {
                 list.add(variable.getName());
@@ -290,8 +318,9 @@ public class WMSMapper extends JXMapKit {
     public float[] getRange(String variable) throws IOException {
 
         Array array = nc.findVariable(variable).read();
+
         float[] dataset = (float[]) array.get1DJavaArray(Float.class);
-        if (variable.matches("time")) {
+        if (variable.equals("time")) {
             if (dataset[0] > dataset[dataset.length - 1]) {
                 return new float[]{dataset[dataset.length - 1], dataset[0]};
             } else {
@@ -356,7 +385,7 @@ public class WMSMapper extends JXMapKit {
 
     Painter getPainterForStep(int index) {
 
-        final List<DrawableParticle> listParticles = getParticles(index);
+        final List<WMSMapper.DrawableParticle> listParticles = getParticles(index);
 
         Painter particleLayer = new Painter<JXMapViewer>() {
             @Override
@@ -367,7 +396,7 @@ public class WMSMapper extends JXMapKit {
                 g.translate(-rect.x, -rect.y);
 
                 //drawRegion(g, map);
-                for (DrawableParticle particle : listParticles) {
+                for (WMSMapper.DrawableParticle particle : listParticles) {
                     drawParticle(g, map, particle);
                 }
                 g.dispose();
@@ -394,7 +423,7 @@ public class WMSMapper extends JXMapKit {
         return region;
     }
 
-    HashMap<String, DrawableZone> getZones() {
+    HashMap<String, WMSMapper.DrawableZone> getZones() {
         if (null == zones) {
             zones = readZones();
         }
@@ -410,11 +439,11 @@ public class WMSMapper extends JXMapKit {
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
 
-                drawRegion(g, map);
+//                drawRegion(g, map);
                 drawZones(g, map);
-                if (gridVisible) {
-                    //drawGrid(g, map);
-                }
+//                if (gridVisible) {
+//                    drawGrid(g, map);
+//                }
                 g.dispose();
             }
         };
@@ -427,66 +456,76 @@ public class WMSMapper extends JXMapKit {
             ArrayFloat.D2 regionEdge = (D2) nc.findVariable("region_edge").read();
             for (int i = 0; i < regionEdge.getShape()[0]; i++) {
                 lregion.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
+
             }
         } catch (IOException ex) {
-            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WMSMapper.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         return lregion;
     }
 
-    private HashMap<String, DrawableZone> readZones() {
-        HashMap<String, DrawableZone> lzones = new HashMap();
+    private HashMap<String, WMSMapper.DrawableZone> readZones() {
+        HashMap<String, WMSMapper.DrawableZone> lzones = new HashMap();
         if (null != nc.findGlobalAttribute("nb_zones")) {
             int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
             for (int iZone = 0; iZone < nbZones; iZone++) {
-                List<GeoPosition> edge = new ArrayList<GeoPosition>();
+                List<Point2D.Float> points = new ArrayList<>();
                 try {
                     Variable varZone = nc.findVariable("zone" + iZone);
                     ArrayFloat.D2 zoneEdge = (D2) varZone.read();
                     String type = varZone.findAttribute("type").getStringValue();
                     String color = varZone.findAttribute("color").getStringValue();
                     for (int i = 0; i < zoneEdge.getShape()[0]; i++) {
-                        edge.add(new GeoPosition(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
+                        points.add(new Point2D.Float(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
                     }
-                    DrawableZone zone = new DrawableZone(edge, color);
+                    WMSMapper.DrawableZone zone = new WMSMapper.DrawableZone(points, color);
                     lzones.put(type + "_zone" + iZone, zone);
+
                 } catch (IOException ex) {
-                    Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WMSMapper.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
         return lzones;
     }
 
-    private void drawZone(DrawableZone zone, Graphics2D g, JXMapViewer map) {
+    private void drawZone(WMSMapper.DrawableZone zone, Graphics2D g, JXMapViewer map) {
 
-        Polygon polygon = new Polygon();
-        for (GeoPosition gp : zone.getEdge()) {
-            //convert geo to world bitmap pixel
-            Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
-            polygon.addPoint((int) pt.getX(), (int) pt.getY());
-        }
-        //do the drawing
         Color color = zone.getColor();
         Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 30);
-        g.setColor(fillColor);
-        g.fill(polygon);
         Color edgeColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 70);
-        g.setColor(edgeColor);
-        g.draw(polygon);
+        for (Point2D pt : zone.getPoints()) {
+            Polygon polygon = new Polygon();
+            addCellPoint(map, polygon, pt.getX() - 0.5, pt.getY() - 0.5);
+            addCellPoint(map, polygon, pt.getX() + 0.5, pt.getY() - 0.5);
+            addCellPoint(map, polygon, pt.getX() + 0.5, pt.getY() + 0.5);
+            addCellPoint(map, polygon, pt.getX() - 0.5, pt.getY() + 0.5);
+            g.setColor(fillColor);
+            g.fill(polygon);
+            g.setColor(edgeColor);
+            g.draw(polygon);
+        }
     }
 
     private void drawZones(Graphics2D g, JXMapViewer map) {
-        for (DrawableZone zone : getZones().values()) {
-            drawZone(zone, g, map);
+
+        if (null != getSimulationManager().getDataset()) {
+            for (WMSMapper.DrawableZone zone : getZones().values()) {
+                drawZone(zone, g, map);
+            }
         }
+    }
+
+    private void addGeoPoint(JXMapViewer map, Polygon polygon, GeoPosition gp) {
+        Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
+        polygon.addPoint((int) pt.getX(), (int) pt.getY());
     }
 
     private void addCellPoint(JXMapViewer map, Polygon polygon, double x, double y) {
         double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
-        GeoPosition gp = new GeoPosition(pos[0], pos[1]);
-        Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
-        polygon.addPoint((int) pt.getX(), (int) pt.getY());
+        addGeoPoint(map, polygon, new GeoPosition(pos[0], pos[1]));
     }
 
     private Point2D getPoint(JXMapViewer map, double x, double y) {
@@ -615,7 +654,7 @@ public class WMSMapper extends JXMapKit {
         g.draw(poly);
     }
 
-    private void drawParticle(Graphics2D g, JXMapViewer map, DrawableParticle particle) {
+    private void drawParticle(Graphics2D g, JXMapViewer map, WMSMapper.DrawableParticle particle) {
 
         //create a polygon
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
@@ -699,8 +738,7 @@ public class WMSMapper extends JXMapKit {
 
     Painter getTimePainter(final int index) {
 
-        Painter<JXMapViewer> timePainter;
-        timePainter = new Painter<JXMapViewer>() {
+        Painter<JXMapViewer> timePainter = new Painter<JXMapViewer>() {
             @Override
             public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
 
@@ -787,7 +825,7 @@ public class WMSMapper extends JXMapKit {
                 FontRenderContext context = g.getFontRenderContext();
                 Font font = new Font("Dialog", Font.PLAIN, 11);
                 TextLayout layout = new TextLayout(String.valueOf(valmin), font, context);
-                
+
                 float text_x = 10;
                 float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
                 g.setColor(Color.BLACK);
@@ -798,7 +836,7 @@ public class WMSMapper extends JXMapKit {
                     List<Attribute> attributes = pcolorVariable.getAttributes();
 
                     for (Attribute attribute : attributes) {
-                        if (attribute.getName().matches("unit")) {
+                        if (attribute.getName().equals("unit")) {
                             vname += " (" + attribute.getStringValue() + ")";
                             break;
                         }
@@ -858,23 +896,26 @@ public class WMSMapper extends JXMapKit {
         try {
             ArrayDouble.D0 arrTime = (D0) vtime.read(new int[]{index}, new int[]{1}).reduce();
             timeD = arrTime.get();
+
         } catch (IOException ex) {
-            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WMSMapper.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WMSMapper.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         return timeD;
     }
 
-    private List<DrawableParticle> getParticles(int index) {
-        List<DrawableParticle> list = new ArrayList();
+    private List<WMSMapper.DrawableParticle> getParticles(int index) {
+        List<WMSMapper.DrawableParticle> list = new ArrayList();
         try {
             ArrayFloat.D1 arrLon = (ArrayFloat.D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce(0);
             ArrayFloat.D1 arrLat = (ArrayFloat.D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce(0);
             ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                if (pcolorVariable.getName().matches("time")) {
+                if (pcolorVariable.getName().equals("time")) {
                     arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
                 } else {
                     arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
@@ -886,16 +927,15 @@ public class WMSMapper extends JXMapKit {
                 if (arrMortality.get(i) == 0) {
                     if (null != arrColorVariable) {
                         if (arrColorVariable.getSize() < 2) {
-                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
+                            list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
                         } else {
-                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
+                            list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
                         }
                     } else {
-                        list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
+                        list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), Float.NaN));
                     }
                 } else {
-                    list.add(new DrawableParticle(lon, arrLat.get(i)));
-
+                    list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i)));
 
                 }
             }
@@ -944,7 +984,7 @@ public class WMSMapper extends JXMapKit {
         } else {
             stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i + 1))).withEnd(dtFormat.format(getTime(i)));
         }
-        for (DrawableParticle particle : getParticles(i)) {
+        for (WMSMapper.DrawableParticle particle : getParticles(i)) {
             String coord = Double.toString(particle.getLongitude()) + "," + Double.toString(particle.getLatitude());
             Placemark placeMark = stepFolder.createAndAddPlacemark();
             String styleURL = "#" + createStyle(particle);
@@ -953,7 +993,7 @@ public class WMSMapper extends JXMapKit {
         kmlMainFolder.addToFeature(stepFolder);
     }
 
-    private String createStyle(DrawableParticle particle) {
+    private String createStyle(WMSMapper.DrawableParticle particle) {
         String color = colorForKML(getColor(particle.getColorValue()));
         if (!colors.contains(color)) {
             colors.add(color);
@@ -1002,7 +1042,7 @@ public class WMSMapper extends JXMapKit {
         BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = bi.getGraphics();
         paintAll(g);
-        new Thread(new ImageWriter(index, bi)).start();
+        new Thread(new WMSMapper.ImageWriter(index, bi)).start();
     }
 
     Date getTime(int index) {
@@ -1014,7 +1054,6 @@ public class WMSMapper extends JXMapKit {
             calendar.setTimeInMillis((long) (time[index] * 1000L));
         }
         return calendar.getTime();
-
 
     }
 
@@ -1084,7 +1123,7 @@ public class WMSMapper extends JXMapKit {
                     true, true, // x/y orientation is normal
                     "file:/home/pverley/downloads/world.topo.bathy.", // base url
                     "x", "y", "z" // url args for x, y & z
-                    ) {
+            ) {
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
                     return baseURL + x + "x" + y + "x" + "z" + ".jpg";
@@ -1103,7 +1142,8 @@ public class WMSMapper extends JXMapKit {
                 @Override
                 public String getTileUrl(int x, int y, int zoom) {
                     int zz = 17 - zoom;
-                    int z = (int) Math.pow(2, (double) zz - 1);
+                    int z = 4;
+                    z = (int) Math.pow(2, (double) zz - 1);
                     return new WMSService("http://www.marine-geo.org/services/wms?", "GMRT,topo").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
                 }
             });
@@ -1124,6 +1164,83 @@ public class WMSMapper extends JXMapKit {
                     return new WMSService("http://www2.demis.nl/wms/wms.asp?wms=WorldMap&", "Bathymetry,Topography,Borders,Coastlines").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
                 }
             });
+        }
+    }
+
+    public class OfflineTileFactory extends TileFactory {
+
+        /**
+         * The empty tile image.
+         */
+        private BufferedImage emptyTile;
+        private Color ocean = new Color(181, 208, 208);
+
+        /**
+         * Creates a new instance of EmptyTileFactory
+         */
+        public OfflineTileFactory() {
+            this(new TileFactoryInfo("EmptyTileFactory 300x300", 1, 15, 17, 300,
+                    true, true, "", "x", "y", "z"));
+        }
+
+        /**
+         * Creates a new instance of EmptyTileFactory using the specified info.
+         */
+        public OfflineTileFactory(TileFactoryInfo info) {
+
+            super(info);
+            int tileSize = info.getTileSize(info.getMinimumZoomLevel());
+            emptyTile = new BufferedImage(tileSize, tileSize,
+                    BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = emptyTile.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(ocean);
+            g.fillRect(0, 0, tileSize, tileSize);
+            g.setColor(Color.WHITE);
+            g.dispose();
+//            File file = new File("/home/pverley/downloads/seamless_blue_water.jpg");
+//            try {
+//                emptyTile = ImageIO.read(file);
+//            } catch (IOException ex) {
+//                Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//            Graphics2D g = emptyTile.createGraphics();
+//            g.dispose();
+        }
+
+        /**
+         * Gets an instance of an empty tile for the given tile position and
+         * zoom on the world map.
+         *
+         * @param x The tile's x position on the world map.
+         * @param y The tile's y position on the world map.
+         * @param zoom The current zoom level.
+         */
+        @Override
+        public Tile getTile(int x, int y, int zoom) {
+            return new Tile(x, y, zoom) {
+                @Override
+                public boolean isLoaded() {
+                    return true;
+                }
+
+                @Override
+                public BufferedImage getImage() {
+                    return emptyTile;
+                }
+            };
+        }
+
+        /**
+         * Override this method to load the tile using, for example, an
+         * <code>ExecutorService</code>.
+         *
+         * @param tile The tile to load.
+         */
+        @Override
+        protected void startLoading(Tile tile) {
+            // noop
         }
     }
 
@@ -1155,11 +1272,11 @@ public class WMSMapper extends JXMapKit {
 
     class DrawableZone {
 
-        private List<GeoPosition> edge;
+        private List<Point2D.Float> points;
         private Color color;
 
-        DrawableZone(List<GeoPosition> edge, String color) {
-            this.edge = edge;
+        DrawableZone(List<Point2D.Float> points, String color) {
+            this.points = points;
             this.color = getColor(color);
         }
 
@@ -1167,8 +1284,8 @@ public class WMSMapper extends JXMapKit {
             return color;
         }
 
-        public List<GeoPosition> getEdge() {
-            return edge;
+        public List<Point2D.Float> getPoints() {
+            return points;
         }
 
         private Color getColor(String strColor) {
@@ -1209,10 +1326,32 @@ public class WMSMapper extends JXMapKit {
             float yMap = y0Map + (yPnl / hPnl) * hMap;
             Point2D pt = new Point2D.Float(xMap, yMap);
 
-            //System.out.println(x0Map + " " + y0Map + " - " + pt);
+            System.out.println(x0Map + " " + y0Map + " - " + pt);
 
             GeoPosition gp = getMainMap().getTileFactory().pixelToGeo(pt, getMainMap().getZoom());
-            System.out.println("Mouse location >> lat: " + gp.getLatitude() + " lon: " + gp.getLongitude());
+            System.out.println("MouseEvent " + e.getPoint() + " " + gp);
         }
     }
+//    //checks for connection to the internet through dummy request
+//    public static boolean isInternetReachable() {
+//        try {
+//            //make a URL to a known source
+//            URL url = new URL("http://www.google.com");
+//
+//            //open a connection to that source
+//            HttpURLConnection urlConnect = (HttpURLConnection) url.openConnection();
+//
+//            //trying to retrieve data from the source. If there
+//            //is no connection, this line will fail
+//            Object objData = urlConnect.getContent();
+//
+//        } catch (UnknownHostException e) {
+//            // TODO Auto-generated catch block
+//            return false;
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            return false;
+//        }
+//        return true;
+//    }
 }

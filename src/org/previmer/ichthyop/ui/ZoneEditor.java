@@ -171,7 +171,7 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
         try {
             String path = IOTools.resolveFile(textField.getText());
 
-            if (e.getActionCommand().matches(EDIT)) {
+            if (e.getActionCommand().equals(EDIT)) {
                 fileChooser.setSelectedFile(new File(path));
                 int answer = fileChooser.showOpenDialog(panel);
                 if (answer == JFileChooser.APPROVE_OPTION) {
@@ -201,7 +201,7 @@ public class ZoneEditor extends AbstractCellEditor implements ActionListener, Ta
                 } else {
                     fireEditingCanceled();
                 }
-            } else if (e.getActionCommand().matches(NEW)) {
+            } else if (e.getActionCommand().equals(NEW)) {
                 File f = new File(path);
                 if (f.isFile()) {
                     f = f.getParentFile();

@@ -4,20 +4,15 @@
  */
 package org.previmer.ichthyop.io;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.jdom.Element;
-import org.previmer.ichthyop.Template;
+import org.jdom2.Element;
 
 /**
  *
  * @author pverley
  */
-public class XParameter extends org.jdom.Element {
+public class XParameter extends org.jdom2.Element {
 
     final public static String PARAMETER = "parameter";
     final public static String KEY = "key";
@@ -33,8 +28,8 @@ public class XParameter extends org.jdom.Element {
     private int index;
     private final ParamType param_type;
     private List<Element> values;
-    private boolean hidden;
-    private ParameterFormat param_format;
+    private final boolean hidden;
+    private final ParameterFormat param_format;
 
     XParameter(Element xparameter) {
         super(PARAMETER);
@@ -130,7 +125,7 @@ public class XParameter extends org.jdom.Element {
 
     public String getValues() {
         if (getType().equals(ParamType.SERIAL) && getLength() > 1) {
-            StringBuffer strV = new StringBuffer();
+            StringBuilder strV = new StringBuilder();
             for (Element elt : values) {
                 strV.append('"');
                 strV.append(elt.getTextNormalize());

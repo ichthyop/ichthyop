@@ -13,13 +13,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 /**
  *
  * @author pverley
  */
-public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
+public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
 
     public final static String BLOCK = "block";
     final public static String KEY = "key";
@@ -33,13 +33,8 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     private List<String> sortedKey;
     private int nbHiddenParameters;
 
-    public XBlock(String name) {
-        super(name);
-        block_type = BlockType.OPTION;
-    }
-
-    public XBlock(Element element, String name) throws IOException {
-        super(name);
+    public XBlock(Element element) throws IOException {
+        super(BLOCK);
         this.block_type = getType(element);
         if (null == block_type) {
             throw new IllegalArgumentException("Unknow type for block " + element.getChildText(TREEPATH));
@@ -50,10 +45,6 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
             addContent(element.cloneContent());
             map = createMap();
         }
-    }
-
-    public XBlock(Element element) throws IOException {
-        this(element, BLOCK);
     }
 
     public XBlock(BlockType block_type, Element element) {
@@ -84,9 +75,6 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     void setKey(String key) {
-        if (null == getChild(KEY)) {
-            addContent(new Element(KEY));
-        }
         getChild(KEY).setText(key);
     }
 
@@ -95,9 +83,6 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }
 
     public void setTreePath(String treePath) {
-        if (null == getChild(TREEPATH)) {
-            addContent(new Element(TREEPATH));
-        }
         getChild(TREEPATH).setText(treePath);
     }
 
@@ -178,13 +163,14 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
         return list;
     }
 
+    @Override
     public int compareTo(XBlock block) {
         return getKey().compareTo(block.getKey());
     }
 
     @Override
     public String toString() {
-        StringBuffer str = new StringBuffer("Block: ");
+        StringBuilder str = new StringBuilder("Block: ");
         str.append(getKey());
         str.append(" (");
         str.append(getType());
@@ -261,6 +247,7 @@ public class XBlock extends org.jdom.Element implements Comparable<XBlock> {
     }*/
     private class XParameterComparator implements Comparator<XParameter> {
 
+        @Override
         public int compare(XParameter o1, XParameter o2) {
             if (o1.isHidden()) {
                 if (o2.isHidden()) {

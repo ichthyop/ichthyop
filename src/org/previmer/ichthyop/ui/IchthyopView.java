@@ -49,6 +49,7 @@ import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
 import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.Version;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.manager.UpdateManager;
 import org.previmer.ichthyop.ui.logging.LogLevel;
@@ -472,13 +473,13 @@ public class IchthyopView extends FrameView
             path += ".gif";
             /* Should i ask every time if user agrees to overwrite */
             /*if (new File(path).exists()) {
-            String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
-            int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
-            if (!(dialog == JOptionPane.OK_OPTION)) {
-            cancel(true);
-            return null;
-            }
-            }*/
+             String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
+             int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
+             if (!(dialog == JOptionPane.OK_OPTION)) {
+             cancel(true);
+             return null;
+             }
+             }*/
             gif.start(path);
             gif.setDelay((int) (1000 / nbfps));
             setMessage(resourceMap.getString("createAnimatedGif.msg.start"), true, Level.INFO);
@@ -619,7 +620,7 @@ public class IchthyopView extends FrameView
                 sb.append(" ");
                 sb.append(file.getName());
                 getLogger().info(sb.toString());
-                return loadConfigurationFile(file);
+                return loadConfigurationFile(file, null);
             } catch (IOException ex) {
                 getLogger().log(Level.SEVERE, getResourceMap().getString("saveAsConfigurationFile.msg.failed"), ex);
             }
@@ -715,11 +716,6 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void updatePlatform() {
-        getLogger().info("{Update platform} Not supported yet.");
-    }
-
-    @Action
     public Task openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -727,7 +723,7 @@ public class IchthyopView extends FrameView
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             checkCfgVersionAndLoad(chooser.getSelectedFile());
-            cfgPath=chooser.getCurrentDirectory();
+            cfgPath = chooser.getCurrentDirectory();
 
         }
         return null;
@@ -744,7 +740,6 @@ public class IchthyopView extends FrameView
                 if (getUpdateManager().getApplicationVersion().priorTo(getUpdateManager().getConfigurationVersion())) {
 
                     SwingUtilities.invokeLater(new Runnable() {
-
                         public void run() {
                             String title = resourceMap.getString("Application.title") + " - " + resourceMap.getString("openConfigurationFile.Action.shortDescription");
                             StringBuffer message = new StringBuffer(resourceMap.getString("updateConfigurationFile.cfgFile"));
@@ -766,7 +761,6 @@ public class IchthyopView extends FrameView
                     return;
                 }
                 SwingUtilities.invokeLater(new Runnable() {
-
                     public void run() {
                         String title = resourceMap.getString("Application.title") + " - " + resourceMap.getString("openConfigurationFile.Action.shortDescription");
                         StringBuffer message = new StringBuffer(resourceMap.getString("updateConfigurationFile.cfgFile"));
@@ -787,7 +781,7 @@ public class IchthyopView extends FrameView
                             try {
                                 getUpdateManager().upgrade();
                                 getLogger().info(resourceMap.getString("updateConfigurationFile.uptodate") + " " + getUpdateManager().getApplicationVersion().toString());
-                                loadConfigurationFile(file).execute();
+                                loadConfigurationFile(file, null).execute();
                             } catch (Exception ex) {
                                 getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
                             }
@@ -796,7 +790,7 @@ public class IchthyopView extends FrameView
                     }
                 });
             } else {
-                loadConfigurationFile(file).execute();
+                loadConfigurationFile(file, null).execute();
             }
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
@@ -832,7 +826,7 @@ public class IchthyopView extends FrameView
         return SimulationManager.getLogger();
     }
 
-    public Task loadConfigurationFile(File file) {
+    public Task loadConfigurationFile(File file, Version version) {
         try {
             getSimulationManager().setConfigurationFile(file);
         } catch (Exception e) {
@@ -843,6 +837,14 @@ public class IchthyopView extends FrameView
                 return new FailedTask(getApplication(), eclone);
             } catch (Exception ex) {
                 return new FailedTask(getApplication(), e);
+            }
+        }
+        if (null != version) {
+            getSimulationManager().getParameterManager().setConfigurationVersion(version);
+            try {
+                getSimulationManager().getParameterManager().save();
+            } catch (IOException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         getLogger().info(getResourceMap().getString("openConfigurationFile.msg.opened") + " " + file.toString());
@@ -1074,16 +1076,21 @@ public class IchthyopView extends FrameView
                     if (getSimulationManager().isStopped()) {
                         break;
                     }
+                    /* Print message progress */
+                    StringBuilder msg = new StringBuilder();
+                    msg.append(getSimulationManager().getTimeManager().stepToString());
+                    if (getSimulationManager().getTimeManager().index() % 10 == 0) {
+                        msg.append(" (");
+                        msg.append(resourceMap.getString("simulationRun.msg.time"));
+                        msg.append(" ");
+                        msg.append(getSimulationManager().getTimeManager().timeToString());
+                        msg.append(")");
+                    }
+                    // Display current step 
+                    setMessage(msg.toString());
                     /* step simulation */
                     getSimulationManager().getSimulation().step();
-                    /* Print message progress */
-                    StringBuffer msg = new StringBuffer();
-                    msg.append(getSimulationManager().getTimeManager().stepToString());
-                    msg.append(" - ");
-                    msg.append(resourceMap.getString("simulationRun.msg.time"));
-                    msg.append(" ");
-                    msg.append(getSimulationManager().getTimeManager().timeToString());
-                    setMessage(msg.toString());
+                    // Publish progress when current step is over
                     setProgress(getSimulationManager().progressCurrent());
                     publish(getSimulationManager().progressCurrent());
 
@@ -1375,7 +1382,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public void changeColorbarVariable() {
-        btnAutoRange.getAction().setEnabled(!((String) cbBoxVariable.getSelectedItem()).matches("None"));
+        btnAutoRange.getAction().setEnabled(!((String) cbBoxVariable.getSelectedItem()).equals("None"));
     }
 
     @Action
@@ -1402,7 +1409,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected float[] doInBackground() throws Exception {
-            if (variable.toLowerCase().matches("none")) {
+            if (variable.toLowerCase().equals("none")) {
                 cancel(true);
                 return null;
             }
@@ -1440,17 +1447,16 @@ public class IchthyopView extends FrameView
         btnColorMin.setEnabled(enabled);
         btnColorMed.setEnabled(enabled);
         btnColorMax.setEnabled(enabled);
-        btnAutoRange.getAction().setEnabled(enabled && !((String) cbBoxVariable.getSelectedItem()).matches("None"));
+        btnAutoRange.getAction().setEnabled(enabled && !((String) cbBoxVariable.getSelectedItem()).equals("None"));
         btnApplyColorbar.getAction().setEnabled(enabled);
         spinnerParticleSize.setEnabled(enabled);
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
-    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -1558,7 +1564,6 @@ public class IchthyopView extends FrameView
         saveasMapsMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
-        updateMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
         scrollPaneSimulationUI = new javax.swing.JScrollPane();
         pnlSimulationUI = new SimulationUI();
@@ -1760,7 +1765,7 @@ public class IchthyopView extends FrameView
         pnlWMS.setName("pnlWMS"); // NOI18N
         pnlWMS.setOpaque(false);
 
-        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&", "None" }));
+        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Offline", "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
         cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
         cbBoxWMS.setName("cbBoxWMS"); // NOI18N
 
@@ -2446,10 +2451,6 @@ public class IchthyopView extends FrameView
         helpMenu.setText(resourceMap.getString("helpMenu.text")); // NOI18N
         helpMenu.setName("helpMenu"); // NOI18N
 
-        updateMenuItem.setAction(actionMap.get("updatePlatform")); // NOI18N
-        updateMenuItem.setName("updateMenuItem"); // NOI18N
-        helpMenu.add(updateMenuItem);
-
         aboutMenuItem.setAction(actionMap.get("showAboutBox")); // NOI18N
         aboutMenuItem.setName("aboutMenuItem"); // NOI18N
         helpMenu.add(aboutMenuItem);
@@ -2536,7 +2537,6 @@ public class IchthyopView extends FrameView
     private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
         // TODO add your handling code here:
         SwingUtilities.invokeLater(new Runnable() {
-
             public void run() {
                 replayPanel.setIndex(sliderTime.getValue());
                 lblTime.setText(replayPanel.getTime());
@@ -2556,7 +2556,7 @@ public class IchthyopView extends FrameView
 
     private void taskPaneConfigurationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneConfigurationPropertyChange
         // TODO add your handling code here:
-        if (evt.getPropertyName().matches("collapsed")) {
+        if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
                 taskPaneAnimation.setCollapsed(true);
@@ -2578,7 +2578,7 @@ public class IchthyopView extends FrameView
 
     private void taskPaneSimulationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneSimulationPropertyChange
         // TODO add your handling code here:
-        if (evt.getPropertyName().matches("collapsed")) {
+        if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneConfiguration.setCollapsed(true);
                 taskPaneAnimation.setCollapsed(true);
@@ -2596,7 +2596,7 @@ public class IchthyopView extends FrameView
 
     private void taskPaneMappingPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneMappingPropertyChange
         // TODO add your handling code here:
-        if (evt.getPropertyName().matches("collapsed")) {
+        if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
                 taskPaneAnimation.setCollapsed(true);
@@ -2613,7 +2613,7 @@ public class IchthyopView extends FrameView
 
     private void taskPaneAnimationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneAnimationPropertyChange
         // TODO add your handling code here:
-        if (evt.getPropertyName().matches("collapsed")) {
+        if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
                 taskPaneConfiguration.setCollapsed(true);
@@ -2631,7 +2631,6 @@ public class IchthyopView extends FrameView
         // TODO add your handling code here:
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
-
             public void run() {
                 btn.setForeground(chooseColor(btn, btn.getForeground()));
             }
@@ -2642,7 +2641,6 @@ public class IchthyopView extends FrameView
         // TODO add your handling code here:
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
-
             public void run() {
                 btn.setForeground(chooseColor(btn, btn.getForeground()));
             }
@@ -2653,7 +2651,6 @@ public class IchthyopView extends FrameView
         // TODO add your handling code here:
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
-
             public void run() {
                 btn.setForeground(chooseColor(btn, btn.getForeground()));
                 wmsMapper.setColorbar(null, 0, 0, 0, null, null, null);
@@ -2667,7 +2664,6 @@ public class IchthyopView extends FrameView
         // TODO add your handling code here:
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
-
             public void run() {
                 btn.setForeground(chooseColor(btn, btn.getForeground()));
             }
@@ -2679,7 +2675,6 @@ public class IchthyopView extends FrameView
         JSpinner source = (JSpinner) evt.getSource();
         final int pixel = (Integer) source.getValue();
         SwingUtilities.invokeLater(new Runnable() {
-
             public void run() {
                 wmsMapper.setParticlePixel(pixel);
             }
@@ -2798,7 +2793,6 @@ public class IchthyopView extends FrameView
     private javax.swing.JFormattedTextField txtFieldMax;
     private javax.swing.JFormattedTextField txtFieldMed;
     private javax.swing.JFormattedTextField txtFieldMin;
-    private javax.swing.JMenuItem updateMenuItem;
     // End of variables declaration//GEN-END:variables
     private JDialog aboutBox;
     private File cfgPath = new File(System.getProperty("user.dir"));

@@ -28,6 +28,7 @@ import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.manager.SimulationManager;
+import org.previmer.ichthyop.manager.UpdateManager;
 
 /**
  * The application's main frame.
@@ -103,11 +104,16 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         if (cfgFile != null) {
             getLogger().log(Level.INFO, resourceMap.getString("save.msg.created") + " " + cfgFile.getPath());
             cancel(); // close the view
-            return IchthyopApp.getIchthyopView().loadConfigurationFile(cfgFile);
+            return IchthyopApp.getIchthyopView().loadConfigurationFile(cfgFile, getUpdateManager().getApplicationVersion());
         }
         return null;
     }
+    
+    private UpdateManager getUpdateManager() {
+        return UpdateManager.getInstance();
+    }
 
+    @Override
     public void valueChanged(TreeSelectionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) templateTree.getLastSelectedPathComponent();
         if (node != null && node.isLeaf()) {
@@ -128,7 +134,6 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         //getLogger().info(resourceMap.getString("view.close.text"));
         try {
             getFrame().setVisible(false);
-            finalize();
         } catch (Throwable ex) {
         }
     }
@@ -174,15 +179,28 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode2.add(treeNode3);
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS3D);
         treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS3D_OPENDAP);
+        treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
 
         treeNode2 = new DefaultMutableTreeNode("OPA");
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OPA3D_NEMO);
         treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
+        
+        treeNode2 = new DefaultMutableTreeNode("SYMPHONIE");
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.SYMPHONIE);
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
 
         treeNode2 = new DefaultMutableTreeNode("Miscellaneous");
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.GENERIC);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OSCAR);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.MERCATOR2D);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.NOVELTIS);
         treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
         templateTree.setModel(new DefaultTreeModel(treeNode1));
@@ -207,8 +225,6 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private void initComponents() {
 
         mainPanel = new javax.swing.JPanel();
-        mainScrollPane = new javax.swing.JScrollPane();
-        newConfigPanel = new javax.swing.JPanel();
         newFilePanel = new javax.swing.JPanel();
         btnChoosePath = new javax.swing.JButton();
         lblName = new javax.swing.JLabel();
@@ -225,16 +241,12 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         templateTree = new javax.swing.JTree();
         jScrollPane3 = new javax.swing.JScrollPane();
         descriptionTextPane = new javax.swing.JTextPane();
-        btnCancel = new javax.swing.JButton();
-        btnSave = new javax.swing.JButton();
         pnlInfo = new javax.swing.JPanel();
         lblInfo = new javax.swing.JLabel();
+        btnSave = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
 
         mainPanel.setName("mainPanel"); // NOI18N
-
-        mainScrollPane.setName("mainScrollPane"); // NOI18N
-
-        newConfigPanel.setName("newConfigPanel"); // NOI18N
 
         newFilePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         newFilePanel.setName("newFilePanel"); // NOI18N
@@ -308,7 +320,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             .addGroup(newFilePanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 555, Short.MAX_VALUE)
                     .addGroup(newFilePanelLayout.createSequentialGroup()
                         .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblType)
@@ -318,12 +330,12 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
                         .addGap(18, 18, 18)
                         .addGroup(newFilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, newFilePanelLayout.createSequentialGroup()
-                                .addComponent(textFieldPath, javax.swing.GroupLayout.DEFAULT_SIZE, 391, Short.MAX_VALUE)
+                                .addComponent(textFieldPath, javax.swing.GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnChoosePath))
-                            .addComponent(textFieldTemplate, javax.swing.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)
-                            .addComponent(textFieldName, javax.swing.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)
-                            .addComponent(textFieldFile, javax.swing.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)))
+                            .addComponent(textFieldName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                            .addComponent(textFieldFile, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                            .addComponent(textFieldTemplate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)))
                     .addComponent(lblChecker))
                 .addContainerGap())
         );
@@ -350,14 +362,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
                     .addComponent(textFieldFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblChecker)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
-
-        btnCancel.setAction(actionMap.get("cancel")); // NOI18N
-        btnCancel.setName("btnCancel"); // NOI18N
-
-        btnSave.setAction(actionMap.get("save")); // NOI18N
-        btnSave.setName("btnSave"); // NOI18N
 
         pnlInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlInfo.border.title"))); // NOI18N
         pnlInfo.setName("pnlInfo"); // NOI18N
@@ -369,11 +375,11 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         pnlInfo.setLayout(pnlInfoLayout);
         pnlInfoLayout.setHorizontalGroup(
             pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 544, Short.MAX_VALUE)
+            .addGap(0, 579, Short.MAX_VALUE)
             .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(pnlInfoLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
+                    .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 555, Short.MAX_VALUE)
                     .addContainerGap()))
         );
         pnlInfoLayout.setVerticalGroup(
@@ -382,39 +388,14 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             .addGroup(pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(pnlInfoLayout.createSequentialGroup()
                     .addComponent(lblInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(44, Short.MAX_VALUE)))
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
-        javax.swing.GroupLayout newConfigPanelLayout = new javax.swing.GroupLayout(newConfigPanel);
-        newConfigPanel.setLayout(newConfigPanelLayout);
-        newConfigPanelLayout.setHorizontalGroup(
-            newConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(newConfigPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(newConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(newFilePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, newConfigPanelLayout.createSequentialGroup()
-                        .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCancel))
-                    .addComponent(pnlInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        newConfigPanelLayout.setVerticalGroup(
-            newConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(newConfigPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(newFilePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(newConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCancel)
-                    .addComponent(btnSave))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        btnSave.setAction(actionMap.get("save")); // NOI18N
+        btnSave.setName("btnSave"); // NOI18N
 
-        mainScrollPane.setViewportView(newConfigPanel);
+        btnCancel.setAction(actionMap.get("cancel")); // NOI18N
+        btnCancel.setName("btnCancel"); // NOI18N
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -422,13 +403,26 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(mainScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 467, Short.MAX_VALUE)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(newFilePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                        .addComponent(btnSave)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCancel)))
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addComponent(mainScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(pnlInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(newFilePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCancel)
+                    .addComponent(btnSave))
                 .addContainerGap())
         );
 
@@ -440,6 +434,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 String name = textFieldName.getText();
                 if (!verifyName(name)) {
@@ -472,8 +467,6 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private javax.swing.JLabel lblPath;
     private javax.swing.JLabel lblType;
     private javax.swing.JPanel mainPanel;
-    private javax.swing.JScrollPane mainScrollPane;
-    private javax.swing.JPanel newConfigPanel;
     private javax.swing.JPanel newFilePanel;
     private javax.swing.JPanel pnlInfo;
     private javax.swing.JTree templateTree;
@@ -483,8 +476,8 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     private javax.swing.JTextField textFieldTemplate;
     // End of variables declaration//GEN-END:variables
     private File location = new File(getDefaultPath());
-    private ResourceMap resourceMap;
-    private JStatusBar statusBar = new JStatusBar();
+    private final ResourceMap resourceMap;
+    private final JStatusBar statusBar = new JStatusBar();
 
     private enum TEMPLATE {
 
@@ -496,14 +489,19 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         MARS3D,
         ROMS2D,
         ROMS3D,
+        ROMS3D_OPENDAP,
         OPA3D_NEMO,
-        GENERIC;
+        SYMPHONIE,
+        GENERIC,
+        OSCAR,
+        MERCATOR2D,
+        NOVELTIS;
         /* variables */
-        private String longName;
-        private String description;
-        private String filename;
-        private String cfgname;
-        private ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(NewConfigView.class);
+        private final String longName;
+        private final String description;
+        private final String filename;
+        private final String cfgname;
+        private final ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(NewConfigView.class);
 
         TEMPLATE() {
             longName = resourceMap.getString(name() + ".title");
@@ -530,7 +528,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
             Calendar calendar = new GregorianCalendar();
             calendar.setTimeInMillis(System.currentTimeMillis());
             dtFormat.setCalendar(calendar);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(dtFormat.format(calendar.getTime()));
             sb.append("_");
             String username = System.getProperty("user.name");
@@ -549,7 +547,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
 
         public static TEMPLATE getTemplate(String name) {
             for (TEMPLATE template : TEMPLATE.values()) {
-                if (template.toString().matches(name)) {
+                if (template.toString().equals(name)) {
                     return template;
                 }
             }

@@ -4,20 +4,18 @@
  */
 package org.previmer.ichthyop.action;
 
-import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.io.IOTools;
-import org.previmer.ichthyop.particle.GrowingParticleLayer;
-import org.previmer.ichthyop.particle.GrowingParticleLayer.Stage;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
  *
@@ -56,7 +54,7 @@ public class BuoyancyAction extends AbstractAction {
      * Buoyuancy scheme only operates during the egg stage. But when the growth
      * of the particle is not simulated, it operates up to this age limit [day].
      */
-    public static long maximumAge;
+    public static double maximumAge;
     /**
      * Egg density [g/cm3], a key parameter to calculate the egg buoyancy.
      */
@@ -80,7 +78,7 @@ public class BuoyancyAction extends AbstractAction {
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth) {
             try {
-                maximumAge = (long) (Float.valueOf(getParameter("age_max")) * 24.f * 3600.f);
+                maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
             } catch (Exception ex) {
                 maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
                 getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
@@ -92,14 +90,8 @@ public class BuoyancyAction extends AbstractAction {
         /*
          * Check whether there is a density CSV file
          */
-        String density_file;
-        try {
-            density_file = getParameter("density_file");
-        } catch (Exception ex) {
-            density_file = null;
-        }
-        if (null != density_file && !density_file.isEmpty()) {
-            String pathname = IOTools.resolveFile(density_file);
+        if (!isNull("density_file")) {
+            String pathname = IOTools.resolveFile(getParameter("density_file"));
             File f = new File(pathname);
             if (!f.isFile()) {
                 throw new FileNotFoundException("Density file " + pathname + " not found.");
@@ -110,6 +102,11 @@ public class BuoyancyAction extends AbstractAction {
             loadDensities(pathname);
             buoyancyModel = BuoyancyModel.DENSITY_AS_AGE_FUNCTION;
         }
+    }
+
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
     }
 
     private void loadDensities(String csvFile) {
@@ -135,11 +132,13 @@ public class BuoyancyAction extends AbstractAction {
     }
 
     @Override
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         boolean canApplyBuoyancy;
         if (isGrowth) {
-            canApplyBuoyancy = ((GrowingParticleLayer) particle.getLayer(GrowingParticleLayer.class)).getStage() == Stage.EGG;
+            // Egg stage only
+            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+            canApplyBuoyancy = (stage == 0);
         } else {
             canApplyBuoyancy = particle.getAge() < maximumAge;
         }
@@ -201,7 +200,6 @@ public class BuoyancyAction extends AbstractAction {
          buoyancyMeters = (buoyancyEgg / 100.0f); //m.s-1
          return (buoyancyMeters * dt_sec); //meter
          */
-
         waterDensity = waterDensity(sal, tp);
 
         return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
@@ -211,10 +209,9 @@ public class BuoyancyAction extends AbstractAction {
     /**
      * Calculates the water density according with the Unesco equation.
      *
-     * @param waterSalinity a double, the sea water salinity [psu] at particle
-     * location.
-     * @param waterTemperature a double, the sea water temperature [celsius] at
-     * particle location
+     * @param sal a double, the sea water salinity [psu] at particle location.
+     * @param tp a double, the sea water temperature [celsius] at particle
+     * location
      * @return double waterDensity, the sea water density [g.cm-3] at the
      * particle location.
      */
@@ -236,15 +233,14 @@ public class BuoyancyAction extends AbstractAction {
          RHO1 = 1000.0f + SIGMA;
          waterDensity = (RHO1 / 1000.f); in [gr.cm-3]
          */
-
         double R1, R2, R3;
 
-        R1 =
-                ((((C2 * tp - C3) * tp + C4) * tp - C5) * tp + C6) * tp - C7;
-        R2 =
-                (((C8 * tp - C9) * tp + C10) * tp - C11) * tp + C12;
-        R3 =
-                (-C13 * tp + C14) * tp - C15;
+        R1
+                = ((((C2 * tp - C3) * tp + C4) * tp - C5) * tp + C6) * tp - C7;
+        R2
+                = (((C8 * tp - C9) * tp + C10) * tp - C11) * tp + C12;
+        R3
+                = (-C13 * tp + C14) * tp - C15;
 
         return ((1000.d + (C1 * sal + R3 * Math.sqrt(Math.abs(sal)) + R2) * sal + R1 + DR350) / 1000.d);
     }

@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.dataset;
 
+import java.util.List;
 import org.previmer.ichthyop.event.NextStepEvent;
 
 /**
@@ -12,33 +13,36 @@ import org.previmer.ichthyop.event.NextStepEvent;
  */
 public class Mars3dDataset extends Mars3dCommon {
 
+    private List<String> files;
+    private int index;
+
+    @Override
     void openDataset() throws Exception {
-        MarsIO.setTimeField(strTime);
-        boolean skipSorting = false;
-        try {
-            skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
-        } catch (Exception ex) {
-            skipSorting = false;
+
+        files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        if (!skipSorting()) {
+            DatasetUtil.sort(files, strTime, timeArrow());
         }
-        ncIn = MarsIO.openLocation(getParameter("input_path"), getParameter("file_filter"), skipSorting);
+        ncIn = DatasetUtil.openFile(files.get(0), true);
         readTimeLength();
     }
 
+    @Override
     void setOnFirstTime() throws Exception {
-        long t0 = getSimulationManager().getTimeManager().get_tO();
-        ncIn = MarsIO.openFile(MarsIO.getFile(t0));
+        double t0 = getSimulationManager().getTimeManager().get_tO();
+        index = DatasetUtil.index(files, t0, timeArrow, strTime);
+        ncIn = DatasetUtil.openFile(files.get(index), true);
         readTimeLength();
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow);
         time_tp1 = t0;
     }
 
+    @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        long time = e.getSource().getTime();
+        double time = e.getSource().getTime();
         //Logger.getAnonymousLogger().info("set fields at time " + time);
-        int time_arrow = (int) Math.signum(e.getSource().get_dt());
-
-        if (time_arrow * time < time_arrow * time_tp1) {
+        if (timeArrow * time < timeArrow * time_tp1) {
             return;
         }
 
@@ -49,12 +53,13 @@ public class Mars3dDataset extends Mars3dCommon {
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
         }
-        rank += time_arrow;
+        rank += timeArrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             ncIn.close();
-            ncIn = MarsIO.openFile(MarsIO.getNextFile(time_arrow));
+            index = DatasetUtil.next(files, index, timeArrow);
+            ncIn = DatasetUtil.openFile(files.get(index), true);
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
+            rank = (1 - timeArrow) / 2 * (nbTimeRecords - 1);
         }
         setAllFieldsTp1AtTime(rank);
     }

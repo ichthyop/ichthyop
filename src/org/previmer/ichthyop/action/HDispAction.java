@@ -1,7 +1,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.MTRandom;
-import org.previmer.ichthyop.arch.IBasicParticle;
+import org.previmer.ichthyop.particle.IParticle;
 
 /**
  * Simulates horizontal dispersion.
@@ -42,13 +42,20 @@ public class HDispAction extends AbstractAction {
      */
     private MTRandom random;
 
+    @Override
     public void loadParameters() throws Exception {
-        random = new MTRandom(true);
+        random = new MTRandom();
         epsilon = Double.valueOf(getParameter("epsilon"));
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);
     }
+    
+    @Override
+    public void init(IParticle particle) {
+        // Nothing to do
+    }
 
-    public void execute(IBasicParticle particle) {
+    @Override
+    public void execute(IParticle particle) {
         particle.increment(getHDispersion(particle.getGridCoordinates(), getSimulationManager().getTimeManager().get_dt()));
     }
 
@@ -101,7 +108,8 @@ public class HDispAction extends AbstractAction {
         double Rx = 2.d * random.nextDouble() - 1.d;
         double Ry = 2.d * random.nextDouble() - 1.d;
         double dL = 0.5d * (getSimulationManager().getDataset().getdxi(j, i) + getSimulationManager().getDataset().getdeta(j, i));
-        double cff = Math.sqrt(2.d * dt) * epsilon16 * Math.pow(dL, 2.d / 3.d);
+        // abs(dt) because it is negative integer in backward simulation
+        double cff = Math.sqrt(2.d * Math.abs(dt)) * epsilon16 * Math.pow(dL, 2.d / 3.d);
         double dx = Rx * cff / getSimulationManager().getDataset().getdxi(j, i);
         double dy = Ry * cff / getSimulationManager().getDataset().getdeta(j, i);
         return new double[]{dx, dy};

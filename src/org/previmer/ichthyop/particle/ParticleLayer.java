@@ -6,7 +6,6 @@
 package org.previmer.ichthyop.particle;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
-import org.previmer.ichthyop.arch.IBasicParticle;
 
 /**
  *
@@ -14,16 +13,15 @@ import org.previmer.ichthyop.arch.IBasicParticle;
  */
 public abstract class ParticleLayer extends SimulationManagerAccessor {
 
-    final private IBasicParticle linkedParticle;
+    final private IParticle linkedParticle;
 
-    public ParticleLayer(IBasicParticle particle) {
+    public ParticleLayer(IParticle particle) {
         this.linkedParticle = particle;
-        init();
     }
 
     abstract public void init();
 
-    public IBasicParticle particle() {
+    public IParticle particle() {
         return linkedParticle;
     }
 

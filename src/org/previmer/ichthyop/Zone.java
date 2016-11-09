@@ -2,44 +2,44 @@ package org.previmer.ichthyop;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
-import org.previmer.ichthyop.arch.IBasicParticle;
-import org.previmer.ichthyop.io.XParameter;
+import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.dataset.IDataset;
 
-/** import AWT */
 /**
  * <p>
- * This class defines a geographical area used by the program to locate
- * the release areas or the recruitment areas. It provides a tool to determine
+ * This class defines a geographical area used by the program to locate the
+ * release areas or the recruitment areas. It provides a tool to determine
  * whether any grid point belongs to the Zone.
  * </p>
  *
- * The geographical area is defined as followed :
- * Four geodesics demarcation points {lon, lat} P1, P2, P3 & P4 and
- * two depths depth1 & depth2.
+ * The geographical area is defined as followed : at least three geodesic
+ * demarcation points {lon, lat} P1, P2, P3, .., Pn and two depths depth1 &
+ * depth2.
  * <p>
- * Longitude is expressed in East degree and latitude in North degree.
- * Depths are positive Integers.
+ * Longitude is expressed in East degree and latitude in North degree. Depths
+ * are positive Integers.
  * </p>
- * The area is first delimited by the polygon (P1 P2 P3 P4).
- * The points dont have to be in the water, but make sure they belong to the
- * geographical grid of the simulation.
- * The four demarcation points P1(plon1, plat1) to P4(plon4, plat4) must be
- * recorded in the clockwise or anticlockwise direction.
- * Then, another routine isolates the area of the polygone that is contained
- * between the bathymetric lines depth1 & depth2.
- * At last the user can choose the color
- * (Red[0, 255], Green[0, 255], Blue[0, 255]) of the area.
-
- * <p>Copyright: Copyright (c) 2007 - Free software under GNU GPL</p>
+ * The area is first delimited by the polygon (P1 P2 P3 P4 .. Pn). The points
+ * don't have to be in the water, but make sure they belong to the geographical
+ * grid of the simulation. The four demarcation points P1(plon1, plat1) to
+ * P4(plon4, plat4) must be recorded in the clockwise or anticlockwise
+ * direction. Then, another routine isolates the area of the polygon that is
+ * contained between the bathymetric lines depth1 & depth2. At last the user can
+ * choose the color (Red[0, 255], Green[0, 255], Blue[0, 255]) of the area.
  *
- * @author P.Verley
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.3 2013/11/15
  */
 public class Zone extends SimulationManagerAccessor {
 
-    private ArrayList<GridPoint> polygon = new ArrayList(3);
-    private HashMap<String, XParameter> parameters = new HashMap();
-    private TypeZone type;
+    /**
+     * A list of {@code GridPoint} that defines the a geographical area.
+     */
+    private final ArrayList<GridPoint> polygon;
+    /**
+     * The type of zone (release, recruitment, etc.)
+     */
+    private final TypeZone type;
     /**
      * Lower bathymetric line [meter]
      */
@@ -49,11 +49,11 @@ public class Zone extends SimulationManagerAccessor {
      */
     private float offshoreLine;
     /**
-     *  [meter]
+     * [meter]
      */
     private float lowerDepth;
     /**
-     *  [meter]
+     * [meter]
      */
     private float upperDepth;
     /**
@@ -61,30 +61,60 @@ public class Zone extends SimulationManagerAccessor {
      */
     int index;
     /*
-     * Zone name
+     * Zone name in the configuration file
      */
-    private String key;
+    private final String key;
     /**
      * Zone color (RGB)
      */
     private Color color;
+    /**
+     * Whether to consider the (vertical) thickness of the zone. Not enabled
+     * means that the zone covers all the water column.
+     */
     private boolean enabledThickness;
+    /**
+     * Whether to enable the bathymetric mask.
+     */
     private boolean enabledBathyMask;
 
+    /**
+     * Creates a new zone.
+     *
+     * @param type, the type of zone
+     * @param key, the name of the zone
+     * @param index, the index of the zone
+     */
     public Zone(TypeZone type, String key, int index) {
+        this.polygon = new ArrayList();
         this.type = type;
         this.key = key;
         this.index = index;
     }
 
+    /**
+     * Sets the color of the zone
+     *
+     * @param color, the color of the zone
+     */
     public void setColor(Color color) {
         this.color = color;
     }
 
+    /**
+     * Returns the color of the zone.
+     *
+     * @return the color of the zone
+     */
     public Color getColor() {
         return color;
     }
 
+    /**
+     * Returns the name of the zone.
+     * 
+     * @return the name of the zone
+     */
     public String getKey() {
         return key;
     }
@@ -125,21 +155,13 @@ public class Zone extends SimulationManagerAccessor {
         polygon.add(point);
     }
 
-    public void addParameter(XParameter xparameter) {
-        parameters.put(xparameter.getKey(), xparameter);
-    }
-
-    public XParameter getParameter(String key) {
-        return parameters.get(key);
-    }
-
     public void init() throws Exception {
 
         for (GridPoint rhoPoint : polygon) {
             rhoPoint.geo2Grid();
             /* make sure the point belongs to the simulated domain */
             if (rhoPoint.getX() < 0 || rhoPoint.getY() < 0) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append(getType());
                 sb.append(" zone \"");
                 sb.append(getKey());
@@ -155,7 +177,7 @@ public class Zone extends SimulationManagerAccessor {
         /* make sure the layer thickness is properly defined */
         if (enabledThickness) {
             if (lowerDepth < upperDepth) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append(getType());
                 sb.append(" zone \"");
                 sb.append(getKey());
@@ -171,7 +193,7 @@ public class Zone extends SimulationManagerAccessor {
         /* make sure bathy mask is correctly defined */
         if (enabledBathyMask) {
             if (offshoreLine < inshoreLine) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append(getType());
                 sb.append(" zone \"");
                 sb.append(getKey());
@@ -188,7 +210,7 @@ public class Zone extends SimulationManagerAccessor {
         polygon.add((GridPoint) polygon.get(0).clone());
     }
 
-    public boolean isParticleInZone(IBasicParticle particle) {
+    public boolean isParticleInZone(IParticle particle) {
 
         boolean isInZone = true;
         if (!getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {
@@ -203,6 +225,22 @@ public class Zone extends SimulationManagerAccessor {
         isInZone = isInZone && isXYInPolygon(particle.getX(), particle.getY());
 
         return isInZone;
+    }
+
+    public double getArea() {
+
+        IDataset dataset = getSimulationManager().getDataset();
+        double area = 0.d;
+        for (int i = 0; i < dataset.get_nx(); i++) {
+            for (int j = 0; j < dataset.get_ny(); j++) {
+                if (dataset.isInWater(i, j)) {
+                    if (isGridPointInZone(i, j)) {
+                        area += dataset.getdeta(j, i) * dataset.getdxi(j, i) * 1e-6;
+                    }
+                }
+            }
+        }
+        return area;
     }
 
     private boolean isDepthInLayer(double depth) {
@@ -340,27 +378,31 @@ public class Zone extends SimulationManagerAccessor {
 
     @Override
     public String toString() {
-        StringBuffer zoneStr = new StringBuffer(getType().toString());
+        StringBuilder zoneStr = new StringBuilder(getType().toString());
         zoneStr.append(' ');
         zoneStr.append("zone ");
         zoneStr.append(getIndex());
         zoneStr.append('\n');
-        zoneStr.append("Polygon [");
+        zoneStr.append("  Polygon [");
         for (GridPoint point : polygon) {
             zoneStr.append(point.toString());
             zoneStr.append(" ");
         }
         zoneStr.append(']');
         zoneStr.append('\n');
-        zoneStr.append("shore-lines (");
+        zoneStr.append("  Shore-lines (");
         zoneStr.append(inshoreLine);
         zoneStr.append("m, ");
         zoneStr.append(offshoreLine);
-        zoneStr.append("m) depth-lines (");
+        zoneStr.append("m)\n  Depth-lines (");
         zoneStr.append(upperDepth);
         zoneStr.append("m, ");
         zoneStr.append(lowerDepth);
         zoneStr.append("m)");
+        zoneStr.append('\n');
+        zoneStr.append("  Area ");
+        zoneStr.append((float) getArea());
+        zoneStr.append(" km2");
 
         return zoneStr.toString();
     }

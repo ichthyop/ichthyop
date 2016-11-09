@@ -27,15 +27,15 @@ public class TimeTracker extends AbstractTracker {
     }
 
     @Override
-    public Attribute[] attributes() {
+    public Attribute[] getAttributes() {
         List<Attribute> listAttributes = new ArrayList();
         String calendarName = getSimulationManager().getTimeManager().getCalendar().getClass().getSimpleName();
         if (calendarName.toLowerCase().contains("interannual")) {
             listAttributes.add(new Attribute("calendar", "gregorian"));
-            listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getParameter("app.time", "time_origin")));
         } else {
             listAttributes.add(new Attribute("calendar", "climato"));
         }
+        listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getParameter("app.time", "time_origin")));
         return listAttributes.toArray(new Attribute[listAttributes.size()]);
     }
 
@@ -44,7 +44,13 @@ public class TimeTracker extends AbstractTracker {
         return new ArrayDouble.D1(1);
     }
 
+    @Override
     public void track() {
         getArray().setDouble(0, getSimulationManager().getTimeManager().getTime());
+    }
+    
+    @Override
+    public void addRuntimeAttributes() {
+        // no runtime attribute
     }
 }

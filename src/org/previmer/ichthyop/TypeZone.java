@@ -11,8 +11,7 @@ package org.previmer.ichthyop;
 public enum TypeZone {
 
     RELEASE(0),
-    RECRUITMENT(1),
-    ORIENTATION(2);
+    RECRUITMENT(1);
     
     private int code;
 

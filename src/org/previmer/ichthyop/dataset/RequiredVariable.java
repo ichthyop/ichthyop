@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.arch.IDataset;
 import org.previmer.ichthyop.manager.SimulationManager;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -103,8 +102,8 @@ public class RequiredVariable {
 
     public Number get(double[] pGrid, double time) {
 
-        int[] origin = null;
-        int[] shape = null;
+        int[] origin;
+        int[] shape;
         int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];

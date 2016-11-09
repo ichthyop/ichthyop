@@ -156,7 +156,7 @@ abstract class Mars3dCommon extends MarsCommon {
             for (int k = 0; k < nz; k++) {
                 s_rho[k] = arrSrho.getDouble(index.set(k));
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading sigma levels. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -211,7 +211,7 @@ abstract class Mars3dCommon extends MarsCommon {
             // Read hc, Cs_r and Cs_w in the NetCDF file.
             Array arrHc = ncIn.findVariable(strHC).read(new int[]{jpo, ipo}, new int[]{ny, nx});
             hc = (float[][]) arrHc.copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("{Dataset} Error reading hc variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -281,7 +281,7 @@ abstract class Mars3dCommon extends MarsCommon {
         Array arrZeta = null;
         try {
             arrZeta = ncIn.findVariable(strZeta).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading ocean free surface elevation. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -487,6 +487,8 @@ abstract class Mars3dCommon extends MarsCommon {
 
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
+        
+        getLogger().info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -494,7 +496,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -503,17 +505,15 @@ abstract class Mars3dCommon extends MarsCommon {
 
         try {
             v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin, new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
 
         try {
-            Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank));
-            time_tp1 -= time_tp1 % 100;
-        } catch (Exception ex) {
+            time_tp1 = DatasetUtil.timeAtRank(ncIn, strTime, rank);
+        } catch (IOException ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
@@ -521,7 +521,7 @@ abstract class Mars3dCommon extends MarsCommon {
 
         try {
             zeta_tp1 = (float[][]) ncIn.findVariable(strZeta).read(new int[]{rank, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
-        } catch (Exception ex) {
+        } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading ocean free surface elevation. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
