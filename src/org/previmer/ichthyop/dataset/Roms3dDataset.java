@@ -149,7 +149,7 @@ public class Roms3dDataset extends RomsCommon {
 
         if (null != ncIn.findGlobalAttribute("VertCoordType")) {
             String strCoordType = ncIn.findGlobalAttribute("VertCoordType").getStringValue();
-            if (strCoordType.toLowerCase().equals(VertCoordType.OLD.name().toLowerCase())) {
+            if (strCoordType.toLowerCase().equals(VertCoordType.NEW.name().toLowerCase())) {
                 return VertCoordType.NEW;
             }
         }
