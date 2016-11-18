@@ -7,16 +7,16 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.3alpha (2016/11/18) 
+Release: 3.3beta (2016/11/18) 
 https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r909
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
 =============
-Alpha version
+Beta version
 
-This alpha version of Ichthyop gathers the latest developments and bug fixes since the previous release. It has not go through full testing yest and might be unstable. This alpha release will keep changing (new features and more bug fixing) until the developer consider it is feature complete and ready for a new release.
-No JAR (Java executable file) is provided for the alpha version, the source code is distributed as a Netbeans project.
+This beta version of Ichthyop gathers the latest developments and bug fixes since the previous release. It has gone through some testing and is stable though it is not fully finalized yet. Automatic update of the configuration files from previous releases is still missing. This beta release may keep changing (bug fixing and final tweaks) until the developer consider it is feature complete and ready for a new release.
+No JAR (Java executable file) is provided for the beta version, the source code is distributed as a Netbeans project.
 
 ==========================
 Changes since Ichthyop 3.2
