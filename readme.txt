@@ -7,8 +7,8 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2015
 
-Release: 3.3alpha (2016/09/23) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r899
+Release: 3.3alpha (2016/11/18) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r909
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
@@ -22,6 +22,7 @@ No JAR (Java executable file) is provided for the alpha version, the source code
 Changes since Ichthyop 3.2
 
 Bug fixes:
+* ROMS3D the VertCoordType global attribute was not read correctly and lead to incorrect calculation of the vertical levels.
 * RungeKutta scheme now works in backward for 2D simulations
 * The 'zone' output variable displays -99 for particles that have not been released yet (used to be zero, which is incorrect information)
 * The 'release_zone' output variable now works with multiple release events (only the first release event would be written in the variable and all other particle release zones were set to zero)
@@ -35,7 +36,7 @@ New features:
 * New plugin for ROMS3D OpenDAP
 * All the Dataset plugins detect automatically the unit of the time value by reading variable attribute "units". It can be either seconds or days, but can be easily extended to other units on demand.
 * Added command line option -quiet in the batch mode for printing only error message
-* New module 'Active swimming'. Swimming velocity is provided as an age function in a separated CSV file. The module accepts two modes : the input swimming velocity can either be interpreted as cruising speed (the particle always swims at the defined velocity) or maximal speed (the particle swims at random velocity among [0, defined velocity]). Swimming is isotropic.
+* New module 'Active swimming'. Swimming velocity is provided as an age function in a separated CSV file. The module accepts two modes : the input swimming velocity can either be constant (the particle always swims at the defined velocity) or random (the particle swims at random velocity among [0, 2 * defined velocity]). Swimming is isotropic.
 * New plugin for NOVELTIS data (from local NetCDF files)
 * New plugin for Mercator2D data (from local NetCDF files), regular grid
 * New plugin for OSCAR data (from local NetCDF files and from OpenDAP) http://www.oscar.noaa.gov/
