@@ -31,10 +31,11 @@ import org.previmer.ichthyop.particle.IParticle;
  * function. The swimming velocity is provided in a semicolon separated CSV
  * file, with two columns the age of the particle in days and the corresponding
  * swimming velocity in metres per second. The swimming velocity in the CSV file
- * can be interpreted as CRUISING velocity or MAXIMAL velocity. CRUISING means
- * that the particle will swim at the exact velocity defined in the CSV file.
- * MAXIMAL means that the particle will swim at random velocity ranging from
- * zero to the velocity defined in the CSV file.
+ * can be either constant or not. CONSTANT velocity means that the particle will
+ * swim at the exact velocity defined in the CSV file. NON CONSTANT velocity
+ * means that the particle will swim at random velocity ranging from zero to two
+ * times the velocity defined in the CSV file so as to ensure an average
+ * velocity equal to the velocity defined in the CSV file.
  *
  * @author P.Verley (philippe.verley@ird.fr)
  */
@@ -45,7 +46,7 @@ public class SwimmingAction extends AbstractAction {
     // ages in seconds
     private float[] ages;
     private double dt;
-    private boolean cruising;
+    private boolean constant;
 
     @Override
     public void loadParameters() throws Exception {
@@ -80,15 +81,15 @@ public class SwimmingAction extends AbstractAction {
         // Simulation time step
         dt = getSimulationManager().getTimeManager().get_dt();
 
-        // Whether the velocity should be considered as maximal velocity or cruising velocity
-        cruising = getParameter("velocity_type").equalsIgnoreCase("cruising");
+        // Whether the velocity should be constant or random
+        constant = Boolean.valueOf(getParameter("constant_velocity"));
     }
 
     @Override
     public void execute(IParticle particle) {
 
         // Find the swimming velocity for this particle
-        double speed = getSpeed(particle) * (cruising ? 1.d : Math.random());
+        double speed = getSpeed(particle) * (constant ? 1.d : 2.d*Math.random());
         // Random x component of the swimming velocity
         double u = randomDir() * Math.random() * speed;
         // y component such as sqrt(x2 + y2) = speed

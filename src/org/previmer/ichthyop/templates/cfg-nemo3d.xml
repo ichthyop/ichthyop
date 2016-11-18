@@ -454,14 +454,12 @@
                 <description>Particle swimming velocity as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Velocity(m/s).</description>
             </parameter>
             <parameter>
-                <key>velocity_type</key>
-                <long_name>Swiming velocity type</long_name>
-                <value>cruising</value>
-                <default>cruising</default>
-                <format>combo</format>
-                <accepted>cruising</accepted>
-                <accepted>maximal</accepted>
-                <description>It controls the meaning of the swimming velocity provided in the CSV file. CRUISING means that the particles will swim at the velocity defined in the CSV file. MAXIMAL means that the particles will swim with random velocity between zero and maximal velocity.</description>
+                <key>constant_velocity</key>
+                <long_name>Constant swiming velocity</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If TRUE the particles will swim at the velocity defined in the CSV file. If FALSE the particles will swim with random velocity between zero and 2 times the velocity defined in the CSV file.</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -529,7 +527,7 @@
         <tree_path>Advanced/Transport/Buoyancy</tree_path>
         <enabled>false</enabled>
         <parameters>
-                     <parameter type="serial">
+            <parameter type="serial">
                 <key>particle_density</key>
                 <long_name>Particle density [g/cm3]</long_name>
                 <value>1.025</value>
@@ -970,7 +968,7 @@
             </parameter>
         </parameters>
     </block>
-        <block type="action">
+    <block type="action">
         <key>action.lethal_temp</key>
         <tree_path>Advanced/Biology/Lethal temperature</tree_path>
         <enabled>false</enabled>
@@ -1228,7 +1226,7 @@
             </parameter>
         </parameters>
     </block>
-     <block type="action">
+    <block type="action">
         <key>action.recruitment.stain</key>
         <tree_path>Advanced/Biology/Recruitment/In stain</tree_path>
         <enabled>false</enabled>
@@ -1269,7 +1267,7 @@
                 <format>boolean</format>
                 <description>Force a particle to remain where it is as soon as it is recruited. If activated, the particle could not be recruited in any other recruitment area. On the contrary, a particle that does not stop moving when recruited can keep drifting and being recruited in others recruitment areas, as long as the recruitement conditions are fulfilled.</description>
             </parameter>
-           <parameter>
+            <parameter>
                 <key>lon_stain</key>
                 <long_name>Longitude [East degree]</long_name>
                 <value>53</value>

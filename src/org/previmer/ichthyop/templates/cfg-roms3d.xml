@@ -503,15 +503,13 @@
                 <template>velocity_function.csv</template>
                 <description>Particle swimming velocity as an age function. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Velocity(m/s).</description>
             </parameter>
-            <parameter>
-                <key>velocity_type</key>
-                <long_name>Swiming velocity type</long_name>
-                <value>cruising</value>
-                <default>cruising</default>
-                <format>combo</format>
-                <accepted>cruising</accepted>
-                <accepted>maximal</accepted>
-                <description>It controls the meaning of the swimming velocity provided in the CSV file. CRUISING means that the particles will swim at the velocity defined in the CSV file. MAXIMAL means that the particles will swim with random velocity between zero and maximal velocity.</description>
+              <parameter>
+                <key>constant_velocity</key>
+                <long_name>Constant swiming velocity</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If TRUE the particles will swim at the velocity defined in the CSV file. If FALSE the particles will swim with random velocity between zero and 2 times the velocity defined in the CSV file.</description>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
