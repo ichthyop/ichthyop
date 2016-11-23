@@ -114,7 +114,6 @@ public class IchthyopView extends FrameView
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
-        System.out.println("ici");
         
         initComponents();
         setStatusBar(statusBar);

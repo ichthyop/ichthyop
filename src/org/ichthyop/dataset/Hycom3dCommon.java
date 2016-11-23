@@ -52,7 +52,6 @@
  */
 package org.ichthyop.dataset;
 
-import org.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
 
@@ -64,17 +63,19 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     double[] longitude;
     double[] latitude;
-    double[] depth;
+    double[] depthLevel;
     double[][] ssh_tp0, ssh_tp1;
-    double[][] u_tp0, u_tp1;
-    double[][] v_tp0, v_tp1;
-    double[][] w_tp0, w_tp1;
+    double[][][] u_tp0, u_tp1;
+    double[][][] v_tp0, v_tp1;
+    double[][][] w_tp0, w_tp1;
     int nx, ny, nz;
-
-    @Override
-    public void setUp() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    int i0, j0;
+    double[] dxu;
+    double dyv;
+    private double latMin, lonMin, latMax, lonMax;
+    double dt_HyMo, time_tp1;
+    int rank;
+    double[][] bathymetry;
 
     @Override
     public double[] latlon2xy(double lat, double lon) {
@@ -218,7 +219,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double z2depth(double x, double y, double z) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
+        int k = (int) Math.floor(kz);
+        double dz = kz - (double) k;
+
+        double depth = (1.d - dz) * getDepth(x, y, k) + dz * getDepth(x, y, k + 1);
+        return depth;
     }
 
     double getDepth(double xRho, double yRho, int k) {
@@ -239,137 +245,302 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 //            }
 //        }
 //        return (hh);
-        return depth[k];
+        return depthLevel[k];
     }
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double du = 0.d;
+        double ix, jy, kz;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        ix = pGrid[0];
+        jy = pGrid[1];
+        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        int i = (int) Math.round(ix);
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int k = (int) kz;
+        double dx = ix - (double) i;
+        double dy = jy - (double) j;
+        double dz = kz - (double) k;
+        double CO = 0.d;
+        for (int ii = 0; ii < 2; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    double co = Math.abs((.5d - (double) ii - dx)
+                            * (1.d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
+                    CO += co;
+                    if (!(Double.isNaN(u_tp0[k + kk][j + jj][i + ii - 1]) || Double.isNaN(u_tp1[k + kk][j + jj][i + ii - 1]))) {
+                        double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                        du += x * co / dxu[j + jj];
+                    }
+                }
+            }
+        }
+        if (CO != 0) {
+            du /= CO;
+        }
+        return du;
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double dv = 0.d;
+        double ix, jy, kz;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        ix = pGrid[0];
+        jy = pGrid[1];
+        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
+        int j = (int) Math.round(jy);
+        int k = (int) kz;
+        double dx = ix - (double) i;
+        double dy = jy - (double) j;
+        double dz = kz - (double) k;
+        double CO = 0.d;
+
+        for (int jj = 0; jj < 2; jj++) {
+            for (int ii = 0; ii < n; ii++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    double co = Math.abs((1.d - (double) ii - dx)
+                            * (.5d - (double) jj - dy)
+                            * (1.d - (double) kk - dz));
+                    CO += co;
+                    if (!(Double.isNaN(v_tp0[k + kk][j + jj - 1][i + ii]) || Double.isNaN(v_tp1[k + kk][j + jj - 1][i + ii]))) {
+                        double x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                        dv += x * co / dyv;
+                    }
+                }
+            }
+        }
+        if (CO != 0) {
+            dv /= CO;
+        }
+        return dv;
     }
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double dw = 0.d;
+        double ix, jy, kz;
+        int n = isCloseToCost(pGrid) ? 1 : 2;
+        ix = pGrid[0];
+        jy = pGrid[1];
+        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
+        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int k = (int) Math.round(kz);
+        double dx = ix - (double) i;
+        double dy = jy - (double) j;
+        double dz = kz - (double) k;
+        double CO = 0.d;
+        for (int ii = 0; ii < n; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                    CO += co;
+                    if (isInWater(i + ii, j + jj)) {
+                        double x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
+                        dw += 2.d * x * co / (depthLevel[Math.min(k + kk + 1, nz - 1)] - depthLevel[k + kk]);
+                    }
+                }
+            }
+        }
+        if (CO != 0) {
+            dw /= CO;
+        }
+        return dw;
     }
 
     @Override
     public boolean isInWater(double[] pGrid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (pGrid.length > 2) {
+            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
+        } else {
+            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        }
+    }
+    
+    private boolean isInWater(int i, int j, int k) {
+        int ci = i;
+        if (ci < 0) {
+            ci = nx - 1;
+        }
+        if (ci > nx - 1) {
+            ci = 0;
+        }
+        return !Double.isNaN(u_tp1[k][j][ci]) && !Double.isNaN(v_tp1[k][j][ci]);
     }
 
     @Override
     public boolean isInWater(int i, int j) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return isInWater(i, j, 0);
     }
 
     @Override
     public boolean isCloseToCost(double[] pGrid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int i, j, ii, jj;
+        i = (int) (Math.round(pGrid[0]));
+        j = (int) (Math.round(pGrid[1]));
+        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
+        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+        int ci = i + ii;
+        if (ci < 0) {
+            ci = nx - 1;
+        }
+        if (ci > nx - 1) {
+            ci = 0;
+        }
+        return !(isInWater(ci, j) && isInWater(ci, j + jj) && isInWater(i, j + jj));
     }
 
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return ((pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
+    }
+
+    void getDimGeogArea() {
+
+        //--------------------------------------
+        // Calculate the Physical Space extrema
+        lonMin = Double.MAX_VALUE;
+        lonMax = -lonMin;
+        latMin = Double.MAX_VALUE;
+        latMax = -latMin;
+
+        int i = nx;
+        while (i-- > 0) {
+            if (longitude[i] >= lonMax) {
+                lonMax = longitude[i];
+            }
+            if (longitude[i] <= lonMin) {
+                lonMin = longitude[i];
+            }
+        }
+        int j = ny;
+        while (j-- > 0) {
+            if (latitude[j] >= latMax) {
+                latMax = latitude[j];
+            }
+            if (latitude[j] <= latMin) {
+                latMin = latitude[j];
+            }
+        }
+
+        double double_tmp;
+        if (lonMin > lonMax) {
+            double_tmp = lonMin;
+            lonMin = lonMax;
+            lonMax = double_tmp;
+        }
+
+        if (latMin > latMax) {
+            double_tmp = latMin;
+            latMin = latMax;
+            latMax = double_tmp;
+        }
+        //getLogger().log(Level.INFO, "lonmin {0} lonmax {1} latmin {2} latmax {3}", new Object[]{lonMin, lonMax, latMin, latMax});
     }
 
     @Override
     public double getBathy(int i, int j) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return bathymetry[j][i];
     }
 
     @Override
     public int get_nx() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return nx;
     }
 
     @Override
     public int get_ny() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return ny;
     }
 
     @Override
     public int get_nz() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return nz;
     }
 
     @Override
     public double getdxi(int j, int i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return dxu[j];
     }
 
     @Override
     public double getdeta(int j, int i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void init() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return dyv;
     }
 
     @Override
     public double getLatMin() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return latMin;
     }
 
     @Override
     public double getLatMax() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return latMax;
     }
 
     @Override
     public double getLonMin() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return lonMin;
     }
 
     @Override
     public double getLonMax() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return lonMax;
     }
 
     @Override
-    public double getLon(int igrid, int jgrid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public double getLon(int i, int j) {
+        return longitude[i];
     }
 
     @Override
-    public double getLat(int igrid, int jgrid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public double getLat(int i, int j) {
+        return latitude[j];
     }
 
     @Override
     public double getDepthMax() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return -1.d;
     }
 
     @Override
     public boolean is3D() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return true;
     }
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public double xTore(double x) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (x < -0.5d) {
+            return nx + x;
+        }
+        if (x > nx - 0.5d) {
+            return x - nx;
+        }
+        return x;
     }
 
     @Override
     public double yTore(double y) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return y;
     }
-
-    @Override
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+    double[][][] computeW() {
+        return new double[nz+1][ny][nx];
     }
 
 }
