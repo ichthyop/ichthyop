@@ -52,7 +52,11 @@
  */
 package org.ichthyop.dataset;
 
+import java.io.IOException;
+import static org.ichthyop.SimulationManagerAccessor.getLogger;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -65,9 +69,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] latitude;
     double[] depthLevel;
     double[][] ssh_tp0, ssh_tp1;
-    double[][][] u_tp0, u_tp1;
-    double[][][] v_tp0, v_tp1;
-    double[][][] w_tp0, w_tp1;
+    float[][][] u_tp0, u_tp1;
+    float[][][] v_tp0, v_tp1;
+    float[][][] w_tp0, w_tp1;
     int nx, ny, nz;
     int i0, j0;
     double[] dxu;
@@ -75,7 +79,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     private double latMin, lonMin, latMax, lonMax;
     double dt_HyMo, time_tp1;
     int rank;
-    double[][] bathymetry;
+    float[][] bathymetry;
+    NetcdfFile nc;
+    int nbTimeRecords;
 
     @Override
     public double[] latlon2xy(double lat, double lon) {
@@ -450,7 +456,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double getBathy(int i, int j) {
-        return bathymetry[j][i];
+        return -1*bathymetry[j][i];
     }
 
     @Override
@@ -539,8 +545,63 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return y;
     }
     
-    double[][][] computeW() {
-        return new double[nz+1][ny][nx];
+    float[][][] computeW() {
+        return new float[nz+1][ny][nx];
+    }
+    
+    void setAllFieldsTp1AtTime(int rank) throws Exception {
+
+        getLogger().info("Reading NetCDF variables...");
+
+        int[] origin = new int[]{rank, 0, 0, 0};
+        double time_tp0 = time_tp1;
+        Array arr;
+        Index index;
+
+        try {
+            arr = nc.findVariable("water_u").read(origin, new int[]{1, nz, ny, nx}).reduce();
+            u_tp1 = new float[nz][ny][nx];
+            index = arr.getIndex();
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        u_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
+                    }
+                }
+            }
+        } catch (IOException | InvalidRangeException ex) {
+            IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arr = nc.findVariable("water_v").read(origin, new int[]{1, nz, ny, nx}).reduce();
+            v_tp1 = new float[nz][ny][nx];
+            index = arr.getIndex();
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        v_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
+                    }
+                }
+            }
+        } catch (IOException | InvalidRangeException ex) {
+            IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
+        try {
+            time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
+        } catch (IOException ex) {
+            IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
+        dt_HyMo = Math.abs(time_tp1 - time_tp0);
+
+        w_tp1 = computeW();
     }
 
 }

@@ -52,13 +52,9 @@
  */
 package org.ichthyop.dataset;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.io.IOTools;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -66,65 +62,84 @@ import ucar.nc2.Variable;
  */
 public class Hycom3dDataset extends Hycom3dCommon {
 
-    private String path;
+    private List<String> uvFiles;
+    private int index;
 
     @Override
     void loadParameters() {
-
-        path = IOTools.resolvePath("/home/data/hycom/glb_u008_912");
     }
 
     @Override
     public void setUp() throws Exception {
 
-        List<String> ncfiles = DatasetUtil.list(path, "*.nc");
-        boolean latOK = false, lonOK = false, depthOK = false, bathyOK = false, maskOK = false;
-        for (String ncfile : ncfiles) {
-            NetcdfFile nc = DatasetUtil.openFile(ncfile, true);
-            // Latitude
-            if (!latOK) {
-                Variable variable = nc.findVariableByAttribute(null, "standard_name", "latitude");
-                if (null != variable) {
-                    latitude = (double[]) variable.read().copyTo1DJavaArray();
-                    latOK = true;
-                }
-            }
-            // Longitude
-            if (!lonOK) {
-                Variable variable = nc.findVariableByAttribute(null, "standard_name", "longitude");
-                if (null != variable) {
-                    longitude = (double[]) variable.read().copyTo1DJavaArray();
-                    lonOK = true;
-                }
-            }
-            // Longitude
-            if (!lonOK) {
-                Variable variable = nc.findVariableByAttribute(null, "standard_name", "longitude");
-                if (null != variable) {
-                    longitude = (double[]) variable.read().copyTo1DJavaArray();
-                    lonOK = true;
-                }
-            }
-            // Depth
-            if (!depthOK) {
-                Variable variable = nc.findVariableByAttribute(null, "standard_name", "depth");
-                if (null != variable) {
-                    depthLevel = (double[]) variable.read().copyTo1DJavaArray();
-                    depthOK = true;
-                }
-            }
-        }
+        String path = "/data/hycom/glb_u008_912";
+        
+        // Bathymetry
+        nc = DatasetUtil.openFile(IOTools.resolveFile("/data/hycom/glb_u008_912/depth_GLBu0.08_07.nc"), true);
+        bathymetry = (float[][]) nc.findVariable("topo").read().reduce().copyToNDJavaArray();
+        nc.close();
+
+        // List uv files
+        uvFiles = DatasetUtil.list(path, "*uv3z*.nc");
+
+        nc = DatasetUtil.openFile(uvFiles.get(0), true);
+        // Latitude
+        latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
+
+        // Longitude
+        longitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "longitude").read().copyTo1DJavaArray();
+
+        // Depth
+        depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
+
+        // Dimensions
+        nx = longitude.length;
+        ny = latitude.length;
+        nz = depthLevel.length;
+        getDimGeogArea();
+
+        // Read U & V for the mask
+        setAllFieldsTp1AtTime(0);
 
     }
 
     @Override
     public void init() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        DatasetUtil.sort(uvFiles, "time", timeArrow());
+        double t0 = getSimulationManager().getTimeManager().get_tO();
+        index = DatasetUtil.index(uvFiles, t0, timeArrow(), "time");
+        nc = DatasetUtil.openFile(uvFiles.get(index), true);
+        nbTimeRecords = nc.findDimension("time").getLength();
+        rank = DatasetUtil.rank(t0, nc, "time", timeArrow());
+        time_tp1 = t0;
+        setAllFieldsTp1AtTime(rank);
     }
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+        double time = e.getSource().getTime();
+        int time_arrow = timeArrow();
+
+        if (time_arrow * time < time_arrow * time_tp1) {
+            return;
+        }
+
+        u_tp0 = u_tp1;
+        v_tp0 = v_tp1;
+        w_tp0 = w_tp1;
+        //wr_tp0 = wr_tp1;
+        rank += time_arrow;
+
+        if (rank > (nbTimeRecords - 1) || rank < 0) {
+            nc.close();
+            index = DatasetUtil.next(uvFiles, index, time_arrow);
+            nc = DatasetUtil.openFile(uvFiles.get(index), true);
+            nbTimeRecords = nc.findDimension("time").getLength();
+            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
+        }
+
+        setAllFieldsTp1AtTime(rank);
     }
 
 }
