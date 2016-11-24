@@ -73,11 +73,11 @@ public class Hycom3dDataset extends Hycom3dCommon {
     public void setUp() throws Exception {
 
         String path = "/data/hycom/glb_u008_912";
-        
+
         // Bathymetry
-        nc = DatasetUtil.openFile(IOTools.resolveFile("/data/hycom/glb_u008_912/depth_GLBu0.08_07.nc"), true);
-        bathymetry = (float[][]) nc.findVariable("topo").read().reduce().copyToNDJavaArray();
-        nc.close();
+        //nc = DatasetUtil.openFile(IOTools.resolveFile("/data/hycom/glb_u008_912/depth_GLBu0.08_07.nc"), true);
+        //bathymetry = (float[][]) nc.findVariable("topo").read().reduce().copyToNDJavaArray();
+        //nc.close();
 
         // List uv files
         uvFiles = DatasetUtil.list(path, "*uv3z*.nc");
@@ -97,7 +97,7 @@ public class Hycom3dDataset extends Hycom3dCommon {
         ny = latitude.length;
         nz = depthLevel.length;
         getDimGeogArea();
-
+        
         // Read U & V for the mask
         setAllFieldsTp1AtTime(0);
 

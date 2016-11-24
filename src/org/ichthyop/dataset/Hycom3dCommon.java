@@ -210,12 +210,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     @Override
     public double depth2z(double x, double y, double depth) {
         double z;
-        int lk = nz - 1;
-        while ((lk > 0) && (getDepth(x, y, lk) > depth)) {
-            lk--;
+        int lk = 0;
+        while ((lk < nz - 1) && (getDepth(x, y, lk) > depth)) {
+            lk++;
         }
-        if (lk == (nz - 1)) {
-            z = (double) lk;
+        if (lk == 0) {
+            z = 0;
         } else {
             double pr = getDepth(x, y, lk);
             z = Math.max(0.d, (double) lk + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
@@ -251,7 +251,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 //            }
 //        }
 //        return (hh);
-        return depthLevel[k];
+        return -depthLevel[k];
     }
 
     @Override
@@ -456,7 +456,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double getBathy(int i, int j) {
-        return -1*bathymetry[j][i];
+        return -1;//-1*bathymetry[j][i];
     }
 
     @Override
@@ -516,7 +516,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double getDepthMax() {
-        return -1.d;
+        return -6000.d;
     }
 
     @Override
