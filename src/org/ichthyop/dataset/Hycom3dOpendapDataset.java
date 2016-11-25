@@ -52,6 +52,7 @@
  */
 package org.ichthyop.dataset;
 
+import java.util.Arrays;
 import org.ichthyop.event.NextStepEvent;
 
 /**
@@ -68,12 +69,30 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
     public void setUp() throws Exception {
 
         nc = DatasetUtil.openURL("http://tds.hycom.org/thredds/dodsC/GLBu0.08/expt_91.2", true);
+        // longitude
         longitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "longitude").read().copyTo1DJavaArray();
-        latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
-        depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
+        i0 = 0;
         nx = longitude.length;
+        // latitude
+        latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
+        j0 = 0;
         ny = latitude.length;
+        
+        depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
         nz = depthLevel.length;
+        
+        // Shrink domain
+        shrink(-25, 5, -40, 40);
+        longitude = Arrays.copyOfRange(longitude, i0, i0+nx);
+        latitude = Arrays.copyOfRange(latitude, j0, j0+ny);   
+        
+        // scale factors
+        dyv = 111138.d * (latitude[1] - latitude[0]);
+        dxu = new double[ny];
+        for (int j = 0; j < ny; j++) {
+            dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
+        }
+        
         nbTimeRecords = nc.findDimension("time").getLength();
         getDimGeogArea();
         // read velocity at t=0 for an initial mask

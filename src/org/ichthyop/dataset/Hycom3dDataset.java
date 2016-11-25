@@ -52,6 +52,7 @@
  */
 package org.ichthyop.dataset;
 
+import java.util.Arrays;
 import java.util.List;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.io.IOTools;
@@ -81,25 +82,44 @@ public class Hycom3dDataset extends Hycom3dCommon {
 
         // List uv files
         uvFiles = DatasetUtil.list(path, "*uv3z*.nc");
-
         nc = DatasetUtil.openFile(uvFiles.get(0), true);
+
         // Latitude
         latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
-
+        j0 = 0;
+        ny = latitude.length;
+        
         // Longitude
         longitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "longitude").read().copyTo1DJavaArray();
-
+        i0 = 0;
+        nx = longitude.length;
+        
         // Depth
         depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
-
-        // Dimensions
-        nx = longitude.length;
-        ny = latitude.length;
         nz = depthLevel.length;
+        
+        // Shrink domain
+        shrink(35, 260, 10, 300);
+        xTore = false;
+        longitude = Arrays.copyOfRange(longitude, i0, i0+nx);
+        latitude = Arrays.copyOfRange(latitude, j0, j0+ny);   
+        
+        // scale factors
+        dyv = 111138.d * (latitude[1] - latitude[0]);
+        dxu = new double[ny];
+        for (int j = 0; j < ny; j++) {
+            dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
+        }
+        
+        // extent
         getDimGeogArea();
         
         // Read U & V for the mask
         setAllFieldsTp1AtTime(0);
+        
+//        System.out.println(Arrays.toString(latlon2xy(-35, 15)));
+//        double x = 125.5, y = 62.5;
+//        System.out.println(isInWater(new double[]{x, y})+ " "+Arrays.toString(xy2latlon(x, y)));
 
     }
 

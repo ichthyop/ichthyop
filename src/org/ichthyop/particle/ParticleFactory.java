@@ -80,7 +80,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
                 return null;
             }
             if (!Double.isNaN(depth)) {
-                if (getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0) > depth || depth > 0) {
+                if (getSimulationManager().getDataset().getDepthMax(particle.getX(), particle.getY()) > depth || depth > 0) {
                     return null;
                 }
             }
@@ -104,7 +104,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
         particle.setX(x);
         particle.setY(y);
         if (is3D) {
-            particle.setZ(getSimulationManager().getDataset().get_nz() - 1);
+            particle.setZ(getSimulationManager().getDataset().depth2z(x, y, 0.));
         } else {
             particle.make2D();
         }

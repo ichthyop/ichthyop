@@ -82,6 +82,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     float[][] bathymetry;
     NetcdfFile nc;
     int nbTimeRecords;
+    boolean xTore = true;
 
     @Override
     public double[] latlon2xy(double lat, double lon) {
@@ -131,8 +132,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
 
         // Refine within cell (ci, cj) by linear interpolation
-        int cip1 = ci + 1 > nx - 1 ? 0 : ci + 1;
-        int cim1 = ci - 1 < 0 ? nx - 1 : ci - 1;
+        int cip1 = (xTore && ci + 1 > nx - 1) ? 0 : ci + 1;
+        int cim1 = (xTore && ci - 1 < 0) ? nx - 1 : ci - 1;
         int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
         int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
         // xgrid
@@ -178,14 +179,14 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         double co;
         for (int ii = 0; ii < 2; ii++) {
             int ci = i;
-            if (i < 0) {
+            if (xTore && i < 0) {
                 ci = nx - 1;
             }
             int cii = i + ii;
-            if (cii > nx - 1) {
+            if (xTore && cii > nx - 1) {
                 cii = 0;
             }
-            if (cii < 0) {
+            if (xTore && cii < 0) {
                 cii = nx - 1;
             }
             for (int jj = 0; jj < 2; jj++) {
@@ -252,6 +253,17 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 //        }
 //        return (hh);
         return -depthLevel[k];
+    }
+
+    @Override
+    public double getDepthMax(double x, double y) {
+
+        for (int k = 0; k < nz; k++) {
+            if (!isInWater((int) Math.round(x), (int) Math.round(y), k)) {
+                return getDepth(x, y, Math.max(0, k - 1));
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -372,13 +384,13 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
         }
     }
-    
+
     private boolean isInWater(int i, int j, int k) {
         int ci = i;
-        if (ci < 0) {
+        if (xTore && ci < 0) {
             ci = nx - 1;
         }
-        if (ci > nx - 1) {
+        if (xTore && ci > nx - 1) {
             ci = 0;
         }
         return !Double.isNaN(u_tp1[k][j][ci]) && !Double.isNaN(v_tp1[k][j][ci]);
@@ -397,10 +409,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
         int ci = i + ii;
-        if (ci < 0) {
+        if (xTore && ci < 0) {
             ci = nx - 1;
         }
-        if (ci > nx - 1) {
+        if (xTore && ci > nx - 1) {
             ci = 0;
         }
         return !(isInWater(ci, j) && isInWater(ci, j + jj) && isInWater(i, j + jj));
@@ -408,7 +420,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
+
+        return (!xTore && (pGrid[0] > (nx - 2.d)) || (!xTore && (pGrid[0] < 1.d))
+                || (pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
     }
 
     void getDimGeogArea() {
@@ -531,11 +545,13 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double xTore(double x) {
-        if (x < -0.5d) {
-            return nx + x;
-        }
-        if (x > nx - 0.5d) {
-            return x - nx;
+        if (xTore) {
+            if (x < -0.5d) {
+                return nx + x;
+            }
+            if (x > nx - 0.5d) {
+                return x - nx;
+            }
         }
         return x;
     }
@@ -544,16 +560,16 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     public double yTore(double y) {
         return y;
     }
-    
+
     float[][][] computeW() {
-        return new float[nz+1][ny][nx];
+        return new float[nz + 1][ny][nx];
     }
-    
+
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, 0, 0, 0};
+        int[] origin = new int[]{rank, 0, j0, i0};
         double time_tp0 = time_tp1;
         Array arr;
         Index index;
@@ -602,6 +618,29 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
 
         w_tp1 = computeW();
+    }
+
+    void shrink(double lat1, double lon1, double lat2, double lon2) throws IOException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException(
+                    "Impossible to proportion the simulation area : points out of domain");
+        }
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        i0 = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        j0 = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        nx = Math.min(nx, ipn - i0 + 1);
+        ny = Math.min(ny, jpn - j0 + 1);
+        //System.out.println("i0 " + i0 + " nx " + nx + " j0 " + j0 + " ny " + ny);
     }
 
 }
