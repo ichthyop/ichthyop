@@ -533,6 +533,11 @@ abstract class Mars3dCommon extends MarsCommon {
         }
         return (hh);
     }
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        return getDepth(x, y, 0);
+    }
 
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {

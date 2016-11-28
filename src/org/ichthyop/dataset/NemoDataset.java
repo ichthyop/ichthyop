@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.dataset;
 
 import java.io.File;
@@ -602,7 +601,7 @@ public class NemoDataset extends AbstractDataset {
         if (CO != 0) {
             dw /= CO;
         }
-        
+
         /*double dwr = get_dWrz(pGrid, time);
          float err = (float) Math.abs((dwr - dw) / dwr);
          System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);*/
@@ -1771,6 +1770,21 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public double getDepthMax() {
         return depthMax;
+    }
+
+    @Override
+    public double getDepthMax(double x, double y) {
+
+        if (isInWater((int) Math.round(x), (int) Math.round(y), nz - 1)) {
+            int ix = (int) Math.round(x);
+            int jy = (int) Math.round(y);
+            for (int k = nz - 2; k > 0; k--) {
+                if (!isInWater(ix, jy, k)) {
+                    return getDepth(Math.max(0, k + 1));
+                }
+            }
+        }
+        return 0.d;
     }
 
     /**

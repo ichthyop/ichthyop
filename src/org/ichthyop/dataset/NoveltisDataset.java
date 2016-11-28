@@ -1037,6 +1037,12 @@ public class NoveltisDataset extends AbstractDataset {
         }
         return (hh);
     }
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        return getDepth(x, y, nz - 1);
+    }
+
 
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 

@@ -222,6 +222,12 @@ public abstract class Mars2dCommon extends MarsCommon {
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
+    
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+    }
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {

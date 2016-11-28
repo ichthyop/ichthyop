@@ -591,6 +591,11 @@ public class OscarDataset extends AbstractDataset {
     public boolean is3D() {
         return false;
     }
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        throw new UnsupportedOperationException(MarsCommon.ErrorMessage.NOT_IN_2D.message());
+    }
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {

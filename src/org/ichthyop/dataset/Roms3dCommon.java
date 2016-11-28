@@ -542,6 +542,12 @@ abstract public class Roms3dCommon extends RomsCommon {
         }
         return (hh);
     }
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        return getDepth(x, y, 0);
+    }
+
 
     @Override
     public int get_nz() {

@@ -185,6 +185,11 @@ public class Roms2dDataset extends RomsCommon {
     public int get_nz() {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
+    }
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {

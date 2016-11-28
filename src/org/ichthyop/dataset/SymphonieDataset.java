@@ -824,6 +824,12 @@ public class SymphonieDataset extends AbstractDataset {
         }
         return (hh);
     }
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        return getDepth(x, y, nk - 1);
+    }
+
 
     @Override
     public double z2depth(double x, double y, double z) {

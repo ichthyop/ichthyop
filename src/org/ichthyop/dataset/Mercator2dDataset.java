@@ -56,6 +56,7 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
+import org.ichthyop.dataset.MarsCommon.ErrorMessage;
 import org.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -926,6 +927,11 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException("Method not supported in 2D");
+    }
+    
+    @Override
+    public double getDepthMax(double x, double y) {
+        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
     @Override
