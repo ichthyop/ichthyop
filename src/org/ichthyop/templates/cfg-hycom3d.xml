@@ -11,7 +11,7 @@
             <parameter type="serial">
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
-                <value>year 01 month 05 day 03 at 00:00</value>
+                <value>year 2016 month 05 day 03 at 00:00</value>
                 <format>date</format>
                 <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
@@ -40,14 +40,14 @@
             <parameter hidden="true">
                 <key>calendar_type</key>
                 <long_name>Type of calendar</long_name>
-                <value>Climatology calendar</value>
+                <value>Gregorian calendar</value>
                 <format>combo</format>
                 <accepted>Climatology calendar</accepted>
                 <accepted>Gregorian calendar</accepted>
                 <default>Gregorian calendar</default>
                 <description>Choose the type of calendar for converting the time variable of the hydrodynamic model (expressed in seconds) into human readble time format. Climatology calendar: 360 days per year. Gregorian calendar: the usual calendar. If you do not know, just skip it ! It is a "cosmetic" parameter that does not affect the run of the simulation. It only controls the display of time on screen.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>time_origin</key>
                 <long_name>Origin of time</long_name>
                 <value>year 1900 month 01 day 01 at 00:00</value>
@@ -55,7 +55,7 @@
                 <default>year 1900 month 01 day 01 at 00:00</default>
                 <description>This parameter comes with Gregorian type of calendar only. For hydrodynamic models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>time_arrow</key>
                 <long_name>Direction of the simulation</long_name>
                 <value>forward</value>
@@ -94,7 +94,7 @@
             <parameter>
                 <key>file_prefix</key>
                 <long_name>Prefix of the NetCDF output file</long_name>
-                <value>roms3d</value>
+                <value>hycom3d</value>
                 <default>my-simulation</default>
                 <description>Type the prefix of the simulation output file. The output filename will look like your-prefix_ichthyop-runYYYYMMDDHHmm.nc, with YYYYMMDDHHmm the current time when running the simulation.</description>
             </parameter>
@@ -130,10 +130,19 @@
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for HYCOM model.</description>
         <parameters>
              <parameter>
-                <key>opendap_url</key>
-                <long_name>OpenDAP URL</long_name>
-                <value></value>
-                <description>ROMS OpenDAP URL</description>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>input</value>
+                <default>input</default>
+                <format>path</format>
+                <description>Folder containing the HYCOM NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>uv_file_pattern</key>
+                <long_name>Velocity file filter</long_name>
+                <value>*uv3z.nc</value>
+                <default>*.nc</default>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -176,123 +185,12 @@
                 <default>0.0</default>
             </parameter>
             <parameter>
-                <key>field_dim_eta</key>
-                <long_name>Dimension in the ETA-direction</long_name>
-                <value>eta_rho</value>
-                <default>eta_rho</default>
-                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_dim_xi</key>
-                <long_name>Dimension in the XI-direction</long_name>
-                <value>xi_rho</value>
-                <default>xi_rho</default>
-                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_dim_z</key>
-                <long_name>Dimension in the vertical direction</long_name>
-                <value>s_rho</value>
-                <default>s_rho</default>
-                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_dim_time</key>
-                <long_name>Dimension in time</long_name>
-                <value>time</value>
-                <default>time</default>
-                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_bathy</key>
-                <long_name>Bathymetry at Rho points</long_name>
-                <value>h</value>
-                <default>h</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_lat</key>
-                <long_name>Latitude of Rho points</long_name>
-                <value>lat_rho</value>
-                <default>lat_rho</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_lon</key>
-                <long_name>Longitude of Rho points</long_name>
-                <value>lon_rho</value>
-                <default>lon_rho</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_mask</key>
-                <long_name>Mask on Rho points</long_name>
-                <value>mask_rho</value>
-                <default>mask_rho</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_pm</key>
-                <long_name>Curvilinear coordinate metric in XI</long_name>
-                <value>pm</value>
-                <default>pm</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_pn</key>
-                <long_name>Curvilinear coordinate metric in ETA</long_name>
-                <value>pn</value>
-                <default>pn</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_time</key>
-                <long_name>Averaged time since initialization</long_name>
-                <value>scrum_time</value>
-                <default>scrum_time</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_zeta</key>
-                <long_name>Averaged free-surface</long_name>
-                <value>zeta</value>
-                <default>zeta</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_u</key>
-                <long_name>U-momentum component</long_name>
-                <value>u</value>
-                <default>u</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_v</key>
-                <long_name>V-momentum component</long_name>
-                <value>v</value>
-                <default>v</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_csr</key>
-                <long_name>S-coordinate stretching curves at Rho points</long_name>
-                <value>Cs_r</value>
-                <default>Cs_r</default>
-                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
-            </parameter>
-            <parameter>
-                <key>field_csw</key>
-                <long_name>S-coordinate stretching curves at W-points</long_name>
-                <value>Cs_w</value>
-                <default>Cs_w</default>
-                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
-            </parameter>
-            <parameter>
-                <key>field_hc</key>
-                <long_name>S-coordinate critical depth</long_name>
-                <value>hc</value>
-                <default>hc</default>
-                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
+                <key>longitude_tore</key>
+                <long_name>Tore along longitude</long_name>
+                <value>true</value>
+                <description>Whether the grid should be considered as a tore along the longitude axis.</description>
+                <format>boolean</format>
+                <default>true</default>
             </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
@@ -875,10 +773,34 @@
         </parameters>
     </block>
     <block type="release">
+    <key>release.surface</key>
+    <tree_path>Main/Release</tree_path>
+    <description>Block of options for releasing particles evenly at sea surface.</description>
+    <enabled>true</enabled>
+    <parameters>
+      <parameter>
+        <key>number_particles</key>
+        <long_name>Number of particles</long_name>
+        <value>1000</value>
+        <default>1000</default>
+        <format>integer</format>
+        <description>Number of particles released in the whole domain. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the stain per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
+      </parameter>
+      <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <format>class</format>
+        <value>org.ichthyop.release.SurfaceRelease</value>
+        <default>org.ichthyop.release.SurfaceRelease</default>
+        <description>The Java class called by the application to implement this release process.</description>
+      </parameter>
+    </parameters>
+  </block>
+    <block type="release">
         <key>release.stain</key>
-        <tree_path>Main/Release stain</tree_path>
+        <tree_path>Advanced/Release/Release stain</tree_path>
         <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <parameters>
             <parameter>
                 <key>number_particles</key>

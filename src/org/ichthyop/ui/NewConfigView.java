@@ -232,6 +232,13 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.ROMS3D_OPENDAP);
         treeNode2.add(treeNode3);
         treeNode1.add(treeNode2);
+        
+        treeNode2 = new DefaultMutableTreeNode("HYCOM");
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.HYCOM3D);
+        treeNode2.add(treeNode3);
+        treeNode3 = new DefaultMutableTreeNode(TEMPLATE.HYCOM3D_OPENDAP);
+        treeNode2.add(treeNode3);
+        treeNode1.add(treeNode2);
 
         treeNode2 = new DefaultMutableTreeNode("OPA");
         treeNode3 = new DefaultMutableTreeNode(TEMPLATE.OPA3D_NEMO);
@@ -545,7 +552,9 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
         GENERIC,
         OSCAR,
         MERCATOR2D,
-        NOVELTIS;
+        NOVELTIS,
+        HYCOM3D,
+        HYCOM3D_OPENDAP;
         /* variables */
         private final String longName;
         private final String description;

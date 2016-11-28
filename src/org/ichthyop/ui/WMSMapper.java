@@ -234,7 +234,7 @@ public class WMSMapper extends JXMapKit {
             latmin = latmax;
             latmax = double_tmp;
         }
-
+        
         defaultLat = 0.5d * (latmin + latmax);
         defaultLon = 0.5d * (lonmin + lonmax);
         setAddressLocation(new GeoPosition(defaultLat, defaultLon));
