@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
 import java.awt.geom.Point2D;
@@ -295,22 +294,38 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         IDataset dataset = getSimulationManager().getDataset();
         for (int i = 1; i < dataset.get_nx(); i++) {
             if (!Double.isNaN(dataset.getLat(i, 0)) && !Double.isNaN(dataset.getLon(i, 0))) {
-                lregion.add(new GeoPosition(dataset.getLat(i, 0), dataset.getLon(i, 0)));
+                double lon = dataset.getLon(i, 0);
+                if (lon > 180) {
+                    lon = lon - 360.d;
+                }
+                lregion.add(new GeoPosition(dataset.getLat(i, 0), lon));
             }
         }
         for (int j = 1; j < dataset.get_ny(); j++) {
             if (!Double.isNaN(dataset.getLat(dataset.get_nx() - 1, j)) && !Double.isNaN(dataset.getLon(dataset.get_nx() - 1, j))) {
-                lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), dataset.getLon(dataset.get_nx() - 1, j)));
+                double lon = dataset.getLon(dataset.get_nx() - 1, j);
+                if (lon > 180) {
+                    lon = lon - 360.d;
+                }
+                lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), lon));
             }
         }
         for (int i = dataset.get_nx() - 1; i > 0; i--) {
             if (!Double.isNaN(dataset.getLat(i, dataset.get_ny() - 1)) && !Double.isNaN(dataset.getLon(i, dataset.get_ny() - 1))) {
-                lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), dataset.getLon(i, dataset.get_ny() - 1)));
+                double lon = dataset.getLon(i, dataset.get_ny() - 1);
+                if (lon > 180) {
+                    lon = lon - 360.d;
+                }
+                lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), lon));
             }
         }
         for (int j = dataset.get_ny() - 1; j > 0; j--) {
             if (!Double.isNaN(dataset.getLat(0, j)) && !Double.isNaN(dataset.getLon(0, j))) {
-                lregion.add(new GeoPosition(dataset.getLat(0, j), dataset.getLon(0, j)));
+                double lon = dataset.getLon(0, j);
+                if (lon > 180) {
+                    lon = lon - 360.d;
+                }
+                lregion.add(new GeoPosition(dataset.getLat(0, j), lon));
             }
         }
         return lregion;
@@ -396,7 +411,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return;
         }
         TimeManager timeManager = e.getSource();
-        if (((long)(timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
+        if (((long) (timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
             writeToNetCDF(i_record++);
         }
     }
