@@ -52,7 +52,6 @@
  */
 package org.ichthyop.dataset;
 
-import java.util.Arrays;
 import org.ichthyop.event.NextStepEvent;
 
 /**
@@ -62,48 +61,15 @@ import org.ichthyop.event.NextStepEvent;
 public class Hycom3dOpendapDataset extends Hycom3dCommon {
 
     @Override
-    void loadParameters() {
-    }
-
-    @Override
-    public void setUp() throws Exception {
-
-        nc = DatasetUtil.openURL("http://tds.hycom.org/thredds/dodsC/GLBu0.08/expt_91.2", true);
-        // longitude
-        longitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "longitude").read().copyTo1DJavaArray();
-        i0 = 0;
-        nx = longitude.length;
-        // latitude
-        latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
-        j0 = 0;
-        ny = latitude.length;
-        
-        depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
-        nz = depthLevel.length;
-        
-        // Shrink domain
-        shrink(-25, 5, -40, 40);
-        longitude = Arrays.copyOfRange(longitude, i0, i0+nx);
-        latitude = Arrays.copyOfRange(latitude, j0, j0+ny);   
-        
-        // scale factors
-        dyv = 111138.d * (latitude[1] - latitude[0]);
-        dxu = new double[ny];
-        for (int j = 0; j < ny; j++) {
-            dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
-        }
-        
-        nbTimeRecords = nc.findDimension("time").getLength();
-        getDimGeogArea();
-        // read velocity at t=0 for an initial mask
-        setAllFieldsTp1AtTime(0);
-        // bathy missing @TODO
+    void open() throws Exception {
+        nc = DatasetUtil.openURL(getParameter("opendap_url"), true);
     }
 
     @Override
     public void init() throws Exception {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
+        nbTimeRecords = nc.findDimension("time").getLength();
         rank = DatasetUtil.rank(t0, nc, "time", timeArrow());
         time_tp1 = t0;
         setAllFieldsTp1AtTime(rank);
@@ -111,10 +77,10 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
+        
         double time = e.getSource().getTime();
-        //Logger.getAnonymousLogger().info("set fields at time " + time);
         int time_arrow = timeArrow();
-
+        
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
         }
@@ -124,6 +90,7 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         w_tp0 = w_tp1;
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
+            nc.close();
             throw new IndexOutOfBoundsException("Time out of dataset range");
         }
         setAllFieldsTp1AtTime(rank);

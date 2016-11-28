@@ -53,7 +53,10 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.Arrays;
 import static org.ichthyop.SimulationManagerAccessor.getLogger;
+import org.ichthyop.ui.LonLatConverter;
+import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -83,6 +86,57 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     NetcdfFile nc;
     int nbTimeRecords;
     boolean xTore = true;
+    
+    abstract void open() throws Exception;
+    
+    @Override
+    void loadParameters() {
+        // does nothing for now
+    }
+    
+    @Override
+    public void setUp() throws Exception {
+
+        // Open NetCDF (abstract)
+        open();
+        
+        // Read whole grid
+        // Latitude
+        latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
+        j0 = 0;
+        ny = latitude.length;
+        // Longitude
+        longitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "longitude").read().copyTo1DJavaArray();
+        i0 = 0;
+        nx = longitude.length;
+        // Depth
+        depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
+        nz = depthLevel.length;
+
+        // Crop the grid
+        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
+            crop();
+            longitude = Arrays.copyOfRange(longitude, i0, i0 + nx);
+            latitude = Arrays.copyOfRange(latitude, j0, j0 + ny);
+        }
+
+        // Longitudinal toricity
+        xTore = !findParameter("longitude_tore") || Boolean.valueOf(getParameter("longitude_tore"));
+
+        // scale factors (assuming regular grid)
+        dyv = 111138.d * (latitude[1] - latitude[0]);
+        dxu = new double[ny];
+        for (int j = 0; j < ny; j++) {
+            dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
+        }
+
+        // Domain geographical extension
+        extent();
+
+        // Read U & V for the mask
+        setAllFieldsTp1AtTime(0);
+
+    }
 
     @Override
     public double[] latlon2xy(double lat, double lon) {
@@ -429,7 +483,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                 || (pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
     }
 
-    void getDimGeogArea() {
+    void extent() {
 
         //--------------------------------------
         // Calculate the Physical Space extrema
@@ -568,6 +622,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     float[][][] computeW() {
         return new float[nz + 1][ny][nx];
     }
+    
+    void readGrid() {
+    }
 
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
@@ -579,7 +636,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         Index index;
 
         try {
-            arr = nc.findVariable("water_u").read(origin, new int[]{1, nz, ny, nx}).reduce();
+            arr = nc.findVariableByAttribute(null, "standard_name", "eastward_sea_water_velocity")
+                    .read(origin, new int[]{1, nz, ny, nx}).reduce();
             u_tp1 = new float[nz][ny][nx];
             index = arr.getIndex();
             for (int k = 0; k < nz; k++) {
@@ -595,7 +653,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             throw ioex;
         }
         try {
-            arr = nc.findVariable("water_v").read(origin, new int[]{1, nz, ny, nx}).reduce();
+            arr = nc.findVariableByAttribute(null, "standard_name", "northward_sea_water_velocity")
+                    .read(origin, new int[]{1, nz, ny, nx}).reduce();
             v_tp1 = new float[nz][ny][nx];
             index = arr.getIndex();
             for (int k = 0; k < nz; k++) {
@@ -624,7 +683,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         w_tp1 = computeW();
     }
 
-    void shrink(double lat1, double lon1, double lat2, double lon2) throws IOException {
+    void crop() throws IOException {
+
+        float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+        float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+        float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+        float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
 
         double[] pGrid1, pGrid2;
         int ipn, jpn;
