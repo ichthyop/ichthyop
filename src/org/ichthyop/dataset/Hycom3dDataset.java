@@ -76,11 +76,13 @@ public class Hycom3dDataset extends Hycom3dCommon {
         DatasetUtil.sort(uvFiles, "time", timeArrow());
         double t0 = getSimulationManager().getTimeManager().get_tO();
         index = DatasetUtil.index(uvFiles, t0, timeArrow(), "time");
+        nc.close();
         nc = DatasetUtil.openFile(uvFiles.get(index), true);
         nbTimeRecords = nc.findDimension("time").getLength();
         rank = DatasetUtil.rank(t0, nc, "time", timeArrow());
         time_tp1 = t0;
         setAllFieldsTp1AtTime(rank);
+        checkRequiredVariable(nc);
     }
 
     @Override

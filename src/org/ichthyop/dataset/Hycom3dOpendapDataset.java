@@ -73,6 +73,7 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         rank = DatasetUtil.rank(t0, nc, "time", timeArrow());
         time_tp1 = t0;
         setAllFieldsTp1AtTime(rank);
+        checkRequiredVariable(nc);
     }
 
     @Override

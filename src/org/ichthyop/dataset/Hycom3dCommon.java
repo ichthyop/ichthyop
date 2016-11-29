@@ -61,6 +61,7 @@ import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -96,6 +97,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     
     @Override
     public void setUp() throws Exception {
+        
+        // Clear required variables
+        clearRequiredVariables();
 
         // Open NetCDF (abstract)
         open();
@@ -598,7 +602,30 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Variable variable = nc.findVariable(name);
+        int[] origin = null, shape = null;
+        switch (variable.getShape().length) {
+            case 4:
+                origin = new int[]{rank, 0, j0, i0};
+                shape = new int[]{1, nz, ny, nx};
+                break;
+            case 2:
+                origin = new int[]{j0, i0};
+                shape = new int[]{ny, nx};
+                break;
+            case 3:
+                if (!variable.isUnlimited()) {
+                    origin = new int[]{0, j0, i0};
+                    shape = new int[]{nz, ny, nx};
+
+                } else {
+                    origin = new int[]{rank, j0, i0};
+                    shape = new int[]{1, ny, nx};
+                }
+                break;
+        }
+
+        return variable.read(origin, shape).reduce();
     }
 
     @Override
@@ -679,6 +706,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
+        
+        for (RequiredVariable variable : requiredVariables.values()) {
+            variable.nextStep(readVariable(nc, variable.getName(), rank), time_tp1, dt_HyMo);
+        }
 
         w_tp1 = computeW();
     }
