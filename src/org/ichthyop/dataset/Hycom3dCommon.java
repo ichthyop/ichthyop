@@ -58,8 +58,6 @@ import static org.ichthyop.SimulationManagerAccessor.getLogger;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
-import ucar.ma2.Index;
-import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -73,8 +71,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] latitude;
     double[] depthLevel;
     double[][] ssh_tp0, ssh_tp1;
-    float[][][] u_tp0, u_tp1;
-    float[][][] v_tp0, v_tp1;
+    //float[][][] u_tp0, u_tp1;
+    TiledVariable u0, u1;
+    //float[][][] v_tp0, v_tp1;
+    TiledVariable v0, v1;
     float[][][] w_tp0, w_tp1;
     int nx, ny, nz;
     int i0, j0;
@@ -87,23 +87,23 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     NetcdfFile nc;
     int nbTimeRecords;
     boolean xTore = true;
-    
+
     abstract void open() throws Exception;
-    
+
     @Override
     void loadParameters() {
         // does nothing for now
     }
-    
+
     @Override
     public void setUp() throws Exception {
-        
+
         // Clear required variables
         clearRequiredVariables();
 
         // Open NetCDF (abstract)
         open();
-        
+
         // Read whole grid
         // Latitude
         latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
@@ -352,8 +352,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(u_tp0[k + kk][j + jj][i + ii - 1]) || Double.isNaN(u_tp1[k + kk][j + jj][i + ii - 1]))) {
-                        double x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1] + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                    if (!(Double.isNaN(u0.getDouble(i + ii - 1, j + jj, k + kk)) || Double.isNaN(u1.getDouble(i + ii - 1, j + jj, k + kk)))) {
+                        double x = (1.d - x_euler) * u0.getDouble(i + ii - 1, j + jj, k + kk) + x_euler * u1.getDouble(i + ii - 1, j + jj, k + kk);
                         du += x * co / dxu[j + jj];
                     }
                 }
@@ -390,8 +390,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(v_tp0[k + kk][j + jj - 1][i + ii]) || Double.isNaN(v_tp1[k + kk][j + jj - 1][i + ii]))) {
-                        double x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii] + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                    if (!(Double.isNaN(v0.getDouble(i + ii, j + jj - 1, k + kk)) || Double.isNaN(v1.getDouble(i + ii, j + jj - 1, k + kk)))) {
+                        double x = (1.d - x_euler) * v0.getDouble(i + ii, j + jj - 1, k + kk) + x_euler * v1.getDouble(i + ii, j + jj - 1, k + kk);
                         dv += x * co / dyv;
                     }
                 }
@@ -455,7 +455,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         if (xTore && ci > nx - 1) {
             ci = 0;
         }
-        return !Double.isNaN(u_tp1[k][j][ci]) && !Double.isNaN(v_tp1[k][j][ci]);
+        return !Double.isNaN(u1.getDouble(ci, j, k)) && !Double.isNaN(v1.getDouble(ci, j, k));
     }
 
     @Override
@@ -649,7 +649,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     float[][][] computeW() {
         return new float[nz + 1][ny][nx];
     }
-    
+
     void readGrid() {
     }
 
@@ -657,45 +657,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, 0, j0, i0};
         double time_tp0 = time_tp1;
-        Array arr;
-        Index index;
 
-        try {
-            arr = nc.findVariableByAttribute(null, "standard_name", "eastward_sea_water_velocity")
-                    .read(origin, new int[]{1, nz, ny, nx}).reduce();
-            u_tp1 = new float[nz][ny][nx];
-            index = arr.getIndex();
-            for (int k = 0; k < nz; k++) {
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        u_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
-                    }
-                }
-            }
-        } catch (IOException | InvalidRangeException ex) {
-            IOException ioex = new IOException("Error reading dataset U velocity variable. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        try {
-            arr = nc.findVariableByAttribute(null, "standard_name", "northward_sea_water_velocity")
-                    .read(origin, new int[]{1, nz, ny, nx}).reduce();
-            v_tp1 = new float[nz][ny][nx];
-            index = arr.getIndex();
-            for (int k = 0; k < nz; k++) {
-                for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
-                        v_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
-                    }
-                }
-            }
-        } catch (IOException | InvalidRangeException ex) {
-            IOException ioex = new IOException("Error reading dataset V velocity variable. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
+        u1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nx, i0, j0, rank);
+        v1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nx, i0, j0, rank);
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
@@ -706,7 +671,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-        
+
         for (RequiredVariable variable : requiredVariables.values()) {
             variable.nextStep(readVariable(nc, variable.getName(), rank), time_tp1, dt_HyMo);
         }

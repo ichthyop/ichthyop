@@ -86,8 +86,8 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
             return;
         }
 
-        u_tp0 = u_tp1;
-        v_tp0 = v_tp1;
+        u0 = u1;
+        v0 = v1;
         w_tp0 = w_tp1;
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {

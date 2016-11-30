@@ -95,14 +95,20 @@ public class Hycom3dDataset extends Hycom3dCommon {
             return;
         }
 
-        u_tp0 = u_tp1;
-        v_tp0 = v_tp1;
+        if (null != u0) {
+            u0.clear();
+        }
+        u0 = u1;
+        if (null != v0) {
+            v0.clear();
+        }
+        v0 = v1;
+        
         w_tp0 = w_tp1;
-        //wr_tp0 = wr_tp1;
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            nc.close();
+            //nc.close();
             index = DatasetUtil.next(uvFiles, index, time_arrow);
             nc = DatasetUtil.openFile(uvFiles.get(index), true);
             nbTimeRecords = nc.findDimension("time").getLength();
