@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.ichthyop.manager.SimulationManager.getLogger;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -69,7 +68,6 @@ import ucar.nc2.Variable;
 public class TiledVariable {
 
     private final NetcdfFile nc;
-    private final String standardName;
     private final Variable variable;
     private final HashMap<Integer, Array> tiles;
     private final int nx, ny, nz;
@@ -83,19 +81,18 @@ public class TiledVariable {
     /*
      * 2D Tile Variable
      */
-    public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int i0, int j0, int rank) {
+    public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int i0, int j0, int rank, int nh) {
 
         
         this.tiles = new HashMap();
         this.nc = nc;
-        this.standardName = standardName;
         this.variable = this.nc.findVariable(standardName);
         this.nx = nx;
         this.ny = ny;
         this.nz = -1;
         this.i0 = i0;
         this.j0 = j0;
-        this.nh = 10;
+        this.nh = nh;
         this.nv = -1;
         this.ntilex = (int) Math.round((float) nx / nh);
         this.ntiley = (int) Math.round((float) ny / nh);
@@ -107,19 +104,18 @@ public class TiledVariable {
     /*
      * 3D Tile Variable
      */
-    public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int nz, int i0, int j0, int rank) {
+    public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int nz, int i0, int j0, int rank, int nh, int nv) {
         
         this.tiles = new HashMap();
         this.nc = nc;
-        this.standardName = standardName;
         this.variable = this.nc.findVariableByAttribute(null, "standard_name", standardName);
         this.nx = nx;
         this.ny = ny;
         this.nz = nz;
         this.i0 = i0;
         this.j0 = j0;
-        this.nh = 10;
-        this.nv = 5;
+        this.nh = nh;
+        this.nv = nv;
         this.ntilex = (int) Math.round((float) nx / nh);
         this.ntiley = (int) Math.round((float) ny / nh);
         this.ntilez = (int) Math.round((float) nz / nv);

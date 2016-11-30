@@ -71,9 +71,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] latitude;
     double[] depthLevel;
     double[][] ssh_tp0, ssh_tp1;
-    //float[][][] u_tp0, u_tp1;
     TiledVariable u0, u1;
-    //float[][][] v_tp0, v_tp1;
     TiledVariable v0, v1;
     float[][][] w_tp0, w_tp1;
     int nx, ny, nz;
@@ -420,18 +418,18 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
-                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
-                    CO += co;
-                    if (isInWater(i + ii, j + jj)) {
-                        double x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-                        dw += 2.d * x * co / (depthLevel[Math.min(k + kk + 1, nz - 1)] - depthLevel[k + kk]);
-                    }
-                }
-            }
-        }
+//        for (int ii = 0; ii < n; ii++) {
+//            for (int jj = 0; jj < n; jj++) {
+//                for (int kk = 0; kk < 2; kk++) {
+//                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+//                    CO += co;
+//                    if (isInWater(i + ii, j + jj)) {
+//                        double x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
+//                        dw += 2.d * x * co / (depthLevel[Math.min(k + kk + 1, nz - 1)] - depthLevel[k + kk]);
+//                    }
+//                }
+//            }
+//        }
         if (CO != 0) {
             dw /= CO;
         }
@@ -647,7 +645,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     }
 
     float[][][] computeW() {
-        return new float[nz + 1][ny][nx];
+        return null;
     }
 
     void readGrid() {
@@ -659,8 +657,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         double time_tp0 = time_tp1;
 
-        u1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nx, i0, j0, rank);
-        v1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nx, i0, j0, rank);
+        u1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 100, 3);
+        v1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 100, 3);
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
@@ -676,7 +674,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             variable.nextStep(readVariable(nc, variable.getName(), rank), time_tp1, dt_HyMo);
         }
 
-        w_tp1 = computeW();
+        //w_tp1 = computeW();
     }
 
     void crop() throws IOException {
