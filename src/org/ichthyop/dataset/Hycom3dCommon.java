@@ -346,12 +346,19 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
+                    int ci = i + ii - 1;
+                    if (xTore && ci < 0) {
+                        ci = nx - 2;
+                    }
+                    if (xTore && ci > nx - 2) {
+                        ci = 0;
+                    }
                     double co = Math.abs((.5d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(u0.getDouble(i + ii - 1, j + jj, k + kk)) || Double.isNaN(u1.getDouble(i + ii - 1, j + jj, k + kk)))) {
-                        double x = (1.d - x_euler) * u0.getDouble(i + ii - 1, j + jj, k + kk) + x_euler * u1.getDouble(i + ii - 1, j + jj, k + kk);
+                    if (!(Double.isNaN(u0.getDouble(ci, j + jj, k + kk)) || Double.isNaN(u1.getDouble(ci, j + jj, k + kk)))) {
+                        double x = (1.d - x_euler) * u0.getDouble(ci, j + jj, k + kk) + x_euler * u1.getDouble(ci, j + jj, k + kk);
                         du += x * co / dxu[j + jj];
                     }
                 }
@@ -384,12 +391,16 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         for (int jj = 0; jj < 2; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
+                    int ci = i + ii;
+                    if (xTore && ci > nx - 2) {
+                        ci = 0;
+                    }
                     double co = Math.abs((1.d - (double) ii - dx)
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(v0.getDouble(i + ii, j + jj - 1, k + kk)) || Double.isNaN(v1.getDouble(i + ii, j + jj - 1, k + kk)))) {
-                        double x = (1.d - x_euler) * v0.getDouble(i + ii, j + jj - 1, k + kk) + x_euler * v1.getDouble(i + ii, j + jj - 1, k + kk);
+                    if (!(Double.isNaN(v0.getDouble(ci, j + jj - 1, k + kk)) || Double.isNaN(v1.getDouble(ci, j + jj - 1, k + kk)))) {
+                        double x = (1.d - x_euler) * v0.getDouble(ci, j + jj - 1, k + kk) + x_euler * v1.getDouble(ci, j + jj - 1, k + kk);
                         dv += x * co / dyv;
                     }
                 }
