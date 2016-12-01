@@ -157,11 +157,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Read U & V for the mask
         setAllFieldsTp1AtTime(0);
         // trick to load surface mask
-        for (int i = 0; i < nx; i+=tilingh)
-            for (int j = 0; j < ny; j+=tilingh) {
+        for (int i = 0; i < nx; i += tilingh) {
+            for (int j = 0; j < ny; j += tilingh) {
                 u1.getDouble(i, j, 0);
                 v1.getDouble(i, j, 0);
             }
+        }
     }
 
     @Override
@@ -212,8 +213,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
 
         // Refine within cell (ci, cj) by linear interpolation
-        int cip1 = (xTore && ci + 1 > nx - 1) ? 0 : ci + 1;
-        int cim1 = (xTore && ci - 1 < 0) ? nx - 1 : ci - 1;
+        int cip1 = xTore(ci + 1);
+        int cim1 = xTore(ci - 1);
         int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
         int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
         // xgrid
@@ -258,17 +259,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         double dy = jy - (double) j;
         double co;
         for (int ii = 0; ii < 2; ii++) {
-            int ci = i;
-            if (xTore && i < 0) {
-                ci = nx - 1;
-            }
-            int cii = i + ii;
-            if (xTore && cii > nx - 1) {
-                cii = 0;
-            }
-            if (xTore && cii < 0) {
-                cii = nx - 1;
-            }
+            int ci = xTore(i);
+            int cii = xTore(i + ii);
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                 lat += co * latitude[j + jj];
@@ -370,13 +362,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    int ci = i + ii - 1;
-                    if (xTore && ci < 0) {
-                        ci = nx - 2;
-                    }
-                    if (xTore && ci > nx - 2) {
-                        ci = 0;
-                    }
+                    int ci = xTore(i + ii - 1);
                     double co = Math.abs((.5d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
@@ -415,10 +401,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         for (int jj = 0; jj < 2; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    int ci = i + ii;
-                    if (xTore && ci > nx - 2) {
-                        ci = 0;
-                    }
+                    int ci = xTore(i + ii);
                     double co = Math.abs((1.d - (double) ii - dx)
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
@@ -480,13 +463,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     }
 
     private boolean isInWater(int i, int j, int k) {
-        int ci = i;
-        if (xTore && ci < 0) {
-            ci = nx - 1;
-        }
-        if (xTore && ci > nx - 1) {
-            ci = 0;
-        }
+        int ci = xTore(i);
         return !Double.isNaN(u1.getDouble(ci, j, k)) && !Double.isNaN(v1.getDouble(ci, j, k));
     }
 
@@ -502,13 +479,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         j = (int) (Math.round(pGrid[1]));
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        int ci = i + ii;
-        if (xTore && ci < 0) {
-            ci = nx - 1;
-        }
-        if (xTore && ci > nx - 1) {
-            ci = 0;
-        }
+        int ci = xTore(i + ii);
         return !(isInWater(ci, j) && isInWater(ci, j + jj) && isInWater(i, j + jj));
     }
 
@@ -660,6 +631,18 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return variable.read(origin, shape).reduce();
     }
 
+    private int xTore(int i) {
+        if (xTore) {
+            if (i < 0) {
+                return nx + i;
+            }
+            if (i > nx - 1) {
+                return i - nx;
+            }
+        }
+        return i;
+    }
+
     @Override
     public double xTore(double x) {
         if (xTore) {
@@ -681,13 +664,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double getW(int i, int j, int k, double time) {
 
         // Toricity
-        int ci = i;
-        if (xTore && ci < 0) {
-            ci = nx - 1;
-        }
-        if (xTore && ci > nx - 1) {
-            ci = 0;
-        }
+        int ci = xTore(i);
 
         // Check is in water
         if (Double.isNaN(uw1.getDouble(ci, j, k)) || Double.isNaN(vw1.getDouble(ci, j, k))) {
