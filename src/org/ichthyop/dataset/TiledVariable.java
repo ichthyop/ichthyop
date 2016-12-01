@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import static org.ichthyop.manager.SimulationManager.getLogger;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -83,7 +84,6 @@ public class TiledVariable {
      */
     public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int i0, int j0, int rank, int nh) {
 
-        
         this.tiles = new HashMap();
         this.nc = nc;
         this.variable = this.nc.findVariable(standardName);
@@ -105,7 +105,7 @@ public class TiledVariable {
      * 3D Tile Variable
      */
     public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int nz, int i0, int j0, int rank, int nh, int nv) {
-        
+
         this.tiles = new HashMap();
         this.nc = nc;
         this.variable = this.nc.findVariableByAttribute(null, "standard_name", standardName);
@@ -122,7 +122,7 @@ public class TiledVariable {
         this.rank = rank;
         this.length = variable.getShape().length;
     }
-    
+
     public void clear() {
         tiles.clear();
         try {
@@ -161,7 +161,25 @@ public class TiledVariable {
             }
         }
         Array tile = tiles.get(tag);
-        return tile.getDouble(tile.getIndex().set(j % nh, i % nh));
+        // Since we apply reduce() on the array, the dimension of the tile may vary
+        if (nytile <= 1) {
+            if (nxtile <= 1) {
+                // dim y = 1 x = 1
+                return tile.getDouble(0);
+            } else {
+                // dim y = 1 x > 1
+                return tile.getDouble(Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0));
+            }
+        } else if (nxtile <= 1) {
+            // dim y > 1 x = 1
+            return tile.getDouble(Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0));
+        } else {
+            // dim y > 1 x > 1
+            return tile.getDouble(tile.getIndex().set(
+                    Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0),
+                    Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)));
+        }
+
     }
 
     public double getDouble(int i, int j, int k) {
@@ -201,14 +219,50 @@ public class TiledVariable {
             }
         }
         Array tile = tiles.get(tag);
-//        int kt = Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0);
-//        int jt = Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0);
-//        int it = Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0);
-//        System.out.println(it + " " + jt + " "+ kt);
-        return tile.getDouble(tile.getIndex().set(
-                Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0),
-                Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0),
-                Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)));
+
+        // Since we apply reduce() on the array, the dimension of the tile may vary        
+        if (nztile <= 1) {
+            if (nytile <= 1) {
+                if (nxtile <= 1) {
+                    // dim z = 1 y = 1 x = 1
+                    return tile.getDouble(0);
+                } else {
+                    // dim z = 1 y = 1 x > 1
+                    return tile.getDouble(Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0));
+                }
+            } else if (nxtile <= 1) {
+                // dim z = 1 y > 1 x = 1
+                return tile.getDouble(Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0));
+            } else {
+                // dim z = 1 y > 1 x > 1
+                return tile.getDouble(tile.getIndex().set(
+                        Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0),
+                        Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)));
+            }
+        } else if (nytile <= 1) {
+            if (nxtile <= 1) {
+                // dim z > 1 y = 1 x = 1
+                return tile.getDouble(Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0));
+            } else {
+                // dim z > 1 y = 1 x > 1
+                return tile.getDouble(tile.getIndex().set(
+                        Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0),
+                        Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)
+                ));
+            }
+        } else if (nxtile <= 1) {
+            // dim z > 1 y > 1 x = 1
+            return tile.getDouble(tile.getIndex().set(
+                    Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0),
+                    Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0)
+            ));
+        } else {
+            // dim z > 1 y > 1 x > 1
+            return tile.getDouble(tile.getIndex().set(
+                    Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0),
+                    Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0),
+                    Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)));
+        }
     }
 
     private int ij2tag(int i, int j) {

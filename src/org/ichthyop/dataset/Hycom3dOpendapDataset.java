@@ -78,17 +78,22 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
-        
+
         double time = e.getSource().getTime();
         int time_arrow = timeArrow();
-        
+
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
         }
 
         u0 = u1;
         v0 = v1;
-        w_tp0 = w_tp1;
+        uw0 = uw1;
+        vw0 = vw1;
+        if (null != wmap0) {
+            wmap0.clear();
+        }
+        wmap0 = wmap1;
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             nc.close();

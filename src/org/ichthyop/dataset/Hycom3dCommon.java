@@ -54,6 +54,7 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import static org.ichthyop.SimulationManagerAccessor.getLogger;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
@@ -70,10 +71,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] longitude;
     double[] latitude;
     double[] depthLevel;
+    double[] ddepth, ddepthw;
     double[][] ssh_tp0, ssh_tp1;
     TiledVariable u0, u1;
     TiledVariable v0, v1;
-    float[][][] w_tp0, w_tp1;
+    TiledVariable uw0, uw1, vw0, vw1;
+    HashMap<Integer, double[]> wmap0, wmap1;
     int nx, ny, nz;
     int i0, j0;
     double[] dxu;
@@ -114,6 +117,21 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Depth
         depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
         nz = depthLevel.length;
+
+        // Compute ddepth
+        ddepth = new double[nz];
+        ddepth[0] = 0.5 * Math.abs(depthLevel[0] - depthLevel[1]);
+        ddepth[nz - 1] = 0.5 * Math.abs(depthLevel[nz - 2] - depthLevel[nz - 1]);
+        for (int k = 1; k < nz - 1; k++) {
+            ddepth[k] = 0.5 * Math.abs(depthLevel[k - 1] - depthLevel[k + 1]);
+        }
+        // Compute ddepthw
+        ddepthw = new double[nz + 1];
+        ddepthw[0] = 0.5 * Math.abs(depthLevel[0] - depthLevel[1]);
+        ddepthw[nz] = 0.5 * Math.abs(depthLevel[nz - 2] - depthLevel[nz - 1]);
+        for (int k = 1; k < nz; k++) {
+            ddepthw[k] = Math.abs(depthLevel[k - 1] - depthLevel[k]);
+        }
 
         // Crop the grid
         if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
@@ -421,26 +439,25 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
-        int k = (int) Math.round(kz);
+        int k = (int) kz;
         double dx = ix - (double) i;
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-//        for (int ii = 0; ii < n; ii++) {
-//            for (int jj = 0; jj < n; jj++) {
-//                for (int kk = 0; kk < 2; kk++) {
-//                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
-//                    CO += co;
-//                    if (isInWater(i + ii, j + jj)) {
-//                        double x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii] + x_euler * w_tp1[k + kk][j + jj][i + ii];
-//                        dw += 2.d * x * co / (depthLevel[Math.min(k + kk + 1, nz - 1)] - depthLevel[k + kk]);
-//                    }
-//                }
-//            }
-//        }
+        for (int ii = 0; ii < n; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                for (int kk = 0; kk < 2; kk++) {
+                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
+                    CO += co;
+                    if (isInWater(i + ii, j + jj)) {
+                        double x = getW(i + ii, j + jj, k + kk, time);
+                        dw += 2.d * x * co / ddepthw[k + kk];
+                    }
+                }
+            }
+        }
         if (CO != 0) {
             dw /= CO;
         }
@@ -655,11 +672,88 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return y;
     }
 
-    float[][][] computeW() {
-        return null;
+    double getW(int i, int j, int k, double time) {
+
+        // Toricity
+        int ci = i;
+        if (xTore && ci < 0) {
+            ci = nx - 1;
+        }
+        if (xTore && ci > nx - 1) {
+            ci = 0;
+        }
+
+        // Check is in water
+        if (Double.isNaN(uw1.getDouble(ci, j, k)) || Double.isNaN(vw1.getDouble(ci, j, k))) {
+            return Double.NaN;
+        }
+
+        // Time fraction
+        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
+        // Unique cell index
+        int tag = (j * nx + ci);
+        // Check whether w needs to be computed
+        if (!wmap0.containsKey(tag)) {
+            wmap0.put(tag, computeW(uw0, vw0, ci, j));
+        }
+        if (!wmap1.containsKey(tag)) {
+            wmap1.put(tag, computeW(uw1, vw1, ci, j));
+        }
+        // Returns time interpolated w at (i, j)
+        return (1.d - dt) * wmap0.get(tag)[k] + dt * wmap1.get(tag)[k];
     }
 
-    void readGrid() {
+    private double[] computeW(TiledVariable uw, TiledVariable vw, int i, int j) {
+
+        double[][] Huon = new double[nz][2];
+        double[][] Hvom = new double[nz][2];
+
+        int ci = i, cim1 = i - 1;
+        if (i == 0) {
+            ci = xTore ? i : i + 1;
+            cim1 = xTore ? nx - 1 : i;
+        }
+        int cj = (j == 0) ? j + 1 : j;
+        int cjm1 = (j == 0) ? j : j - 1;
+
+        for (int k = nz; k-- > 0;) {
+            Huon[k][1] = Double.isNaN(uw.getDouble(ci, cj, k))
+                    ? 0.d
+                    : uw.getDouble(ci, cj, k) * dyv * ddepth[k];
+            Huon[k][0] = Double.isNaN(uw.getDouble(cim1, cj, k))
+                    ? 0.d
+                    : uw.getDouble(cim1, cj, k) * dyv * ddepth[k];
+
+            Hvom[k][1] = Double.isNaN(vw.getDouble(ci, cj, k))
+                    ? 0.d
+                    : vw.getDouble(ci, cj, k) * dxu[j] * ddepth[k];
+            Hvom[k][0] = Double.isNaN(vw.getDouble(ci, cjm1, k))
+                    ? 0.d
+                    : vw.getDouble(ci, cjm1, k) * dxu[cjm1] * ddepth[k];
+        }
+
+        double[] w = new double[nz + 1];
+
+        // Find k0, index of the deepest cell in water
+        int k0 = nz - 1;
+        for (int k = nz - 1; k > 0; k--) {
+            if (!Double.isNaN(uw.getDouble(ci, cj, k)) && !Double.isNaN(vw.getDouble(ci, cj, k))) {
+                k0 = k;
+                break;
+            }
+        }
+
+        for (int k = nz; k > k0; k--) {
+            w[k] = 0.d;
+        }
+        for (int k = k0; k > 0; k--) {
+            w[k] = w[k + 1] - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
+            w[k] /= (dyv * dxu[cj]);
+        }
+        w[0] = 0.d;
+
+        return w;
     }
 
     void setAllFieldsTp1AtTime(int rank) throws Exception {
@@ -670,6 +764,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         u1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 100, 3);
         v1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 100, 3);
+        uw1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 1, nz);
+        vw1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 1, nz);
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
@@ -685,7 +781,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             variable.nextStep(readVariable(nc, variable.getName(), rank), time_tp1, dt_HyMo);
         }
 
-        //w_tp1 = computeW();
+        wmap1 = new HashMap();
     }
 
     void crop() throws IOException {

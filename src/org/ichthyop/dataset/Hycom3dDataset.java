@@ -103,8 +103,20 @@ public class Hycom3dDataset extends Hycom3dCommon {
             v0.clear();
         }
         v0 = v1;
-        
-        w_tp0 = w_tp1;
+
+        if (null != uw0) {
+            uw0.clear();
+        }
+        uw0 = uw1;
+        if (null != vw0) {
+            vw0.clear();
+        }
+        vw0 = vw1;
+        if (null != wmap0) {
+            wmap0.clear();
+        }
+        wmap0 = wmap1;
+
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
