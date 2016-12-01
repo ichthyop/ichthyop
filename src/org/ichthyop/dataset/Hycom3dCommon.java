@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import static org.ichthyop.SimulationManagerAccessor.getLogger;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
@@ -88,6 +87,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     NetcdfFile nc;
     int nbTimeRecords;
     boolean xTore = true;
+    private final int tilingh = 100, tilingv = 3;
+    private final int tilinghw = 10;
 
     abstract void open() throws Exception;
 
@@ -155,7 +156,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         // Read U & V for the mask
         setAllFieldsTp1AtTime(0);
-
+        // trick to load surface mask
+        for (int i = 0; i < nx; i+=tilingh)
+            for (int j = 0; j < ny; j+=tilingh) {
+                u1.getDouble(i, j, 0);
+                v1.getDouble(i, j, 0);
+            }
     }
 
     @Override
@@ -758,14 +764,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        getLogger().info("Reading NetCDF variables...");
-
         double time_tp0 = time_tp1;
 
-        u1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 100, 3);
-        v1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 100, 3);
-        uw1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 1, nz);
-        vw1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, 1, nz);
+        u1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        v1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        uw1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        vw1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);

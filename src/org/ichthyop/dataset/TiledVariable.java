@@ -53,11 +53,11 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import static org.ichthyop.manager.SimulationManager.getLogger;
 import ucar.ma2.Array;
-import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -155,6 +155,7 @@ public class TiledVariable {
                     break;
             }
             try {
+                getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), tag, Arrays.toString(origin), Arrays.toString(shape)});
                 tiles.put(tag, variable.read(origin, shape).reduce());
             } catch (IOException | InvalidRangeException ex) {
                 getLogger().log(Level.SEVERE, null, ex);
@@ -213,6 +214,7 @@ public class TiledVariable {
                     break;
             }
             try {
+                getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), Integer.toString(tag), Arrays.toString(origin), Arrays.toString(shape)});
                 tiles.put(tag, variable.read(origin, shape).reduce());
             } catch (IOException | InvalidRangeException ex) {
                 getLogger().log(Level.SEVERE, null, ex);
