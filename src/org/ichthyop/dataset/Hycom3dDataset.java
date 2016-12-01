@@ -95,27 +95,27 @@ public class Hycom3dDataset extends Hycom3dCommon {
             return;
         }
 
-        if (null != u0) {
-            u0.clear();
+        if (null != u[0]) {
+            u[0].clear();
         }
-        u0 = u1;
-        if (null != v0) {
-            v0.clear();
+        u[0] = u[1];
+        if (null != v[0]) {
+            v[0].clear();
         }
-        v0 = v1;
+        v[0] = v[1];
 
-        if (null != uw0) {
-            uw0.clear();
+        if (null != uw[0]) {
+            uw[0].clear();
         }
-        uw0 = uw1;
-        if (null != vw0) {
-            vw0.clear();
+        uw[0] = uw[1];
+        if (null != vw[0]) {
+            vw[0].clear();
         }
-        vw0 = vw1;
-        if (null != wmap0) {
-            wmap0.clear();
+        vw[0] = vw[1];
+        if (null != wmap[0]) {
+            wmap[0].clear();
         }
-        wmap0 = wmap1;
+        wmap[0] = wmap[1];
 
         rank += time_arrow;
 

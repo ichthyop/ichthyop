@@ -86,14 +86,14 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
             return;
         }
 
-        u0 = u1;
-        v0 = v1;
-        uw0 = uw1;
-        vw0 = vw1;
-        if (null != wmap0) {
-            wmap0.clear();
+        u[0] = u[1];
+        v[0] = v[1];
+        uw[0] = uw[1];
+        vw[0] = vw[1];
+        if (null != wmap[0]) {
+            wmap[0].clear();
         }
-        wmap0 = wmap1;
+        wmap[0] = wmap[1];
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             nc.close();

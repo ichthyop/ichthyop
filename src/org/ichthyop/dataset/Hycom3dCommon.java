@@ -71,11 +71,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] latitude;
     double[] depthLevel;
     double[] ddepth, ddepthw;
-    double[][] ssh_tp0, ssh_tp1;
-    TiledVariable u0, u1;
-    TiledVariable v0, v1;
-    TiledVariable uw0, uw1, vw0, vw1;
-    HashMap<Integer, double[]> wmap0, wmap1;
+    private final int nt = 2;
+    TiledVariable[] u;
+    TiledVariable[] v;
+    TiledVariable[] uw;
+    TiledVariable[] vw;
+    HashMap<Integer, double[]>[] wmap;
     int nx, ny, nz;
     int i0, j0;
     double[] dxu;
@@ -155,12 +156,17 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         extent();
 
         // Read U & V for the mask
+        u = new TiledVariable[nt];
+        v = new TiledVariable[nt];
+        uw = new TiledVariable[nt];
+        vw = new TiledVariable[nt];
+        wmap = new HashMap[nt];
         setAllFieldsTp1AtTime(0);
         // trick to load surface mask
         for (int i = 0; i < nx; i += tilingh) {
             for (int j = 0; j < ny; j += tilingh) {
-                u1.getDouble(i, j, 0);
-                v1.getDouble(i, j, 0);
+                u[1].getDouble(i, j, 0);
+                v[1].getDouble(i, j, 0);
             }
         }
     }
@@ -367,8 +373,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(u0.getDouble(ci, j + jj, k + kk)) || Double.isNaN(u1.getDouble(ci, j + jj, k + kk)))) {
-                        double x = (1.d - x_euler) * u0.getDouble(ci, j + jj, k + kk) + x_euler * u1.getDouble(ci, j + jj, k + kk);
+                    if (!(Double.isNaN(u[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(u[1].getDouble(ci, j + jj, k + kk)))) {
+                        double x = (1.d - x_euler) * u[0].getDouble(ci, j + jj, k + kk) + x_euler * u[1].getDouble(ci, j + jj, k + kk);
                         du += x * co / dxu[j + jj];
                     }
                 }
@@ -406,8 +412,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(v0.getDouble(ci, j + jj - 1, k + kk)) || Double.isNaN(v1.getDouble(ci, j + jj - 1, k + kk)))) {
-                        double x = (1.d - x_euler) * v0.getDouble(ci, j + jj - 1, k + kk) + x_euler * v1.getDouble(ci, j + jj - 1, k + kk);
+                    if (!(Double.isNaN(v[0].getDouble(ci, j + jj - 1, k + kk)) || Double.isNaN(v[1].getDouble(ci, j + jj - 1, k + kk)))) {
+                        double x = (1.d - x_euler) * v[0].getDouble(ci, j + jj - 1, k + kk) + x_euler * v[1].getDouble(ci, j + jj - 1, k + kk);
                         dv += x * co / dyv;
                     }
                 }
@@ -464,7 +470,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     private boolean isInWater(int i, int j, int k) {
         int ci = xTore(i);
-        return !Double.isNaN(u1.getDouble(ci, j, k)) && !Double.isNaN(v1.getDouble(ci, j, k));
+        return !Double.isNaN(u[1].getDouble(ci, j, k)) && !Double.isNaN(v[1].getDouble(ci, j, k));
     }
 
     @Override
@@ -667,7 +673,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         int ci = xTore(i);
 
         // Check is in water
-        if (Double.isNaN(uw1.getDouble(ci, j, k)) || Double.isNaN(vw1.getDouble(ci, j, k))) {
+        if (Double.isNaN(uw[1].getDouble(ci, j, k)) || Double.isNaN(vw[1].getDouble(ci, j, k))) {
             return Double.NaN;
         }
 
@@ -677,14 +683,14 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Unique cell index
         int tag = (j * nx + ci);
         // Check whether w needs to be computed
-        if (!wmap0.containsKey(tag)) {
-            wmap0.put(tag, computeW(uw0, vw0, ci, j));
+        if (!wmap[0].containsKey(tag)) {
+            wmap[0].put(tag, computeW(uw[0], vw[0], ci, j));
         }
-        if (!wmap1.containsKey(tag)) {
-            wmap1.put(tag, computeW(uw1, vw1, ci, j));
+        if (!wmap[1].containsKey(tag)) {
+            wmap[1].put(tag, computeW(uw[1], vw[1], ci, j));
         }
         // Returns time interpolated w at (i, j)
-        return (1.d - dt) * wmap0.get(tag)[k] + dt * wmap1.get(tag)[k];
+        return (1.d - dt) * wmap[0].get(tag)[k] + dt * wmap[1].get(tag)[k];
     }
 
     private double[] computeW(TiledVariable uw, TiledVariable vw, int i, int j) {
@@ -743,10 +749,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         double time_tp0 = time_tp1;
 
-        u1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        v1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        uw1 = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
-        vw1 = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        u[1] = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        v[1] = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        uw[1] = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        vw[1] = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
@@ -762,7 +768,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             variable.nextStep(readVariable(nc, variable.getName(), rank), time_tp1, dt_HyMo);
         }
 
-        wmap1 = new HashMap();
+        wmap[1] = new HashMap();
     }
 
     void crop() throws IOException {
