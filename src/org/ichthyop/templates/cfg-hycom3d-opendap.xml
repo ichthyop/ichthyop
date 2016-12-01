@@ -789,7 +789,7 @@
     </block>
     <block type="release">
         <key>release.stain</key>
-        <tree_path>Advance/Release/Release stain</tree_path>
+        <tree_path>Advanced/Release/Release stain</tree_path>
         <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
         <enabled>false</enabled>
         <parameters>
