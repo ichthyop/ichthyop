@@ -52,8 +52,12 @@
  */
 package org.ichthyop.dataset;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ichthyop.event.NextStepEvent;
+import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -99,19 +103,25 @@ public class Hycom3dDataset extends Hycom3dCommon {
             u[0].clear();
         }
         u[0] = u[1];
+        u[1] = u[2];
         if (null != v[0]) {
             v[0].clear();
         }
         v[0] = v[1];
+        v[1] = v[2];
 
         if (null != uw[0]) {
             uw[0].clear();
         }
         uw[0] = uw[1];
+        uw[1] = uw[2];
+        
         if (null != vw[0]) {
             vw[0].clear();
         }
         vw[0] = vw[1];
+        vw[1] = vw[2];
+        
         if (null != wmap[0]) {
             wmap[0].clear();
         }
@@ -120,7 +130,7 @@ public class Hycom3dDataset extends Hycom3dCommon {
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            //nc.close();
+            nc.close();
             index = DatasetUtil.next(uvFiles, index, time_arrow);
             nc = DatasetUtil.openFile(uvFiles.get(index), true);
             nbTimeRecords = nc.findDimension("time").getLength();
@@ -128,6 +138,16 @@ public class Hycom3dDataset extends Hycom3dCommon {
         }
 
         setAllFieldsTp1AtTime(rank);
+    }
+
+    @Override
+    NetcdfFile getNC() {
+        try {
+            return DatasetUtil.openFile(uvFiles.get(index), true);
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
 }

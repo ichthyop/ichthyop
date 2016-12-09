@@ -53,6 +53,7 @@
 package org.ichthyop.dataset;
 
 import org.ichthyop.event.NextStepEvent;
+import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -100,6 +101,11 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
             throw new IndexOutOfBoundsException("Time out of dataset range");
         }
         setAllFieldsTp1AtTime(rank);
+    }
+
+    @Override
+    NetcdfFile getNC() {
+        return nc;
     }
 
 }

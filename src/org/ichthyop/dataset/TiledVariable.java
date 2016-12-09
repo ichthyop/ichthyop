@@ -211,14 +211,11 @@ public class TiledVariable {
         return new int[]{nh * (tag % ntilex), nh * ((tag / ntilex) % ntiley), nv * ((tag / (ntilex * ntiley)) % ntilez)};
     }
 
-    private Array loadTile(int tag) throws IOException, InvalidRangeException {
+    private Array loadTile(int tag) {
 
-//        if (log) {
-//            System.out.println("i " + i + " j " + j + " k " + k + " tag=" + tag);
-//        }
         int[] ijktile = tag2ijk(tag);
 //        if (log) {
-//            System.out.println("i0 " + ijktile[0] + " j0 " + ijktile[1] + " k0 " + ijktile[2]);
+//            System.out.println("tag=" + tag + " i0 " + ijktile[0] + " j0 " + ijktile[1] + " k0 " + ijktile[2]);
 //        }
         int i0tile = i0 + ijktile[0];
         int j0tile = j0 + ijktile[1];
@@ -250,7 +247,12 @@ public class TiledVariable {
         }
 
         getLogger().log(Level.FINE, "Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
-        return variable.read(origin, shape).reduce();
+        try {
+            return variable.read(origin, shape).reduce();
+        } catch (IOException | InvalidRangeException ex) {
+            getLogger().log(Level.SEVERE, "", ex);
+        }
+        return null;
     }
 
     private Array getTile(int tag) {

@@ -71,7 +71,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] latitude;
     double[] depthLevel;
     double[] ddepth, ddepthw;
-    private final int nt = 2;
+    private final int nt = 3;
     TiledVariable[] u;
     TiledVariable[] v;
     TiledVariable[] uw;
@@ -92,6 +92,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     private final int tilinghw = 10;
 
     abstract void open() throws Exception;
+    abstract NetcdfFile getNC();
 
     @Override
     void loadParameters() {
@@ -160,7 +161,13 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         v = new TiledVariable[nt];
         uw = new TiledVariable[nt];
         vw = new TiledVariable[nt];
-        wmap = new HashMap[nt];
+        wmap = new HashMap[2];
+        for (int t = 0; t < nt; t++) {
+            u[t] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+            v[t] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+            uw[t] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+            vw[t] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        }
         setAllFieldsTp1AtTime(0);
         // trick to load surface mask
         for (int i = 0; i < nx; i += tilingh) {
@@ -376,7 +383,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                     if (!(Double.isNaN(u[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(u[1].getDouble(ci, j + jj, k + kk)))) {
                         double x = (1.d - x_euler) * u[0].getDouble(ci, j + jj, k + kk) + x_euler * u[1].getDouble(ci, j + jj, k + kk);
                         du += x * co / dxu[j + jj];
-                    }
+    }
                 }
             }
         }
@@ -415,7 +422,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                     if (!(Double.isNaN(v[0].getDouble(ci, j + jj - 1, k + kk)) || Double.isNaN(v[1].getDouble(ci, j + jj - 1, k + kk)))) {
                         double x = (1.d - x_euler) * v[0].getDouble(ci, j + jj - 1, k + kk) + x_euler * v[1].getDouble(ci, j + jj - 1, k + kk);
                         dv += x * co / dyv;
-                    }
+    }
                 }
             }
         }
@@ -749,10 +756,15 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         double time_tp0 = time_tp1;
 
-        u[1] = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        v[1] = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        uw[1] = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
-        vw[1] = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        u[nt - 1] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        v[nt - 1] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        uw[nt - 1] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        vw[nt - 1] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+
+        u[nt - 1].loadTiles(u[0].getTilesIndex());
+        v[nt - 1].loadTiles(v[0].getTilesIndex());
+        uw[nt - 1].loadTiles(uw[0].getTilesIndex());
+        vw[nt - 1].loadTiles(vw[0].getTilesIndex());
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);

@@ -329,7 +329,7 @@ public class DatasetUtil {
     static NetcdfFile openFile(String filename, boolean enhanced) throws IOException {
         NetcdfFile nc;
         nc = NetcdfDataset.openDataset(filename, enhanced, null);
-        getLogger().log(Level.INFO, "'{'Dataset'}' Open {0}", filename);
+        getLogger().log(Level.FINE, "'{'Dataset'}' Open {0}", filename);
         return nc;
     }
 
