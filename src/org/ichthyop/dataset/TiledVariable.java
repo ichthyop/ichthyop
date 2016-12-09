@@ -83,8 +83,6 @@ public class TiledVariable {
     private final int ntilex, ntiley, ntilez;
     private final int rank;
     private final int length;
-    
-
 
     /*
      * 2D Tile Variable
@@ -93,17 +91,17 @@ public class TiledVariable {
 
         this.tiles = new ConcurrentHashMap();
         this.nc = nc;
-        this.variable = this.nc.findVariable(standardName);
+        this.variable = this.nc.findVariableByAttribute(null, "standard_name", standardName);
         this.nx = nx;
         this.ny = ny;
-        this.nz = -1;
+        this.nz = 0;
         this.i0 = i0;
         this.j0 = j0;
         this.nh = nh;
-        this.nv = -1;
+        this.nv = 1;
         this.ntilex = (int) Math.round((float) nx / nh);
         this.ntiley = (int) Math.round((float) ny / nh);
-        this.ntilez = -1;
+        this.ntilez = 1;
         this.rank = rank;
         this.length = variable.getShape().length;
     }
@@ -125,7 +123,7 @@ public class TiledVariable {
         this.nv = nv;
         this.ntilex = (int) Math.round((float) nx / nh);
         this.ntiley = (int) Math.round((float) ny / nh);
-        this.ntilez = (int) Math.round((float) nz / nv);
+        this.ntilez = Math.max((int) Math.round((float) nz / nv), 1);
         this.rank = rank;
         this.length = variable.getShape().length;
     }
@@ -140,33 +138,7 @@ public class TiledVariable {
     }
 
     public double getDouble(int i, int j) {
-
-        int tag = ij2tag(i, j);
-        int[] ijtile = tag2ij(tag);
-        int nxtile = Math.min(nh, nx - ijtile[0]);
-        int nytile = Math.min(nh, ny - ijtile[1]);
-
-       Array tile = getTile(i, j);
-       
-        // Since we apply reduce() on the array, the dimension of the tile may vary
-        if (nytile <= 1) {
-            if (nxtile <= 1) {
-                // dim y = 1 x = 1
-                return tile.getDouble(0);
-            } else {
-                // dim y = 1 x > 1
-                return tile.getDouble(Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0));
-            }
-        } else if (nxtile <= 1) {
-            // dim y > 1 x = 1
-            return tile.getDouble(Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0));
-        } else {
-            // dim y > 1 x > 1
-            return tile.getDouble(tile.getIndex().set(
-                    Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0),
-                    Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)));
-        }
-
+        return getDouble(i, j, 0);
     }
 
     public double getDouble(int i, int j, int k) {
@@ -230,47 +202,12 @@ public class TiledVariable {
         }
     }
 
-    private int ij2tag(int i, int j) {
-        return Math.min(i / nh, ntilex - 1) + ntilex * Math.min(j / nh, ntiley - 1);
-    }
-
-    private int[] tag2ij(int tag) {
-        return new int[]{nh * (tag % ntilex), nh * ((tag / ntilex) % ntiley)};
-    }
-
     private int ijk2tag(int i, int j, int k) {
         return Math.min(i / nh, ntilex - 1) + ntilex * Math.min(j / nh, ntiley - 1) + ntilex * ntiley * Math.min(k / nv, ntilez - 1);
     }
 
     private int[] tag2ijk(int tag) {
         return new int[]{nh * (tag % ntilex), nh * ((tag / ntilex) % ntiley), nv * ((tag / (ntilex * ntiley)) % ntilez)};
-    }
-
-    private Array loadTile(int i, int j) throws IOException, InvalidRangeException {
-
-        int tag = ij2tag(i, j);
-        int[] ijtile = tag2ij(tag);
-        int i0tile = i0 + ijtile[0];
-        int j0tile = j0 + ijtile[1];
-        int nxtile = Math.min(nh, i0 + nx - i0tile);
-        int nytile = Math.min(nh, j0 + ny - j0tile);
-
-        // load tile
-        int[] origin = null, shape = null;
-        switch (length) {
-            case 2:
-                origin = new int[]{j0tile, i0tile};
-                shape = new int[]{nytile, nxtile};
-                break;
-            case 3:
-                origin = new int[]{rank, j0tile, i0tile};
-                shape = new int[]{1, nytile, nxtile};
-                break;
-        }
-
-        getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), tag, Arrays.toString(origin), Arrays.toString(shape)});
-        return variable.read(origin, shape).reduce();
-
     }
 
     private Array loadTile(int i, int j, int k) throws IOException, InvalidRangeException {
@@ -286,16 +223,25 @@ public class TiledVariable {
         int i0tile = i0 + ijktile[0];
         int j0tile = j0 + ijktile[1];
         int k0tile = ijktile[2];
-        int nxtile = ((tag + 1) % ntilex == 0) ? i0 + nx - i0tile : nh;
-        int nytile = ((tag / ntilex + 1) % ntiley == 0) ? j0 + ny - j0tile : nh;
-        int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - k0tile : nv;
+        int nxtile = ((tag + 1) % ntilex == 0) ? nx - ijktile[0] : nh;
+        int nytile = ((tag / ntilex + 1) % ntiley == 0) ? ny - ijktile[1] : nh;
+        int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ijktile[2] : nv;
 
         // load tile
         int[] origin = null, shape = null;
         switch (length) {
+            case 2:
+                origin = new int[]{j0tile, i0tile};
+                shape = new int[]{nytile, nxtile};
+                break;
             case 3:
-                origin = new int[]{k0tile, j0tile, i0tile};
-                shape = new int[]{nztile, nytile, nxtile};
+                if (variable.isUnlimited()) {
+                    origin = new int[]{rank, j0tile, i0tile};
+                    shape = new int[]{1, nytile, nxtile};
+                } else {
+                    origin = new int[]{k0tile, j0tile, i0tile};
+                    shape = new int[]{nztile, nytile, nxtile};
+                }
                 break;
             case 4:
                 origin = new int[]{rank, k0tile, j0tile, i0tile};
@@ -315,31 +261,6 @@ public class TiledVariable {
         if (f == null) {
             Callable<Array> readtile = () -> {
                 return loadTile(i, j, k);
-            };
-            FutureTask ft = new FutureTask(readtile);
-            f = tiles.putIfAbsent(tag, ft);
-            if (f == null) {
-                f = ft;
-                ft.run();
-            }
-        }
-        try {
-            return f.get();
-        } catch (CancellationException | InterruptedException e) {
-            tiles.remove(tag, f);
-        } catch (ExecutionException e) {
-        }
-        return null;
-    }
-    
-    private Array getTile(int i, int j) {
-
-        int tag = ij2tag(i, j);
-                
-        Future<Array> f = tiles.get(tag);
-        if (f == null) {
-            Callable<Array> readtile = () -> {
-                return loadTile(i, j);
             };
             FutureTask ft = new FutureTask(readtile);
             f = tiles.putIfAbsent(tag, ft);
