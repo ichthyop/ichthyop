@@ -54,7 +54,13 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import static org.ichthyop.manager.SimulationManager.getLogger;
 import ucar.ma2.Array;
@@ -70,13 +76,14 @@ public class TiledVariable {
 
     private final NetcdfFile nc;
     private final Variable variable;
-    private final HashMap<Integer, Array> tiles;
+    private final ConcurrentMap<Integer, Future<Array>> tiles;
     private final int nx, ny, nz;
     private final int i0, j0;
     private final int nh, nv;
     private final int ntilex, ntiley, ntilez;
     private final int rank;
     private final int length;
+    
 
 
     /*
@@ -84,7 +91,7 @@ public class TiledVariable {
      */
     public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int i0, int j0, int rank, int nh) {
 
-        this.tiles = new HashMap();
+        this.tiles = new ConcurrentHashMap();
         this.nc = nc;
         this.variable = this.nc.findVariable(standardName);
         this.nx = nx;
@@ -106,7 +113,7 @@ public class TiledVariable {
      */
     public TiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int nz, int i0, int j0, int rank, int nh, int nv) {
 
-        this.tiles = new HashMap();
+        this.tiles = new ConcurrentHashMap();
         this.nc = nc;
         this.variable = this.nc.findVariableByAttribute(null, "standard_name", standardName);
         this.nx = nx;
@@ -136,32 +143,11 @@ public class TiledVariable {
 
         int tag = ij2tag(i, j);
         int[] ijtile = tag2ij(tag);
-        int i0tile = i0 + ijtile[0];
-        int j0tile = j0 + ijtile[1];
-        int nxtile = Math.min(nh, i0 + nx - i0tile);
-        int nytile = Math.min(nh, j0 + ny - j0tile);
+        int nxtile = Math.min(nh, nx - ijtile[0]);
+        int nytile = Math.min(nh, ny - ijtile[1]);
 
-        if (!tiles.containsKey(tag)) {
-            // load tile
-            int[] origin = null, shape = null;
-            switch (length) {
-                case 2:
-                    origin = new int[]{j0tile, i0tile};
-                    shape = new int[]{nytile, nxtile};
-                    break;
-                case 3:
-                    origin = new int[]{rank, j0tile, i0tile};
-                    shape = new int[]{1, nytile, nxtile};
-                    break;
-            }
-            try {
-                getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), tag, Arrays.toString(origin), Arrays.toString(shape)});
-                tiles.put(tag, variable.read(origin, shape).reduce());
-            } catch (IOException | InvalidRangeException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
-            }
-        }
-        Array tile = tiles.get(tag);
+       Array tile = getTile(i, j);
+       
         // Since we apply reduce() on the array, the dimension of the tile may vary
         if (nytile <= 1) {
             if (nxtile <= 1) {
@@ -193,34 +179,11 @@ public class TiledVariable {
 //        if (log) {
 //            System.out.println("i0 " + ijktile[0] + " j0 " + ijktile[1] + " k0 " + ijktile[2]);
 //        }
-        int i0tile = i0 + ijktile[0];
-        int j0tile = j0 + ijktile[1];
-        int k0tile = ijktile[2];
-        int nxtile = ((tag + 1) % ntilex == 0) ? i0 + nx - i0tile : nh;
-        int nytile = ((tag / ntilex + 1) % ntiley == 0) ? j0 + ny - j0tile : nh;
-        int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - k0tile : nv;
+        int nxtile = ((tag + 1) % ntilex == 0) ? nx - ijktile[0] : nh;
+        int nytile = ((tag / ntilex + 1) % ntiley == 0) ? ny - ijktile[1] : nh;
+        int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ijktile[2] : nv;
 
-        if (!tiles.containsKey(tag)) {
-            // load tile
-            int[] origin = null, shape = null;
-            switch (length) {
-                case 3:
-                    origin = new int[]{k0tile, j0tile, i0tile};
-                    shape = new int[]{nztile, nytile, nxtile};
-                    break;
-                case 4:
-                    origin = new int[]{rank, k0tile, j0tile, i0tile};
-                    shape = new int[]{1, nztile, nytile, nxtile};
-                    break;
-            }
-            try {
-                getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), Integer.toString(tag), Arrays.toString(origin), Arrays.toString(shape)});
-                tiles.put(tag, variable.read(origin, shape).reduce());
-            } catch (IOException | InvalidRangeException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
-            }
-        }
-        Array tile = tiles.get(tag);
+        Array tile = getTile(i, j, k);
 
         // Since we apply reduce() on the array, the dimension of the tile may vary        
         if (nztile <= 1) {
@@ -281,5 +244,116 @@ public class TiledVariable {
 
     private int[] tag2ijk(int tag) {
         return new int[]{nh * (tag % ntilex), nh * ((tag / ntilex) % ntiley), nv * ((tag / (ntilex * ntiley)) % ntilez)};
+    }
+
+    private Array loadTile(int i, int j) throws IOException, InvalidRangeException {
+
+        int tag = ij2tag(i, j);
+        int[] ijtile = tag2ij(tag);
+        int i0tile = i0 + ijtile[0];
+        int j0tile = j0 + ijtile[1];
+        int nxtile = Math.min(nh, i0 + nx - i0tile);
+        int nytile = Math.min(nh, j0 + ny - j0tile);
+
+        // load tile
+        int[] origin = null, shape = null;
+        switch (length) {
+            case 2:
+                origin = new int[]{j0tile, i0tile};
+                shape = new int[]{nytile, nxtile};
+                break;
+            case 3:
+                origin = new int[]{rank, j0tile, i0tile};
+                shape = new int[]{1, nytile, nxtile};
+                break;
+        }
+
+        getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), tag, Arrays.toString(origin), Arrays.toString(shape)});
+        return variable.read(origin, shape).reduce();
+
+    }
+
+    private Array loadTile(int i, int j, int k) throws IOException, InvalidRangeException {
+
+        int tag = ijk2tag(i, j, k);
+//        if (log) {
+//            System.out.println("i " + i + " j " + j + " k " + k + " tag=" + tag);
+//        }
+        int[] ijktile = tag2ijk(tag);
+//        if (log) {
+//            System.out.println("i0 " + ijktile[0] + " j0 " + ijktile[1] + " k0 " + ijktile[2]);
+//        }
+        int i0tile = i0 + ijktile[0];
+        int j0tile = j0 + ijktile[1];
+        int k0tile = ijktile[2];
+        int nxtile = ((tag + 1) % ntilex == 0) ? i0 + nx - i0tile : nh;
+        int nytile = ((tag / ntilex + 1) % ntiley == 0) ? j0 + ny - j0tile : nh;
+        int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - k0tile : nv;
+
+        // load tile
+        int[] origin = null, shape = null;
+        switch (length) {
+            case 3:
+                origin = new int[]{k0tile, j0tile, i0tile};
+                shape = new int[]{nztile, nytile, nxtile};
+                break;
+            case 4:
+                origin = new int[]{rank, k0tile, j0tile, i0tile};
+                shape = new int[]{1, nztile, nytile, nxtile};
+                break;
+        }
+
+        getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), Integer.toString(tag), Arrays.toString(origin), Arrays.toString(shape)});
+        return variable.read(origin, shape).reduce();
+    }
+
+    private Array getTile(int i, int j, int k) {
+
+        int tag = ijk2tag(i, j, k);
+
+        Future<Array> f = tiles.get(tag);
+        if (f == null) {
+            Callable<Array> readtile = () -> {
+                return loadTile(i, j, k);
+            };
+            FutureTask ft = new FutureTask(readtile);
+            f = tiles.putIfAbsent(tag, ft);
+            if (f == null) {
+                f = ft;
+                ft.run();
+            }
+        }
+        try {
+            return f.get();
+        } catch (CancellationException | InterruptedException e) {
+            tiles.remove(tag, f);
+        } catch (ExecutionException e) {
+        }
+        return null;
+    }
+    
+    private Array getTile(int i, int j) {
+
+        int tag = ij2tag(i, j);
+                
+        Future<Array> f = tiles.get(tag);
+        if (f == null) {
+            Callable<Array> readtile = () -> {
+                return loadTile(i, j);
+            };
+            FutureTask ft = new FutureTask(readtile);
+            f = tiles.putIfAbsent(tag, ft);
+            if (f == null) {
+                f = ft;
+                ft.run();
+            }
+        }
+        try {
+            return f.get();
+        } catch (CancellationException | InterruptedException e) {
+            tiles.remove(tag, f);
+        } catch (ExecutionException e) {
+        }
+        return null;
     }
 }
