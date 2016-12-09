@@ -54,6 +54,7 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -155,7 +156,7 @@ public class TiledVariable {
         int nytile = ((tag / ntilex + 1) % ntiley == 0) ? ny - ijktile[1] : nh;
         int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ijktile[2] : nv;
 
-        Array tile = getTile(i, j, k);
+        Array tile = getTile(tag);
 
         // Since we apply reduce() on the array, the dimension of the tile may vary        
         if (nztile <= 1) {
@@ -210,9 +211,8 @@ public class TiledVariable {
         return new int[]{nh * (tag % ntilex), nh * ((tag / ntilex) % ntiley), nv * ((tag / (ntilex * ntiley)) % ntilez)};
     }
 
-    private Array loadTile(int i, int j, int k) throws IOException, InvalidRangeException {
+    private Array loadTile(int tag) throws IOException, InvalidRangeException {
 
-        int tag = ijk2tag(i, j, k);
 //        if (log) {
 //            System.out.println("i " + i + " j " + j + " k " + k + " tag=" + tag);
 //        }
@@ -249,18 +249,16 @@ public class TiledVariable {
                 break;
         }
 
-        getLogger().log(Level.FINE, "Reading NetCDF variable {0} tile {1} ({2} : {3})", new Object[]{variable.getFullName(), Integer.toString(tag), Arrays.toString(origin), Arrays.toString(shape)});
+        getLogger().log(Level.FINE, "Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
         return variable.read(origin, shape).reduce();
     }
 
-    private Array getTile(int i, int j, int k) {
-
-        int tag = ijk2tag(i, j, k);
+    private Array getTile(int tag) {
 
         Future<Array> f = tiles.get(tag);
         if (f == null) {
             Callable<Array> readtile = () -> {
-                return loadTile(i, j, k);
+                return loadTile(tag);
             };
             FutureTask ft = new FutureTask(readtile);
             f = tiles.putIfAbsent(tag, ft);
@@ -276,5 +274,15 @@ public class TiledVariable {
         } catch (ExecutionException e) {
         }
         return null;
+    }
+
+    Set<Integer> getTilesIndex() {
+        return tiles.keySet();
+    }
+
+    void loadTiles(Set<Integer> tags) {
+            tags.forEach((tag) -> {
+                getTile(tag);
+            });
     }
 }
