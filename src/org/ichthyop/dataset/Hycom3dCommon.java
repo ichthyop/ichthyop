@@ -169,13 +169,6 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             vw[t] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
         }
         setAllFieldsTp1AtTime(0);
-        // trick to load surface mask
-        for (int i = 0; i < nx; i += tilingh) {
-            for (int j = 0; j < ny; j += tilingh) {
-                u[1].getDouble(i, j, 0);
-                v[1].getDouble(i, j, 0);
-            }
-        }
     }
 
     @Override
@@ -375,7 +368,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    int ci = xTore(i + ii - 1);
+                    int ci = Math.max(xTore(i + ii - 1), 0);
                     double co = Math.abs((.5d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
@@ -415,12 +408,13 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
                     int ci = xTore(i + ii);
+                    int cj = (int) Math.max(j + jj - 1, 0);
                     double co = Math.abs((1.d - (double) ii - dx)
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(v[0].getDouble(ci, j + jj - 1, k + kk)) || Double.isNaN(v[1].getDouble(ci, j + jj - 1, k + kk)))) {
-                        double x = (1.d - x_euler) * v[0].getDouble(ci, j + jj - 1, k + kk) + x_euler * v[1].getDouble(ci, j + jj - 1, k + kk);
+                    if (!(Double.isNaN(v[0].getDouble(ci, cj, k + kk)) || Double.isNaN(v[1].getDouble(ci, cj, k + kk)))) {
+                        double x = (1.d - x_euler) * v[0].getDouble(ci, cj, k + kk) + x_euler * v[1].getDouble(ci, cj, k + kk);
                         dv += x * co / dyv;
     }
                 }
