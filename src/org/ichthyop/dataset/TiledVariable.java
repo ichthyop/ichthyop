@@ -60,6 +60,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -283,8 +284,16 @@ public class TiledVariable {
     }
 
     void loadTiles(Set<Integer> tags) {
-            tags.forEach((tag) -> {
-                getTile(tag);
-            });
+        Executors.newSingleThreadExecutor().execute(() -> {
+            tags.forEach(
+                    (tag) -> {
+                        getTile(tag);
+                    }
+            );
+        });
+    }
+
+    String getSource() {
+        return nc.getLocation();
     }
 }

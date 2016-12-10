@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ichthyop.event.NextStepEvent;
 import ucar.nc2.NetcdfFile;
 
@@ -72,21 +71,40 @@ public class Hycom3dDataset extends Hycom3dCommon {
     void open() throws Exception {
         // List uv files
         uvFiles = DatasetUtil.list(getParameter("input_path"), getParameter("uv_file_pattern"));
-        nc = DatasetUtil.openFile(uvFiles.get(0), true);
+        index = 0;
     }
 
     @Override
     public void init() throws Exception {
-        DatasetUtil.sort(uvFiles, "time", timeArrow());
+        int time_arrow = timeArrow();
+        DatasetUtil.sort(uvFiles, "time", time_arrow);
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        index = DatasetUtil.index(uvFiles, t0, timeArrow(), "time");
-        nc.close();
-        nc = DatasetUtil.openFile(uvFiles.get(index), true);
+        index = DatasetUtil.index(uvFiles, t0, time_arrow, "time");
+        NetcdfFile nc = DatasetUtil.openFile(uvFiles.get(index), true);
         nbTimeRecords = nc.findDimension("time").getLength();
-        rank = DatasetUtil.rank(t0, nc, "time", timeArrow());
+        rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
         time_tp1 = t0;
-        setAllFieldsTp1AtTime(rank);
-        checkRequiredVariable(nc);
+
+        // t+1
+        u[1] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        v[1] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        w[1] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), rank);
+
+        // t+2
+        int rank2 = rank + time_arrow;
+        int index2 = index;
+        if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
+            index2 = DatasetUtil.next(uvFiles, index, time_arrow);
+            nc = DatasetUtil.openFile(uvFiles.get(index2), true);
+            int nbTimeRecords2 = nc.findDimension("time").getLength();
+            nc.close();
+            rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
+        }
+        u[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        v[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), rank2);
+
+        //checkRequiredVariable(nc);
     }
 
     @Override
@@ -104,40 +122,58 @@ public class Hycom3dDataset extends Hycom3dCommon {
         }
         u[0] = u[1];
         u[1] = u[2];
+
         if (null != v[0]) {
             v[0].clear();
         }
         v[0] = v[1];
         v[1] = v[2];
 
-        if (null != uw[0]) {
-            uw[0].clear();
+        if (null != w[0]) {
+            w[0].clear();
         }
-        uw[0] = uw[1];
-        uw[1] = uw[2];
-        
-        if (null != vw[0]) {
-            vw[0].clear();
-        }
-        vw[0] = vw[1];
-        vw[1] = vw[2];
-        
-        if (null != wmap[0]) {
-            wmap[0].clear();
-        }
-        wmap[0] = wmap[1];
+        w[0] = w[1];
+        w[1] = w[2];
 
+        // t+1
         rank += time_arrow;
-
         if (rank > (nbTimeRecords - 1) || rank < 0) {
-            nc.close();
             index = DatasetUtil.next(uvFiles, index, time_arrow);
-            nc = DatasetUtil.openFile(uvFiles.get(index), true);
+            NetcdfFile nc = DatasetUtil.openFile(uvFiles.get(index), true);
             nbTimeRecords = nc.findDimension("time").getLength();
+            nc.close();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
+        double time_tp0 = time_tp1;
+        NetcdfFile nc = DatasetUtil.openFile(uvFiles.get(index), true);
+        time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
+        nc.close();
+        dt_HyMo = Math.abs(time_tp1 - time_tp0);
 
-        setAllFieldsTp1AtTime(rank);
+        // t+2
+        int rank2 = rank + time_arrow;
+        int index2 = index;
+        if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
+            index2 = DatasetUtil.next(uvFiles, index, time_arrow);
+            nc = DatasetUtil.openFile(uvFiles.get(index2), true);
+            int nbTimeRecords2 = nc.findDimension("time").getLength();
+            nc.close();
+            rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
+        }
+        u[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+//        System.out.println("t+0 "+u[0].getSource());
+//        System.out.println("t+1 "+u[1].getSource());
+//        System.out.println("t+2 "+u[2].getSource());
+        v[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), rank2);
+        // pre-load tiles
+        u[2].loadTiles(u[0].getTilesIndex());
+        v[2].loadTiles(v[0].getTilesIndex());
+        w[2].loadTiles(w[0].getTilesIndex());
+
+//        for (RequiredVariable variable : requiredVariables.values()) {
+//            variable.nextStep(readVariable(nc, variable.getName(), rank), time_tp1, dt_HyMo);
+//        }
     }
 
     @Override

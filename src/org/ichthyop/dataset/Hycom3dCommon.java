@@ -54,7 +54,16 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
@@ -71,12 +80,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] latitude;
     double[] depthLevel;
     double[] ddepth, ddepthw;
-    private final int nt = 3;
+    final int nt = 3;
     TiledVariable[] u;
     TiledVariable[] v;
-    TiledVariable[] uw;
-    TiledVariable[] vw;
-    HashMap<Integer, double[]>[] wmap;
+    WTiledVariable[] w;
     int nx, ny, nz;
     int i0, j0;
     double[] dxu;
@@ -85,13 +92,13 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double dt_HyMo, time_tp1;
     int rank;
     float[][] bathymetry;
-    NetcdfFile nc;
+    //NetcdfFile nc;
     int nbTimeRecords;
     boolean xTore = true;
-    private final int tilingh = 100, tilingv = 3;
-    private final int tilinghw = 10;
+    final int tilingh = 100, tilingv = 3;
 
     abstract void open() throws Exception;
+
     abstract NetcdfFile getNC();
 
     @Override
@@ -103,12 +110,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     public void setUp() throws Exception {
 
         // Clear required variables
-        clearRequiredVariables();
-
+//        clearRequiredVariables();
         // Open NetCDF (abstract)
         open();
 
         // Read whole grid
+        NetcdfFile nc = getNC();
         // Latitude
         latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
         j0 = 0;
@@ -120,6 +127,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Depth
         depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
         nz = depthLevel.length;
+        nc.close();
 
         // Compute ddepth
         ddepth = new double[nz];
@@ -159,16 +167,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Read U & V for the mask
         u = new TiledVariable[nt];
         v = new TiledVariable[nt];
-        uw = new TiledVariable[nt];
-        vw = new TiledVariable[nt];
-        wmap = new HashMap[2];
-        for (int t = 0; t < nt; t++) {
-            u[t] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-            v[t] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-            uw[t] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
-            vw[t] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
-        }
-        setAllFieldsTp1AtTime(0);
+        w = new WTiledVariable[nt];
+        // Initializes u & v for the mask
+        u[0] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
+        v[0] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
     }
 
     @Override
@@ -376,7 +378,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                     if (!(Double.isNaN(u[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(u[1].getDouble(ci, j + jj, k + kk)))) {
                         double x = (1.d - x_euler) * u[0].getDouble(ci, j + jj, k + kk) + x_euler * u[1].getDouble(ci, j + jj, k + kk);
                         du += x * co / dxu[j + jj];
-    }
+                    }
                 }
             }
         }
@@ -416,7 +418,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                     if (!(Double.isNaN(v[0].getDouble(ci, cj, k + kk)) || Double.isNaN(v[1].getDouble(ci, cj, k + kk)))) {
                         double x = (1.d - x_euler) * v[0].getDouble(ci, cj, k + kk) + x_euler * v[1].getDouble(ci, cj, k + kk);
                         dv += x * co / dyv;
-    }
+                    }
                 }
             }
         }
@@ -435,6 +437,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
+        // Time fraction
+        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
         int k = (int) kz;
@@ -448,7 +453,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                     double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
                     if (isInWater(i + ii, j + jj)) {
-                        double x = getW(i + ii, j + jj, k + kk, time);
+                        double x = (1.d - dt) * w[0].getDouble(i + ii, j + jj, k + kk) + dt * w[1].getDouble(i + ii, j + jj, k + kk);
                         dw += 2.d * x * co / ddepthw[k + kk];
                     }
                 }
@@ -471,7 +476,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     private boolean isInWater(int i, int j, int k) {
         int ci = xTore(i);
-        return !Double.isNaN(u[1].getDouble(ci, j, k)) && !Double.isNaN(v[1].getDouble(ci, j, k));
+        return !Double.isNaN(u[0].getDouble(ci, j, k)) && !Double.isNaN(v[0].getDouble(ci, j, k));
     }
 
     @Override
@@ -668,115 +673,6 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return y;
     }
 
-    double getW(int i, int j, int k, double time) {
-
-        // Toricity
-        int ci = xTore(i);
-
-        // Check is in water
-        if (Double.isNaN(uw[1].getDouble(ci, j, k)) || Double.isNaN(vw[1].getDouble(ci, j, k))) {
-            return Double.NaN;
-        }
-
-        // Time fraction
-        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        // Unique cell index
-        int tag = (j * nx + ci);
-        // Check whether w needs to be computed
-        if (!wmap[0].containsKey(tag)) {
-            wmap[0].put(tag, computeW(uw[0], vw[0], ci, j));
-        }
-        if (!wmap[1].containsKey(tag)) {
-            wmap[1].put(tag, computeW(uw[1], vw[1], ci, j));
-        }
-        // Returns time interpolated w at (i, j)
-        return (1.d - dt) * wmap[0].get(tag)[k] + dt * wmap[1].get(tag)[k];
-    }
-
-    private double[] computeW(TiledVariable uw, TiledVariable vw, int i, int j) {
-
-        double[][] Huon = new double[nz][2];
-        double[][] Hvom = new double[nz][2];
-
-        int ci = i, cim1 = i - 1;
-        if (i == 0) {
-            ci = xTore ? i : i + 1;
-            cim1 = xTore ? nx - 1 : i;
-        }
-        int cj = (j == 0) ? j + 1 : j;
-        int cjm1 = (j == 0) ? j : j - 1;
-
-        for (int k = nz; k-- > 0;) {
-            Huon[k][1] = Double.isNaN(uw.getDouble(ci, cj, k))
-                    ? 0.d
-                    : uw.getDouble(ci, cj, k) * dyv * ddepth[k];
-            Huon[k][0] = Double.isNaN(uw.getDouble(cim1, cj, k))
-                    ? 0.d
-                    : uw.getDouble(cim1, cj, k) * dyv * ddepth[k];
-
-            Hvom[k][1] = Double.isNaN(vw.getDouble(ci, cj, k))
-                    ? 0.d
-                    : vw.getDouble(ci, cj, k) * dxu[j] * ddepth[k];
-            Hvom[k][0] = Double.isNaN(vw.getDouble(ci, cjm1, k))
-                    ? 0.d
-                    : vw.getDouble(ci, cjm1, k) * dxu[cjm1] * ddepth[k];
-        }
-
-        double[] w = new double[nz + 1];
-
-        // Find k0, index of the deepest cell in water
-        int k0 = nz - 1;
-        for (int k = nz - 1; k > 0; k--) {
-            if (!Double.isNaN(uw.getDouble(ci, cj, k)) && !Double.isNaN(vw.getDouble(ci, cj, k))) {
-                k0 = k;
-                break;
-            }
-        }
-
-        for (int k = nz; k > k0; k--) {
-            w[k] = 0.d;
-        }
-        for (int k = k0; k > 0; k--) {
-            w[k] = w[k + 1] - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
-            w[k] /= (dyv * dxu[cj]);
-        }
-        w[0] = 0.d;
-
-        return w;
-    }
-
-    void setAllFieldsTp1AtTime(int rank) throws Exception {
-
-        double time_tp0 = time_tp1;
-
-        u[nt - 1] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        v[nt - 1] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        uw[nt - 1] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
-        vw[nt - 1] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
-
-        u[nt - 1].loadTiles(u[0].getTilesIndex());
-        v[nt - 1].loadTiles(v[0].getTilesIndex());
-        uw[nt - 1].loadTiles(uw[0].getTilesIndex());
-        vw[nt - 1].loadTiles(vw[0].getTilesIndex());
-
-        try {
-            time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
-        } catch (IOException ex) {
-            IOException ioex = new IOException("Error reading dataset time variable. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-
-        dt_HyMo = Math.abs(time_tp1 - time_tp0);
-
-        for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(nc, variable.getName(), rank), time_tp1, dt_HyMo);
-        }
-
-        wmap[1] = new HashMap();
-    }
-
     void crop() throws IOException {
 
         float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
@@ -790,8 +686,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         pGrid1 = latlon2xy(lat1, lon1);
         pGrid2 = latlon2xy(lat2, lon2);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            throw new IOException(
-                    "Impossible to proportion the simulation area : points out of domain");
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
         }
 
         //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
@@ -803,6 +698,134 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         nx = Math.min(nx, ipn - i0 + 1);
         ny = Math.min(ny, jpn - j0 + 1);
         //System.out.println("i0 " + i0 + " nx " + nx + " j0 " + j0 + " ny " + ny);
+    }
+
+    class WTiledVariable {
+
+        private final ConcurrentMap<Integer, Future<double[]>> tiles;
+        private final TiledVariable uw;
+        private final TiledVariable vw;
+        private final int tilinghw = 10;
+        private final String ncfile;
+
+        WTiledVariable(NetcdfFile nc, int rank) {
+            ncfile = nc.getLocation();
+            tiles = new ConcurrentHashMap();
+            uw = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+            vw = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        }
+
+        void clear() {
+            tiles.clear();
+            uw.clear();
+            vw.clear();
+        }
+
+        private double getDouble(int i, int j, int k) {
+
+            // Toricity
+            int ci = xTore(i);
+
+            // Check is in water
+            if (Double.isNaN(uw.getDouble(ci, j, k)) || Double.isNaN(vw.getDouble(ci, j, k))) {
+                return Double.NaN;
+            }
+
+            return getTile(j * nx + ci)[k];
+        }
+
+        private double[] getTile(int tag) {
+            // Unique cell index
+            int j = tag / nx;
+            int i = tag % nx;
+
+            Future<double[]> f = tiles.get(tag);
+            if (f == null) {
+                Callable<double[]> readtile = () -> {
+                    return computeW(i, j);
+                };
+                FutureTask ft = new FutureTask(readtile);
+                f = tiles.putIfAbsent(tag, ft);
+                if (f == null) {
+                    f = ft;
+                    ft.run();
+                }
+            }
+            try {
+                return f.get();
+            } catch (CancellationException | InterruptedException e) {
+                tiles.remove(tag, f);
+            } catch (ExecutionException e) {
+            }
+            return null;
+        }
+
+        private double[] computeW(int i, int j) {
+
+            //getLogger().log(Level.INFO, "Compute W from "+ ncfile + " at "+ i + " " + j);
+            double[][] Huon = new double[nz][2];
+            double[][] Hvom = new double[nz][2];
+
+            int ci = i, cim1 = i - 1;
+            if (i == 0) {
+                ci = xTore ? i : i + 1;
+                cim1 = xTore ? nx - 1 : i;
+            }
+            int cj = (j == 0) ? j + 1 : j;
+            int cjm1 = (j == 0) ? j : j - 1;
+
+            for (int k = nz; k-- > 0;) {
+                Huon[k][1] = Double.isNaN(uw.getDouble(ci, cj, k))
+                        ? 0.d
+                        : uw.getDouble(ci, cj, k) * dyv * ddepth[k];
+                Huon[k][0] = Double.isNaN(uw.getDouble(cim1, cj, k))
+                        ? 0.d
+                        : uw.getDouble(cim1, cj, k) * dyv * ddepth[k];
+
+                Hvom[k][1] = Double.isNaN(vw.getDouble(ci, cj, k))
+                        ? 0.d
+                        : vw.getDouble(ci, cj, k) * dxu[j] * ddepth[k];
+                Hvom[k][0] = Double.isNaN(vw.getDouble(ci, cjm1, k))
+                        ? 0.d
+                        : vw.getDouble(ci, cjm1, k) * dxu[cjm1] * ddepth[k];
+            }
+
+            double[] w = new double[nz + 1];
+
+            // Find k0, index of the deepest cell in water
+            int k0 = nz - 1;
+            for (int k = nz - 1; k > 0; k--) {
+                if (!Double.isNaN(uw.getDouble(ci, cj, k)) && !Double.isNaN(vw.getDouble(ci, cj, k))) {
+                    k0 = k;
+                    break;
+                }
+            }
+
+            for (int k = nz; k > k0; k--) {
+                w[k] = 0.d;
+            }
+            for (int k = k0; k > 0; k--) {
+                w[k] = w[k + 1] - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
+                w[k] /= (dyv * dxu[cj]);
+            }
+            w[0] = 0.d;
+
+            return w;
+        }
+
+        void loadTiles(Set<Integer> tags) {
+            Executors.newSingleThreadExecutor().execute(() -> {
+                tags.forEach(
+                        (tag) -> {
+                            getTile(tag);
+                        }
+                );
+            });
+        }
+
+        Set<Integer> getTilesIndex() {
+            return tiles.keySet();
+        }
     }
 
 }

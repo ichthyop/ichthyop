@@ -60,6 +60,8 @@ import ucar.nc2.NetcdfFile;
  * @author pverley
  */
 public class Hycom3dOpendapDataset extends Hycom3dCommon {
+    
+    private NetcdfFile nc;
 
     @Override
     void open() throws Exception {
@@ -73,7 +75,7 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         nbTimeRecords = nc.findDimension("time").getLength();
         rank = DatasetUtil.rank(t0, nc, "time", timeArrow());
         time_tp1 = t0;
-        setAllFieldsTp1AtTime(rank);
+        //setAllFieldsTp1AtTime(rank);
         checkRequiredVariable(nc);
     }
 
@@ -89,18 +91,13 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
 
         u[0] = u[1];
         v[0] = v[1];
-        uw[0] = uw[1];
-        vw[0] = vw[1];
-        if (null != wmap[0]) {
-            wmap[0].clear();
-        }
-        wmap[0] = wmap[1];
+        w[0] = w[1];
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             nc.close();
             throw new IndexOutOfBoundsException("Time out of dataset range");
         }
-        setAllFieldsTp1AtTime(rank);
+        //setAllFieldsTp1AtTime(rank);
     }
 
     @Override
