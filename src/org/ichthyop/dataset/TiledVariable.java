@@ -56,13 +56,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import static org.ichthyop.manager.SimulationManager.getLogger;
 import ucar.ma2.Array;
@@ -78,7 +75,7 @@ public class TiledVariable {
 
     private final NetcdfFile nc;
     private final Variable variable;
-    private final ConcurrentMap<Integer, Future<Array>> tiles;
+    private final ConcurrentMap<Integer, Array> tiles;
     private final int nx, ny, nz;
     private final int i0, j0;
     private final int nh, nv;
@@ -214,69 +211,55 @@ public class TiledVariable {
 
     private Array loadTile(int tag) {
 
-        int[] ijktile = tag2ijk(tag);
-//        if (log) {
-//            System.out.println("tag=" + tag + " i0 " + ijktile[0] + " j0 " + ijktile[1] + " k0 " + ijktile[2]);
-//        }
-        int i0tile = i0 + ijktile[0];
-        int j0tile = j0 + ijktile[1];
-        int k0tile = ijktile[2];
-        int nxtile = ((tag + 1) % ntilex == 0) ? nx - ijktile[0] : nh;
-        int nytile = ((tag / ntilex + 1) % ntiley == 0) ? ny - ijktile[1] : nh;
-        int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ijktile[2] : nv;
+        synchronized (nc) {
+            int[] ijktile = tag2ijk(tag);
+            int i0tile = i0 + ijktile[0];
+            int j0tile = j0 + ijktile[1];
+            int k0tile = ijktile[2];
+            int nxtile = ((tag + 1) % ntilex == 0) ? nx - ijktile[0] : nh;
+            int nytile = ((tag / ntilex + 1) % ntiley == 0) ? ny - ijktile[1] : nh;
+            int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ijktile[2] : nv;
 
-        // load tile
-        int[] origin = null, shape = null;
-        switch (length) {
-            case 2:
-                origin = new int[]{j0tile, i0tile};
-                shape = new int[]{nytile, nxtile};
-                break;
-            case 3:
-                if (variable.isUnlimited()) {
-                    origin = new int[]{rank, j0tile, i0tile};
-                    shape = new int[]{1, nytile, nxtile};
-                } else {
-                    origin = new int[]{k0tile, j0tile, i0tile};
-                    shape = new int[]{nztile, nytile, nxtile};
-                }
-                break;
-            case 4:
-                origin = new int[]{rank, k0tile, j0tile, i0tile};
-                shape = new int[]{1, nztile, nytile, nxtile};
-                break;
-        }
+            // load tile
+            int[] origin = null, shape = null;
+            switch (length) {
+                case 2:
+                    origin = new int[]{j0tile, i0tile};
+                    shape = new int[]{nytile, nxtile};
+                    break;
+                case 3:
+                    if (variable.isUnlimited()) {
+                        origin = new int[]{rank, j0tile, i0tile};
+                        shape = new int[]{1, nytile, nxtile};
+                    } else {
+                        origin = new int[]{k0tile, j0tile, i0tile};
+                        shape = new int[]{nztile, nytile, nxtile};
+                    }
+                    break;
+                case 4:
+                    origin = new int[]{rank, k0tile, j0tile, i0tile};
+                    shape = new int[]{1, nztile, nytile, nxtile};
+                    break;
+            }
 
-        getLogger().log(Level.FINE, "Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
-        try {
-            return variable.read(origin, shape).reduce();
-        } catch (IOException | InvalidRangeException ex) {
-            getLogger().log(Level.SEVERE, "", ex);
+            getLogger().log(Level.FINE, "Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
+            try {
+                return variable.read(origin, shape).reduce();
+            } catch (IOException | InvalidRangeException ex) {
+                getLogger().log(Level.SEVERE, null, ex);
+            }
+            return null;
         }
-        return null;
     }
 
     private Array getTile(int tag) {
 
-        Future<Array> f = tiles.get(tag);
-        if (f == null) {
-            Callable<Array> readtile = () -> {
-                return loadTile(tag);
-            };
-            FutureTask ft = new FutureTask(readtile);
-            f = tiles.putIfAbsent(tag, ft);
-            if (f == null) {
-                f = ft;
-                ft.run();
+        synchronized (tiles) {
+            if (!tiles.containsKey(tag)) {
+                tiles.putIfAbsent(tag, loadTile(tag));
             }
+            return tiles.get(tag);
         }
-        try {
-            return f.get();
-        } catch (CancellationException | InterruptedException e) {
-            tiles.remove(tag, f);
-        } catch (ExecutionException e) {
-        }
-        return null;
     }
 
     Set<Integer> getTilesIndex() {
@@ -284,16 +267,31 @@ public class TiledVariable {
     }
 
     void loadTiles(Set<Integer> tags) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            tags.forEach(
-                    (tag) -> {
-                        getTile(tag);
-                    }
-            );
-        });
+
+        ExecutorService pool = Executors.newCachedThreadPool();
+        tags.forEach(
+                (tag) -> {
+                    pool.submit(new LoadTileTask(tag));
+                }
+        );
+        pool.shutdown();
     }
 
     String getSource() {
         return nc.getLocation();
+    }
+
+    private class LoadTileTask implements Callable<Array> {
+
+        private final int tag;
+
+        LoadTileTask(int tag) {
+            this.tag = tag;
+        }
+
+        @Override
+        public Array call() throws Exception {
+            return getTile(tag);
+        }
     }
 }

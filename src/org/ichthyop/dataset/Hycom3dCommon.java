@@ -60,6 +60,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -702,7 +703,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     class WTiledVariable {
 
-        private final ConcurrentMap<Integer, Future<double[]>> tiles;
+        private final ConcurrentMap<Integer, double[]> tiles;
         private final TiledVariable uw;
         private final TiledVariable vw;
         private final int tilinghw = 10;
@@ -738,31 +739,17 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             // Unique cell index
             int j = tag / nx;
             int i = tag % nx;
-
-            Future<double[]> f = tiles.get(tag);
-            if (f == null) {
-                Callable<double[]> readtile = () -> {
-                    return computeW(i, j);
-                };
-                FutureTask ft = new FutureTask(readtile);
-                f = tiles.putIfAbsent(tag, ft);
-                if (f == null) {
-                    f = ft;
-                    ft.run();
+            synchronized (tiles) {
+                if (!tiles.containsKey(tag)) {
+                    tiles.putIfAbsent(tag, computeW(i, j));
                 }
+                return tiles.get(tag);
             }
-            try {
-                return f.get();
-            } catch (CancellationException | InterruptedException e) {
-                tiles.remove(tag, f);
-            } catch (ExecutionException e) {
-            }
-            return null;
         }
 
         private double[] computeW(int i, int j) {
 
-            //getLogger().log(Level.INFO, "Compute W from "+ ncfile + " at "+ i + " " + j);
+//getLogger().log(Level.INFO, "Compute W from "+ ncfile + " at "+ i + " " + j);
             double[][] Huon = new double[nz][2];
             double[][] Hvom = new double[nz][2];
 
@@ -814,17 +801,31 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
 
         void loadTiles(Set<Integer> tags) {
-            Executors.newSingleThreadExecutor().execute(() -> {
-                tags.forEach(
-                        (tag) -> {
-                            getTile(tag);
-                        }
-                );
-            });
+            ExecutorService pool = Executors.newCachedThreadPool();
+            tags.forEach(
+                    (tag) -> {
+                        pool.submit(new LoadTileTask(rank));
+                    }
+            );
+            pool.shutdown();
         }
 
         Set<Integer> getTilesIndex() {
             return tiles.keySet();
+        }
+
+        private class LoadTileTask implements Callable<double[]> {
+
+            private final int rank;
+
+            LoadTileTask(int rank) {
+                this.rank = rank;
+            }
+
+            @Override
+            public double[] call() throws Exception {
+                return getTile(rank);
+            }
         }
     }
 
