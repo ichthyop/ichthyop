@@ -59,6 +59,7 @@ package org.ichthyop.particle;
  */
 public enum ParticleMortality {
 
+    ERROR(-1),
     ALIVE(0),
     DEAD_COLD(1),
     OUT_OF_DOMAIN(2),

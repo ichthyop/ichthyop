@@ -50,18 +50,20 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
+import java.util.logging.Level;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.event.SetupListener;
 import org.ichthyop.manager.SimulationManager;
+import static org.ichthyop.manager.SimulationManager.getLogger;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.Particle;
+import org.ichthyop.particle.ParticleMortality;
 
 /**
  * The Population is the intermediate level of the hierarchy of the IBM:
@@ -90,7 +92,7 @@ public class Population extends ArrayList implements SetupListener {
      * particles, the simulation will make use of the multi thread environment
      * (if any).
      */
-    private final int THRESHOLD = 1000;
+    private final int THRESHOLD = 2000;
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -171,14 +173,18 @@ public class Population extends ArrayList implements SetupListener {
 
         /**
          * Loop over the subset of particles and apply the
-         * {@link org.ichthyop.particle.MasterParticle#step()}
-         * function.
+         * {@link org.ichthyop.particle.MasterParticle#step()} function.
          */
         private void processDirectly() {
             for (int iParticle = iStart; iParticle < iEnd; iParticle++) {
                 Particle particle = (Particle) Population.this.get(iParticle);
-                if (particle.isLiving()) {
-                    particle.step();
+                try {
+                    if (particle.isLiving()) {
+                        particle.step();
+                    }
+                } catch (Exception ex) {
+                    getLogger().log(Level.SEVERE, null, ex);
+                    particle.kill(ParticleMortality.ERROR);
                 }
             }
         }
@@ -188,7 +194,7 @@ public class Population extends ArrayList implements SetupListener {
 
             // Size of the subset
             int nParticle = iEnd - iStart;
-            if (nParticle < THRESHOLD) {
+            if (nParticle < Math.max(THRESHOLD, size() / Runtime.getRuntime().availableProcessors())) {
                 // If the size of the subset is smaller than the THRESHOLD,
                 // process directly the whole subset
                 processDirectly();
