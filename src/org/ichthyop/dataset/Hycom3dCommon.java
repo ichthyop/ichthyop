@@ -107,17 +107,30 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         // Read whole grid
         NetcdfFile nc = getNC();
+        Array array;
         // Latitude
-        latitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "latitude").read().copyTo1DJavaArray();
+        array = nc.findVariableByAttribute(null, "standard_name", "latitude").read().reduce();
+        ny = array.getShape()[0];
+        latitude = new double[ny];
+        for (int j = 0; j < ny; j++) {
+            latitude[j] = array.getDouble(j);
+        }
         j0 = 0;
-        ny = latitude.length;
         // Longitude
-        longitude = (double[]) nc.findVariableByAttribute(null, "standard_name", "longitude").read().copyTo1DJavaArray();
+        array = nc.findVariableByAttribute(null, "standard_name", "longitude").read().reduce();
+        nx = array.getShape()[0];
+        longitude = new double[nx];
+        for (int i = 0; i < nx; i++) {
+            longitude[i] = array.getDouble(i);
+        }
         i0 = 0;
-        nx = longitude.length;
         // Depth
-        depthLevel = (double[]) nc.findVariableByAttribute(null, "standard_name", "depth").read().copyTo1DJavaArray();
-        nz = depthLevel.length;
+        array = nc.findVariableByAttribute(null, "standard_name", "depth").read().reduce();
+        nz = array.getShape()[0];
+        depthLevel = new double[nz];
+        for (int k = 0; k < nz; k++) {
+            depthLevel[k] = array.getDouble(k);
+        }
         nc.close();
 
         // Compute ddepth
@@ -155,11 +168,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Domain geographical extension
         extent();
 
-        // Read U & V for the mask
         u = new NetcdfTiledVariable[nt];
         v = new NetcdfTiledVariable[nt];
         w = new WTiledVariable[nt];
-        // Initializes u & v for the mask
+        // Initializes u[0] & v[0] for the mask
         u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
         v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
     }
