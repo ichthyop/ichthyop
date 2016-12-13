@@ -672,7 +672,7 @@ public class Mercator2dDataset extends AbstractDataset {
                     found2 = true;
                 } else {
                     di = (int) Math.max(1, di / 2);
-                    dj = (int) Math.max(1, di / 2);
+                    dj = (int) Math.max(1, dj / 2);
                     found1 = false;
                 }
             }
