@@ -154,16 +154,17 @@ public class Hycom3dDataset extends Hycom3dCommon {
         int rank2 = rank + time_arrow;
         int index2 = index;
         if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
+            try {
             index2 = DatasetUtil.next(uvFiles, index, time_arrow);
+            } catch(IOException ex) {
+                return;
+            }
             nc = DatasetUtil.openFile(uvFiles.get(index2), true);
             int nbTimeRecords2 = nc.findDimension("time").getLength();
             nc.close();
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }
         u[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
-//        System.out.println("t+0 "+u[0].getSource());
-//        System.out.println("t+1 "+u[1].getSource());
-//        System.out.println("t+2 "+u[2].getSource());
         v[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
         w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), nx, ny, nz, i0, j0, tilinghw, rank2);
         // pre-load tiles

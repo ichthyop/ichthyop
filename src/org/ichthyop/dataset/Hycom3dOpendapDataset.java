@@ -60,7 +60,7 @@ import ucar.nc2.NetcdfFile;
  * @author pverley
  */
 public class Hycom3dOpendapDataset extends Hycom3dCommon {
-    
+
     private NetcdfFile nc;
 
     @Override
@@ -71,12 +71,23 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
     @Override
     public void init() throws Exception {
 
+        int time_arrow = timeArrow();
+
         double t0 = getSimulationManager().getTimeManager().get_tO();
         nbTimeRecords = nc.findDimension("time").getLength();
-        rank = DatasetUtil.rank(t0, nc, "time", timeArrow());
+        rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
         time_tp1 = t0;
-        //setAllFieldsTp1AtTime(rank);
-        checkRequiredVariable(nc);
+
+        u[1] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        v[1] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        w[1] = new WTiledVariable(nc, nx, ny, nz, i0, j0, tilinghw, rank);
+
+        // t+2
+        u[2] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank + time_arrow, tilingh, tilingv);
+        v[2] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank + time_arrow, tilingh, tilingv);
+        w[2] = new WTiledVariable(nc, nx, ny, nz, i0, j0, tilinghw, rank + time_arrow);
+
+        //checkRequiredVariable(nc);
     }
 
     @Override
@@ -90,14 +101,35 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         }
 
         u[0] = u[1];
+        u[1] = u[2];
         v[0] = v[1];
+        v[1] = v[2];
         w[0] = w[1];
+        w[1] = w[2];
+
+        // t+1
         rank += time_arrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             nc.close();
             throw new IndexOutOfBoundsException("Time out of dataset range");
         }
-        //setAllFieldsTp1AtTime(rank);
+        double time_tp0 = time_tp1;
+        time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
+        dt_HyMo = Math.abs(time_tp1 - time_tp0);
+
+        // t+2
+        int rank2 = rank + time_arrow;
+        if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
+            nc.close();
+            return;
+        }
+        u[2] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        v[2] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        w[2] = new WTiledVariable(nc, nx, ny, nz, i0, j0, tilinghw, rank2);
+        // pre-load tiles
+        u[2].loadTiles(u[0].getTilesIndex());
+        v[2].loadTiles(v[0].getTilesIndex());
+        w[2].loadTiles(w[0].getTilesIndex());
     }
 
     @Override
