@@ -86,9 +86,9 @@ public class Hycom3dDataset extends Hycom3dCommon {
         time_tp1 = t0;
 
         // t+1
-        u[1] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        v[1] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
-        w[1] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), rank);
+        u[1] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        v[1] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilingh, tilingv);
+        w[1] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), nx, ny, nz, i0, j0, tilinghw, rank);
 
         // t+2
         int rank2 = rank + time_arrow;
@@ -100,9 +100,9 @@ public class Hycom3dDataset extends Hycom3dCommon {
             nc.close();
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }
-        u[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
-        v[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
-        w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), rank2);
+        u[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        v[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), nx, ny, nz, i0, j0, tilinghw, rank2);
 
         //checkRequiredVariable(nc);
     }
@@ -160,12 +160,12 @@ public class Hycom3dDataset extends Hycom3dCommon {
             nc.close();
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }
-        u[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        u[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
 //        System.out.println("t+0 "+u[0].getSource());
 //        System.out.println("t+1 "+u[1].getSource());
 //        System.out.println("t+2 "+u[2].getSource());
-        v[2] = new TiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
-        w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), rank2);
+        v[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, tilingh, tilingv);
+        w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), nx, ny, nz, i0, j0, tilinghw, rank2);
         // pre-load tiles
         u[2].loadTiles(u[0].getTilesIndex());
         v[2].loadTiles(v[0].getTilesIndex());

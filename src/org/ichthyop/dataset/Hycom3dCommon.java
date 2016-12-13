@@ -54,20 +54,10 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.logging.Level;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
+import ucar.ma2.ArrayDouble;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -82,8 +72,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] depthLevel;
     double[] ddepth, ddepthw;
     final int nt = 3;
-    TiledVariable[] u;
-    TiledVariable[] v;
+    NetcdfTiledVariable[] u;
+    NetcdfTiledVariable[] v;
     WTiledVariable[] w;
     int nx, ny, nz;
     int i0, j0;
@@ -96,7 +86,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     //NetcdfFile nc;
     int nbTimeRecords;
     boolean xTore = true;
-    final int tilingh = 100, tilingv = 3;
+    final int tilingh = 100, tilingv = 3, tilinghw = 10;
 
     abstract void open() throws Exception;
 
@@ -166,12 +156,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         extent();
 
         // Read U & V for the mask
-        u = new TiledVariable[nt];
-        v = new TiledVariable[nt];
+        u = new NetcdfTiledVariable[nt];
+        v = new NetcdfTiledVariable[nt];
         w = new WTiledVariable[nt];
         // Initializes u & v for the mask
-        u[0] = new TiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
-        v[0] = new TiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
+        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
+        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
     }
 
     @Override
@@ -701,55 +691,23 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         //System.out.println("i0 " + i0 + " nx " + nx + " j0 " + j0 + " ny " + ny);
     }
 
-    class WTiledVariable {
+    public class WTiledVariable extends AbstractTiledVariable {
 
-        private final ConcurrentMap<Integer, double[]> tiles;
-        private final TiledVariable uw;
-        private final TiledVariable vw;
-        private final int tilinghw = 10;
-        private final String ncfile;
+        private final NetcdfTiledVariable uw;
+        private final NetcdfTiledVariable vw;
 
-        WTiledVariable(NetcdfFile nc, int rank) {
-            ncfile = nc.getLocation();
-            tiles = new ConcurrentHashMap();
-            uw = new TiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
-            vw = new TiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, tilinghw, nz);
+        WTiledVariable(NetcdfFile nc, int nx, int ny, int nz, int i0, int j0, int nh, int rank) {
+            super(nx, ny, nz, 1, nz);
+            uw = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, nh, nz);
+            vw = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, nh, nz);
         }
 
-        void clear() {
-            tiles.clear();
-            uw.clear();
-            vw.clear();
-        }
+        @Override
+        Array loadTile(int tag) {
 
-        private double getDouble(int i, int j, int k) {
-
-            // Toricity
-            int ci = xTore(i);
-
-            // Check is in water
-            if (Double.isNaN(uw.getDouble(ci, j, k)) || Double.isNaN(vw.getDouble(ci, j, k))) {
-                return Double.NaN;
-            }
-
-            return getTile(j * nx + ci)[k];
-        }
-
-        private double[] getTile(int tag) {
-            // Unique cell index
             int j = tag / nx;
             int i = tag % nx;
-            synchronized (tiles) {
-                if (!tiles.containsKey(tag)) {
-                    tiles.putIfAbsent(tag, computeW(i, j));
-                }
-                return tiles.get(tag);
-            }
-        }
 
-        private double[] computeW(int i, int j) {
-
-//getLogger().log(Level.INFO, "Compute W from "+ ncfile + " at "+ i + " " + j);
             double[][] Huon = new double[nz][2];
             double[][] Hvom = new double[nz][2];
 
@@ -777,8 +735,6 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                         : vw.getDouble(ci, cjm1, k) * dxu[cjm1] * ddepth[k];
             }
 
-            double[] w = new double[nz + 1];
-
             // Find k0, index of the deepest cell in water
             int k0 = nz - 1;
             for (int k = nz - 1; k > 0; k--) {
@@ -788,45 +744,24 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                 }
             }
 
+            Array w = new ArrayDouble.D1(nz + 1);
             for (int k = nz; k > k0; k--) {
-                w[k] = 0.d;
+                w.setDouble(k, 0.d);
             }
             for (int k = k0; k > 0; k--) {
-                w[k] = w[k + 1] - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
-                w[k] /= (dyv * dxu[cj]);
+                double wtmp = w.getDouble(k + 1) - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
+                wtmp /= (dyv * dxu[cj]);
+                w.setDouble(k, wtmp);
             }
-            w[0] = 0.d;
+            w.setDouble(0, 0.d);
 
             return w;
         }
 
-        void loadTiles(Set<Integer> tags) {
-            ExecutorService pool = Executors.newCachedThreadPool();
-            tags.forEach(
-                    (tag) -> {
-                        pool.submit(new LoadTileTask(rank));
-                    }
-            );
-            pool.shutdown();
-        }
-
-        Set<Integer> getTilesIndex() {
-            return tiles.keySet();
-        }
-
-        private class LoadTileTask implements Callable<double[]> {
-
-            private final int rank;
-
-            LoadTileTask(int rank) {
-                this.rank = rank;
-            }
-
-            @Override
-            public double[] call() throws Exception {
-                return getTile(rank);
-            }
+        @Override
+        void closeSource() {
+            uw.clear();
+            vw.clear();
         }
     }
-
 }
