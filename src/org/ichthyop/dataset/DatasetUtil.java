@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.dataset;
 
 import java.io.File;
@@ -292,6 +291,29 @@ public class DatasetUtil {
         return lrank;
     }
 
+    public static String findVariable(NetcdfFile nc, String name) {
+
+        for (Variable variable : nc.getVariables()) {
+            String vname = variable.getFullName();
+            if (vname.equalsIgnoreCase(name)) {
+                return vname;
+            }
+            Attribute sname = variable.findAttributeIgnoreCase("standard_name");
+            if (null != sname) {
+                if (sname.getStringValue().equalsIgnoreCase(name)) {
+                    return vname;
+                }
+            }
+            Attribute lname = variable.findAttributeIgnoreCase("long_name");
+            if (null != lname) {
+                if (lname.getStringValue().equalsIgnoreCase(name)) {
+                    return vname;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Guess whether time is expressed in seconds in the NetCDF file and if not
      * return a conversion value to adjust it to seconds. So far it detects
@@ -402,7 +424,7 @@ public class DatasetUtil {
 
         double d = 2 * 6367000.d
                 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
-                                + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
+                        + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
 
         return d;
     }

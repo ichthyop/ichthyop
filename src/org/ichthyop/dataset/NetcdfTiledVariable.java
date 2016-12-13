@@ -54,9 +54,7 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.ichthyop.manager.SimulationManager.getLogger;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -78,18 +76,22 @@ public class NetcdfTiledVariable extends AbstractTiledVariable {
     /*
      * 2D Tile Variable
      */
-    public NetcdfTiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int i0, int j0, int rank, int nh) {
-        this(nc, standardName, nx, ny, 0, i0, j0, rank, nh, 1);
+    public NetcdfTiledVariable(NetcdfFile nc, String name, int nx, int ny, int i0, int j0, int rank, int nh) throws IOException {
+        this(nc, name, nx, ny, 0, i0, j0, rank, nh, 1);
     }
 
     /*
      * 3D Tile Variable
      */
-    public NetcdfTiledVariable(NetcdfFile nc, String standardName, int nx, int ny, int nz, int i0, int j0, int rank, int nh, int nv) {
+    public NetcdfTiledVariable(NetcdfFile nc, String name, int nx, int ny, int nz, int i0, int j0, int rank, int nh, int nv) throws IOException {
 
         super(nx, ny, nz, nh, nv);
         this.nc = nc;
-        this.variable = this.nc.findVariableByAttribute(null, "standard_name", standardName);
+        String vname = DatasetUtil.findVariable(nc, name);
+        if (null == vname) {
+            throw new IOException("Variable " + name + "not found in " + nc.getLocation());
+        }
+        this.variable = this.nc.findVariable(vname);
         this.i0 = i0;
         this.j0 = j0;
         this.rank = rank;

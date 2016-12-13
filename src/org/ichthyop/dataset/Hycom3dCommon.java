@@ -109,7 +109,11 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         NetcdfFile nc = getNC();
         Array array;
         // Latitude
-        array = nc.findVariableByAttribute(null, "standard_name", "latitude").read().reduce();
+        String name = DatasetUtil.findVariable(nc, "latitude");
+        if (null == name) {
+            throw new IOException("Latitude variable not found in HYCOM dataset");
+        }
+        array = nc.findVariable(name).read().reduce();
         ny = array.getShape()[0];
         latitude = new double[ny];
         for (int j = 0; j < ny; j++) {
@@ -117,7 +121,11 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
         j0 = 0;
         // Longitude
-        array = nc.findVariableByAttribute(null, "standard_name", "longitude").read().reduce();
+        name = DatasetUtil.findVariable(nc, "longitude");
+        if (null == name) {
+            throw new IOException("Longitude variable not found in HYCOM dataset");
+        }
+        array = nc.findVariable(name).read().reduce();
         nx = array.getShape()[0];
         longitude = new double[nx];
         for (int i = 0; i < nx; i++) {
@@ -125,7 +133,11 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
         i0 = 0;
         // Depth
-        array = nc.findVariableByAttribute(null, "standard_name", "depth").read().reduce();
+        name = DatasetUtil.findVariable(nc, "depth");
+        if (null == name) {
+            throw new IOException("Depth variable not found in HYCOM dataset");
+        }
+        array = nc.findVariable(name).read().reduce();
         nz = array.getShape()[0];
         depthLevel = new double[nz];
         for (int k = 0; k < nz; k++) {
@@ -708,7 +720,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         private final NetcdfTiledVariable uw;
         private final NetcdfTiledVariable vw;
 
-        WTiledVariable(NetcdfFile nc, int nx, int ny, int nz, int i0, int j0, int nh, int rank) {
+        WTiledVariable(NetcdfFile nc, int nx, int ny, int nz, int i0, int j0, int nh, int rank) throws IOException {
             super(nx, ny, nz, 1, nz);
             uw = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, nh, nz);
             vw = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, nh, nz);
