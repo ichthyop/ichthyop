@@ -50,9 +50,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
+import java.io.BufferedWriter;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.io.BlockType;
@@ -62,10 +62,14 @@ import org.ichthyop.io.XParameter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ichthyop.Version;
 import org.ichthyop.io.ConfigurationFile;
 
@@ -170,9 +174,117 @@ public class ParameterManager extends AbstractManager {
 
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
+        //asProperties();
     }
 
     public void initializePerformed(InitializeEvent e) {
         // does nothing
+    }
+
+    private void asProperties() throws IOException {
+
+        String file = cfgFile.getFile().toString().replaceAll("xml$", "cfg");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            String newline = System.getProperty("line.separator");
+
+            writer.write("# " + cfgFile.getLongName() + newline);
+            writer.write("# " + cfgFile.getDescription() + newline);
+            writer.write(newline);
+            writer.write("ichthyop.version=" + cfgFile.getVersion().toString() + newline);
+            writer.write(newline);
+            for (XBlock block : readBlocks()) {
+                writer.write("#" + newline);
+                writer.write("# " + block.getKey().replaceAll("[\\._]", " ").toUpperCase() + newline);
+                writer.write("#" + newline);
+                StringBuilder str = new StringBuilder();
+                str.append(block.getKey());
+                str.append(".description=");
+                str.append(block.getDescription());
+                str.append(newline);
+                writer.write(str.toString());
+
+                str = new StringBuilder();
+                str.append(block.getKey());
+                str.append(".enabled=");
+                str.append(block.isEnabled());
+                str.append(newline);
+                writer.write(str.toString());
+
+                str = new StringBuilder();
+                str.append(block.getKey());
+                str.append(".treepath=");
+                str.append(block.getTreePath());
+                writer.write(str.toString());
+
+                str = new StringBuilder();
+                str.append(block.getKey());
+                str.append(".type=");
+                str.append(block.getType());
+                str.append(newline);
+                writer.write(str.toString());
+                for (XParameter parameter : block.getXParameters()) {
+                    writer.write("#" + newline);
+                    str.append(newline);
+                    str = new StringBuilder();
+                    str.append(block.getKey());
+                    str.append(".");
+                    str.append(parameter.getKey());
+                    str.append(".long_name=");
+                    str.append(nullify(parameter.getLongName()));
+                    str.append(newline);
+                    writer.write(str.toString());
+
+                    str = new StringBuilder();
+                    str.append(block.getKey());
+                    str.append(".");
+                    str.append(parameter.getKey());
+                    str.append(".format=");
+                    str.append(nullify(parameter.getFormat().toString()));
+                    str.append(newline);
+                    writer.write(str.toString());
+
+                    str = new StringBuilder();
+                    str.append(block.getKey());
+                    str.append(".");
+                    str.append(parameter.getKey());
+                    str.append(".description=");
+                    str.append(nullify(parameter.getDescription()));
+                    str.append(newline);
+                    writer.write(str.toString());
+
+                    str = new StringBuilder();
+                    str.append(block.getKey());
+                    str.append(".");
+                    str.append(parameter.getKey());
+                    str.append(".default=");
+                    str.append(nullify(parameter.getDefault()));
+                    str.append(newline);
+                    writer.write(str.toString());
+
+                    str = new StringBuilder();
+                    str.append(block.getKey());
+                    str.append(".");
+                    str.append(parameter.getKey());
+                    str.append(".accepted=");
+                    str.append(Arrays.toString(parameter.getAcceptedValues()));
+                    str.append(newline);
+                    writer.write(str.toString());
+
+                    str = new StringBuilder();
+                    str.append(block.getKey());
+                    str.append(".");
+                    str.append(parameter.getKey());
+                    str.append("=");
+                    str.append(nullify(parameter.getValue()));
+                    str.append(newline);
+                    writer.write(str.toString());
+
+                }
+            }
+        }
+    }
+
+    private String nullify(String str) {
+        return str.isEmpty() ? "null" : str;
     }
 }
