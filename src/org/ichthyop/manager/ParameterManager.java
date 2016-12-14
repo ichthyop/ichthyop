@@ -174,7 +174,7 @@ public class ParameterManager extends AbstractManager {
 
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
-        asProperties();
+        //asProperties();
     }
 
     public void initializePerformed(InitializeEvent e) {
