@@ -81,7 +81,11 @@ public class Hycom3dDataset extends Hycom3dCommon {
         double t0 = getSimulationManager().getTimeManager().get_tO();
         index = DatasetUtil.index(uvFiles, t0, time_arrow, "time");
         NetcdfFile nc = DatasetUtil.openFile(uvFiles.get(index), true);
-        nbTimeRecords = nc.findDimension("time").getLength();
+        String name = DatasetUtil.findVariable(nc, "time");
+        if (null == name) {
+            throw new IOException("Time variable not found in HYCOM dataset");
+        }
+        nbTimeRecords = nc.findVariable(name).getShape()[0];
         rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
         time_tp1 = t0;
 
@@ -96,7 +100,7 @@ public class Hycom3dDataset extends Hycom3dCommon {
         if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
             index2 = DatasetUtil.next(uvFiles, index, time_arrow);
             nc = DatasetUtil.openFile(uvFiles.get(index2), true);
-            int nbTimeRecords2 = nc.findDimension("time").getLength();
+            int nbTimeRecords2 = nc.findVariable(name).getShape()[0];
             nc.close();
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }
@@ -140,7 +144,7 @@ public class Hycom3dDataset extends Hycom3dCommon {
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             index = DatasetUtil.next(uvFiles, index, time_arrow);
             NetcdfFile nc = DatasetUtil.openFile(uvFiles.get(index), true);
-            nbTimeRecords = nc.findDimension("time").getLength();
+            nbTimeRecords = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
             nc.close();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
@@ -155,12 +159,12 @@ public class Hycom3dDataset extends Hycom3dCommon {
         int index2 = index;
         if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
             try {
-            index2 = DatasetUtil.next(uvFiles, index, time_arrow);
-            } catch(IOException ex) {
+                index2 = DatasetUtil.next(uvFiles, index, time_arrow);
+            } catch (IOException ex) {
                 return;
             }
             nc = DatasetUtil.openFile(uvFiles.get(index2), true);
-            int nbTimeRecords2 = nc.findDimension("time").getLength();
+            int nbTimeRecords2 = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
             nc.close();
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }

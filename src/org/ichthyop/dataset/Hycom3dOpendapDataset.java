@@ -52,6 +52,7 @@
  */
 package org.ichthyop.dataset;
 
+import java.io.IOException;
 import org.ichthyop.event.NextStepEvent;
 import ucar.nc2.NetcdfFile;
 
@@ -74,7 +75,9 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         int time_arrow = timeArrow();
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        nbTimeRecords = nc.findDimension("time").getLength();
+        String name = DatasetUtil.findVariable(nc, "time");
+        if (null==name) throw new IOException("Time variable not found in HYCOM dataset");
+        nbTimeRecords = nc.findVariable(name).getShape()[0];
         rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
         time_tp1 = t0;
 

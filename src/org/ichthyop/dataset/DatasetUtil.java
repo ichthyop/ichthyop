@@ -130,8 +130,8 @@ public class DatasetUtil {
             throw new FileNotFoundException(file);
         }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
-        Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
+        Array timeArr = nc.findVariable(findVariable(nc, strTime)).read();
+        double convert = guessTimeConversion(nc.findVariable(findVariable(nc, strTime)));
         nc.close();
         return convert == 1.d
                 ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(0)))
@@ -151,8 +151,8 @@ public class DatasetUtil {
             throw new FileNotFoundException(file);
         }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
-        Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
+        Array timeArr = nc.findVariable(findVariable(nc, strTime)).read();
+        double convert = guessTimeConversion(nc.findVariable(findVariable(nc, strTime)));
         nc.close();
         return convert == 1.d
                 ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1)))
@@ -160,8 +160,8 @@ public class DatasetUtil {
     }
 
     public static double timeAtRank(NetcdfFile nc, String strTime, int rank) throws IOException {
-        Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
+        Array timeArr = nc.findVariable(findVariable(nc, strTime)).read();
+        double convert = guessTimeConversion(nc.findVariable(findVariable(nc, strTime)));
         return (convert == 1.d)
                 ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(rank)))
                 : convert * timeArr.getDouble(timeArr.getIndex().set(rank));
@@ -269,8 +269,9 @@ public class DatasetUtil {
         double nctime;
         Array timeArr = null;
         try {
-            timeArr = nc.findVariable(strTime).read();
-            double convert = guessTimeConversion(nc.findVariable(strTime));
+            Variable vtime = nc.findVariable(findVariable(nc, strTime));
+            double convert = guessTimeConversion(vtime);
+            timeArr = vtime.read();
             nctime = (convert == 1)
                     ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(lrank)))
                     : timeArr.getDouble(timeArr.getIndex().set(lrank)) * convert;
