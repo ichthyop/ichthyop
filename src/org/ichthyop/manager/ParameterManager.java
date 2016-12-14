@@ -174,7 +174,7 @@ public class ParameterManager extends AbstractManager {
 
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
-        //asProperties();
+        asProperties();
     }
 
     public void initializePerformed(InitializeEvent e) {
@@ -183,25 +183,33 @@ public class ParameterManager extends AbstractManager {
 
     private void asProperties() throws IOException {
 
+        boolean extended = true;
+
         String file = cfgFile.getFile().toString().replaceAll("xml$", "cfg");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             String newline = System.getProperty("line.separator");
 
+            writer.write("# " + newline);
             writer.write("# " + cfgFile.getLongName() + newline);
-            writer.write("# " + cfgFile.getDescription() + newline);
-            writer.write(newline);
+            if (extended) {
+                writer.write("# " + cfgFile.getDescription() + newline);
+            }
+            writer.write("# " + newline);
             writer.write("ichthyop.version=" + cfgFile.getVersion().toString() + newline);
-            writer.write(newline);
             for (XBlock block : readBlocks()) {
                 writer.write("#" + newline);
-                writer.write("# " + block.getKey().replaceAll("[\\._]", " ").toUpperCase() + newline);
-                writer.write("#" + newline);
+                if (extended) {
+                    writer.write("# " + block.getKey().replaceAll("[\\._]", " ").toUpperCase() + newline);
+                    writer.write("#" + newline);
+                }
                 StringBuilder str = new StringBuilder();
                 str.append(block.getKey());
                 str.append(".description=");
                 str.append(block.getDescription());
                 str.append(newline);
-                writer.write(str.toString());
+                if (extended) {
+                    writer.write(str.toString());
+                }
 
                 str = new StringBuilder();
                 str.append(block.getKey());
@@ -214,16 +222,23 @@ public class ParameterManager extends AbstractManager {
                 str.append(block.getKey());
                 str.append(".treepath=");
                 str.append(block.getTreePath());
-                writer.write(str.toString());
+                if (extended) {
+                    writer.write(str.toString());
+                }
 
                 str = new StringBuilder();
                 str.append(block.getKey());
                 str.append(".type=");
                 str.append(block.getType());
                 str.append(newline);
-                writer.write(str.toString());
+                if (block.getType() != BlockType.OPTION) {
+                    writer.write(str.toString());
+                }
+
                 for (XParameter parameter : block.getXParameters()) {
-                    writer.write("#" + newline);
+                    if (extended) {
+                        writer.write("#" + newline);
+                    }
                     str.append(newline);
                     str = new StringBuilder();
                     str.append(block.getKey());
@@ -232,7 +247,9 @@ public class ParameterManager extends AbstractManager {
                     str.append(".long_name=");
                     str.append(nullify(parameter.getLongName()));
                     str.append(newline);
-                    writer.write(str.toString());
+                    if (extended) {
+                        writer.write(str.toString());
+                    }
 
                     str = new StringBuilder();
                     str.append(block.getKey());
@@ -241,7 +258,9 @@ public class ParameterManager extends AbstractManager {
                     str.append(".format=");
                     str.append(nullify(parameter.getFormat().toString()));
                     str.append(newline);
-                    writer.write(str.toString());
+                    if (extended) {
+                        writer.write(str.toString());
+                    }
 
                     str = new StringBuilder();
                     str.append(block.getKey());
@@ -250,7 +269,9 @@ public class ParameterManager extends AbstractManager {
                     str.append(".description=");
                     str.append(nullify(parameter.getDescription()));
                     str.append(newline);
-                    writer.write(str.toString());
+                    if (extended) {
+                        writer.write(str.toString());
+                    }
 
                     str = new StringBuilder();
                     str.append(block.getKey());
@@ -259,7 +280,9 @@ public class ParameterManager extends AbstractManager {
                     str.append(".default=");
                     str.append(nullify(parameter.getDefault()));
                     str.append(newline);
-                    writer.write(str.toString());
+                    if (extended) {
+                        writer.write(str.toString());
+                    }
 
                     str = new StringBuilder();
                     str.append(block.getKey());
@@ -268,7 +291,9 @@ public class ParameterManager extends AbstractManager {
                     str.append(".accepted=");
                     str.append(Arrays.toString(parameter.getAcceptedValues()));
                     str.append(newline);
-                    writer.write(str.toString());
+                    if (extended) {
+                        writer.write(str.toString());
+                    }
 
                     str = new StringBuilder();
                     str.append(block.getKey());
@@ -278,7 +303,6 @@ public class ParameterManager extends AbstractManager {
                     str.append(nullify(parameter.getValue()));
                     str.append(newline);
                     writer.write(str.toString());
-
                 }
             }
         }
