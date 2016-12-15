@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import java.util.logging.Level;
@@ -63,7 +62,7 @@ import org.ichthyop.particle.ParticleMortality;
  */
 public class AdvectionAction extends AbstractAction {
 
-    private boolean isEuler;
+    private boolean isRK4;
     private boolean isForward;
     private boolean horizontal;
     private boolean vertical;
@@ -75,12 +74,12 @@ public class AdvectionAction extends AbstractAction {
 
         /* numerical scheme */
         try {
-            isEuler = getParameter("scheme").equals(AdvectionScheme.FORWARD_EULER.getName());
+            isRK4 = getParameter("scheme").equals(AdvectionScheme.RUNGE_KUTTA_4.getName());
         } catch (Exception ex) {
             /*  set RK4 as default in case could not determine the scheme
              * defined by user.
              */
-            isEuler = false;
+            isRK4 = true;
             // print the info in the log
             getLogger().log(Level.INFO, "Failed to read the advection numerical scheme. Set by default to {0}", AdvectionScheme.RUNGE_KUTTA_4.getName());
         }
@@ -102,7 +101,7 @@ public class AdvectionAction extends AbstractAction {
             vertical = true;
         }
     }
-    
+
     @Override
     public void init(IParticle particle) {
         // Nothing to do
@@ -111,18 +110,18 @@ public class AdvectionAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
         if (isForward) {
-            advectForward(particle, getSimulationManager().getTimeManager().getTime());
+            moveForwardInTime(particle, getSimulationManager().getTimeManager().getTime());
         } else {
-            advectBackward(particle, getSimulationManager().getTimeManager().getTime());
+            moveBackwardInTime(particle, getSimulationManager().getTimeManager().getTime());
         }
     }
 
-    private void advectForward(IParticle particle, double time) throws
+    private void moveForwardInTime(IParticle particle, double time) throws
             ArrayIndexOutOfBoundsException {
 
-        double[] mvt = isEuler
-                ? advectEuler(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt())
-                : advectRk4(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt());
+        double[] mvt = isRK4
+                ? computeMoveRK4(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt())
+                : computeMove(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt());
         //Logger.getAnonymousLogger().info("dx " + mvt[0] + " dy " + mvt[1] + " dz " + mvt[2]);
         if (!horizontal) {
             mvt[0] = 0;
@@ -134,7 +133,7 @@ public class AdvectionAction extends AbstractAction {
         particle.increment(mvt);
     }
 
-    private double[] advectEuler(double pGrid[], double time, double dt) {
+    private double[] computeMove(double pGrid[], double time, double dt) {
 
         int dim = pGrid.length;
         double[] dU = new double[dim];
@@ -158,9 +157,8 @@ public class AdvectionAction extends AbstractAction {
     }
 
     /**
-     * Advects the particle forward in time with the apropriate scheme (Euler
-     * or Runge Kutta 4).
-     * The process is a bit more complex than forward advection.
+     * Advects the particle forward in time with the appropriate scheme (Euler or
+     * Runge Kutta 4). The process is a bit more complex than forward advection.
      * <pre>
      * Let's take X(t) = |x, y, z the particle vector position at time = t.
      * X1(t - dt) = X(t) - Ua(t, x, y, z)dt with vector X1 = |x1, y1, z1
@@ -168,14 +166,14 @@ public class AdvectionAction extends AbstractAction {
      * With Ua the input model velocity vector.
      * </pre>
      */
-    private void advectBackward(IParticle particle, double time) throws
+    private void moveBackwardInTime(IParticle particle, double time) throws
             ArrayIndexOutOfBoundsException {
 
         double[] mvt, pgrid;
         double dt = getSimulationManager().getTimeManager().get_dt();
 
-        if (isEuler) {
-            mvt = advectEuler(pgrid = particle.getGridCoordinates(), time, dt);
+        if (isRK4) {
+            mvt = computeMove(pgrid = particle.getGridCoordinates(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }
@@ -183,9 +181,9 @@ public class AdvectionAction extends AbstractAction {
                 particle.kill(ParticleMortality.OUT_OF_DOMAIN);
                 return;
             }
-            mvt = advectEuler(pgrid, time, dt);
+            mvt = computeMove(pgrid, time, dt);
         } else {
-            mvt = advectRk4(pgrid = particle.getGridCoordinates(), time, dt);
+            mvt = computeMoveRK4(pgrid = particle.getGridCoordinates(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
             }
@@ -193,7 +191,7 @@ public class AdvectionAction extends AbstractAction {
                 particle.kill(ParticleMortality.OUT_OF_DOMAIN);
                 return;
             }
-            mvt = advectRk4(pgrid, time, dt);
+            mvt = computeMoveRK4(pgrid, time, dt);
         }
 
         if (!horizontal) {
@@ -217,25 +215,25 @@ public class AdvectionAction extends AbstractAction {
      * @throws an ArrayIndexOutOfBoundsException if the particle is out of the
      * domain.
      */
-    private double[] advectRk4(double[] p0, double time,
+    private double[] computeMoveRK4(double[] p0, double time,
             double dt) throws ArrayIndexOutOfBoundsException {
 
         int dim = p0.length;
         double[] dU = new double[dim];
         double[] pk = new double[dim];
 
-        double[] k1 = advectEuler(p0, time, dt);
+        double[] k1 = computeMove(p0, time, dt);
 
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + .5d * k1[i];
         }
         if (getSimulationManager().getDataset().isOnEdge(pk)) {
-            return (dim > 2) 
+            return (dim > 2)
                     ? new double[]{.5d * k1[0], .5d * k1[1], 0}
                     : new double[]{.5d * k1[0], .5d * k1[1]};
         }
 
-        double[] k2 = advectEuler(pk, time + dt / 2, dt);
+        double[] k2 = computeMove(pk, time + dt / 2, dt);
 
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + .5d * k2[i];
@@ -246,7 +244,7 @@ public class AdvectionAction extends AbstractAction {
                     : new double[]{.5d * k2[0], .5d * k2[1]};
         }
 
-        double[] k3 = advectEuler(pk, time + dt / 2, dt);
+        double[] k3 = computeMove(pk, time + dt / 2, dt);
 
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + k3[i];
@@ -257,7 +255,7 @@ public class AdvectionAction extends AbstractAction {
                     : new double[]{k3[0], k3[1]};
         }
 
-        double[] k4 = advectEuler(pk, time + dt, dt);
+        double[] k4 = computeMove(pk, time + dt, dt);
 
         for (int i = 0; i < dim; i++) {
             dU[i] = (k1[i] + 2.d * k2[i] + 2.d * k3[i] + k4[i]) / 6.d;
@@ -270,8 +268,8 @@ public class AdvectionAction extends AbstractAction {
 
         FORWARD_EULER("euler", "Forward Euler"),
         RUNGE_KUTTA_4("rk4", "Runge Kutta 4");
-        private String key;
-        private String name;
+        private final String key;
+        private final String name;
 
         AdvectionScheme(String key, String name) {
             this.key = key;
