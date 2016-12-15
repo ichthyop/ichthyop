@@ -368,25 +368,23 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     @Override
     public double get_dUx(double[] pGrid, double time) {
         double du = 0.d;
-        double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+        double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) Math.round(ix);
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-        for (int ii = 0; ii < 2; ii++) {
+
+        for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    int ci = Math.max(xTore(i + ii - 1), 0);
-                    double co = Math.abs((.5d - (double) ii - dx)
+                    int ci = Math.max(xTore(i + ii), 0);
+                    double co = Math.abs((1.d - (double) ii - dx)
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
@@ -406,32 +404,29 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
-        double ix, jy, kz;
+
         int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+        double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (int) Math.round(jy);
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
 
-        for (int jj = 0; jj < 2; jj++) {
+        for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
                     int ci = xTore(i + ii);
-                    int cj = (int) Math.max(j + jj - 1, 0);
                     double co = Math.abs((1.d - (double) ii - dx)
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Double.isNaN(v[0].getDouble(ci, cj, k + kk)) || Double.isNaN(v[1].getDouble(ci, cj, k + kk)))) {
-                        double x = (1.d - x_euler) * v[0].getDouble(ci, cj, k + kk) + x_euler * v[1].getDouble(ci, cj, k + kk);
+                    if (!(Double.isNaN(v[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(v[1].getDouble(ci, j + jj, k + kk)))) {
+                        double x = (1.d - x_euler) * v[0].getDouble(ci, j + jj, k + kk) + x_euler * v[1].getDouble(ci, j + jj, k + kk);
                         dv += x * co / dyv;
                     }
                 }
@@ -446,20 +441,17 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     @Override
     public double get_dWz(double[] pGrid, double time) {
         double dw = 0.d;
-        double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
-        kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
+        double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         // Time fraction
         double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
 
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
         for (int ii = 0; ii < n; ii++) {
