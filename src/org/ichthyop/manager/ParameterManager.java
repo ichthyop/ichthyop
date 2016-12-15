@@ -67,9 +67,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map.Entry;
 import org.ichthyop.Version;
 import org.ichthyop.io.ConfigurationFile;
 
@@ -79,11 +80,11 @@ import org.ichthyop.io.ConfigurationFile;
  */
 public class ParameterManager extends AbstractManager {
 
-    private static ParameterManager parameterManager = new ParameterManager();
+    private static final ParameterManager MANAGER = new ParameterManager();
     private ConfigurationFile cfgFile;
 
     public static ParameterManager getInstance() {
-        return parameterManager;
+        return MANAGER;
     }
 
     public void setConfigurationFile(File file) throws Exception {
@@ -172,143 +173,145 @@ public class ParameterManager extends AbstractManager {
         cfgFile.addBlock(block);
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
-        //asProperties();
+//        toCSV(toProperties(cfgFile, true), "=");
+//        toJson(toProperties(cfgFile, true));
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) {
         // does nothing
     }
 
-    private void asProperties() throws IOException {
+    public HashMap<String, String> toProperties(ConfigurationFile cfg, boolean extended) throws IOException {
+        HashMap<String, String> map = new LinkedHashMap();
 
-        boolean extended = true;
+        map.put("configuration.longname", cfgFile.getLongName());
+        map.put("configuration.description", clean(cfgFile.getDescription()));
+        map.put("ichthyop.version", cfgFile.getVersion().toString());
+        for (XBlock block : cfg.readBlocks()) {
+            map.put(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
+            if (extended) {
+                map.put(block.getKey() + ".description", clean(block.getDescription()));
+                map.put(block.getKey() + ".treepath", block.getTreePath());
+            }
+            if (block.getType() != BlockType.OPTION) {
+                map.put(block.getKey() + ".type", block.getType().toString());
+            }
+            block.getXParameters().forEach((parameter) -> {
+                StringBuilder key;
+                if (extended) {
+                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".long_name");
+                    map.put(key.toString(), parameter.getLongName());
+                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".format");
+                    map.put(key.toString(), nullify(parameter.getFormat().toString()));
+                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".description");
+                    map.put(key.toString(), clean(nullify(parameter.getDescription())));
+                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".default");
+                    map.put(key.toString(), handleArray(nullify(parameter.getDefault())));
+                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".accepted");
+                    map.put(key.toString(), handleArray(parameter.getAcceptedValues()));
+                }
+                key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey());
+                map.put(key.toString(), handleArray(nullify(parameter.getValue())));
+            });
+        }
+
+        return map;
+    }
+
+    private void toCSV(HashMap<String, String> parameters, String separator) throws IOException {
 
         String file = cfgFile.getFile().toString().replaceAll("xml$", "cfg");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             String newline = System.getProperty("line.separator");
 
-            writer.write("# " + newline);
-            writer.write("# " + cfgFile.getLongName() + newline);
-            if (extended) {
-                writer.write("# " + cfgFile.getDescription() + newline);
-            }
-            writer.write("# " + newline);
-            writer.write("ichthyop.version=" + cfgFile.getVersion().toString() + newline);
-            for (XBlock block : readBlocks()) {
-                writer.write("#" + newline);
-                if (extended) {
-                    writer.write("# " + block.getKey().replaceAll("[\\._]", " ").toUpperCase() + newline);
-                    writer.write("#" + newline);
-                }
+            for (Entry<String, String> parameter : parameters.entrySet()) {
                 StringBuilder str = new StringBuilder();
-                str.append(block.getKey());
-                str.append(".description=");
-                str.append(block.getDescription());
-                str.append(newline);
-                if (extended) {
-                    writer.write(str.toString());
-                }
-
-                str = new StringBuilder();
-                str.append(block.getKey());
-                str.append(".enabled=");
-                str.append(block.isEnabled());
+                str.append(parameter.getKey());
+                str.append(separator);
+                String value = parameter.getValue();
+                str.append(isNotString(value) ? value : "\"" + value + "\"");
                 str.append(newline);
                 writer.write(str.toString());
-
-                str = new StringBuilder();
-                str.append(block.getKey());
-                str.append(".treepath=");
-                str.append(block.getTreePath());
-                if (extended) {
-                    writer.write(str.toString());
-                }
-
-                str = new StringBuilder();
-                str.append(block.getKey());
-                str.append(".type=");
-                str.append(block.getType());
-                str.append(newline);
-                if (block.getType() != BlockType.OPTION) {
-                    writer.write(str.toString());
-                }
-
-                for (XParameter parameter : block.getXParameters()) {
-                    if (extended) {
-                        writer.write("#" + newline);
-                    }
-                    str.append(newline);
-                    str = new StringBuilder();
-                    str.append(block.getKey());
-                    str.append(".");
-                    str.append(parameter.getKey());
-                    str.append(".long_name=");
-                    str.append(nullify(parameter.getLongName()));
-                    str.append(newline);
-                    if (extended) {
-                        writer.write(str.toString());
-                    }
-
-                    str = new StringBuilder();
-                    str.append(block.getKey());
-                    str.append(".");
-                    str.append(parameter.getKey());
-                    str.append(".format=");
-                    str.append(nullify(parameter.getFormat().toString()));
-                    str.append(newline);
-                    if (extended) {
-                        writer.write(str.toString());
-                    }
-
-                    str = new StringBuilder();
-                    str.append(block.getKey());
-                    str.append(".");
-                    str.append(parameter.getKey());
-                    str.append(".description=");
-                    str.append(nullify(parameter.getDescription()));
-                    str.append(newline);
-                    if (extended) {
-                        writer.write(str.toString());
-                    }
-
-                    str = new StringBuilder();
-                    str.append(block.getKey());
-                    str.append(".");
-                    str.append(parameter.getKey());
-                    str.append(".default=");
-                    str.append(nullify(parameter.getDefault()));
-                    str.append(newline);
-                    if (extended) {
-                        writer.write(str.toString());
-                    }
-
-                    str = new StringBuilder();
-                    str.append(block.getKey());
-                    str.append(".");
-                    str.append(parameter.getKey());
-                    str.append(".accepted=");
-                    str.append(Arrays.toString(parameter.getAcceptedValues()));
-                    str.append(newline);
-                    if (extended) {
-                        writer.write(str.toString());
-                    }
-
-                    str = new StringBuilder();
-                    str.append(block.getKey());
-                    str.append(".");
-                    str.append(parameter.getKey());
-                    str.append("=");
-                    str.append(nullify(parameter.getValue()));
-                    str.append(newline);
-                    writer.write(str.toString());
-                }
             }
         }
     }
 
+    private void toJson(HashMap<String, String> parameters) throws IOException {
+
+        String file = cfgFile.getFile().toString().replaceAll("xml$", "json");
+        String newline = System.getProperty("line.separator");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write("{" + newline);
+            int k = 0;
+            int size = parameters.size();
+            for (Entry<String, String> parameter : parameters.entrySet()) {
+                StringBuilder str = new StringBuilder();
+                str.append("\"");
+                str.append(parameter.getKey());
+                str.append("\"");
+                str.append(":");
+                String value = parameter.getValue();
+                str.append(isNotString(value) ? value : "\"" + value + "\"");
+                if (++k < size) {
+                    str.append(",");
+                }
+                str.append(newline);
+                writer.write(str.toString());
+            }
+            writer.write("}" + newline);
+        }
+    }
+
+    private String clean(String str) {
+        return str.replaceAll("[\"'\u2018\u2019\u201c\u201d\u201f]", "");
+    }
+
+    private boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");
+    }
+
+    private boolean isBoolean(String str) {
+        return Boolean.TRUE.toString().equalsIgnoreCase(str) || Boolean.FALSE.toString().equalsIgnoreCase(str);
+    }
+
+    private boolean isArray(String str) {
+        return str.startsWith("[") && str.endsWith("]");
+    }
+
+    private boolean isNotString(String str) {
+        return isNumeric(str) || isBoolean(str) || isArray(str) || str.equalsIgnoreCase("null");
+    }
+
     private String nullify(String str) {
         return str.isEmpty() ? "null" : str;
+    }
+
+    private String handleArray(String[] values) {
+
+        String[] array = new String[values.length];
+        for (int k = 0; k < array.length; k++) {
+            array[k] = isNotString(values[k]) ? values[k] : "\"" + values[k] + "\"";
+        }
+        return Arrays.toString(array);
+    }
+
+    private String handleArray(String value) {
+        String[] tokens = value.split("\"");
+        List<String> list = new ArrayList();
+        for (String token : tokens) {
+            String str = token.trim();
+            if (!str.isEmpty()) {
+                list.add(isNotString(str) ? str : "\"" + str + "\"");
+            }
+        }
+        if (list.size() > 1) {
+            return Arrays.toString(list.toArray(new String[list.size()]));
+        } else {
+            return value;
+        }
     }
 }
