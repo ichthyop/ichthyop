@@ -107,44 +107,44 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         open();
 
         // Read whole grid
-        NetcdfFile nc = getNC();
-        Array array;
-        // Latitude
-        String name = DatasetUtil.findVariable(nc, "latitude");
-        if (null == name) {
-            throw new IOException("Latitude variable not found in HYCOM dataset");
+        try (NetcdfFile nc = getNC()) {
+            Array array;
+            // Latitude
+            String name = DatasetUtil.findVariable(nc, "latitude");
+            if (null == name) {
+                throw new IOException("Latitude variable not found in HYCOM dataset");
+            }
+            array = nc.findVariable(name).read().reduce();
+            ny = array.getShape()[0];
+            latitude = new double[ny];
+            for (int j = 0; j < ny; j++) {
+                latitude[j] = array.getDouble(j);
+            }
+            j0 = 0;
+            // Longitude
+            name = DatasetUtil.findVariable(nc, "longitude");
+            if (null == name) {
+                throw new IOException("Longitude variable not found in HYCOM dataset");
+            }
+            array = nc.findVariable(name).read().reduce();
+            nx = array.getShape()[0];
+            longitude = new double[nx];
+            for (int i = 0; i < nx; i++) {
+                longitude[i] = array.getDouble(i);
+            }
+            i0 = 0;
+            // Depth
+            name = DatasetUtil.findVariable(nc, "depth");
+            if (null == name) {
+                throw new IOException("Depth variable not found in HYCOM dataset");
+            }
+            array = nc.findVariable(name).read().reduce();
+            nz = array.getShape()[0];
+            depthLevel = new double[nz];
+            for (int k = 0; k < nz; k++) {
+                depthLevel[k] = array.getDouble(k);
+            }
         }
-        array = nc.findVariable(name).read().reduce();
-        ny = array.getShape()[0];
-        latitude = new double[ny];
-        for (int j = 0; j < ny; j++) {
-            latitude[j] = array.getDouble(j);
-        }
-        j0 = 0;
-        // Longitude
-        name = DatasetUtil.findVariable(nc, "longitude");
-        if (null == name) {
-            throw new IOException("Longitude variable not found in HYCOM dataset");
-        }
-        array = nc.findVariable(name).read().reduce();
-        nx = array.getShape()[0];
-        longitude = new double[nx];
-        for (int i = 0; i < nx; i++) {
-            longitude[i] = array.getDouble(i);
-        }
-        i0 = 0;
-        // Depth
-        name = DatasetUtil.findVariable(nc, "depth");
-        if (null == name) {
-            throw new IOException("Depth variable not found in HYCOM dataset");
-        }
-        array = nc.findVariable(name).read().reduce();
-        nz = array.getShape()[0];
-        depthLevel = new double[nz];
-        for (int k = 0; k < nz; k++) {
-            depthLevel[k] = array.getDouble(k);
-        }
-        nc.close();
 
         // Compute ddepth
         ddepth = new double[nz];
@@ -367,15 +367,21 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return 1.d / distance;
     }
 
+    private boolean isOut(int i, int j, int k) {
+        return i < 0 || j < 0 || k < 0 || i > nx - 1 || j > ny - 1 || k > nz - 1;
+    }
+
     private double interpolateIDW(AbstractTiledVariable[] tv, double[] pGrid, double time) {
 
         double value = 0.d;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-
+        boolean coast = isCloseToCost(pGrid);
+        int n[] = coast ? new int[]{0, 1} : new int[]{0, 2}; // 8 points
+        //int n[] = coast ? new int[]{0, 1} : new int[] {-1, 3}; // 16 points
+        //int n[] = coast ? new int[]{0, 1} : new int[] {-2, 4}; // 64 points
+        int i = coast ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = coast ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
+        int k = coast ? (int) Math.round(pGrid[2]) : (int) pGrid[2];
         double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
-        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
-        int k = (int) Math.max(0.d, Math.min(pGrid[2], nz - 1.00001d));
         double CO = 0.d;
 
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
@@ -386,10 +392,13 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                 value = (1.d - dt) * tv[0].getDouble(i, j, k) + dt * tv[1].getDouble(i, j, k);
             }
         } else {
-            for (int ii = 0; ii < n; ii++) {
-                for (int jj = 0; jj < n; jj++) {
-                    for (int kk = 0; kk < 2; kk++) {
-                        int ci = Math.max(xTore(i + ii), 0);
+            for (int ii = n[0]; ii < n[1]; ii++) {
+                for (int jj = n[0]; jj < n[1]; jj++) {
+                    for (int kk = n[0]; kk < n[1]; kk++) {
+                        int ci = xTore(i + ii);
+                        if (isOut(ci, j + jj, k + kk)) {
+                            continue;
+                        }
                         double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
                         CO += co;
                         if (!(Double.isNaN(tv[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(tv[1].getDouble(ci, j + jj, k + kk)))) {
@@ -433,7 +442,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     private boolean isInWater(int i, int j, int k) {
         int ci = xTore(i);
-        return !Double.isNaN(u[0].getDouble(ci, j, k)) && !Double.isNaN(v[0].getDouble(ci, j, k));
+        return !Double.isNaN(u[0].getDouble(ci, j, k));
     }
 
     @Override
