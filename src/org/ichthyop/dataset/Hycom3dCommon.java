@@ -70,7 +70,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     double[] longitude;
     double[] latitude;
     double[] depthLevel;
-    double[] ddepth, ddepthw;
+    double[] ddepth;
     final int nt = 3;
     NetcdfTiledVariable[] u;
     NetcdfTiledVariable[] v;
@@ -152,13 +152,6 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         ddepth[nz - 1] = 0.5 * Math.abs(depthLevel[nz - 2] - depthLevel[nz - 1]);
         for (int k = 1; k < nz - 1; k++) {
             ddepth[k] = 0.5 * Math.abs(depthLevel[k - 1] - depthLevel[k + 1]);
-        }
-        // Compute ddepthw
-        ddepthw = new double[nz + 1];
-        ddepthw[0] = 0.5 * Math.abs(depthLevel[0] - depthLevel[1]);
-        ddepthw[nz] = 0.5 * Math.abs(depthLevel[nz - 2] - depthLevel[nz - 1]);
-        for (int k = 1; k < nz; k++) {
-            ddepthw[k] = Math.abs(depthLevel[k - 1] - depthLevel[k]);
         }
 
         // Crop the grid
@@ -491,7 +484,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             }
         }
         if (CO != 0) {
-            dw /= (CO * ddepthw[(int) Math.round(pGrid[2])]);
+            dw /= (CO * ddepth[(int) Math.round(pGrid[2])]);
         }
         return dw;
     }
@@ -759,7 +752,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             int cj = (j == 0) ? j + 1 : j;
             int cjm1 = (j == 0) ? j : j - 1;
 
-            for (int k = nz; k-- > 0;) {
+            for (int k = 0; k < nz; k++) {
                 Huon[k][1] = Double.isNaN(uw.getDouble(ci, cj, k))
                         ? 0.d
                         : uw.getDouble(ci, cj, k) * dyv * ddepth[k];
@@ -778,18 +771,18 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             // Find k0, index of the deepest cell in water
             int k0 = nz - 1;
             for (int k = nz - 1; k > 0; k--) {
-                if (!Double.isNaN(uw.getDouble(ci, cj, k)) && !Double.isNaN(vw.getDouble(ci, cj, k))) {
+                if (!Double.isNaN(uw.getDouble(ci, cj, k))) {
                     k0 = k;
                     break;
                 }
             }
 
-            Array w = new ArrayDouble.D1(nz + 1);
-            for (int k = nz; k > k0; k--) {
+            Array w = new ArrayDouble.D1(nz);
+            for (int k = nz - 1; k > k0; k--) {
                 w.setDouble(k, 0.d);
             }
             for (int k = k0; k > 0; k--) {
-                double wtmp = w.getDouble(k + 1) - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
+                double wtmp = ((k > nz - 2) ? 0. : w.getDouble(k + 1)) - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
                 wtmp /= (dyv * dxu[cj]);
                 w.setDouble(k, wtmp);
             }
