@@ -324,23 +324,6 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     }
 
     double getDepth(double xRho, double yRho, int k) {
-
-//        final int i = (int) xRho;
-//        final int j = (int) yRho;
-//        double hh = 0.d;
-//        final double dx = (xRho - i);
-//        final double dy = (yRho - j);
-//        for (int ii = 0; ii < 2; ii++) {
-//            for (int jj = 0; jj < 2; jj++) {
-//                if (isInWater(i + ii, j + jj)) {
-//                    double co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-//                    double z_r = depth[k]
-//                            + (double) ssh_tp0[j + jj][i + ii] * (1.d + depth[k]/bathy[nz-1]);
-//                    hh += co * z_r;
-//                }
-//            }
-//        }
-//        return (hh);
         return -depthLevel[k];
     }
 
