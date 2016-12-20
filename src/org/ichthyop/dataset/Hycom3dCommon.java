@@ -367,24 +367,23 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return 1.d / distance;
     }
 
-    @Override
-    public double get_dUx(double[] pGrid, double time) {
-        double du = 0.d;
+    private double interpolateIDW(AbstractTiledVariable[] tv, double[] pGrid, double time) {
+
+        double value = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
-        double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
         double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
-        int k = (int) kz;
+        int k = (int) Math.max(0.d, Math.min(pGrid[2], nz - 1.00001d));
         double CO = 0.d;
 
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
             // pGrid falls on a grid point
             CO = 1.d;
             i = xTore(i);
-            if (!(Double.isNaN(u[0].getDouble(i, j, k)) || Double.isNaN(u[1].getDouble(i, j, k)))) {
-                du = (1.d - dt) * u[0].getDouble(i, j, k) + dt * u[1].getDouble(i, j, k);
+            if (!(Double.isNaN(tv[0].getDouble(i, j, k)) || Double.isNaN(tv[1].getDouble(i, j, k)))) {
+                value = (1.d - dt) * tv[0].getDouble(i, j, k) + dt * tv[1].getDouble(i, j, k);
             }
         } else {
             for (int ii = 0; ii < n; ii++) {
@@ -393,100 +392,34 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                         int ci = Math.max(xTore(i + ii), 0);
                         double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
                         CO += co;
-                        if (!(Double.isNaN(u[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(u[1].getDouble(ci, j + jj, k + kk)))) {
-                            double x = (1.d - dt) * u[0].getDouble(ci, j + jj, k + kk) + dt * u[1].getDouble(ci, j + jj, k + kk);
-                            du += x * co;
+                        if (!(Double.isNaN(tv[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(tv[1].getDouble(ci, j + jj, k + kk)))) {
+                            double x = (1.d - dt) * tv[0].getDouble(ci, j + jj, k + kk) + dt * tv[1].getDouble(ci, j + jj, k + kk);
+                            value += x * co;
                         }
                     }
                 }
             }
         }
         if (CO != 0) {
-            du /= (CO * dxu[(int) Math.round(pGrid[1])]);
+            value /= CO;
         }
-        return du;
+
+        return value;
+    }
+
+    @Override
+    public double get_dUx(double[] pGrid, double time) {
+        return interpolateIDW(u, pGrid, time) / dxu[(int) Math.round(pGrid[1])];
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        double dv = 0.d;
-
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
-        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
-        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
-        int k = (int) kz;
-        double CO = 0.d;
-
-        if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
-            // pGrid falls on a grid point
-            CO = 1.d;
-            i = xTore(i);
-            if (!(Double.isNaN(v[0].getDouble(i, j, k)) || Double.isNaN(v[1].getDouble(i, j, k)))) {
-                dv = (1.d - dt) * v[0].getDouble(i, j, k) + dt * v[1].getDouble(i, j, k);
-            }
-        } else {
-            for (int jj = 0; jj < n; jj++) {
-                for (int ii = 0; ii < n; ii++) {
-                    for (int kk = 0; kk < 2; kk++) {
-                        int ci = xTore(i + ii);
-                        double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
-                        CO += co;
-                        if (!(Double.isNaN(v[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(v[1].getDouble(ci, j + jj, k + kk)))) {
-                            double x = (1.d - dt) * v[0].getDouble(ci, j + jj, k + kk) + dt * v[1].getDouble(ci, j + jj, k + kk);
-                            dv += x * co;
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            dv /= (CO * dyv);
-        }
-        return dv;
+        return interpolateIDW(v, pGrid, time) / dyv;
     }
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        double dw = 0.d;
-        int n = isCloseToCost(pGrid) ? 1 : 2;
-        double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-
-        // Time fraction
-        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
-        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
-        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
-        int k = (int) kz;
-        double CO = 0.d;
-
-        if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
-            // pGrid falls on a grid point
-            CO = 1.d;
-            i = xTore(i);
-            if (!(Double.isNaN(w[0].getDouble(i, j, k)) || Double.isNaN(w[1].getDouble(i, j, k)))) {
-                dw = (1.d - dt) * w[0].getDouble(i, j, k) + dt * w[1].getDouble(i, j, k);
-            }
-        } else {
-            for (int ii = 0; ii < n; ii++) {
-                for (int jj = 0; jj < n; jj++) {
-                    for (int kk = 0; kk < 2; kk++) {
-                        double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
-                        CO += co;
-                        if (isInWater(i + ii, j + jj)) {
-                            double x = (1.d - dt) * w[0].getDouble(i + ii, j + jj, k + kk) + dt * w[1].getDouble(i + ii, j + jj, k + kk);
-                            dw += 2.d * x * co;
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            dw /= (CO * ddepth[(int) Math.round(pGrid[2])]);
-        }
-        return dw;
+        return interpolateIDW(w, pGrid, time) / ddepth[(int) Math.round(pGrid[2])];
     }
 
     @Override
