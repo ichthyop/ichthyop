@@ -87,6 +87,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     int nbTimeRecords;
     boolean xTore = true;
     final int tilingh = 100, tilingv = 3, tilinghw = 10;
+    final private int p = 2;
 
     abstract void open() throws Exception;
 
@@ -365,38 +366,50 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return 0.d;
     }
 
+    private double weight(double[] xyz, int[] ijk, int p) {
+        double distance = 0.d;
+        for (int n = 0; n < xyz.length; n++) {
+            distance += Math.abs(Math.pow(xyz[n] - ijk[n], p));
+        }
+        return 1.d / distance;
+    }
+
     @Override
     public double get_dUx(double[] pGrid, double time) {
         double du = 0.d;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
         double CO = 0.d;
 
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
-                    int ci = Math.max(xTore(i + ii), 0);
-                    double co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
-                    if (!(Double.isNaN(u[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(u[1].getDouble(ci, j + jj, k + kk)))) {
-                        double x = (1.d - x_euler) * u[0].getDouble(ci, j + jj, k + kk) + x_euler * u[1].getDouble(ci, j + jj, k + kk);
-                        du += x * co / dxu[j + jj];
+        if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
+            // pGrid falls on a grid point
+            CO = 1.d;
+            i = xTore(i);
+            if (!(Double.isNaN(u[0].getDouble(i, j, k)) || Double.isNaN(u[1].getDouble(i, j, k)))) {
+                du = (1.d - dt) * u[0].getDouble(i, j, k) + dt * u[1].getDouble(i, j, k);
+            }
+        } else {
+            for (int ii = 0; ii < n; ii++) {
+                for (int jj = 0; jj < n; jj++) {
+                    for (int kk = 0; kk < 2; kk++) {
+                        int ci = Math.max(xTore(i + ii), 0);
+                        double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
+                        CO += co;
+                        if (!(Double.isNaN(u[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(u[1].getDouble(ci, j + jj, k + kk)))) {
+                            double x = (1.d - dt) * u[0].getDouble(ci, j + jj, k + kk) + dt * u[1].getDouble(ci, j + jj, k + kk);
+                            du += x * co;
+                        }
                     }
                 }
             }
         }
         if (CO != 0) {
-            du /= CO;
+            du /= (CO * dxu[(int) Math.round(pGrid[1])]);
         }
         return du;
     }
@@ -408,32 +421,36 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         int n = isCloseToCost(pGrid) ? 1 : 2;
         double kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
         double CO = 0.d;
 
-        for (int jj = 0; jj < n; jj++) {
-            for (int ii = 0; ii < n; ii++) {
-                for (int kk = 0; kk < 2; kk++) {
-                    int ci = xTore(i + ii);
-                    double co = Math.abs((1.d - (double) ii - dx)
-                            * (.5d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
-                    CO += co;
-                    if (!(Double.isNaN(v[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(v[1].getDouble(ci, j + jj, k + kk)))) {
-                        double x = (1.d - x_euler) * v[0].getDouble(ci, j + jj, k + kk) + x_euler * v[1].getDouble(ci, j + jj, k + kk);
-                        dv += x * co / dyv;
+        if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
+            // pGrid falls on a grid point
+            CO = 1.d;
+            i = xTore(i);
+            if (!(Double.isNaN(v[0].getDouble(i, j, k)) || Double.isNaN(v[1].getDouble(i, j, k)))) {
+                dv = (1.d - dt) * v[0].getDouble(i, j, k) + dt * v[1].getDouble(i, j, k);
+            }
+        } else {
+            for (int jj = 0; jj < n; jj++) {
+                for (int ii = 0; ii < n; ii++) {
+                    for (int kk = 0; kk < 2; kk++) {
+                        int ci = xTore(i + ii);
+                        double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
+                        CO += co;
+                        if (!(Double.isNaN(v[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(v[1].getDouble(ci, j + jj, k + kk)))) {
+                            double x = (1.d - dt) * v[0].getDouble(ci, j + jj, k + kk) + dt * v[1].getDouble(ci, j + jj, k + kk);
+                            dv += x * co;
+                        }
                     }
                 }
             }
         }
         if (CO != 0) {
-            dv /= CO;
+            dv /= (CO * dyv);
         }
         return dv;
     }
@@ -450,24 +467,31 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-        double dx = pGrid[0] - (double) i;
-        double dy = pGrid[1] - (double) j;
-        double dz = kz - (double) k;
         double CO = 0.d;
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                for (int kk = 0; kk < 2; kk++) {
-                    double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
-                    CO += co;
-                    if (isInWater(i + ii, j + jj)) {
-                        double x = (1.d - dt) * w[0].getDouble(i + ii, j + jj, k + kk) + dt * w[1].getDouble(i + ii, j + jj, k + kk);
-                        dw += 2.d * x * co / ddepthw[k + kk];
+
+        if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
+            // pGrid falls on a grid point
+            CO = 1.d;
+            i = xTore(i);
+            if (!(Double.isNaN(w[0].getDouble(i, j, k)) || Double.isNaN(w[1].getDouble(i, j, k)))) {
+                dw = (1.d - dt) * w[0].getDouble(i, j, k) + dt * w[1].getDouble(i, j, k);
+            }
+        } else {
+            for (int ii = 0; ii < n; ii++) {
+                for (int jj = 0; jj < n; jj++) {
+                    for (int kk = 0; kk < 2; kk++) {
+                        double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
+                        CO += co;
+                        if (isInWater(i + ii, j + jj)) {
+                            double x = (1.d - dt) * w[0].getDouble(i + ii, j + jj, k + kk) + dt * w[1].getDouble(i + ii, j + jj, k + kk);
+                            dw += 2.d * x * co;
+                        }
                     }
                 }
             }
         }
         if (CO != 0) {
-            dw /= CO;
+            dw /= (CO * ddepthw[(int) Math.round(pGrid[2])]);
         }
         return dw;
     }
