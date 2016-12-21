@@ -54,7 +54,7 @@
 package org.ichthyop.io;
 
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.RecruitableParticleLayer;
+import org.ichthyop.particle.RecruitableParticle;
 
 /**
  *
@@ -64,7 +64,6 @@ public class RecruitmentStainTracker extends IntegerTracker {
 
     @Override
     int getValue(IParticle particle) {
-        RecruitableParticleLayer rparticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
-        return rparticle.isRecruited() ? 1 : 0;
+        return RecruitableParticle.isRecruited(particle) ? 1 : 0;
     }
 }

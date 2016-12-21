@@ -54,11 +54,11 @@
 package org.ichthyop.action;
 
 import org.ichthyop.util.Constant;
-import org.ichthyop.particle.RecruitableParticleLayer;
+import org.ichthyop.particle.RecruitableParticle;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.io.RecruitmentStainTracker;
-import org.ichthyop.particle.LengthParticleLayer;
+import org.ichthyop.particle.LengthParticle;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 
@@ -129,17 +129,14 @@ public class RecruitmentStainAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        //@todo
-        // catch cast exception
-        RecruitableParticleLayer rParticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
-        if (stopMovingOnceRecruited && rParticle.isRecruited()) {
+        if (stopMovingOnceRecruited && RecruitableParticle.isRecruited(particle)) {
             particle.lock();
             return;
         }
 
-        if (!rParticle.isRecruited()) {
+        if (!RecruitableParticle.isRecruited(particle)) {
             if (satisfyRecruitmentCriterion(particle) && isParticleInsideStain(particle)) {
-                rParticle.setRecruited(0, true);
+                RecruitableParticle.setRecruited(particle, 0, true);
             }
         }
     }
@@ -159,7 +156,7 @@ public class RecruitmentStainAction extends AbstractAction {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
-            return (((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
+            return (LengthParticle.getLength(particle) >= lengthMinAtRecruitment);
         }
     }
 

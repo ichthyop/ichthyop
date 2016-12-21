@@ -65,7 +65,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import org.ichthyop.io.IOTools;
-import org.ichthyop.particle.StageParticleLayer;
+import org.ichthyop.particle.StageParticle;
 
 /**
  *
@@ -234,7 +234,7 @@ public class MigrationAction extends AbstractAction {
             isSatisfiedCriterion = particle.getAge() > minimumAge;
         } else {
             // stage == 0 means egg, stage > 0 means larvae
-            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+            int stage = StageParticle.getStage(particle);
             isSatisfiedCriterion = stage > 0;
         }
 

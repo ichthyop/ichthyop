@@ -50,40 +50,32 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.particle;
+
+import org.ichthyop.SimulationManagerAccessor;
 
 /**
  *
  * @author pverley
  */
-public class StageParticleLayer extends ParticleLayer {
-    
-    private int stage;
+public class LengthParticle extends SimulationManagerAccessor {
 
-    public StageParticleLayer(IParticle particle) {
-        super(particle);
+    private final static String LENGTH = "length";
+
+    public static void init(IParticle particle) {
+        particle.set(LENGTH, 0.d);
     }
 
-    @Override
-    public void init() {
-        setStage(0);
+    public static double getLength(IParticle particle) {
+        return particle.getDouble(LENGTH);
     }
 
-    /**
-     * @return the stage
-     */
-    public int getStage() {
-        return stage;
+    public static void setLength(IParticle particle, double length) {
+        particle.set(LENGTH, length);
     }
 
-    /**
-     * @param stage the stage to set
-     */
-    public void setStage(int stage) {
-        this.stage = stage;
+    public static void incrementLength(IParticle particle, double dlength) {
+        particle.set(LENGTH, particle.getDouble(LENGTH) + dlength);
     }
-    
-    
-    
+
 }

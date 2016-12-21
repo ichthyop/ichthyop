@@ -58,7 +58,7 @@ import java.util.Iterator;
 import org.ichthyop.TypeZone;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.RecruitableParticleLayer;
+import org.ichthyop.particle.RecruitableParticle;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
@@ -67,7 +67,7 @@ import ucar.nc2.Attribute;
 
 /**
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author Philippe Verley (philippe dot verley at ird dot fr)
  */
 public class RecruitmentZoneTracker extends AbstractTracker {
 
@@ -90,15 +90,13 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     @Override
     public void track() {
         IParticle particle;
-        RecruitableParticleLayer rparticle;
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            rparticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
             Index index = getArray().getIndex();
             for (Zone zone : getZones()) {
                 index.set(0, particle.getIndex(), zone.getIndex());
-                int recruited = rparticle.isRecruited(zone.getIndex())
+                int recruited = RecruitableParticle.isRecruited(particle, zone.getIndex())
                         ? 1
                         : 0;
                 getArray().setInt(index, recruited);

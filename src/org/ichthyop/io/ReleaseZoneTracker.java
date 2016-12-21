@@ -57,7 +57,7 @@ import java.util.List;
 import org.ichthyop.TypeZone;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.ZoneParticleLayer;
+import org.ichthyop.particle.ZoneParticle;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
@@ -111,8 +111,7 @@ public class ReleaseZoneTracker extends AbstractTracker {
         // Only write release zone when particle is released
         for (int i = nPopTm1; i < nNow; i++) {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
-            ZoneParticleLayer zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);
-            getArray().setInt(getIndex().set(particle.getIndex()), zparticle.getNumZone(TypeZone.RELEASE));
+            getArray().setInt(getIndex().set(particle.getIndex()), ZoneParticle.getNumZone(particle, TypeZone.RELEASE));
         }
         nPopTm1 = nNow;
 

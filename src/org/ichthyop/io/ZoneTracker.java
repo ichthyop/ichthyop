@@ -58,7 +58,7 @@ import java.util.List;
 import org.ichthyop.TypeZone;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.ZoneParticleLayer;
+import org.ichthyop.particle.ZoneParticle;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
@@ -98,15 +98,13 @@ public class ZoneTracker extends AbstractTracker {
     @Override
     public void track() {
         IParticle particle;
-        ZoneParticleLayer zparticle;
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            zparticle = (ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class);
             Index index = getArray().getIndex();
             for (TypeZone type : TypeZone.values()) {
                 index.set(0, particle.getIndex(), type.getCode());
-                getArray().setInt(index, zparticle.getNumZone(type));
+                getArray().setInt(index, ZoneParticle.getNumZone(particle, type));
             }
         }
     }

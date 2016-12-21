@@ -55,9 +55,9 @@ package org.ichthyop.action;
 
 import org.ichthyop.io.ETracker;
 import org.ichthyop.io.LengthTracker;
-import org.ichthyop.particle.DebParticleLayer;
+import org.ichthyop.particle.DebParticle;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.LengthParticleLayer;
+import org.ichthyop.particle.LengthParticle;
 import org.ichthyop.particle.ParticleMortality;
 
 /**
@@ -143,26 +143,21 @@ public class DebGrowthAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(length_init);
-        
-        DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-        debLayer.setE(E_init);
-        debLayer.setE_R(0);
-        debLayer.setV(Math.pow(shape_larvae * length_init, 3));
+        LengthParticle.setLength(particle, length_init);
+        DebParticle.setE(particle, E_init);
+        DebParticle.setE_R(particle, 0);
+        DebParticle.setV(particle, Math.pow(shape_larvae * length_init, 3));
     }
 
     @Override
     public void execute(IParticle particle) {
-        DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-        double temp = getSimulationManager().getDataset().get(temperature_field, debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        double food = getSimulationManager().getDataset().get(food_field, debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        double[] res_deb = grow(dt, debLayer.getE(), debLayer.getV(), debLayer.getE_R(), Vj, temp, food);
-        debLayer.setE(res_deb[0]);
-        debLayer.setV(res_deb[1]);
-        debLayer.setE_R(res_deb[2]);
-        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(computeLength(debLayer.getV()));
+        double temp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double food = getSimulationManager().getDataset().get(food_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double[] res_deb = grow(dt, DebParticle.getE(particle), DebParticle.getV(particle), DebParticle.getE_R(particle), Vj, temp, food);
+        DebParticle.setE(particle, res_deb[0]);
+        DebParticle.setV(particle, res_deb[1]);
+        DebParticle.setE_R(particle, res_deb[2]);
+        LengthParticle.setLength(particle, computeLength(DebParticle.getV(particle)));
 
         if (res_deb[3] == 0) {
             particle.kill(ParticleMortality.STARVATION);

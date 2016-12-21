@@ -55,7 +55,7 @@ package org.ichthyop.stage;
 
 import org.ichthyop.io.BlockType;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.LengthParticleLayer;
+import org.ichthyop.particle.LengthParticle;
 
 /**
  *
@@ -69,12 +69,11 @@ public class LengthStage extends AbstractStage {
 
     @Override
     public int getStage(IParticle particle) {
-        double length = ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength();
-        return getStage((float) length);
+        return getStage(LengthParticle.getLength(particle));
     }
 
     @Override
-    public int getStage(float length) {
+    public int getStage(double length) {
         int stage = 0;
         for (float threshold : getThresholds()) {
             if (length >= threshold) {

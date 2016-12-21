@@ -50,15 +50,14 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import org.ichthyop.io.BlockType;
 import org.ichthyop.io.LengthTracker;
 import org.ichthyop.io.StageTracker;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.LengthParticleLayer;
-import org.ichthyop.particle.StageParticleLayer;
+import org.ichthyop.particle.LengthParticle;
+import org.ichthyop.particle.StageParticle;
 import org.ichthyop.stage.LengthStage;
 import org.ichthyop.util.Constant;
 
@@ -87,7 +86,7 @@ public class LinearGrowthAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
-        
+
         boolean addTracker = true;
         try {
             addTracker = Boolean.valueOf(getParameter("length_tracker"));
@@ -109,19 +108,14 @@ public class LinearGrowthAction extends AbstractAction {
     }
 
     @Override
-    public void init(IParticle particle
-    ) {
-        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(lengthStage.getThreshold(0));
+    public void init(IParticle particle) {
+        LengthParticle.setLength(particle, lengthStage.getThreshold(0));
     }
 
     @Override
-    public void execute(IParticle particle
-    ) {
-        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.incrementLength(grow(getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue()));
-        StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
-        stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
+    public void execute(IParticle particle) {
+        LengthParticle.incrementLength(particle, grow(getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue()));
+        StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
     }
 
     private double grow(double temperature) {

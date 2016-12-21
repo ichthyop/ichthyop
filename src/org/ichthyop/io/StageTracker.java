@@ -54,7 +54,7 @@
 package org.ichthyop.io;
 
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.StageParticleLayer;
+import org.ichthyop.particle.StageParticle;
 
 /**
  *
@@ -64,6 +64,6 @@ public class StageTracker extends IntegerTracker {
 
     @Override
     int getValue(IParticle particle) {
-        return ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+        return StageParticle.getStage(particle);
     }
 }

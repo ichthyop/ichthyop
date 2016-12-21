@@ -54,7 +54,7 @@
 package org.ichthyop.io;
 
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.DebParticleLayer;
+import org.ichthyop.particle.DebParticle;
 
 /**
  *
@@ -64,7 +64,6 @@ public class ETracker extends FloatTracker {
 
     @Override
     float getValue(IParticle particle) {
-        DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-        return (float) gParticle.getE();
+        return (float) DebParticle.getE(particle);
     }
 }

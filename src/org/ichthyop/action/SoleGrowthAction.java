@@ -59,8 +59,8 @@ import org.ichthyop.io.BlockType;
 import org.ichthyop.io.LengthTracker;
 import org.ichthyop.io.StageTracker;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.LengthParticleLayer;
-import org.ichthyop.particle.StageParticleLayer;
+import org.ichthyop.particle.LengthParticle;
+import org.ichthyop.particle.StageParticle;
 import org.ichthyop.stage.LengthStage;
 import org.ichthyop.util.Constant;
 
@@ -117,17 +117,14 @@ public class SoleGrowthAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.setLength(lengthStage.getThreshold(0));
+        LengthParticle.setLength(particle, lengthStage.getThreshold(0));
     }
 
     @Override
     public void execute(IParticle particle) {
-        LengthParticleLayer sole = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        double temp = getSimulationManager().getDataset().get(temperature_field, sole.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        sole.incrementLength(grow(lengthStage.getStage(particle), temp));
-        StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
-        stageLayer.setStage(lengthStage.getStage((float) sole.getLength()));
+        double temp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        LengthParticle.incrementLength(particle, grow(lengthStage.getStage(particle), temp));
+        StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
     }
 
     private double grow(int stage, double temperature) {

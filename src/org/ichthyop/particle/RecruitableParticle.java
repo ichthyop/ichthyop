@@ -50,55 +50,65 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.particle;
+
+import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.TypeZone;
 
 /**
  *
- * @author gandres
+ * @author pverley
  */
-public class DebParticleLayer extends ParticleLayer {
+public class RecruitableParticle extends SimulationManagerAccessor {
 
-    /*
-     * DEB PARAMETERS
-     */
-    // Variables
-    private double E; // Réserve
-    private double V; // Structure
-    private double E_R; // Maturité
+    private static final String RECRUITED = "recruited";
+    private static final String NEW_RECRUITED = "new_recruited";
+    private static final String RECRUITMENT_ZONE = "recruitment_zone";
 
-    public DebParticleLayer(IParticle particle) {
-        super(particle);
+    public static void init(IParticle particle) {
+        particle.set(NEW_RECRUITED, false);
+        particle.set(RECRUITMENT_ZONE, -1);
+        boolean[] recruited = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT))
+                ? new boolean[getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT).size()]
+                : new boolean[1];
+        particle.set(RECRUITED, recruited);
     }
 
-    @Override
-    public void init() {
-       // Nothing to do
+    public static boolean isRecruited(IParticle particle) {
+
+        boolean[] recruited = (boolean[]) particle.get(RECRUITED);
+        for (boolean bln : recruited) {
+            if (bln) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public double getE() {
-        return E;
+    public static boolean isRecruited(IParticle particle, int numZone) {
+        boolean[] recruited = (boolean[]) particle.get(RECRUITED);
+        return recruited[numZone];
     }
 
-    public void setE(double E) {
-        this.E = E;
+    public static boolean isNewRecruited(IParticle particle) {
+        return (boolean) particle.get(NEW_RECRUITED);
     }
 
-    public double getV() {
-
-        return V;
+    public static void setNewRecruited(IParticle particle, boolean recruited) {
+        particle.set(NEW_RECRUITED, recruited);
     }
 
-    public void setV(double V) {
-        this.V = V;
+    public static int getNumRecruitmentZone(IParticle particle) {
+        return particle.getInt(RECRUITMENT_ZONE);
     }
 
-    public double getE_R() {
-        return E_R;
+    public static void setNumRecruitmentZone(IParticle particle, int numZone) {
+        particle.set(RECRUITMENT_ZONE, numZone);
     }
 
-    public void setE_R(double E_R) {
-
-        this.E_R = E_R;
+    public static void setRecruited(IParticle particle, int num_zone, boolean recruited) {
+        boolean[] recruitedZone = (boolean[]) particle.get(RECRUITED);
+        recruitedZone[num_zone] = recruited;
+        particle.set(RECRUITED, recruitedZone);
     }
 }

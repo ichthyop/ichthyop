@@ -50,32 +50,41 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+package org.ichthyop.particle;
 
-package org.ichthyop.action;
-
-import org.ichthyop.particle.IParticle;
-import org.ichthyop.io.BitTracker;
-import org.ichthyop.particle.BitParticleLayer;
+import org.ichthyop.SimulationManagerAccessor;
 
 /**
  *
- * @author pverley
+ * @author gandres
  */
-public class BitAction extends AbstractAction {
+public class DebParticle extends SimulationManagerAccessor {
 
-    @Override
-    public void loadParameters() throws Exception {
-        getSimulationManager().getOutputManager().addPredefinedTracker(BitTracker.class);
-    }
-    
-    @Override
-    public void init(IParticle particle) {
-        // Nothing to do
+    private static final String E = "DEB_E"; // Réserve
+    private static final String V = "DEB_V"; // Structure
+    private static final String E_R = "DEB_E_R"; // Maturité
+
+    public static double getE(IParticle particle) {
+        return particle.getDouble(E);
     }
 
-    @Override
-    public void execute(IParticle particle) {
-        ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).setBit((int) Math.round(Math.random()));
+    public static void setE(IParticle particle, double E) {
+        particle.set(DebParticle.E, E);
     }
 
+    public static double getV(IParticle particle) {
+        return particle.getDouble(V);
+    }
+
+    public static void setV(IParticle particle, double V) {
+        particle.set(DebParticle.V, V);
+    }
+
+    public static double getE_R(IParticle particle) {
+        return particle.getDouble(E_R);
+    }
+
+    public static void setE_R(IParticle particle, double E_R) {
+        particle.set(DebParticle.E_R, E_R);
+    }
 }

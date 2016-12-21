@@ -50,11 +50,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.io;
 
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.LengthParticleLayer;
+import org.ichthyop.particle.LengthParticle;
 
 /**
  *
@@ -62,9 +61,8 @@ import org.ichthyop.particle.LengthParticleLayer;
  */
 public class LengthTracker extends FloatTracker {
 
-
     @Override
     float getValue(IParticle particle) {
-            return (float) ((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength();
+        return (float) LengthParticle.getLength(particle);
     }
 }

@@ -58,9 +58,9 @@ import org.ichthyop.util.Constant;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.io.RecruitmentZoneTracker;
 import org.ichthyop.io.ZoneTracker;
-import org.ichthyop.particle.LengthParticleLayer;
-import org.ichthyop.particle.RecruitableParticleLayer;
-import org.ichthyop.particle.ZoneParticleLayer;
+import org.ichthyop.particle.LengthParticle;
+import org.ichthyop.particle.RecruitableParticle;
+import org.ichthyop.particle.ZoneParticle;
 
 /**
  *
@@ -128,24 +128,21 @@ public class RecruitmentZoneAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        //@todo
-        // catch cast exception
-        RecruitableParticleLayer rParticle = (RecruitableParticleLayer) particle.getLayer(RecruitableParticleLayer.class);
-        if (stopMovingOnceRecruited && rParticle.isRecruited()) {
+        if (stopMovingOnceRecruited && RecruitableParticle.isRecruited(particle)) {
             particle.lock();
             return;
         }
 
-        int numCurrentZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RECRUITMENT);
-        if ((numCurrentZone != -1) && !rParticle.isRecruited(numCurrentZone)) {
+        int numCurrentZone = ZoneParticle.getNumZone(particle, TypeZone.RECRUITMENT);
+        if ((numCurrentZone != -1) && !RecruitableParticle.isRecruited(particle, numCurrentZone)) {
 
             if (satisfyRecruitmentCriterion(particle)) {
-                timeInZone = (rParticle.getNumRecruitmentZone() == numCurrentZone)
+                timeInZone = (RecruitableParticle.getNumRecruitmentZone(particle) == numCurrentZone)
                         ? timeInZone + getSimulationManager().getTimeManager().get_dt()
                         : 0;
-                rParticle.setNumRecruitmentZone(numCurrentZone);
-                rParticle.setNewRecruited(timeInZone >= durationMinInRecruitArea);
-                rParticle.setRecruited(numCurrentZone, rParticle.isNewRecruited());
+                RecruitableParticle.setNumRecruitmentZone(particle, numCurrentZone);
+                RecruitableParticle.setNewRecruited(particle, timeInZone >= durationMinInRecruitArea);
+                RecruitableParticle.setRecruited(particle, numCurrentZone, timeInZone >= durationMinInRecruitArea);
             }
         }
     }
@@ -154,7 +151,7 @@ public class RecruitmentZoneAction extends AbstractAction {
         if (isAgeCriterion) {
             return ((float) particle.getAge() / Constant.ONE_DAY) >= ageMinAtRecruitment;
         } else {
-            return (((LengthParticleLayer) particle.getLayer(LengthParticleLayer.class)).getLength() >= lengthMinAtRecruitment);
+            return (LengthParticle.getLength(particle) >= lengthMinAtRecruitment);
         }
     }
 

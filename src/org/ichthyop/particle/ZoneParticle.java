@@ -51,19 +51,32 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package org.ichthyop.io;
+package org.ichthyop.particle;
 
-import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.BitParticleLayer;
+import org.ichthyop.Zone;
+import org.ichthyop.TypeZone;
+import java.util.Iterator;
+import org.ichthyop.SimulationManagerAccessor;
 
 /**
  *
  * @author pverley
  */
-public class BitTracker extends IntegerTracker {
+public class ZoneParticle extends SimulationManagerAccessor {
 
-    @Override
-    int getValue(IParticle particle) {
-        return ((BitParticleLayer) particle.getLayer(BitParticleLayer.class)).getBit();
+    public static int getNumZone(IParticle particle, TypeZone type) {
+        int nZone = -1;
+        boolean foundZone = false;
+        if (null != getSimulationManager().getZoneManager().getZones(type)) {
+            Iterator iter = getSimulationManager().getZoneManager().getZones(type).iterator();
+            while (!foundZone && iter.hasNext()) {
+                Zone znTmp = (Zone) iter.next();
+                if (znTmp.isParticleInZone(particle)) {
+                    nZone = znTmp.getIndex();
+                    foundZone = true;
+                }
+            }
+        }
+        return nZone;
     }
 }

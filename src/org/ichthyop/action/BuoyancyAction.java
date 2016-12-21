@@ -64,7 +64,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.StageParticleLayer;
+import org.ichthyop.particle.StageParticle;
 
 /**
  *
@@ -186,7 +186,7 @@ public class BuoyancyAction extends AbstractAction {
         boolean canApplyBuoyancy;
         if (isGrowth) {
             // Egg stage only
-            int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+            int stage = StageParticle.getStage(particle);
             canApplyBuoyancy = (stage == 0);
         } else {
             canApplyBuoyancy = particle.getAge() < maximumAge;

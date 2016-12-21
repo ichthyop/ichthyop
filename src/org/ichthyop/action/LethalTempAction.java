@@ -65,7 +65,7 @@ import java.util.logging.Logger;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.ParticleMortality;
-import org.ichthyop.particle.StageParticleLayer;
+import org.ichthyop.particle.StageParticle;
 
 /**
  *
@@ -197,7 +197,7 @@ public class LethalTempAction extends AbstractAction {
     private void checkTpGrowingParticle(IParticle particle) {
 
         double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
+        int stage = StageParticle.getStage(particle);
         // stage == 0 means egg, stage > 0 means larvae
         boolean frozen = ((stage == 0) && (temperature <= coldLethalTp[0])) || ((stage != 0) && (temperature <= coldLethalTp[1]));
         boolean heated = ((stage == 0) && (temperature >= hotLethalTp[0])) || ((stage != 0) && (temperature >= hotLethalTp[1]));

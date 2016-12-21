@@ -71,7 +71,7 @@ public abstract class AbstractStage extends SimulationManagerAccessor {
     private final String blockKey;
 
     public abstract int getStage(IParticle particle);
-    public abstract int getStage(float value);
+    public abstract int getStage(double value);
 
     AbstractStage(BlockType blockType, String blockKey) {
         this.blockType = blockType;

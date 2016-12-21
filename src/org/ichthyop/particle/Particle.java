@@ -50,15 +50,11 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.particle;
 
 import org.ichthyop.GridPoint;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -71,34 +67,26 @@ public class Particle extends GridPoint implements IParticle {
     private ParticleMortality deathCause;
     private boolean living = true;
     private boolean locked = false;
-    private final List<ParticleLayer> layers = new ArrayList();
+    private final Map<String, Object> attributes = new HashMap();
 
     @Override
-    public ParticleLayer getLayer(Class layerClass) {
-        for (ParticleLayer layer : layers) {
-            if (layer.getClass().getCanonicalName().equals(layerClass.getCanonicalName())) {
-                return layer;
-            }
-        }
-        try {
-            ParticleLayer layer = (ParticleLayer) layerClass.getConstructor(IParticle.class).newInstance(this);
-            layer.init();
-            layers.add(layer);
-            return layer;
-        } catch (InstantiationException ex) {
-            Logger.getLogger(Particle.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(Particle.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(Particle.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(Particle.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(Particle.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(Particle.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    public double getDouble(String key) {
+        return (double) attributes.get(key);
+    }
+
+    @Override
+    public int getInt(String key) {
+        return (int) attributes.get(key);
+    }
+
+    @Override
+    public Object get(String key) {
+        return attributes.get(key);
+    }
+    
+    @Override
+    public void set(String key, Object value) {
+        attributes.put(key, value);
     }
 
     @Override
@@ -163,16 +151,17 @@ public class Particle extends GridPoint implements IParticle {
     }
 
     /**
-     * Applies all the user defined actions
-     * ({@link org.ichthyop.arch.IAction}) and then applies all the
-     * system actions ({@link org.ichthyop.arch.ISysAction})
+     * Applies all the user defined actions ({@link org.ichthyop.arch.IAction})
+     * and then applies all the system actions
+     * ({@link org.ichthyop.arch.ISysAction})
      */
     public void step() {
         getSimulationManager().getActionManager().executeActions(this);
     }
-    
+
     @Override
     public void init() {
+        attributes.clear();
         getSimulationManager().getActionManager().initActions(this);
     }
 

@@ -53,38 +53,28 @@
 
 package org.ichthyop.particle;
 
-import org.ichthyop.Zone;
-import org.ichthyop.TypeZone;
-import java.util.Iterator;
+import org.ichthyop.SimulationManagerAccessor;
 
 /**
  *
  * @author pverley
  */
-public class ZoneParticleLayer extends ParticleLayer {
+public class StageParticle extends SimulationManagerAccessor {
+    
+    private static final String STAGE = "stage";
 
-    public ZoneParticleLayer(IParticle particle) {
-        super(particle);
+    public static void init(IParticle particle) {
+        particle.set(STAGE, 0);
     }
 
-    public int getNumZone(TypeZone type) {
-        int nZone = -1;
-        boolean foundZone = false;
-        if (null != getSimulationManager().getZoneManager().getZones(type)) {
-            Iterator iter = getSimulationManager().getZoneManager().getZones(type).iterator();
-            while (!foundZone && iter.hasNext()) {
-                Zone znTmp = (Zone) iter.next();
-                if (znTmp.isParticleInZone(particle())) {
-                    nZone = znTmp.getIndex();
-                    foundZone = true;
-                }
-            }
-        }
-        return nZone;
+    public static int getStage(IParticle particle) {
+        return particle.getInt(STAGE);
     }
 
-    @Override
-    public void init() {
-        // nothing to do
+    public static void setStage(IParticle particle, int stage) {
+        particle.set(STAGE, stage);
     }
+    
+    
+    
 }

@@ -138,7 +138,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
                 return null;
             }
         }
-        int numReleaseZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
+        int numReleaseZone = ZoneParticle.getNumZone(particle, TypeZone.RELEASE);
         if (numReleaseZone == -1) {
             return null;
         }
@@ -166,7 +166,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
         /*
          * Test wether the grid point is inside one of the release zones
          */
-        int numReleaseZone = ((ZoneParticleLayer) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.RELEASE);
+        int numReleaseZone = ZoneParticle.getNumZone(particle, TypeZone.RELEASE);
         if (numReleaseZone == -1) {
             return null;
         }
