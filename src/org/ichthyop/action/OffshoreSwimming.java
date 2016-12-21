@@ -53,6 +53,7 @@
 package org.ichthyop.action;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.particle.IParticle;
 
@@ -62,16 +63,48 @@ import org.ichthyop.particle.IParticle;
  */
 public class OffshoreSwimming extends AbstractAction {
 
-    // max radius (meter)
-    private final double radius = 50 * 1e3;
+    // erception radius of the coast (meter)
+    private double radius;
+    // average swimming velocity (meter/second)
+    private double velocity;
+    // swimming period (second)
+    private double period;
 
     @Override
     public void loadParameters() throws Exception {
-        // Nothing to do
+
+        radius = Double.valueOf(getParameter("perception_radius")) * 1e3;
+        velocity = Double.valueOf(getParameter("swimming_velocity"));
+        period = Double.valueOf(getParameter("swimming_period")) * 3600;
     }
 
     @Override
     public void execute(IParticle particle) {
+
+        // Limited offshore swimming period
+        if (particle.getAge() > period) {
+            return;
+        }
+        
+        // Find coastal cells
+        List<int[]> coord = findCoastalCells(particle);
+        if (coord.isEmpty()) {
+            return;
+        }
+
+        // Compute barycenter of the coastal cells        
+        double[] barycenter = barycenter(coord);
+        // Distance from barycenter to particle
+        double[] latlon = getSimulationManager().getDataset().xy2latlon(barycenter[0], barycenter[1]);
+        double distance = DatasetUtil.geodesicDistance(latlon[0], latlon[1], particle.getLat(), particle.getLon());
+        // Distance swum offsore
+        double dswim = velocity * getSimulationManager().getTimeManager().get_dt() / distance;
+        double dx = (particle.getX() - barycenter[0]) * dswim;
+        double dy = (particle.getY() - barycenter[1]) * dswim;
+        particle.increment(new double[]{dx, dy});
+    }
+
+    private List<int[]> findCoastalCells(IParticle particle) {
 
         double lat0 = particle.getLat();
         double lon0 = particle.getLon();
@@ -79,23 +112,23 @@ public class OffshoreSwimming extends AbstractAction {
         int j0 = (int) Math.round(particle.getY());
         int n = 1;
         // Find coastal cells withing the defined radius
-        ArrayList<int[]> coord = new ArrayList();
+        List<int[]> coord = new ArrayList();
         int nx = getSimulationManager().getDataset().get_nx();
         int ny = getSimulationManager().getDataset().get_ny();
         while (true) {
-            int c = 0;
+            double dmin = radius, distance;
             for (int i = -n; i < n; i++) {
                 if (j0 + n < ny && i0 + i >= 0 && i0 + i < nx) {
-                    if (inside(i0 + i, j0 + n, lat0, lon0)) {
-                        c++;
+                    if ((distance = distance(i0 + i, j0 + n, lat0, lon0)) < radius) {
+                        dmin = Math.min(dmin, distance);
                         if (coastal(i0 + i, j0 + n)) {
                             coord.add(new int[]{i0 + i, j0 + n});
                         }
                     }
                 }
                 if (j0 - n >= 0 && i0 + i >= 0 && i0 + i < nx) {
-                    if (inside(i0 + i, j0 - n, lat0, lon0)) {
-                        c++;
+                    if ((distance = distance(i0 + i, j0 - n, lat0, lon0)) < radius) {
+                        dmin = Math.min(dmin, distance);
                         if (coastal(i0 + i, j0 - n)) {
                             coord.add(new int[]{i0 + i, j0 - n});
                         }
@@ -104,61 +137,66 @@ public class OffshoreSwimming extends AbstractAction {
             }
             for (int j = -n + 1; j < n - 1; j++) {
                 if (i0 + n < nx && j0 + j >= 0 && j0 + j < ny) {
-                    if (inside(i0 + n, j0 + j, lat0, lon0)) {
-                        c++;
+                    if ((distance = distance(i0 + n, j0 + j, lat0, lon0)) < radius) {
+                        dmin = Math.min(dmin, distance);
                         if (coastal(i0 + n, j0 + j)) {
                             coord.add(new int[]{i0 + n, j0 + j});
                         }
                     }
                 }
                 if (i0 - n >= 0 && j0 + j >= 0 && j0 + j < ny) {
-                    if (inside(i0 - n, j0 + j, lat0, lon0)) {
-                        c++;
+                    if ((distance = distance(i0 - n, j0 + j, lat0, lon0)) < radius) {
+                        dmin = Math.min(dmin, distance);
                         if (coastal(i0 - n, j0 + j)) {
                             coord.add(new int[]{i0 - n, j0 + j});
                         }
                     }
                 }
             }
-            if (c == 0) {
+            if (dmin >= radius) {
                 break;
             }
             n++;
         }
 
-//        for (int[] ij : coord) {
-//            System.out.println("particle " + particle.getIndex() + " i" + ij[0] + " j" + ij[1]);
-//        }
+        return coord;
+    }
+
+    private double[] barycenter(List<int[]> coord) {
+
+        double[] xy = new double[]{0.d, 0.d};
+        coord.forEach((ij) -> {
+            xy[0] += ij[0];
+            xy[1] += ij[1];
+        });
+
+        xy[0] /= coord.size();
+        xy[1] /= coord.size();
+
+        return xy;
 
     }
 
-    private int ibound(int i) {
-        return Math.max(Math.min(i, getSimulationManager().getDataset().get_nx() - 1), 0);
-    }
-
-    private int jbound(int j) {
-        return Math.max(Math.min(j, getSimulationManager().getDataset().get_ny() - 1), 0);
-    }
-
-    private boolean inside(int i, int j, double lat0, double lon0) {
+    private double distance(int i, int j, double lat0, double lon0) {
         double lat = getSimulationManager().getDataset().getLat(i, j);
         double lon = getSimulationManager().getDataset().getLon(i, j);
-        return DatasetUtil.geodesicDistance(lat0, lon0, lat, lon) < radius;
+        return DatasetUtil.geodesicDistance(lat0, lon0, lat, lon);
     }
 
     private boolean coastal(int i, int j) {
 
-        if (!getSimulationManager().getDataset().isInWater(i, j)) {
-            int ip1 = Math.min(i + 1, getSimulationManager().getDataset().get_nx()-1);
-            int jp1 = Math.min(j + 1, getSimulationManager().getDataset().get_ny()-1);
-            int im1 = Math.max(i - 1, 0);
-            int jm1 = Math.max(j - 1, 0);
-            return getSimulationManager().getDataset().isInWater(ip1, j)
-                    || getSimulationManager().getDataset().isInWater(im1, j)
-                    || getSimulationManager().getDataset().isInWater(i, jp1)
-                    || getSimulationManager().getDataset().isInWater(i, jm1);
-        }
-        return false;
+        return !getSimulationManager().getDataset().isInWater(i, j);
+//        if (!getSimulationManager().getDataset().isInWater(i, j)) {
+//            int ip1 = Math.min(i + 1, getSimulationManager().getDataset().get_nx() - 1);
+//            int jp1 = Math.min(j + 1, getSimulationManager().getDataset().get_ny() - 1);
+//            int im1 = Math.max(i - 1, 0);
+//            int jm1 = Math.max(j - 1, 0);
+//            return getSimulationManager().getDataset().isInWater(ip1, j)
+//                    || getSimulationManager().getDataset().isInWater(im1, j)
+//                    || getSimulationManager().getDataset().isInWater(i, jp1)
+//                    || getSimulationManager().getDataset().isInWater(i, jm1);
+//        }
+//        return false;
     }
 
     @Override
