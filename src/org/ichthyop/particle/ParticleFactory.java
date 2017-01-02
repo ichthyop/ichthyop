@@ -50,9 +50,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.particle;
 
+import java.io.IOException;
 import org.ichthyop.SimulationManagerAccessor;
 import org.ichthyop.TypeZone;
 
@@ -62,13 +62,23 @@ import org.ichthyop.TypeZone;
  */
 public class ParticleFactory extends SimulationManagerAccessor {
 
-    public static IParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) {
+    public static IParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) throws IOException {
 
         Particle particle = new Particle();
         particle.setIndex(index);
         boolean living = mortality.equals(ParticleMortality.ALIVE);
 
-        particle.setLon(lon);
+        double lonmin = getSimulationManager().getDataset().getLonMin();
+        double lonmax = getSimulationManager().getDataset().getLonMax();
+        if (inside(lon, lonmin, lonmax)) {
+            particle.setLon(lon);
+        } else if (inside(lon + 360, lonmin, lonmax)) {
+            particle.setLon(lon + 360);
+        } else if (inside(lon - 360, lonmin, lonmax)) {
+            particle.setLon(lon - 360);
+        } else {
+            throw new IOException("Particle longitude " + lon + " not comprised inside lonmin " + lonmin + " lonmax " + lonmax);
+        }
         particle.setLat(lat);
         particle.setDepth(depth);
         if (Double.isNaN(depth)) {
@@ -90,11 +100,11 @@ public class ParticleFactory extends SimulationManagerAccessor {
         return particle;
     }
 
-    public static IParticle createGeoParticle(int index, double lon, double lat, double depth) {
+    public static IParticle createGeoParticle(int index, double lon, double lat, double depth) throws IOException {
         return createGeoParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
     }
 
-    public static IParticle createGeoParticle(int index, double lon, double lat) {
+    public static IParticle createGeoParticle(int index, double lon, double lat) throws IOException {
         return createGeoParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
     }
 
@@ -175,5 +185,9 @@ public class ParticleFactory extends SimulationManagerAccessor {
          */
         particle.grid2Geo();
         return particle;
+    }
+
+    private static boolean inside(double d, double dmin, double dmax) {
+        return d >= dmin && d <= dmax;
     }
 }
