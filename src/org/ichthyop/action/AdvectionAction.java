@@ -61,14 +61,14 @@ import org.ichthyop.particle.ParticleMortality;
  * @author pverley
  */
 public class AdvectionAction extends AbstractAction {
-    
+
     private boolean isRK4;
     private boolean isForward;
     private boolean horizontal;
     private boolean vertical;
     // Threshold for CFL error message
     public static final float THRESHOLD_CFL = 1.0f;
-    
+
     @Override
     public void loadParameters() throws Exception {
 
@@ -101,28 +101,30 @@ public class AdvectionAction extends AbstractAction {
             vertical = true;
         }
     }
-    
+
     @Override
     public void init(IParticle particle) {
         // Nothing to do
     }
-    
+
     @Override
     public void execute(IParticle particle) {
-        if (isForward) {
-            moveForwardInTime(particle, getSimulationManager().getTimeManager().getTime());
-        } else {
-            moveBackwardInTime(particle, getSimulationManager().getTimeManager().getTime());
-        }
-    }
-    
-    private void moveForwardInTime(IParticle particle, double time) {
-        
+
+        double time = getSimulationManager().getTimeManager().getTime();
+        double[] pgrid = particle.getGridCoordinates();
+        double dt = getSimulationManager().getTimeManager().get_dt();
+        double[] mvt;
         try {
-            double[] mvt = isRK4
-                    ? computeMoveRK4(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt())
-                    : computeMove(particle.getGridCoordinates(), time, getSimulationManager().getTimeManager().get_dt());
-            //Logger.getAnonymousLogger().info("dx " + mvt[0] + " dy " + mvt[1] + " dz " + mvt[2]);
+            if (isForward) {
+                // move forward in time
+                mvt = isRK4
+                        ? computeMoveRK4(pgrid, time, dt)
+                        : computeMove(particle.getGridCoordinates(), time, dt);
+            } else {
+                // move backward in time
+                mvt = substract(backwardGuess(pgrid, time, dt), pgrid);
+            }
+//            getLogger().log(Level.INFO, "dx {0} dy {1} dz {2}", new Object[]{mvt[0], mvt[1], mvt[2]});
             if (!horizontal) {
                 mvt[0] = 0;
                 mvt[1] = 0;
@@ -135,12 +137,12 @@ public class AdvectionAction extends AbstractAction {
             particle.kill(ParticleMortality.OUT_OF_DOMAIN);
         }
     }
-    
+
     private double[] computeMove(double pGrid[], double time, double dt) {
-        
+
         int dim = pGrid.length;
         double[] dU = new double[dim];
-        
+
         dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
         if (Math.abs(dU[0]) > THRESHOLD_CFL) {
             getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
@@ -155,12 +157,56 @@ public class AdvectionAction extends AbstractAction {
                 getLogger().log(Level.WARNING, "CFL broken for W {0}", (float) dU[2]);
             }
         }
-        
+
         return dU;
     }
 
     /**
-     * Advects the particle forward in time with the appropriate scheme (Euler
+     * Moves the particle with the dataset velocity field, using a Runge Kutta
+     * 4th order scheme.
+     *
+     * @param p0 a double[] grid coordinates (x, y, z) of the particle.
+     * @param time a double, the current time [second] of the simulation
+     * @param dt a double, the time step [second] of the simulation.
+     * @return a double[], the move of the particle on the grid (dx, dy, dz)
+     * @throws an ArrayIndexOutOfBoundsException if the particle is out of the
+     * domain.
+     */
+    private double[] computeMoveRK4(double[] p0, double time, double dt) throws ArrayIndexOutOfBoundsException {
+
+        int dim = p0.length;
+        double[] dU = new double[dim];
+        double[] pk = new double[dim];
+
+        double[] k1 = computeMove(p0, time, dt);
+
+        for (int i = 0; i < dim; i++) {
+            pk[i] = p0[i] + .5d * k1[i];
+        }
+
+        double[] k2 = computeMove(pk, time + dt / 2, dt);
+
+        for (int i = 0; i < dim; i++) {
+            pk[i] = p0[i] + .5d * k2[i];
+        }
+
+        double[] k3 = computeMove(pk, time + dt / 2, dt);
+
+        for (int i = 0; i < dim; i++) {
+            pk[i] = p0[i] + k3[i];
+        }
+
+        double[] k4 = computeMove(pk, time + dt, dt);
+
+        for (int i = 0; i < dim; i++) {
+            dU[i] = (k1[i] + 2.d * k2[i] + 2.d * k3[i] + k4[i]) / 6.d;
+        }
+
+        return (dU);
+    }
+
+    /*
+     * Moves the particle backward in time with the appropriate scheme (Euler
      * or Runge Kutta 4). The process is a bit more complex than forward
      * advection.
      * <pre>
@@ -170,105 +216,56 @@ public class AdvectionAction extends AbstractAction {
      * With Ua the input model velocity vector.
      * </pre>
      */
-    private void moveBackwardInTime(IParticle particle, double time) throws
-            ArrayIndexOutOfBoundsException {
-        
-        double[] mvt, pgrid;
-        double dt = getSimulationManager().getTimeManager().get_dt();
-        
+    private double[] backwardGuess(double[] pgrid, double time, double dt) {
+        double[] mvt;
+
+        double[] ptmp = pgrid.clone();
         if (isRK4) {
-            mvt = computeMove(pgrid = particle.getGridCoordinates(), time, dt);
-            for (int i = 0; i < mvt.length; i++) {
-                pgrid[i] += mvt[i];
-            }
-            if (getSimulationManager().getDataset().isOnEdge(pgrid)) {
-                particle.kill(ParticleMortality.OUT_OF_DOMAIN);
-                return;
-            }
-            mvt = computeMove(pgrid, time, dt);
-        } else {
-            mvt = computeMoveRK4(pgrid = particle.getGridCoordinates(), time, dt);
-            for (int i = 0; i < mvt.length; i++) {
-                pgrid[i] += mvt[i];
-            }
-            if (getSimulationManager().getDataset().isOnEdge(pgrid)) {
-                particle.kill(ParticleMortality.OUT_OF_DOMAIN);
-                return;
-            }
             mvt = computeMoveRK4(pgrid, time, dt);
+            for (int i = 0; i < mvt.length; i++) {
+                ptmp[i] += mvt[i];
+            }
+            mvt = computeMoveRK4(ptmp, time, dt);
+        } else {
+            mvt = computeMove(pgrid, time, dt);
+            for (int i = 0; i < mvt.length; i++) {
+                ptmp[i] += mvt[i];
+            }
+
+            mvt = computeMove(ptmp, time, dt);
         }
-        
-        if (!horizontal) {
-            mvt[0] = 0;
-            mvt[1] = 1;
+
+        double[] p0 = pgrid.clone();
+        for (int i = 0; i < mvt.length; i++) {
+            p0[i] += mvt[i];
         }
-        if (!vertical && mvt.length > 2) {
-            mvt[2] = 0;
-        }
-        particle.increment(mvt);
+        return p0;
     }
 
-    /**
-     * Advects the particle with the NetCDF dataset velocity field, using a
-     * Runge Kutta 4th order scheme.
-     *
-     * @param p0 a double[] grid coordinates (x, y, z) of the particle.
-     * @param time a double, the current time [second] of the simulation
-     * @param dt a double, the time step [second] of the simulation.
-     * @return a double[], the move of the particle on the grid (dx, dy, dz)
-     * @throws an ArrayIndexOutOfBoundsException if the particle is out of the
-     * domain.
-     */
-    private double[] computeMoveRK4(double[] p0, double time,
-            double dt) throws ArrayIndexOutOfBoundsException {
-        
-        int dim = p0.length;
-        double[] dU = new double[dim];
-        double[] pk = new double[dim];
-        
-        double[] k1 = computeMove(p0, time, dt);
-        
-        for (int i = 0; i < dim; i++) {
-            pk[i] = p0[i] + .5d * k1[i];
+    private double[] substract(double[] p1, double[] p2) {
+        double[] p3 = new double[p1.length];
+        for (int i = 0; i < p1.length; i++) {
+            p3[i] = p1[i] - p2[i];
         }
-        
-        double[] k2 = computeMove(pk, time + dt / 2, dt);
-        
-        for (int i = 0; i < dim; i++) {
-            pk[i] = p0[i] + .5d * k2[i];
-        }
-        
-        double[] k3 = computeMove(pk, time + dt / 2, dt);
-        
-        for (int i = 0; i < dim; i++) {
-            pk[i] = p0[i] + k3[i];
-        }
-        
-        double[] k4 = computeMove(pk, time + dt, dt);
-        
-        for (int i = 0; i < dim; i++) {
-            dU[i] = (k1[i] + 2.d * k2[i] + 2.d * k3[i] + k4[i]) / 6.d;
-        }
-        
-        return (dU);
+        return p3;
     }
-    
+
     public enum AdvectionScheme {
-        
+
         FORWARD_EULER("euler", "Forward Euler"),
         RUNGE_KUTTA_4("rk4", "Runge Kutta 4");
         private final String key;
         private final String name;
-        
+
         AdvectionScheme(String key, String name) {
             this.key = key;
             this.name = name;
         }
-        
+
         public String getKey() {
             return key;
         }
-        
+
         public String getName() {
             return name;
         }
