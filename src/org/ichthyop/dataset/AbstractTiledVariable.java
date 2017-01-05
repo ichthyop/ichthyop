@@ -70,12 +70,13 @@ abstract class AbstractTiledVariable {
     final int nx, ny, nz;
     final int nh, nv;
     final int ntilex, ntiley, ntilez;
-    
+    private final double timestamp;
+
     abstract Array loadTile(int tag);
-    
+
     abstract void closeSource();
-    
-    public AbstractTiledVariable(int nx, int ny, int nz, int nh, int nv) {
+
+    public AbstractTiledVariable(int nx, int ny, int nz, int nh, int nv, double timestamp) {
 
         this.tiles = new ConcurrentHashMap();
         this.nx = nx;
@@ -83,16 +84,16 @@ abstract class AbstractTiledVariable {
         this.nz = nz;
         this.nh = nh;
         this.nv = nv;
+        this.timestamp = timestamp;
         this.ntilex = (int) Math.round((float) nx / nh);
         this.ntiley = (int) Math.round((float) ny / nh);
         this.ntilez = Math.max((int) Math.round((float) nz / nv), 1);
     }
-    
+
     public void clear() {
         tiles.clear();
         closeSource();
     }
-    
 
     public double getDouble(int i, int j) {
         return getDouble(i, j, 0);
@@ -179,6 +180,10 @@ abstract class AbstractTiledVariable {
 
     Set<Integer> getTilesIndex() {
         return tiles.keySet();
+    }
+
+    double getTimeStamp() {
+        return timestamp;
     }
 
     void loadTiles(Set<Integer> tags) {

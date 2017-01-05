@@ -76,16 +76,16 @@ public class NetcdfTiledVariable extends AbstractTiledVariable {
     /*
      * 2D Tile Variable
      */
-    public NetcdfTiledVariable(NetcdfFile nc, String name, int nx, int ny, int i0, int j0, int rank, int nh) throws IOException {
-        this(nc, name, nx, ny, 0, i0, j0, rank, nh, 1);
+    public NetcdfTiledVariable(NetcdfFile nc, String name, int nx, int ny, int i0, int j0, int rank, double timestamp, int nh) throws IOException {
+        this(nc, name, nx, ny, 0, i0, j0, rank, timestamp, nh, 1);
     }
 
     /*
      * 3D Tile Variable
      */
-    public NetcdfTiledVariable(NetcdfFile nc, String name, int nx, int ny, int nz, int i0, int j0, int rank, int nh, int nv) throws IOException {
+    public NetcdfTiledVariable(NetcdfFile nc, String name, int nx, int ny, int nz, int i0, int j0, int rank, double timestamp, int nh, int nv) throws IOException {
 
-        super(nx, ny, nz, nh, nv);
+        super(nx, ny, nz, nh, nv, timestamp);
         this.nc = nc;
         String vname = DatasetUtil.findVariable(nc, name);
         if (null == vname) {

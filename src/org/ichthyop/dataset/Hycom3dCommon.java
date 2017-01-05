@@ -178,8 +178,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         v = new NetcdfTiledVariable[nt];
         w = new WTiledVariable[nt];
         // Initializes u[0] & v[0] for the mask
-        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
-        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, tilingh, tilingv);
+        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
+        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
     }
 
     @Override
@@ -655,10 +655,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         private final NetcdfTiledVariable uw;
         private final NetcdfTiledVariable vw;
 
-        WTiledVariable(NetcdfFile nc, int nx, int ny, int nz, int i0, int j0, int nh, int rank) throws IOException {
-            super(nx, ny, nz, 1, nz);
-            uw = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, nh, nz);
-            vw = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, nh, nz);
+        WTiledVariable(NetcdfFile nc, int nx, int ny, int nz, int i0, int j0, int nh, int rank, double timestamp) throws IOException {
+            super(nx, ny, nz, 1, nz, timestamp);
+            uw = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, timestamp, nh, nz);
+            vw = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, timestamp, nh, nz);
         }
 
         @Override
