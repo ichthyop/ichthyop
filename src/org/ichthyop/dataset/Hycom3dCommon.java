@@ -330,14 +330,15 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     @Override
     public double getDepthMax(double x, double y) {
 
-        if (isInWater((int) Math.round(x), (int) Math.round(y), 0)) {
+        int ix = (int) Math.round(x);
+        int jy = (int) Math.round(y);
+        if (isInWater(ix, jy, 0)) {
             for (int k = 0; k < nz; k++) {
-                int ix = (int) Math.round(x);
-                int jy = (int) Math.round(y);
                 if (!isInWater(ix, jy, k)) {
                     return getDepth(x, y, Math.max(0, k - 1));
                 }
             }
+            return getDepth(x, y, nz - 1);
         }
         return 0.d;
     }
