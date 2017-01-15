@@ -178,6 +178,9 @@ public class ParameterManager extends AbstractManager {
         // does nothing
 //        toCSV(toProperties(cfgFile, true), "=");
 //        toJson(toProperties(cfgFile, true));
+//        for (Entry<String, String> parameter : toProperties(cfgFile, false).entrySet()) {
+//            System.out.println(parameter);
+//        }
     }
 
     @Override
@@ -191,6 +194,7 @@ public class ParameterManager extends AbstractManager {
         map.put("configuration.longname", cfgFile.getLongName());
         map.put("configuration.description", clean(cfgFile.getDescription()));
         map.put("ichthyop.version", cfgFile.getVersion().toString());
+        map.put("configuration.blocks", listBlocks(cfgFile));
         for (XBlock block : cfg.readBlocks()) {
             map.put(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
             if (extended) {
@@ -216,6 +220,8 @@ public class ParameterManager extends AbstractManager {
                 }
                 key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey());
                 map.put(key.toString(), handleArray(nullify(parameter.getValue())));
+                key = new StringBuilder(block.getKey()).append(".parameters");
+                map.put(key.toString(), listParameters(block));
             });
         }
 
@@ -313,5 +319,21 @@ public class ParameterManager extends AbstractManager {
         } else {
             return value;
         }
+    }
+
+    private String listBlocks(ConfigurationFile cfg) throws IOException {
+        List<String> list = new ArrayList();
+        for (XBlock block : cfg.readBlocks()) {
+            list.add(block.getKey());
+        }
+        return Arrays.toString(list.toArray(new String[list.size()]));
+    }
+
+    private String listParameters(XBlock block) {
+        List<String> list = new ArrayList();
+        for (XParameter param : block.getXParameters()) {
+            list.add(param.getKey());
+        }
+        return Arrays.toString(list.toArray(new String[list.size()]));
     }
 }
