@@ -326,7 +326,7 @@ public class ParameterManager extends AbstractManager {
         for (XBlock block : cfg.readBlocks()) {
             list.add(block.getKey());
         }
-        return Arrays.toString(list.toArray(new String[list.size()]));
+        return handleArray(list.toArray(new String[list.size()]));
     }
 
     private String listParameters(XBlock block) {
@@ -334,6 +334,6 @@ public class ParameterManager extends AbstractManager {
         for (XParameter param : block.getXParameters()) {
             list.add(param.getKey());
         }
-        return Arrays.toString(list.toArray(new String[list.size()]));
+        return handleArray(list.toArray(new String[list.size()]));
     }
 }
