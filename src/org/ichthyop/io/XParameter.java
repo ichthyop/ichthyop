@@ -74,28 +74,21 @@ public class XParameter extends org.jdom2.Element {
     final public static String ACCEPTED = "accepted";
     final public static String DEFAULT = "default";
     final public static String TEMPLATE = "template";
-    private int index;
-    private final ParamType param_type;
-    private List<Element> values;
+    private Element value;
     private final boolean hidden;
     private final ParameterFormat param_format;
 
     XParameter(Element xparameter) {
         super(PARAMETER);
-        param_type = getType(xparameter);
         hidden = isHidden(xparameter);
         param_format = getFormat(xparameter);
         if (xparameter != null) {
-            if (getType().equals(ParamType.SERIAL)) {
-                this.setAttribute(TYPE, getType().toString());
-            }
             if (isHidden()) {
                 this.setAttribute(HIDDEN, String.valueOf(true));
             }
             addContent(xparameter.cloneContent());
-            values = getChildren(VALUE);
+            value = getChild(VALUE);
         }
-        reset();
     }
 
     public String getKey() {
@@ -104,10 +97,6 @@ public class XParameter extends org.jdom2.Element {
 
     public String getLongName() {
         return getChildTextNormalize(LONGNAME);
-    }
-
-    public ParamType getType() {
-        return param_type;
     }
 
     public boolean isHidden() {
@@ -127,14 +116,6 @@ public class XParameter extends org.jdom2.Element {
             return getChildTextNormalize(DESCRIPTION);
         } else {
             return null;
-        }
-    }
-
-    private ParamType getType(Element element) {
-        if (null != element && null != element.getAttribute(TYPE)) {
-            return ParamType.getType(element.getAttribute(TYPE).getValue());
-        } else {
-            return ParamType.SINGLE;
         }
     }
 
@@ -165,35 +146,11 @@ public class XParameter extends org.jdom2.Element {
 
     @Override
     public String getValue() {
-        return getValue(index);
+        return value.getTextNormalize();
     }
 
-    public String getValue(int index) {
-        return values.get(index).getTextNormalize();
-    }
-
-    public String getValues() {
-        if (getType().equals(ParamType.SERIAL) && getLength() > 1) {
-            StringBuilder strV = new StringBuilder();
-            for (Element elt : values) {
-                strV.append('"');
-                strV.append(elt.getTextNormalize());
-                strV.append("\" ");
-            }
-            return strV.toString().trim();
-        } else {
-            return getValue();
-        }
-    }
-
-    public void setValue(String value) {
-        setValue(value, 0);
-    }
-
-    public void addValue() {
-        indexOf(values.get(getLength() - 1));
-        addContent(indexOf(values.get(getLength() - 1)) + 1, new Element(VALUE).setText(getDefault()));
-        values = getChildren(VALUE);
+    public void setValue(String str) {
+        value.setText(str);
     }
 
     public String getDefault() {
@@ -210,41 +167,5 @@ public class XParameter extends org.jdom2.Element {
         } else {
             return null;
         }
-    }
-
-    public void setValue(String value, int index) {
-        if (index >= values.size()) {
-            addContent(new Element(VALUE));
-            values = getChildren(VALUE);
-        }
-        values.get(index).setText(value);
-    }
-
-    public void removeValue(int index) {
-        values.remove(index);
-    }
-
-    public boolean isSerial() {
-        return getType().equals(ParamType.SERIAL);
-    }
-
-    public int getLength() {
-        return getChildren(VALUE).size();
-    }
-
-    public boolean hasNext() {
-        return index < (getLength() - 1);
-    }
-
-    public int index() {
-        return index;
-    }
-
-    public void reset() {
-        index = 0;
-    }
-
-    public void increment() {
-        index++;
     }
 }

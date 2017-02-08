@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.io;
 
 import java.io.File;
@@ -129,7 +128,7 @@ public class ConfigurationFile {
         if (null != structure.getRootElement().getChild(VERSION)) {
             String number = structure.getRootElement().getChildTextNormalize(VERSION);
             String date = structure.getRootElement().getChild(VERSION).getAttributeValue(DATE);
-            return new Version(number, date);  
+            return new Version(number, date);
         } else {
             return Version.v3_0_beta;
         }
@@ -167,14 +166,12 @@ public class ConfigurationFile {
         xmlOut.output(structure, out);
     }
 
-    public List<XParameter> getParameters(ParamType paramType) {
+    public List<XParameter> getParameters() {
         List<XParameter> list = new ArrayList();
         for (XBlock xblock : map.values()) {
             if (xblock.isEnabled()) {
                 for (XParameter xparam : xblock.getXParameters()) {
-                    if (xparam.getType().equals(paramType)) {
-                        list.add(xparam);
-                    }
+                    list.add(xparam);
                 }
             }
         }
@@ -290,7 +287,7 @@ public class ConfigurationFile {
         structure.getRootElement().addContent(block);
         map.put(new BlockId(block.getType(), block.getKey()).toString(), block);
     }
-    
+
     public void removeBlock(final BlockType type, final String key) {
         map.remove(key);
         structure.getRootElement().removeContent(getBlock(type, key));

@@ -60,8 +60,6 @@ import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.InitializeListener;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.event.SetupListener;
-import org.ichthyop.io.ParamType;
-import org.ichthyop.io.XParameter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -84,26 +82,13 @@ public class SimulationManager {
 
     final private static SimulationManager simulationManager = new SimulationManager();
     /**
-     * Index of the current simulation (always 0 for SINGLE mode)
-     */
-    private int i_simulation;
-    /**
-     * *
-     * Number of simulations (always 1 for SINGLE mode)
-     */
-    private int nb_simulations = 1;
-    /**
      * Listeners list for SetupEvent and InitializeEvent.
      */
     private final EventListenerList listeners = new EventListenerList();
     /**
      * Computer time when the current simulation starts [millisecond]
      */
-    private long cpu_start_current;
-    /**
-     * Computer time when the simulation starts [millisecond]
-     */
-    private long cpu_start_global;
+    private long cpu_start;
     /**
      * A flag indicating wheter the simulation has been interrupted or
      * completed.
@@ -157,7 +142,6 @@ public class SimulationManager {
     public void setConfigurationFile(File file) throws Exception {
 
         cfgFile = null;
-        nb_simulations = 1;
         isSetup = false;
         if (file != null) {
             /* Make sure file exists */
@@ -175,9 +159,6 @@ public class SimulationManager {
             }
             cfgFile = file;
             getParameterManager().setConfigurationFile(file);
-            for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
-                nb_simulations *= xparam.getLength();
-            }
             mobiliseManagers();
         }
     }
@@ -211,16 +192,11 @@ public class SimulationManager {
         if (null == id) {
             id = newId();
         }
-        if (this.getNumberOfSimulations() > 1) {
-            return id + "_s" + (getIndexSimulation() + 1);
-        } else {
-            return id;
-        }
+        return id;
     }
 
     public void resetId() {
         id = null;
-        i_simulation = 0;
     }
 
     private static String newId() {
@@ -238,86 +214,23 @@ public class SimulationManager {
     }
 
     /**
-     * Checks for the existence of a new set of parameters. Systematically
-     * returns false for SINGLE mode.
-     *
-     * @return <code>true</code> if a new set of parameters is available;
-     * <code>false</code> otherwise
-     */
-    public boolean hasNextSimulation() {
-
-        if (flagStop) {
-            return false;
-        }
-
-        for (XParameter xparam : getParameterManager().getParameters(ParamType.SERIAL)) {
-            if (xparam.hasNext()) {
-                xparam.increment();
-                this.reset();
-                return true;
-            } else {
-                xparam.reset();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets the number of simulations (which equals the number of sets of
-     * parameters predefined by the user). Returns 1 for SINGLE mode.
-     *
-     * @return the number of simulations.
-     */
-    public int getNumberOfSimulations() {
-        return nb_simulations;
-    }
-
-    /**
-     * Resets indexes and time values at the beginning of a new simulation.
-     */
-    private void reset() {
-        i_simulation++;
-    }
-
-    /**
      * Calculates the progress of the current simulation
      *
      * @return the progress of the current simulation as a percent
      */
-    public float progressCurrent() {
+    public float progress() {
         float progress = (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps();
         return Math.min(Math.max(progress, 0.f), 1.f);
     }
 
     /**
-     * Calculates the progress of the current simulation compared to the whole
-     * sets of simulations.
-     *
-     * @return the progress of the whole sets of simulations as a percent
-     */
-    public float progressGlobal() {
-        float progress = (i_simulation + (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps()) / nb_simulations;
-        return Math.min(Math.max(progress, 0.f), 1.f);
-    }
-
-    /**
      * Estimates the time left to end up the current simulation.
      *
      * @return the time left, formatted in a String
      */
-    public String timeLeftCurrent() {
+    public String timeLeft() {
 
-        return timeLeft(progressCurrent(), cpu_start_current);
-    }
-
-    /**
-     * Estimates the time left to end up the current simulation.
-     *
-     * @return the time left, formatted in a String
-     */
-    public String timeLeftGlobal() {
-
-        return timeLeft(progressGlobal(), cpu_start_global);
+        return timeLeft(progress(), cpu_start);
     }
 
     private String timeLeft(float progress, long cpu_start) {
@@ -376,14 +289,6 @@ public class SimulationManager {
         getOutputManager();
     }
 
-    public String indexSimulationToString() {
-        return (i_simulation + 1) + " / " + nb_simulations;
-    }
-
-    public int getIndexSimulation() {
-        return i_simulation;
-    }
-
     public void setup() throws Exception {
         flagStop = false;
         getZoneManager().cleanup();
@@ -408,12 +313,8 @@ public class SimulationManager {
         return flagStop;
     }
 
-    public void resetTimerCurrent() {
-        cpu_start_current = System.currentTimeMillis();
-    }
-
-    public void resetTimerGlobal() {
-        cpu_start_global = System.currentTimeMillis();
+    public void resetTimer() {
+        cpu_start = System.currentTimeMillis();
     }
 
     public Simulation getSimulation() {

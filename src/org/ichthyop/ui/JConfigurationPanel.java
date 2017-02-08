@@ -100,8 +100,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         ckBoxBlock.addActionListener(this);
         btnRedo.addActionListener(this);
         btnUndo.addActionListener(this);
-        btnAddValue.addActionListener(this);
-        btnRemoveValue.addActionListener(this);
         ckBoxHiddenParameter.addActionListener(this);
     }
 
@@ -139,7 +137,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         return (ParameterTable) table;
     }
 
-    private void setupBlockPanel(XBlock block) {
+    private void setupBlockPanel(XBlock block) throws Exception {
 
         /* Display block information */
         String title = getResourceMap().getString("pnlBlockInfo.border.title") + " " + block.getTreePath();
@@ -169,8 +167,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         /* Disabled buttons */
         btnUndo.getAction().setEnabled(false);
         btnRedo.getAction().setEnabled(false);
-        btnAddValue.getAction().setEnabled(false);
-        btnRemoveValue.getAction().setEnabled(false);
         ckBoxHiddenParameter.setSelected(false);
         getTable().setModel(block, this);
         if (block.getNbHiddenParameters() > 0) {
@@ -203,7 +199,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 }
             } else {
                 /* Warn user in case no block of this type is enable */
-                StringBuffer msg = new StringBuffer();
+                StringBuilder msg = new StringBuilder();
                 msg.append(getResourceMap().getString("noBlockEnabled.text.part1"));
                 msg.append(" <");
                 msg.append(type.toString());
@@ -219,17 +215,18 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnUndo.getAction().setEnabled(enabled && getTable().getUndoManager().canUndo());
         btnRedo.getAction().setEnabled(enabled && getTable().getUndoManager().canRedo());
         ckBoxHiddenParameter.getAction().setEnabled(enabled && (blockTree.getSelectedBlock().getNbHiddenParameters() > 0));
-        btnAddValue.getAction().setEnabled(false);
-        btnRemoveValue.getAction().setEnabled(false);
     }
 
+    @Override
     public void valueChanged(TreeSelectionEvent e) {
         Application.getInstance().getContext().getTaskService().execute(new ShowConfigEditorsTask());
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 getTable().stopEditing();
             }
@@ -251,6 +248,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         @Override
         protected Object doInBackground() throws Exception {
 
+            
             DefaultMutableTreeNode node = blockTree.getSelectedNode();
             if (node != null && node.isLeaf()) {
                 XBlock block = blockTree.getSelectedBlock();
@@ -280,16 +278,16 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
     }
 
+    @Override
     public void tableChanged(TableModelEvent e) {
         if (e != null) {
             btnRedo.getAction().setEnabled(false);
             btnUndo.getAction().setEnabled(true);
             firePropertyChange("configurationFile", null, null);
         }
-        btnAddValue.getAction().setEnabled(false);
-        btnRemoveValue.getAction().setEnabled(false);
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             try {
@@ -304,27 +302,22 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(modelRow));
                 String title = getResourceMap().getString("pnlParameterInfo.border.title") + " " + xparam.getLongName();
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(title));
-                StringBuffer info = new StringBuffer("<html><i><p>");
+                StringBuilder info = new StringBuilder("<html><i><p>");
                 if (null != xparam.getDescription()) {
                     info.append(xparam.getDescription());
                 } else {
                     info.append(getResourceMap().getString("noDescription.text"));
                 }
                 info.append("</p><br>");
-                if (xparam.isSerial()) {
-                    info.append(getResourceMap().getString("serialParameterDescription.text"));
-                    info.append("<br>");
-                }
                 if (xparam.isHidden()) {
                     info.append(getResourceMap().getString("hiddenParameterDescription.text"));
                 }
                 info.append("</i></html>");
                 lblParameter.setText(info.toString());
-                btnAddValue.getAction().setEnabled(xparam.isSerial());
-                btnRemoveValue.getAction().setEnabled(xparam.isSerial() && (xparam.getLength() > 1));
             } catch (Exception ex) {
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParameterInfo.border.title")));
                 lblParameter.setText(getResourceMap().getString("noDescription.text"));
+                ex.printStackTrace();
             }
         }
     }
@@ -357,53 +350,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             btnUndo.getAction().setEnabled(getTable().getUndoManager().canUndo());
         } else {
             btnRedo.getAction().setEnabled(false);
-        }
-    }
-
-    @Action
-    public Task addSerialValue() {
-        return new SerialValueTask(SerialValueTask.ADD);
-    }
-
-    @Action
-    public Task removeSerialValue() {
-        return new SerialValueTask(SerialValueTask.REMOVE);
-    }
-
-    private class SerialValueTask extends Task {
-
-        final static int ADD = 1;
-        final static int REMOVE = -1;
-        private int actionType;
-
-        SerialValueTask(int actionType) {
-            super(Application.getInstance());
-            this.actionType = actionType;
-            busyLabel.setBusy(true);
-            busyLabel.setText("");
-            scrollPaneTable.setViewportView(busyLabel);
-            btnRemoveValue.getAction().setEnabled(false);
-            btnAddValue.getAction().setEnabled(false);
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-            int row = table.getSelectedRow();
-            XParameter xparam = blockTree.getSelectedBlock().getXParameter(getTable().getParameterKey(row).toString());
-            if (actionType == ADD) {
-                xparam.addValue();
-            } else {
-                int index = getTable().getParameterIndex(row);
-                xparam.removeValue(index);
-            }
-            getTable().setModel(blockTree.getSelectedBlock(), JConfigurationPanel.this);
-            return null;
-        }
-
-        @Override
-        protected void succeeded(Object o) {
-            scrollPaneTable.setViewportView(table);
-            JConfigurationPanel.this.firePropertyChange("configurationFile", null, null);
         }
     }
 
@@ -471,11 +417,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     /** This method is called from within the constructor to
      * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
      */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         blockEditor = new javax.swing.JPanel();
@@ -510,8 +452,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         lblParameter = new javax.swing.JLabel();
         btnUndo = new javax.swing.JButton();
         btnRedo = new javax.swing.JButton();
-        btnAddValue = new javax.swing.JButton();
-        btnRemoveValue = new javax.swing.JButton();
         ckBoxHiddenParameter = new javax.swing.JCheckBox();
         scrollPaneTable = new javax.swing.JScrollPane();
         table = new org.ichthyop.ui.ParameterTable();
@@ -777,15 +717,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRedo.setAction(actionMap.get("redo")); // NOI18N
         btnRedo.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
         btnRedo.setName("btnRedo"); // NOI18N
-
-        btnAddValue.setAction(actionMap.get("addSerialValue")); // NOI18N
-        btnAddValue.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
-        btnAddValue.setName("btnAddValue"); // NOI18N
-
-        btnRemoveValue.setAction(actionMap.get("removeSerialValue")); // NOI18N
-        btnRemoveValue.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
-        btnRemoveValue.setName("btnRemoveValue"); // NOI18N
-
+        
         ckBoxHiddenParameter.setAction(actionMap.get("showHiddenParameters")); // NOI18N
         ckBoxHiddenParameter.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
         ckBoxHiddenParameter.setName("ckBoxHiddenParameter"); // NOI18N
@@ -821,11 +753,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlParametersLayout.createSequentialGroup()
                         .addComponent(btnUndo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRedo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAddValue)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnRemoveValue)))
+                        .addComponent(btnRedo)))
                 .addContainerGap())
         );
         pnlParametersLayout.setVerticalGroup(
@@ -837,9 +765,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUndo)
-                    .addComponent(btnRedo)
-                    .addComponent(btnAddValue)
-                    .addComponent(btnRemoveValue))
+                    .addComponent(btnRedo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlParameterInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -891,22 +817,18 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(splitPaneCfg, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
         );
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
-    private void textFieldTitleKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldTitleKeyTyped
-        // TODO add your handling code here:
+    private void textFieldTitleKeyTyped(java.awt.event.KeyEvent evt) {
         firePropertyChange("configurationFile", null, null);
-    }//GEN-LAST:event_textFieldTitleKeyTyped
+    }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel blockEditor;
     private org.ichthyop.ui.BlockTree blockTree;
-    private javax.swing.JButton btnAddValue;
     private javax.swing.JButton btnCollapse;
     private javax.swing.JButton btnExpand;
     private javax.swing.JButton btnLower;
     private javax.swing.JButton btnRedo;
-    private javax.swing.JButton btnRemoveValue;
     private javax.swing.JButton btnUndo;
     private javax.swing.JButton btnUpper;
     private org.jdesktop.swingx.JXBusyLabel busyLabel;
@@ -936,6 +858,5 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JTextArea textAreaDescription;
     private javax.swing.JTextField textFieldTitle;
     private javax.swing.JTextField textFieldVersion;
-    // End of variables declaration//GEN-END:variables
     private boolean hasStructureChanged;
 }

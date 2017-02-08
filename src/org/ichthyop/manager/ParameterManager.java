@@ -56,7 +56,6 @@ import java.io.BufferedWriter;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.io.BlockType;
-import org.ichthyop.io.ParamType;
 import org.ichthyop.io.XBlock;
 import org.ichthyop.io.XParameter;
 import java.io.File;
@@ -120,8 +119,8 @@ public class ParameterManager extends AbstractManager {
         cfgFile.setLongName(longName);
     }
 
-    public List<XParameter> getParameters(ParamType paramType) {
-        return cfgFile.getParameters(paramType);
+    public List<XParameter> getParameters() {
+        return cfgFile.getParameters();
     }
 
     public String getParameter(String blockKey, String key) {

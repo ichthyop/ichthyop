@@ -228,14 +228,14 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
             str.append("  ");
             str.append(param.getKey());
             str.append("::");
-            str.append(param.getValues());
+            str.append(param.getValue());
             str.append("\n");
         }
         for (XParameter param : getXParameters()) {
             str.append("  ~");
             str.append(param.getKey());
             str.append("::");
-            str.append(param.getValues());
+            str.append(param.getValue());
             str.append("\n");
         }
         str.append("\n");
