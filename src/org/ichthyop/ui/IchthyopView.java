@@ -70,8 +70,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.EventObject;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -95,6 +98,7 @@ import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
+import org.ichthyop.Template;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
@@ -631,14 +635,43 @@ public class IchthyopView extends FrameView
             isSetup = false;
         }
     }
+    
+    private File getDefaultCfgPath() {
+        StringBuilder path = new StringBuilder();
+        path.append(System.getProperty("user.dir"));
+        if (!path.toString().endsWith(File.separator)) {
+            path.append(File.separator);
+        }
+        path.append("cfg");
+        path.append(File.separator);
+        
+        // generate a file name
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        dtFormat.setCalendar(calendar);
+        path.append(dtFormat.format(calendar.getTime()));
+        path.append("_");
+        String username = System.getProperty("user.name");
+        if (null != username && !username.isEmpty()) {
+            path.append(username);
+            path.append("_");
+
+        }
+        path.append("ichthyop-config.xml");
+        
+        return new File(path.toString());
+    }
 
     @Action
     public Task saveAsConfigurationFile() {
-        JFileChooser fc = new JFileChooser(getSimulationManager().getConfigurationFile());
+        File cwd = untitled ? getDefaultCfgPath() : getSimulationManager().getConfigurationFile();
+        System.out.println(cwd);
+        JFileChooser fc = new JFileChooser(cwd);
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
         fc.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.configurationFile"), getResourceMap().getString("Application.configurationFile.extension")));
-        fc.setSelectedFile(getSimulationManager().getConfigurationFile());
+        fc.setSelectedFile(cwd);
         int returnVal = fc.showSaveDialog(getFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = addExtension(fc.getSelectedFile(), getResourceMap().getString("Application.configurationFile.extension"));
@@ -661,6 +694,7 @@ public class IchthyopView extends FrameView
             }
             try {
                 IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
+                untitled = false;
                 StringBuffer sb = new StringBuffer();
                 sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.prefix"));
                 sb.append(" ");
@@ -689,7 +723,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public Task saveConfigurationFile() {
-        return new SaveCfgFileTask(getApplication());
+        return untitled ? saveAsConfigurationFile() : new SaveCfgFileTask(getApplication());
     }
 
     private class SaveCfgFileTask extends SFTask {
@@ -710,6 +744,7 @@ public class IchthyopView extends FrameView
         @Override
         protected void onSuccess(Object o) {
             btnSaveCfgFile.getAction().setEnabled(false);
+            untitled = false;
             isSetup = false;
             setMessage(resourceMap.getString("saveConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().getName(), false, LogLevel.COMPLETE);
         }
@@ -736,6 +771,7 @@ public class IchthyopView extends FrameView
             getSimulationManager().setConfigurationFile(null);
         } catch (Exception ex) {
         }
+        getFrame().setTitle(getResourceMap().getString("Application.title"));
         lblCfgFile.setText(getResourceMap().getString("lblCfgFile.text"));
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
         btnSimulationRun.getAction().setEnabled(false);
@@ -840,6 +876,7 @@ public class IchthyopView extends FrameView
                     }
                 });
             } else {
+                untitled = false;
                 loadConfigurationFile(file, null).execute();
             }
         } catch (Exception ex) {
@@ -897,12 +934,13 @@ public class IchthyopView extends FrameView
                 Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        getLogger().info(getResourceMap().getString("openConfigurationFile.msg.opened") + " " + file.toString());
-        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + file.getName());
-        lblCfgFile.setText(file.getAbsolutePath());
+        getLogger().info(getResourceMap().getString("openConfigurationFile.msg.opened") + " " + (untitled ? "Untitled configuration" : file.toString()));
+        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (untitled ? "Untitled configuration" : file.toString()));
+        lblCfgFile.setText((untitled ? "Filename not set yet" : file.getAbsolutePath()));
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
         isSetup = false;
         saveAsMenuItem.getAction().setEnabled(true);
+        saveMenuItem.getAction().setEnabled(untitled);
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
         btnPreview.getAction().setEnabled(true);
@@ -983,6 +1021,7 @@ public class IchthyopView extends FrameView
         progressTimer.start();
     }
 
+    @Override
     public void timingEvent(float fraction) {
         float ellpased_time = (fraction * TEN_MINUTES - time) * nbfps;
         if (ellpased_time > 1) {
@@ -995,6 +1034,7 @@ public class IchthyopView extends FrameView
         }
     }
 
+    @Override
     public void begin() {
         nbfps = (Float) animationSpeed.getValue();
         time = 0;
@@ -1002,11 +1042,13 @@ public class IchthyopView extends FrameView
         startAccelerationProgress();
     }
 
+    @Override
     public void end() {
         btnOpenAnimation.getAction().setEnabled(true);
         getLogger().info(getResourceMap().getString("animation.msg.stopped"));
     }
 
+    @Override
     public void repeat() {
     }
 
@@ -1021,6 +1063,7 @@ public class IchthyopView extends FrameView
             statusBar.getProgressBar().setIndeterminate(false);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             progress = (int) (100.f * animator.getTimingFraction() / duration);
             statusBar.getProgressBar().setValue(progress);
@@ -1037,8 +1080,14 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void newConfigurationFile() {
-        getApplication().show(new NewConfigView(IchthyopApp.getApplication()));
+    public Task newConfigurationFile() throws IOException {
+
+        // close any opened configuration file (and save if necessary)
+        closeConfigurationFile();
+
+        // create a temp file with generic template
+        untitled = true;
+        return loadConfigurationFile(Template.createTemplate(), getUpdateManager().getApplicationVersion());
     }
 
     @Action
@@ -1205,11 +1254,11 @@ public class IchthyopView extends FrameView
 
     public void savePreferences() {
 
-        if (null != getSimulationManager().getConfigurationFile()) {
+        if (null != getSimulationManager().getConfigurationFile() && !untitled) {
             savePreference(openMenuItem, getSimulationManager().getConfigurationFile().getPath());
             //savePreference(blockTree, blockTree.getSelectedKey());
         } else {
-            savePreference(openMenuItem, cfgPath.getPath());
+            savePreference(openMenuItem, System.getProperty("user.dir"));
         }
 
         savePreference(animationSpeed, animationSpeed.getValue());
@@ -2872,6 +2921,7 @@ public class IchthyopView extends FrameView
     private ResourceMap resourceMap = Application.getInstance(org.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
     private TimeDirection animationDirection;
     private MouseWheelScroller mouseScroller = new MouseWheelScroller();
+    private boolean untitled = true;
 
     private enum TimeDirection {
 

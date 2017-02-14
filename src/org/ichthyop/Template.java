@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop;
 
 import java.io.BufferedInputStream;
@@ -62,7 +61,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import org.ichthyop.io.IOTools;
 
-/**
+/*
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
@@ -71,26 +70,28 @@ public class Template {
     public static void createTemplate(String templateName, File destination) throws IOException {
         try {
             writeTemplate(getTemplateURL(templateName), destination.getAbsolutePath());
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             IOException ioex = new IOException("Failed to create template at " + destination + " ==> " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
     }
-
+    
     public static URL getTemplateURL(String templateName) {
         String path = "templates/" + templateName;
         return Template.class.getResource(path);
     }
 
-    private static void writeTemplate(URL url, String destination) throws Exception {
+    public static File createTemplate() throws IOException {
+        File tmpFile = File.createTempFile("ichthyop-config_", null);
+        writeTemplate(getTemplateURL("cfg-generic.xml"), tmpFile.getAbsolutePath());
+        return tmpFile;
+    }
 
-        URLConnection connection = null;
-        InputStream is = null;
-        FileOutputStream destinationFile = null;
+    private static void writeTemplate(URL url, String destination) throws IOException {
 
         //On crée une connection vers cet URL
-        connection = url.openConnection();
+        URLConnection connection = url.openConnection();
 
         //On récupère la taille du fichier
         int length = connection.getContentLength();
@@ -101,18 +102,17 @@ public class Template {
         }
 
         //On récupère le stream du fichier
-        is = new BufferedInputStream(connection.getInputStream());
+        InputStream is = new BufferedInputStream(connection.getInputStream());
 
         //On prépare le tableau de bits pour les données du fichier
         byte[] data = new byte[length];
 
         //On déclare les variables pour se retrouver dans la lecture du fichier
-        int currentBit = 0;
         int deplacement = 0;
 
         //Tant que l'on n'est pas à la fin du fichier, on récupère des données
         while (deplacement < length) {
-            currentBit = is.read(data, deplacement, data.length - deplacement);
+            int currentBit = is.read(data, deplacement, data.length - deplacement);
             if (currentBit == -1) {
                 break;
             }
@@ -126,7 +126,7 @@ public class Template {
 
         //On crée un stream sortant vers la destination
         IOTools.makeDirectories(destination);
-        destinationFile = new FileOutputStream(destination);
+        FileOutputStream destinationFile = new FileOutputStream(destination);
 
         //On écrit les données du fichier dans ce stream
         destinationFile.write(data);
@@ -137,8 +137,7 @@ public class Template {
         try {
             is.close();
             destinationFile.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
         }
-
     }
 }
