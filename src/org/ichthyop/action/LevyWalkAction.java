@@ -52,7 +52,7 @@
  */
 package org.ichthyop.action;
 
-import org.apache.commons.math3.distribution.UniformRealDistribution;
+import java.util.Random;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.util.MTRandom;
 
@@ -62,35 +62,47 @@ import org.ichthyop.util.MTRandom;
  */
 public class LevyWalkAction extends AbstractAction {
 
-    private double alpha;
-    private double vmax;
-    private UniformRealDistribution urd1;
-    private UniformRealDistribution urd2;
-    private MTRandom rd;
+    private double alphaH, alphaV;
+    private double vmax, depthmax;
+    private boolean hEnabled, vEnabled;
+    private MTRandom rd1, rd2, rd3;
 
     @Override
     public void loadParameters() throws Exception {
-        alpha = Double.valueOf(getParameter("alpha"));
-        urd1 = new UniformRealDistribution();
+        alphaH = Double.valueOf(getParameter("alpha_h"));
         vmax = Double.valueOf(getParameter("vmax"));
-        urd2 = new UniformRealDistribution(Math.pow(2, -alpha), Math.pow(1, -alpha));
-        rd = new MTRandom();
+        alphaV = Double.valueOf(getParameter("alpha_v"));
+        depthmax = Double.valueOf(getParameter("depthmax"));
+        if (depthmax > 0) depthmax *= -1.d;
+        hEnabled = Boolean.valueOf(getParameter("enabled_h"));
+        vEnabled = Boolean.valueOf(getParameter("enabled_v"));
+        rd1 = new MTRandom();
+        rd2 = new MTRandom(2L * System.currentTimeMillis());
+        rd3 = new MTRandom(System.currentTimeMillis() / 2L);
     }
 
     @Override
     public void execute(IParticle particle) {
 
-        double theta = urd1.sample() * 2 * Math.PI;
-        //double f = vmax * levywalk1();
-        double f = vmax * levywalk2();
+        if (hEnabled) {
+            // random direction
+            double theta = rd1.nextDouble() * 2 * Math.PI;
+            // Levywalk velocity
+            double vxy = vmax * levywalk(rd2, alphaH);
+            // converts direction and velocity into dx, dy move
+            double dt = getSimulationManager().getTimeManager().get_dt();
+            int i = (int) Math.round(particle.getX());
+            int j = (int) Math.round(particle.getY());
+            double dx = vxy * Math.cos(theta) / getSimulationManager().getDataset().getdxi(j, i) * dt;
+            double dy = vxy * Math.sin(theta) / getSimulationManager().getDataset().getdeta(j, i) * dt;
+            particle.increment(new double[]{dx, dy});
+        }
 
-        // Converts into dx, dy move
-        double dt = getSimulationManager().getTimeManager().get_dt();
-        int i = (int) Math.round(particle.getX());
-        int j = (int) Math.round(particle.getY());
-        double dx = f * Math.cos(theta) / getSimulationManager().getDataset().getdxi(j, i) * dt;
-        double dy = f * Math.sin(theta) / getSimulationManager().getDataset().getdeta(j, i) * dt;
-        particle.increment(new double[]{dx, dy});
+        if (vEnabled) {
+            double depth = depthmax * levywalk(rd3, alphaV);
+            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
+            particle.increment(new double[]{0.d, 0.d, dz}, false, true);
+        }
     }
 
     @Override
@@ -103,8 +115,8 @@ public class LevyWalkAction extends AbstractAction {
      *
      * @return
      */
-    private double levywalk1() {
-        return (Math.pow(urd2.sample(), -1. / alpha) - 1.);
+    private double levywalk(Random rd, double alpha) {
+        return (Math.pow(bounded_uniform(rd, Math.pow(2, -alpha), Math.pow(1, -alpha)), -1. / alpha) - 1.);
     }
 
     /**
@@ -135,19 +147,19 @@ public class LevyWalkAction extends AbstractAction {
      *
      *
      */
-    private double levywalk2() {
+//    private double levywalk(Random rd, double alpha) {
+//
+//        double X = bounded_uniform(rd, -Math.PI / 2.0, Math.PI / 2.0);
+//        // uses Mersenne Twister random number generator to retrieve a value between (0,1) (does not include 0 or 1
+//        // themselves)
+//        double Y = -Math.log(nextDouble(rd, false, false));
+//
+//        double Z = (Math.sin(alpha * X) / Math.pow(Math.cos(X), 1.0 / alpha))
+//                * Math.pow(Math.cos((1.0 - alpha) * X) / Y, (1.0 - alpha) / alpha);
+//        return Math.abs(Z);
+//    }
 
-        double X = bounded_uniform(-Math.PI / 2.0, Math.PI / 2.0);
-        // uses Mersenne Twister random number generator to retrieve a value between (0,1) (does not include 0 or 1
-        // themselves)
-        double Y = -Math.log(nextDouble(false, false));
-
-        double Z = (Math.sin(alpha * X) / Math.pow(Math.cos(X), 1.0 / alpha))
-                * Math.pow(Math.cos((1.0 - alpha) * X) / Y, (1.0 - alpha) / alpha);
-        return Math.abs(Z);
-    }
-
-    private double nextDouble(boolean includeZero, boolean includeOne) {
+    private double nextDouble(Random rd, boolean includeZero, boolean includeOne) {
         double d = 0.0;
         do {
             d = rd.nextDouble();                           // grab a value, initially from half-open [0.0, 1.0)
@@ -160,9 +172,9 @@ public class LevyWalkAction extends AbstractAction {
         return d;
     }
 
-    private double bounded_uniform(double low, double high) {
+    private double bounded_uniform(Random rd, double low, double high) {
         // returns a double in inverval (0,1). IE, neither zero nor one will be returned. 		
-        double x = nextDouble(false, false);
+        double x = nextDouble(rd, false, false);
 
         double range = high - low;
         x *= range;	// scale onto the required range of values
