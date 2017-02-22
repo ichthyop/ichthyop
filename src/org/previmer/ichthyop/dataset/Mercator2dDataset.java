@@ -192,9 +192,9 @@ public class Mercator2dDataset extends AbstractDataset {
                 {
                     int ci = i + ii - 1;
                     if (ci < 0) {
-                        ci = nx - 2;
+                        ci = nx - 1;
                     }
-                    if (ci > nx - 2) {
+                    if (ci > nx - 1) {
                         ci = 0;
                     }
 
@@ -228,7 +228,10 @@ public class Mercator2dDataset extends AbstractDataset {
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 int ci = i + ii;
-                if (ci > nx - 2) {
+                if (ci < 0) {
+                    ci = nx - 1;
+                }
+                if (ci > nx - 1) {
                     ci = 0;
                 }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
@@ -417,7 +420,7 @@ public class Mercator2dDataset extends AbstractDataset {
         }
 
         try {
-            if (ncV.findVariable(strU).getShape().length > 3) {
+            if (ncV.findVariable(strV).getShape().length > 3) {
                 v_tp1 = (double[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
             } else {
                 v_tp1 = (double[][]) ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
@@ -637,14 +640,14 @@ public class Mercator2dDataset extends AbstractDataset {
         double xgrid;
         if (lon >= longitude[ci]) {
             double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
-                ? 360.d + (longitude[cip1] - longitude[ci])
-                : longitude[cip1] - longitude[ci];
+                    ? 360.d + (longitude[cip1] - longitude[ci])
+                    : longitude[cip1] - longitude[ci];
             double deltax = (lon - longitude[ci]) / dx;
             xgrid = xTore(ci + deltax);
         } else {
             double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d)
-                ? 360.d + (longitude[ci] - longitude[cim1])
-                : longitude[ci] - longitude[cim1];
+                    ? 360.d + (longitude[ci] - longitude[cim1])
+                    : longitude[ci] - longitude[cim1];
             double deltax = (lon - longitude[cim1]) / dx;
             xgrid = xTore(cim1 + deltax);
         }
