@@ -38,7 +38,7 @@ public class LinearGrowthAction extends AbstractAction {
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
-        
+
         boolean addTracker = true;
         try {
             addTracker = Boolean.valueOf(getParameter("length_tracker"));
@@ -78,7 +78,11 @@ public class LinearGrowthAction extends AbstractAction {
     private double grow(double temperature) {
 
         double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
-        return (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
+        // temperature may be NaN in dry cells at low tide
+        // improvement suggested by David S Wethey, 2017.02.10
+        return Double.isNaN(temperature)
+                ? 0.d
+                : (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
 
     }
 }
