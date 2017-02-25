@@ -94,7 +94,7 @@ public class ActionManager extends AbstractManager {
                     AbstractAction action = createAction(actionClass);
                     action.loadParameters();
                     actionMap.put(xaction.getKey(), action);
-                    getLogger().log(Level.INFO, "Instantiated action \"{0}\"", xaction.getTreePath());
+                    info("Instantiated action \"{0}\"", xaction.getTreePath());
                 } catch (Exception ex) {
                     StringBuilder msg = new StringBuilder();
                     msg.append("Failed to setup action ");
@@ -119,7 +119,7 @@ public class ActionManager extends AbstractManager {
         for (AbstractSysAction sysaction : sysActionList) {
             try {
                 sysaction.loadParameters();
-                getLogger().log(Level.INFO, "Instantiated system action \"{0}\"", sysaction.getClass().getCanonicalName());
+                info("Instantiated system action \"{0}\"", sysaction.getClass().getCanonicalName());
             } catch (Exception ex) {
                 StringBuilder msg = new StringBuilder();
                 msg.append("Failed to setup system action ");
@@ -168,7 +168,7 @@ public class ActionManager extends AbstractManager {
     public void setupPerformed(SetupEvent e) throws Exception {
         loadActions();
         implementSysActions();
-        getLogger().info("Action manager setup [OK]");
+        info("Action manager setup [OK]");
     }
 
     @Override

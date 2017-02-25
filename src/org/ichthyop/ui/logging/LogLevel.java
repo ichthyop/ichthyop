@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.ui.logging;
 
 import java.util.logging.Level;
@@ -64,7 +63,7 @@ public class LogLevel extends Level {
     public static final LogLevel COMPLETE = new LogLevel("INFO");
 
     public LogLevel(String name) {
-        super(name, 850);
+        super(name, Level.INFO.intValue());
     }
 
 }

@@ -256,7 +256,7 @@ public class WindDriftFileAction extends WindDriftAction {
                 throw ioex;
             }
         }
-        getLogger().log(Level.INFO, "Opened wind dataset {0}", filename);
+        info("Opened wind dataset {0}", filename);
     }
 
     void getDimNC() throws IOException {

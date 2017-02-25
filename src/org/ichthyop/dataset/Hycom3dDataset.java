@@ -188,7 +188,7 @@ public class Hycom3dDataset extends Hycom3dCommon {
         try {
             return DatasetUtil.openFile(uvFiles.get(index), true);
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            error("Failed to open NetCDF file " + uvFiles.get(index), ex);
         }
         return null;
     }

@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Level;
-import static org.ichthyop.manager.SimulationManager.getLogger;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -131,11 +130,11 @@ public class NetcdfTiledVariable extends AbstractTiledVariable {
                     break;
             }
 
-            getLogger().log(Level.FINE, "Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
+            debug("Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
             try {
                 return variable.read(origin, shape).reduce();
             } catch (IOException | InvalidRangeException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
+                error("Error reading NetCDF variable "+ variable.getFullName() + " from " + nc.getLocation(), ex);
             }
             return null;
         }
@@ -146,7 +145,7 @@ public class NetcdfTiledVariable extends AbstractTiledVariable {
         try {
             nc.close();
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            warning("Error closing NetCDF " + nc.getLocation(), ex);
         }
     }
 

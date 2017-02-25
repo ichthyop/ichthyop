@@ -584,7 +584,7 @@ public abstract class MarsCommon extends AbstractDataset {
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (IOException | NumberFormatException ex) {
-                getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
+                warning("Failed to resize domain. " + ex.toString(), ex);
             }
         }
     }

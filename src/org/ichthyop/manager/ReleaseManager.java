@@ -145,7 +145,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         sb.append(" seconds. Released ");
         sb.append(nbReleased);
         sb.append(" particles.");
-        getLogger().info(sb.toString());
+        info(sb.toString());
     }
 
     public int getNbParticles() {
@@ -222,7 +222,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
                 return getSimulationManager().getParameterManager().getListParameter(BlockType.OPTION, "release.schedule", "events");
             }
         } catch (Exception ex) {
-            getLogger().log(Level.WARNING, "Failed to read the release schedule. By default, particles will all be released at simulation initial time. {0}", ex.toString());
+            warning("Failed to read the release schedule. By default, particles will all be released at simulation initial time. {0}", ex.toString());
         }
         String st0 = getSimulationManager().getParameterManager().getString("app.time.initial_time");
         return new String[]{st0};
@@ -296,7 +296,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         releaseProcess = null;
         timeEvent = new double[getReleaseEvents().length];
         instantiateReleaseProcess();
-        getLogger().info("Release manager setup [OK]");
+        info("Release manager setup [OK]");
     }
 
     @Override
@@ -304,6 +304,6 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         addReleaseListener(this);
         getSimulationManager().getTimeManager().addNextStepListener(this);
         schedule();
-        getLogger().info("Release manager initialization [OK]");
+        info("Release manager initialization [OK]");
     }
 }

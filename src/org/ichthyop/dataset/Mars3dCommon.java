@@ -182,7 +182,7 @@ abstract class Mars3dCommon extends MarsCommon {
             strB = getParameter("field_var_b");
         } catch (Exception ex) {
             strHC = strA = strB = null;
-            getLogger().warning("{Dataset} Could not find generalized sigma level parameters in the configuration file. Simple sigma levels will be used then.");
+            warning("{Dataset} Could not find generalized sigma level parameters in the configuration file. Simple sigma levels will be used then.");
         }
 
     }
@@ -223,7 +223,7 @@ abstract class Mars3dCommon extends MarsCommon {
         s_w[0] = -1.d;
 
         if ((strHC != null) && (null != ncIn.findVariable(strHC))) {
-            getLogger().info("{Dataset} Generalized sigma levels detected.");
+            info("{Dataset} Generalized sigma levels detected.");
             getSigLevelsV8();
         } else {
             getSigLevelsV6();
@@ -542,7 +542,7 @@ abstract class Mars3dCommon extends MarsCommon {
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
         
-        getLogger().info("Reading NetCDF variables...");
+        info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;

@@ -53,10 +53,8 @@
 package org.ichthyop;
 
 import java.util.logging.Level;
-import javax.swing.JFrame;
 import ml.options.OptionSet;
 import ml.options.Options;
-import org.ichthyop.manager.SimulationManager;
 import org.ichthyop.ui.IchthyopApp;
 import org.jdesktop.application.Application;
 
@@ -90,16 +88,16 @@ public class Launcher extends IchthyopLinker {
             // Get the matching set and throw error if none found
             OptionSet set = opt.getMatchingSet(false, false);
             if (set == null) {
-                SimulationManager.getLogger().log(Level.SEVERE, "Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
+                getLogger().log(Level.SEVERE, "Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
             } else {
                 if (set.isSet("verbose") && set.isSet("quiet")) {
-                    SimulationManager.getLogger().log(Level.SEVERE, "Invalid command usage, -verbose and -quiet options are exclusive", new IllegalArgumentException("Osmose logging cannot be both verbose and quiet."));
+                    getLogger().log(Level.SEVERE, "Invalid command usage, -verbose and -quiet options are exclusive", new IllegalArgumentException("Ichthyop logging cannot be both verbose and quiet."));
                 }
                 if (set.isSet("verbose")) {
-                    SimulationManager.getLogger().setLevel(Level.FINE);
+                    getLogger().setLevel(Level.FINE);
                 }
                 if (set.isSet("quiet")) {
-                    SimulationManager.getLogger().setLevel(Level.SEVERE);
+                    getLogger().setLevel(Level.SEVERE);
                 }
                 // The configuration file is provided, Ichthyop goes into batch mode
                 new Thread(new IchthyopBatch(set.getData().get(0))).start();

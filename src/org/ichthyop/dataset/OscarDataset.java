@@ -480,7 +480,7 @@ public class OscarDataset extends AbstractDataset {
 
     private void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        getLogger().log(Level.INFO, "Reading NetCDF variables from {0} at rank {1}", new Object[]{ncIn.getLocation(), rank});
+        info("Reading NetCDF variables from {0} at rank {1}", new Object[]{ncIn.getLocation(), rank});
 
         int[] origin = new int[]{rank, 0, 0, 0};
         int[] shape = new int[]{1, 1, nlat, nlon};
@@ -625,8 +625,7 @@ public class OscarDataset extends AbstractDataset {
             }
             setAllFieldsTp1AtTime(rank);
         } catch (Exception ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-            System.exit(1);
+            error("Error while updating Oscar dataset", ex);
         }
     }
 

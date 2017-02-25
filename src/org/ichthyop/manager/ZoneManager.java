@@ -128,11 +128,13 @@ public class ZoneManager extends AbstractManager {
         return map.get(type);
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         /* Nothing to do. Zones are loaded by other classes such as Action
         or ReleaseProcess */
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
         for (List<Zone> listZone : map.values()) {
@@ -140,6 +142,6 @@ public class ZoneManager extends AbstractManager {
                 zone.init();
             }
         }
-        getLogger().info("Zone manager initialization [OK]");
+        info("Zone manager initialization [OK]");
     }
 }

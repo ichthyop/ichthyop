@@ -557,7 +557,7 @@ abstract public class Roms3dCommon extends RomsCommon {
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        getLogger().info("Reading NetCDF variables...");
+        info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;

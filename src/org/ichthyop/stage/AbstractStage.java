@@ -92,7 +92,7 @@ public abstract class AbstractStage extends IchthyopLinker {
 
         // Make sure that tags.length == thresholds.length
         if (tags.length != thresholds.length) {
-            getLogger().log(Level.WARNING, "Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{blockKey, tags.length, thresholds.length});
+            warning("Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{blockKey, tags.length, thresholds.length});
         }
     }
 

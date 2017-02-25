@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.io;
 
 import org.ichthyop.TypeZone;
@@ -65,6 +64,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.ichthyop.IchthyopLinker;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -73,7 +74,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 import org.ichthyop.manager.SimulationManager;
 
-public class ZoneFile {
+public class ZoneFile extends IchthyopLinker {
 
     private File file;
     private Document structure;
@@ -88,13 +89,13 @@ public class ZoneFile {
         } else {
             structure = new Document(new Element(ZONES));
             zones = new HashMap();
+
             try {
                 save(new String[]{});
-            } catch (FileNotFoundException ex) {
-                SimulationManager.getLogger().log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
-                SimulationManager.getLogger().log(Level.SEVERE, null, ex);
+                error("Error saving zone file " + file, ex);
             }
+
         }
     }
 
@@ -115,7 +116,7 @@ public class ZoneFile {
             structure = new Document(racine);
             zones = createMap();
         } catch (JDOMException | IOException e) {
-            SimulationManager.getLogger().log(Level.SEVERE, null, e);
+            error("Error loading zone file " + file, e);
         }
     }
 
@@ -253,4 +254,3 @@ public class ZoneFile {
         zones.put(newKey, zone);
     }
 }
-

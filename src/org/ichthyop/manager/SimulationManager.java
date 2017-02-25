@@ -66,19 +66,19 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 import org.jdom2.input.SAXBuilder;
 import org.ichthyop.calendar.InterannualCalendar;
-import org.ichthyop.ui.logging.SystemOutHandler;
-import org.ichthyop.util.IchthyopLogFormatter;
+import org.ichthyop.logging.IchthyopLogger;
+import org.ichthyop.logging.StdoutHandler;
 
 /**
  *
  * @author pverley
  */
-public class SimulationManager {
+public class SimulationManager extends IchthyopLogger {
 
     final private static SimulationManager simulationManager = new SimulationManager();
     /**
@@ -90,7 +90,7 @@ public class SimulationManager {
      */
     private long cpu_start;
     /**
-     * A flag indicating wheter the simulation has been interrupted or
+     * A flag indicating whether the simulation has been interrupted or
      * completed.
      */
     private boolean flagStop = false;
@@ -107,11 +107,6 @@ public class SimulationManager {
      */
     private static final SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
     /*
-     * The simulation logger that should be used by all the classes that
-     * are allowed to dialog with the SimulationManager
-     */
-    private static final Logger logger = Logger.getAnonymousLogger();
-    /*
      * Whether the simulation has been setup or not 
      */
     private boolean isSetup;
@@ -123,20 +118,15 @@ public class SimulationManager {
     public static SimulationManager getInstance() {
         return simulationManager;
     }
-
-    public static Logger getLogger() {
-        return logger;
-    }
-
+    
     public void setupLogger() {
-
-        // setup the logger
-        logger.setUseParentHandlers(false);
-        IchthyopLogFormatter formatter = new IchthyopLogFormatter(true);
-        SystemOutHandler sh = new SystemOutHandler();
-        sh.setFormatter(formatter);
-        logger.addHandler(sh);
-        logger.setLevel(Level.INFO);
+        Handler[] handlers = getLogger().getHandlers();
+        for (Handler handler : handlers) {
+            getLogger().removeHandler(handler);
+        }
+        getLogger().setUseParentHandlers(false);
+        getLogger().addHandler(new StdoutHandler());
+        getLogger().setLevel(Level.INFO);
     }
 
     public void setConfigurationFile(File file) throws Exception {

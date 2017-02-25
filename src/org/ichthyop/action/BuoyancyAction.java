@@ -130,7 +130,7 @@ public class BuoyancyAction extends AbstractAction {
                 maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
             } catch (Exception ex) {
                 maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
-                getLogger().warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
+                warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
             }
         }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());

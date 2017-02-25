@@ -175,8 +175,7 @@ public class NcFileRelease extends AbstractRelease {
             nc.close();
             return nParticle;
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-            System.exit(1);
+            error("Failed to read number of particles in NetCDF file " + filename, ex);
         }
         return -1;
     }

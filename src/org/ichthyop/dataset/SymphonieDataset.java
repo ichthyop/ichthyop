@@ -267,7 +267,7 @@ public class SymphonieDataset extends AbstractDataset {
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (Exception ex) {
-                getLogger().log(Level.WARNING, "Failed to resize domain", ex);
+                warning("Failed to resize domain", ex);
             }
         }
     }
@@ -692,7 +692,7 @@ public class SymphonieDataset extends AbstractDataset {
                 throw ioex;
             }
         }
-        getLogger().log(Level.INFO, "Opened dataset {0}", filename);
+        info("Opened dataset {0}", filename);
     }
 
     @Override

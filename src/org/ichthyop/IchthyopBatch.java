@@ -85,16 +85,16 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
         try {
             File file = new File(IOTools.resolveFile(filename));
             getSimulationManager().setConfigurationFile(file);
-            getLogger().log(Level.INFO, "Opened configuration file {0}", file.getPath());
-            getLogger().info("===== Simulation started =====");
+            info("Opened configuration file {0}", file.getPath());
+            info("===== Simulation started =====");
             getSimulationManager().resetId();
             /* */
             long startTime = System.currentTimeMillis();
             /* setup */
-            getLogger().info("Setting up...");
+            info("Setting up...");
             getSimulationManager().setup();
             /* initialization */
-            getLogger().info("Initializing...");
+            info("Initializing...");
             getSimulationManager().init();
             /* first time step */
             getSimulationManager().getTimeManager().firstStepTriggered();
@@ -109,10 +109,10 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
                 progress(getSimulationManager().getTimeManager().index());
             } while (getSimulationManager().getTimeManager().hasNextStep());
             long endTime = System.currentTimeMillis();
-            getLogger().log(Level.INFO, "Simulation ran in {0} seconds.", ((endTime - startTime) / 1000L));
-            getLogger().info("===== Simulation completed =====");
+            info("Simulation ran in {0} seconds.", ((endTime - startTime) / 1000L));
+            info("===== Simulation completed =====");
         } catch (Exception ex) {
-            getLogger().log(Level.SEVERE, "An error occured while running the simulation", ex);
+            error("An error occured while running the simulation", ex);
         }
     }
 
@@ -134,6 +134,6 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
             msg.append(getSimulationManager().timeLeft());
             msg.append(")");
         }
-        getLogger().info(msg.toString());
+        info(msg.toString());
     }
 }

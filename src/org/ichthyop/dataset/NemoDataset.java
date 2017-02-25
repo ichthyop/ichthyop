@@ -208,7 +208,7 @@ public class NemoDataset extends AbstractDataset {
         int[] size = new int[]{ny, nx};
         NetcdfFile nc;
         nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
-        getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
+        info("read lon, lat & mask from {0}", nc.getLocation());
         //fichier *byte*mask*
         lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
                 copyToNDJavaArray();
@@ -284,7 +284,7 @@ public class NemoDataset extends AbstractDataset {
         String str_e3tps = getParameter("field_var_e3tps");
         String str_mbathy = getParameter("field_var_mbathy");
 
-        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
+        info("Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
 
         try {
             // Open NetCDF file
@@ -300,8 +300,7 @@ public class NemoDataset extends AbstractDataset {
             mbathy = (short[][]) nc.findVariable(str_mbathy).read(new int[]{0, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
 
         } catch (Exception ex) {
-            getLogger().log(Level.SEVERE, "Error while reconstructing e3t[][][] from e3t_0, e3t_ps and mbathy...", ex);
-            System.exit(1);
+            error("Error while reconstructing e3t[][][] from e3t_0, e3t_ps and mbathy...", ex);
         }
 
         // Reconstruct e3t_ps
@@ -877,7 +876,7 @@ public class NemoDataset extends AbstractDataset {
                 float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (IOException | NumberFormatException ex) {
-                getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
+                warning("Failed to resize domain. " + ex.toString(), ex);
             }
         }
     }
@@ -906,7 +905,7 @@ public class NemoDataset extends AbstractDataset {
             readW = Boolean.valueOf(getParameter("read_var_w"));
         } else {
             readW = false;
-            getLogger().warning("Ichthyop will recalculate W variable from U and V");
+            warning("Ichthyop will recalculate W variable from U and V");
         }
         if (readW) {
             strW = getParameter("field_var_w");
@@ -922,7 +921,7 @@ public class NemoDataset extends AbstractDataset {
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
         if (!findParameter("enhanced()_mode")) {
-            getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced() mode (scale,offset,missing).");
+            warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced() mode (scale,offset,missing).");
         }
         time_arrow = timeArrow();
     }
@@ -1083,7 +1082,7 @@ public class NemoDataset extends AbstractDataset {
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        getLogger().info("Reading NetCDF variables...");
+        info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
@@ -1639,7 +1638,7 @@ public class NemoDataset extends AbstractDataset {
      */
     private void open(int index) throws IOException {
 
-        getLogger().info("Opening NEMO dataset");
+        info("Opening NEMO dataset");
         if (ncU != null) {
             ncU.close();
         }

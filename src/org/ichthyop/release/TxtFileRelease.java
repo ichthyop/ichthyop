@@ -139,7 +139,7 @@ public class TxtFileRelease extends AbstractRelease {
                     getSimulationManager().getSimulation().getPopulation().add(particle);
                     index++;
                 } else {
-                    getLogger().log(Level.WARNING, "Drifter release - Drifter at line {0} ({1}) is not in water. Line ignored.", new Object[]{iline, line});
+                    warning("Drifter release - Drifter at line {0} ({1}) is not in water. Line ignored.", new Object[]{iline, line});
                     //throw new IOException("{Drifter release} Drifter at line " + iline + " (" + line + ") is not in water");
                 }
             }

@@ -58,13 +58,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.ichthyop.IchthyopLinker;
 import ucar.ma2.Array;
 
 /**
  *
  * @author pverley
  */
-abstract class AbstractTiledVariable {
+abstract class AbstractTiledVariable extends IchthyopLinker {
 
     private final ConcurrentMap<Integer, Array> tiles;
     final int nx, ny, nz;

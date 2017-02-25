@@ -155,7 +155,7 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
                 }
                 msg.append("\n");
                 msg.append("Watch out, these classes might not work correctly.");
-                getLogger().log(Level.WARNING, msg.toString(), ex);
+                warning(msg.toString(), ex);
             }
         }
     }

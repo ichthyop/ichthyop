@@ -167,9 +167,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
             filePart.renameTo(fileBase);
-            getLogger().info("Closed NetCDF output file.");
+            info("Closed NetCDF output file.");
         } catch (Exception ex) {
-            getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
+            warning("Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
     }
 
@@ -373,7 +373,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     AbstractTracker tracker = (AbstractTracker) trackerClass.newInstance();
                     trackers.add(tracker);
                 } catch (Exception ex) {
-                    getLogger().log(Level.SEVERE, "Error adding tracker " + trackerClass.getSimpleName() + " in NetCDF output file. The variable will not be recorded.", ex);
+                    warning("Error adding tracker " + trackerClass.getSimpleName() + " in NetCDF output file. The variable will not be recorded.", ex);
                 }
             }
         }
@@ -417,7 +417,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private void writeToNetCDF(int i_record) {
-        getLogger().log(Level.INFO, "Saving variables...");
+        info("Saving variables...");
         List<AbstractTracker> errTrackers = new ArrayList();
         for (AbstractTracker tracker : trackers) {
             if (tracker.isEnabled()) {
@@ -427,7 +427,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    getLogger().log(Level.WARNING, "Error tracking variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    warning("Error tracking variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
                     continue;
                 }
                 /* Write the current time step in the NetCDF file */
@@ -436,7 +436,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    getLogger().log(Level.WARNING, "Error writing variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
+                    warning("Error writing variable " + tracker.getName() + ". The variable will no longer be recorded in the NetCDF output file.", ex);
                 }
             }
         }
@@ -490,7 +490,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 ncOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
             } catch (Exception ex) {
                 errTrackers.add(tracker);
-                getLogger().log(Level.WARNING, "Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
+                warning("Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
             }
         }
         trackers.removeAll(errTrackers);
@@ -504,7 +504,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         clearPredefinedTrackerList = true;
         clearCustomTrackerList = true;
 
-        getLogger().info("Output manager setup [OK]");
+        info("Output manager setup [OK]");
     }
 
     @Override
@@ -556,7 +556,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             sb.append(ex.toString());
             sb.append("\n");
             sb.append("Map creation might not work correctly later on.");
-            getLogger().log(Level.WARNING, sb.toString());
+            warning(sb.toString());
         }
 
         /* write the zones */
@@ -568,12 +568,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             sb.append(ex.toString());
             sb.append("\n");
             sb.append("Map creation might not work correctly later on.");
-            getLogger().log(Level.WARNING, sb.toString());
+            warning(sb.toString());
         }
 
         /* initialization completed */
-        getLogger().log(Level.INFO, "Created output file {0}", ncOut.getLocation());
-        getLogger().info("Output manager initialization [OK]");
+        info("Created output file {0}", ncOut.getLocation());
+        info("Output manager initialization [OK]");
     }
 
     public class NCDimFactory {

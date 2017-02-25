@@ -164,10 +164,10 @@ public class OntogeneticMigrationAction extends AbstractAction {
                     }
                 }
             } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, "Error parsing the CMS Ontogenetic Vertical Migration configuration file", ex);
+                error("Error parsing the CMS Ontogenetic Vertical Migration configuration file", ex);
             }
         } catch (FileNotFoundException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            error("CMS Ontogenetic Vertical Migration configuration file not found" , ex);
         }
 
         // Perform a quick check over the probabilities, to make sure that the
@@ -180,7 +180,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
             if (sum != 100) {
                 // I set a warning. It could be as well Level.SEVERE to generate
                 // an error that would stop the simulation.
-                getLogger().log(Level.WARNING, "Ontogenetic Vertical Migration: the sum of probability for time step {0} equals {1}.", new Object[]{time[iTime], sum});
+                warning("Ontogenetic Vertical Migration: the sum of probability for time step {0} equals {1}.", new Object[]{time[iTime], sum});
             }
         }
 

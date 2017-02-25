@@ -164,7 +164,7 @@ public abstract class Mars2dCommon extends MarsCommon {
     @Override
     void setAllFieldsTp1AtTime(int i_time) throws Exception {
         
-        getLogger().info("Reading NetCDF variables...");
+        info("Reading NetCDF variables...");
 
         int[] origin = new int[]{i_time, jpo, ipo};
         u_tp1 = new float[ny][nx - 1];

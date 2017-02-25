@@ -196,7 +196,7 @@ public class WindAction extends AbstractAction {
             try {
                 time = getSimulationManager().getTimeManager().date2seconds(getProperty("from.time", rank));
             } catch (ParseException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
+                error("Failed to parse time in wind scenario", ex);
             }
         }
 

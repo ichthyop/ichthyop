@@ -157,7 +157,7 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     private void readConstantField() throws Exception {
 
-        getLogger().log(Level.INFO, "Read longitude and latitude from {0}", ncU.getLocation());
+        info("Read longitude and latitude from {0}", ncU.getLocation());
         longitude = (float[]) ncU.findVariable(strLon).read().copyToNDJavaArray();
         latitude = (float[]) ncU.findVariable(strLat).read().copyToNDJavaArray();
         nx = longitude.length;
@@ -449,7 +449,7 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        getLogger().info("Reading NetCDF variables...");
+        info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, 0, 0};
         double time_tp0 = time_tp1;

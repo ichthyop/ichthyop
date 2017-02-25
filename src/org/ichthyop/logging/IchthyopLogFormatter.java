@@ -68,7 +68,7 @@ public class IchthyopLogFormatter extends Formatter {
     @Override
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
-        builder.append("osmose");
+        builder.append("ichthyop");
         // level printed as fine/info/warn (4 letters) or severe
         String level = record.getLevel().intValue() < Level.SEVERE.intValue()
                 ? record.getLevel().toString().substring(0, 4)

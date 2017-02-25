@@ -81,7 +81,7 @@ public class AdvectionAction extends AbstractAction {
              */
             isRK4 = true;
             // print the info in the log
-            getLogger().log(Level.INFO, "Failed to read the advection numerical scheme. Set by default to {0}", AdvectionScheme.RUNGE_KUTTA_4.getName());
+            info("Failed to read the advection numerical scheme. Set by default to {0}", AdvectionScheme.RUNGE_KUTTA_4.getName());
         }
 
         /* time direction */
@@ -145,16 +145,16 @@ public class AdvectionAction extends AbstractAction {
 
         dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
         if (Math.abs(dU[0]) > THRESHOLD_CFL) {
-            getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
+            warning("CFL broken for U {0}", (float) dU[0]);
         }
         dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
         if (Math.abs(dU[1]) > THRESHOLD_CFL) {
-            getLogger().log(Level.WARNING, "CFL broken for V {0}", (float) dU[1]);
+            warning("CFL broken for V {0}", (float) dU[1]);
         }
         if (dim > 2) {
             dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time) * dt;
             if (Math.abs(dU[2]) > THRESHOLD_CFL) {
-                getLogger().log(Level.WARNING, "CFL broken for W {0}", (float) dU[2]);
+                warning("CFL broken for W {0}", (float) dU[2]);
             }
         }
 

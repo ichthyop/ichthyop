@@ -93,9 +93,9 @@ public class UpdateManager extends AbstractManager {
         File bak = new File(getConfigurationFile().getFile().getPath() + ".bak");
         try {
             IOTools.copyFile(getConfigurationFile().getFile(), bak);
-            getLogger().info("{Configuration} A copy of the original configuration file has been saved as " + bak.getName());
+            info("{Configuration} A copy of the original configuration file has been saved as " + bak.getName());
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "{Configuration} Failed to backup the configuration file.", ex);
+            warning("{Configuration} Failed to backup the configuration file.", ex);
         }
         /*
          * Upgrade the configuration file to latest version

@@ -70,7 +70,7 @@ public class SysActionMove extends AbstractSysAction {
         try {
             coastlineBehavior = CoastlineBehavior.getBehavior(getParameter("app.transport.coastline_behavior"));
         } catch (Exception ex) {
-            getLogger().log(Level.WARNING, "Defauly coastline behavior set as {0} since the parameter could not be found in the configuration file.", coastlineBehavior.name());
+            warning("Defauly coastline behavior set as {0} since the parameter could not be found in the configuration file.", coastlineBehavior.name());
         }
     }
 

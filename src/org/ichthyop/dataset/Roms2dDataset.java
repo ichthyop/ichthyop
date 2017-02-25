@@ -217,7 +217,7 @@ public class Roms2dDataset extends RomsCommon {
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
-        getLogger().info("Reading NetCDF variables...");
+        info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, jpo, ipo};
         double time_tp0 = time_tp1;

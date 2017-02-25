@@ -405,7 +405,7 @@ public class TimeManager extends AbstractManager {
         cleanNextStepListener();
         cleanLastStepListener();
         loadParameters();
-        getLogger().info("Time manager setup [OK]");
+        info("Time manager setup [OK]");
     }
 
     @Override
@@ -414,7 +414,7 @@ public class TimeManager extends AbstractManager {
         i_step = 0;
         time = t0;
         nb_steps = (int) Math.abs(simuDuration / dt);
-        getLogger().info("Time manager initialization [OK]");
+        info("Time manager initialization [OK]");
     }
 
     public SimpleDateFormat getInputDurationFormat() {
