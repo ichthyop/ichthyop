@@ -53,14 +53,14 @@
 
 package org.ichthyop.release;
 
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 import org.ichthyop.event.ReleaseEvent;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractRelease extends SimulationManagerAccessor {
+public abstract class AbstractRelease extends IchthyopLinker {
 
     private final String releaseKey;
     

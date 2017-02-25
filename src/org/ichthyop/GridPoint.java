@@ -66,7 +66,7 @@ package org.ichthyop;
  *
  * @author P.Verley
  */
-public class GridPoint extends SimulationManagerAccessor {
+public class GridPoint extends IchthyopLinker {
 
 ///////////////////////////////
 // Declaration of the variables

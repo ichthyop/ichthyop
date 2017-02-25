@@ -229,7 +229,7 @@ public class TimeManager extends AbstractManager {
     }
 
     private String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getParameter("app.time", key);
+        return getSimulationManager().getParameterManager().getString("app.time." + key);
     }
 
     /**

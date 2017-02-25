@@ -52,13 +52,13 @@
  */
 package org.ichthyop.particle;
 
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author gandres
  */
-public class DebParticle extends SimulationManagerAccessor {
+public class DebParticle extends IchthyopLinker {
 
     private static final String E = "DEB_E"; // Réserve
     private static final String V = "DEB_V"; // Structure

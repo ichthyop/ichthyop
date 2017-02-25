@@ -83,7 +83,7 @@ import org.ichthyop.dataset.IDataset;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.3 2013/11/15
  */
-public class Zone extends SimulationManagerAccessor {
+public class Zone extends IchthyopLinker {
 
     /**
      * A list of {@code GridPoint} that defines the a geographical area.

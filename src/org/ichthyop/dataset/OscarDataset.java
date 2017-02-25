@@ -56,8 +56,6 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
-import static org.ichthyop.SimulationManagerAccessor.getLogger;
-import static org.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.ma2.Index;

@@ -70,8 +70,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import org.ichthyop.Version;
 import org.ichthyop.io.ConfigurationFile;
+import org.ichthyop.util.Separator;
 
 /**
  *
@@ -81,6 +83,8 @@ public class ParameterManager extends AbstractManager {
 
     private static final ParameterManager MANAGER = new ParameterManager();
     private ConfigurationFile cfgFile;
+    private HashMap<String, String> parameters;
+    private String inputPathname;
 
     public static ParameterManager getInstance() {
         return MANAGER;
@@ -89,6 +93,8 @@ public class ParameterManager extends AbstractManager {
     public void setConfigurationFile(File file) throws Exception {
         cfgFile = new ConfigurationFile(file);
         cfgFile.load();
+        parameters = toProperties(cfgFile, false);
+        inputPathname = file.getParent();
     }
 
     public ConfigurationFile getConfigurationFile() {
@@ -123,7 +129,7 @@ public class ParameterManager extends AbstractManager {
         return cfgFile.getParameters();
     }
 
-    public String getParameter(String blockKey, String key) {
+    private String getParameter(String blockKey, String key) {
         return getParameter(BlockType.OPTION, blockKey, key);
     }
 
@@ -138,7 +144,7 @@ public class ParameterManager extends AbstractManager {
         return list.toArray(new String[list.size()]);
     }
 
-    public String getParameter(BlockType blockType, String blockKey, String key) {
+    private String getParameter(BlockType blockType, String blockKey, String key) {
 
         XParameter xparam = cfgFile.getBlock(blockType, blockKey).getXParameter(key);
         if (xparam != null) {
@@ -148,7 +154,7 @@ public class ParameterManager extends AbstractManager {
         }
     }
 
-    public boolean isBlockEnabled(BlockType type, String key) {
+    private boolean isBlockEnabled(BlockType type, String key) {
         return cfgFile.getBlock(type, key).isEnabled();
     }
 
@@ -185,6 +191,283 @@ public class ParameterManager extends AbstractManager {
     @Override
     public void initializePerformed(InitializeEvent e) {
         // does nothing
+    }
+    
+    /**
+     * Check whether parameter 'key' has 'null' value. The function returns
+     * {@code true} in several cases: the parameter does not exist, the value of
+     * the parameter is empty or the value of the parameter is set to "null".
+     *
+     * @param key, the key of the parameter
+     * @return {@code true} if the parameter is either null, empty or does not
+     * exist
+     */
+    public boolean isNull(String key) {
+        String param = parameters.get(key.toLowerCase());
+        return (null == param)
+                || param.isEmpty()
+                || param.equalsIgnoreCase("null");
+    }
+
+    /**
+     * Check whether the parameter exists, no matter what the value is.
+     *
+     * @param key, the key of the parameter
+     * @return {@code true} if the parameter exists.
+     */
+    public final boolean canFind(String key) {
+        return parameters.containsKey(key.toLowerCase());
+    }
+
+    /**
+     * Find all the parameters whose key matches the filter given as argument.
+     * The filter accepts the following meta-character: "?" for any single
+     * character and "*" for any String.
+     *
+     * @see fr.ird.osmose.util.Properties#getKeys(java.lang.String) for details
+     * about how the filter works.
+     * @param filter
+     * @return
+     */
+    public List<String> findKeys(String filter) {
+
+        // Add \Q \E around substrings of fileMask that are not meta-characters
+        String regexpPattern = filter.replaceAll("[^\\*\\?]+", "\\\\Q$0\\\\E");
+        // Replace all "*" by the corresponding java regex meta-characters
+        regexpPattern = regexpPattern.replaceAll("\\*", ".*");
+        // Replace all "?" by the corresponding java regex meta-characters
+        regexpPattern = regexpPattern.replaceAll("\\?", ".");
+
+        // List the keys and select the ones that match the filter
+        List<String> filteredKeys = new ArrayList();
+        for (String key : parameters.keySet()) {
+            if (key.matches(regexpPattern)) {
+                filteredKeys.add(key);
+            }
+        }
+        return filteredKeys;
+    }
+
+    /**
+     * Returns the value of the specified parameter as a {@code String}
+     *
+     * @param key, the key of the parameter
+     * @throws NullPointerException if the parameter is not found.
+     * @return the value of the parameter as a {@code String}
+     */
+    public String getString(String key) {
+        String lkey = key.toLowerCase();
+        if (parameters.containsKey(lkey)) {
+            return parameters.get(lkey);
+        } else {
+            error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
+        }
+        return null;
+    }
+
+    /**
+     * Returns the specified parameter as a path resolved again the main
+     * configuration file.
+     *
+     * @see #resolveFile(java.lang.String)
+     * @param key, the key of the parameter
+     * @return, the parameter as a path resolved again the main configuration
+     * file.
+     */
+    public String getFile(String key) {
+        return resolve(getString(key), inputPathname);
+    }
+
+    /**
+     * Returns the specified parameter as an array of strings, {@code String[]}.
+     *
+     * @param key, the key of the parameter
+     * @return the parameter as a {@code String[]}
+     */
+    public String[] getArrayString(String key) {
+        String value = getString(key);
+        String[] values = value.split(Separator.guess(value, Separator.SEMICOLON).toString());
+        for (int i = 0; i < values.length; i++) {
+            values[i] = values[i].trim();
+        }
+        return values;
+    }
+
+    /**
+     * Returns the specified parameter as an integer.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the value of the parameter cannot be
+     * parsed as an integer.
+     * @return the parameter as an integer
+     */
+    public int getInt(String key) {
+        String s = getString(key);
+        try {
+            return Integer.valueOf(s);
+        } catch (NumberFormatException ex) {
+            error("Could not convert to Integer parameter " + getString(key), ex);
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    /**
+     * Returns the specified parameter as a float.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the value of the parameter cannot be
+     * parsed as a float.
+     * @return the parameter as a float
+     */
+    public float getFloat(String key) {
+        String s = getString(key);
+        try {
+            return Float.valueOf(s);
+        } catch (NumberFormatException ex) {
+            error("Could not convert to Float parameter " + getString(key), ex);
+        }
+        return Float.NaN;
+    }
+
+    /**
+     * Returns the specified parameter as a double.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the value of the parameter cannot be
+     * parsed as a double.
+     * @return the parameter as a double
+     */
+    public double getDouble(String key) {
+        String s = getString(key);
+        try {
+            return Double.valueOf(s);
+        } catch (NumberFormatException ex) {
+            error("Could not convert to Double parameter " + getString(key), ex);
+        }
+        return Double.NaN;
+    }
+
+    /**
+     * Returns the specified parameter as a boolean.
+     *
+     * @param key, the key of the parameter
+     * @param warning, send a warning if the key cannot be found
+     * @throws NumberFormatException if the value of the parameter cannot be
+     * parsed as a boolean.
+     * @return the parameter as a boolean
+     */
+    public boolean getBoolean(String key, boolean warning) {
+        if (canFind(key)) {
+            try {
+                return Boolean.valueOf(getString(key));
+            } catch (NumberFormatException ex) {
+                error("Could not convert to Boolean parameter " + getString(key), ex);
+            }
+        } else if (warning) {
+            warning("Could not find Boolean parameter " + key + ". Osmose assumes it is false.");
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the specified parameter as a boolean.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the value of the parameter cannot be
+     * parsed as a boolean.
+     * @return the parameter as a boolean
+     */
+    public boolean getBoolean(String key) {
+        return getBoolean(key, true);
+    }
+
+    /**
+     * Returns the specified parameter as an array of integers, {@code int[]}.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the values of the parameter cannot be
+     * parsed as an integer.
+     * @return the parameter as a {@code int[]}
+     */
+    public int[] getArrayInt(String key) {
+        String[] as = getArrayString(key);
+        try {
+            int[] ai = new int[as.length];
+            for (int i = 0; i < ai.length; i++) {
+                ai[i] = Integer.valueOf(as[i]);
+            }
+            return ai;
+        } catch (NumberFormatException ex) {
+            error("Could not convert to array of Integer parameter " + getString(key), ex);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the specified parameter as an array of floats, {@code float[]}.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the values of the parameter cannot be
+     * parsed as a float.
+     * @return the parameter as a {@code float[]}
+     */
+    public float[] getArrayFloat(String key) {
+        String[] as = getArrayString(key);
+        try {
+            float[] af = new float[as.length];
+            for (int i = 0; i < af.length; i++) {
+                af[i] = Float.valueOf(as[i]);
+            }
+            return af;
+        } catch (NumberFormatException ex) {
+            error("Could not convert to array of Float parameter " + getString(key), ex);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the specified parameter as an array of doubles, {@code double[]}.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the values of the parameter cannot be
+     * parsed as a double.
+     * @return the parameter as a {@code double[]}
+     */
+    public double[] getArrayDouble(String key) {
+        String[] as = getArrayString(key);
+        try {
+            double[] ad = new double[as.length];
+            for (int i = 0; i < ad.length; i++) {
+                ad[i] = Double.valueOf(as[i]);
+            }
+            return ad;
+        } catch (NumberFormatException ex) {
+            error("Could not convert to array of Double parameter " + getString(key), ex);
+        }
+        return null;
+    }
+
+    /**
+     * Resolves a file path against the the input path. If filename is a
+     * directory the function ensures the path ends with a separator.
+     *
+     * @param filename, the file path to resolve
+     * @param relativeTo, the path against the file must be resolved
+     * @return the resolved file path
+     */
+    private String resolve(String filename, String relativeTo) {
+        String pathname = filename;
+        try {
+            File file = new File(relativeTo);
+            pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
+        } catch (Exception ex) {
+            // do nothing, just return the argument
+        }
+        if (new File(pathname).isDirectory() && !pathname.endsWith(File.separator)) {
+            pathname += File.separator;
+        }
+        return pathname;
     }
 
     public HashMap<String, String> toProperties(ConfigurationFile cfg, boolean extended) throws IOException {

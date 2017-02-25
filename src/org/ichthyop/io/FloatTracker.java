@@ -54,7 +54,7 @@
 package org.ichthyop.io;
 
 import java.util.Iterator;
-import static org.ichthyop.SimulationManagerAccessor.getSimulationManager;
+import static org.ichthyop.IchthyopLinker.getSimulationManager;
 import org.ichthyop.particle.IParticle;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;

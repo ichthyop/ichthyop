@@ -107,7 +107,7 @@ public class Roms3dDataset extends Roms3dCommon {
         readTimeLength();
 
         try {
-            if (!getParameter("grid_file").isEmpty()) {
+            if (!isNull("grid_file")) {
                 String path = IOTools.resolvePath(getParameter("grid_file"));
                 if (!isDirectory(path)) {
                     throw new IOException("{Dataset} " + getParameter("grid_file") + " is not a valid directory.");

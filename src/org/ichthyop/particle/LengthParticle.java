@@ -52,13 +52,13 @@
  */
 package org.ichthyop.particle;
 
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class LengthParticle extends SimulationManagerAccessor {
+public class LengthParticle extends IchthyopLinker {
 
     private final static String LENGTH = "length";
 

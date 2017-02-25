@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
 import java.io.IOException;
@@ -116,7 +115,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     }
 
     public String getParameter(String releaseKey, String key) {
-        return getSimulationManager().getParameterManager().getParameter(BlockType.RELEASE, releaseKey, key);
+        return getSimulationManager().getParameterManager().getString(releaseKey + "." + key);
     }
 
     private XBlock findActiveReleaseProcess() throws Exception {
@@ -180,7 +179,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     }
 
     private double get_t0() throws Exception {
-        String iniTime = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
+        String iniTime = getSimulationManager().getParameterManager().getString("app.time.initial_time");
         try {
             return getSimulationManager().getTimeManager().date2seconds(iniTime);
         } catch (ParseException ex) {
@@ -199,7 +198,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         timeEvent = new double[events.length];
         double t0 = get_t0();
         int arrow = (getSimulationManager().getTimeManager().get_dt()) > 0 ? 1 : -1;
-        String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
+        String st0 = getSimulationManager().getParameterManager().getString("app.time.initial_time");
         for (int i = 0; i < timeEvent.length; i++) {
             try {
                 timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i]);
@@ -217,7 +216,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     private String[] getReleaseEvents() throws Exception {
 
         try {
-            String isScheduleEnabled = getSimulationManager().getParameterManager().getParameter("release.schedule", "is_enabled");
+            String isScheduleEnabled = getSimulationManager().getParameterManager().getString("release.schedule.is_enabled");
             boolean isEnabled = Boolean.valueOf(isScheduleEnabled);
             if (isEnabled) {
                 return getSimulationManager().getParameterManager().getListParameter(BlockType.OPTION, "release.schedule", "events");
@@ -225,7 +224,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Failed to read the release schedule. By default, particles will all be released at simulation initial time. {0}", ex.toString());
         }
-        String st0 = getSimulationManager().getParameterManager().getParameter("app.time", "initial_time");
+        String st0 = getSimulationManager().getParameterManager().getString("app.time.initial_time");
         return new String[]{st0};
     }
 

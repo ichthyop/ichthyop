@@ -412,7 +412,7 @@ public class WindDriftFileAction extends WindDriftAction {
             int min_o = calendar_o.get(Calendar.MINUTE);
             calendartmp = new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o);
             INPUT_DATE_FORMAT.setCalendar(calendartmp);
-            String origin_hydro = getSimulationManager().getParameterManager().getParameter("app.time", "time_origin");
+            String origin_hydro = getSimulationManager().getParameterManager().getString("app.time.time_origin");
             calendartmp.setTime(INPUT_DATE_FORMAT.parse(origin_hydro));
             origin = -calendartmp.getTimeInMillis() / 1000L;
         }

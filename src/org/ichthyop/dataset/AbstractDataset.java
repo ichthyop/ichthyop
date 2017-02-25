@@ -50,13 +50,12 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.dataset;
 
 import java.util.HashMap;
 import java.util.logging.Level;
 import org.ichthyop.event.NextStepListener;
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 import org.ichthyop.manager.TimeManager;
 import ucar.nc2.NetcdfFile;
 
@@ -64,24 +63,28 @@ import ucar.nc2.NetcdfFile;
  *
  * @author pverley
  */
-public abstract class AbstractDataset extends SimulationManagerAccessor implements IDataset, NextStepListener {
-
+public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
+    
     private final String datasetKey;
     /*
      *
      */
     HashMap<String, RequiredVariable> requiredVariables;
-
+    
     abstract void loadParameters();
-
+    
     public AbstractDataset() {
         datasetKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
     }
-
+    
     public String getParameter(String key) {
         return getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
     }
-
+    
+    public boolean isNull(String key) {
+        return getSimulationManager().getParameterManager().isNull(datasetKey + "." + key);
+    }
+    
     public boolean findParameter(String key) {
         // Check whether the parameter can be retrieved
         try {
@@ -93,7 +96,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         // The parameter does exist
         return true;
     }
-
+    
     @Override
     public Number get(String variableName, double[] pGrid, double time) {
         if (null != requiredVariables.get(variableName)) {
@@ -101,7 +104,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         }
         return Float.NaN;
     }
-
+    
     @Override
     public void requireVariable(String name, Class requiredBy) {
         if (!requiredVariables.containsKey(name)) {
@@ -110,7 +113,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
             requiredVariables.get(name).addRequiredBy(requiredBy);
         }
     }
-
+    
     public void clearRequiredVariables() {
         if (requiredVariables != null) {
             requiredVariables.clear();
@@ -118,7 +121,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
             requiredVariables = new HashMap();
         }
     }
-
+    
     @Override
     public void removeRequiredVariable(String name, Class requiredBy) {
         RequiredVariable var = requiredVariables.get(name);
@@ -132,7 +135,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
             }
         }
     }
-
+    
     public void checkRequiredVariable(NetcdfFile nc) {
         for (RequiredVariable variable : requiredVariables.values()) {
             try {
@@ -156,23 +159,23 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
             }
         }
     }
-
+    
     boolean skipSorting() {
         try {
             return Boolean.valueOf(getParameter("skip_sorting"));
-        } catch (NullPointerException ex ) {
+        } catch (NullPointerException ex) {
             return false;
         }
     }
     
     int timeArrow() {
-        return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
+        return getSimulationManager().getParameterManager().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
     }
     
     boolean enhanced() {
         try {
             return Boolean.valueOf(getParameter("enhanced_mode"));
-        } catch (NullPointerException ex ) {
+        } catch (NullPointerException ex) {
             return true;
         }
     }

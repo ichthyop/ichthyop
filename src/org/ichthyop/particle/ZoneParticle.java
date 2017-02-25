@@ -56,13 +56,13 @@ package org.ichthyop.particle;
 import org.ichthyop.Zone;
 import org.ichthyop.TypeZone;
 import java.util.Iterator;
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class ZoneParticle extends SimulationManagerAccessor {
+public class ZoneParticle extends IchthyopLinker {
 
     public static int getNumZone(IParticle particle, TypeZone type) {
         int nZone = -1;

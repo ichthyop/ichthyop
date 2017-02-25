@@ -87,7 +87,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
 
     }
   
-    static void openURL(String opendapURL) throws IOException {
+    void openURL(String opendapURL) throws IOException {
         try {
             ncIn = NetcdfDataset.openDataset(opendapURL);
             getLogger().log(Level.INFO, "'{'Wind Dataset'}' Open remote {0}", opendapURL);

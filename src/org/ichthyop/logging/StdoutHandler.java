@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,24 +50,36 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+package org.ichthyop.logging;
 
-package org.ichthyop;
-
-import org.ichthyop.manager.SimulationManager;
-import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.StreamHandler;
 
 /**
  *
  * @author pverley
  */
-public class SimulationManagerAccessor {
+public class StdoutHandler extends StreamHandler {
 
-    public static SimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
+    public StdoutHandler() {
+        super(System.out, new IchthyopLogFormatter());
+        setLevel(Level.ALL);
     }
-    
-    public static Logger getLogger() {
-     return SimulationManager.getLogger();
+
+    /**
+     * Publish a <tt>LogRecord</tt>.
+     * <p>
+     * The logging request was made initially to a <tt>Logger</tt> object, which
+     * initialized the <tt>LogRecord</tt> and forwarded it here.
+     * <p>
+     * @param record description of the log event. A null record is silently
+     * ignored and is not published
+     */
+    @Override
+    public void publish(LogRecord record) {
+        super.publish(record);
+        flush();
     }
 
 }

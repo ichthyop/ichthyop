@@ -52,14 +52,14 @@
  */
 package org.ichthyop.particle;
 
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 import org.ichthyop.TypeZone;
 
 /**
  *
  * @author pverley
  */
-public class RecruitableParticle extends SimulationManagerAccessor {
+public class RecruitableParticle extends IchthyopLinker {
 
     private static final String RECRUITED = "recruited";
     private static final String NEW_RECRUITED = "new_recruited";

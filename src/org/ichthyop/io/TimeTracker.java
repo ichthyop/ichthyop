@@ -84,7 +84,7 @@ public class TimeTracker extends AbstractTracker {
         } else {
             listAttributes.add(new Attribute("calendar", "climato"));
         }
-        listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getParameter("app.time", "time_origin")));
+        listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getString("app.time.time_origin")));
         return listAttributes.toArray(new Attribute[listAttributes.size()]);
     }
 

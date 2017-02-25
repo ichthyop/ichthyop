@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
 import java.util.ArrayList;
@@ -151,17 +150,17 @@ public class ActionManager extends AbstractManager {
                 action.execute(particle);
             }
         }
-        
+
         // System actions
         for (AbstractSysAction sysaction : sysActionList) {
             sysaction.execute(particle);
         }
     }
-    
+
     public void initActions(Particle particle) {
         // Pre-defined actions
         for (AbstractAction action : getSortedActions()) {
-                action.init(particle);
+            action.init(particle);
         }
     }
 
@@ -178,7 +177,7 @@ public class ActionManager extends AbstractManager {
     }
 
     public boolean isEnabled(String actionKey) {
-        return getSimulationManager().getParameterManager().isBlockEnabled(BlockType.ACTION, actionKey);
+        return getSimulationManager().getParameterManager().getBoolean(actionKey + ".enabled");
     }
 
     private class ActionComparator implements Comparator<AbstractAction> {

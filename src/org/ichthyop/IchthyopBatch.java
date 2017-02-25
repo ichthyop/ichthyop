@@ -60,7 +60,7 @@ import org.ichthyop.io.IOTools;
  *
  * @author pverley
  */
-public class IchthyopBatch extends SimulationManagerAccessor implements Runnable {
+public class IchthyopBatch extends IchthyopLinker implements Runnable {
 
     /**
      * The path of the configuration file.

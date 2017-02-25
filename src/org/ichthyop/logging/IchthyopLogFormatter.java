@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,66 +50,53 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+package org.ichthyop.logging;
 
-package org.ichthyop.stage;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
-import org.ichthyop.IchthyopLinker;
-import org.ichthyop.io.BlockType;
-import org.ichthyop.particle.IParticle;
+import java.util.logging.LogRecord;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractStage extends IchthyopLinker {
+public class IchthyopLogFormatter extends Formatter {
 
-    private float[] thresholds;
-    private String[] tags;
-
-    private final BlockType blockType;
-    private final String blockKey;
-
-    public abstract int getStage(IParticle particle);
-    public abstract int getStage(double value);
-
-    AbstractStage(BlockType blockType, String blockKey) {
-        this.blockType = blockType;
-        this.blockKey = blockKey;
-    }
-
-    public void init() {
-
-        // Load the stage tags
-        tags = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_tags");
-
-        // Load the stage thresholds
-        String[] sThresholds = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_thresholds");
-        thresholds = new float[sThresholds.length];
-        for (int i = 0; i < sThresholds.length; i++) {
-            thresholds[i] = Float.valueOf(sThresholds[i]);
+    @Override
+    public String format(LogRecord record) {
+        StringBuilder builder = new StringBuilder(1000);
+        builder.append("osmose");
+        // level printed as fine/info/warn (4 letters) or severe
+        String level = record.getLevel().intValue() < Level.SEVERE.intValue()
+                ? record.getLevel().toString().substring(0, 4)
+                : record.getLevel().toString();
+        builder.append("[").append(level.toLowerCase()).append("] ");
+        builder.append(formatMessage(record));
+        if (null != record.getThrown()) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            pw.println();
+            record.getThrown().printStackTrace(pw);
+            pw.close();
+            builder.append(sw);
+        } else {
+            builder.append("\n");
         }
-
-        // Make sure that tags.length == thresholds.length
-        if (tags.length != thresholds.length) {
-            getLogger().log(Level.WARNING, "Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{blockKey, tags.length, thresholds.length});
-        }
+        return builder.toString();
     }
 
-    public int getNStage() {
-        return tags.length;
+    @Override
+    public String getHead(Handler h
+    ) {
+        return super.getHead(h);
     }
 
-    public String getTag(int iStage) {
-        return tags[iStage];
+    @Override
+    public String getTail(Handler h
+    ) {
+        return super.getTail(h);
     }
-    
-    public float getThreshold(int iStage) {
-        return thresholds[iStage];
-    }
-
-    float[] getThresholds() {
-        return thresholds;
-    }
-
 }

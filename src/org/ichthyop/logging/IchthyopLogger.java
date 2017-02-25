@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,66 +50,64 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
-package org.ichthyop.stage;
+package org.ichthyop.logging;
 
 import java.util.logging.Level;
-import org.ichthyop.IchthyopLinker;
-import org.ichthyop.io.BlockType;
-import org.ichthyop.particle.IParticle;
+import java.util.logging.Logger;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractStage extends IchthyopLinker {
+public class IchthyopLogger {
 
-    private float[] thresholds;
-    private String[] tags;
+    /**
+     * The application logger
+     */
+    private final static Logger ICHTHYOPLOGGER = Logger.getAnonymousLogger();
 
-    private final BlockType blockType;
-    private final String blockKey;
-
-    public abstract int getStage(IParticle particle);
-    public abstract int getStage(double value);
-
-    AbstractStage(BlockType blockType, String blockKey) {
-        this.blockType = blockType;
-        this.blockKey = blockKey;
+    final public void error(String msg, Exception ex) {
+        ICHTHYOPLOGGER.log(Level.SEVERE, msg, ex);
+        System.exit(1);
     }
 
-    public void init() {
-
-        // Load the stage tags
-        tags = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_tags");
-
-        // Load the stage thresholds
-        String[] sThresholds = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_thresholds");
-        thresholds = new float[sThresholds.length];
-        for (int i = 0; i < sThresholds.length; i++) {
-            thresholds[i] = Float.valueOf(sThresholds[i]);
-        }
-
-        // Make sure that tags.length == thresholds.length
-        if (tags.length != thresholds.length) {
-            getLogger().log(Level.WARNING, "Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{blockKey, tags.length, thresholds.length});
-        }
+    final public void warning(String msg) {
+        ICHTHYOPLOGGER.warning(msg);
     }
 
-    public int getNStage() {
-        return tags.length;
+    final public void warning(String msg, Object param) {
+        ICHTHYOPLOGGER.log(Level.WARNING, msg, param);
     }
 
-    public String getTag(int iStage) {
-        return tags[iStage];
+    final public void warning(String msg, Object params[]) {
+        ICHTHYOPLOGGER.log(Level.WARNING, msg, params);
+    }
+
+    final public void info(String msg) {
+        ICHTHYOPLOGGER.info(msg);
+    }
+
+    final public void info(String msg, Object param) {
+        ICHTHYOPLOGGER.log(Level.INFO, msg, param);
+    }
+
+    final public void info(String msg, Object params[]) {
+        ICHTHYOPLOGGER.log(Level.INFO, msg, params);
+    }
+
+    final public void debug(String msg) {
+        ICHTHYOPLOGGER.log(Level.FINE, msg);
+    }
+
+    final public void debug(String msg, Object param) {
+        ICHTHYOPLOGGER.log(Level.FINE, msg, param);
+    }
+
+    final public void debug(String msg, Object params[]) {
+        ICHTHYOPLOGGER.log(Level.FINE, msg, params);
     }
     
-    public float getThreshold(int iStage) {
-        return thresholds[iStage];
+    final public static Logger getLogger() {
+        return ICHTHYOPLOGGER;
     }
-
-    float[] getThresholds() {
-        return thresholds;
-    }
-
 }

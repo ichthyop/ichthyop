@@ -128,7 +128,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     public String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getParameter(block_key, key);
+        return getSimulationManager().getParameterManager().getString(block_key + "." + key);
     }
 
     public String getFileLocation() {

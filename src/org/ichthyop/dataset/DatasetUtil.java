@@ -59,7 +59,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import static org.ichthyop.SimulationManagerAccessor.getLogger;
+import org.ichthyop.IchthyopLinker;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.util.MetaFilenameFilter;
 import org.ichthyop.util.NCComparator;
@@ -73,7 +73,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class DatasetUtil {
+public class DatasetUtil extends IchthyopLinker {
 
     /**
      * List directory content with file pattern accepting * and ?

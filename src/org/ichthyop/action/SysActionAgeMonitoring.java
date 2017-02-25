@@ -75,7 +75,7 @@ public class SysActionAgeMonitoring extends AbstractSysAction {
 
     @Override
     public void loadParameters() throws Exception {
-        keepDrifting = Boolean.valueOf(getParameter("app.time", "keep_drifting"));
+        keepDrifting = Boolean.valueOf(getParameter("app.time.keep_drifting"));
     }
 
 }

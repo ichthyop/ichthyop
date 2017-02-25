@@ -98,7 +98,7 @@ public class DatasetManager extends AbstractManager {
     }
 
     public String getParameter(String datasetKey, String key) {
-        return getSimulationManager().getParameterManager().getParameter(BlockType.DATASET, datasetKey, key);
+        return getSimulationManager().getParameterManager().getString(datasetKey + "." + key);
     }
 
     private XBlock findActiveDataset() throws Exception {

@@ -53,14 +53,14 @@
 package org.ichthyop.particle;
 
 import java.io.IOException;
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 import org.ichthyop.TypeZone;
 
 /**
  *
  * @author pverley
  */
-public class ParticleFactory extends SimulationManagerAccessor {
+public class ParticleFactory extends IchthyopLinker {
 
     public static IParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) throws IOException {
 

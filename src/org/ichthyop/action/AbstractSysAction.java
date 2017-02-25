@@ -53,21 +53,21 @@
 
 package org.ichthyop.action;
 
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 import org.ichthyop.particle.Particle;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractSysAction extends SimulationManagerAccessor {
+public abstract class AbstractSysAction extends IchthyopLinker {
     
     abstract public void loadParameters() throws Exception;
 
     abstract public void execute(Particle particle);
 
-    public String getParameter(String block, String key) {
-        return getSimulationManager().getParameterManager().getParameter(block, key);
+    public String getParameter(String key) {
+        return getSimulationManager().getParameterManager().getString(key);
     }
 
 }

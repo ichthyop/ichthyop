@@ -56,7 +56,7 @@ package org.ichthyop.io;
 import org.ichthyop.TypeZone;
 import org.ichthyop.manager.OutputManager.NCDimFactory;
 import org.ichthyop.manager.PropertyManager;
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 import java.util.ArrayList;
 import java.util.List;
 import ucar.ma2.Array;
@@ -69,7 +69,7 @@ import ucar.nc2.Dimension;
  *
  * @author pverley
  */
-public abstract class AbstractTracker extends SimulationManagerAccessor {
+public abstract class AbstractTracker extends IchthyopLinker {
 
     private final ArrayList<Dimension> dimensions = new ArrayList();
     private final List<Attribute> attributes = new ArrayList();

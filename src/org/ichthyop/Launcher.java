@@ -63,7 +63,7 @@ import org.jdesktop.application.Application;
 /**
  * Main of the program. 
  */
-public class Launcher extends SimulationManagerAccessor {
+public class Launcher extends IchthyopLinker {
     
     /**
      * Main method launching the application, either batch or UI.

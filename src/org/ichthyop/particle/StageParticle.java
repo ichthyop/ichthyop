@@ -53,13 +53,13 @@
 
 package org.ichthyop.particle;
 
-import org.ichthyop.SimulationManagerAccessor;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class StageParticle extends SimulationManagerAccessor {
+public class StageParticle extends IchthyopLinker {
     
     private static final String STAGE = "stage";
 

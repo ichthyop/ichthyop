@@ -53,15 +53,14 @@
 
 package org.ichthyop.action;
 
-import org.ichthyop.SimulationManagerAccessor;
-import org.ichthyop.io.BlockType;
+import org.ichthyop.IchthyopLinker;
 import org.ichthyop.particle.IParticle;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractAction extends SimulationManagerAccessor {
+public abstract class AbstractAction extends IchthyopLinker {
 
     private final String actionKey;
 
@@ -80,7 +79,7 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
     }
 
     public String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getParameter(BlockType.ACTION, actionKey, key);
+        return getSimulationManager().getParameterManager().getString(actionKey + "." + key);
     }
     
     /**
@@ -93,17 +92,11 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
      * exist
      */
     public boolean isNull(String key) {
-        String value;
-        try {
-            value = getParameter(key).trim();
-        } catch (Exception ex) {
-            return true;
-        }
-        return (null == value) || value.isEmpty() ||  value.equalsIgnoreCase("null");
+        return getSimulationManager().getParameterManager().isNull(actionKey + "." + key);
     }
     
     public String[] getListParameter(String key) {
-        return getSimulationManager().getParameterManager().getListParameter(BlockType.ACTION, actionKey, key);
+        return getSimulationManager().getParameterManager().getArrayString(actionKey + "." + key);
     }
 
     public ActionPriority getPriority() {
@@ -117,7 +110,7 @@ public abstract class AbstractAction extends SimulationManagerAccessor {
     }
 
     public boolean isEnabled() {
-        return getSimulationManager().getActionManager().isEnabled(actionKey);
+        return getSimulationManager().getParameterManager().getBoolean(actionKey+".enabled");
     }
 
 }

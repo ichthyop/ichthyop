@@ -51,65 +51,15 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-package org.ichthyop.stage;
+package org.ichthyop;
 
-import java.util.logging.Level;
-import org.ichthyop.IchthyopLinker;
-import org.ichthyop.io.BlockType;
-import org.ichthyop.particle.IParticle;
+import org.ichthyop.manager.SimulationManager;
+import org.ichthyop.logging.IchthyopLogger;
 
-/**
- *
- * @author pverley
- */
-public abstract class AbstractStage extends IchthyopLinker {
 
-    private float[] thresholds;
-    private String[] tags;
+public class IchthyopLinker extends IchthyopLogger {
 
-    private final BlockType blockType;
-    private final String blockKey;
-
-    public abstract int getStage(IParticle particle);
-    public abstract int getStage(double value);
-
-    AbstractStage(BlockType blockType, String blockKey) {
-        this.blockType = blockType;
-        this.blockKey = blockKey;
+    public static SimulationManager getSimulationManager() {
+        return SimulationManager.getInstance();
     }
-
-    public void init() {
-
-        // Load the stage tags
-        tags = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_tags");
-
-        // Load the stage thresholds
-        String[] sThresholds = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_thresholds");
-        thresholds = new float[sThresholds.length];
-        for (int i = 0; i < sThresholds.length; i++) {
-            thresholds[i] = Float.valueOf(sThresholds[i]);
-        }
-
-        // Make sure that tags.length == thresholds.length
-        if (tags.length != thresholds.length) {
-            getLogger().log(Level.WARNING, "Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{blockKey, tags.length, thresholds.length});
-        }
-    }
-
-    public int getNStage() {
-        return tags.length;
-    }
-
-    public String getTag(int iStage) {
-        return tags[iStage];
-    }
-    
-    public float getThreshold(int iStage) {
-        return thresholds[iStage];
-    }
-
-    float[] getThresholds() {
-        return thresholds;
-    }
-
 }
