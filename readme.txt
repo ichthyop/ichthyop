@@ -5,10 +5,10 @@ http://www.ichthyop.org
 
 Ichthtyop is an individual based model that simulates Lagrangian transport of particles.
 
-Copyright (c) Philippe VERLEY 2006-2015
+Copyright (c) Philippe VERLEY 2006-2017
 
-Release: 3.3beta (2016/11/18) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r909
+Release: 3.3beta (2017/02/27) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r980
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
@@ -33,6 +33,7 @@ Bug fixes:
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* "Patches in zones" release mode accepts a new parameter "per_zone" to indicate whether the number of particles is global (as it used to be) or per release zones (new feature).
 * New plugin for ROMS3D OpenDAP
 * All the Dataset plugins detect automatically the unit of the time value by reading variable attribute "units". It can be either seconds or days, but can be easily extended to other units on demand.
 * Added command line option -quiet in the batch mode for printing only error message
