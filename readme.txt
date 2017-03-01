@@ -7,8 +7,8 @@ Ichthtyop is an individual based model that simulates Lagrangian transport of pa
 
 Copyright (c) Philippe VERLEY 2006-2017
 
-Release: 3.3beta (2017/02/27) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r980
+Release: 3.3beta (2017/03/01) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r984
 
 Feedback & Bug reports: www.ichthyop.org/forum
 
