@@ -23,10 +23,10 @@ import org.previmer.ichthyop.ui.IchthyopApp;
  */
 public class UpdateManager extends AbstractManager {
 
-    private static UpdateManager updateManager = new UpdateManager();
+    private static final UpdateManager UPDATE_MANAGER = new UpdateManager();
 
     public static UpdateManager getInstance() {
-        return updateManager;
+        return UPDATE_MANAGER;
     }
 
     /*
@@ -40,18 +40,21 @@ public class UpdateManager extends AbstractManager {
         File bak = new File(getConfigurationFile().getFile().getPath() + ".bak");
         try {
             IOTools.copyFile(getConfigurationFile().getFile(), bak);
-            getLogger().info("{Configuration} A copy of the original configuration file has been saved as " + bak.getName());
+            getLogger().log(Level.INFO, "[Configuration] A copy of the original configuration file has been saved as {0}", bak.getName());
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "{Configuration} Failed to backup the configuration file.", ex);
+            getLogger().log(Level.SEVERE, "[Configuration] Failed to backup the configuration file.", ex);
         }
         /*
          * Upgrade the configuration file to latest version
          */
-        if (getConfigurationVersion().priorTo(Version.v3_1)) {
+        if (getConfigurationVersion().priorTo(Version.V31)) {
             u30bTo31();
         }
-        if (getConfigurationVersion().priorTo(getApplicationVersion())) {
+        if (getConfigurationVersion().priorTo(Version.V32)) {
             u31To32();
+        }
+        if (getConfigurationVersion().priorTo(Version.V33B)) {
+            u32To33();
         }
         /*
          * Save the updated configuration file
@@ -63,7 +66,26 @@ public class UpdateManager extends AbstractManager {
         }
         getSimulationManager().getParameterManager().save();
     }
-    
+
+    /*
+     * Upgrade the 3.2 configuration file to 3.3
+     */
+    private void u32To33() throws Exception {
+        //@TODO
+        getLogger().warning("The automatic upgrade of the configuration file from v3.2 to v3.3 is not implemented yet. Ichthyop will update the version number but parts of your configuration may not work anymore. Sorry for the inconvenience.");
+        /*
+         * Update version number and date
+         */
+        getConfigurationFile().setVersion(getApplicationVersion());
+        StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
+        str.append("  --@@@--  ");
+        str.append((new GregorianCalendar()).getTime());
+        str.append(" File updated to version ");
+        str.append(Version.V33B);
+        str.append('.');
+        getConfigurationFile().setDescription(str.toString());
+    }
+
     /*
      * Upgrade the 3.1 configuration file to 3.2
      */
@@ -90,7 +112,7 @@ public class UpdateManager extends AbstractManager {
         str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
         str.append(" File updated to version ");
-        str.append(getApplicationVersion());
+        str.append(Version.V32);
         str.append('.');
         getConfigurationFile().setDescription(str.toString());
     }
@@ -225,12 +247,12 @@ public class UpdateManager extends AbstractManager {
         /*
          * Update version number and date
          */
-        getConfigurationFile().setVersion(Version.v3_1);
+        getConfigurationFile().setVersion(Version.V31);
         StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
         str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
         str.append(" File updated to version ");
-        str.append(Version.v3_1);
+        str.append(Version.V31);
         str.append('.');
         getConfigurationFile().setDescription(str.toString());
     }
@@ -260,9 +282,7 @@ public class UpdateManager extends AbstractManager {
     }
 
     public Version getApplicationVersion() {
-        return new Version(
-                IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version"),
-                IchthyopApp.getApplication().getContext().getResourceMap().getString("Application.version.date"));
+        return Version.VALUES[Version.VALUES.length - 1];
     }
 
     public Version getConfigurationVersion() {
@@ -281,7 +301,7 @@ public class UpdateManager extends AbstractManager {
 
     private void validateVersion(Version testedVersion) {
 
-        for (Version version : Version.values) {
+        for (Version version : Version.VALUES) {
             if (version.getNumber().equals(testedVersion.getNumber())) {
                 return;
             }

@@ -28,16 +28,17 @@ public class Version {
      * Ichthyop always expect that the date of older version is prior to a
      * newer version.
      */
-    final public static Version v3_0_beta = new Version("3.0b", "2010/07/08");
-    final public static Version v3_1 = new Version("3.1", "2012/11/19");
-    final public static Version v3_2 = new Version("3.2", "2012/11/20");
+    final public static Version V30B = new Version("3.0b", "2010/07/08");
+    final public static Version V31 = new Version("3.1", "2012/11/19");
+    final public static Version V32 = new Version("3.2", "2012/11/20");
+    final public static Version V33B = new Version("3.3b", "2017/03/01");
     //
-    final public static Version[] values = new Version[]{v3_0_beta, v3_1, v3_2};
+    final public static Version[] VALUES = new Version[]{V30B, V31, V32, V33B};
     /*
      * 
      */
-    private String number;
-    private String date;
+    private final String number;
+    private final String date;
 
     public Version(String number, String date) {
         this.date = date;
