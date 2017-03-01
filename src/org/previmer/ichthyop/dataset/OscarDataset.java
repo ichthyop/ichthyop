@@ -133,6 +133,7 @@ public class OscarDataset extends AbstractDataset {
         } else {
             opendap = false;
             listInputFiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+            DatasetUtil.sort(listInputFiles, strTime, timeArrow());
             ncIn = DatasetUtil.openFile(listInputFiles.get(0), true);
         }
         getDimNC();

@@ -24,11 +24,11 @@ import org.previmer.ichthyop.io.ZoneFile;
  */
 public class ZoneManager extends AbstractManager {
 
-    private static ZoneManager zoneManager = new ZoneManager();
-    private HashMap<TypeZone, ArrayList<Zone>> map;
+    private static final ZoneManager ZONE_MANAGER = new ZoneManager();
+    private final HashMap<TypeZone, ArrayList<Zone>> map;
 
     public static ZoneManager getInstance() {
-        return zoneManager;
+        return ZONE_MANAGER;
     }
 
     private ZoneManager() {
@@ -78,11 +78,13 @@ public class ZoneManager extends AbstractManager {
         return map.get(type);
     }
 
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         /* Nothing to do. Zones are loaded by other classes such as Action
         or ReleaseProcess */
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
         for (List<Zone> listZone : map.values()) {

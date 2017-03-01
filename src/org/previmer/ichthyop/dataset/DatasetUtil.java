@@ -41,7 +41,7 @@ public class DatasetUtil {
 
         File inputPath = new File(IOTools.resolvePath(path));
         if (!inputPath.isDirectory()) {
-            throw new IOException("{Dataset} " + inputPath + " is not a valid directory.");
+            throw new IOException("[Dataset] " + inputPath + " is not a valid directory.");
         }
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(pattern));
         if (listFile.length > 0) {
@@ -178,7 +178,7 @@ public class DatasetUtil {
      */
     public static int next(List<String> list, int index, int timeArrow) throws IOException {
         if ((list.size() == 1) || ((index + 1) >= list.size())) {
-            throw new IOException("{Dataset} Unable to find any file following " + list.get(index));
+            throw new IOException("[Dataset] Unable to find any file following " + list.get(index));
         }
         return index + 1;
     }
@@ -201,7 +201,7 @@ public class DatasetUtil {
 
         // Time value not found among NetCDF files        
         StringBuilder msg = new StringBuilder();
-        msg.append("{Dataset} Time value ");
+        msg.append("[Dataset] Time value ");
         msg.append(time);
         msg.append(" (in seconds) not contained among NetCDF files.");
         throw new IndexOutOfBoundsException(msg.toString());
