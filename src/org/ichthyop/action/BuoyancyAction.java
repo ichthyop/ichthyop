@@ -117,13 +117,18 @@ public class BuoyancyAction extends AbstractAction {
     private float[] particleDensities;
     private float[] ages;
     private BuoyancyModel buoyancyModel;
+    
+    @Override
+    public String getKey() {
+        return "action.buoyancy";
+    }
 
     @Override
     public void loadParameters() throws Exception {
         particleDensity = getConfiguration().getFloat("action.buoyancy.particle_density");
         salinity_field = getConfiguration().getString("action.buoyancy.salinity_field");
         temperature_field = getConfiguration().getString("action.buoyancy.temperature_field");
-        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        isGrowth = getConfiguration().getBoolean("action.growth.enabled");
         if (!isGrowth) {
             try {
                 maximumAge = getConfiguration().getDouble("age_max") * 24.d * 3600.d;

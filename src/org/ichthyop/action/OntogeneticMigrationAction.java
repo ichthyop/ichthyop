@@ -58,7 +58,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.IParticle;
 
 /**
@@ -102,6 +101,11 @@ public class OntogeneticMigrationAction extends AbstractAction {
     // maxProbability[nTime]
     // maxProbability[iTime] = max(probability[iTime][:])
     private float[] maxProbability;
+    
+    @Override
+    public String getKey() {
+        return "action.migration.ontogenetic";
+    }
 
     @Override
     public void loadParameters() throws Exception {

@@ -64,7 +64,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.StageParticle;
 
 /**
@@ -123,6 +122,11 @@ public class MigrationAction extends AbstractAction {
      * and vertical migration is only enabled beyond egg stage.
      */
     private boolean isGrowth;
+    
+    @Override
+    public String getKey() {
+        return "action.growth";
+    }
 
     /**
      * Read parameters from the configuration file.
@@ -138,7 +142,7 @@ public class MigrationAction extends AbstractAction {
         }
 
         // Check whether the growth module is enabled
-        isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        isGrowth = getConfiguration().getBoolean("action.growth.enabled");
         calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
         // Otherwise read migration minimal age
         if (!isGrowth) {

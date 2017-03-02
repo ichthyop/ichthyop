@@ -66,8 +66,4 @@ public abstract class AbstractSysAction extends IchthyopLinker {
 
     abstract public void execute(Particle particle);
 
-    public String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getString(key);
-    }
-
 }

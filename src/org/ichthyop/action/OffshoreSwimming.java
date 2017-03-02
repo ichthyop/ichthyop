@@ -69,6 +69,11 @@ public class OffshoreSwimming extends AbstractAction {
     private double velocity;
     // swimming period (second)
     private double period;
+    
+    @Override
+    public String getKey() {
+        return "action.offshore_swimming";
+    }
 
     @Override
     public void loadParameters() throws Exception {

@@ -67,6 +67,11 @@ public class AdvectionAction extends AbstractAction {
     private boolean vertical;
     // Threshold for CFL error message
     public static final float THRESHOLD_CFL = 1.0f;
+    
+    @Override
+    public String getKey() {
+        return "action.advection";
+    }
 
     @Override
     public void loadParameters() throws Exception {

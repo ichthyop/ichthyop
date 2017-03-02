@@ -73,6 +73,11 @@ public class SoleGrowthAction extends AbstractAction {
     private double dt_day;
     private LengthStage lengthStage;
     private float[] c1, c2;
+    
+    @Override
+    public String getKey() {
+        return "action.growth.sole";
+    }
 
     @Override
     public void loadParameters() throws Exception {
@@ -91,7 +96,7 @@ public class SoleGrowthAction extends AbstractAction {
         dt_day = (double) getSimulationManager().getTimeManager().get_dt() / Constant.ONE_DAY;
 
         // Pre-defined stages of the sole larva
-        lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
+        lengthStage = new LengthStage(BlockType.ACTION, getKey());
         lengthStage.init();
 
         // Coefficients of the growth equation

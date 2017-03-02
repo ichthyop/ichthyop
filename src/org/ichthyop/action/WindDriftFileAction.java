@@ -63,7 +63,6 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ichthyop.calendar.InterannualCalendar;
-import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.dataset.RequiredExternalVariable;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.IParticle;
@@ -147,6 +146,11 @@ public class WindDriftFileAction extends WindDriftAction {
      * V wind variable
      */
     RequiredExternalVariable V_variable;
+    
+    @Override
+    public String getKey() {
+        return "action.wind_drift_file";
+    }
 
     @Override
     public void loadParameters() throws Exception {

@@ -61,6 +61,10 @@ import ucar.nc2.dataset.NetcdfDataset;
 
 public class WindDriftURLAction extends WindDriftFileAction {
 
+    @Override
+    public String getKey() {
+        return "action.wind_drift_url";
+    }
         
     @Override
     public void loadParameters() throws Exception {

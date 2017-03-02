@@ -77,11 +77,16 @@ public class LethalTempAction extends AbstractAction {
     private float[] ages;
     private boolean FLAG_GROWTH, FLAG_LETHAL_TEMP_FUNCTION;
     private String temperature_field;
+    
+    @Override
+    public String getKey() {
+        return "action.growth";
+    }
 
     @Override
     public void loadParameters() throws Exception {
 
-        FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
+        FLAG_GROWTH = getConfiguration().getBoolean("action.growth.enabled");
         temperature_field = getConfiguration().getString("action.lethal_temp.temperature_field");
         if (!FLAG_GROWTH) {
             /*

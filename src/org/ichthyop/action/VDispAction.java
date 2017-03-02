@@ -65,6 +65,11 @@ public class VDispAction extends AbstractAction {
 
     private MTRandom random;
     private String kv_field;
+    
+    @Override
+    public String getKey() {
+        return "action.vdisp";
+    }
 
     @Override
     public void loadParameters() throws Exception {

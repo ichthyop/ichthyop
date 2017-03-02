@@ -70,6 +70,11 @@ public class GradientMoveAction extends AbstractAction {
     private String varName;
     private String direction;
     private int stride;
+    
+    @Override
+    public String getKey() {
+        return "action.gradient";
+    }
 
     @Override
     public void loadParameters() throws Exception {

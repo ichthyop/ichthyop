@@ -94,6 +94,11 @@ public class HDispAction extends AbstractAction {
      * Mersenne Twister pseudo random number generator
      */
     private MTRandom random;
+    
+    @Override
+    public String getKey() {
+        return "action.hdisp";
+    }
 
     @Override
     public void loadParameters() throws Exception {

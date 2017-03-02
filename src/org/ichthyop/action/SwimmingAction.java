@@ -83,6 +83,11 @@ public class SwimmingAction extends AbstractAction {
     private float[] ages;
     private double dt;
     private boolean cruising;
+    
+    @Override
+    public String getKey() {
+        return "action.swimming";
+    }
 
     @Override
     public void loadParameters() throws Exception {

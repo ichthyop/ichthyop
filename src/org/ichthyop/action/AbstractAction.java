@@ -61,30 +61,12 @@ import org.ichthyop.particle.IParticle;
  * @author pverley
  */
 public abstract class AbstractAction extends IchthyopLinker {
-
-    private final String actionKey;
+    
+    abstract public String getKey();
 
     abstract public void loadParameters() throws Exception;
 
     abstract public void execute(IParticle particle);
 
     abstract public void init(IParticle particle);
-
-    public AbstractAction() {
-        actionKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
-    }
-
-    public String getBlockKey() {
-        return actionKey;
-    }
-    
-    public ActionPriority getPriority() {
-        String priority = getConfiguration().getString(actionKey + ".priority");
-        for (ActionPriority actionPriority : ActionPriority.values()) {
-            if (priority.equals(actionPriority.toString())) {
-                return actionPriority;
-            }
-        }
-        return ActionPriority.NORMAL;
-    }
 }

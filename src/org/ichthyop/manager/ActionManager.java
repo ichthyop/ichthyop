@@ -58,9 +58,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import org.ichthyop.action.AbstractAction;
 import org.ichthyop.action.AbstractSysAction;
+import org.ichthyop.action.ActionPriority;
 import org.ichthyop.action.SysActionAgeMonitoring;
 import org.ichthyop.action.SysActionMove;
 import org.ichthyop.event.InitializeEvent;
@@ -75,30 +75,30 @@ import org.ichthyop.particle.Particle;
  */
 public class ActionManager extends AbstractManager {
 
-    final private static ActionManager actionManager = new ActionManager();
+    final private static ActionManager ACTION_MANAGER = new ActionManager();
     private HashMap<String, AbstractAction> actionMap;
     private List<AbstractSysAction> sysActionList;
 
     public static ActionManager getInstance() {
-        return actionManager;
+        return ACTION_MANAGER;
     }
 
     private void loadActions() throws InstantiationException {
         actionMap = new HashMap();
         Iterator<XBlock> it = getSimulationManager().getParameterManager().getBlocks(BlockType.ACTION).iterator();
-        while (it.hasNext()) {
-            XBlock xaction = it.next();
-            if (xaction.isEnabled()) {
+        String[] blockKeys = getConfiguration().getArrayString("configuration.blocks");
+        for (String blockKey : blockKeys) {
+            if (blockKey.startsWith("action.") && getConfiguration().getBoolean(blockKey + ".enabled")) {
                 try {
-                    Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
+                    Class actionClass = Class.forName(getConfiguration().getString(blockKey+".class_name"));
                     AbstractAction action = createAction(actionClass);
                     action.loadParameters();
-                    actionMap.put(xaction.getKey(), action);
-                    info("Instantiated action \"{0}\"", xaction.getTreePath());
+                    actionMap.put(blockKey, action);
+                    info("Instantiated action \"{0}\"", actionClass.getName());
                 } catch (Exception ex) {
                     StringBuilder msg = new StringBuilder();
                     msg.append("Failed to setup action ");
-                    msg.append(xaction.getTreePath());
+                    msg.append(blockKey);
                     msg.append("\n");
                     msg.append(ex.toString());
                     InstantiationException iex = new InstantiationException(msg.toString());
@@ -175,16 +175,22 @@ public class ActionManager extends AbstractManager {
     public void initializePerformed(InitializeEvent e) {
         // nothing to do
     }
-
-    public boolean isEnabled(String actionKey) {
-        return getSimulationManager().getParameterManager().getBoolean(actionKey + ".enabled");
+    
+    private ActionPriority getPriority(String actionKey) {
+        String priority = getConfiguration().getString(actionKey + ".priority");
+        for (ActionPriority actionPriority : ActionPriority.values()) {
+            if (priority.equals(actionPriority.toString())) {
+                return actionPriority;
+            }
+        }
+        return ActionPriority.NORMAL;
     }
 
     private class ActionComparator implements Comparator<AbstractAction> {
 
         @Override
         public int compare(AbstractAction action1, AbstractAction action2) {
-            return action2.getPriority().rank().compareTo(action1.getPriority().rank());
+            return getPriority(action2.getKey()).rank().compareTo(getPriority(action1.getKey()).rank());
         }
     }
 }

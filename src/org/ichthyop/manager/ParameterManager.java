@@ -288,7 +288,7 @@ public class ParameterManager extends AbstractManager {
         String value = getString(key);
         String[] values = value.split(Separator.guess(value, Separator.SEMICOLON).toString());
         for (int i = 0; i < values.length; i++) {
-            values[i] = values[i].trim();
+            values[i] = values[i].trim().replaceAll("^\"|\"$", "");;
         }
         return values;
     }

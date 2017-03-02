@@ -85,6 +85,11 @@ public class DebGrowthAction extends AbstractAction {
     private double Vj; // Structure at mouth opening (yolk_to_feeding)
 
     private double dt;
+    
+    @Override
+    public String getKey() {
+        return "action.growthDeb";
+    }
 
     @Override
     public void loadParameters() throws Exception {

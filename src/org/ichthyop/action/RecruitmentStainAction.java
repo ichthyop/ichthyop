@@ -86,12 +86,17 @@ public class RecruitmentStainAction extends AbstractAction {
     private double thickness_stain;
     private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    
+    @Override
+    public String getKey() {
+        return "action.recruitment.stain";
+    }
 
     @Override
     public void loadParameters() throws Exception {
 
         isAgeCriterion = getConfiguration().getString("action.recruitment.stain.criterion").equals("Age criterion");
-        boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        boolean isGrowth = getConfiguration().getBoolean("action.growth.enabled");
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
         }

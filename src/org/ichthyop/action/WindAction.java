@@ -72,7 +72,13 @@ public class WindAction extends AbstractAction {
     private Properties windprop;
     private HashMap<Integer, WindScenario> scenarios;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    
+    @Override
+    public String getKey() {
+        return "action.wind";
+    }
 
+    @Override
     public void loadParameters() throws Exception {
 
         windprop = new Properties();
@@ -101,6 +107,7 @@ public class WindAction extends AbstractAction {
         // Nothing to do
     }
 
+    @Override
     public void execute(IParticle particle) {
 
         /* for 3D simulation, ckeck whether the particle is close surface */

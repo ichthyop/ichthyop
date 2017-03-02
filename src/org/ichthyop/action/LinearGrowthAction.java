@@ -76,6 +76,11 @@ public class LinearGrowthAction extends AbstractAction {
     private double coeff2; //0.03d
     private String temperature_field;
     private LengthStage lengthStage;
+    
+    @Override
+    public String getKey() {
+        return "action.growth";
+    }
 
     @Override
     public void loadParameters() throws Exception {
@@ -84,7 +89,7 @@ public class LinearGrowthAction extends AbstractAction {
         coeff2 = getConfiguration().getFloat("action.growth.coeff2");
         temperature_field = getConfiguration().getString("action.growth.temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
+        lengthStage = new LengthStage(BlockType.ACTION, getKey());
         lengthStage.init();
 
         boolean addTracker = true;

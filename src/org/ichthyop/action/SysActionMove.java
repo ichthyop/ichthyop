@@ -53,7 +53,6 @@
 
 package org.ichthyop.action;
 
-import java.util.logging.Level;
 import org.ichthyop.particle.Particle;
 import org.ichthyop.particle.ParticleMortality;
 
@@ -68,7 +67,7 @@ public class SysActionMove extends AbstractSysAction {
     @Override
     public void loadParameters() throws Exception {
         try {
-            coastlineBehavior = CoastlineBehavior.getBehavior(getParameter("app.transport.coastline_behavior"));
+            coastlineBehavior = CoastlineBehavior.getBehavior(getConfiguration().getString("app.transport.coastline_behavior"));
         } catch (Exception ex) {
             warning("Defauly coastline behavior set as {0} since the parameter could not be found in the configuration file.", coastlineBehavior.name());
         }

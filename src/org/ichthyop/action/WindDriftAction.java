@@ -77,6 +77,11 @@ public class WindDriftAction extends AbstractAction {
      * Wind convention used
      */
     static double convention;
+    
+    @Override
+    public String getKey() {
+        return "action.wind_drift";
+    }
 
     @Override
     public void loadParameters() throws Exception {

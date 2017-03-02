@@ -66,6 +66,11 @@ public class LevyWalkAction extends AbstractAction {
     private double vmax, depthmax;
     private boolean hEnabled, vEnabled;
     private MTRandom rd1, rd2, rd3;
+    
+    @Override
+    public String getKey() {
+        return "action.levywalk";
+    }
 
     @Override
     public void loadParameters() throws Exception {
