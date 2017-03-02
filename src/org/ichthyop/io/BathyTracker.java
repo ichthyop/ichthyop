@@ -53,7 +53,6 @@
 
 package org.ichthyop.io;
 
-import static org.ichthyop.IchthyopLinker.getSimulationManager;
 import org.ichthyop.particle.IParticle;
 
 /**

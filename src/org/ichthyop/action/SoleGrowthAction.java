@@ -54,7 +54,6 @@
 package org.ichthyop.action;
 
 import java.io.IOException;
-import static org.ichthyop.IchthyopLinker.getSimulationManager;
 import org.ichthyop.io.BlockType;
 import org.ichthyop.io.LengthTracker;
 import org.ichthyop.io.StageTracker;
