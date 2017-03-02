@@ -77,16 +77,16 @@ public class PatchyRelease extends AbstractRelease {
     public void loadParameters() throws Exception {
 
         /* retrieve patches parameters */
-        nb_patches = Integer.valueOf(getParameter("number_patches"));
-        nb_agregated = Integer.valueOf(getParameter("number_agregated"));
-        radius_patch = Float.valueOf(getParameter("radius_patch"));
-        thickness_patch = Float.valueOf(getParameter("thickness_patch"));
+        nb_patches = getConfiguration().getInt("release.patches.number_patches");
+        nb_agregated = getConfiguration().getInt("release.patches.number_agregated");
+        radius_patch = getConfiguration().getFloat("release.patches.radius_patch");
+        thickness_patch = getConfiguration().getFloat("release.patches.thickness_patch");
 
         /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
 
         /* Load release zones*/
-        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
+        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("release.patches.zone_file"), TypeZone.RELEASE);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
@@ -125,7 +125,7 @@ public class PatchyRelease extends AbstractRelease {
             int counter = 0;
             while (null == particle) {
                 if (counter++ > DROP_MAX) {
-                    throw new NullPointerException("{Patchy release} Unable to release particle. Check out the zone definitions.");
+                    throw new NullPointerException("[patchy release] Unable to release particle. Check out the zone definitions.");
                 }
                 double x = xmin + Math.random() * (xmax - xmin);
                 double y = ymin + Math.random() * (ymax - ymin);
@@ -144,7 +144,7 @@ public class PatchyRelease extends AbstractRelease {
                 while (null == particlePatch) {
 
                     if (counter++ > DROP_MAX) {
-                        throw new NullPointerException("{Patchy release} Unable to release particle. Check out the patchy release definition.");
+                        throw new NullPointerException("[patchy release] Unable to release particle. Check out the patchy release definition.");
                     }
                     double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
                     double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
@@ -162,6 +162,7 @@ public class PatchyRelease extends AbstractRelease {
         return index;
     }
 
+    @Override
     public int getNbParticles() {
         return nb_patches * nb_agregated;
     }

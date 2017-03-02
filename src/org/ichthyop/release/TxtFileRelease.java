@@ -61,10 +61,8 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
-import java.util.logging.Level;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.event.ReleaseEvent;
-import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.ParticleFactory;
 
 /**
@@ -80,15 +78,14 @@ public class TxtFileRelease extends AbstractRelease {
     @Override
     public void loadParameters() throws IOException {
 
-        textFile = getFile(getParameter("txtfile"));
+        textFile = getFile(getConfiguration().getFile("release.txtfile.txtfile"));
         is3D = getSimulationManager().getDataset().is3D();
         nbParticles = readNbParticles();
     }
 
     private File getFile(String filename) throws IOException {
 
-        String pathname = IOTools.resolveFile(filename);
-        File file = new File(pathname);
+        File file = new File(filename);
         if (!file.isFile()) {
             throw new FileNotFoundException("Drifter file " + filename + " not found.");
         }
@@ -117,7 +114,7 @@ public class TxtFileRelease extends AbstractRelease {
                     try {
                         coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
                     } catch (ParseException ex) {
-                        IOException ioex = new IOException("{Drifter release} Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
+                        IOException ioex = new IOException("[drifter release] Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
                         ioex.setStackTrace(ex.getStackTrace());
                         throw ioex;
                     }
@@ -139,7 +136,7 @@ public class TxtFileRelease extends AbstractRelease {
                     getSimulationManager().getSimulation().getPopulation().add(particle);
                     index++;
                 } else {
-                    warning("Drifter release - Drifter at line {0} ({1}) is not in water. Line ignored.", new Object[]{iline, line});
+                    warning("[drifter release] Drifter at line {0} ({1}) is not in water. Line ignored.", new Object[]{iline, line});
                     //throw new IOException("{Drifter release} Drifter at line " + iline + " (" + line + ") is not in water");
                 }
             }

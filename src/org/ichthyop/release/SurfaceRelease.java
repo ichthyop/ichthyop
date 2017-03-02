@@ -68,7 +68,7 @@ public class SurfaceRelease extends AbstractRelease {
 
     @Override
     public void loadParameters() throws Exception {
-        nParticles = Integer.valueOf(getParameter("number_particles"));
+        nParticles = getConfiguration().getInt("release.surface.number_particles");
         is3D = getSimulationManager().getDataset().is3D();
     }
 
@@ -86,7 +86,7 @@ public class SurfaceRelease extends AbstractRelease {
             while (null == particle) {
 
                 if (counter++ > DROP_MAX) {
-                    throw new NullPointerException("{Release surface} Unable to release particle.");
+                    throw new NullPointerException("[release surface] Unable to release particle.");
                 }
                 double x = Math.random() * (nx - 1);
                 double y = Math.random() * (ny - 1);

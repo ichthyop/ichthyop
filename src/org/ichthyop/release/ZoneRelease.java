@@ -74,13 +74,13 @@ public class ZoneRelease extends AbstractRelease {
     public void loadParameters() throws Exception {
 
         /* Get number of particles to release */
-        nParticles = Integer.valueOf(getParameter("number_particles"));
+        nParticles = getConfiguration().getInt("release.zone.number_particles");
 
         /* Check whether 2D or 3D simulation */
         is3D = getSimulationManager().getDataset().is3D();
 
         /* Load release zones*/
-        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
+        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("release.zone.zone_file"), TypeZone.RELEASE);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
                 : 0;
@@ -120,7 +120,7 @@ public class ZoneRelease extends AbstractRelease {
             int counter = 0;
             while (null == particle) {
                 if (counter++ > DROP_MAX) {
-                    throw new NullPointerException("{Zone Release} Unable to release particle. Check out the zone definitions.");
+                    throw new NullPointerException("[zone release] Unable to release particle. Check out the zone definitions.");
                 }
                 double x = xmin + Math.random() * (xmax - xmin);
                 double y = ymin + Math.random() * (ymax - ymin);

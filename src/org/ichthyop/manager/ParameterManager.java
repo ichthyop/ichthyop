@@ -70,7 +70,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import org.ichthyop.Version;
 import org.ichthyop.io.ConfigurationFile;
 import org.ichthyop.util.Separator;
@@ -192,7 +191,7 @@ public class ParameterManager extends AbstractManager {
     public void initializePerformed(InitializeEvent e) {
         // does nothing
     }
-    
+
     /**
      * Check whether parameter 'key' has 'null' value. The function returns
      * {@code true} in several cases: the parameter does not exist, the value of
@@ -258,7 +257,7 @@ public class ParameterManager extends AbstractManager {
     public String getString(String key) {
         String lkey = key.toLowerCase();
         if (parameters.containsKey(lkey)) {
-            return parameters.get(lkey);
+            return parameters.get(lkey).trim().replaceAll("^\"|\"$", "");
         } else {
             error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
         }
@@ -286,9 +285,10 @@ public class ParameterManager extends AbstractManager {
      */
     public String[] getArrayString(String key) {
         String value = getString(key);
+        value = value.replaceAll("^\\[|\\]$", "");
         String[] values = value.split(Separator.guess(value, Separator.SEMICOLON).toString());
         for (int i = 0; i < values.length; i++) {
-            values[i] = values[i].trim().replaceAll("^\"|\"$", "");;
+            values[i] = values[i].trim().replaceAll("^\"|\"$", "");
         }
         return values;
     }
@@ -478,13 +478,13 @@ public class ParameterManager extends AbstractManager {
         map.put("ichthyop.version", cfgFile.getVersion().toString());
         map.put("configuration.blocks", listBlocks(cfgFile));
         for (XBlock block : cfg.readBlocks()) {
-            map.put(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
+            if (block.getType() != BlockType.OPTION) {
+                map.put(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
+                map.put(block.getKey() + ".type", block.getType().toString());
+            }
             if (extended) {
                 map.put(block.getKey() + ".description", clean(block.getDescription()));
                 map.put(block.getKey() + ".treepath", block.getTreePath());
-            }
-            if (block.getType() != BlockType.OPTION) {
-                map.put(block.getKey() + ".type", block.getType().toString());
             }
             block.getXParameters().forEach((parameter) -> {
                 StringBuilder key;

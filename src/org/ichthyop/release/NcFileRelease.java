@@ -56,10 +56,8 @@ package org.ichthyop.release;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.event.ReleaseEvent;
-import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.ParticleFactory;
 import org.ichthyop.particle.ParticleMortality;
 import ucar.ma2.ArrayDouble;
@@ -80,7 +78,7 @@ public class NcFileRelease extends AbstractRelease {
     public void loadParameters() throws IOException {
 
         /* make sure file exits and can be read */
-        filename = IOTools.resolveFile(getParameter("ncfile"));
+        filename = getConfiguration().getFile("release.ncfile.ncfile");
 
         File file = new File(filename);
         if (!file.isFile()) {

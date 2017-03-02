@@ -82,13 +82,13 @@ public class StainRelease extends AbstractRelease {
         is3D = getSimulationManager().getDataset().is3D();
 
         /* retrieve stain parameters */
-        nb_particles = Integer.valueOf(getParameter("number_particles"));
-        radius_stain = Float.valueOf(getParameter("radius_stain"));
-        lon_stain = Double.valueOf(LonLatConverter.convert(getParameter("lon_stain"), LonLatFormat.DecimalDeg));
-        lat_stain = Double.valueOf(LonLatConverter.convert(getParameter("lat_stain"), LonLatFormat.DecimalDeg));
+        nb_particles = getConfiguration().getInt("release.stain.number_particles");
+        radius_stain = getConfiguration().getFloat("release.stain.radius_stain");
+        lon_stain = Double.valueOf(LonLatConverter.convert(getConfiguration().getString("release.stain.lon_stain"), LonLatFormat.DecimalDeg));
+        lat_stain = Double.valueOf(LonLatConverter.convert(getConfiguration().getString("release.stain.lat_stain"), LonLatFormat.DecimalDeg));
         if (is3D) {
-            thickness_stain = Float.valueOf(getParameter("thickness_stain"));
-            depth_stain = Float.valueOf(getParameter("depth_stain"));
+            thickness_stain = getConfiguration().getFloat("release.stain.thickness_stain");
+            depth_stain = getConfiguration().getFloat("release.stain.depth_stain");
         }
     }
 
@@ -97,7 +97,7 @@ public class StainRelease extends AbstractRelease {
 
         boolean isStainInWater = getSimulationManager().getDataset().isInWater(getSimulationManager().getDataset().latlon2xy(lat_stain, lon_stain));
         if (!isStainInWater) {
-            throw new IOException("{Release stain} Center of the stain [lat: " + lat_stain + "; lon: " + lon_stain + "] is not in water or out of the domain. Fixed that in section Release stain.");
+            throw new IOException("[release stain] Center of the stain [lat: " + lat_stain + "; lon: " + lon_stain + "] is not in water or out of the domain. Fixed that in section Release stain.");
         }
 
         int DROP_MAX = 2000;
@@ -108,7 +108,7 @@ public class StainRelease extends AbstractRelease {
             while (null == particlePatch) {
 
                 if (counter++ > DROP_MAX) {
-                    throw new NullPointerException("{Release stain} Unable to release particle. Check out the stain definition.");
+                    throw new NullPointerException("[release stain] Unable to release particle. Check out the stain definition.");
                 }
                 GeoPosition point = getGeoPosition();
                 double depth = Double.NaN;
@@ -140,6 +140,6 @@ public class StainRelease extends AbstractRelease {
 
     @Override
     public int getNbParticles() {
-        return Integer.valueOf(getParameter("number_particles"));
+        return getConfiguration().getInt("release.stain.number_particles");
     }
 }

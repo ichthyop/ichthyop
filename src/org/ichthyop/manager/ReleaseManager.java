@@ -60,10 +60,6 @@ import org.ichthyop.event.SetupEvent;
 import org.ichthyop.io.BlockType;
 import org.ichthyop.event.ReleaseEvent;
 import org.ichthyop.event.ReleaseListener;
-import org.ichthyop.io.XBlock;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.release.AbstractRelease;
@@ -74,7 +70,7 @@ import org.ichthyop.release.AbstractRelease;
  */
 public class ReleaseManager extends AbstractManager implements ReleaseListener, NextStepListener {
 
-    private static final ReleaseManager releaseManager = new ReleaseManager();
+    private static final ReleaseManager RELEASE_MANAGER = new ReleaseManager();
     private AbstractRelease releaseProcess;
     /**
      * Stores time of the release events
@@ -94,44 +90,31 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     private final EventListenerList listeners = new EventListenerList();
 
     public static ReleaseManager getInstance() {
-        return releaseManager;
+        return RELEASE_MANAGER;
     }
 
     private void instantiateReleaseProcess() throws Exception {
 
-        XBlock releaseBlock = findActiveReleaseProcess();
-        String className = getParameter(releaseBlock.getKey(), "class_name");
-        try {
-            releaseProcess = (AbstractRelease) Class.forName(className).newInstance();
-            releaseProcess.loadParameters();
-        } catch (Exception ex) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Release process instantiation failed ==> ");
-            sb.append(ex.toString());
-            InstantiationException ieex = new InstantiationException(sb.toString());
-            ieex.setStackTrace(ex.getStackTrace());
-            throw ieex;
-        }
-    }
-
-    public String getParameter(String releaseKey, String key) {
-        return getSimulationManager().getParameterManager().getString(releaseKey + "." + key);
-    }
-
-    private XBlock findActiveReleaseProcess() throws Exception {
-        List<XBlock> list = new ArrayList();
-        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.RELEASE)) {
-            if (block.isEnabled()) {
-                list.add(block);
+        String[] blockKeys = getConfiguration().getArrayString("configuration.blocks");
+        for (String blockKey : blockKeys) {
+            if (getConfiguration().canFind(blockKey + ".type")
+                    && getConfiguration().getString(blockKey + ".type").equalsIgnoreCase("release")) {
+                if (getConfiguration().getBoolean(blockKey + ".enabled")) {
+                    String className = getConfiguration().getString(blockKey + ".class_name");
+                    try {
+                        releaseProcess = (AbstractRelease) Class.forName(className).newInstance();
+                        releaseProcess.loadParameters();
+                    } catch (Exception ex) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Release process instantiation failed ==> ");
+                        sb.append(ex.toString());
+                        InstantiationException ieex = new InstantiationException(sb.toString());
+                        ieex.setStackTrace(ex.getStackTrace());
+                        throw ieex;
+                    }
+                }
             }
         }
-        if (list.isEmpty()) {
-            throw new NullPointerException("Could not find any enabled " + BlockType.RELEASE.toString() + " block in the configuration file.");
-        }
-        if (list.size() > 1) {
-            throw new IOException("Found several " + BlockType.RELEASE.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
-        }
-        return list.get(0);
     }
 
     @Override

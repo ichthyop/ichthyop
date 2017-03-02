@@ -61,20 +61,10 @@ import org.ichthyop.event.ReleaseEvent;
  * @author pverley
  */
 public abstract class AbstractRelease extends IchthyopLinker {
-
-    private final String releaseKey;
     
     abstract public void loadParameters() throws Exception;
 
     abstract public int release(ReleaseEvent event) throws Exception;
 
-    abstract public int getNbParticles();
-
-    public AbstractRelease() {
-        releaseKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
-    }
-
-    String getParameter(String key) {
-        return getSimulationManager().getReleaseManager().getParameter(releaseKey, key);
-    }
+    abstract public int getNbParticles();    
 }
