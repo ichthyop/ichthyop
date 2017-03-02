@@ -55,11 +55,16 @@ package org.ichthyop;
 
 import org.ichthyop.manager.SimulationManager;
 import org.ichthyop.logging.IchthyopLogger;
+import org.ichthyop.manager.ParameterManager;
 
 
 public class IchthyopLinker extends IchthyopLogger {
 
     public static SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
+    }
+    
+    public ParameterManager getConfiguration() {
+        return SimulationManager.getInstance().getParameterManager();
     }
 }

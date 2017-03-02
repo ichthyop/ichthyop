@@ -52,7 +52,6 @@
  */
 package org.ichthyop.action;
 
-import java.util.logging.Level;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.ParticleMortality;
 
@@ -74,7 +73,7 @@ public class AdvectionAction extends AbstractAction {
 
         /* numerical scheme */
         try {
-            isRK4 = getParameter("scheme").equals(AdvectionScheme.RUNGE_KUTTA_4.getName());
+            isRK4 = getConfiguration().getString("action.advection.scheme").equals(AdvectionScheme.RUNGE_KUTTA_4.getName());
         } catch (Exception ex) {
             /*  set RK4 as default in case could not determine the scheme
              * defined by user.
@@ -89,14 +88,14 @@ public class AdvectionAction extends AbstractAction {
 
         /* Horizontal advection enabled ? */
         try {
-            horizontal = Boolean.valueOf(getParameter("horizontal"));
+            horizontal = getConfiguration().getBoolean("action.advection.horizontal");
         } catch (Exception ex) {
             horizontal = true;
         }
 
         /* Vertical advection enabled ? */
         try {
-            vertical = Boolean.valueOf(getParameter("vertical"));
+            vertical = getConfiguration().getBoolean("action.advection.vertical");
         } catch (Exception ex) {
             vertical = true;
         }

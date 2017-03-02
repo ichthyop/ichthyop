@@ -87,22 +87,22 @@ public class RecruitmentZoneAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         timeInZone = 0;
-        durationMinInRecruitArea = (int) (Float.valueOf(getParameter("duration_min")) * 24.f * 3600.f);
-        isAgeCriterion = getParameter("criterion").equals("Age criterion");
+        durationMinInRecruitArea = (int) (getConfiguration().getFloat("action.recruitment.zone.duration_min") * 24.f * 3600.f);
+        isAgeCriterion = getConfiguration().getString("action.recruitment.zone.criterion").equals("Age criterion");
         boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
         }
         if (isAgeCriterion) {
-            ageMinAtRecruitment = Float.valueOf(getParameter("limit_age"));
+            ageMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_age");
         } else {
-            lengthMinAtRecruitment = Float.valueOf(getParameter("limit_length"));
+            lengthMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_length");
         }
-        stopMovingOnceRecruited = Boolean.valueOf(getParameter("stop_moving"));
-        getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RECRUITMENT);
+        stopMovingOnceRecruited = getConfiguration().getBoolean("action.recruitment.zone.stop_moving");
+        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("action.recruitment.zone.zone_file"), TypeZone.RECRUITMENT);
         boolean addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("recruited_tracker"));
+            addTracker = getConfiguration().getBoolean("action.recruitment.zone.recruited_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
@@ -111,7 +111,7 @@ public class RecruitmentZoneAction extends AbstractAction {
         }
         addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("zone_tracker"));
+            addTracker = getConfiguration().getBoolean("action.recruitment.zone.zone_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }

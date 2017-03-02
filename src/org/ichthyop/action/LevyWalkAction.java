@@ -69,13 +69,13 @@ public class LevyWalkAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        alphaH = Double.valueOf(getParameter("alpha_h"));
-        vmax = Double.valueOf(getParameter("vmax"));
-        alphaV = Double.valueOf(getParameter("alpha_v"));
-        depthmax = Double.valueOf(getParameter("depthmax"));
+        alphaH = getConfiguration().getDouble("action.levywalk.alpha_h");
+        vmax = getConfiguration().getDouble("action.levywalk.vmax");
+        alphaV = getConfiguration().getDouble("action.levywalk.alpha_v");
+        depthmax = getConfiguration().getDouble("action.levywalk.depthmax");
         if (depthmax > 0) depthmax *= -1.d;
-        hEnabled = Boolean.valueOf(getParameter("enabled_h"));
-        vEnabled = Boolean.valueOf(getParameter("enabled_v"));
+        hEnabled = getConfiguration().getBoolean("enabled_h");
+        vEnabled = getConfiguration().getBoolean("enabled_v");
         rd1 = new MTRandom();
         rd2 = new MTRandom(2L * System.currentTimeMillis());
         rd3 = new MTRandom(System.currentTimeMillis() / 2L);

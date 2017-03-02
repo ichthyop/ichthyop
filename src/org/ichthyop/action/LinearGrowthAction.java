@@ -79,17 +79,17 @@ public class LinearGrowthAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        tp_threshold = Float.valueOf(getParameter("threshold_temp"));
-        coeff1 = Float.valueOf(getParameter("coeff1"));
-        coeff2 = Float.valueOf(getParameter("coeff2"));
-        temperature_field = getParameter("temperature_field");
+        tp_threshold = getConfiguration().getFloat("action.growth.threshold_temp");
+        coeff1 = getConfiguration().getFloat("action.growth.coeff1");
+        coeff2 = getConfiguration().getFloat("action.growth.coeff2");
+        temperature_field = getConfiguration().getString("action.growth.temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
 
         boolean addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("length_tracker"));
+            addTracker = getConfiguration().getBoolean("action.growth.length_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
@@ -98,7 +98,7 @@ public class LinearGrowthAction extends AbstractAction {
         }
         addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("stage_tracker"));
+            addTracker = getConfiguration().getBoolean("action.growth.stage_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }

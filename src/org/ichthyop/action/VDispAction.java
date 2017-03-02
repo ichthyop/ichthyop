@@ -66,9 +66,10 @@ public class VDispAction extends AbstractAction {
     private MTRandom random;
     private String kv_field;
 
+    @Override
     public void loadParameters() throws Exception {
         random = new MTRandom(true);
-        kv_field = getParameter("kv_field");
+        kv_field = getConfiguration().getString("action.vdisp.kv_field");
         getSimulationManager().getDataset().requireVariable(kv_field, getClass());
     }
     
@@ -77,6 +78,7 @@ public class VDispAction extends AbstractAction {
         // Nothing to do
     }
 
+    @Override
     public void execute(IParticle particle) {
         particle.increment(getVDispersion(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt()));
     }

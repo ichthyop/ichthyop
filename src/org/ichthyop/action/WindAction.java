@@ -60,7 +60,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.logging.Level;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.io.IOTools;
 
@@ -79,7 +78,7 @@ public class WindAction extends AbstractAction {
         windprop = new Properties();
         scenarios = new HashMap();
 
-        String filename = IOTools.resolveFile(getParameter("wind_file"));
+        String filename = getConfiguration().getFile("action.wind.wind_file");
         File file = new File(filename);
         if (!file.isFile()) {
             throw new FileNotFoundException("Wind file " + filename + " not found.");

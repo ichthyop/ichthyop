@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import org.ichthyop.io.ETracker;
@@ -90,40 +89,40 @@ public class DebGrowthAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        p_Xm = Double.valueOf(getParameter("ingestion_rate")) / (86400.0 * 100.0);        // 325;J cm-2 d-1, max. surf. specific ingestion rate
+        p_Xm = getConfiguration().getDouble("action.growthDeb.ingestion_rate") / (86400.0 * 100.0);        // 325;J cm-2 d-1, max. surf. specific ingestion rate
         // divisé par 86400 pour la conversion en secondes et divisé par 100 pour la conversion en mm-2
-        ae = Double.valueOf(getParameter("assimilation_efficiency"));     // 0.71 ;- Assimilation efficiency; E. capensis = 0.71 James et al. (1989)
-        XK_chl = Double.valueOf(getParameter("half_saturation"));        //0.1; Half saturation constant for sat derived  [chlorophyll-a] mg m3
+        ae = getConfiguration().getDouble("action.growthDeb.assimilation_efficiency");     // 0.71 ;- Assimilation efficiency; E. capensis = 0.71 James et al. (1989)
+        XK_chl = getConfiguration().getDouble("action.growthDeb.half_saturation");        //0.1; Half saturation constant for sat derived  [chlorophyll-a] mg m3
         // Energetic related parameters
-        E_m = Double.valueOf(getParameter("reserve_capacity")) / 1000.0;       //2700; J/cm^3, reserve capacity 
+        E_m = getConfiguration().getDouble("action.growthDeb.reserve_capacity") / 1000.0;       //2700; J/cm^3, reserve capacity 
         // divisé par 1000 pour la conversion en mm-3
-        E_g = Double.valueOf(getParameter("cost_growth")) / 1000.0;       //4000; J cm-3; // Cost for growth 
+        E_g = getConfiguration().getDouble("action.growthDeb.cost_growth") / 1000.0;       //4000; J cm-3; // Cost for growth 
         // divisé par 1000 pour la conversion en mm-3
-        p_M = Double.valueOf(getParameter("volume_cost_maintenance")) / (86400.0 * 1000.0);         //49; J cm-3 d-1; Volume specific maint. cost
+        p_M = getConfiguration().getDouble("action.growthDeb.volume_cost_maintenance") / (86400.0 * 1000.0);         //49; J cm-3 d-1; Volume specific maint. cost
         // divisé par 86400 pour la conversion en secondes et divisé par 1000 pour la conversion en mm-3
-        Kappa = Double.valueOf(getParameter("allocation_rule"));        //0.7; - energy (pC) allocation rule 
+        Kappa = getConfiguration().getDouble("action.growthDeb.allocation_rule");        //0.7; - energy (pC) allocation rule 
         // Temperature related params
-        TA = Double.valueOf(getParameter("arrhenius"));      //9800 ; Arrhenius temp (K) Pecquerie et al. 2009
-        T1 = Double.valueOf(getParameter("ref_temp"));	 //273 + 16; K, Ref temp = 16C (avg. mid-water temp in GoL)
+        TA = getConfiguration().getDouble("action.growthDeb.arrhenius");      //9800 ; Arrhenius temp (K) Pecquerie et al. 2009
+        T1 = getConfiguration().getDouble("action.growthDeb.ref_temp");	 //273 + 16; K, Ref temp = 16C (avg. mid-water temp in GoL)
         //p= [p_Xm ae XK_chl E_m E_g p_M Kappa TA T1 mu_E shape_larvae ]; // pack params
 
-        length_init = Double.valueOf(getParameter("initial_length"));
-        feeding_length = Double.valueOf(getParameter("yolk2feeding_length"));
+        length_init = getConfiguration().getDouble("action.growthDeb.initial_length");
+        feeding_length = getConfiguration().getDouble("action.growthDeb.yolk2feeding_length");
 
-        shape_larvae = Double.valueOf(getParameter("shape")); //0.152 ; larvae < 3.7cm length and weight data  - Palomera et al.
-        E_init = Double.valueOf(getParameter("initial_reserve")); //0.022;//0.89998;// //-0.087209;      // J, Reserve at size of hatching.
+        shape_larvae = getConfiguration().getDouble("action.growthDeb.shape"); //0.152 ; larvae < 3.7cm length and weight data  - Palomera et al.
+        E_init = getConfiguration().getDouble("action.growthDeb.initial_reserve"); //0.022;//0.89998;// //-0.087209;      // J, Reserve at size of hatching.
         // Structure at mouth opening (yolk_to_feeding)
         Vj = Math.pow(shape_larvae * feeding_length, 3);
 
-        dt = getSimulationManager().getTimeManager().get_dt();//Double.valueOf(getParameter("")); //1 ; 
-        temperature_field = getParameter("temperature_field");
+        dt = getSimulationManager().getTimeManager().get_dt();
+        temperature_field = getConfiguration().getString("action.growthDeb.temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        food_field = getParameter("food_field");
+        food_field = getConfiguration().getString("action.growthDeb.food_field");
         getSimulationManager().getDataset().requireVariable(food_field, getClass());
 
         boolean addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("length_tracker"));
+            addTracker = getConfiguration().getBoolean("action.growthDeb.length_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
@@ -132,7 +131,7 @@ public class DebGrowthAction extends AbstractAction {
         }
         addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("E_tracker"));
+            addTracker = getConfiguration().getBoolean("action.growthDeb.E_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
@@ -164,7 +163,7 @@ public class DebGrowthAction extends AbstractAction {
         }
 
     }
-    
+
     private double computeLength(double V) {
         return Math.pow(V, 1 / 3.0) / shape_larvae;
     }

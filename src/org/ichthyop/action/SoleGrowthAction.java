@@ -78,7 +78,7 @@ public class SoleGrowthAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         // Request the temperature variable from the hydrodynamic dataset
-        temperature_field = getParameter("temperature_field");
+        temperature_field = getConfiguration().getString("action.growth.sole.temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
 
         // Add the length tracker
@@ -97,7 +97,7 @@ public class SoleGrowthAction extends AbstractAction {
         // Coefficients of the growth equation
         // dLength(dt) = c1 * (temperature ^ c2) * dt
         c1 = new float[lengthStage.getNStage()];
-        String[] sCoeff = getListParameter("c1");
+        String[] sCoeff = getConfiguration().getArrayString("action.growth.sole.c1");
         if (sCoeff.length != c1.length) {
             throw new IOException("In Sole Growth section, the number of c1 coefficients must be equal to the number of stages.");
         }
@@ -105,7 +105,7 @@ public class SoleGrowthAction extends AbstractAction {
             c1[iStage] = Float.parseFloat(sCoeff[iStage]);
         }
         c2 = new float[lengthStage.getNStage()];
-        sCoeff = getListParameter("c2");
+        sCoeff = getConfiguration().getArrayString("action.growth.sole.c2");
         if (sCoeff.length != c2.length) {
             throw new IOException("In Sole Growth section, the number of c2 coefficients must be equal to the number of stages.");
         }

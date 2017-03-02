@@ -54,8 +54,6 @@
 package org.ichthyop.action;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.dataset.RequiredExternalVariable;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
@@ -66,16 +64,16 @@ public class WindDriftURLAction extends WindDriftFileAction {
         
     @Override
     public void loadParameters() throws Exception {
-        strTime = getParameter("field_time");
+        strTime = getConfiguration().getString("action.wind_drift_url.field_time");
         time_current=getSimulationManager().getTimeManager().getTime();
-        openURL(getParameter("wind_url"));
-        wind_factor=Double.valueOf(getParameter("wind_factor"));
-        angle = Math.PI/2.0-Double.valueOf(getParameter("angle"))*Math.PI/180.0;
-        strUW=getParameter("wind_u");
-        strVW=getParameter("wind_v");
-        strLon=getParameter("longitude");
-        strLat=getParameter("latitude");
-        convention = "wind to".equals(getParameter("wind_convention"))? 1 : -1;
+        openURL(getConfiguration().getString("action.wind_drift_url.wind_url"));
+        wind_factor=getConfiguration().getDouble("action.wind_drift_url.wind_factor");
+        angle = Math.PI/2.0-getConfiguration().getDouble("action.wind_drift_url.angle")*Math.PI/180.0;
+        strUW=getConfiguration().getString("action.wind_drift_url.wind_u");
+        strVW=getConfiguration().getString("action.wind_drift_url.wind_v");
+        strLon=getConfiguration().getString("action.wind_drift_url.longitude");
+        strLat=getConfiguration().getString("action.wind_drift_url.latitude");
+        convention = "wind to".equals(getConfiguration().getString("action.wind_drift_url.wind_convention"))? 1 : -1;
         
         getDimNC();
         setOnFirstTime();

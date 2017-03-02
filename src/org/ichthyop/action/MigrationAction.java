@@ -142,11 +142,11 @@ public class MigrationAction extends AbstractAction {
         calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
         // Otherwise read migration minimal age
         if (!isGrowth) {
-            minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
+            minimumAge = (long) (getConfiguration().getFloat("action.migration.age_min") * 24.f * 3600.f);
         }
         // Check existence of daytime depth as an age function, provided in CSV file
-        if (!isNull("daytime_depth_file")) {
-            String pathname = IOTools.resolveFile(getParameter("daytime_depth_file"));
+        if (!getConfiguration().isNull("action.migration.daytime_depth_file")) {
+            String pathname = getConfiguration().getFile("action.migration.daytime_depth_file");
             File f = new File(pathname);
             if (!f.isFile()) {
                 throw new FileNotFoundException("File of depth at daytime " + pathname + " not found.");
@@ -175,11 +175,11 @@ public class MigrationAction extends AbstractAction {
             }
         } else {
             // Constant daytime depth if no CSV file is provided
-            depthDay = Float.valueOf(getParameter("daytime_depth"));
+            depthDay = getConfiguration().getFloat("action.migration.daytime_depth");
         }
         // Check existence of night time depth as an age function, provided in CSV file
-        if (!isNull("nighttime_depth_file")) {
-            String pathname = IOTools.resolveFile(getParameter("nighttime_depth_file"));
+        if (!getConfiguration().isNull("action.migration.nighttime_depth_file")) {
+            String pathname = getConfiguration().getFile("action.migration.nighttime_depth_file");
             File f = new File(pathname);
             if (!f.isFile()) {
                 throw new FileNotFoundException("File of depth at night " + pathname + " not found.");
@@ -208,13 +208,13 @@ public class MigrationAction extends AbstractAction {
             }
         } else {
             // Constant night time depth if no CSV file is provided
-            depthNight = Float.valueOf(getParameter("nighttime_depth"));
+            depthNight = getConfiguration().getFloat("action.migration.nighttime_depth");
         }
         // Sunset and sunrise definition
         SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
         hourFormat.setCalendar(calendar);
-        sunset = hourFormat.parse(getParameter("sunset"));
-        sunrise = hourFormat.parse(getParameter("sunrise"));
+        sunset = hourFormat.parse(getConfiguration().getString("action.migration.sunset"));
+        sunrise = hourFormat.parse(getConfiguration().getString("action.migration.sunrise"));
         // Check whether depth at day and depth at night are constant in the
         // case they are not function of age
         isodepth = (null == depthsDay && null == depthsNight) && (depthDay == depthNight);

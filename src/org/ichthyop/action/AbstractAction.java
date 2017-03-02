@@ -77,30 +77,9 @@ public abstract class AbstractAction extends IchthyopLinker {
     public String getBlockKey() {
         return actionKey;
     }
-
-    public String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getString(actionKey + "." + key);
-    }
     
-    /**
-     * Check whether parameter 'key' has 'null' value. The function returns
-     * {@code true} in several cases: the parameter does not exist, the value of
-     * the parameter is empty or the value of the parameter is set to "null".
-     *
-     * @param key, the key of the parameter
-     * @return {@code true} if the parameter is either null, empty or does not
-     * exist
-     */
-    public boolean isNull(String key) {
-        return getSimulationManager().getParameterManager().isNull(actionKey + "." + key);
-    }
-    
-    public String[] getListParameter(String key) {
-        return getSimulationManager().getParameterManager().getArrayString(actionKey + "." + key);
-    }
-
     public ActionPriority getPriority() {
-        String priority = getParameter("priority");
+        String priority = getConfiguration().getString(actionKey + ".priority");
         for (ActionPriority actionPriority : ActionPriority.values()) {
             if (priority.equals(actionPriority.toString())) {
                 return actionPriority;
@@ -108,9 +87,4 @@ public abstract class AbstractAction extends IchthyopLinker {
         }
         return ActionPriority.NORMAL;
     }
-
-    public boolean isEnabled() {
-        return getSimulationManager().getParameterManager().getBoolean(actionKey+".enabled");
-    }
-
 }

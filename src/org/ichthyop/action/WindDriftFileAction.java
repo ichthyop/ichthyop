@@ -150,19 +150,19 @@ public class WindDriftFileAction extends WindDriftAction {
 
     @Override
     public void loadParameters() throws Exception {
-        strTime = getParameter("field_time");
+        strTime = getConfiguration().getString("action.wind_drift_file.field_time");
         time_current = getSimulationManager().getTimeManager().getTime();
-        openLocation(getParameter("input_path"));
+        openLocation(getConfiguration().getString("action.wind_drift_file.input_path"));
 
-        wind_factor = Double.valueOf(getParameter("wind_factor"));
-        depth_application = Float.valueOf(getParameter("depth_application"));
-        //angle = Math.PI / 2.0 - Double.valueOf(getParameter("angle")) * Math.PI / 180.0;
-        angle = Double.valueOf(getParameter("angle")) * Math.PI / 180.0;
-        strUW = getParameter("wind_u");
-        strVW = getParameter("wind_v");
-        strLon = getParameter("longitude");
-        strLat = getParameter("latitude");
-        convention = getParameter("wind_convention").equals("wind to") ? 1 : -1;
+        wind_factor = getConfiguration().getDouble("action.wind_drift_file.wind_factor");
+        depth_application = getConfiguration().getFloat("action.wind_drift_file.depth_application");
+        //angle = Math.PI / 2.0 - getConfiguration().getDouble("angle")) * Math.PI / 180.0;
+        angle = getConfiguration().getDouble("action.wind_drift_file.angle") * Math.PI / 180.0;
+        strUW = getConfiguration().getString("action.wind_drift_file.wind_u");
+        strVW = getConfiguration().getString("action.wind_drift_file.wind_v");
+        strLon = getConfiguration().getString("action.wind_drift_file.longitude");
+        strLat = getConfiguration().getString("action.wind_drift_file.latitude");
+        convention = getConfiguration().getString("action.wind_drift_file.wind_convention").equals("wind to") ? 1 : -1;
 
         getDimNC();
         setOnFirstTime();
@@ -211,7 +211,7 @@ public class WindDriftFileAction extends WindDriftAction {
         ArrayList<String> list;
 
         File inputPath = new File(path);
-        String fileMask = getParameter("file_filter");
+        String fileMask = getConfiguration().getString("file_filter");
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(fileMask));
         if (listFile.length == 0) {
             throw new IOException(path + " contains no file matching mask " + fileMask);
@@ -223,7 +223,7 @@ public class WindDriftFileAction extends WindDriftAction {
         if (list.size() > 1) {
             boolean skipSorting;
             try {
-                skipSorting = Boolean.valueOf(getParameter("skip_sorting"));
+                skipSorting = Boolean.valueOf(getConfiguration().getString("skip_sorting"));
             } catch (Exception ex) {
                 skipSorting = false;
             }
@@ -389,8 +389,8 @@ public class WindDriftFileAction extends WindDriftAction {
     }
 
     double conversion2seconds(double time) throws Exception {
-        String units = getParameter("time_unit");
-        String time_origin = getParameter("time_origin");
+        String units = getConfiguration().getString("time_unit");
+        String time_origin = getConfiguration().getString("time_origin");
         double origin = 0;
         try {
             origin = getSimulationManager().getTimeManager().date2seconds(time_origin);
@@ -412,7 +412,7 @@ public class WindDriftFileAction extends WindDriftAction {
             int min_o = calendar_o.get(Calendar.MINUTE);
             calendartmp = new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o);
             INPUT_DATE_FORMAT.setCalendar(calendartmp);
-            String origin_hydro = getSimulationManager().getParameterManager().getString("app.time.time_origin");
+            String origin_hydro = getConfiguration().getString("app.time.time_origin");
             calendartmp.setTime(INPUT_DATE_FORMAT.parse(origin_hydro));
             origin = -calendartmp.getTimeInMillis() / 1000L;
         }

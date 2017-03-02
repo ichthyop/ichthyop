@@ -82,14 +82,14 @@ public class LethalTempAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
-        temperature_field = getParameter("temperature_field");
+        temperature_field = getConfiguration().getString("action.lethal_temp.temperature_field");
         if (!FLAG_GROWTH) {
             /*
              * Check whether there is a lethal temperature CSV file
              */
             String lethal_temp_file;
             try {
-                lethal_temp_file = getParameter("lethal_temp_file");
+                lethal_temp_file = getConfiguration().getString("action.lethal_temp.lethal_temp_file");
             } catch (Exception ex) {
                 lethal_temp_file = null;
             }
@@ -109,22 +109,22 @@ public class LethalTempAction extends AbstractAction {
                  * If not just load constant lethal temperature egg
                  */
                 ages = new float[1];
-                coldLethalTp = new float[]{Float.valueOf(getParameter("cold_lethal_temperature_egg"))};
-                hotLethalTp = new float[]{Float.valueOf(getParameter("hot_lethal_temperature_egg"))};
+                coldLethalTp = new float[]{getConfiguration().getFloat("action.lethal_temp.cold_lethal_temperature_egg")};
+                hotLethalTp = new float[]{getConfiguration().getFloat("action.lethal_temp.hot_lethal_temperature_egg")};
                 FLAG_LETHAL_TEMP_FUNCTION = false;
             }
         } else {
             coldLethalTp = new float[]{
-                Float.valueOf(getParameter("cold_lethal_temperature_egg")),
-                Float.valueOf(getParameter("cold_lethal_temperature_larva"))};
+                getConfiguration().getFloat("action.lethal_temp.cold_lethal_temperature_egg"),
+                getConfiguration().getFloat("action.lethal_temp.cold_lethal_temperature_larva")};
             hotLethalTp = new float[]{
-                Float.valueOf(getParameter("hot_lethal_temperature_egg")),
-                Float.valueOf(getParameter("hot_lethal_temperature_larva"))};
+                getConfiguration().getFloat("action.lethal_temp.hot_lethal_temperature_egg"),
+                getConfiguration().getFloat("action.lethal_temp.hot_lethal_temperature_larva")};
         }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         boolean addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("temp_tracker"));
+            addTracker = getConfiguration().getBoolean("action.lethal_temp.temp_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }

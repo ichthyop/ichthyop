@@ -88,7 +88,7 @@ public class SwimmingAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         // Read swimming velocity file
-        String velocity_file = getParameter("velocity_file");
+        String velocity_file = getConfiguration().getString("action.swimming.velocity_file");
         String pathname = IOTools.resolveFile(velocity_file);
         File f = new File(pathname);
         if (!f.isFile()) {
@@ -118,7 +118,7 @@ public class SwimmingAction extends AbstractAction {
         dt = getSimulationManager().getTimeManager().get_dt();
 
         // Whether the velocity should be considered as maximal velocity or cruising velocity
-        cruising = getParameter("velocity_type").equalsIgnoreCase("cruising");
+        cruising = getConfiguration().getString("action.swimming.velocity_type").equalsIgnoreCase("cruising");
     }
 
     @Override

@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.StageParticle;
 
@@ -79,7 +78,7 @@ public class BuoyancyAction extends AbstractAction {
     final private static double MEAN_MAJOR_AXIS = 0.14f;
     final private static double LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS);
     final private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
-    final private static double g = 980.0f; // [cm/s2]
+    final private static double G = 980.0f; // [cm/s2]
     final private static double DR350 = 28.106331f;
     final private static double C1 = 4.8314f * Math.pow(10, -4);
     final private static double C2 = 6.536332f * Math.pow(10, -9);
@@ -121,13 +120,13 @@ public class BuoyancyAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        particleDensity = Float.valueOf(getParameter("particle_density"));
-        salinity_field = getParameter("salinity_field");
-        temperature_field = getParameter("temperature_field");
+        particleDensity = getConfiguration().getFloat("action.buoyancy.particle_density");
+        salinity_field = getConfiguration().getString("action.buoyancy.salinity_field");
+        temperature_field = getConfiguration().getString("action.buoyancy.temperature_field");
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth) {
             try {
-                maximumAge = Double.valueOf(getParameter("age_max")) * 24.d * 3600.d;
+                maximumAge = getConfiguration().getDouble("age_max") * 24.d * 3600.d;
             } catch (Exception ex) {
                 maximumAge = getSimulationManager().getTimeManager().getTransportDuration();
                 warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
@@ -139,8 +138,8 @@ public class BuoyancyAction extends AbstractAction {
         /*
          * Check whether there is a density CSV file
          */
-        if (!isNull("density_file")) {
-            String pathname = IOTools.resolveFile(getParameter("density_file"));
+        if (getConfiguration().isNull("action.buoyancy.density_file")) {
+            String pathname = getConfiguration().getFile("action.buoyancy.density_file");
             File f = new File(pathname);
             if (!f.isFile()) {
                 throw new FileNotFoundException("Density file " + pathname + " not found.");
@@ -251,7 +250,7 @@ public class BuoyancyAction extends AbstractAction {
          */
         waterDensity = waterDensity(sal, tp);
 
-        return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
+        return (((G * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
                 * (waterDensity - particleDensity)) / 100.0f) * dt);
     }
 

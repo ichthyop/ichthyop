@@ -90,29 +90,29 @@ public class RecruitmentStainAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        isAgeCriterion = getParameter("criterion").equals("Age criterion");
+        isAgeCriterion = getConfiguration().getString("action.recruitment.stain.criterion").equals("Age criterion");
         boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
         }
         if (isAgeCriterion) {
-            ageMinAtRecruitment = Float.valueOf(getParameter("limit_age"));
+            ageMinAtRecruitment = getConfiguration().getFloat("action.recruitment.stain.limit_age");
         } else {
-            lengthMinAtRecruitment = Float.valueOf(getParameter("limit_length"));
+            lengthMinAtRecruitment = getConfiguration().getFloat("action.recruitment.stain.limit_length");
         }
-        stopMovingOnceRecruited = Boolean.valueOf(getParameter("stop_moving"));
+        stopMovingOnceRecruited = getConfiguration().getBoolean("action.recruitment.stain.stop_moving");
 
-        radius_stain = Float.valueOf(getParameter("radius_stain"));
-        lon_stain = Double.valueOf(LonLatConverter.convert(getParameter("lon_stain"), LonLatFormat.DecimalDeg));
-        lat_stain = Double.valueOf(LonLatConverter.convert(getParameter("lat_stain"), LonLatFormat.DecimalDeg));
+        radius_stain = getConfiguration().getFloat("action.recruitment.stain.radius_stain");
+        lon_stain = Double.valueOf(LonLatConverter.convert(getConfiguration().getString("action.recruitment.stain.lon_stain"), LonLatFormat.DecimalDeg));
+        lat_stain = Double.valueOf(LonLatConverter.convert(getConfiguration().getString("action.recruitment.stain.lat_stain"), LonLatFormat.DecimalDeg));
         if (is3D) {
-            thickness_stain = Float.valueOf(getParameter("thickness_stain"));
-            depth_stain = Float.valueOf(getParameter("depth_stain"));
+            thickness_stain = getConfiguration().getFloat("action.recruitment.stain.thickness_stain");
+            depth_stain = getConfiguration().getFloat("action.recruitment.stain.depth_stain");
         }
 
         boolean addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("recruited_tracker"));
+            addTracker = getConfiguration().getBoolean("action.recruitment.stain.recruited_tracker");
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }

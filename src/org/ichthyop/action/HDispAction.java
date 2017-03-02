@@ -98,7 +98,7 @@ public class HDispAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
         random = new MTRandom();
-        epsilon = Double.valueOf(getParameter("epsilon"));
+        epsilon = getConfiguration().getDouble("action.hdisp.epsilon");
         epsilon16 = Math.pow(epsilon, 1.d / 6.d);
     }
     

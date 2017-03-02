@@ -73,9 +73,9 @@ public class OffshoreSwimming extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        radius = Double.valueOf(getParameter("perception_radius")) * 1e3;
-        velocity = Double.valueOf(getParameter("swimming_velocity"));
-        period = Double.valueOf(getParameter("swimming_period")) * 3600;
+        radius = getConfiguration().getDouble("action.offshore_swimming.perception_radius") * 1e3;
+        velocity = getConfiguration().getDouble("action.offshore_swimming.swimming_velocity");
+        period = getConfiguration().getDouble("action.offshore_swimming.swimming_period") * 3600;
     }
 
     @Override

@@ -74,9 +74,9 @@ public class GradientMoveAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        varName = getParameter("variable");
-        speed = Double.valueOf(getParameter("speed"));
-        direction = getParameter("direction");
+        varName = getConfiguration().getString("action.gradient.variable");
+        speed = getConfiguration().getDouble("action.gradient.speed");
+        direction = getConfiguration().getString("action.gradient.direction");
         stride = 1;
 
         getSimulationManager().getDataset().requireVariable(varName, getClass());

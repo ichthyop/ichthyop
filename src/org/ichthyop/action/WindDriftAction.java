@@ -80,15 +80,15 @@ public class WindDriftAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        wind_factor = Double.valueOf(getParameter("wind_factor"));
-        strUW = getParameter("wind_u");
-        strVW = getParameter("wind_v");
+        wind_factor = getConfiguration().getDouble("action.wind_drift.wind_factor");
+        strUW = getConfiguration().getString("action.wind_drift.wind_u");
+        strVW = getConfiguration().getString("action.wind_drift.wind_v");
 
-        depth_application = Float.valueOf(getParameter("depth_application"));
-        angle = Math.PI / 2.0 - Double.valueOf(getParameter("angle")) * Math.PI / 180.0;
+        depth_application = getConfiguration().getFloat("action.wind_drift.depth_application");
+        angle = Math.PI / 2.0 - getConfiguration().getDouble("action.wind_drift.angle") * Math.PI / 180.0;
         getSimulationManager().getDataset().requireVariable(strUW, getClass());
         getSimulationManager().getDataset().requireVariable(strVW, getClass());
-        convention = "wind to".equals(getParameter("wind_convention")) ? 1 : -1;
+        convention = "wind to".equals(getConfiguration().getString("action.wind_drift.wind_convention")) ? 1 : -1;
     }
 
     @Override

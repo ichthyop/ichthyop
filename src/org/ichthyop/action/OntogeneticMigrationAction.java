@@ -58,7 +58,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.logging.Level;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.particle.IParticle;
 
@@ -107,7 +106,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        String pathname = IOTools.resolveFile(getParameter("cms_ovm_config_file"));
+        String pathname = getConfiguration().getFile("action.migration.ontogenetic.cms_ovm_config_file");
         File file = new File(pathname);
         if (!file.isFile()) {
             throw new FileNotFoundException("CMS Ontogenetic Vertical Migration configuration file " + pathname + " not found.");
