@@ -380,7 +380,7 @@ public class WMSMapper extends JXMapKit {
             double stdDeviation = getStandardDeviation(dataset, mean);
             float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
             float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
-            System.out.println("min: " + getMin(dataset) + " max: " + getMax(dataset));
+            //System.out.println("min: " + getMin(dataset) + " max: " + getMax(dataset));
             return new float[]{lower, upper};
         }
     }

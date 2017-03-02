@@ -313,7 +313,7 @@ public class IchthyopView extends FrameView
             for (int iStep = 0; iStep < wmsMapper.getNbSteps(); iStep++) {
                 setProgress((float) (iStep + 1) / wmsMapper.getNbSteps());
                 publish(new Painter[]{wmsMapper.getPainterForStep(iStep), wmsMapper.getTimePainter(iStep)});
-                Thread.sleep(500);
+                if (getProgress() % 10 == 0) Thread.sleep(500);
             }
             return null;
         }
@@ -350,8 +350,13 @@ public class IchthyopView extends FrameView
             setMessage(sb.toString(), false, LogLevel.COMPLETE);
             replayPanel.setFolder(null);
             taskPaneMapping.setCollapsed(true);
+            // move to animation pane
             taskPaneAnimation.setCollapsed(false);
-            getApplication().getContext().getTaskService().execute(new OpenFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
+            setAnimationToolsEnabled(false);
+            btnAnimationFW.getAction().setEnabled(true);
+            animationLoaded = false;
+            lblFolder.setText(wmsMapper.getFolder().getName());
+            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
         }
 
         @Override
@@ -435,17 +440,17 @@ public class IchthyopView extends FrameView
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int returnPath = chooser.showDialog(getFrame(), getResourceMap().getString("openFolderAnimation.dialog.title"));
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            return new OpenFolderAnimationTask(getApplication(), chooser.getSelectedFile());
+            return new LoadFolderAnimationTask(getApplication(), chooser.getSelectedFile());
         }
         return null;
     }
 
-    private class OpenFolderAnimationTask extends SFTask {
+    private class LoadFolderAnimationTask extends SFTask {
 
         private final File folder;
         int nbPNG = 0;
 
-        OpenFolderAnimationTask(Application instance, File folder) {
+        LoadFolderAnimationTask(Application instance, File folder) {
             super(instance);
             this.folder = folder;
             setMessage(resourceMap.getString("openFolderAnimation.msg.opened") + " " + folder.getAbsolutePath());
@@ -472,6 +477,7 @@ public class IchthyopView extends FrameView
             sliderTime.setMaximum(nbPNG - 1);
             setAnimationToolsEnabled(true);
             sliderTime.setValue(0);
+            animationLoaded = true;
             startAnimationFW();
         }
 
@@ -482,6 +488,7 @@ public class IchthyopView extends FrameView
             sliderTime.setMaximum(0);
             sliderTime.setValue(0);
             setAnimationToolsEnabled(false);
+            animationLoaded = false;
             outputFolder = null;
         }
 
@@ -1001,16 +1008,18 @@ public class IchthyopView extends FrameView
     }
 
     private void startAnimation() {
-        if (!animator.isRunning()) {
+        if (!animationLoaded) {
+            getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
+        } else if (!animator.isRunning()) {
             replayPanel.removeMouseWheelListener(mouseScroller);
-            animator.setAcceleration(0.01f);
+            animator.setAcceleration(0.002f);
             btnAnimationFW.setEnabled(true);
             animator.start();
         }
     }
 
     private void startAccelerationProgress() {
-        progressTimer = new Timer(100, new ProgressAction());
+        progressTimer = new Timer(20, new ProgressAction());
         progressTimer.start();
     }
 
@@ -2888,6 +2897,7 @@ public class IchthyopView extends FrameView
     private TimeDirection animationDirection;
     private final MouseWheelScroller mouseScroller = new MouseWheelScroller();
     private boolean untitled = true;
+    private boolean animationLoaded = false;
 
     private enum TimeDirection {
 
