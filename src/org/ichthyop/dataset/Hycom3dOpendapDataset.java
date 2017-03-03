@@ -63,10 +63,15 @@ import ucar.nc2.NetcdfFile;
 public class Hycom3dOpendapDataset extends Hycom3dCommon {
 
     private NetcdfFile nc;
+    
+    @Override
+    String getKey() {
+        return "dataset.hycom_3d_opendap";
+    }
 
     @Override
     void open() throws Exception {
-        nc = DatasetUtil.openURL(getParameter("opendap_url"), true);
+        nc = DatasetUtil.openURL(getConfiguration().getString("dataset.hycom_3d_opendap.opendap_url"), true);
     }
 
     @Override

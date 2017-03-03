@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.dataset;
 
 import java.io.IOException;
@@ -217,12 +216,11 @@ abstract public class Roms3dCommon extends RomsCommon {
         super.loadParameters();
 
         /* load 3D parameters */
-        strZDim = getParameter("field_dim_z");
-        strZeta = getParameter("field_var_zeta");
-        strCs_r = getParameter("field_csr");
-        strCs_w = getParameter("field_csw");
-        strHC = getParameter("field_hc");
-
+        strZDim = getConfiguration().getString(getKey() + ".field_dim_z");
+        strZeta = getConfiguration().getString(getKey() + ".field_var_zeta");
+        strCs_r = getConfiguration().getString(getKey() + ".field_csr");
+        strCs_w = getConfiguration().getString(getKey() + ".field_csw");
+        strHC = getConfiguration().getString(getKey() + ".field_hc");
     }
 
     /**
@@ -542,12 +540,11 @@ abstract public class Roms3dCommon extends RomsCommon {
         }
         return (hh);
     }
-    
+
     @Override
     public double getDepthMax(double x, double y) {
         return getDepth(x, y, 0);
     }
-
 
     @Override
     public int get_nz() {

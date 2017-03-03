@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import org.ichthyop.dataset.MarsCommon.ErrorMessage;
 import org.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
@@ -147,6 +146,12 @@ public class Mercator2dDataset extends AbstractDataset {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    
+    @Override
+    String getKey() {
+        return "dataset.mercator2d";
+    }
+    
     @Override
     public boolean is3D() {
         return false;
@@ -345,11 +350,13 @@ public class Mercator2dDataset extends AbstractDataset {
         loadParameters();
         clearRequiredVariables();
         // List U and V files
-        listUFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridu_pattern"));
+        listUFiles = DatasetUtil.list(getConfiguration().getString("dataset.mercator2d.input_path"),
+                getConfiguration().getString("dataset.mercator2d.gridu_pattern"));
         if (!skipSorting()) {
             DatasetUtil.sort(listUFiles, strTime, timeArrow());
         }
-        listVFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridv_pattern"));
+        listVFiles = DatasetUtil.list(getConfiguration().getString("dataset.mercator2d.input_path"),
+                getConfiguration().getString("dataset.mercator2d.gridv_pattern"));
         if (!skipSorting()) {
             DatasetUtil.sort(listVFiles, strTime, timeArrow());
         }
@@ -367,11 +374,11 @@ public class Mercator2dDataset extends AbstractDataset {
     public void loadParameters() {
 
         // Variable names
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
-        strTime = getParameter("field_var_time");
+        strLon = getConfiguration().getString("field_var_lon");
+        strLat = getConfiguration().getString("field_var_lat");
+        strU = getConfiguration().getString("field_var_u");
+        strV = getConfiguration().getString("field_var_v");
+        strTime = getConfiguration().getString("field_var_time");
         // Time arrow
         time_arrow = timeArrow();
     }

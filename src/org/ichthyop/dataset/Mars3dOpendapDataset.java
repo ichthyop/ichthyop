@@ -60,10 +60,15 @@ import org.ichthyop.event.NextStepEvent;
  * @author pverley
  */
 public class Mars3dOpendapDataset extends Mars3dCommon {
+    
+    @Override
+    String getKey() {
+        return "dataset.mars_3d_opendap";
+    }
 
     @Override
     void openDataset() throws Exception {
-        ncIn = DatasetUtil.openURL(getParameter("opendap_url"), true);
+        ncIn = DatasetUtil.openURL(getConfiguration().getString("dataset.mars_3d_opendap.opendap_url"), true);
         readTimeLength();
     }
 

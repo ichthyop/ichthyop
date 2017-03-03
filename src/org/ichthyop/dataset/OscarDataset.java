@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import org.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
@@ -143,18 +142,23 @@ public class OscarDataset extends AbstractDataset {
      * Index of the current file read in the {@code listInputFiles}
      */
     private int indexFile;
+    
+    @Override
+    String getKey() {
+        return "dataset.oscar";
+    }
 
     @Override
     void loadParameters() {
 
-        strLonDim = getParameter("field_dim_lon");
-        strLatDim = getParameter("field_dim_lat");
-        strTimeDim = getParameter("field_dim_time");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
-        strTime = getParameter("field_var_time");
+        strLonDim = getConfiguration().getString("dataset.oscar.field_dim_lon");
+        strLatDim = getConfiguration().getString("dataset.oscar.field_dim_lat");
+        strTimeDim = getConfiguration().getString("dataset.oscar.field_dim_time");
+        strLon = getConfiguration().getString("dataset.oscar.field_var_lon");
+        strLat = getConfiguration().getString("dataset.oscar.field_var_lat");
+        strU = getConfiguration().getString("dataset.oscar.field_var_u");
+        strV = getConfiguration().getString("dataset.oscar.field_var_v");
+        strTime = getConfiguration().getString("dataset.oscar.field_var_time");
     }
 
     @Override
@@ -162,12 +166,12 @@ public class OscarDataset extends AbstractDataset {
 
         loadParameters();
         clearRequiredVariables();
-        if (getParameter("source").toLowerCase().contains("opendap")) {
+        if (getConfiguration().getString("dataset.oscar.source").toLowerCase().contains("dataset.oscar.opendap")) {
             opendap = true;
-            ncIn = DatasetUtil.openURL(getParameter("opendap_url"), true);
+            ncIn = DatasetUtil.openURL(getConfiguration().getString("dataset.oscar.opendap_url"), true);
         } else {
             opendap = false;
-            listInputFiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+            listInputFiles = DatasetUtil.list(getConfiguration().getString("dataset.oscar.input_path"), getConfiguration().getString("dataset.oscar.file_filter"));
             ncIn = DatasetUtil.openFile(listInputFiles.get(0), true);
         }
         getDimNC();

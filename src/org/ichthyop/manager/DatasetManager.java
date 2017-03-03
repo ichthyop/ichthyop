@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
 import java.io.IOException;
@@ -58,9 +57,6 @@ import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.io.BlockType;
 import org.ichthyop.dataset.IDataset;
-import org.ichthyop.io.XBlock;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -68,28 +64,41 @@ import java.util.List;
  */
 public class DatasetManager extends AbstractManager {
 
-    final private static DatasetManager datasetManager = new DatasetManager();
+    final private static DatasetManager DATASET_MANAGER = new DatasetManager();
     private IDataset dataset;
 
     public static DatasetManager getInstance() {
-        return datasetManager;
+        return DATASET_MANAGER;
     }
 
     private void instantiateDataset() throws Exception {
 
-        XBlock datasetBlock = findActiveDataset();
-        String className = getParameter(datasetBlock.getKey(), "class_name");
-        if (datasetBlock != null) {
-            try {
-            dataset = (IDataset) Class.forName(className).newInstance();
-            } catch (Exception ex) {
-                StringBuffer sb = new StringBuffer();
-                sb.append("Dataset instantiation failed ==> ");
-                sb.append(ex.toString());
-                InstantiationException ieex = new InstantiationException(sb.toString());
-                ieex.setStackTrace(ex.getStackTrace());
-                throw ieex;
+        int n = 0;
+        String[] keys = getConfiguration().getArrayString("configuration.blocks");
+        for (String key : keys) {
+            if (getConfiguration().canFind(key + ".type")
+                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
+                if (getConfiguration().getBoolean(key + ".enabled")) {
+                    String className = getConfiguration().getString(key + ".class_name");
+                    try {
+                        dataset = (IDataset) Class.forName(className).newInstance();
+                        n++;
+                    } catch (Exception ex) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Dataset instantiation failed ==> ");
+                        sb.append(ex.toString());
+                        InstantiationException ieex = new InstantiationException(sb.toString());
+                        ieex.setStackTrace(ex.getStackTrace());
+                        throw ieex;
+                    }
+                }
             }
+        }
+        if (n == 0) {
+            throw new NullPointerException("Could not find any " + BlockType.DATASET.toString() + " block in the configuration file.");
+        }
+        if (n > 1) {
+            throw new IOException("Found several " + BlockType.DATASET.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
         }
     }
 
@@ -97,31 +106,13 @@ public class DatasetManager extends AbstractManager {
         return dataset;
     }
 
-    public String getParameter(String datasetKey, String key) {
-        return getSimulationManager().getParameterManager().getString(datasetKey + "." + key);
-    }
-
-    private XBlock findActiveDataset() throws Exception {
-        List<XBlock> list = new ArrayList();
-        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.DATASET)) {
-            if (block.isEnabled()) {
-                list.add(block);
-            }
-        }
-        if (list.isEmpty()) {
-            throw new NullPointerException("Could not find any " + BlockType.DATASET.toString() + " block in the configuration file.");
-        }
-        if (list.size() > 1) {
-            throw new IOException("Found several " + BlockType.DATASET.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
-        }
-        return list.get(0);
-    }
-
+    @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         instantiateDataset();
         getDataset().setUp();
     }
 
+    @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
         getSimulationManager().getTimeManager().addNextStepListener(getDataset());
         getDataset().init();

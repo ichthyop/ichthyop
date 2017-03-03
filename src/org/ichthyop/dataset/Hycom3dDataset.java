@@ -54,7 +54,6 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import org.ichthyop.event.NextStepEvent;
 import ucar.nc2.NetcdfFile;
 
@@ -66,11 +65,17 @@ public class Hycom3dDataset extends Hycom3dCommon {
 
     private List<String> uvFiles;
     private int index;
+    
+    @Override
+    String getKey() {
+        return "dataset.hycom_3d";
+    }
 
     @Override
     void open() throws Exception {
         // List uv files
-        uvFiles = DatasetUtil.list(getParameter("input_path"), getParameter("uv_file_pattern"));
+        uvFiles = DatasetUtil.list(getConfiguration().getString("dataset.hycom_3d.input_path"),
+                getConfiguration().getString("dataset.hycom_3d.uv_file_pattern"));
         index = 0;
     }
 
@@ -98,13 +103,14 @@ public class Hycom3dDataset extends Hycom3dCommon {
         int rank2 = rank + time_arrow;
         int index2 = index;
         if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
+            nc.close();
             index2 = DatasetUtil.next(uvFiles, index, time_arrow);
             nc = DatasetUtil.openFile(uvFiles.get(index2), true);
             int nbTimeRecords2 = nc.findVariable(name).getShape()[0];
-            nc.close();
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }
         double time_tp2 = DatasetUtil.timeAtRank(nc, "time", rank2);
+        nc.close();
         u[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);
         v[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);
         w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), nx, ny, nz, i0, j0, tilinghw, rank2, time_tp2);
@@ -152,13 +158,13 @@ public class Hycom3dDataset extends Hycom3dCommon {
         double time_tp0 = time_tp1;
         NetcdfFile nc = DatasetUtil.openFile(uvFiles.get(index), true);
         time_tp1 = DatasetUtil.timeAtRank(nc, "time", rank);
-        nc.close();
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
 
         // t+2
         int rank2 = rank + time_arrow;
         int index2 = index;
         if (rank2 > (nbTimeRecords - 1) || rank2 < 0) {
+            nc.close();
             try {
                 index2 = DatasetUtil.next(uvFiles, index, time_arrow);
             } catch (IOException ex) {
@@ -166,10 +172,11 @@ public class Hycom3dDataset extends Hycom3dCommon {
             }
             nc = DatasetUtil.openFile(uvFiles.get(index2), true);
             int nbTimeRecords2 = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-            nc.close();
+            
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }
         double time_tp2 = DatasetUtil.timeAtRank(nc, "time", rank2);
+        nc.close();
         u[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);
         v[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);
         w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), nx, ny, nz, i0, j0, tilinghw, rank2, time_tp2);

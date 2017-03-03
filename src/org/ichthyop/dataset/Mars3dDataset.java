@@ -64,11 +64,17 @@ public class Mars3dDataset extends Mars3dCommon {
 
     private List<String> files;
     private int index;
+    
+    @Override
+    String getKey() {
+        return "dataset.mars_3d";
+    }
 
     @Override
     void openDataset() throws Exception {
 
-        files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        files = DatasetUtil.list(getConfiguration().getString("dataset.mars_3d.input_path"),
+                getConfiguration().getString("dataset.mars_3d.file_filter"));
         if (!skipSorting()) {
             DatasetUtil.sort(files, strTime, timeArrow());
         }

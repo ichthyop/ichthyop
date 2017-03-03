@@ -155,14 +155,14 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         }
 
         // Crop the grid
-        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
+        if (getConfiguration().getBoolean("shrink_domain")) {
             crop();
             longitude = Arrays.copyOfRange(longitude, i0, i0 + nx);
             latitude = Arrays.copyOfRange(latitude, j0, j0 + ny);
         }
 
         // Longitudinal toricity
-        xTore = !findParameter("longitude_tore") || Boolean.valueOf(getParameter("longitude_tore"));
+        xTore = getConfiguration().getBoolean("longitude_tore");
 
         // scale factors (assuming regular grid)
         dyv = 111138.d * (latitude[1] - latitude[0]);
@@ -625,10 +625,10 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     void crop() throws IOException {
 
-        float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
-        float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
-        float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
-        float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+        float lon1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+        float lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+        float lon2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+        float lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("south-east-corner.lat"), LonLatFormat.DecimalDeg));
 
         double[] pGrid1, pGrid2;
         int ipn, jpn;

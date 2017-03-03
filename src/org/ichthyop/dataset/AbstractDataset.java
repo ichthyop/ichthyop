@@ -53,7 +53,6 @@
 package org.ichthyop.dataset;
 
 import java.util.HashMap;
-import java.util.logging.Level;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.IchthyopLinker;
 import org.ichthyop.manager.TimeManager;
@@ -64,39 +63,13 @@ import ucar.nc2.NetcdfFile;
  * @author pverley
  */
 public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
-    
-    private final String datasetKey;
-    /*
-     *
-     */
-    HashMap<String, RequiredVariable> requiredVariables;
-    
+
+    final HashMap<String, RequiredVariable> requiredVariables = new HashMap();
+
+    abstract String getKey();
+
     abstract void loadParameters();
-    
-    public AbstractDataset() {
-        datasetKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
-    }
-    
-    public String getParameter(String key) {
-        return getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
-    }
-    
-    public boolean isNull(String key) {
-        return getSimulationManager().getParameterManager().isNull(datasetKey + "." + key);
-    }
-    
-    public boolean findParameter(String key) {
-        // Check whether the parameter can be retrieved
-        try {
-            getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
-        } catch (NullPointerException ex) {
-            // Tue parameter does not exist
-            return false;
-        }
-        // The parameter does exist
-        return true;
-    }
-    
+
     @Override
     public Number get(String variableName, double[] pGrid, double time) {
         if (null != requiredVariables.get(variableName)) {
@@ -104,7 +77,7 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
         }
         return Float.NaN;
     }
-    
+
     @Override
     public void requireVariable(String name, Class requiredBy) {
         if (!requiredVariables.containsKey(name)) {
@@ -113,15 +86,11 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
             requiredVariables.get(name).addRequiredBy(requiredBy);
         }
     }
-    
+
     public void clearRequiredVariables() {
-        if (requiredVariables != null) {
             requiredVariables.clear();
-        } else {
-            requiredVariables = new HashMap();
-        }
     }
-    
+
     @Override
     public void removeRequiredVariable(String name, Class requiredBy) {
         RequiredVariable var = requiredVariables.get(name);
@@ -135,7 +104,7 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
             }
         }
     }
-    
+
     public void checkRequiredVariable(NetcdfFile nc) {
         for (RequiredVariable variable : requiredVariables.values()) {
             try {
@@ -159,24 +128,18 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
             }
         }
     }
-    
+
     boolean skipSorting() {
-        try {
-            return Boolean.valueOf(getParameter("skip_sorting"));
-        } catch (NullPointerException ex) {
-            return false;
-        }
+        return getConfiguration().getBoolean(getKey() + ".skip_sorting", false);
     }
-    
+
     int timeArrow() {
-        return getSimulationManager().getParameterManager().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
+        return getConfiguration().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
     }
-    
+
     boolean enhanced() {
-        try {
-            return Boolean.valueOf(getParameter("enhanced_mode"));
-        } catch (NullPointerException ex) {
-            return true;
-        }
+        return getConfiguration().canFind(getKey() + ".enhanced_mode")
+                ? getConfiguration().getBoolean(getKey() + ".enhanced_mode")
+                : true;
     }
 }

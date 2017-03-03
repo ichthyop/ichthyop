@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
@@ -186,6 +185,11 @@ public class NoveltisDataset extends AbstractDataset {
      * Index of current NetCDF file
      */
     private int index;
+    
+    @Override
+    String getKey() {
+        return "dataset.noveltis";
+    }
 
     @Override
     public void setUp() throws Exception {
@@ -208,20 +212,20 @@ public class NoveltisDataset extends AbstractDataset {
 
     @Override
     void loadParameters() {
-        strLonDim = getParameter("field_dim_lon");
-        strLatDim = getParameter("field_dim_lat");
-        strTimeDim = getParameter("field_dim_time");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strBathy = getParameter("field_var_bathy");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
-        strTime = getParameter("field_var_time");
+        strLonDim = getConfiguration().getString("dataset.noveltis.field_dim_lon");
+        strLatDim = getConfiguration().getString("dataset.noveltis.field_dim_lat");
+        strTimeDim = getConfiguration().getString("dataset.noveltis.field_dim_time");
+        strLon = getConfiguration().getString("dataset.noveltis.field_var_lon");
+        strLat = getConfiguration().getString("dataset.noveltis.field_var_lat");
+        strBathy = getConfiguration().getString("dataset.noveltis.field_var_bathy");
+        strU = getConfiguration().getString("dataset.noveltis.field_var_u");
+        strV = getConfiguration().getString("dataset.noveltis.field_var_v");
+        strTime = getConfiguration().getString("dataset.noveltis.field_var_time");
         /*
          * Read specific 3D variable names
          */
-        strZDim = getParameter("field_dim_z");
-        strSigma = getParameter("field_var_sigma");
+        strZDim = getConfiguration().getString("dataset.noveltis.field_dim_z");
+        strSigma = getConfiguration().getString("dataset.noveltis.field_var_sigma");
     }
 
     /**
@@ -624,20 +628,12 @@ public class NoveltisDataset extends AbstractDataset {
     }
 
     public void shrinkGrid() {
-        boolean isParamDefined;
-        try {
-            Boolean.valueOf(getParameter("shrink_domain"));
-            isParamDefined = true;
-        } catch (NullPointerException ex) {
-            isParamDefined = false;
-        }
-
-        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+        if (Boolean.valueOf(getConfiguration().getString("dataset.noveltis.shrink_domain"))) {
             try {
-                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
-                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
-                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
-                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lon1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.noveltis.north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.noveltis.north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.noveltis.south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.noveltis.south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (NumberFormatException | IOException ex) {
                 warning("Failed to resize domain. " + ex.toString(), ex);
@@ -1205,7 +1201,8 @@ public class NoveltisDataset extends AbstractDataset {
     }
 
     void openDataset() throws Exception {
-        files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        files = DatasetUtil.list(getConfiguration().getString("dataset.noveltis.input_path"),
+                getConfiguration().getString("dataset.noveltis.file_filter"));
         if (!skipSorting()) {
             DatasetUtil.sort(files, strTime, timeArrow());
         }

@@ -55,9 +55,7 @@ package org.ichthyop.dataset;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import org.ichthyop.event.NextStepEvent;
-import org.ichthyop.io.IOTools;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.ichthyop.util.MetaFilenameFilter;
@@ -194,6 +192,12 @@ public class NemoDataset extends AbstractDataset {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    
+    @Override
+    String getKey() {
+        return "dataset.nemo";
+    }
+    
     @Override
     public boolean is3D() {
         return true;
@@ -234,7 +238,9 @@ public class NemoDataset extends AbstractDataset {
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
-        if (findParameter("field_var_e3t0") && findParameter("field_var_e3tps") && findParameter("field_var_mbathy")) {
+        if (!getConfiguration().isNull("dataset.nemo.field_var_e3t0")
+                && !getConfiguration().isNull("dataset.nemo.field_var_e3tps")
+                && !getConfiguration().isNull("dataset.nemo.field_var_mbathy")) {
             compute_e3t();
         } else {
             e3t = read_e3_field(nc, stre3t);
@@ -280,9 +286,9 @@ public class NemoDataset extends AbstractDataset {
         // int[ny][nx]
         short[][] mbathy = null;
 
-        String str_e3t0 = getParameter("field_var_e3t0");
-        String str_e3tps = getParameter("field_var_e3tps");
-        String str_mbathy = getParameter("field_var_mbathy");
+        String str_e3t0 = getConfiguration().getString("dataset.nemo.field_var_e3t0");
+        String str_e3tps = getConfiguration().getString("dataset.nemo.field_var_e3tps");
+        String str_mbathy = getConfiguration().getString("dataset.nemo.field_var_mbathy");
 
         info("Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
 
@@ -868,12 +874,12 @@ public class NemoDataset extends AbstractDataset {
 
     public void shrinkGrid() {
 
-        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
+        if (getConfiguration().getBoolean("dataset.nemo.shrink_domain")) {
             try {
-                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
-                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.nemo.north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.nemo.north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.nemo.south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.nemo.south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (IOException | NumberFormatException ex) {
                 warning("Failed to resize domain. " + ex.toString(), ex);
@@ -892,37 +898,31 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public void loadParameters() {
 
-        strXDim = getParameter("field_dim_x");
-        strYDim = getParameter("field_dim_y");
-        strZDim = getParameter("field_dim_z");
-        strTimeDim = getParameter("field_dim_time");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strMask = getParameter("field_var_mask");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
-        if (findParameter("read_var_w")) {
-            readW = Boolean.valueOf(getParameter("read_var_w"));
-        } else {
-            readW = false;
-            warning("Ichthyop will recalculate W variable from U and V");
-        }
+        strXDim = getConfiguration().getString("dataset.nemo.field_dim_x");
+        strYDim = getConfiguration().getString("dataset.nemo.field_dim_y");
+        strZDim = getConfiguration().getString("dataset.nemo.field_dim_z");
+        strTimeDim = getConfiguration().getString("dataset.nemo.field_dim_time");
+        strLon = getConfiguration().getString("dataset.nemo.field_var_lon");
+        strLat = getConfiguration().getString("dataset.nemo.field_var_lat");
+        strMask = getConfiguration().getString("dataset.nemo.field_var_mask");
+        strU = getConfiguration().getString("dataset.nemo.field_var_u");
+        strV = getConfiguration().getString("dataset.nemo.field_var_v");
+        
+            readW = getConfiguration().getBoolean("dataset.nemo.read_var_w");
+        
         if (readW) {
-            strW = getParameter("field_var_w");
+            strW = getConfiguration().getString("dataset.nemo.field_var_w");
         }
-        strTime = getParameter("field_var_time");
-        stre3t = getParameter("field_var_e3t");
-        stre3u = getParameter("field_var_e3u");
-        stre3v = getParameter("field_var_e3v");
-        str_gdepT = getParameter("field_var_gdept"); // z_rho
-        str_gdepW = getParameter("field_var_gdepw"); // z_w
-        stre1t = getParameter("field_var_e1t");
-        stre2t = getParameter("field_var_e2t");
-        stre1v = getParameter("field_var_e1v");
-        stre2u = getParameter("field_var_e2u");
-        if (!findParameter("enhanced()_mode")) {
-            warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced() mode (scale,offset,missing).");
-        }
+        strTime = getConfiguration().getString("dataset.nemo.field_var_time");
+        stre3t = getConfiguration().getString("dataset.nemo.field_var_e3t");
+        stre3u = getConfiguration().getString("dataset.nemo.field_var_e3u");
+        stre3v = getConfiguration().getString("dataset.nemo.field_var_e3v");
+        str_gdepT = getConfiguration().getString("dataset.nemo.field_var_gdept"); // z_rho
+        str_gdepW = getConfiguration().getString("dataset.nemo.field_var_gdepw"); // z_w
+        stre1t = getConfiguration().getString("dataset.nemo.field_var_e1t");
+        stre2t = getConfiguration().getString("dataset.nemo.field_var_e2t");
+        stre1v = getConfiguration().getString("dataset.nemo.field_var_e1v");
+        stre2u = getConfiguration().getString("dataset.nemo.field_var_e2u");
         time_arrow = timeArrow();
     }
 
@@ -1581,29 +1581,29 @@ public class NemoDataset extends AbstractDataset {
      */
     private void sortInputFiles() throws IOException {
 
-        String path = IOTools.resolvePath(getParameter("input_path"));
+        String path = getConfiguration().getFile("dataset.nemo.input_path");
         File file = new File(path);
 
-        file_mask = checkExistenceAndUnicity(file, getParameter("byte_mask_pattern"));
-        file_hgr = checkExistenceAndUnicity(file, getParameter("hgr_pattern"));
-        file_zgr = checkExistenceAndUnicity(file, getParameter("zgr_pattern"));
+        file_mask = checkExistenceAndUnicity(file, getConfiguration().getString("dataset.nemo.byte_mask_pattern"));
+        file_hgr = checkExistenceAndUnicity(file, getConfiguration().getString("dataset.nemo.hgr_pattern"));
+        file_zgr = checkExistenceAndUnicity(file, getConfiguration().getString("dataset.nemo.zgr_pattern"));
 
         isGridInfoInOneFile = (new File(file_mask).equals(new File(file_hgr)))
                 && (new File(file_mask).equals(new File(file_zgr)));
 
-        listUFiles = DatasetUtil.list(path, getParameter("gridu_pattern"));
+        listUFiles = DatasetUtil.list(path, getConfiguration().getString("dataset.nemo.gridu_pattern"));
         if (listUFiles.isEmpty()) {
-            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridu_pattern"));
+            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getConfiguration().getString("dataset.nemo.gridu_pattern"));
         }
-        listVFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridv_pattern"));
+        listVFiles = DatasetUtil.list(getConfiguration().getString("dataset.nemo.input_path"), getConfiguration().getString("dataset.nemo.gridv_pattern"));
         if (listVFiles.isEmpty()) {
-            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridv_pattern"));
+            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getConfiguration().getString("dataset.nemo.gridv_pattern"));
         }
-        listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
+        listTFiles = DatasetUtil.list(getConfiguration().getString("dataset.nemo.input_path"), getConfiguration().getString("dataset.nemo.gridt_pattern"));
         if (readW) {
-            listWFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridw_pattern"));
+            listWFiles = DatasetUtil.list(getConfiguration().getString("dataset.nemo.input_path"), getConfiguration().getString("dataset.nemo.gridw_pattern"));
             if (listWFiles.isEmpty()) {
-                throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridw_pattern"));
+                throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getConfiguration().getString("dataset.nemo.gridw_pattern"));
             }
         }
         if (!skipSorting()) {

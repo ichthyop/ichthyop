@@ -54,7 +54,6 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
-import java.util.logging.Level;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
@@ -167,15 +166,15 @@ public abstract class MarsCommon extends AbstractDataset {
 
     @Override
     void loadParameters() {
-        strLonDim = getParameter("field_dim_lon");
-        strLatDim = getParameter("field_dim_lat");
-        strTimeDim = getParameter("field_dim_time");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strBathy = getParameter("field_var_bathy");
-        strU = getParameter("field_var_u");
-        strV = getParameter("field_var_v");
-        strTime = getParameter("field_var_time");
+        strLonDim = getConfiguration().getString(getKey() + ".field_dim_lon");
+        strLatDim = getConfiguration().getString(getKey() + ".field_dim_lat");
+        strTimeDim = getConfiguration().getString(getKey() + ".field_dim_time");
+        strLon = getConfiguration().getString(getKey() + ".field_var_lon");
+        strLat = getConfiguration().getString(getKey() + ".field_var_lat");
+        strBathy = getConfiguration().getString(getKey() + ".field_var_bathy");
+        strU = getConfiguration().getString(getKey() + ".field_var_u");
+        strV = getConfiguration().getString(getKey() + ".field_var_v");
+        strTime = getConfiguration().getString(getKey() + ".field_var_time");
         timeArrow = timeArrow();
     }
 
@@ -568,20 +567,13 @@ public abstract class MarsCommon extends AbstractDataset {
     }
 
     public void shrinkGrid() {
-        boolean isParamDefined;
-        try {
-            Boolean.valueOf(getParameter("shrink_domain"));
-            isParamDefined = true;
-        } catch (NullPointerException ex) {
-            isParamDefined = false;
-        }
-
-        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+ 
+        if (getConfiguration().getBoolean(getKey() + ".shrink_domain")) {
             try {
-                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
-                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (IOException | NumberFormatException ex) {
                 warning("Failed to resize domain. " + ex.toString(), ex);

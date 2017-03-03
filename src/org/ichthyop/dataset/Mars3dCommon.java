@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.dataset;
 
 import java.io.IOException;
@@ -169,20 +168,20 @@ abstract class Mars3dCommon extends MarsCommon {
         /*
          * Read specific 3D variable names
          */
-        strZDim = getParameter("field_dim_z");
-        strZeta = getParameter("field_var_zeta");
-        strSigma = getParameter("field_var_sigma");
+        strZDim = getConfiguration().getString(getKey() + ".field_dim_z");
+        strZeta = getConfiguration().getString(getKey() + ".field_var_zeta");
+        strSigma = getConfiguration().getString(getKey() + ".field_var_sigma");
 
         /*
          * Read specifi generalized sigma parameters for MARS V8
          */
         try {
-            strHC = getParameter("field_var_hc");
-            strA = getParameter("field_var_a");
-            strB = getParameter("field_var_b");
+            strHC = getConfiguration().getString(getKey() + ".field_var_hc");
+            strA = getConfiguration().getString(getKey() + ".field_var_a");
+            strB = getConfiguration().getString(getKey() + ".field_var_b");
         } catch (Exception ex) {
             strHC = strA = strB = null;
-            warning("{Dataset} Could not find generalized sigma level parameters in the configuration file. Simple sigma levels will be used then.");
+            warning("[dataset] Could not find generalized sigma level parameters in the configuration file. Simple sigma levels will be used then.");
         }
 
     }
@@ -223,7 +222,7 @@ abstract class Mars3dCommon extends MarsCommon {
         s_w[0] = -1.d;
 
         if ((strHC != null) && (null != ncIn.findVariable(strHC))) {
-            info("{Dataset} Generalized sigma levels detected.");
+            info("[dataset] Generalized sigma levels detected.");
             getSigLevelsV8();
         } else {
             getSigLevelsV6();
@@ -261,21 +260,21 @@ abstract class Mars3dCommon extends MarsCommon {
             Array arrHc = ncIn.findVariable(strHC).read(new int[]{jpo, ipo}, new int[]{ny, nx});
             hc = (float[][]) arrHc.copyToNDJavaArray();
         } catch (IOException | InvalidRangeException ex) {
-            IOException ioex = new IOException("{Dataset} Error reading hc variable. " + ex.toString());
+            IOException ioex = new IOException("[dataset] Error reading hc variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
             a = ncIn.findVariable(strA).readScalarDouble();
         } catch (IOException ex) {
-            IOException ioex = new IOException("{Dataset} Error reading theta, surface control parameter. " + ex.toString());
+            IOException ioex = new IOException("[dataset] Error reading theta, surface control parameter. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
             b = ncIn.findVariable(strB).readScalarDouble();
         } catch (IOException ex) {
-            IOException ioex = new IOException("{Dataset} Error reading b, bottom control parameter. " + ex.toString());
+            IOException ioex = new IOException("[dataset] Error reading b, bottom control parameter. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
@@ -295,9 +294,7 @@ abstract class Mars3dCommon extends MarsCommon {
         double[][][] z_r_tmp = new double[nz][ny][nx];
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
 
-
         // OLD: z_unperturbated = hc * (sc - Cs) + Cs * h
-
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 z_w_tmp[0][j][i] = -hRho[j][i];
@@ -335,7 +332,6 @@ abstract class Mars3dCommon extends MarsCommon {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-
 
         if (arrZeta.getElementType() == float.class) {
             zeta_tp0 = (float[][]) arrZeta.copyToNDJavaArray();
@@ -421,7 +417,7 @@ abstract class Mars3dCommon extends MarsCommon {
         double dz = kz - (double) k;
         double CO = 0.d;
         for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {     
+            for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
                     double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
@@ -446,7 +442,7 @@ abstract class Mars3dCommon extends MarsCommon {
         ix = pGrid[0];
         jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
-        
+
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
         int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
         int j = (int) Math.round(jy);
@@ -455,7 +451,7 @@ abstract class Mars3dCommon extends MarsCommon {
         double dy = jy - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
-     
+
         for (int jj = 0; jj < 2; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -533,7 +529,7 @@ abstract class Mars3dCommon extends MarsCommon {
         }
         return (hh);
     }
-    
+
     @Override
     public double getDepthMax(double x, double y) {
         return getDepth(x, y, 0);
@@ -541,12 +537,11 @@ abstract class Mars3dCommon extends MarsCommon {
 
     @Override
     void setAllFieldsTp1AtTime(int rank) throws Exception {
-        
+
         info("Reading NetCDF variables...");
 
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
-
 
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
@@ -555,7 +550,6 @@ abstract class Mars3dCommon extends MarsCommon {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-
 
         try {
             v_tp1 = (float[][][]) ncIn.findVariable(strV).read(origin, new int[]{1, nz, (ny - 1), nx}).reduce().copyToNDJavaArray();
@@ -605,7 +599,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * u_tp1[k][j][i - 1];
                     if (Double.isNaN(Huon[k][j][i])) {
                         Huon[k][j][i] = 0.d;
-                        
+
                     }
                 }
             }
@@ -617,7 +611,7 @@ abstract class Mars3dCommon extends MarsCommon {
                             * v_tp1[k][j - 1][i];
                     if (Double.isNaN(Hvom[k][j][i])) {
                         Hvom[k][j][i] = 0.d;
-                        
+
                     }
                 }
             }
@@ -690,7 +684,6 @@ abstract class Mars3dCommon extends MarsCommon {
 
         //-----------------------------------------------------
         // Daily recalculation of z_w and z_r with zeta
-
         double[][][] z_w_tmp = new double[nz + 1][ny][nx];
 
         for (int i = nx; i-- > 0;) {

@@ -56,7 +56,6 @@ package org.ichthyop.dataset;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.ui.LonLatConverter;
@@ -198,41 +197,47 @@ public class SymphonieDataset extends AbstractDataset {
      * Vertical component of the velocity field at time t + dt
      */
     private float[][][] w_tp1;
+    
+    @Override
+    String getKey() {
+        return "dataset.symphonie";
+    }
 
     @Override
     void loadParameters() {
 
         // Dimensions
-        strDim_nj_t = getParameter("field_dim_nj");
-        strDim_ni_t = getParameter("field_dim_ni");
-        strDim_nk_t = getParameter("field_dim_nk");
-        strDim_time = getParameter("field_dim_time");
+        strDim_nj_t = getConfiguration().getString("dataset.symphonie.field_dim_nj");
+        strDim_ni_t = getConfiguration().getString("dataset.symphonie.field_dim_ni");
+        strDim_nk_t = getConfiguration().getString("dataset.symphonie.field_dim_nk");
+        strDim_time = getConfiguration().getString("dataset.symphonie.field_dim_time");
         // Variables
-        strVar_longitude_t = getParameter("field_var_lon");
-        strVar_latitude_t = getParameter("field_var_lat");
-        strVar_mask_t = getParameter("field_var_mask");
-        strVar_hm_w = getParameter("field_var_bathy");
-        strVar_dx_v = getParameter("field_var_dx");
-        strVar_dy_u = getParameter("field_var_dy");
-        strVar_dxdy_t = getParameter("field_var_dxdy");
-        strVar_time = getParameter("field_var_time");
-        strVar_ssh_ib = getParameter("field_var_ssh");
-        strVar_depth_t = getParameter("field_var_depth_t");
-        strVar_depth_w = getParameter("field_var_depth_w");
-        strVar_u = getParameter("field_var_u");
-        strVar_v = getParameter("field_var_v");
+        strVar_longitude_t = getConfiguration().getString("dataset.symphonie.field_var_lon");
+        strVar_latitude_t = getConfiguration().getString("dataset.symphonie.field_var_lat");
+        strVar_mask_t = getConfiguration().getString("dataset.symphonie.field_var_mask");
+        strVar_hm_w = getConfiguration().getString("dataset.symphonie.field_var_bathy");
+        strVar_dx_v = getConfiguration().getString("dataset.symphonie.field_var_dx");
+        strVar_dy_u = getConfiguration().getString("dataset.symphonie.field_var_dy");
+        strVar_dxdy_t = getConfiguration().getString("dataset.symphonie.field_var_dxdy");
+        strVar_time = getConfiguration().getString("dataset.symphonie.field_var_time");
+        strVar_ssh_ib = getConfiguration().getString("dataset.symphonie.field_var_ssh");
+        strVar_depth_t = getConfiguration().getString("dataset.symphonie.field_var_depth_t");
+        strVar_depth_w = getConfiguration().getString("dataset.symphonie.field_var_depth_w");
+        strVar_u = getConfiguration().getString("dataset.symphonie.field_var_u");
+        strVar_v = getConfiguration().getString("dataset.symphonie.field_var_v");
     }
 
     @Override
     public void setUp() throws Exception {
         loadParameters();
         clearRequiredVariables();
-        listInputFiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        listInputFiles = DatasetUtil.list(getConfiguration().getString("dataset.symphonie.input_path"),
+                getConfiguration().getString("dataset.symphonie.file_filter"));
         if (!skipSorting()) {
             DatasetUtil.sort(listInputFiles, strVar_time, timeArrow());
         }
         open(listInputFiles.get(0));
-        openGridFile(getParameter("grid_file"));
+        openGridFile(getConfiguration().getString("dataset.symphonie.grid_file"));
         getDimNC();
         shrinkGrid();
         readConstantField();
@@ -253,18 +258,18 @@ public class SymphonieDataset extends AbstractDataset {
     public void shrinkGrid() {
         boolean isParamDefined;
         try {
-            Boolean.valueOf(getParameter("shrink_domain"));
+            Boolean.valueOf(getConfiguration().getString("dataset.symphonie.shrink_domain"));
             isParamDefined = true;
         } catch (NullPointerException ex) {
             isParamDefined = false;
         }
 
-        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+        if (isParamDefined && Boolean.valueOf(getConfiguration().getString("dataset.symphonie.shrink_domain"))) {
             try {
-                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
-                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
-                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
-                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lon1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.symphonie.north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.symphonie.north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.symphonie.south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString("dataset.symphonie.south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (Exception ex) {
                 warning("Failed to resize domain", ex);

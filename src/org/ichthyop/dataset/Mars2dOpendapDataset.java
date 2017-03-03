@@ -61,6 +61,11 @@ import org.ichthyop.event.NextStepEvent;
  * @author pverley
  */
 public class Mars2dOpendapDataset extends Mars2dCommon {
+    
+    @Override
+    String getKey() {
+        return "dataset.mars_2d_opendap";
+    }
 
     /**
      * Loads the NetCDF dataset from the specified filename.
@@ -69,7 +74,7 @@ public class Mars2dOpendapDataset extends Mars2dCommon {
      */
     @Override
     void openDataset() throws Exception {
-        ncIn = DatasetUtil.openURL(getParameter("opendap_url"), true);
+        ncIn = DatasetUtil.openURL(getConfiguration().getString("dataset.mars_2d_opendap.opendap_url"), true);
         readTimeLength();
     }
 

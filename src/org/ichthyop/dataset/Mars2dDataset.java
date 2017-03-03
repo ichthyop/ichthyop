@@ -64,11 +64,16 @@ public class Mars2dDataset extends Mars2dCommon {
     
     private List<String> files;
     private int index;
+    
+    @Override
+    String getKey() {
+        return "dataset.mars_2d";
+    }
 
     @Override
     void openDataset() throws Exception {
         
-        files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        files = DatasetUtil.list(getConfiguration().getString("dataset.mars_2d.input_path"), getConfiguration().getString("dataset.mars_2d.file_filter"));
         if (!skipSorting()) 
             DatasetUtil.sort(files, strTime, timeArrow());
         ncIn = DatasetUtil.openFile(files.get(0), true);

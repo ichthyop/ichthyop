@@ -67,6 +67,11 @@ public class Roms3dDataset extends Roms3dCommon {
     
     private List<String> ncfiles;
     private int ncindex;
+    
+    @Override
+    String getKey() {
+        return "dataset.roms_3d";
+    }
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
@@ -99,7 +104,7 @@ public class Roms3dDataset extends Roms3dCommon {
     @Override
     void openDataset() throws Exception {
 
-        ncfiles = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
+        ncfiles = DatasetUtil.list(getConfiguration().getString("dataset.roms_3d.input_path"), getConfiguration().getString("dataset.roms_3d.file_filter"));
         if (!skipSorting()) {
             DatasetUtil.sort(ncfiles, strTime, timeArrow());
         }
@@ -107,10 +112,10 @@ public class Roms3dDataset extends Roms3dCommon {
         readTimeLength();
 
         try {
-            if (!isNull("grid_file")) {
-                String path = IOTools.resolvePath(getParameter("grid_file"));
+            if (!getConfiguration().isNull("dataset.roms_3d.grid_file")) {
+                String path = getConfiguration().getFile("dataset.roms_3d.grid_file");
                 if (!isDirectory(path)) {
-                    throw new IOException("{Dataset} " + getParameter("grid_file") + " is not a valid directory.");
+                    throw new IOException("[dataset] " + getConfiguration().getString("dataset.roms_3d.grid_file") + " is not a valid directory.");
                 }
             } else {
                 gridFile = ncIn.getLocation();
