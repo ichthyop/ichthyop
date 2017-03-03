@@ -3,21 +3,21 @@
     <long_name>Generic Ichthyop configuration file</long_name>
     <description>The file has few pre-defined parameters.</description>
     <block type="option">
-        <tree_path>Time/General time options</tree_path>
+        <tree_path>Main/Time</tree_path>
         <key>app.time</key>
         <description>Set the general time options of the simulation.</description>
         <parameters>
-            <parameter type="serial">
+            <parameter>
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
-                <value>year 2010 month 05 day 13 at 10:00</value>
+                <value>year 01 month 05 day 03 at 00:00</value>
                 <format>date</format>
                 <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
-            <parameter type="serial">
+            <parameter>
                 <key>transport_duration</key>
                 <long_name>Transport duration</long_name>
-                <value>0000 day(s) 12 hour(s) 00 minute(s)</value>
+                <value>0015 day(s) 00 hour(s) 00 minute(s)</value>
                 <format>duration</format>
                 <description>Set the duration of particle transport. Format: #### day(s) ## hour(s) ## minute(s)</description>
             </parameter>
@@ -29,17 +29,17 @@
                 <format>boolean</format>
                 <description>Determine whether a particle should be deactivated or on the contrary should keep drifting once its age exceeds transport duration. This parameter only operates with several release events (see section release schedule) when the simulation duration is upper than the transport duration.</description>
             </parameter>
-            <parameter type="serial">
+            <parameter>
                 <key>time_step</key>
                 <long_name>Time step [second]</long_name>
-                <value>600</value>
+                <value>7200</value>
                 <format>integer</format>
                 <description>The computational time step (dt) expressed in seconds. Take great care for setting this parameter. Simulation must not break the CFL criterion: (U * dt) / dX inferior to 1 with U the velocity and dX the move. An acceptable estimation could be dt = 0.7 * dGrid / Umax with dGrid the average length of the grid cells and Umax the order of magnitude of the fastest current velocities in the hydrodynamic model.</description>
             </parameter>
             <parameter>
                 <key>calendar_type</key>
                 <long_name>Type of calendar</long_name>
-                <value>Gregorian calendar</value>
+                <value>Climatology calendar</value>
                 <format>combo</format>
                 <accepted>Climatology calendar</accepted>
                 <accepted>Gregorian calendar</accepted>
@@ -49,7 +49,7 @@
             <parameter>
                 <key>time_origin</key>
                 <long_name>Origin of time</long_name>
-                <value>year 1900 month 01 day 01 at 00:00</value>
+                <value>year 0000 month 01 day 01 at 00:00</value>
                 <format>date</format>
                 <default>year 1900 month 01 day 01 at 00:00</default>
                 <description>This parameter comes with Gregorian type of calendar only. For hydrodynamic models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the hydrodynamic dataset.</description>
@@ -125,7 +125,7 @@
     </block>
     <block type="dataset">
         <key>dataset.mars_2d_opendap</key>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <tree_path>Dataset/MARS 2D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MARS model, 2D simulation and OpenDAP access.</description>
         <parameters>
@@ -239,7 +239,7 @@
                 <default>V</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Mars2dOpendapDataset</value>
@@ -407,7 +407,7 @@
                 <default>XE</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Mars3dOpendapDataset</value>
@@ -549,7 +549,7 @@
                 <default>V</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Mars2dDataset</value>
@@ -733,7 +733,7 @@
                 <default>XE</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Mars3dDataset</value>
@@ -745,8 +745,8 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_2d</key>
-        <tree_path>Dataset/ROMS 2D</tree_path>
         <enabled>false</enabled>
+        <tree_path>Dataset/ROMS 2D</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 2D simulation and local NetCDF files.</description>
         <parameters>
             <parameter>
@@ -904,7 +904,7 @@
                 <default>vbar</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Roms2dDataset</value>
@@ -916,8 +916,8 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_3d</key>
+        <enabled>true</enabled>
         <tree_path>Dataset/ROMS 3D</tree_path>
-        <enabled>false</enabled>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 3D simulation and local NetCDF files.</description>
         <parameters>
             <parameter>
@@ -931,9 +931,17 @@
             <parameter>
                 <key>file_filter</key>
                 <long_name>File filter</long_name>
-                <value>*.nc</value>
+                <value>*benguela*.nc</value>
                 <default>*.nc</default>
                 <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>grid_file</key>
+                <long_name>Grid file</long_name>
+                <value />
+                <default />
+                <format>file</format>
+                <description>Separate grid file for ROMS configuration. In some simulations, lon, lat and mask are archived in separate grid file. In most cases this parameter should be empty.</description>
             </parameter>
             <parameter>
                 <key>skip_sorting</key>
@@ -942,14 +950,6 @@
                 <default>false</default>
                 <format>boolean</format>
                 <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
-            </parameter>
-            <parameter>
-                <key>grid_file</key>
-                <long_name>Grid file</long_name>
-                <value />
-                <default />
-                <format>file</format>
-                <description>Separate grid file for ROMS configuration. In some simulations, lon, lat and mask are archived in separate grid file. In most cases this parameter should be empty.</description>
             </parameter>
             <parameter>
                 <key>shrink_domain</key>
@@ -1110,7 +1110,7 @@
                 <default>hc</default>
                 <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Roms3dDataset</value>
@@ -1122,6 +1122,7 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_3d_opendap</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/ROMS 3D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 3D simulation and local NetCDF files.</description>
         <parameters>
@@ -1290,7 +1291,7 @@
                 <default>hc</default>
                 <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Roms3dOpendapDataset</value>
@@ -1300,8 +1301,9 @@
             </parameter>
         </parameters>
     </block>
-       <block type="dataset">
+    <block type="dataset">
         <key>dataset.hycom_3d_opendap</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/HYCOM 3D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for HYCOM model.</description>
         <parameters>
@@ -1359,7 +1361,7 @@
                 <format>boolean</format>
                 <default>true</default>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Hycom3dOpendapDataset</value>
@@ -1369,12 +1371,13 @@
             </parameter>
         </parameters>
     </block>
-        <block type="dataset">
+    <block type="dataset">
         <key>dataset.hycom_3d</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/HYCOM 3D</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for HYCOM model.</description>
         <parameters>
-             <parameter>
+            <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
                 <value>input</value>
@@ -1437,7 +1440,7 @@
                 <format>boolean</format>
                 <default>true</default>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Hycom3dDataset</value>
@@ -1449,6 +1452,7 @@
     </block>
     <block type="dataset">
         <key>dataset.nemo</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/OPA NEMO</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for OPA NEMO model, 3D simulation and local NetCDF files. It is assumed that the grid information is split in three distincts files: mask file (x, y, z dimensions and land-ocean mask), zgr file (depth T point, depth W point and e3t), hgr file (e1t, e2t, e1v and e2u variables). If theses fields are all recorded in a single file, it is not a problem, just type the same file pattern for the three files. The application expects to find lon and lat variables in "gridT" files, U and time variables and time dimension in "gridU" files and V variable in "gridV" files. Again, just provide the same file pattern for the three types of files if all the variables are recorded within the same file.</description>
         <parameters>
@@ -1697,7 +1701,7 @@
                 <default>vovecrtz</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.NemoDataset</value>
@@ -1709,6 +1713,7 @@
     </block>
     <block type="dataset">
         <key>dataset.mercator2d</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/MERCATOR2D</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MECATOR 2D model</description>
         <parameters>
@@ -1769,7 +1774,7 @@
                 <default>v</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.Mercator2dDataset</value>
@@ -1781,6 +1786,7 @@
     </block>
     <block type="dataset">
         <key>dataset.noveltis</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/Noveltis</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for NOVELTIS model, 3D simulation and local NetCDF files.</description>
         <parameters>
@@ -1924,7 +1930,7 @@
                 <default>v</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.NoveltisDataset</value>
@@ -1936,6 +1942,7 @@
     </block>
     <block type="dataset">
         <key>dataset.oscar</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/OSCAR</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for OSCAR model</description>
         <parameters>
@@ -2027,7 +2034,7 @@
                 <default>v</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.OscarDataset</value>
@@ -2037,8 +2044,9 @@
             </parameter>
         </parameters>
     </block>
-        <block type="dataset">
+    <block type="dataset">
         <key>dataset.symphonie</key>
+        <enabled>false</enabled>
         <tree_path>Dataset/Symphonie</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for Symphonie model, 3D simulation and local NetCDF files.</description>
         <parameters>
@@ -2232,7 +2240,7 @@
                 <default>ssh-ib</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.dataset.SymphonieDataset</value>
@@ -2274,7 +2282,7 @@
                 <format>boolean</format>
                 <description>Determine whether vertical advection is enabled. For 2D simulations, this parameter is ignored.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.AdvectionAction</value>
@@ -2282,7 +2290,7 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <long_name>priority</long_name>
                 <key>priority</key>
                 <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
@@ -2322,7 +2330,7 @@
                 <accepted>maximal</accepted>
                 <description>It controls the meaning of the swimming velocity provided in the CSV file. CRUISING means that the particles will swim at the velocity defined in the CSV file. MAXIMAL means that the particles will swim with random velocity between zero and maximal velocity.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.SwimmingAction</value>
@@ -2330,7 +2338,7 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>normal</value>
@@ -2351,7 +2359,7 @@
         <tree_path>Transport/Horizontal dispersion</tree_path>
         <enabled>false</enabled>
         <parameters>
-            <parameter type="serial">
+            <parameter>
                 <key>epsilon</key>
                 <long_name>Dissipation rate [meter2/second3]</long_name>
                 <value>1E-9</value>
@@ -2359,7 +2367,7 @@
                 <format>float</format>
                 <default>1E-9</default>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.HDispAction</value>
@@ -2367,7 +2375,7 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>normal</value>
@@ -2388,7 +2396,7 @@
         <tree_path>Transport/Buoyancy</tree_path>
         <enabled>false</enabled>
         <parameters>
-            <parameter type="serial">
+            <parameter>
                 <key>particle_density</key>
                 <long_name>Particle density [g/cm3]</long_name>
                 <value>1.025</value>
@@ -2416,7 +2424,7 @@
             <parameter>
                 <key>salinity_field</key>
                 <long_name>Salinity variable name</long_name>
-                <value>sal</value>
+                <value>salt</value>
                 <default>salt</default>
                 <description>The name of the salinity variable (case sensitive) in the hydrodynamic dataset.</description>
             </parameter>
@@ -2427,7 +2435,7 @@
                 <default>temp</default>
                 <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.BuoyancyAction</value>
@@ -2435,7 +2443,7 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>normal</value>
@@ -2465,12 +2473,30 @@
                 <description>Set the depth [meter] of the particle during daytime. Daytime period starts at sunrise and ends at sunset. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
             </parameter>
             <parameter>
+                <key>daytime_depth_file</key>
+                <long_name>Depth at daytime as function of age</long_name>
+                <value />
+                <default>depth_day.csv</default>
+                <format>textfile</format>
+                <template>depth_function.csv</template>
+                <description>Depth at day time as a function of age. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Depth(metre). Depth is negative number. If this parameter is left void, ichthyop assumes constant daytime depth, defined by parameter "Depth at daytime".</description>
+            </parameter>
+            <parameter>
                 <key>nighttime_depth</key>
                 <long_name>Depth at nighttime [meter]</long_name>
                 <value>-10</value>
                 <default>-10</default>
                 <format>float</format>
                 <description>Set the depth [meter] of the particle during nighttime. Nighttime. period starts at sunset and ends at sunrise. Depth is negative number, but the application will automatically convert positive values multiplying by -1. You can set daytime depth = nightime depth to force motion of particle at constant depth.</description>
+            </parameter>
+            <parameter>
+                <key>nighttime_depth_file</key>
+                <long_name>Depth at nighttime as function of age</long_name>
+                <value />
+                <default>depth_night.csv</default>
+                <format>textfile</format>
+                <template>depth_function.csv</template>
+                <description>Depth at night as a function of age. The parameter is the pathname of CSV file (semicolon separator) that contains two columns. Headers Age(day);Depth(metre). Depth is negative number. If this parameter is left void, ichthyop assumes constant nighttime depth, defined by parameter "Depth at nighttime".</description>
             </parameter>
             <parameter>
                 <key>sunrise</key>
@@ -2496,7 +2522,7 @@
                 <format>float</format>
                 <description>If the growth procedure is activated (See biology section) then the DVM operates during the larvae stages (yolk-sac and feeding larva) and this parameter is ignored by the application. If not migration only operates after this minimum age [day].</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.MigrationAction</value>
@@ -2504,7 +2530,44 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.migration.ontogenetic</key>
+        <description>Block of options to control the Ontogenetic Vertical Migration (OVM) process of larvae. Only operate for 3D simulation. Based on CMS.</description>
+        <tree_path>Transport/Ontogenetic migration</tree_path>
+        <enabled>false</enabled>
+        <parameters>
+            <parameter>
+                <key>cms_ovm_config_file</key>
+                <long_name>Path of the CMS Ontogenetic migration configuration file</long_name>
+                <value></value>
+                <default></default>
+                <format>file</format>
+                <description>Select the CSM Ontogenetic migration configuration file.</description>
+            </parameter>
+            <parameter>
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.ichthyop.action.OntogeneticMigrationAction</value>
+                <default>org.ichthyop.action.ntogeneticMigrationAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>normal</value>
@@ -2521,7 +2584,7 @@
     </block>
     <block type="action">
         <key>action.wind</key>
-        <tree_path>Transport/Wind drift</tree_path>
+        <tree_path>Transport/Wind drift/Wind scenario</tree_path>
         <enabled>false</enabled>
         <description>Block of options to implement particle drift due to sea surface wind. The application is not able yet to read any realistic wind datasets. You will have to build your own wind scenarii, providing parameters such as wind direction and intensity, windage, etc. in a separate textfile. For 2D simulations, every particle is exposed to surface wind. For 3D simulations, the application only applies wind drift to close-surface particles (technically, particles that reach the top grid level). First time you enable the wind action, do not forget to create a new wind file (the filename is preset but the file may not exist yet on your disk).</description>
         <parameters>
@@ -2534,7 +2597,7 @@
                 <template>wind-iroise.txt</template>
                 <description>Select an existing wind scenario (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/wind_scenario1.xml' or '../wind_scenario2.xml' etc.).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <format>class</format>
@@ -2542,7 +2605,348 @@
                 <default>org.ichthyop.action.WindAction</default>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.wind_drift</key>
+        <tree_path>Transport/Wind drift/Data from Netcdf current file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read any realistic wind field which are included in current files. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <parameters>
+            <parameter>
+                <key>wind_factor</key>
+                <long_name>Wind factor</long_name>
+                <value>0.03</value>
+                <default>0.03</default>
+                <format>float</format>
+                <description>Wind factor value</description>
+            </parameter>
+            <parameter>
+                <key>angle</key>
+                <long_name>Angle deviation (in degree)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description> Constant angle deviation imposed by wind. 0° is Eastward (wind blows toward East), 90° is a Northward (wind blows toward North).</description>
+            </parameter>
+            <parameter>
+                <key>wind_u</key>
+                <long_name>U wind speed</long_name>
+                <value>UWND</value>
+                <default>UWND</default>
+                <description>Wind speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wind_v</key>
+                <long_name>V wind speed</long_name>
+                <value>VWND</value>
+                <default>VWND</default>
+                <description>Wind speed name along y</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account.</description>
+            </parameter>
+            <parameter>
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.ichthyop.action.WindDriftAction</value>
+                <default>org.ichthyop.action.WindDriftAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter>
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.wind_drift_file</key>
+        <tree_path>Transport/Wind drift/Data from Netcdf wind file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from files. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <parameters>
+            <parameter>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>input/Manga4000/</value>
+                <format>path</format>
+                <default>input</default>
+                <description>Folder containing the wind NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>file_filter</key>
+                <long_name>File filter</long_name>
+                <value>*.nc</value>
+                <default>*.nc</default>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>field_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time</value>
+                <default>time</default>
+                <parameter>
+                    <key>initial_time</key>
+                    <long_name>Beginning of simulation</long_name>
+                    <value>year 2010 month 05 day 13 at 10:00</value>
+                    <format>date</format>
+                    <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
+                </parameter>
+                <description>Name of the NetCDF variable in the wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>longitude</key>
+                <long_name>longitude field</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the longitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>latitude</key>
+                <long_name>latitude field</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the latitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>wind_u</key>
+                <long_name>U wind speed</long_name>
+                <value>UWND</value>
+                <default>UWND</default>
+                <description>Wind speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wind_v</key>
+                <long_name>V wind speed</long_name>
+                <value>VWND</value>
+                <default>VWND</default>
+                <description>Wind speed name along y</description>
+            </parameter>
+            <parameter>
+                <key>wind_factor</key>
+                <long_name>Wind factor</long_name>
+                <value>0.03</value>
+                <default>0.03</default>
+                <format>float</format>
+                <description>Wind factor value</description>
+            </parameter>
+            <parameter>
+                <key>angle</key>
+                <long_name>Angle deviation (in degree)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description> Constant angle deviation imposed by wind.0° is Eastward (wind blows toward East), 90° is a Northward (wind blows toward North).</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account.</description>
+            </parameter>
+            <parameter>
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>time_unit</key>
+                <long_name>Unit of time</long_name>
+                <value>seconds</value>
+                <format>combo</format>
+                <accepted>seconds</accepted>
+                <accepted>minutes</accepted>
+                <accepted>hours</accepted>
+                <accepted>days</accepted>
+                <default>seconds</default>
+                <description>Unit of time in wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>time_origin</key>
+                <long_name>Origin of time</long_name>
+                <value>year 1900 month 01 day 01 at 00:00</value>
+                <format>date</format>
+                <default>year 1900 month 01 day 01 at 00:00</default>
+                <description> For wind models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.ichthyop.action.WindDriftFileAction</value>
+                <default>org.ichthyop.action.WindDriftFileAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter>
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+                <value>normal</value>
+                <default>normal</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.wind_drift_url</key>
+        <tree_path>Transport/Wind drift/Data from OpenDAP wind file</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options to implement particle drift due to sea surface wind. The application is able to read realistic wind datasets from OpenDAP. Displacement induced by wind (dXwind) is a linear function of wind speed (Uwind) : dXwind = wind_factor * Uwind .</description>
+        <parameters>
+            <parameter>
+                <key>wind_url</key>
+                <long_name>OpenDAP URL</long_name>
+                <value>http://www.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE</value>
+                <description>Folder containing the wind NetCDF files.</description>
+            </parameter>
+            <parameter>
+                <key>field_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF variable in the wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>longitude</key>
+                <long_name>longitude field</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the longitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>latitude</key>
+                <long_name>latitude field</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the latitude field in wind dataset</description>
+            </parameter>
+            <parameter>
+                <key>wind_u</key>
+                <long_name>U wind speed</long_name>
+                <value>UWND</value>
+                <default>UWND</default>
+                <description>Wind speed name along x</description>
+            </parameter>
+            <parameter>
+                <key>wind_v</key>
+                <long_name>V wind speed</long_name>
+                <value>VWND</value>
+                <default>VWND</default>
+                <description>Wind speed name along y</description>
+            </parameter>
+            <parameter>
+                <key>wind_factor</key>
+                <long_name>Wind factor</long_name>
+                <value>0.03</value>
+                <default>0.03</default>
+                <format>float</format>
+                <description>Wind factor value</description>
+            </parameter>
+            <parameter>
+                <key>angle</key>
+                <long_name>Angle deviation (in degree)</long_name>
+                <value>0</value>
+                <default>0</default>
+                <format>float</format>
+                <description> Constant angle deviation imposed by wind.0° is Eastward (wind blows toward East), 90° is a Northward (wind blows toward North).</description>
+            </parameter>
+            <parameter>
+                <key>depth_application</key>
+                <long_name>Depth application (in meters)</long_name>
+                <value>1</value>
+                <default>1</default>
+                <format>float</format>
+                <description> Depth under which wind drift is not taking into account.</description>
+            </parameter>
+            <parameter>
+                <key>wind_convention</key>
+                <long_name>Wind convention</long_name>
+                <value>wind to</value>
+                <format>combo</format>
+                <accepted>wind to</accepted>
+                <accepted>wind from</accepted>
+                <default>wind to</default>
+                <description>Wind convention used in wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>time_unit</key>
+                <long_name>Unit of time</long_name>
+                <value>seconds</value>
+                <format>combo</format>
+                <accepted>seconds</accepted>
+                <accepted>minutes</accepted>
+                <accepted>hours</accepted>
+                <accepted>days</accepted>
+                <default>seconds</default>
+                <description>Unit of time in wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>time_origin</key>
+                <long_name>Origin of time</long_name>
+                <value>year 1900 month 01 day 01 at 00:00</value>
+                <format>date</format>
+                <default>year 1900 month 01 day 01 at 00:00</default>
+                <description> For wind models that record time variable according to a Gregorian calendar, time is the number of seconds elapsed since an origin of time. Most of the time, origin of time starts 1900/01/01 00:00. Nevertheless, for some simulations, you may have to set another origin of time for the Gregorian calendar. This origin is usually defined as an attribute of the time variable in the wind dataset.</description>
+            </parameter>
+            <parameter>
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.ichthyop.action.WindDriftURLAction</value>
+                <default>org.ichthyop.action.WindDriftURLAction</default>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
@@ -2603,7 +3007,7 @@
                 <template>zone-iroise.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone (recruitment zone for instance).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>zone_tracker</key>
                 <long_name>Track zones</long_name>
                 <value>true</value>
@@ -2611,7 +3015,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "zone" variable in the NetCDF output file. Setting to false does not guarantee the "zone" variable will not be recorded in the NetCDF output file because it migt be required by another module (Recruitment for instance).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.release.ZoneRelease</value>
@@ -2634,6 +3038,14 @@
                 <default>10</default>
                 <format>integer</format>
                 <description>Number of patches released in the zones. The application randomly releases the patches within the zones in order to ensure a homogeneous distribution of patches among the zones. The downside is that you do not control the number of patches released per zone.</description>
+            </parameter>
+            <parameter>
+                <key>per_zone</key>
+                <long_name>Patches per zone ?</long_name>
+                <value>true</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Whether the number of patches must be interpreted as global or per zone.</description>
             </parameter>
             <parameter>
                 <key>number_agregated</key>
@@ -2668,7 +3080,7 @@
                 <template>zone-iroise.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads release zones from the file and ignores the other types of zone recruitment zone for instance).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>zone_tracker</key>
                 <long_name>Track zones</long_name>
                 <value>true</value>
@@ -2676,7 +3088,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "zone" variable in the NetCDF output file. Setting to false does not guarantee the "zone" variable will not be recorded in the NetCDF output file because it migt be required by another module (Recruitment for instance).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <format>class</format>
@@ -2701,7 +3113,7 @@
                 <template>drifter-iroise.txt</template>
                 <description>Select an existing drifter textfile (*.txt) or create a new one. Relative pathnames are supported (e.g 'cfg/my_drifters1.xml' or '../my_drifters2.xml' etc.).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <format>class</format>
@@ -2725,7 +3137,7 @@
                 <format>file</format>
                 <description>Select an existing Ichthyop NetCDF output file. Relative pathnames are supported (e.g 'output/ichthyop-run201006291600.nc' or '../ichthyop-run201006291601.nc' etc.).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <format>class</format>
@@ -2734,35 +3146,35 @@
             </parameter>
         </parameters>
     </block>
-        <block type="release">
-    <key>release.surface</key>
-    <tree_path>Release/Surface release</tree_path>
-    <description>Block of options for releasing particles evenly at sea surface.</description>
-    <enabled>true</enabled>
-    <parameters>
-      <parameter>
-        <key>number_particles</key>
-        <long_name>Number of particles</long_name>
-        <value>1000</value>
-        <default>1000</default>
-        <format>integer</format>
-        <description>Number of particles released in the whole domain. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the stain per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
-      </parameter>
-      <parameter hidden="true">
-        <key>class_name</key>
-        <long_name>Java Class file</long_name>
-        <format>class</format>
-        <value>org.ichthyop.release.SurfaceRelease</value>
-        <default>org.ichthyop.release.SurfaceRelease</default>
-        <description>The Java class called by the application to implement this release process.</description>
-      </parameter>
-    </parameters>
-  </block>
+    <block type="release">
+        <key>release.surface</key>
+        <tree_path>Release/Surface release</tree_path>
+        <description>Block of options for releasing particles evenly at sea surface.</description>
+        <enabled>true</enabled>
+        <parameters>
+            <parameter>
+                <key>number_particles</key>
+                <long_name>Number of particles</long_name>
+                <value>1000</value>
+                <default>1000</default>
+                <format>integer</format>
+                <description>Number of particles released in the whole domain. If several release events are defined (see section release schedule), this parameter becomes the number of particles released in the stain per release event. It means the application will total number_particles_released_in_zones * number_release_events particles.</description>
+            </parameter>
+            <parameter>
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <format>class</format>
+                <value>org.ichthyop.release.SurfaceRelease</value>
+                <default>org.ichthyop.release.SurfaceRelease</default>
+                <description>The Java class called by the application to implement this release process.</description>
+            </parameter>
+        </parameters>
+    </block>
     <block type="release">
         <key>release.stain</key>
         <tree_path>Release/Release stain</tree_path>
         <description>Block of options for releasing a "stain" of particles aroung a given location.</description>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <parameters>
             <parameter>
                 <key>number_particles</key>
@@ -2812,7 +3224,7 @@
                 <format>float</format>
                 <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <format>class</format>
@@ -2907,7 +3319,7 @@
                 <default>temp</default>
                 <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>temp_tracker</key>
                 <long_name>Track temperature</long_name>
                 <value>true</value>
@@ -2915,7 +3327,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a temperature variable in the NetCDF output file. Setting to false does not guarantee the temperature variable will not be recorded in the NetCDF output file because it migt be required by another module.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.LethalTempAction</value>
@@ -2923,7 +3335,7 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>low</value>
@@ -2975,7 +3387,7 @@
                 <default>temp</default>
                 <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>length_tracker</key>
                 <long_name>Track particle length</long_name>
                 <value>true</value>
@@ -2983,7 +3395,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "length" variable in the NetCDF output file.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>stage_tracker</key>
                 <long_name>Track particle biological stage</long_name>
                 <value>true</value>
@@ -2991,7 +3403,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "stage" variable in the NetCDF output file.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.LinearGrowthAction</value>
@@ -2999,7 +3411,230 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>low</value>
+                <default>low</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.growthDeb</key>
+        <tree_path>Biology/DEB Growth</tree_path>
+        <enabled>true</enabled>
+        <description>Block of options for setting up the growth model. It simulates the growth in length of particles depending on water temperature and food. Dynamic Energy Budget is used to compute length.</description>
+        <parameters>
+            <parameter>
+                <key>shape</key>
+                <long_name>Shape coefficient 1</long_name>
+                <value>0.152</value>
+                <default>0.152</default>
+                <format>float</format>
+                <description>Value of the shape coefficient enable to convert volumetric length  (DEB length) in real length</description>
+            </parameter>
+            <parameter>
+                <key>initial_reserve</key>
+                <long_name>Initial reserve [J]</long_name>
+                <value>0.99</value>
+                <default>0.63</default>
+                <format>float</format>
+                <description>Value of the reserve (E) [J]</description>
+            </parameter>
+            <parameter>
+                <key>assimilation_efficiency</key>
+                <long_name>Assimilation efficiency</long_name>
+                <value>0.71</value>
+                <default>0.71</default>
+                <format>float</format>
+                <description>Assimilation food efficiency</description>
+            </parameter>
+            <parameter>
+                <key>half_saturation</key>
+                <long_name>Half saturation constante [mg m3]</long_name>
+                <value>0.1</value>
+                <default>0.1</default>
+                <format>float</format>
+                <description>Half saturation constant (XK) [mg m3]</description>
+            </parameter>
+            <parameter>
+                <key>allocation_rule</key>
+                <long_name>Allocation rule</long_name>
+                <value>0.7</value>
+                <default>0.7</default>
+                <format>float</format>
+                <description>Energy allocation rule (Kappa)</description>
+            </parameter>
+            <parameter>
+                <key>food_field</key>
+                <long_name>Food variable name</long_name>
+                <value>zoo_COP_cell</value>
+                <default>zoo</default>
+                <description>The name of the food variable (case sensitive) in the bioenergetic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>TEMP</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>ingestion_rate</key>
+                <long_name>Ingestion rate [J cm-2 d-1]</long_name>
+                <value>325</value>
+                <default>325</default>
+                <format>float</format>
+                <description>Surface specific ingestion rate (P_Xm)[J cm-2 d-1]</description>
+            </parameter>
+            <parameter>
+                <key>reserve_capacity</key>
+                <long_name>Reserve capacity [J cm3]</long_name>
+                <value>2700</value>
+                <default>2700</default>
+                <format>float</format>
+                <description>Reserve capacity (Em) [J cm3]</description>
+            </parameter>
+            <parameter>
+                <key>cost_growth</key>
+                <long_name>Cost for growth [J cm-3]</long_name>
+                <value>4000</value>
+                <default>4000</default>
+                <format>float</format>
+                <description>Cost for growth (Eg) [J cm-3]</description>
+            </parameter>
+            <parameter>
+                <key>volume_cost_maintenance</key>
+                <long_name>Maintenance cost [J cm-3 d-1]</long_name>
+                <value>49</value>
+                <default>49</default>
+                <format>float</format>
+                <description>Volume specific maintenance cost (p_M) [J cm-3 d-1]</description>
+            </parameter>
+            <parameter>
+                <key>arrhenius</key>
+                <long_name>Arrhenius temperature [K]</long_name>
+                <value>9800</value>
+                <default>9800</default>
+                <format>float</format>
+                <description>Arrhenius temperature (TA) [K]</description>
+            </parameter>
+            <parameter>
+                <key>ref_temp</key>
+                <long_name>Reference temperature [K]</long_name>
+                <value>289</value>
+                <default>289</default>
+                <format>float</format>
+                <description>Reference temperature (T1) [K]</description>
+            </parameter>
+            <parameter>
+                <key>length_tracker</key>
+                <long_name>Track particle length</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "length" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>stage_tracker</key>
+                <long_name>Track particle biological stage</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "stage" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.ichthyop.action.DebGrowthAction</value>
+                <default>org.ichthyop.action.DebGrowthAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter>
+                <key>E_tracker</key>
+                <long_name>Track E, the particle energy reserve</long_name>
+                <value>true</value>
+                <default>true</default>
+                <format>boolean</format>
+                <description>If true the application adds a "E" variable in the NetCDF output file.</description>
+            </parameter>
+            <parameter>
+                <key>priority</key>
+                <long_name>priority</long_name>
+                <value>low</value>
+                <default>low</default>
+                <format>combo</format>
+                <accepted>lowest</accepted>
+                <accepted>low</accepted>
+                <accepted>normal</accepted>
+                <accepted>high</accepted>
+                <accepted>highest</accepted>
+                <description>Level of priority of the action (comparatively to other actions). Each time step, a high priority action will be called by the application before than a low priority action. Actions with same level of priority will be called without any specific order.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="action">
+        <key>action.growth.sole</key>
+        <tree_path>Biology/Solea growth</tree_path>
+        <enabled>false</enabled>
+        <description>Block of options for setting up the growth model of Sole larvae. It simulates the growth in length of particles as a function of water temperature. Length increases with time length(t + dt) = length(t) + c1 * (temperature ^ c2) * dt, c1 and c2 depending on the stage of the larvae</description>
+        <parameters>
+            <parameter>
+                <key>temperature_field</key>
+                <long_name>Temperature variable name</long_name>
+                <value>temp</value>
+                <default>temp</default>
+                <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>stage_tags</key>
+                <long_name>Tags of the stages</long_name>
+                <value>"egg" "yolk-sac larva" "feeding larva" "metamorphosing larva"</value>
+                <default>"egg" "yolk-sac larva" "feeding larva" "metamorphosing larva"</default>
+                <format>list</format>
+                <description>Names of each physiological stage of the larva life history. No matter what you set, Ichthyop assumes that the first stage corresponds to egg stage.</description>
+            </parameter>
+            <parameter>
+                <key>stage_thresholds</key>
+                <long_name>Initial length of the stages [millimetre]</long_name>
+                <value>"1.2" "3" "4" "8"</value>
+                <default>"1.2" "3" "4" "8"</default>
+                <format>list</format>
+                <description>Initial length for each physiological stage of the larva life history, in millimetre. Ichthyop assumes that the first length provided corresponds to the egg length.</description>
+            </parameter>
+            <parameter>
+                <key>c1</key>
+                <long_name>First coeff of the growth equation</long_name>
+                <value>"0.0066" "0.0073" "0.0011" "0.0017"</value>
+                <default>"0.0066" "0.0073" "0.0011" "0.0017"</default>
+                <format>list</format>
+                <description>First coefficient of the sole growth equation, c1, such as dLength(dt) = c1 * (temperature ^ c2) * dt</description>
+            </parameter>
+            <parameter>
+                <key>c2</key>
+                <long_name>Second coeff of the growth equation</long_name>
+                <value>"1.5739" "1.4619" "1.9316" "1.9316"</value>
+                <default>"1.5739" "1.4619" "1.9316" "1.9316"</default>
+                <format>list</format>
+                <description>Second coefficient of the sole growth equation, c2, such as dLength(dt) = c1 * (temperature ^ c2) * dt</description>
+            </parameter>
+            <parameter>
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.ichthyop.action.SoleGrowthAction</value>
+                <default>org.ichthyop.action.SoleGrowthAction</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this action.</description>
+            </parameter>
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>low</value>
@@ -3072,7 +3707,7 @@
                 <template>zone-iroise.xml</template>
                 <description>Select an existing zone file (*.xml) or create a new one. Relative pathnames are supported (e.g 'cfg/my_zones1.xml' or '../my_zones2.xml' etc.). The application only loads recruitment zones from the file and ignores the other types of zone (release zone for instance).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>recruited_tracker</key>
                 <long_name>Track recruitment status</long_name>
                 <value>true</value>
@@ -3080,7 +3715,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "recruited" variable in the NetCDF output file.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>zone_tracker</key>
                 <long_name>Track zones</long_name>
                 <value>true</value>
@@ -3088,7 +3723,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "zone" variable in the NetCDF output file. Setting to false does not guarantee the "zone" variable will not be recorded in the NetCDF output file because it migt be required by another module (Zone release for instance).</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.RecruitmentZoneAction</value>
@@ -3096,7 +3731,7 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>highest</value>
@@ -3192,7 +3827,7 @@
                 <format>float</format>
                 <description>Thickness [meter] of the stain. This parameter is ignored for 2D simulation. Particles are randomly released within the layer [depth_stain - thickness / 2; depth_stain + thickness / 2]</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>recruited_tracker</key>
                 <long_name>Track recruitment status</long_name>
                 <value>true</value>
@@ -3200,7 +3835,7 @@
                 <format>boolean</format>
                 <description>If true the application adds a "recruited" variable in the NetCDF output file.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.ichthyop.action.RecruitmentStainAction</value>
@@ -3208,7 +3843,7 @@
                 <format>class</format>
                 <description>The Java class called by the application to implement this action.</description>
             </parameter>
-            <parameter hidden="true">
+            <parameter>
                 <key>priority</key>
                 <long_name>priority</long_name>
                 <value>highest</value>
