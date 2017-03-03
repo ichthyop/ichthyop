@@ -53,7 +53,6 @@
 
 package org.ichthyop.stage;
 
-import org.ichthyop.io.BlockType;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.LengthParticle;
 
@@ -63,8 +62,8 @@ import org.ichthyop.particle.LengthParticle;
  */
 public class LengthStage extends AbstractStage {
 
-    public LengthStage(BlockType blockType, String blockKey) {
-        super(blockType, blockKey);
+    public LengthStage(String key) {
+        super( key);
     }
 
     @Override

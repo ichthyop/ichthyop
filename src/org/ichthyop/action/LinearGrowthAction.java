@@ -89,25 +89,14 @@ public class LinearGrowthAction extends AbstractAction {
         coeff2 = getConfiguration().getFloat("action.growth.coeff2");
         temperature_field = getConfiguration().getString("action.growth.temperature_field");
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        lengthStage = new LengthStage(BlockType.ACTION, getKey());
+        lengthStage = new LengthStage(getKey());
         lengthStage.init();
 
-        boolean addTracker = true;
-        try {
-            addTracker = getConfiguration().getBoolean("action.growth.length_tracker");
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addTracker) {
+        if (getConfiguration().getBoolean("action.growth.length_tracker")) {
             getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
         }
-        addTracker = true;
-        try {
-            addTracker = getConfiguration().getBoolean("action.growth.stage_tracker");
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addTracker) {
+        
+        if (getConfiguration().getBoolean("action.growth.stage_tracker")) {
             getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
         }
     }
@@ -115,6 +104,7 @@ public class LinearGrowthAction extends AbstractAction {
     @Override
     public void init(IParticle particle) {
         LengthParticle.setLength(particle, lengthStage.getThreshold(0));
+        StageParticle.init(particle);
     }
 
     @Override

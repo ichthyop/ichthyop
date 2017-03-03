@@ -50,12 +50,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.stage;
 
-import java.util.logging.Level;
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.io.BlockType;
 import org.ichthyop.particle.IParticle;
 
 /**
@@ -67,32 +64,27 @@ public abstract class AbstractStage extends IchthyopLinker {
     private float[] thresholds;
     private String[] tags;
 
-    private final BlockType blockType;
-    private final String blockKey;
+    private final String key;
 
     public abstract int getStage(IParticle particle);
+
     public abstract int getStage(double value);
 
-    AbstractStage(BlockType blockType, String blockKey) {
-        this.blockType = blockType;
-        this.blockKey = blockKey;
+    AbstractStage(String key) {
+        this.key = key;
     }
 
     public void init() {
 
         // Load the stage tags
-        tags = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_tags");
+        tags = getConfiguration().getArrayString(key + ".stage_tags");
 
         // Load the stage thresholds
-        String[] sThresholds = getSimulationManager().getParameterManager().getListParameter(blockType, blockKey, "stage_thresholds");
-        thresholds = new float[sThresholds.length];
-        for (int i = 0; i < sThresholds.length; i++) {
-            thresholds[i] = Float.valueOf(sThresholds[i]);
-        }
+        thresholds = getConfiguration().getArrayFloat(key + ".stage_thresholds");
 
         // Make sure that tags.length == thresholds.length
         if (tags.length != thresholds.length) {
-            warning("Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{blockKey, tags.length, thresholds.length});
+            warning("Stages defined in block {0} has {1} tags and {2} thresholds, this is not consistent (we expect n tags and n thresholds). Please fix it.", new Object[]{key, tags.length, thresholds.length});
         }
     }
 
@@ -103,7 +95,7 @@ public abstract class AbstractStage extends IchthyopLinker {
     public String getTag(int iStage) {
         return tags[iStage];
     }
-    
+
     public float getThreshold(int iStage) {
         return thresholds[iStage];
     }

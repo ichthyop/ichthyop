@@ -80,13 +80,13 @@ import org.ichthyop.util.Separator;
  */
 public class ParameterManager extends AbstractManager {
 
-    private static final ParameterManager MANAGER = new ParameterManager();
+    private static final ParameterManager PARAMETER_MANAGER = new ParameterManager();
     private ConfigurationFile cfgFile;
     private HashMap<String, String> parameters;
     private String inputPathname;
 
     public static ParameterManager getInstance() {
-        return MANAGER;
+        return PARAMETER_MANAGER;
     }
 
     public void setConfigurationFile(File file) throws Exception {
@@ -126,35 +126,6 @@ public class ParameterManager extends AbstractManager {
 
     public List<XParameter> getParameters() {
         return cfgFile.getParameters();
-    }
-
-    private String getParameter(String blockKey, String key) {
-        return getParameter(BlockType.OPTION, blockKey, key);
-    }
-
-    public String[] getListParameter(BlockType blockType, String blockKey, String key) {
-        String[] tokens = getParameter(blockType, blockKey, key).split("\"");
-        List<String> list = new ArrayList();
-        for (String token : tokens) {
-            if (!token.trim().isEmpty()) {
-                list.add(token.trim());
-            }
-        }
-        return list.toArray(new String[list.size()]);
-    }
-
-    private String getParameter(BlockType blockType, String blockKey, String key) {
-
-        XParameter xparam = cfgFile.getBlock(blockType, blockKey).getXParameter(key);
-        if (xparam != null) {
-            return xparam.getValue();
-        } else {
-            throw new NullPointerException("Could not retrieve parameter " + blockKey + "/" + key);
-        }
-    }
-
-    private boolean isBlockEnabled(BlockType type, String key) {
-        return cfgFile.getBlock(type, key).isEnabled();
     }
 
     public Iterable<XBlock> getBlocks(BlockType type) {

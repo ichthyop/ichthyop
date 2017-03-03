@@ -57,7 +57,6 @@ import java.text.ParseException;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.event.SetupEvent;
-import org.ichthyop.io.BlockType;
 import org.ichthyop.event.ReleaseEvent;
 import org.ichthyop.event.ReleaseListener;
 import javax.swing.event.EventListenerList;
@@ -197,23 +196,16 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     }
 
     private String[] getReleaseEvents() throws Exception {
-
-        try {
-            String isScheduleEnabled = getSimulationManager().getParameterManager().getString("release.schedule.is_enabled");
-            boolean isEnabled = Boolean.valueOf(isScheduleEnabled);
-            if (isEnabled) {
-                return getSimulationManager().getParameterManager().getListParameter(BlockType.OPTION, "release.schedule", "events");
-            }
-        } catch (Exception ex) {
-            warning("Failed to read the release schedule. By default, particles will all be released at simulation initial time. {0}", ex.toString());
+        if (getConfiguration().getBoolean("release.schedule.is_enabled")) {
+            return getConfiguration().getArrayString("release.schedule.events");
+        } else {
+            return new String[]{getConfiguration().getString("app.time.initial_time")};
         }
-        String st0 = getSimulationManager().getParameterManager().getString("app.time.initial_time");
-        return new String[]{st0};
     }
 
     /**
      * Adds the specified value listener to receive ValueChanged events from the
-     * paremeter.
+     * parameter.
      *
      * @param listener the ValueListener
      */

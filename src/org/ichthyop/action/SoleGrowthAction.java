@@ -54,7 +54,6 @@
 package org.ichthyop.action;
 
 import java.io.IOException;
-import org.ichthyop.io.BlockType;
 import org.ichthyop.io.LengthTracker;
 import org.ichthyop.io.StageTracker;
 import org.ichthyop.particle.IParticle;
@@ -94,9 +93,9 @@ public class SoleGrowthAction extends AbstractAction {
 
         // Time step expressed in day
         dt_day = (double) getSimulationManager().getTimeManager().get_dt() / Constant.ONE_DAY;
-
+            
         // Pre-defined stages of the sole larva
-        lengthStage = new LengthStage(BlockType.ACTION, getKey());
+        lengthStage = new LengthStage(getKey());
         lengthStage.init();
 
         // Coefficients of the growth equation
@@ -122,6 +121,7 @@ public class SoleGrowthAction extends AbstractAction {
     @Override
     public void init(IParticle particle) {
         LengthParticle.setLength(particle, lengthStage.getThreshold(0));
+        StageParticle.init(particle);
     }
 
     @Override
