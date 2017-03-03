@@ -52,6 +52,7 @@
  */
 package org.ichthyop.manager;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
@@ -61,6 +62,7 @@ import org.ichthyop.io.XParameter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,7 +103,7 @@ public class ParameterManager extends AbstractManager {
     }
 
     public String getConfigurationDescription() {
-        return cfgFile.getDescription();
+        return getString("configuration.description");
     }
 
     public void setConfigurationDescription(String description) {
@@ -109,7 +111,7 @@ public class ParameterManager extends AbstractManager {
     }
 
     public Version getConfigurationVersion() {
-        return cfgFile.getVersion();
+        return new Version(getString("configuration.version"));
     }
 
     public void setConfigurationVersion(Version version) {
@@ -117,7 +119,7 @@ public class ParameterManager extends AbstractManager {
     }
 
     public String getConfigurationTitle() {
-        return cfgFile.getLongName();
+        return getString("configuration.longname");
     }
 
     public void setConfigurationTitle(String longName) {
@@ -441,12 +443,78 @@ public class ParameterManager extends AbstractManager {
         return pathname;
     }
 
+    /**
+     * Loads recursively the parameters from the configuration file. The
+     * function scans one by one the lines of the configuration file. A line is
+     * discarded when it matches any of these criteria: it is empty, it contains
+     * only blank and/or tab characters<br>
+     * Any other lines are expected to be parameters formed as
+     * <i>"key":"value"</i>. Refer to the documentation at the beginning of the
+     * class for details about the parameters.<br>
+     * A parameter whose key start with <i>ichthyop.configuration.</i> means the
+     * value designate an other configuration file that has to be loaded in the
+     * current {@code Configuration}. The function {@code loadProperties} is
+     * called recursively.
+     *
+     * @param filename, the configuration file to be loaded
+     * @param depth, an integer that reflects the level of recursivity of the
+     * function. Zero for the main configuration file, one for a file loaded
+     * from the main configuration file, etc.
+     */
+    private void loadParameters(String filename, int depth) {
+
+        BufferedReader bfIn = null;
+        // Open the buffer
+        try {
+            bfIn = new BufferedReader(new FileReader(filename));
+        } catch (FileNotFoundException ex) {
+            error("Could not find Ichthyop configuration file: " + filename, ex);
+        }
+        StringBuilder msg = new StringBuilder();
+        StringBuilder space = new StringBuilder();
+        for (int i = 0; i < depth; i++) {
+            space.append(". ");
+        }
+        msg.append(space);
+        msg.append("Loading parameters from ");
+        msg.append(filename);
+        info(msg.toString());
+        space.append(". ");
+
+        // Read it
+        String line = null;
+        int iline = 1;
+        try {
+            while ((line = bfIn.readLine()) != null) {
+                line = line.trim();
+                if (!(line.length() <= 1)) {
+                    Parameter entry = new Parameter(iline, filename);
+                    entry.parse(line);
+                    if (parameters.containsKey(entry.key)) {
+                        warning("{0}Ichthyop will ignore parameter {1}", new Object[]{space, entry});
+                        warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
+
+                    } else {
+                        parameters.put(entry.key, entry.value);
+                        debug(space + entry.toString());
+                        if (entry.key.startsWith("ichthyop.configuration")) {
+                            loadParameters(getFile(entry.key), depth + 1);
+                        }
+                    }
+                }
+                iline++;
+            }
+        } catch (IOException ex) {
+            error("Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
+        }
+    }
+
     public HashMap<String, String> toProperties(ConfigurationFile cfg, boolean extended) throws IOException {
         HashMap<String, String> map = new LinkedHashMap();
 
         map.put("configuration.longname", cfgFile.getLongName());
         map.put("configuration.description", clean(cfgFile.getDescription()));
-        map.put("ichthyop.version", cfgFile.getVersion().toString());
+        map.put("configuration.version", cfgFile.getVersion().toString());
         map.put("configuration.blocks", listBlocks(cfgFile));
         for (XBlock block : cfg.readBlocks()) {
             if (block.getType() != BlockType.OPTION) {
@@ -588,5 +656,143 @@ public class ParameterManager extends AbstractManager {
             list.add(param.getKey());
         }
         return handleArray(list.toArray(new String[list.size()]));
+    }
+
+    /**
+     * Inner class that represents a parameter in the configuration file.
+     * {@code Configuration} parses the configuration file line by line. When
+     * the line is not discarded (refer to function
+     * {@link #loadParameters(java.lang.String, int)} for details about
+     * discarded lines), it assumes it is a parameter (formed as
+     * <i>"key":"value"</i> or <i>"key":["value1", "value2", "value3",
+     * "value4"</i>) and creates a new {@code Parameter} object.
+     */
+    private class Parameter {
+
+        /**
+         * Path of the configuration file containing the parameter.
+         */
+        private final String source;
+        /**
+         * The line of the parameter in the configuration file.
+         */
+        private final int iline;
+        /**
+         * The key of the parameter.
+         */
+        private String key;
+        /**
+         * The value of the parameter.
+         */
+        private String value;
+        /**
+         * The separator between key and value. <i>key keySeparator value</i>
+         */
+        final private String keySeparator = ":";
+        /**
+         * The separator between the values of the parameter. <i>key
+         * keySeparator value1 valueSeparator value2 valueSeparator value3</i>
+         */
+        final private String valueSeparator = ",";
+
+        /**
+         * Create a new parameter out of the given line.
+         *
+         * @param iline, the line of the parameter in the configuration file
+         * @param source, the path of the configuration file
+         */
+        Parameter(int iline, String source) {
+            this.iline = iline;
+            this.source = source;
+        }
+
+        /**
+         * Create a new parameter from the command line
+         *
+         * @param key, the key of the parameter
+         * @param value, the value of the parameter
+         */
+        Parameter(String key, String value) {
+            this.key = key;
+            this.value = value;
+            this.source = "command line";
+            this.iline = -1;
+        }
+
+        /**
+         * Parse the line as a parameter. It follows the following steps: guess
+         * the separator between key and value. Splits the line into a key and a
+         * value. Guess the value separator in case it is actually an array of
+         * values.
+         *
+         * @param line, the line to be parsed as a parameter
+         */
+        private void parse(String line) {
+            key = value = null;
+            split(line);
+            value = clean(value);
+        }
+
+        /**
+         * Cleans the value of the parameter. Trims the value (removes leading
+         * and trailing blank characters), and removes any trailing separators.
+         *
+         * @param value, the value to be cleaned
+         * @return a copy of the value, trimmed and without any trailing
+         * separator.
+         */
+        private String clean(String value) {
+            String cleanedValue = value.trim();
+            if (cleanedValue.endsWith(valueSeparator)) {
+                cleanedValue = cleanedValue.substring(0, cleanedValue.lastIndexOf(valueSeparator));
+                return clean(cleanedValue);
+            } else {
+                return cleanedValue;
+            }
+        }
+
+        /**
+         * Splits the given line into a key and a value, using the
+         * {@code keySeparator}. Sends and error message if the line cannot be
+         * split.
+         *
+         * @param line, the line to be split into a key and a value.
+         */
+        private void split(String line) {
+
+            // make sure the line contains at least one semi-colon (key;value)
+            if (!line.contains(keySeparator)) {
+                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
+            }
+            // extract the key and remove leading and trailing double quotes
+            key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim().replaceAll("^\"|\"$", "");;
+            // extract the value
+            try {
+                value = line.substring(line.indexOf(keySeparator) + 1).trim();
+            } catch (StringIndexOutOfBoundsException ex) {
+                // set value to "null"
+                value = "null";
+            }
+            // set empty value to "null"
+            if (value.isEmpty()) {
+                value = "null";
+            }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder str = new StringBuilder();
+            str.append(key);
+            str.append(" = ");
+            str.append(value);
+            str.append(" (from ");
+            str.append(source);
+            if (iline >= 0) {
+                str.append(" line ");
+                str.append(iline);
+            }
+            str.append(")");
+            return str.toString();
+        }
     }
 }

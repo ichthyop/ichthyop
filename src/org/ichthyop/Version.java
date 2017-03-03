@@ -74,6 +74,16 @@ public class Version {
     private final String number;
     private final String date;
 
+    public Version(String version) {
+        String[] tokens = version.split(" ");
+        this.number = tokens[0];
+        if (tokens.length > 1) {
+            this.date = tokens[1].trim().replaceAll("^\\(|\\)$", "");
+        } else {
+            this.date = null;
+        }
+    }
+
     public Version(String number, String date) {
         this.date = date;
         this.number = number;
