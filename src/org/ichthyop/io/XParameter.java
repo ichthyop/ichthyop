@@ -68,24 +68,18 @@ public class XParameter extends org.jdom2.Element {
     final public static String LONGNAME = "long_name";
     final public static String VALUE = "value";
     final public static String TYPE = "type";
-    final public static String HIDDEN = "hidden";
     final public static String DESCRIPTION = "description";
     final public static String FORMAT = "format";
     final public static String ACCEPTED = "accepted";
     final public static String DEFAULT = "default";
     final public static String TEMPLATE = "template";
     private Element value;
-    private final boolean hidden;
     private final ParameterFormat param_format;
 
     XParameter(Element xparameter) {
         super(PARAMETER);
-        hidden = isHidden(xparameter);
         param_format = getFormat(xparameter);
         if (xparameter != null) {
-            if (isHidden()) {
-                this.setAttribute(HIDDEN, String.valueOf(true));
-            }
             addContent(xparameter.cloneContent());
             value = getChild(VALUE);
         }
@@ -97,18 +91,6 @@ public class XParameter extends org.jdom2.Element {
 
     public String getLongName() {
         return getChildTextNormalize(LONGNAME);
-    }
-
-    public boolean isHidden() {
-        return hidden;
-    }
-
-    private boolean isHidden(Element element) {
-        if (null != element && null != element.getAttribute(HIDDEN)) {
-            return Boolean.valueOf(element.getAttribute(HIDDEN).getValue());
-        } else {
-            return false;
-        }
     }
 
     public String getDescription() {

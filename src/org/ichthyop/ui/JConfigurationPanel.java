@@ -100,7 +100,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         ckBoxBlock.addActionListener(this);
         btnRedo.addActionListener(this);
         btnUndo.addActionListener(this);
-        ckBoxHiddenParameter.addActionListener(this);
     }
 
     @Action
@@ -167,13 +166,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         /* Disabled buttons */
         btnUndo.getAction().setEnabled(false);
         btnRedo.getAction().setEnabled(false);
-        ckBoxHiddenParameter.setSelected(false);
         getTable().setModel(block, this);
-        if (block.getNbHiddenParameters() > 0) {
-            ckBoxHiddenParameter.getAction().setEnabled(true);
-        } else {
-            ckBoxHiddenParameter.getAction().setEnabled(false);
-        }
         setParameterEditorEnabled(block.isEnabled());
     }
 
@@ -214,7 +207,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         table.setEnabled(enabled);
         btnUndo.getAction().setEnabled(enabled && getTable().getUndoManager().canUndo());
         btnRedo.getAction().setEnabled(enabled && getTable().getUndoManager().canRedo());
-        ckBoxHiddenParameter.getAction().setEnabled(enabled && (blockTree.getSelectedBlock().getNbHiddenParameters() > 0));
     }
 
     @Override
@@ -308,11 +300,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 } else {
                     info.append(getResourceMap().getString("noDescription.text"));
                 }
-                info.append("</p><br>");
-                if (xparam.isHidden()) {
-                    info.append(getResourceMap().getString("hiddenParameterDescription.text"));
-                }
-                info.append("</i></html>");
+                info.append("</p></i></html>");
                 lblParameter.setText(info.toString());
             } catch (Exception ex) {
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(getResourceMap().getString("pnlParameterInfo.border.title")));
@@ -324,11 +312,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
     private ResourceMap getResourceMap() {
         return Application.getInstance().getContext().getResourceMap(JConfigurationPanel.class);
-    }
-
-    @Action
-    public void showHiddenParameters() {
-        getTable().setAllRowsVisible(ckBoxHiddenParameter.isSelected());
     }
 
     @Action
@@ -452,7 +435,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         lblParameter = new javax.swing.JLabel();
         btnUndo = new javax.swing.JButton();
         btnRedo = new javax.swing.JButton();
-        ckBoxHiddenParameter = new javax.swing.JCheckBox();
         scrollPaneTable = new javax.swing.JScrollPane();
         table = new org.ichthyop.ui.ParameterTable();
 
@@ -717,10 +699,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRedo.setAction(actionMap.get("redo")); // NOI18N
         btnRedo.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
         btnRedo.setName("btnRedo"); // NOI18N
-        
-        ckBoxHiddenParameter.setAction(actionMap.get("showHiddenParameters")); // NOI18N
-        ckBoxHiddenParameter.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
-        ckBoxHiddenParameter.setName("ckBoxHiddenParameter"); // NOI18N
 
         scrollPaneTable.setName("scrollPaneTable"); // NOI18N
 
@@ -748,7 +726,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 .addContainerGap()
                 .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(scrollPaneTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 626, Short.MAX_VALUE)
-                    .addComponent(ckBoxHiddenParameter, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlParameterInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlParametersLayout.createSequentialGroup()
                         .addComponent(btnUndo)
@@ -759,8 +736,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         pnlParametersLayout.setVerticalGroup(
             pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlParametersLayout.createSequentialGroup()
-                .addComponent(ckBoxHiddenParameter)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(scrollPaneTable, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -833,7 +808,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JButton btnUpper;
     private org.jdesktop.swingx.JXBusyLabel busyLabel;
     private javax.swing.JCheckBox ckBoxBlock;
-    private javax.swing.JCheckBox ckBoxHiddenParameter;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

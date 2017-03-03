@@ -80,7 +80,6 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
     private final BlockType block_type;
     private HashMap<String, XParameter> map;
     private List<String> sortedKey;
-    private int nbHiddenParameters;
 
     public XBlock(Element element) throws IOException {
         super(BLOCK);
@@ -89,7 +88,6 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
             throw new IllegalArgumentException("Unknow type for block " + element.getChildText(TREEPATH));
         }
         this.setAttribute(TYPE, block_type.toString());
-        nbHiddenParameters = 0;
         if (element != null) {
             addContent(element.cloneContent());
             map = createMap();
@@ -100,7 +98,6 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
         super(BLOCK);
         this.block_type = block_type;
         this.setAttribute(TYPE, block_type.toString());
-        nbHiddenParameters = 0;
         if (element != null) {
             addContent(element.cloneContent());
             map = createMap();
@@ -163,19 +160,12 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
         }
     }
 
-    public int getNbHiddenParameters() {
-        return nbHiddenParameters;
-    }
-
     private HashMap<String, XParameter> createMap() {
         HashMap<String, XParameter> lmap = new HashMap();
         sortedKey = new ArrayList();
         for (XParameter xparam : readParameters()) {
             lmap.put(xparam.getKey(), xparam);
             sortedKey.add(xparam.getKey());
-            if (xparam.isHidden()) {
-                nbHiddenParameters++;
-            }
         }
         return lmap;
     }
@@ -298,19 +288,7 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
 
         @Override
         public int compare(XParameter o1, XParameter o2) {
-            if (o1.isHidden()) {
-                if (o2.isHidden()) {
-                    return o1.getKey().compareToIgnoreCase(o2.getKey());
-                } else {
-                    return 1;
-                }
-            } else {
-                if (o2.isHidden()) {
-                    return -1;
-                } else {
-                    return o1.getKey().compareToIgnoreCase(o2.getKey());
-                }
-            }
+            return o1.getKey().compareToIgnoreCase(o2.getKey());
         }
     }
 }

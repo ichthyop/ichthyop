@@ -251,10 +251,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
                 if (block.isEnabled()) {
                     for (XParameter param : block.getXParameters()) {
-                        if (!param.isHidden()) {
-                            String key = block.getKey() + "." + param.getKey();
-                            ncOut.addGlobalAttribute(key, param.getValue());
-                        }
+                        String key = block.getKey() + "." + param.getKey();
+                        ncOut.addGlobalAttribute(key, param.getValue());
                     }
                 }
             }

@@ -62,7 +62,6 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
-import javax.swing.RowFilter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -70,7 +69,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import org.ichthyop.calendar.InterannualCalendar;
 import org.ichthyop.io.XBlock;
 import org.ichthyop.io.XParameter;
@@ -130,7 +128,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(block));
         setEditors(block);
-        setAllRowsVisible(false);
         getModel().addTableModelListener(l);
     }
 
@@ -204,30 +201,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
         if (null != getCellEditor()) {
             getCellEditor().stopCellEditing();
         }
-    }
-
-    public void setAllRowsVisible(final boolean visible) {
-        stopEditing();
-        TableRowSorter<ParameterTableModel> sorter = new TableRowSorter(model);
-        sorter.setRowFilter(new RowFilter() {
-
-            @Override
-            public boolean include(Entry entry) {
-                int row = (Integer) entry.getIdentifier();
-                try {
-                    boolean hidden = model.getTableParameter(row).getXParameter().isHidden();
-                    if (visible) {
-                        return true;
-                    } else {
-                        return !hidden;
-                    }
-                } catch (Exception ex) {
-                    return false;
-                }
-            }
-        });
-        setRowSorter(sorter);
-        adjustColumnSizes();
     }
 
     /*
@@ -476,18 +449,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
             } else {
                 comp.setForeground(Color.BLACK);
             }
-
-            int mrow = table.convertRowIndexToModel(row);
-            if (model.getTableParameter(mrow).getXParameter().isHidden()) {
-                comp.setBackground(new Color(255, 0, 0, 20));
-            } else {
-                comp.setBackground(Color.WHITE);
-            }
+            comp.setBackground(Color.WHITE);
             return comp;
         }
-    }
-
-    class ParamTableRowFilter extends TableRowSorter<ParameterTableModel> {
     }
 
     private class TableParameter {
