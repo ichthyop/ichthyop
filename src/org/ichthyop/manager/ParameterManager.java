@@ -534,8 +534,6 @@ public class ParameterManager extends AbstractManager {
                     map.put(key.toString(), nullify(parameter.getFormat().toString()));
                     key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".description");
                     map.put(key.toString(), clean(nullify(parameter.getDescription())));
-                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".default");
-                    map.put(key.toString(), handleArray(nullify(parameter.getDefault())));
                     key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".accepted");
                     map.put(key.toString(), handleArray(parameter.getAcceptedValues()));
                 }
