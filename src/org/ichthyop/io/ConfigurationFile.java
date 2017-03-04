@@ -57,7 +57,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +71,7 @@ import org.jdom2.filter.Filter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 import org.ichthyop.Version;
+import org.ichthyop.util.StringUtil;
 
 public class ConfigurationFile {
 
@@ -215,6 +218,89 @@ public class ConfigurationFile {
             listBlock.add(new XBlock(elt));
         }
         return listBlock;
+    }
+
+    public HashMap<String, String> toProperties(boolean extended) throws IOException {
+        HashMap<String, String> parameters = new LinkedHashMap();
+
+        parameters.put("configuration.longname", getLongName());
+        parameters.put("configuration.description", StringUtil.removeQuotes(getDescription()));
+        parameters.put("configuration.version", getVersion().toString());
+        parameters.put("configuration.subsets", listBlocks());
+        for (XBlock block : readBlocks()) {
+            String bkey = block.getKey().toLowerCase();
+            if (block.getType() != BlockType.OPTION) {
+                parameters.put(bkey + ".enabled", String.valueOf(block.isEnabled()));
+                parameters.put(bkey + ".type", block.getType().toString());
+            }
+            if (extended) {
+                parameters.put(bkey + ".description", StringUtil.removeQuotes(block.getDescription()));
+                parameters.put(bkey + ".treepath", block.getTreePath());
+            }
+            block.getXParameters().forEach((parameter) -> {
+                StringBuilder key;
+                String pkey = parameter.getKey().toLowerCase();
+                if (extended) {
+                    key = new StringBuilder(bkey).append(".").append(pkey).append(".longname");
+                    parameters.put(key.toString(), parameter.getLongName());
+                    key = new StringBuilder(bkey).append(".").append(pkey).append(".format");
+                    parameters.put(key.toString(), StringUtil.nullify(parameter.getFormat().toString()));
+                    key = new StringBuilder(bkey).append(".").append(pkey).append(".description");
+                    parameters.put(key.toString(), StringUtil.removeQuotes(StringUtil.nullify(parameter.getDescription())));
+                    key = new StringBuilder(bkey).append(".").append(pkey).append(".accepted");
+                    parameters.put(key.toString(), handleArray(parameter.getAcceptedValues()));
+                }
+                key = new StringBuilder(bkey).append(".").append(pkey);
+                parameters.put(key.toString(), handleArray(StringUtil.nullify(parameter.getValue())));
+                key = new StringBuilder(bkey).append(".parameters");
+                parameters.put(key.toString(), listParameters(block));
+            });
+        }
+
+        return parameters;
+    }
+
+    
+
+    private String listBlocks() throws IOException {
+        List<String> list = new ArrayList();
+        for (XBlock block : readBlocks()) {
+            list.add(block.getKey().toLowerCase());
+        }
+        return handleArray(list.toArray(new String[list.size()]));
+    }
+
+    private String listParameters(XBlock block) {
+        List<String> list = new ArrayList();
+        for (XParameter param : block.getXParameters()) {
+            list.add(param.getKey());
+        }
+        return handleArray(list.toArray(new String[list.size()]));
+    }
+
+    private String handleArray(String[] values) {
+
+        String[] array = new String[values.length];
+        for (int k = 0; k < array.length; k++) {
+            array[k] = StringUtil.isNotString(values[k]) ? values[k] : "\"" + values[k] + "\"";
+        }
+        return Arrays.toString(array);
+    }
+
+    private String handleArray(String value) {
+        String[] tokens = value.split("\"");
+        List<String> list = new ArrayList();
+        for (String token : tokens) {
+            String str = token.trim();
+            if (!str.isEmpty()) {
+                list.add(StringUtil.isNotString(str) ? str : "\"" + str + "\"");
+            }
+        }
+        if (list.size() > 1) {
+            return Arrays.toString(list.toArray(new String[list.size()]));
+        } else {
+            return value;
+        }
     }
 
     public List<XBlock> readBlocks(final BlockType type) {

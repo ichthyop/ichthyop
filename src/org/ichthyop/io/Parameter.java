@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,25 +50,63 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+package org.ichthyop.io;
 
-package org.ichthyop.ui;
-
-import javax.swing.JPanel;
-import org.ichthyop.io.XBlock;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class JBlockPanel extends JPanel {
+public class Parameter extends IchthyopLinker {
 
-    private XBlock block;
+    final private String key;
 
-    public XBlock getBlock() {
-        return block;
+    public Parameter(String key) {
+        this.key = key;
     }
 
-    public void setBlock(XBlock block) {
-        this.block = block;
+    public String getKey() {
+        return key;
+    }
+
+    public String getLongName() {
+        return !getConfiguration().isNull(key + ".longname")
+                ? getConfiguration().getString(key + ".longname")
+                : key;
+    }
+
+    public String getDescription() {
+        return getConfiguration().isNull(key + ".description")
+                ? null
+                : getConfiguration().getString(key + ".description");
+    }
+
+    public ParameterFormat getFormat() {
+        return getConfiguration().isNull(key + ".format")
+                ? ParameterFormat.TEXT
+                : ParameterFormat.getFormat(getConfiguration().getString(key + ".format"));
+    }
+
+    public String[] getAcceptedValues() {
+        if (getFormat().equals(ParameterFormat.COMBO) && !getConfiguration().isNull(key + ".accepted")) {
+            return getConfiguration().getArrayString(key + ".accepted");
+        }
+        return new String[]{};
+
+    }
+
+    public String getValue() {
+        return getConfiguration().getString(key);
+    }
+
+    public void setValue(String value) {
+        getConfiguration().setString(key, value);
+    }
+
+    public String getTemplate() {
+        return getConfiguration().isNull(key + ".template")
+                ? null
+                : getConfiguration().getString(key + ".template");
     }
 }

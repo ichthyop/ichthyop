@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,30 +50,36 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
-package org.ichthyop.io;
+package org.ichthyop.util;
 
 /**
  *
  * @author pverley
  */
-public enum BlockType {
-
-    OPTION,
-    ACTION,
-    RELEASE,
-    DATASET;
-
-    public static BlockType getType(String value) {
-        for (BlockType type : values()) {
-            if (type.toString().equals(value))
-                return type;
-        }
-        return null;
+public class StringUtil {
+    
+     private static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");
     }
-
-    @Override
-    public String toString() {
-        return name().toLowerCase();
+    
+    private static boolean isBoolean(String str) {
+        return Boolean.TRUE.toString().equalsIgnoreCase(str) || Boolean.FALSE.toString().equalsIgnoreCase(str);
     }
+    
+    private static boolean isArray(String str) {
+        return str.startsWith("[") && str.endsWith("]");
+    }
+    
+    public static boolean isNotString(String str) {
+        return isNumeric(str) || isBoolean(str) || isArray(str) || str.equalsIgnoreCase("null");
+    }
+    
+    public static String nullify(String str) {
+        return str.isEmpty() ? "null" : str;
+    }
+    
+    public static String removeQuotes(String str) {
+        return str.replaceAll("[\"'\u2018\u2019\u201c\u201d\u201f]", "");
+    }
+    
 }

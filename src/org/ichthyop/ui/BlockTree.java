@@ -55,7 +55,7 @@ package org.ichthyop.ui;
 
 import java.awt.Component;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -68,10 +68,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import org.ichthyop.io.ParameterSet;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
-import org.ichthyop.io.XBlock;
-import org.ichthyop.manager.ParameterManager;
 import org.ichthyop.manager.SimulationManager;
 
 /**
@@ -80,7 +79,7 @@ import org.ichthyop.manager.SimulationManager;
  */
 public class BlockTree extends JTree {
 
-    private HashMap<String, XBlock> blockMap;
+    private HashMap<String, ParameterSet> blockMap;
 
     public BlockTree() {
         super(new Object[]{});
@@ -136,27 +135,17 @@ public class BlockTree extends JTree {
         return blockMap.keySet();
     }
 
-    public void put(String key, XBlock variable) {
+    public void put(String key, ParameterSet variable) {
         if (blockMap != null) {
             blockMap.put(key, variable);
         }
     }
 
-    public XBlock get(String key) {
+    public ParameterSet get(String key) {
         if (blockMap != null) {
             return blockMap.get(key);
         }
         return null;
-    }
-
-    public void writeStructure(ParameterManager manager) {
-        for (Enumeration e1 = getRoot().postorderEnumeration(); e1.hasMoreElements();) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
-            if (node.isLeaf()) {
-                XBlock block = blockMap.get(nodeToTreePath(node));
-                manager.addBlock(block);
-            }
-        }
     }
 
     public void expandAll() {
@@ -177,15 +166,11 @@ public class BlockTree extends JTree {
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(getSimulationManager().getConfigurationFile().getName());
         setModel(new DefaultTreeModel(root));
-        List<XBlock> listb = new ArrayList();
-        for (XBlock block : getSimulationManager().getParameterManager().readBlocks()) {
-            listb.add(block);
-        }
-        //Collections.sort(listb);
-        Collections.reverse(listb);
-        blockMap = new HashMap(listb.size());
-        for (XBlock block : listb) {
-            insertIntoTree(block);
+        List<String> keys = Arrays.asList(getSimulationManager().getParameterManager().getParameterSets());
+        Collections.reverse(keys);
+        blockMap = new HashMap(keys.size());
+        for (String key : keys) {
+            insertIntoTree(new ParameterSet(key));
         }
         setCellRenderer(new TreeRenderer());
     }
@@ -236,7 +221,7 @@ public class BlockTree extends JTree {
         return parent.getIndex(node);
     }
 
-    public void refresh(DefaultMutableTreeNode node, XBlock block) {
+    public void refresh(DefaultMutableTreeNode node, ParameterSet block) {
         int leafIndex = getLeafIndex(node);
         remove(node);
         insertIntoTree(block, leafIndex, true);
@@ -253,11 +238,11 @@ public class BlockTree extends JTree {
         }
     }
 
-    public void insertIntoTree(XBlock block) {
+    public void insertIntoTree(ParameterSet block) {
         insertIntoTree(block, 0, false);
     }
 
-    public void insertIntoTree(XBlock block, int leafIndex, boolean isVisible) {
+    public void insertIntoTree(ParameterSet block, int leafIndex, boolean isVisible) {
 
         blockMap.put(block.getTreePath(), block);
         String[] treePath = block.getTreePath().split("/");
@@ -288,7 +273,7 @@ public class BlockTree extends JTree {
 
     public String nodeToTreePath(DefaultMutableTreeNode node) {
         TreeNode[] path = node.getPath();
-        StringBuffer key = new StringBuffer();
+        StringBuilder key = new StringBuilder();
         if (path.length < 2) {
             return null;
         }
@@ -300,7 +285,7 @@ public class BlockTree extends JTree {
         return key.toString();
     }
 
-    public XBlock getSelectedBlock() {
+    public ParameterSet getSelectedBlock() {
         return blockMap.get(getTreePath());
     }
 

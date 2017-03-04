@@ -56,100 +56,81 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
-import org.ichthyop.io.BlockType;
-import org.ichthyop.io.XBlock;
-import org.ichthyop.io.XParameter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import org.ichthyop.Version;
 import org.ichthyop.io.ConfigurationFile;
 import org.ichthyop.util.Separator;
+import org.ichthyop.util.StringUtil;
 
 /**
  *
  * @author pverley
  */
 public class ParameterManager extends AbstractManager {
-
+    
     private static final ParameterManager PARAMETER_MANAGER = new ParameterManager();
-    private ConfigurationFile cfgFile;
     private HashMap<String, String> parameters;
     private String inputPathname;
-
+    private String mainFilename;
+    
     public static ParameterManager getInstance() {
         return PARAMETER_MANAGER;
     }
-
+    
     public void setConfigurationFile(File file) throws Exception {
-        cfgFile = new ConfigurationFile(file);
-        cfgFile.load();
-        parameters = toProperties(cfgFile, false);
+        if (file.getName().endsWith(".xml")) {
+            xmlImport(file);
+        } else {
+            this.loadParameters(file.getAbsolutePath(), 0);
+        }
+        mainFilename = file.getAbsolutePath();
         inputPathname = file.getParent();
     }
-
-    public ConfigurationFile getConfigurationFile() {
-        return cfgFile;
+    
+    private void xmlImport(File file) throws Exception {
+        ConfigurationFile cfgFile = new ConfigurationFile(file);
+        cfgFile.load();
+        parameters = cfgFile.toProperties(true);
+        //toJson(file.getAbsolutePath(), parameters);
     }
-
+    
     public String getConfigurationDescription() {
         return getString("configuration.description");
     }
-
+    
     public void setConfigurationDescription(String description) {
-        cfgFile.setDescription(description);
+        setString("configuration.description", description);
     }
-
+    
     public Version getConfigurationVersion() {
         return new Version(getString("configuration.version"));
     }
-
+    
     public void setConfigurationVersion(Version version) {
-        cfgFile.setVersion(version);
+        setString("configuration.version", version.toString());
     }
-
+    
     public String getConfigurationTitle() {
         return getString("configuration.longname");
     }
-
+    
     public void setConfigurationTitle(String longName) {
-        cfgFile.setLongName(longName);
+        setString("configuration.longname", longName);
     }
-
-    public List<XParameter> getParameters() {
-        return cfgFile.getParameters();
-    }
-
-    public Iterable<XBlock> getBlocks(BlockType type) {
-        return cfgFile.getBlocks(type);
-    }
-
-    public Collection<XBlock> readBlocks() throws IOException {
-        return cfgFile.readBlocks();
-    }
-
-    public void cleanup() {
-        cfgFile.removeAllBlocks();
-    }
-
+    
+    
     public void save() throws IOException, FileNotFoundException {
-        cfgFile.write(new FileOutputStream(cfgFile.getFile()));
+        // @TODO
     }
-
-    public void addBlock(XBlock block) {
-        cfgFile.addBlock(block);
-    }
-
+    
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
@@ -159,7 +140,7 @@ public class ParameterManager extends AbstractManager {
 //            System.out.println(parameter);
 //        }
     }
-
+    
     @Override
     public void initializePerformed(InitializeEvent e) {
         // does nothing
@@ -343,7 +324,7 @@ public class ParameterManager extends AbstractManager {
         } else if (warning) {
             warning("Could not find Boolean parameter " + key + ". Osmose assumes it is false.");
         }
-
+        
         return false;
     }
 
@@ -466,7 +447,7 @@ public class ParameterManager extends AbstractManager {
      * from the main configuration file, etc.
      */
     private void loadParameters(String filename, int depth) {
-
+        
         BufferedReader bfIn = null;
         // Open the buffer
         try {
@@ -497,7 +478,7 @@ public class ParameterManager extends AbstractManager {
                     if (parameters.containsKey(entry.key)) {
                         warning("{0}Ichthyop will ignore parameter {1}", new Object[]{space, entry});
                         warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
-
+                        
                     } else {
                         parameters.put(entry.key, entry.value);
                         debug(space + entry.toString());
@@ -514,68 +495,30 @@ public class ParameterManager extends AbstractManager {
     }
     
     public String[] getParameterSets() {
-        return getArrayString("configuration.parameter_sets");
+        return getArrayString("configuration.subsets");
     }
-
-    public HashMap<String, String> toProperties(ConfigurationFile cfg, boolean extended) throws IOException {
-        HashMap<String, String> map = new LinkedHashMap();
-
-        map.put("configuration.longname", cfgFile.getLongName());
-        map.put("configuration.description", clean(cfgFile.getDescription()));
-        map.put("configuration.version", cfgFile.getVersion().toString());
-        map.put("configuration.parameter_sets", listBlocks(cfgFile));
-        for (XBlock block : cfg.readBlocks()) {
-            if (block.getType() != BlockType.OPTION) {
-                map.put(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
-                map.put(block.getKey() + ".type", block.getType().toString());
-            }
-            if (extended) {
-                map.put(block.getKey() + ".description", clean(block.getDescription()));
-                map.put(block.getKey() + ".treepath", block.getTreePath());
-            }
-            block.getXParameters().forEach((parameter) -> {
-                StringBuilder key;
-                if (extended) {
-                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".long_name");
-                    map.put(key.toString(), parameter.getLongName());
-                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".format");
-                    map.put(key.toString(), nullify(parameter.getFormat().toString()));
-                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".description");
-                    map.put(key.toString(), clean(nullify(parameter.getDescription())));
-                    key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey()).append(".accepted");
-                    map.put(key.toString(), handleArray(parameter.getAcceptedValues()));
-                }
-                key = new StringBuilder(block.getKey()).append(".").append(parameter.getKey());
-                map.put(key.toString(), handleArray(nullify(parameter.getValue())));
-                key = new StringBuilder(block.getKey()).append(".parameters");
-                map.put(key.toString(), listParameters(block));
-            });
-        }
-
-        return map;
-    }
-
-    private void toCSV(HashMap<String, String> parameters, String separator) throws IOException {
-
-        String file = cfgFile.getFile().toString().replaceAll("xml$", "cfg");
+    
+    private void toCSV(String xmlfile, HashMap<String, String> parameters, String separator) throws IOException {
+        
+        String file = xmlfile.replaceAll("xml$", "cfg");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             String newline = System.getProperty("line.separator");
-
+            
             for (Entry<String, String> parameter : parameters.entrySet()) {
                 StringBuilder str = new StringBuilder();
                 str.append(parameter.getKey());
                 str.append(separator);
                 String value = parameter.getValue();
-                str.append(isNotString(value) ? value : "\"" + value + "\"");
+                str.append(StringUtil.isNotString(value) ? value : "\"" + value + "\"");
                 str.append(newline);
                 writer.write(str.toString());
             }
         }
     }
-
-    private void toJson(HashMap<String, String> parameters) throws IOException {
-
-        String file = cfgFile.getFile().toString().replaceAll("xml$", "json");
+    
+    private void toJson(String xmlfile, HashMap<String, String> parameters) throws IOException {
+        
+        String file = xmlfile.replaceAll("xml$", "json");
         String newline = System.getProperty("line.separator");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("{" + newline);
@@ -588,7 +531,7 @@ public class ParameterManager extends AbstractManager {
                 str.append("\"");
                 str.append(":");
                 String value = parameter.getValue();
-                str.append(isNotString(value) ? value : "\"" + value + "\"");
+                str.append(StringUtil.isNotString(value) ? value : "\"" + value + "\"");
                 if (++k < size) {
                     str.append(",");
                 }
@@ -598,72 +541,7 @@ public class ParameterManager extends AbstractManager {
             writer.write("}" + newline);
         }
     }
-
-    private String clean(String str) {
-        return str.replaceAll("[\"'\u2018\u2019\u201c\u201d\u201f]", "");
-    }
-
-    private boolean isNumeric(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?");
-    }
-
-    private boolean isBoolean(String str) {
-        return Boolean.TRUE.toString().equalsIgnoreCase(str) || Boolean.FALSE.toString().equalsIgnoreCase(str);
-    }
-
-    private boolean isArray(String str) {
-        return str.startsWith("[") && str.endsWith("]");
-    }
-
-    private boolean isNotString(String str) {
-        return isNumeric(str) || isBoolean(str) || isArray(str) || str.equalsIgnoreCase("null");
-    }
-
-    private String nullify(String str) {
-        return str.isEmpty() ? "null" : str;
-    }
-
-    private String handleArray(String[] values) {
-
-        String[] array = new String[values.length];
-        for (int k = 0; k < array.length; k++) {
-            array[k] = isNotString(values[k]) ? values[k] : "\"" + values[k] + "\"";
-        }
-        return Arrays.toString(array);
-    }
-
-    private String handleArray(String value) {
-        String[] tokens = value.split("\"");
-        List<String> list = new ArrayList();
-        for (String token : tokens) {
-            String str = token.trim();
-            if (!str.isEmpty()) {
-                list.add(isNotString(str) ? str : "\"" + str + "\"");
-            }
-        }
-        if (list.size() > 1) {
-            return Arrays.toString(list.toArray(new String[list.size()]));
-        } else {
-            return value;
-        }
-    }
-
-    private String listBlocks(ConfigurationFile cfg) throws IOException {
-        List<String> list = new ArrayList();
-        for (XBlock block : cfg.readBlocks()) {
-            list.add(block.getKey());
-        }
-        return handleArray(list.toArray(new String[list.size()]));
-    }
-
-    private String listParameters(XBlock block) {
-        List<String> list = new ArrayList();
-        for (XParameter param : block.getXParameters()) {
-            list.add(param.getKey());
-        }
-        return handleArray(list.toArray(new String[list.size()]));
-    }
-
+    
     /**
      * Inner class that represents a parameter in the configuration file.
      * {@code Configuration} parses the configuration file line by line. When
@@ -784,7 +662,7 @@ public class ParameterManager extends AbstractManager {
                 value = "null";
             }
         }
-
+        
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder();

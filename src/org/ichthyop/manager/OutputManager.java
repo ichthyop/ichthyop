@@ -60,9 +60,7 @@ import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.TypeZone;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.io.BlockType;
-import org.ichthyop.io.XBlock;
 import java.io.IOException;
-import java.util.logging.Level;
 import ucar.nc2.NetcdfFileWriteable;
 import org.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
@@ -80,7 +78,8 @@ import org.ichthyop.io.LonTracker;
 import org.ichthyop.io.MortalityTracker;
 import org.ichthyop.io.TimeTracker;
 import org.ichthyop.io.CustomTracker;
-import org.ichthyop.io.XParameter;
+import org.ichthyop.io.ParameterSet;
+import org.ichthyop.io.Parameter;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -244,16 +243,14 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         ncOut.addGlobalAttribute("transport_dimension", dim);
 
         /* Write all parameters */
-        for (BlockType type : BlockType.values()) {
-            for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
-                if (!block.getType().equals(BlockType.OPTION)) {
-                    ncOut.addGlobalAttribute(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
-                }
-                if (block.isEnabled()) {
-                    for (XParameter param : block.getXParameters()) {
-                        String key = block.getKey() + "." + param.getKey();
-                        ncOut.addGlobalAttribute(key, param.getValue());
-                    }
+        for (String key : getConfiguration().getParameterSets()) {
+            ParameterSet parameterSet = new ParameterSet(key);
+            if (!parameterSet.getType().equals(BlockType.OPTION)) {
+                ncOut.addGlobalAttribute(parameterSet.getKey() + ".enabed", String.valueOf(parameterSet.isEnabled()));
+            }
+            if (parameterSet.isEnabled()) {
+                for (Parameter param : parameterSet.getParameters()) {
+                    ncOut.addGlobalAttribute(param.getKey(), param.getValue());
                 }
             }
         }

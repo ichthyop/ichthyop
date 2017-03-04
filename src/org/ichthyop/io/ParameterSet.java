@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,30 +50,66 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.io;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public enum BlockType {
+public class ParameterSet extends IchthyopLinker {
 
-    OPTION,
-    ACTION,
-    RELEASE,
-    DATASET;
+    final private String key;
 
-    public static BlockType getType(String value) {
-        for (BlockType type : values()) {
-            if (type.toString().equals(value))
-                return type;
-        }
-        return null;
+    public ParameterSet(String key) {
+        this.key = key;
     }
 
-    @Override
-    public String toString() {
-        return name().toLowerCase();
+    public String getKey() {
+        return key;
+    }
+
+    public BlockType getType() {
+        return getConfiguration().isNull(key + ".type")
+                ? BlockType.OPTION
+                : BlockType.getType(getConfiguration().getString(key + ".type"));
+    }
+
+    public String getTreePath() {
+        return getConfiguration().getString(key + ".treepath");
+    }
+
+    public boolean isEnabled() {
+        return getConfiguration().getBoolean(key + ".enabled", false);
+    }
+
+    public boolean canBeDeactivated() {
+        return getConfiguration().canFind(key + ".enabled");
+    }
+
+    public void setEnabled(boolean enabled) {
+        getConfiguration().setString(key + ".enabled", Boolean.toString(enabled));
+    }
+
+    public String getDescription() {
+        return getConfiguration().isNull(key + ".description")
+                ? null
+                : getConfiguration().getString(key + ".description");
+    }
+
+    public Parameter getParameter(String key) {
+        return new Parameter(this.key + "." + key);
+    }
+
+    public List<Parameter> getParameters() {
+        String[] pkeys = getConfiguration().getArrayString(key + ".parameters");
+        List<Parameter> parameters = new ArrayList(pkeys.length);
+        for (String pkey : pkeys) {
+            parameters.add(new Parameter(key + "." + pkey));
+        }
+        return parameters;
     }
 }

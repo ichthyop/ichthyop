@@ -85,38 +85,40 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the configuration file to the application version.
      */
     public void upgrade() throws Exception {
-
-        /*
-         * Backup configuration file
-         */
-        File bak = new File(getConfigurationFile().getFile().getPath() + ".bak");
-        try {
-            IOTools.copyFile(getConfigurationFile().getFile(), bak);
-            getLogger().log(Level.INFO, "[Configuration] A copy of the original configuration file has been saved as {0}", bak.getName());
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "[Configuration] Failed to backup the configuration file.", ex);
-        }
-        /*
-         * Upgrade the configuration file to latest version
-         */
-        if (getConfigurationVersion().priorTo(Version.V31)) {
-            u30bTo31();
-        }
-        if (getConfigurationVersion().priorTo(Version.V32)) {
-            u31To32();
-        }
-        if (getConfigurationVersion().priorTo(Version.V33B)) {
-            u32To33();
-        }
-        /*
-         * Save the updated configuration file
-         */
-        Iterator<XBlock> it = getConfigurationFile().getAllBlocks().iterator();
-        getSimulationManager().getParameterManager().cleanup();
-        while (it.hasNext()) {
-            getSimulationManager().getParameterManager().addBlock(it.next());
-        }
-        getSimulationManager().getParameterManager().save();
+        
+//
+//
+//        /*
+//         * Backup configuration file
+//         */
+//        File bak = new File(getConfigurationFile().getFile().getPath() + ".bak");
+//        try {
+//            IOTools.copyFile(getConfigurationFile().getFile(), bak);
+//            getLogger().log(Level.INFO, "[Configuration] A copy of the original configuration file has been saved as {0}", bak.getName());
+//        } catch (IOException ex) {
+//            getLogger().log(Level.SEVERE, "[Configuration] Failed to backup the configuration file.", ex);
+//        }
+//        /*
+//         * Upgrade the configuration file to latest version
+//         */
+//        if (getConfigurationVersion().priorTo(Version.V31)) {
+//            u30bTo31();
+//        }
+//        if (getConfigurationVersion().priorTo(Version.V32)) {
+//            u31To32();
+//        }
+//        if (getConfigurationVersion().priorTo(Version.V33B)) {
+//            u32To33();
+//        }
+//        /*
+//         * Save the updated configuration file
+//         */
+//        Iterator<XBlock> it = getConfigurationFile().getAllBlocks().iterator();
+//        getSimulationManager().getParameterManager().cleanup();
+//        while (it.hasNext()) {
+//            getSimulationManager().getParameterManager().addBlock(it.next());
+//        }
+//        getSimulationManager().getParameterManager().save();
     }
 
     /*
@@ -310,15 +312,18 @@ public class UpdateManager extends AbstractManager {
     }
 
     private ConfigurationFile getConfigurationFile() {
-        return getSimulationManager().getParameterManager().getConfigurationFile();
+        //return getSimulationManager().getParameterManager().getConfigurationFile();
+        return null;
     }
 
     private XParameter getXParameter(BlockType blockType, String blockKey, String key) {
-        return getSimulationManager().getParameterManager().getConfigurationFile().getXParameter(blockType, blockKey, key);
+        //return getSimulationManager().getParameterManager().getConfigurationFile().getXParameter(blockType, blockKey, key);
+        return null;
     }
 
     private XBlock getXBlock(BlockType blockType, String blockKey) {
-        return getSimulationManager().getParameterManager().getConfigurationFile().getBlock(blockType, blockKey);
+        //return getSimulationManager().getParameterManager().getConfigurationFile().getBlock(blockType, blockKey);
+        return null;
     }
 
     public boolean versionMismatch() throws Exception {

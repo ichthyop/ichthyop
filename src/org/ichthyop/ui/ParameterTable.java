@@ -70,8 +70,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import org.ichthyop.calendar.InterannualCalendar;
-import org.ichthyop.io.XBlock;
-import org.ichthyop.io.XParameter;
 import java.awt.event.ActionEvent;
 import java.text.ParseException;
 import java.util.logging.Level;
@@ -87,6 +85,8 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 import org.ichthyop.calendar.Day360Calendar;
+import org.ichthyop.io.Parameter;
+import org.ichthyop.io.ParameterSet;
 import org.ichthyop.manager.TimeManager;
 
 /*
@@ -124,14 +124,14 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return model.getUndoManager();
     }
 
-    public void setModel(XBlock block, TableModelListener l) {
+    public void setModel(ParameterSet block, TableModelListener l) {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(block));
         setEditors(block);
         getModel().addTableModelListener(l);
     }
 
-    private void setEditors(XBlock block) {
+    private void setEditors(ParameterSet block) {
 
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
@@ -143,7 +143,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         setDefaultRenderer(Object.class, new ParamTableCellRenderer());
 
         for (int row = 0; row < model.getRowCount(); row++) {
-            XParameter xparam = block.getXParameter(getParameterKey(row));
+            Parameter xparam = block.getParameter(getParameterKey(row));
             Object value = model.getValueAt(row, 1);
             switch (xparam.getFormat()) {
                 case COMBO:
@@ -239,13 +239,13 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
     }
 
-    private void setupDateEditor(XBlock block) {
+    private void setupDateEditor(ParameterSet block) {
         Calendar calendar;
 
         String origin = "1900/01/01 00:00";
         if (null != model.block) {
-            if (null != block.getXParameter("time_origin")) {
-                origin = block.getXParameter("time_origin").getValue();
+            if (null != block.getParameter("time_origin")) {
+                origin = block.getParameter("time_origin").getValue();
             }
         }
         Calendar calendar_o = Calendar.getInstance();
@@ -259,7 +259,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
         int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
         int minute_o = calendar_o.get(Calendar.MINUTE);
-        if (block.getXParameter("calendar_type").getValue().equals("climato")) {
+        if (block.getParameter("calendar_type").getValue().equals("climato")) {
             calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
         } else {
             calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
@@ -294,7 +294,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
     public String getParameterKey(int row) {
         String key = "";
         if (row >= 0) {
-            key = model.getTableParameter(row).getXParameter().getKey();
+            key = model.getTableParameter(row).getParameter().getKey();
         }
         return key;
     }
@@ -309,14 +309,14 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     public class ParameterTableModel extends AbstractTableModel {
 
-        private XBlock block;
+        private ParameterSet block;
         private TableParameter[] data;
         final public static String NAME_HEADER = "Name";
         final public static String VALUE_HEADER = "Value";
         private final String[] HEADERS = new String[]{NAME_HEADER, VALUE_HEADER};
         private JUndoManager undoManager;
 
-        ParameterTableModel(XBlock block) {
+        ParameterTableModel(ParameterSet block) {
             this.block = block;
             data = createData();
             addUndoableEditListener(undoManager = new JUndoManager());
@@ -402,11 +402,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
         private TableParameter[] createData() {
 
-            Collection<XParameter> list = block.getXParameters();
+            Collection<Parameter> list = block.getParameters();
             List<TableParameter> listData = new ArrayList();
             TableParameter[] tableData;
             int i = 0;
-            for (XParameter xparam : list) {
+            for (Parameter xparam : list) {
                 listData.add(new TableParameter(xparam));
             }
             tableData = new TableParameter[listData.size()];
@@ -419,8 +419,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
         private Object[] getLongValues() {
 
             String[] longuest = new String[]{"", ""};
-            Collection<XParameter> list = block.getXParameters();
-            for (XParameter xparam : list) {
+            Collection<Parameter> list = block.getParameters();
+            for (Parameter xparam : list) {
                 if (xparam.getLongName().length() > longuest[0].length()) {
                     longuest[0] = xparam.getLongName();
                 }
@@ -456,15 +456,15 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     private class TableParameter {
 
-        private final XParameter xparameter;
+        private final Parameter xparameter;
         private String value;
 
-        TableParameter(XParameter xparameter) {
+        TableParameter(Parameter xparameter) {
             this.xparameter = xparameter;
             this.value = xparameter.getValue();
         }
 
-        XParameter getXParameter() {
+        Parameter getParameter() {
             return xparameter;
         }
 
