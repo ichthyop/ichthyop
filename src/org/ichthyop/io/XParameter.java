@@ -67,11 +67,9 @@ public class XParameter extends org.jdom2.Element {
     final public static String KEY = "key";
     final public static String LONGNAME = "long_name";
     final public static String VALUE = "value";
-    final public static String TYPE = "type";
     final public static String DESCRIPTION = "description";
     final public static String FORMAT = "format";
     final public static String ACCEPTED = "accepted";
-    final public static String DEFAULT = "default";
     final public static String TEMPLATE = "template";
     private Element value;
     private final ParameterFormat param_format;
@@ -133,14 +131,6 @@ public class XParameter extends org.jdom2.Element {
 
     public void setValue(String str) {
         value.setText(str);
-    }
-
-    public String getDefault() {
-        if (null != getChildTextNormalize(DEFAULT)) {
-            return getChildTextNormalize(DEFAULT);
-        } else {
-            return getFormat().getDefault();
-        }
     }
 
     public String getTemplate() {
