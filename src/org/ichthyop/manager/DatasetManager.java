@@ -74,7 +74,7 @@ public class DatasetManager extends AbstractManager {
     private void instantiateDataset() throws Exception {
 
         int n = 0;
-        String[] keys = getConfiguration().getArrayString("configuration.blocks");
+        String[] keys = getConfiguration().getParameterSets();
         for (String key : keys) {
             if (getConfiguration().canFind(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {

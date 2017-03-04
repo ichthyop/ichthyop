@@ -219,6 +219,10 @@ public class ParameterManager extends AbstractManager {
         }
         return filteredKeys;
     }
+    
+    public void setString(String key, String value) {
+        parameters.put(key, value);
+    }
 
     /**
      * Returns the value of the specified parameter as a {@code String}
@@ -508,6 +512,10 @@ public class ParameterManager extends AbstractManager {
             error("Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
         }
     }
+    
+    public String[] getParameterSets() {
+        return getArrayString("configuration.parameter_sets");
+    }
 
     public HashMap<String, String> toProperties(ConfigurationFile cfg, boolean extended) throws IOException {
         HashMap<String, String> map = new LinkedHashMap();
@@ -515,7 +523,7 @@ public class ParameterManager extends AbstractManager {
         map.put("configuration.longname", cfgFile.getLongName());
         map.put("configuration.description", clean(cfgFile.getDescription()));
         map.put("configuration.version", cfgFile.getVersion().toString());
-        map.put("configuration.blocks", listBlocks(cfgFile));
+        map.put("configuration.parameter_sets", listBlocks(cfgFile));
         for (XBlock block : cfg.readBlocks()) {
             if (block.getType() != BlockType.OPTION) {
                 map.put(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));

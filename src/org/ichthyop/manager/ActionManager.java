@@ -82,7 +82,7 @@ public class ActionManager extends AbstractManager {
 
     private void loadActions() throws InstantiationException {
         actionMap = new HashMap();
-        String[] keys = getConfiguration().getArrayString("configuration.blocks");
+        String[] keys = getConfiguration().getParameterSets();
         for (String key : keys) {
             System.out.println(key);
             if (getConfiguration().canFind(key + ".type")
