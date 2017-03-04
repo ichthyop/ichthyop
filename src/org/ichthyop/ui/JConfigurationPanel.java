@@ -188,7 +188,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             if (selectedBlock.isEnabled()) {
                 for (String block : getSimulationManager().getParameterManager().getParameterSets()) {
                     ParameterSet set = new ParameterSet(block);
-                    if (set.getType().equals(type) && set.getKey().equals(selectedBlock.getKey())) {
+                    if (set.getType().equals(type) && !set.getKey().equals(selectedBlock.getKey())) {
                         blockTree.get(set.getTreePath()).setEnabled(false);
                     }
                 }
