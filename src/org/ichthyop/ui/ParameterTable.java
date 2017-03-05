@@ -55,39 +55,27 @@ package org.ichthyop.ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
-import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-import org.ichthyop.calendar.InterannualCalendar;
-import java.awt.event.ActionEvent;
-import java.text.ParseException;
 import java.util.logging.Level;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.AbstractUndoableEdit;
-import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import javax.swing.undo.UndoableEdit;
-import org.ichthyop.calendar.Day360Calendar;
 import org.ichthyop.io.Parameter;
 import org.ichthyop.io.ParameterSet;
-import org.ichthyop.manager.TimeManager;
 
 /*
  *
@@ -127,23 +115,19 @@ public class ParameterTable extends JMultiCellEditorsTable {
     public void setModel(ParameterSet block, TableModelListener l) {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(block));
-        setEditors(block);
+        setEditors();
         getModel().addTableModelListener(l);
     }
 
-    private void setEditors(ParameterSet block) {
+    private void setEditors() {
 
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
 
-        if (block.getKey().equals("app.time")) {
-            setupDateEditor(block);
-        }
-
         setDefaultRenderer(Object.class, new ParamTableCellRenderer());
 
         for (int row = 0; row < model.getRowCount(); row++) {
-            Parameter xparam = block.getParameter(getParameterKey(row));
+            Parameter xparam = new Parameter(getParameterKey(row));
             Object value = model.getValueAt(row, 1);
             switch (xparam.getFormat()) {
                 case COMBO:
@@ -174,10 +158,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.DIRECTORIES_ONLY));
                     break;
                 case CLASS:
-                    try {
-                        editorModel.addEditorForRow(row, new ClassEditor());
-                    } catch (Exception ex) {
-                    }
+                    editorModel.addEditorForRow(row, new ClassEditor());
                     break;
                 case LIST:
                     editorModel.addEditorForRow(row, new ListEditor());
@@ -236,58 +217,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
             cellWidth = comp.getPreferredSize().width;
 
             column.setPreferredWidth(Math.max(headerWidth, cellWidth));
-        }
-    }
-
-    private void setupDateEditor(ParameterSet block) {
-        Calendar calendar;
-
-        String origin = "1900/01/01 00:00";
-        if (null != model.block) {
-            if (null != block.getParameter("time_origin")) {
-                origin = block.getParameter("time_origin").getValue();
-            }
-        }
-        Calendar calendar_o = Calendar.getInstance();
-        try {
-            calendar_o.setTime(TimeManager.INPUT_DATE_FORMAT.parse(origin));
-        } catch (ParseException ex) {
-            calendar_o.setTimeInMillis(0);
-        }
-        int year_o = calendar_o.get(Calendar.YEAR);
-        int month_o = calendar_o.get(Calendar.MONTH);
-        int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
-        int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
-        int minute_o = calendar_o.get(Calendar.MINUTE);
-        if (block.getParameter("calendar_type").getValue().equals("climato")) {
-            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
-        } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
-        }
-        for (int i = 0; i < getRowCount() - 1; i++) {
-            TableCellEditor editor = getRowEditorModel().getEditor(i);
-            if (null != editor) {
-                if (editor instanceof DateEditor) {
-                    ((DateEditor) editor).setCalendar(calendar);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void tableChanged(TableModelEvent e) {
-        super.tableChanged(e);
-
-        if (null != model) {
-            try {
-                if (getParameterKey(e.getLastRow()).equals("calendar_type")
-                        || getParameterKey(e.getLastRow()).equals("time_origin")) {
-                    if (null != model.block) {
-                        setupDateEditor(model.block);
-                    }
-                }
-            } catch (Exception ex) {
-            }
         }
     }
 
@@ -379,6 +308,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
 
         public void setValueAt(Object value, int row, int column, boolean undoable) {
+            Object oldValue = getValueAt(row, column);
+            if (String.valueOf(oldValue).equals(String.valueOf(value))) {
+                return;
+            }
             UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
             if (undoable == false || listeners == null) {
                 data[row].setValue(value.toString());
@@ -386,7 +319,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 return;
             }
 
-            Object oldValue = getValueAt(row, column);
             data[row].setValue(value.toString());
             fireTableCellUpdated(row, column);
             JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
@@ -479,98 +411,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
         void setValue(String value) {
             this.value = value;
             xparameter.setValue(value);
-        }
-    }
-
-    public class JUndoManager extends UndoManager {
-
-        protected Action undoAction;
-        protected Action redoAction;
-
-        public JUndoManager() {
-            this.undoAction = new JvUndoAction(this);
-            this.redoAction = new JvRedoAction(this);
-
-            synchronizeActions();           // to set initial names
-        }
-
-        public Action getUndoAction() {
-            return undoAction;
-        }
-
-        public Action getRedoAction() {
-            return redoAction;
-        }
-
-        @Override
-        public boolean addEdit(UndoableEdit anEdit) {
-            try {
-                return super.addEdit(anEdit);
-            } finally {
-                synchronizeActions();
-            }
-        }
-
-        @Override
-        protected void undoTo(UndoableEdit edit) throws CannotUndoException {
-            try {
-                super.undoTo(edit);
-            } finally {
-                synchronizeActions();
-            }
-        }
-
-        @Override
-        protected void redoTo(UndoableEdit edit) throws CannotRedoException {
-            try {
-                super.redoTo(edit);
-            } finally {
-                synchronizeActions();
-            }
-        }
-
-        private void synchronizeActions() {
-            undoAction.setEnabled(canUndo());
-            undoAction.putValue(Action.NAME, getUndoPresentationName());
-
-            redoAction.setEnabled(canRedo());
-            redoAction.putValue(Action.NAME, getRedoPresentationName());
-        }
-    }
-
-    class JvUndoAction extends AbstractAction {
-
-        protected final UndoManager manager;
-
-        public JvUndoAction(UndoManager manager) {
-            this.manager = manager;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                manager.undo();
-            } catch (CannotUndoException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    class JvRedoAction extends AbstractAction {
-
-        protected final UndoManager manager;
-
-        public JvRedoAction(UndoManager manager) {
-            this.manager = manager;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                manager.redo();
-            } catch (CannotRedoException ex) {
-                ex.printStackTrace();
-            }
         }
     }
 

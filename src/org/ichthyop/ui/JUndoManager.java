@@ -50,63 +50,105 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.io;
+package org.ichthyop.ui;
 
-import org.ichthyop.IchthyopLinker;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 
-/**
- *
- * @author pverley
- */
-public class Parameter extends IchthyopLinker {
+public class JUndoManager extends UndoManager {
 
-    final private String key;
+        protected Action undoAction;
+        protected Action redoAction;
 
-    public Parameter(String key) {
-        this.key = key;
-    }
+        public JUndoManager() {
+            this.undoAction = new JvUndoAction(this);
+            this.redoAction = new JvRedoAction(this);
 
-    public String getKey() {
-        return key;
-    }
-
-    public String getLongName() {
-        return getConfiguration().isNull(key + ".longname")
-                ? key
-                : getConfiguration().getString(key + ".longname");
-    }
-
-    public String getDescription() {
-        return getConfiguration().isNull(key + ".description")
-                ? null
-                : getConfiguration().getString(key + ".description");
-    }
-
-    public ParameterFormat getFormat() {
-        return getConfiguration().isNull(key + ".format")
-                ? ParameterFormat.TEXT
-                : ParameterFormat.getFormat(getConfiguration().getString(key + ".format"));
-    }
-
-    public String[] getAcceptedValues() {
-        if (getFormat().equals(ParameterFormat.COMBO) && !getConfiguration().isNull(key + ".accepted")) {
-            return getConfiguration().getArrayString(key + ".accepted");
+            synchronizeActions();           // to set initial names
         }
-        return new String[]{};
 
+        public Action getUndoAction() {
+            return undoAction;
+        }
+
+        public Action getRedoAction() {
+            return redoAction;
+        }
+
+        @Override
+        public boolean addEdit(UndoableEdit anEdit) {
+
+            try {
+                return super.addEdit(anEdit);
+            } finally {
+                synchronizeActions();
+            }
+        }
+
+        @Override
+        protected void undoTo(UndoableEdit edit) throws CannotUndoException {
+            try {
+                super.undoTo(edit);
+            } finally {
+                synchronizeActions();
+            }
+        }
+
+        @Override
+        protected void redoTo(UndoableEdit edit) throws CannotRedoException {
+            try {
+                super.redoTo(edit);
+            } finally {
+                synchronizeActions();
+            }
+        }
+
+        private void synchronizeActions() {
+            undoAction.setEnabled(canUndo());
+            undoAction.putValue(Action.NAME, getUndoPresentationName());
+
+            redoAction.setEnabled(canRedo());
+            redoAction.putValue(Action.NAME, getRedoPresentationName());
+        }
+        
+         class JvUndoAction extends AbstractAction {
+
+        protected final UndoManager manager;
+
+        public JvUndoAction(UndoManager manager) {
+            this.manager = manager;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                manager.undo();
+            } catch (CannotUndoException ex) {
+                //
+            }
+        }
     }
 
-    public String getValue() {
-        return getConfiguration().getString(key);
-    }
+    class JvRedoAction extends AbstractAction {
 
-    public void setValue(String value) {
-        getConfiguration().setString(key, value);
-    }
+        protected final UndoManager manager;
 
-    public String getTemplate() {
-        return getConfiguration().isNull(key + ".template")
-                ? null
-                : getConfiguration().getString(key + ".template");
+        public JvRedoAction(UndoManager manager) {
+            this.manager = manager;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                manager.redo();
+            } catch (CannotRedoException ex) {
+                //
+            }
+        }
     }
-}
+    }

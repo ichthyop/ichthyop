@@ -57,6 +57,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -142,7 +143,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         /* Display block information */
         String title = getResourceMap().getString("pnlBlockInfo.border.title") + " " + block.getTreePath();
         pnlBlockInfo.setBorder(BorderFactory.createTitledBorder(title));
-        if (block.getType().equals(BlockType.OPTION) || !block.canBeDeactivated()) {
+        if (block.getType().equals(BlockType.OPTION)) {
             ckBoxBlock.setVisible(false);
         } else {
             ckBoxBlock.setVisible(true);
@@ -168,9 +169,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnUndo.getAction().setEnabled(false);
         btnRedo.getAction().setEnabled(false);
         getTable().setModel(block, this);
-        setParameterEditorEnabled(block.isEnabled());
-    }
-
+        setParameterEditorEnabled(block.getType().equals(BlockType.OPTION) ? true : block.isEnabled());
+        }
+        
     @Action
     public void setBlockEnabled() {
         blockTree.getSelectedBlock().setEnabled(ckBoxBlock.isSelected());
@@ -288,7 +289,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 } else {
                     modelRow = table.convertRowIndexToModel(viewRow);
                 }
-                Parameter xparam = blockTree.getSelectedBlock().getParameter(getTable().getParameterKey(modelRow));
+                Parameter xparam = new Parameter(getTable().getParameterKey(modelRow));
                 String title = getResourceMap().getString("pnlParameterInfo.border.title") + " " + xparam.getLongName();
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(title));
                 StringBuilder info = new StringBuilder("<html><i><p>");
@@ -830,4 +831,5 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JTextField textFieldTitle;
     private javax.swing.JTextField textFieldVersion;
     private boolean hasStructureChanged;
+    private final HashMap<String, JUndoManager> undoManagers = new HashMap();
 }

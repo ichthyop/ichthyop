@@ -86,10 +86,6 @@ public class ParameterSet extends IchthyopLinker {
         return getConfiguration().getBoolean(key + ".enabled", false);
     }
 
-    public boolean canBeDeactivated() {
-        return getConfiguration().canFind(key + ".enabled");
-    }
-
     public void setEnabled(boolean enabled) {
         getConfiguration().setString(key + ".enabled", Boolean.toString(enabled));
     }
@@ -98,10 +94,6 @@ public class ParameterSet extends IchthyopLinker {
         return getConfiguration().isNull(key + ".description")
                 ? null
                 : getConfiguration().getString(key + ".description");
-    }
-
-    public Parameter getParameter(String key) {
-        return new Parameter(this.key + "." + key);
     }
 
     public List<Parameter> getParameters() {
