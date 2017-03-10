@@ -84,7 +84,7 @@ public class Template {
 
     public static File createTemplate() throws IOException {
         File tmpFile = File.createTempFile("ichthyop-config_", null);
-        writeTemplate(getTemplateURL("cfg-generic.xml"), tmpFile.getAbsolutePath());
+        writeTemplate(getTemplateURL("cfg-generic.csv"), tmpFile.getAbsolutePath());
         return tmpFile;
     }
 

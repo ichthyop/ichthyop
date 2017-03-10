@@ -662,7 +662,7 @@ public class IchthyopView extends FrameView
             path.append("_");
 
         }
-        path.append("ichthyop-config.xml");
+        path.append("ichthyop-config.cfg");
 
         return new File(path.toString());
     }
@@ -707,7 +707,7 @@ public class IchthyopView extends FrameView
                 sb.append(" ");
                 sb.append(file.getName());
                 getLogger().info(sb.toString());
-                return loadConfigurationFile(file, null);
+                return loadConfigurationFile(file);
             } catch (IOException ex) {
                 getLogger().log(Level.SEVERE, getResourceMap().getString("saveAsConfigurationFile.msg.failed"), ex);
             }
@@ -864,7 +864,7 @@ public class IchthyopView extends FrameView
                         try {
                             getUpdateManager().upgrade();
                             getLogger().log(Level.INFO, "{0} {1}", new Object[]{resourceMap.getString("updateConfigurationFile.uptodate"), getUpdateManager().getApplicationVersion().toString()});
-                            loadConfigurationFile(file, null).execute();
+                            loadConfigurationFile(file).execute();
                         } catch (Exception ex) {
                             getLogger().log(Level.SEVERE, "[configuration] " + file.getName() + " ==> " + ex.getMessage(), ex);
                         }
@@ -873,7 +873,7 @@ public class IchthyopView extends FrameView
                 });
             } else {
                 untitled = false;
-                loadConfigurationFile(file, null).execute();
+                loadConfigurationFile(file).execute();
             }
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, "[Configuration] " + file.getName() + " ==> " + ex.getMessage(), ex);
@@ -909,7 +909,7 @@ public class IchthyopView extends FrameView
         return SimulationManager.getLogger();
     }
 
-    public Task loadConfigurationFile(File file, Version version) {
+    public Task loadConfigurationFile(File file) {
         try {
             getSimulationManager().setConfigurationFile(file);
         } catch (Exception e) {
@@ -920,14 +920,6 @@ public class IchthyopView extends FrameView
                 return new FailedTask(getApplication(), eclone);
             } catch (Exception ex) {
                 return new FailedTask(getApplication(), e);
-            }
-        }
-        if (null != version) {
-            getSimulationManager().getParameterManager().setConfigurationVersion(version);
-            try {
-                getSimulationManager().getParameterManager().save();
-            } catch (IOException ex) {
-                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         File cfgFile = getSimulationManager().getConfigurationFile();
@@ -1086,7 +1078,7 @@ public class IchthyopView extends FrameView
 
         // create a temp file with generic template
         untitled = true;
-        return loadConfigurationFile(Template.createTemplate(), getUpdateManager().getApplicationVersion());
+        return loadConfigurationFile(Template.createTemplate());
     }
 
     @Action
