@@ -63,7 +63,7 @@ import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.exception.InvalidVersionNumberException;
 import org.ichthyop.io.BlockType;
-import org.ichthyop.io.ConfigurationFile;
+import org.ichthyop.io.OldConfigurationFile;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.io.XBlock;
 import org.ichthyop.io.XParameter;
@@ -143,7 +143,7 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the 3.1 configuration file to 3.2
      */
     private void u31To32() throws Exception {
-        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        OldConfigurationFile cfg32 = new OldConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
         String treepath, newTreepath;
         /*
          * Update block action.lethal_temp
@@ -174,7 +174,7 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the 3.0b configuration file to 3.1
      */
     private void u30bTo31() throws Exception {
-        ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
+        OldConfigurationFile cfg31 = new OldConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
         String treepath, newTreepath;
         /*
          * Add the density_file parameter in the action.buoyancy block
@@ -310,7 +310,7 @@ public class UpdateManager extends AbstractManager {
         getConfigurationFile().setDescription(str.toString());
     }
 
-    private ConfigurationFile getConfigurationFile() {
+    private OldConfigurationFile getConfigurationFile() {
         //return getSimulationManager().getParameterManager().getConfigurationFile();
         return null;
     }

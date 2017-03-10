@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ichthyop.IchthyopLinker;
 import org.jdom2.Content;
 import org.jdom2.Document;
@@ -75,7 +74,7 @@ import org.ichthyop.Version;
 import org.ichthyop.util.StringUtil;
 import org.jdom2.JDOMException;
 
-public class ConfigurationFile extends IchthyopLinker {
+public class OldConfigurationFile extends IchthyopLinker {
 
     private File file;
     private Document structure;
@@ -85,11 +84,11 @@ public class ConfigurationFile extends IchthyopLinker {
     public final static String VERSION = "version";
     public final static String DATE = "date";
 
-    public ConfigurationFile(File file) {
+    public OldConfigurationFile(File file) {
         this.file = file;
     }
 
-    public ConfigurationFile(URL url) {
+    public OldConfigurationFile(URL url) {
         try {
             SAXBuilder sxb = new SAXBuilder();
             Element racine = sxb.build(url).getRootElement();

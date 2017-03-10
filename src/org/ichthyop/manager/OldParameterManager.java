@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.ichthyop.Version;
-import org.ichthyop.io.ConfigurationFile;
+import org.ichthyop.io.OldConfigurationFile;
 
 /**
  *
@@ -22,18 +22,18 @@ import org.ichthyop.io.ConfigurationFile;
 public class OldParameterManager extends AbstractManager {
 
     private static OldParameterManager PARAMETER_MANAGER = new OldParameterManager();
-    private ConfigurationFile cfgFile;
+    private OldConfigurationFile cfgFile;
 
     public static OldParameterManager getInstance() {
         return PARAMETER_MANAGER;
     }
 
     public void setConfigurationFile(File file) throws Exception {
-        cfgFile = new ConfigurationFile(file);
+        cfgFile = new OldConfigurationFile(file);
         cfgFile.load();
     }
 
-    public ConfigurationFile getConfigurationFile() {
+    public OldConfigurationFile getConfigurationFile() {
         return cfgFile;
     }
 

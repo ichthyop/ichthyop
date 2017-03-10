@@ -67,7 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import org.ichthyop.Version;
-import org.ichthyop.io.ConfigurationFile;
+import org.ichthyop.io.OldConfigurationFile;
 import org.ichthyop.util.Separator;
 import org.ichthyop.util.StringUtil;
 
@@ -89,7 +89,7 @@ public class ParameterManager extends AbstractManager {
     public void setConfigurationFile(File file) throws Exception {
         parameters.clear();
         if (file.getName().endsWith(".xml")) {
-            ConfigurationFile cfg = new ConfigurationFile(file);
+            OldConfigurationFile cfg = new OldConfigurationFile(file);
             cfg.load();
             HashMap<String, String> xmlMap = cfg.toProperties(true);
             mainFilename = file.getAbsolutePath().replaceAll("xml$", "csv");
@@ -98,6 +98,7 @@ public class ParameterManager extends AbstractManager {
                 Parameter parameter = new Parameter(i, mainFilename);
                 parameter.parse(entry.toString());
                 parameters.put(parameter.key, parameter);
+                debug(parameter.toString());
                 i++;
             }
             File tmp = new File(mainFilename);
@@ -150,12 +151,14 @@ public class ParameterManager extends AbstractManager {
             Collections.sort(keys);
             for (String key : keys) {
                 StringBuilder str = new StringBuilder();
-                str.append("\"");
-                str.append(key);
-                str.append("\"");
+                str.append("\"").append(key).append("\"");
                 str.append(getParameter(key).keySeparator);
                 String value = getParameter(key).value;
-                str.append(StringUtil.isNotString(value) ? value : "\"" + value + "\"");
+                if (StringUtil.isNotString(value) | StringUtil.isQuoted(value)) {
+                    str.append(value);
+                } else {
+                    str.append("\"").append(value).append("\"");
+                }
                 str.append(newline);
                 writer.write(str.toString());
             }
@@ -166,11 +169,6 @@ public class ParameterManager extends AbstractManager {
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
-//        toCSV(toProperties(cfgFile, true), "=");
-//        toJson(toProperties(cfgFile, true));
-//        for (Entry<String, String> parameter : toProperties(cfgFile, false).entrySet()) {
-//            System.out.println(parameter);
-//        }
     }
 
     @Override

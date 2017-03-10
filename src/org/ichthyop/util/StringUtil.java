@@ -74,6 +74,10 @@ public class StringUtil {
         return isNumeric(str) || isBoolean(str) || isArray(str) || str.equalsIgnoreCase("null");
     }
     
+    public static boolean isQuoted(String str) {
+        return str.startsWith("\"") && str.endsWith("\"");
+    }
+    
     public static String nullify(String str) {
         return str.isEmpty() ? "null" : str;
     }
