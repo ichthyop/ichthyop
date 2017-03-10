@@ -130,9 +130,11 @@ public class SimulationManager extends IchthyopLogger {
 
     public void setConfigurationFile(File file) throws Exception {
 
-        getParameterManager().setConfigurationFile(file);
-        cfgFile = new File(getParameterManager().getMainFile());
-        mobiliseManagers();
+        if (null != file) {
+            getParameterManager().setConfigurationFile(file);
+            cfgFile = new File(getParameterManager().getMainFile());
+            mobiliseManagers();
+        }
     }
 
     public File getConfigurationFile() {

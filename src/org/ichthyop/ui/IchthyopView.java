@@ -866,7 +866,7 @@ public class IchthyopView extends FrameView
                             getLogger().log(Level.INFO, "{0} {1}", new Object[]{resourceMap.getString("updateConfigurationFile.uptodate"), getUpdateManager().getApplicationVersion().toString()});
                             loadConfigurationFile(file, null).execute();
                         } catch (Exception ex) {
-                            getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
+                            getLogger().log(Level.SEVERE, "[configuration] " + file.getName() + " ==> " + ex.getMessage(), ex);
                         }
                     } else {
                     }
@@ -876,7 +876,7 @@ public class IchthyopView extends FrameView
                 loadConfigurationFile(file, null).execute();
             }
         } catch (Exception ex) {
-            getLogger().log(Level.SEVERE, "{Configuration} " + file.getName() + " ==> " + ex.getMessage(), ex);
+            getLogger().log(Level.SEVERE, "[Configuration] " + file.getName() + " ==> " + ex.getMessage(), ex);
         }
     }
 

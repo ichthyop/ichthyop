@@ -513,9 +513,9 @@ public class ParameterManager extends AbstractManager {
             space.append(". ");
         }
         msg.append(space);
-        msg.append("Loading parameters from ");
+        msg.append("[configuration] loading parameters from ");
         msg.append(filename);
-        info(msg.toString());
+        debug(msg.toString());
         space.append(". ");
 
         // Read it
@@ -535,7 +535,7 @@ public class ParameterManager extends AbstractManager {
 
                     } else {
                         parameters.put(entry.key, entry);
-                        debug(space + entry.toString());
+                        debug("[configuration] " + space + entry.toString());
                         if (entry.key.startsWith("ichthyop.configuration")) {
                             loadParameters(getFile(entry.key), depth + 1, json);
                         }
