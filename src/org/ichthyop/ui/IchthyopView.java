@@ -102,7 +102,6 @@ import org.ichthyop.Template;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
-import org.ichthyop.Version;
 import org.ichthyop.manager.UpdateManager;
 import org.ichthyop.ui.logging.LogLevel;
 import org.ichthyop.util.MetaFilenameFilter;
@@ -1677,8 +1676,8 @@ public class IchthyopView extends FrameView
         leftSplitPane.setName("leftSplitPane"); // NOI18N
         leftSplitPane.setOneTouchExpandable(true);
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopView.class);
-        titledPanelSteps.setTitle(resourceMap.getString("titledPanelSteps.title")); // NOI18N
+        org.jdesktop.application.ResourceMap ivResourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopView.class);
+        titledPanelSteps.setTitle(ivResourceMap.getString("titledPanelSteps.title")); // NOI18N
         titledPanelSteps.setMinimumSize(new java.awt.Dimension(200, 200));
         titledPanelSteps.setName("titledPanelSteps"); // NOI18N
 
@@ -1688,15 +1687,10 @@ public class IchthyopView extends FrameView
         stepsPanel.setName("stepsPanel"); // NOI18N
 
         taskPaneConfiguration.setAnimated(false);
-        taskPaneConfiguration.setIcon(resourceMap.getIcon("step.Configuration.icon")); // NOI18N
-        taskPaneConfiguration.setTitle(resourceMap.getString("step.Configuration.text")); // NOI18N
+        taskPaneConfiguration.setIcon(ivResourceMap.getIcon("step.Configuration.icon")); // NOI18N
+        taskPaneConfiguration.setTitle(ivResourceMap.getString("step.Configuration.text")); // NOI18N
         taskPaneConfiguration.setName("taskPaneConfiguration"); // NOI18N
-        taskPaneConfiguration.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            @Override
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                taskPaneConfigurationPropertyChange(evt);
-            }
-        });
+        taskPaneConfiguration.addPropertyChangeListener(this::taskPaneConfigurationPropertyChange);
 
         pnlFile.setName("pnlFile"); // NOI18N
         pnlFile.setOpaque(false);
@@ -1775,14 +1769,10 @@ public class IchthyopView extends FrameView
         taskPaneConfiguration.add(pnlFile);
 
         taskPaneSimulation.setAnimated(false);
-        taskPaneSimulation.setIcon(resourceMap.getIcon("step.Simulation.icon")); // NOI18N
-        taskPaneSimulation.setTitle(resourceMap.getString("step.Simulation.text")); // NOI18N
+        taskPaneSimulation.setIcon(ivResourceMap.getIcon("step.Simulation.icon")); // NOI18N
+        taskPaneSimulation.setTitle(ivResourceMap.getString("step.Simulation.text")); // NOI18N
         taskPaneSimulation.setName("taskPaneSimulation"); // NOI18N
-        taskPaneSimulation.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                taskPaneSimulationPropertyChange(evt);
-            }
-        });
+        taskPaneSimulation.addPropertyChangeListener(this::taskPaneSimulationPropertyChange);
 
         pnlSimulation.setName("pnlSimulation"); // NOI18N
         pnlSimulation.setOpaque(false);
@@ -1799,13 +1789,9 @@ public class IchthyopView extends FrameView
         btnSimulationRun.setName("btnSimulationRun"); // NOI18N
         btnSimulationRun.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        ckBoxDrawGrid.setText(resourceMap.getString("ckBoxDrawGrid.text")); // NOI18N
+        ckBoxDrawGrid.setText(ivResourceMap.getString("ckBoxDrawGrid.text")); // NOI18N
         ckBoxDrawGrid.setName("ckBoxDrawGrid"); // NOI18N
-        ckBoxDrawGrid.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ckBoxDrawGridActionPerformed(evt);
-            }
-        });
+        ckBoxDrawGrid.addActionListener(this::ckBoxDrawGridActionPerformed);
 
         javax.swing.GroupLayout pnlSimulationLayout = new javax.swing.GroupLayout(pnlSimulation);
         pnlSimulation.setLayout(pnlSimulationLayout);
@@ -1836,14 +1822,10 @@ public class IchthyopView extends FrameView
         taskPaneSimulation.add(pnlSimulation);
 
         taskPaneMapping.setAnimated(false);
-        taskPaneMapping.setIcon(resourceMap.getIcon("step.Mapping.icon")); // NOI18N
-        taskPaneMapping.setTitle(resourceMap.getString("step.Mapping.text")); // NOI18N
+        taskPaneMapping.setIcon(ivResourceMap.getIcon("step.Mapping.icon")); // NOI18N
+        taskPaneMapping.setTitle(ivResourceMap.getString("step.Mapping.text")); // NOI18N
         taskPaneMapping.setName("taskPaneMapping"); // NOI18N
-        taskPaneMapping.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                taskPaneMappingPropertyChange(evt);
-            }
-        });
+        taskPaneMapping.addPropertyChangeListener(this::taskPaneMappingPropertyChange);
 
         pnlMapping.setName("pnlMapping"); // NOI18N
         pnlMapping.setOpaque(false);
@@ -1887,8 +1869,8 @@ public class IchthyopView extends FrameView
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblNC.setFont(resourceMap.getFont("lblNC.font")); // NOI18N
-        lblNC.setText(resourceMap.getString("lblNC.text")); // NOI18N
+        lblNC.setFont(ivResourceMap.getFont("lblNC.font")); // NOI18N
+        lblNC.setText(ivResourceMap.getString("lblNC.text")); // NOI18N
         lblNC.setName("lblNC"); // NOI18N
 
         btnCloseNC.setAction(actionMap.get("closeNetCDF")); // NOI18N
@@ -1897,25 +1879,25 @@ public class IchthyopView extends FrameView
         btnExportToKMZ.setAction(actionMap.get("exportToKMZ")); // NOI18N
         btnExportToKMZ.setName("btnExportToKMZ"); // NOI18N
 
-        pnlColor.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlColor.border.title"))); // NOI18N
+        pnlColor.setBorder(javax.swing.BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColor.border.title"))); // NOI18N
         pnlColor.setName("pnlColor"); // NOI18N
         pnlColor.setOpaque(false);
 
-        pnlColorBar.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlColorBar.border.title"))); // NOI18N
+        pnlColorBar.setBorder(javax.swing.BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColorBar.border.title"))); // NOI18N
         pnlColorBar.setName("pnlColorBar"); // NOI18N
         pnlColorBar.setOpaque(false);
 
-        lblVariable.setText(resourceMap.getString("lblVariable.text")); // NOI18N
+        lblVariable.setText(ivResourceMap.getString("lblVariable.text")); // NOI18N
         lblVariable.setName("lblVariable"); // NOI18N
 
         cbBoxVariable.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"None"}));
         cbBoxVariable.setAction(actionMap.get("changeColorbarVariable")); // NOI18N
         cbBoxVariable.setName("cbBoxVariable"); // NOI18N
 
-        lblMin.setText(resourceMap.getString("lblMin.text")); // NOI18N
+        lblMin.setText(ivResourceMap.getString("lblMin.text")); // NOI18N
         lblMin.setName("lblMin"); // NOI18N
 
-        lblMax.setText(resourceMap.getString("lblMax.text")); // NOI18N
+        lblMax.setText(ivResourceMap.getString("lblMax.text")); // NOI18N
         lblMax.setName("lblMax"); // NOI18N
 
         txtFieldMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
@@ -1925,7 +1907,7 @@ public class IchthyopView extends FrameView
         NumberFormatter floatFormatter = new NumberFormatter(floatFormat);
         floatFormatter.setFormat(floatFormat);
         txtFieldMax.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
-        txtFieldMax.setValue(new Float(100.f));
+        txtFieldMax.setValue(100.f);
 
         btnAutoRange.setAction(actionMap.get("autoRangeColorbar")); // NOI18N
         btnAutoRange.setName("btnAutoRange"); // NOI18N
@@ -1933,48 +1915,36 @@ public class IchthyopView extends FrameView
         btnApplyColorbar.setAction(actionMap.get("applyColorbarSettings")); // NOI18N
         btnApplyColorbar.setName("btnApplyColorbar"); // NOI18N
 
-        btnColorMin.setForeground(resourceMap.getColor("btnColorMin.foreground")); // NOI18N
-        btnColorMin.setIcon(resourceMap.getIcon("btnColorMin.icon")); // NOI18N
-        btnColorMin.setText(resourceMap.getString("btnColorMin.text")); // NOI18N
+        btnColorMin.setForeground(ivResourceMap.getColor("btnColorMin.foreground")); // NOI18N
+        btnColorMin.setIcon(ivResourceMap.getIcon("btnColorMin.icon")); // NOI18N
+        btnColorMin.setText(ivResourceMap.getString("btnColorMin.text")); // NOI18N
         btnColorMin.setName("btnColorMin"); // NOI18N
-        btnColorMin.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnColorMinActionPerformed(evt);
-            }
-        });
+        btnColorMin.addActionListener(this::btnColorMinActionPerformed);
 
-        btnColorMax.setForeground(resourceMap.getColor("btnColorMax.foreground")); // NOI18N
-        btnColorMax.setIcon(resourceMap.getIcon("btnColorMax.icon")); // NOI18N
-        btnColorMax.setText(resourceMap.getString("btnColorMax.text")); // NOI18N
+        btnColorMax.setForeground(ivResourceMap.getColor("btnColorMax.foreground")); // NOI18N
+        btnColorMax.setIcon(ivResourceMap.getIcon("btnColorMax.icon")); // NOI18N
+        btnColorMax.setText(ivResourceMap.getString("btnColorMax.text")); // NOI18N
         btnColorMax.setName("btnColorMax"); // NOI18N
-        btnColorMax.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnColorMaxActionPerformed(evt);
-            }
-        });
+        btnColorMax.addActionListener(this::btnColorMaxActionPerformed);
 
         txtFieldMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
         txtFieldMin.setName("txtFieldMin"); // NOI18N
         txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
-        txtFieldMin.setValue(new Float(0.f));
+        txtFieldMin.setValue(0.f);
 
-        lblMed.setText(resourceMap.getString("lblMed.text")); // NOI18N
+        lblMed.setText(ivResourceMap.getString("lblMed.text")); // NOI18N
         lblMed.setName("lblMed"); // NOI18N
 
         txtFieldMed.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
         txtFieldMed.setName("txtFieldMed"); // NOI18N
         txtFieldMed.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
-        txtFieldMed.setValue(new Float(50.f));
+        txtFieldMed.setValue(50.f);
 
-        btnColorMed.setForeground(resourceMap.getColor("btnColorMed.foreground")); // NOI18N
-        btnColorMed.setIcon(resourceMap.getIcon("btnColorMed.icon")); // NOI18N
-        btnColorMed.setText(resourceMap.getString("btnColorMed.text")); // NOI18N
+        btnColorMed.setForeground(ivResourceMap.getColor("btnColorMed.foreground")); // NOI18N
+        btnColorMed.setIcon(ivResourceMap.getIcon("btnColorMed.icon")); // NOI18N
+        btnColorMed.setText(ivResourceMap.getString("btnColorMed.text")); // NOI18N
         btnColorMed.setName("btnColorMed"); // NOI18N
-        btnColorMed.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnColorMedActionPerformed(evt);
-            }
-        });
+        btnColorMed.addActionListener(this::btnColorMedActionPerformed);
 
         javax.swing.GroupLayout pnlColorBarLayout = new javax.swing.GroupLayout(pnlColorBar);
         pnlColorBar.setLayout(pnlColorBarLayout);
@@ -2040,29 +2010,21 @@ public class IchthyopView extends FrameView
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblColor.setText(resourceMap.getString("lblColor.text")); // NOI18N
+        lblColor.setText(ivResourceMap.getString("lblColor.text")); // NOI18N
         lblColor.setName("lblColor"); // NOI18N
 
-        btnParticleColor.setForeground(resourceMap.getColor("btnParticleColor.foreground")); // NOI18N
-        btnParticleColor.setIcon(resourceMap.getIcon("btnParticleColor.icon")); // NOI18N
-        btnParticleColor.setText(resourceMap.getString("btnParticleColor.text")); // NOI18N
+        btnParticleColor.setForeground(ivResourceMap.getColor("btnParticleColor.foreground")); // NOI18N
+        btnParticleColor.setIcon(ivResourceMap.getIcon("btnParticleColor.icon")); // NOI18N
+        btnParticleColor.setText(ivResourceMap.getString("btnParticleColor.text")); // NOI18N
         btnParticleColor.setName("btnParticleColor"); // NOI18N
-        btnParticleColor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnParticleColorActionPerformed(evt);
-            }
-        });
+        btnParticleColor.addActionListener(this::btnParticleColorActionPerformed);
 
-        lblColor1.setText(resourceMap.getString("lblColor1.text")); // NOI18N
+        lblColor1.setText(ivResourceMap.getString("lblColor1.text")); // NOI18N
         lblColor1.setName("lblColor1"); // NOI18N
 
         spinnerParticleSize.setModel(new javax.swing.SpinnerNumberModel(1, 1, 10, 1));
         spinnerParticleSize.setName("spinnerParticleSize"); // NOI18N
-        spinnerParticleSize.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                spinnerParticleSizeStateChanged(evt);
-            }
-        });
+        spinnerParticleSize.addChangeListener(this::spinnerParticleSizeStateChanged);
 
         javax.swing.GroupLayout pnlColorLayout = new javax.swing.GroupLayout(pnlColor);
         pnlColor.setLayout(pnlColorLayout);
@@ -2141,35 +2103,28 @@ public class IchthyopView extends FrameView
         taskPaneMapping.add(pnlMapping);
 
         taskPaneAnimation.setAnimated(false);
-        taskPaneAnimation.setIcon(resourceMap.getIcon("step.Animation.icon")); // NOI18N
-        taskPaneAnimation.setTitle(resourceMap.getString("step.Animation.text")); // NOI18N
+        taskPaneAnimation.setIcon(ivResourceMap.getIcon("step.Animation.icon")); // NOI18N
+        taskPaneAnimation.setTitle(ivResourceMap.getString("step.Animation.text")); // NOI18N
         taskPaneAnimation.setName("taskPaneAnimation"); // NOI18N
-        taskPaneAnimation.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                taskPaneAnimationPropertyChange(evt);
-            }
-        });
+        taskPaneAnimation.addPropertyChangeListener(this::taskPaneAnimationPropertyChange);
 
         pnlAnimation.setName("pnlAnimation"); // NOI18N
         pnlAnimation.setOpaque(false);
 
         lblFramePerSecond.setName("lblFramePerSecond"); // NOI18N
         lblFramePerSecond.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 lblFramePerSecondMouseClicked(evt);
             }
         });
 
         animationSpeed.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(1.5f), Float.valueOf(0.5f), Float.valueOf(24.0f), Float.valueOf(0.1f)));
-        animationSpeed.setToolTipText(resourceMap.getString("animationSpeed.toolTipText")); // NOI18N
+        animationSpeed.setToolTipText(ivResourceMap.getString("animationSpeed.toolTipText")); // NOI18N
         animationSpeed.setFocusable(false);
         animationSpeed.setMaximumSize(new java.awt.Dimension(77, 30));
         animationSpeed.setName("animationSpeed"); // NOI18N
-        animationSpeed.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                animationSpeedStateChanged(evt);
-            }
-        });
+        animationSpeed.addChangeListener(this::animationSpeedStateChanged);
 
         btnDeleteMaps.setAction(actionMap.get("deleteMaps")); // NOI18N
         btnDeleteMaps.setFocusable(false);
@@ -2183,27 +2138,23 @@ public class IchthyopView extends FrameView
         btnSaveAsMaps.setName("btnSaveAsMaps"); // NOI18N
         btnSaveAsMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        lblAnimationSpeed.setText(resourceMap.getString("lblAnimationSpeed.text")); // NOI18N
+        lblAnimationSpeed.setText(ivResourceMap.getString("lblAnimationSpeed.text")); // NOI18N
         lblAnimationSpeed.setName("lblAnimationSpeed"); // NOI18N
 
         btnOpenAnimation.setAction(actionMap.get("openFolderAnimation")); // NOI18N
         btnOpenAnimation.setName("btnOpenAnimation"); // NOI18N
         btnOpenAnimation.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        lblFolder.setFont(resourceMap.getFont("lblFolder.font")); // NOI18N
-        lblFolder.setText(resourceMap.getString("lblFolder.text")); // NOI18N
+        lblFolder.setFont(ivResourceMap.getFont("lblFolder.font")); // NOI18N
+        lblFolder.setText(ivResourceMap.getString("lblFolder.text")); // NOI18N
         lblFolder.setName("lblFolder"); // NOI18N
 
         sliderTime.setValue(0);
         sliderTime.setName("sliderTime"); // NOI18N
-        sliderTime.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                sliderTimeStateChanged(evt);
-            }
-        });
+        sliderTime.addChangeListener(this::sliderTimeStateChanged);
 
-        lblTime.setFont(resourceMap.getFont("lblTime.font")); // NOI18N
-        lblTime.setText(resourceMap.getString("lblTime.text")); // NOI18N
+        lblTime.setFont(ivResourceMap.getFont("lblTime.font")); // NOI18N
+        lblTime.setText(ivResourceMap.getString("lblTime.text")); // NOI18N
         lblTime.setName("lblTime"); // NOI18N
 
         jToolBar1.setFloatable(false);
@@ -2225,7 +2176,7 @@ public class IchthyopView extends FrameView
         jToolBar1.add(btnPrevious);
 
         btnAnimationBW.setAction(actionMap.get("startAnimationBW")); // NOI18N
-        btnAnimationBW.setText(resourceMap.getString("btnAnimationBW.text")); // NOI18N
+        btnAnimationBW.setText(ivResourceMap.getString("btnAnimationBW.text")); // NOI18N
         btnAnimationBW.setFocusable(false);
         btnAnimationBW.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnAnimationBW.setName("btnAnimationBW"); // NOI18N
@@ -2233,7 +2184,7 @@ public class IchthyopView extends FrameView
         jToolBar1.add(btnAnimationBW);
 
         btnAnimationStop.setAction(actionMap.get("stopAnimation")); // NOI18N
-        btnAnimationStop.setText(resourceMap.getString("btnAnimationStop.text")); // NOI18N
+        btnAnimationStop.setText(ivResourceMap.getString("btnAnimationStop.text")); // NOI18N
         btnAnimationStop.setFocusable(false);
         btnAnimationStop.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnAnimationStop.setName("btnAnimationStop"); // NOI18N
@@ -2241,7 +2192,7 @@ public class IchthyopView extends FrameView
         jToolBar1.add(btnAnimationStop);
 
         btnAnimationFW.setAction(actionMap.get("startAnimationFW")); // NOI18N
-        btnAnimationFW.setText(resourceMap.getString("btnAnimationFW.text")); // NOI18N
+        btnAnimationFW.setText(ivResourceMap.getString("btnAnimationFW.text")); // NOI18N
         btnAnimationFW.setFocusable(false);
         btnAnimationFW.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnAnimationFW.setName("btnAnimationFW"); // NOI18N
@@ -2266,7 +2217,7 @@ public class IchthyopView extends FrameView
         btnAnimatedGif.setName("btnAnimatedGif"); // NOI18N
         btnAnimatedGif.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        ckBoxReverseTime.setText(resourceMap.getString("ckBoxReverseTime.text")); // NOI18N
+        ckBoxReverseTime.setText(ivResourceMap.getString("ckBoxReverseTime.text")); // NOI18N
         ckBoxReverseTime.setName("ckBoxReverseTime"); // NOI18N
 
         javax.swing.GroupLayout pnlAnimationLayout = new javax.swing.GroupLayout(pnlAnimation);
@@ -2369,7 +2320,7 @@ public class IchthyopView extends FrameView
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
 
-        titledPanelLogger.setTitle(resourceMap.getString("titledPanelLogger.title")); // NOI18N
+        titledPanelLogger.setTitle(ivResourceMap.getString("titledPanelLogger.title")); // NOI18N
         titledPanelLogger.setName("titledPanelLogger"); // NOI18N
 
         loggerScrollPane.setName("loggerScrollPane"); // NOI18N
@@ -2389,7 +2340,7 @@ public class IchthyopView extends FrameView
 
         splitPane.setLeftComponent(leftSplitPane);
 
-        titledPanelMain.setTitle(resourceMap.getString("titledPanelMain.title")); // NOI18N
+        titledPanelMain.setTitle(ivResourceMap.getString("titledPanelMain.title")); // NOI18N
         titledPanelMain.setMinimumSize(new java.awt.Dimension(32, 32));
         titledPanelMain.setName("titledPanelMain"); // NOI18N
 
@@ -2437,7 +2388,7 @@ public class IchthyopView extends FrameView
 
         menuBar.setName("menuBar"); // NOI18N
 
-        configurationMenu.setText(resourceMap.getString("configurationMenu.text")); // NOI18N
+        configurationMenu.setText(ivResourceMap.getString("configurationMenu.text")); // NOI18N
         configurationMenu.setName("configurationMenu"); // NOI18N
 
         newMenuItem.setAction(actionMap.get("newConfigurationFile")); // NOI18N
@@ -2472,7 +2423,7 @@ public class IchthyopView extends FrameView
 
         menuBar.add(configurationMenu);
 
-        simulationMenu.setText(resourceMap.getString("simulationMenu.text")); // NOI18N
+        simulationMenu.setText(ivResourceMap.getString("simulationMenu.text")); // NOI18N
         simulationMenu.setName("simulationMenu"); // NOI18N
 
         simulationMenuItem.setAction(actionMap.get("simulationRun")); // NOI18N
@@ -2485,7 +2436,7 @@ public class IchthyopView extends FrameView
 
         menuBar.add(simulationMenu);
 
-        mappingMenu.setText(resourceMap.getString("mappingMenu.text")); // NOI18N
+        mappingMenu.setText(ivResourceMap.getString("mappingMenu.text")); // NOI18N
         mappingMenu.setName("mappingMenu"); // NOI18N
 
         mapMenuItem.setAction(actionMap.get("createMaps")); // NOI18N
@@ -2509,7 +2460,7 @@ public class IchthyopView extends FrameView
 
         menuBar.add(mappingMenu);
 
-        animationMenu.setText(resourceMap.getString("animationMenu.text")); // NOI18N
+        animationMenu.setText(ivResourceMap.getString("animationMenu.text")); // NOI18N
         animationMenu.setName("animationMenu"); // NOI18N
 
         startFWMenuItem.setAction(actionMap.get("startAnimationFW")); // NOI18N
@@ -2544,7 +2495,7 @@ public class IchthyopView extends FrameView
 
         menuBar.add(animationMenu);
 
-        helpMenu.setText(resourceMap.getString("helpMenu.text")); // NOI18N
+        helpMenu.setText(ivResourceMap.getString("helpMenu.text")); // NOI18N
         helpMenu.setName("helpMenu"); // NOI18N
 
         aboutMenuItem.setAction(actionMap.get("showAboutBox")); // NOI18N
@@ -2585,13 +2536,15 @@ public class IchthyopView extends FrameView
         hyperLinkLogo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         hyperLinkLogo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         hyperLinkLogo.setName("hyperLinkLogo"); // NOI18N
-        hyperLinkLogo.setRolloverIcon(resourceMap.getIcon("hyperLinkLogo.rolloverIcon")); // NOI18N
-        hyperLinkLogo.setSelectedIcon(resourceMap.getIcon("hyperLinkLogo.selectedIcon")); // NOI18N
+        hyperLinkLogo.setRolloverIcon(ivResourceMap.getIcon("hyperLinkLogo.rolloverIcon")); // NOI18N
+        hyperLinkLogo.setSelectedIcon(ivResourceMap.getIcon("hyperLinkLogo.selectedIcon")); // NOI18N
         hyperLinkLogo.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 hyperLinkLogoMouseEntered(evt);
             }
 
+            @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 hyperLinkLogoMouseExited(evt);
             }
