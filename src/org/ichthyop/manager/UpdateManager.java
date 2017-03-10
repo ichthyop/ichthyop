@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
 import java.io.File;
@@ -85,7 +84,7 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the configuration file to the application version.
      */
     public void upgrade() throws Exception {
-        
+
 //
 //
 //        /*

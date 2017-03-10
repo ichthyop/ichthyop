@@ -76,7 +76,7 @@ public class Version {
 
     public Version(String version) {
         String[] tokens = version.split(" ");
-        this.number = tokens[0];
+        this.number = tokens[0].trim();
         if (tokens.length > 1) {
             this.date = tokens[1].trim().replaceAll("^\\(|\\)$", "");
         } else {

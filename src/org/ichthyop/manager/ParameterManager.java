@@ -62,6 +62,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -75,62 +76,93 @@ import org.ichthyop.util.StringUtil;
  * @author pverley
  */
 public class ParameterManager extends AbstractManager {
-    
+
     private static final ParameterManager PARAMETER_MANAGER = new ParameterManager();
-    private HashMap<String, String> parameters;
+    private HashMap<String, Parameter> parameters = new HashMap();
     private String inputPathname;
     private String mainFilename;
-    
+
     public static ParameterManager getInstance() {
         return PARAMETER_MANAGER;
     }
-    
+
     public void setConfigurationFile(File file) throws Exception {
+        parameters.clear();
         if (file.getName().endsWith(".xml")) {
-            xmlImport(file);
+            ConfigurationFile cfg = new ConfigurationFile(file);
+            cfg.load();
+            HashMap<String, String> xmlMap = cfg.toProperties(true);
+            mainFilename = file.getAbsolutePath().replaceAll("xml$", "csv");
+            int i = 1;
+            for (Entry<String, String> entry : xmlMap.entrySet()) {
+                Parameter parameter = new Parameter(i, mainFilename);
+                parameter.parse(entry.toString());
+                parameters.put(parameter.key, parameter);
+                i++;
+            }
+            File tmp = new File(mainFilename);
+            warning("XML format deprecated. Configuration file {0} has been converted to CSV format {1}", new String[]{file.getName(), tmp.getName()});
+            save();
+        } else if (file.getName().endsWith(".json")) {
+            loadParameters(file.getAbsolutePath(), 0, true);
+            mainFilename = file.getAbsolutePath();
         } else {
-            this.loadParameters(file.getAbsolutePath(), 0);
+            loadParameters(file.getAbsolutePath(), 0, false);
+            mainFilename = file.getAbsolutePath();
         }
-        mainFilename = file.getAbsolutePath();
+
         inputPathname = file.getParent();
     }
-    
-    private void xmlImport(File file) throws Exception {
-        ConfigurationFile cfgFile = new ConfigurationFile(file);
-        cfgFile.load();
-        parameters = cfgFile.toProperties(true);
-        //toJson(file.getAbsolutePath(), parameters);
+
+    public String getMainFile() {
+        return mainFilename;
     }
-    
+
     public String getConfigurationDescription() {
         return getString("configuration.description");
     }
-    
+
     public void setConfigurationDescription(String description) {
         setString("configuration.description", description);
     }
-    
+
     public Version getConfigurationVersion() {
         return new Version(getString("configuration.version"));
     }
-    
+
     public void setConfigurationVersion(Version version) {
         setString("configuration.version", version.toString());
     }
-    
+
     public String getConfigurationTitle() {
         return getString("configuration.longname");
     }
-    
+
     public void setConfigurationTitle(String longName) {
         setString("configuration.longname", longName);
     }
-    
-    
+
     public void save() throws IOException, FileNotFoundException {
-        // @TODO
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(mainFilename))) {
+            String newline = System.getProperty("line.separator");
+            List<String> keys = new ArrayList(parameters.keySet());
+            Collections.sort(keys);
+            for (String key : keys) {
+                StringBuilder str = new StringBuilder();
+                str.append("\"");
+                str.append(key);
+                str.append("\"");
+                str.append(getParameter(key).keySeparator);
+                String value = getParameter(key).value;
+                str.append(StringUtil.isNotString(value) ? value : "\"" + value + "\"");
+                str.append(newline);
+                writer.write(str.toString());
+            }
+        }
+        info("Configuration file {0} has been saved.", mainFilename);
     }
-    
+
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         // does nothing
@@ -140,7 +172,7 @@ public class ParameterManager extends AbstractManager {
 //            System.out.println(parameter);
 //        }
     }
-    
+
     @Override
     public void initializePerformed(InitializeEvent e) {
         // does nothing
@@ -156,10 +188,10 @@ public class ParameterManager extends AbstractManager {
      * exist
      */
     public boolean isNull(String key) {
-        String param = parameters.get(key.toLowerCase());
+        Parameter param = parameters.get(key.toLowerCase());
         return (null == param)
-                || param.isEmpty()
-                || param.equalsIgnoreCase("null");
+                || param.value.isEmpty()
+                || param.value.equalsIgnoreCase("null");
     }
 
     /**
@@ -200,9 +232,26 @@ public class ParameterManager extends AbstractManager {
         }
         return filteredKeys;
     }
-    
+
     public void setString(String key, String value) {
-        parameters.put(key, value);
+        getParameter(key).value = value;
+    }
+
+    /**
+     * Returns the parameter designated by its key.
+     *
+     * @param key, the key of the parameter
+     * @throws NullPointerException if the parameter is not found.
+     * @return the parameter as a {@link Parameter}
+     */
+    private Parameter getParameter(String key) {
+        String lkey = key.toLowerCase();
+        if (parameters.containsKey(lkey)) {
+            return parameters.get(lkey);
+        } else {
+            error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
+        }
+        return null;
     }
 
     /**
@@ -212,14 +261,19 @@ public class ParameterManager extends AbstractManager {
      * @throws NullPointerException if the parameter is not found.
      * @return the value of the parameter as a {@code String}
      */
-    public String getString(String key) {
-        String lkey = key.toLowerCase();
-        if (parameters.containsKey(lkey)) {
-            return parameters.get(lkey).trim().replaceAll("^\"|\"$", "");
-        } else {
-            error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
-        }
-        return null;
+    final public String getString(String key) {
+        return getParameter(key).value.trim().replaceAll("^\"|\"$", "");
+    }
+
+    /**
+     * Returns the path of the configuration file that contains the specified
+     * parameter.
+     *
+     * @param key, the key of the parameter
+     * @return the path of the configuration file that contains the parameter.
+     */
+    final public String getSource(String key) {
+        return parameters.get(key.toLowerCase()).source;
     }
 
     /**
@@ -324,7 +378,7 @@ public class ParameterManager extends AbstractManager {
         } else if (warning) {
             warning("Could not find Boolean parameter " + key + ". Osmose assumes it is false.");
         }
-        
+
         return false;
     }
 
@@ -446,8 +500,8 @@ public class ParameterManager extends AbstractManager {
      * function. Zero for the main configuration file, one for a file loaded
      * from the main configuration file, etc.
      */
-    private void loadParameters(String filename, int depth) {
-        
+    private void loadParameters(String filename, int depth, boolean json) {
+
         BufferedReader bfIn = null;
         // Open the buffer
         try {
@@ -473,17 +527,19 @@ public class ParameterManager extends AbstractManager {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
                 if (!(line.length() <= 1)) {
-                    Parameter entry = new Parameter(iline, filename);
+                    Parameter entry = json
+                            ? new Parameter(iline, filename, ":", ",")
+                            : new Parameter(iline, filename);
                     entry.parse(line);
                     if (parameters.containsKey(entry.key)) {
                         warning("{0}Ichthyop will ignore parameter {1}", new Object[]{space, entry});
                         warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
-                        
+
                     } else {
-                        parameters.put(entry.key, entry.value);
+                        parameters.put(entry.key, entry);
                         debug(space + entry.toString());
                         if (entry.key.startsWith("ichthyop.configuration")) {
-                            loadParameters(getFile(entry.key), depth + 1);
+                            loadParameters(getFile(entry.key), depth + 1, json);
                         }
                     }
                 }
@@ -493,63 +549,20 @@ public class ParameterManager extends AbstractManager {
             error("Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
         }
     }
-    
+
     public String[] getParameterSets() {
         return getArrayString("configuration.subsets");
     }
-    
-    private void toCSV(String xmlfile, HashMap<String, String> parameters, String separator) throws IOException {
-        
-        String file = xmlfile.replaceAll("xml$", "cfg");
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            String newline = System.getProperty("line.separator");
-            
-            for (Entry<String, String> parameter : parameters.entrySet()) {
-                StringBuilder str = new StringBuilder();
-                str.append(parameter.getKey());
-                str.append(separator);
-                String value = parameter.getValue();
-                str.append(StringUtil.isNotString(value) ? value : "\"" + value + "\"");
-                str.append(newline);
-                writer.write(str.toString());
-            }
-        }
-    }
-    
-    private void toJson(String xmlfile, HashMap<String, String> parameters) throws IOException {
-        
-        String file = xmlfile.replaceAll("xml$", "json");
-        String newline = System.getProperty("line.separator");
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write("{" + newline);
-            int k = 0;
-            int size = parameters.size();
-            for (Entry<String, String> parameter : parameters.entrySet()) {
-                StringBuilder str = new StringBuilder();
-                str.append("\"");
-                str.append(parameter.getKey());
-                str.append("\"");
-                str.append(":");
-                String value = parameter.getValue();
-                str.append(StringUtil.isNotString(value) ? value : "\"" + value + "\"");
-                if (++k < size) {
-                    str.append(",");
-                }
-                str.append(newline);
-                writer.write(str.toString());
-            }
-            writer.write("}" + newline);
-        }
-    }
-    
+
     /**
      * Inner class that represents a parameter in the configuration file.
      * {@code Configuration} parses the configuration file line by line. When
      * the line is not discarded (refer to function
      * {@link #loadParameters(java.lang.String, int)} for details about
-     * discarded lines), it assumes it is a parameter (formed as
-     * <i>"key":"value"</i> or <i>"key":["value1", "value2", "value3",
-     * "value4"</i>) and creates a new {@code Parameter} object.
+     * discarded lines), it assumes it is a parameter (formed as <i>key
+     * separator value</i> or <i>key separator1 value1 separator2 value2
+     * separator2 value3 separator2 value4</i>) and creates a new
+     * {@code Parameter} object.
      */
     private class Parameter {
 
@@ -572,12 +585,25 @@ public class ParameterManager extends AbstractManager {
         /**
          * The separator between key and value. <i>key keySeparator value</i>
          */
-        final private String keySeparator = ":";
+        private String keySeparator;
         /**
          * The separator between the values of the parameter. <i>key
          * keySeparator value1 valueSeparator value2 valueSeparator value3</i>
          */
-        final private String valueSeparator = ",";
+        private String valueSeparator;
+
+        /**
+         * Create a new parameter out of the given line.
+         *
+         * @param iline, the line of the parameter in the configuration file
+         * @param source, the path of the configuration file
+         */
+        Parameter(int iline, String source, String keySeparator, String valueSeparator) {
+            this.iline = iline;
+            this.source = source;
+            this.keySeparator = keySeparator;
+            this.valueSeparator = valueSeparator;
+        }
 
         /**
          * Create a new parameter out of the given line.
@@ -613,7 +639,13 @@ public class ParameterManager extends AbstractManager {
          */
         private void parse(String line) {
             key = value = null;
+            if (null == keySeparator) {
+                keySeparator = Separator.guess(line, Separator.EQUALS).toString();
+            }
             split(line);
+            if (null == valueSeparator) {
+                valueSeparator = Separator.guess(value, Separator.SEMICOLON).toString();
+            }
             value = clean(value);
         }
 
@@ -649,7 +681,7 @@ public class ParameterManager extends AbstractManager {
                 error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
             }
             // extract the key and remove leading and trailing double quotes
-            key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim().replaceAll("^\"|\"$", "");;
+            key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim().replaceAll("^\"|\"$", "");
             // extract the value
             try {
                 value = line.substring(line.indexOf(keySeparator) + 1).trim();
@@ -662,7 +694,7 @@ public class ParameterManager extends AbstractManager {
                 value = "null";
             }
         }
-        
+
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder();

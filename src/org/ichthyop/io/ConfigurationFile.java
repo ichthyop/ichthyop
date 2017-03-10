@@ -53,6 +53,7 @@
 package org.ichthyop.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -63,17 +64,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ichthyop.IchthyopLinker;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
 import org.jdom2.filter.Filter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 import org.ichthyop.Version;
 import org.ichthyop.util.StringUtil;
+import org.jdom2.JDOMException;
 
-public class ConfigurationFile {
+public class ConfigurationFile extends IchthyopLinker {
 
     private File file;
     private Document structure;
@@ -95,7 +97,7 @@ public class ConfigurationFile {
             structure = new Document(racine);
             map = createMap();
         } catch (Exception ex) {
-            Logger.getLogger(ConfigurationFile.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
@@ -105,11 +107,45 @@ public class ConfigurationFile {
 
     public void load() throws Exception {
 
+        /* Make sure file exists */
+        if (!file.isFile()) {
+            throw new FileNotFoundException("Configuration file " + file.getPath() + " not found.");
+        }
+        if (!file.canRead()) {
+            throw new IOException("Configuration file " + file.getPath() + " cannot be read");
+        }
+        /* Make sure file is valid */
+        if (isValidXML(file)) {
+            if (!isValidConfigFile(file)) {
+                throw new IOException(file.getName() + " is not a valid Ichthyop configuration file.");
+            }
+        }
+
         SAXBuilder sxb = new SAXBuilder();
         Element racine = sxb.build(file).getRootElement();
         racine.detach();
         structure = new Document(racine);
         map = createMap();
+    }
+
+    private boolean isValidXML(File file) throws IOException {
+        try {
+            new SAXBuilder().build(file).getRootElement();
+        } catch (JDOMException ex) {
+            IOException ioex = new IOException("Error occured reading " + file.getName() + " \n" + ex.getMessage(), ex);
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        return true;
+    }
+
+    private boolean isValidConfigFile(File file) {
+        try {
+            return new SAXBuilder().build(file).getRootElement().getName().equals("icstructure");
+
+        } catch (JDOMException | IOException ex) {
+            return false;
+        }
     }
 
     public String getDescription() {
@@ -247,8 +283,10 @@ public class ConfigurationFile {
                     parameters.put(key.toString(), StringUtil.nullify(parameter.getFormat().toString()));
                     key = new StringBuilder(bkey).append(".").append(pkey).append(".description");
                     parameters.put(key.toString(), StringUtil.removeQuotes(StringUtil.nullify(parameter.getDescription())));
-                    key = new StringBuilder(bkey).append(".").append(pkey).append(".accepted");
-                    parameters.put(key.toString(), handleArray(parameter.getAcceptedValues()));
+                    if (parameter.getAcceptedValues().length > 0) {
+                        key = new StringBuilder(bkey).append(".").append(pkey).append(".accepted");
+                        parameters.put(key.toString(), handleArray(parameter.getAcceptedValues()));
+                    }
                 }
                 key = new StringBuilder(bkey).append(".").append(pkey);
                 parameters.put(key.toString(), handleArray(StringUtil.nullify(parameter.getValue())));
@@ -259,8 +297,6 @@ public class ConfigurationFile {
 
         return parameters;
     }
-
-    
 
     private String listBlocks() throws IOException {
         List<String> list = new ArrayList();

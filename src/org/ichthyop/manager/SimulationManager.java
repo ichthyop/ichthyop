@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
 import org.jdom2.JDOMException;
@@ -118,7 +117,7 @@ public class SimulationManager extends IchthyopLogger {
     public static SimulationManager getInstance() {
         return simulationManager;
     }
-    
+
     public void setupLogger() {
         Handler[] handlers = getLogger().getHandlers();
         for (Handler handler : handlers) {
@@ -131,46 +130,9 @@ public class SimulationManager extends IchthyopLogger {
 
     public void setConfigurationFile(File file) throws Exception {
 
-        cfgFile = null;
-        isSetup = false;
-        if (file != null) {
-            /* Make sure file exists */
-            if (!file.isFile()) {
-                throw new FileNotFoundException("Configuration file " + file.getPath() + " not found.");
-            }
-            if (!file.canRead()) {
-                throw new IOException("Configuration file " + file.getPath() + " cannot be read");
-            }
-            /* Make sure file is valid */
-            if (isValidXML(file)) {
-                if (!isValidConfigFile(file)) {
-                    throw new IOException(file.getName() + " is not a valid Ichthyop configuration file.");
-                }
-            }
-            cfgFile = file;
-            getParameterManager().setConfigurationFile(file);
-            mobiliseManagers();
-        }
-    }
-
-    private boolean isValidXML(File file) throws IOException {
-        try {
-            new SAXBuilder().build(file).getRootElement();
-        } catch (JDOMException ex) {
-            IOException ioex = new IOException("Error occured reading " + file.getName() + " \n" + ex.getMessage(), ex);
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        return true;
-    }
-
-    private boolean isValidConfigFile(File file) {
-        try {
-            return new SAXBuilder().build(file).getRootElement().getName().equals("icstructure");
-
-        } catch (JDOMException | IOException ex) {
-            return false;
-        }
+        getParameterManager().setConfigurationFile(file);
+        cfgFile = new File(getParameterManager().getMainFile());
+        mobiliseManagers();
     }
 
     public File getConfigurationFile() {

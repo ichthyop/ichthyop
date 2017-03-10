@@ -68,7 +68,7 @@ public class IchthyopLogger {
 
     final public void error(String msg, Exception ex) {
         ICHTHYOPLOGGER.log(Level.SEVERE, msg, ex);
-        System.exit(1);
+        //System.exit(1);
     }
 
     final public void warning(String msg) {

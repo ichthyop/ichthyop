@@ -84,7 +84,6 @@ public class ActionManager extends AbstractManager {
         actionMap = new HashMap();
         String[] keys = getConfiguration().getParameterSets();
         for (String key : keys) {
-            System.out.println(key);
             if (getConfiguration().canFind(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("action")) {
                 if (getConfiguration().getBoolean(key + ".enabled")) {

@@ -674,11 +674,10 @@ public class IchthyopView extends FrameView
         JFileChooser fc = new JFileChooser(cwd);
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
-        fc.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.configurationFile"), getResourceMap().getString("Application.configurationFile.extension")));
         fc.setSelectedFile(cwd);
         int returnVal = fc.showSaveDialog(getFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = addExtension(fc.getSelectedFile(), getResourceMap().getString("Application.configurationFile.extension"));
+            File file = fc.getSelectedFile();
             if (file.getAbsolutePath().equals(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
                 JOptionPane.showMessageDialog(fc, getResourceMap().getString("saveAsConfigurationFile.msg.different"), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.OK_OPTION);
                 saveAsConfigurationFile();
@@ -808,7 +807,6 @@ public class IchthyopView extends FrameView
     public Task openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.configurationFile"), getResourceMap().getString("Application.configurationFile.extension")));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
             checkCfgVersionAndLoad(chooser.getSelectedFile());
@@ -933,9 +931,10 @@ public class IchthyopView extends FrameView
                 Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openConfigurationFile.msg.opened"), untitled ? "Untitled configuration" : file.toString()});
-        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (untitled ? "Untitled configuration" : file.toString()));
-        lblCfgFile.setText((untitled ? "Filename not set yet" : file.getAbsolutePath()));
+        File cfgFile = getSimulationManager().getConfigurationFile();
+        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openConfigurationFile.msg.opened"), untitled ? "Untitled configuration" : cfgFile.toString()});
+        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (untitled ? "Untitled configuration" : cfgFile.toString()));
+        lblCfgFile.setText((untitled ? "Filename not set yet" : cfgFile.getAbsolutePath()));
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
         initDone = false;
         saveAsMenuItem.getAction().setEnabled(true);
