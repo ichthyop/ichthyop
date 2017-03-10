@@ -180,14 +180,14 @@ public class OldConfigurationFile extends IchthyopLinker {
         structure.getRootElement().getChild(VERSION).setAttribute(DATE, version.getDate());
     }
 
-    public void setLongName(String longName) {
+    public void setTitle(String longName) {
         if (null == structure.getRootElement().getChild(LONG_NAME)) {
             structure.getRootElement().addContent(new Element(LONG_NAME));
         }
         structure.getRootElement().getChild(LONG_NAME).setText(longName);
     }
 
-    public String getLongName() {
+    public String getTitle() {
         if (null != structure.getRootElement().getChild(LONG_NAME)) {
             return structure.getRootElement().getChildTextNormalize(LONG_NAME);
         } else {
@@ -258,7 +258,7 @@ public class OldConfigurationFile extends IchthyopLinker {
     public HashMap<String, String> toProperties(boolean extended) throws IOException {
         HashMap<String, String> parameters = new LinkedHashMap();
 
-        parameters.put("configuration.longname", getLongName());
+        parameters.put("configuration.title", getTitle());
         parameters.put("configuration.description", StringUtil.removeQuotes(getDescription()));
         parameters.put("configuration.version", getVersion().toString());
         parameters.put("configuration.subsets", listBlocks());
@@ -417,8 +417,8 @@ public class OldConfigurationFile extends IchthyopLinker {
 
 class BlockId {
 
-    private BlockType blockType;
-    private String blockKey;
+    private final BlockType blockType;
+    private final String blockKey;
 
     BlockId(BlockType type, String blockName) {
         this.blockType = type;
@@ -435,7 +435,7 @@ class BlockId {
 
     @Override
     public String toString() {
-        StringBuffer id = new StringBuffer(getBlockType().toString());
+        StringBuilder id = new StringBuilder(getBlockType().toString());
         id.append('/');
         id.append(getBlockKey());
         return id.toString();

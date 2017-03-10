@@ -737,7 +737,6 @@ public class IchthyopView extends FrameView
 
         @Override
         protected Object doInBackground() throws Exception {
-            pnlConfiguration.updateXMLStructure();
             getSimulationManager().getParameterManager().save();
             getSimulationManager().setConfigurationFile(getSimulationManager().getConfigurationFile());
             return null;

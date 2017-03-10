@@ -62,6 +62,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -170,8 +172,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnRedo.getAction().setEnabled(false);
         getTable().setModel(block, this);
         setParameterEditorEnabled(block.getType().equals(BlockType.OPTION) ? true : block.isEnabled());
-        }
-        
+    }
+
     @Action
     public void setBlockEnabled() {
         blockTree.getSelectedBlock().setEnabled(ckBoxBlock.isSelected());
@@ -282,14 +284,11 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         if (!e.getValueIsAdjusting()) {
             try {
                 int viewRow = table.getSelectedRow();
-                int modelRow = viewRow;
                 if (viewRow < 0) {
                     //Selection got filtered away.
                     return;
-                } else {
-                    modelRow = table.convertRowIndexToModel(viewRow);
                 }
-                Parameter xparam = new Parameter(getTable().getParameterKey(modelRow));
+                Parameter xparam = new Parameter(getTable().getParameterKey(table.convertRowIndexToModel(viewRow)));
                 String title = getResourceMap().getString("pnlParameterInfo.border.title") + " " + xparam.getLongName();
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(title));
                 StringBuilder info = new StringBuilder("<html><i><p>");
@@ -334,13 +333,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
     }
 
-    public void updateXMLStructure() {
-//        getSimulationManager().getParameterManager().setConfigurationTitle(textFieldTitle.getText());
-//        getSimulationManager().getParameterManager().setConfigurationDescription(textAreaDescription.getText());
-//        blockTree.writeStructure(getSimulationManager().getParameterManager());
-//        hasStructureChanged = false;
-    }
-
     public Task loadBlockTree() {
         return new CreateBlockTreeTask(IchthyopApp.getApplication());
     }
@@ -352,6 +344,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         CreateBlockTreeTask(Application instance) {
             super(instance);
             blockTree.setVisible(false);
+            textFieldTitle.getDocument().removeDocumentListener(titleDL);
+            textAreaDescription.getDocument().removeDocumentListener(descriptionDL);
         }
 
         @Override
@@ -388,6 +382,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             if (null != cfgVersion) {
                 textFieldVersion.setText(cfgVersion);
             }
+            textFieldTitle.getDocument().addDocumentListener(titleDL);
+            textAreaDescription.getDocument().addDocumentListener(descriptionDL);
             splitPaneCfg.setRightComponent(pnlNoBlockSelected);
         }
     }
@@ -467,11 +463,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         lblDescription.setName("lblDescription"); // NOI18N
 
         textFieldTitle.setName("textFieldTitle"); // NOI18N
-        textFieldTitle.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                textFieldTitleKeyTyped(evt);
-            }
-        });
 
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
@@ -480,11 +471,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         textAreaDescription.setRows(5);
         textAreaDescription.setWrapStyleWord(true);
         textAreaDescription.setName("textAreaDescription"); // NOI18N
-        textAreaDescription.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                textFieldTitleKeyTyped(evt);
-            }
-        });
         jScrollPane2.setViewportView(textAreaDescription);
 
         lblVersion.setText("Version");
@@ -792,7 +778,13 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         );
     }
 
-    private void textFieldTitleKeyTyped(java.awt.event.KeyEvent evt) {
+    private void updateDescription(String str) {
+        getSimulationManager().getParameterManager().setConfigurationDescription(str);
+        firePropertyChange("configurationFile", null, null);
+    }
+
+    private void updateTitle(String str) {
+        getSimulationManager().getParameterManager().setConfigurationTitle(str);
         firePropertyChange("configurationFile", null, null);
     }
 
@@ -832,4 +824,37 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JTextField textFieldVersion;
     private boolean hasStructureChanged;
     private final HashMap<String, JUndoManager> undoManagers = new HashMap();
+
+    private final DocumentListener titleDL = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            updateTitle(textFieldTitle.getText());
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            updateTitle(textFieldTitle.getText());
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            updateTitle(textFieldTitle.getText());
+        }
+    };
+    private final DocumentListener descriptionDL = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            updateDescription(textAreaDescription.getText());
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            updateDescription(textAreaDescription.getText());
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            updateDescription(textAreaDescription.getText());
+        }
+    };
 }

@@ -136,11 +136,11 @@ public class ParameterManager extends AbstractManager {
     }
 
     public String getConfigurationTitle() {
-        return getString("configuration.longname");
+        return getString("configuration.title");
     }
 
     public void setConfigurationTitle(String longName) {
-        setString("configuration.longname", longName);
+        setString("configuration.title", longName);
     }
 
     public void save() throws IOException, FileNotFoundException {

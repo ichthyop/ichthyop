@@ -54,11 +54,11 @@ public class OldParameterManager extends AbstractManager {
     }
 
     public String getConfigurationTitle() {
-        return cfgFile.getLongName();
+        return cfgFile.getTitle();
     }
 
     public void setConfigurationTitle(String longName) {
-        cfgFile.setLongName(longName);
+        cfgFile.setTitle(longName);
     }
 
     public List<XParameter> getParameters() {
