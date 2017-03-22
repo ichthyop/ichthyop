@@ -51,7 +51,7 @@ public class UpdateManager extends AbstractManager {
         if (getConfigurationVersion().priorTo(Version.V32)) {
             u31To32();
         }
-        if (getConfigurationVersion().priorTo(Version.V33B)) {
+        if (getConfigurationVersion().priorTo(Version.V33)) {
             u32To33();
         }
         /*
@@ -91,12 +91,12 @@ public class UpdateManager extends AbstractManager {
         /*
          * Update version number and date
          */
-        getConfigurationFile().setVersion(Version.V33B);
+        getConfigurationFile().setVersion(Version.V33);
         StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
         str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
         str.append(" File updated to version ");
-        str.append(Version.V33B);
+        str.append(Version.V33);
         str.append('.');
         getConfigurationFile().setDescription(str.toString());
     }
