@@ -59,11 +59,13 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Level;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.Template;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -125,6 +127,24 @@ public class OldConfigurationFile extends IchthyopLinker {
         racine.detach();
         structure = new Document(racine);
         map = createMap();
+    }
+
+    public void upgrade() {
+        try {
+            if (getVersion().priorTo(Version.V31)) {
+
+                u30bTo31();
+
+            }
+            if (getVersion().priorTo(Version.V32)) {
+                u31To32();
+            }
+            if (getVersion().priorTo(Version.V33B)) {
+                u32To33();
+            }
+        } catch (Exception ex) {
+            error("Error while upgrading the XML configuration file", ex);
+        }
     }
 
     private boolean isValidXML(File file) throws IOException {
@@ -394,7 +414,7 @@ public class OldConfigurationFile extends IchthyopLinker {
         map.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
     }
 
-    public HashMap<String, XBlock> createMap() throws Exception {
+    private HashMap<String, XBlock> createMap() throws Exception {
         HashMap<String, XBlock> lmap = new HashMap();
         for (XBlock xblock : readBlocks()) {
             lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
@@ -412,6 +432,196 @@ public class OldConfigurationFile extends IchthyopLinker {
     public void removeBlock(final BlockType type, final String key) {
         map.remove(key);
         structure.getRootElement().removeContent(getBlock(type, key));
+    }
+
+    /*
+     * Upgrade the 3.2 configuration file to 3.3
+     */
+    private void u32To33() throws Exception {
+        //@TODO
+        getLogger().warning("The automatic upgrade of the configuration file from v3.2 to v3.3 is not implemented yet. Ichthyop will update the version number but parts of your configuration may not work anymore. Sorry for the inconvenience.");
+        /*
+         * Update version number and date
+         */
+        setVersion(Version.V33B);
+        StringBuilder str = new StringBuilder(getDescription());
+        str.append("  --@@@--  ");
+        str.append((new GregorianCalendar()).getTime());
+        str.append(" File updated to version ");
+        str.append(Version.V33B);
+        str.append('.');
+        setDescription(str.toString());
+    }
+
+    /*
+     * Upgrade the 3.1 configuration file to 3.2
+     */
+    private void u31To32() throws Exception {
+        OldConfigurationFile cfg32 = new OldConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        String treepath, newTreepath;
+        /*
+         * Update block action.lethal_temp
+         */
+        if (null != getBlock(BlockType.ACTION, "action.lethal_temp")) {
+            treepath = getBlock(BlockType.ACTION, "action.lethal_temp").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Lethal temperatures"
+                    : "Biology/Lethal temperatures";
+            removeBlock(BlockType.ACTION, "action.lethal_temp");
+            addBlock(cfg32.getBlock(BlockType.ACTION, "action.lethal_temp"));
+            getBlock(BlockType.ACTION, "action.lethal_temp").setTreePath(newTreepath);
+        }
+        /*
+         * Update version number and date
+         */
+        setVersion(Version.V32);
+        StringBuilder str = new StringBuilder(getDescription());
+        str.append("  --@@@--  ");
+        str.append((new GregorianCalendar()).getTime());
+        str.append(" File updated to version ");
+        str.append(Version.V32);
+        str.append('.');
+        setDescription(str.toString());
+    }
+
+    /*
+     * Upgrade the 3.0b configuration file to 3.1
+     */
+    private void u30bTo31() throws Exception {
+        OldConfigurationFile cfg31 = new OldConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
+        String treepath, newTreepath;
+        /*
+         * Add the density_file parameter in the action.buoyancy block
+         */
+        if (null != getBlock(BlockType.ACTION, "action.buoyancy")) {
+            if (null == getBlock(BlockType.ACTION, "action.buoyancy").getXParameter("density_file")) {
+                getBlock(BlockType.ACTION, "action.buoyancy").addXParameter(cfg31.getXParameter(BlockType.ACTION, "action.buoyancy", "density_file"));
+            }
+        }
+
+        /*
+         * Update the recruitment in zone block
+         */
+        if (null != getBlock(BlockType.ACTION, "action.recruitment")) {
+            getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
+            treepath = getBlock(BlockType.ACTION, "action.recruitment").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Recruitment/In zones"
+                    : "Biology/Recruitment/In zones";
+            getBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
+            updateBlockKey("action.recruitment.zone", getBlock(BlockType.ACTION, "action.recruitment"));
+        }
+        /*
+         * Add the recruitment in stain block
+         */
+        if (!containsBlock(BlockType.ACTION, "action.recruitment.stain")) {
+            addBlock(cfg31.getBlock(BlockType.ACTION, "action.recruitment.stain").detach());
+            treepath = getBlock(BlockType.ACTION, "action.recruitment.zone").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Biology/Recruitment/In stain"
+                    : "Biology/Recruitment/In stain";
+            getBlock(BlockType.ACTION, "action.recruitment.stain").setTreePath(newTreepath);
+        }
+        /*
+         * Add the coastline behavior block
+         */
+        if (!containsBlock(BlockType.OPTION, "app.transport")) {
+            addBlock(cfg31.getBlock(BlockType.OPTION, "app.transport").detach());
+            treepath = getBlock(BlockType.ACTION, "action.advection").getTreePath();
+            newTreepath = treepath.startsWith("Advanced")
+                    ? "Advanced/Transport/General"
+                    : "Transport/General";
+            getBlock(BlockType.OPTION, "app.transport").setTreePath(newTreepath);
+        }
+        /*
+         * Update MARS OpendDAP URL
+         */
+        if (null != getBlock(BlockType.DATASET, "dataset.mars_2d_opendap")) {
+            getXParameter(BlockType.DATASET, "dataset.mars_2d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
+        }
+        if (null != getBlock(BlockType.DATASET, "dataset.mars_3d_opendap")) {
+            getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
+        }
+        /*
+         * Update MARS Generelized Sigma parameters
+         */
+        if (null != getBlock(BlockType.DATASET, "dataset.mars_3d")) {
+            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_hc")) {
+                getBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_hc"));
+            }
+            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_a")) {
+                getBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_a"));
+            }
+            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_b")) {
+                getBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_b"));
+            }
+        }
+        if (null != getBlock(BlockType.DATASET, "dataset.mars_3d_opendap")) {
+            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_hc")) {
+                getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_hc"));
+            }
+            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_a")) {
+                getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_a"));
+            }
+            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_b")) {
+                getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_b"));
+            }
+        }
+        /*
+         * Update OPA NEMO parameters
+         */
+        if (null != getBlock(BlockType.DATASET, "dataset.nemo")) {
+            if (null == getBlock(BlockType.DATASET, "dataset.nemo").getXParameter("field_var_e3u")) {
+                getBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3u"));
+            }
+            if (null == getBlock(BlockType.DATASET, "dataset.nemo").getXParameter("field_var_e3v")) {
+                getBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3v"));
+            }
+        }
+        /*
+         * Add skip_sorting option in Dataset blocks
+         */
+        for (XBlock xblock : getBlocks(BlockType.DATASET)) {
+            if (null == xblock.getXParameter("skip_sorting")) {
+                if (null != cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting")) {
+                    xblock.addXParameter(cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting"));
+                }
+            }
+        }
+        /*
+         * Fix lethal_temperature_larva value 12.0 instead of 12.O  
+         */
+        if (null != getBlock(BlockType.ACTION, "action.lethal_temp")) {
+            try {
+                float f = Float.valueOf(getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
+            } catch (NumberFormatException ex) {
+                getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").setValue("12.0");
+            }
+        }
+        /*
+         * Add grid_file parameter in ROMS configuration
+         */
+        if (null != getBlock(BlockType.DATASET, "dataset.roms_2d")) {
+            if (null == getBlock(BlockType.DATASET, "dataset.roms_2d").getXParameter("grid_file")) {
+                getBlock(BlockType.DATASET, "dataset.roms_2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_2d", "grid_file"));
+            }
+        }
+        if (null != getBlock(BlockType.DATASET, "dataset.roms_3d")) {
+            if (null == getBlock(BlockType.DATASET, "dataset.roms_3d").getXParameter("grid_file")) {
+                getBlock(BlockType.DATASET, "dataset.roms_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_3d", "grid_file"));
+            }
+        }
+        /*
+         * Update version number and date
+         */
+        setVersion(Version.V31);
+        StringBuilder str = new StringBuilder(getDescription());
+        str.append("  --@@@--  ");
+        str.append((new GregorianCalendar()).getTime());
+        str.append(" File updated to version ");
+        str.append(Version.V31);
+        str.append('.');
+        setDescription(str.toString());
     }
 }
 

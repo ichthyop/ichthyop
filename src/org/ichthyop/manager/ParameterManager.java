@@ -91,6 +91,7 @@ public class ParameterManager extends AbstractManager {
         if (file.getName().endsWith(".xml")) {
             OldConfigurationFile cfg = new OldConfigurationFile(file);
             cfg.load();
+            cfg.upgrade();
             HashMap<String, String> xmlMap = cfg.toProperties(true);
             mainFilename = file.getAbsolutePath().replaceAll("xml$", "csv");
             int i = 1;
