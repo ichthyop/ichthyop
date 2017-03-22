@@ -2494,6 +2494,14 @@
                 <format>integer</format>
                 <description>The number of aggregated particles in a patch.</description>
             </parameter>
+             <parameter>
+                <key>per_zone</key>
+                <long_name>Patches per zone ?</long_name>
+                <value>true</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Whether the number of patches must be interpreted as global or per zone.</description>
+            </parameter>
             <parameter>
                 <key>radius_patch</key>
                 <long_name>Radius of the patch [meter]</long_name>

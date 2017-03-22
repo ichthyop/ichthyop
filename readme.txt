@@ -1,22 +1,17 @@
 ====================
 ICHTHYOP readme file
-================================
+====================
+
 http://www.ichthyop.org
 
 Ichthtyop is an individual based model that simulates Lagrangian transport of particles.
 
 Copyright (c) Philippe VERLEY 2006-2017
 
-Release: 3.3beta (2017/03/01) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r984
+Release: 3.3 (2017/03/23) 
+https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r1018
 
 Feedback & Bug reports: www.ichthyop.org/forum
-
-=============
-Beta version
-
-This beta version of Ichthyop gathers the latest developments and bug fixes since the previous release. It has gone through some testing and is stable though it is not fully finalized yet. Automatic update of the configuration files from previous releases is still missing. This beta release may keep changing (bug fixing and final tweaks) until the developer consider it is feature complete and ready for a new release.
-No JAR (Java executable file) is provided for the beta version, the source code is distributed as a Netbeans project.
 
 ==========================
 Changes since Ichthyop 3.2
@@ -33,6 +28,7 @@ Bug fixes:
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
 New features:
+* Linear growth can define custom larval stages with length thresholds
 * "Patches in zones" release mode accepts a new parameter "per_zone" to indicate whether the number of particles is global (as it used to be) or per release zones (new feature).
 * New plugin for ROMS3D OpenDAP
 * All the Dataset plugins detect automatically the unit of the time value by reading variable attribute "units". It can be either seconds or days, but can be easily extended to other units on demand.
@@ -51,19 +47,12 @@ New features:
 ===========
 Requirement
 
-JDK 1.8
-Netbeans 8.1
+Java >= 1.8
 
-=============================
-Run Ichthyop from source code
+============
+Run Ichthyop 
 
-Install JDK and Netbeans
-Open Netbeans
-Netbeans Menu File > Open Project...
-  Go to folder ichthyop-3.3alpha_src and click on "Open Project". Project name is "Ichthyop stable 3"
-Two ways of running Ichthyop :
-* from Netbeans, Menu > Run > Run Project (Ichthyop stable 3)
-* Build the Ichthyop JAR from Netbeans by click on Menu > Run > Clean and Build Project (Ichthyop stable 3). It will create a JAR file in folder ichthyop-3.3alpha_src/dist/ You can double click on the JAR file or run it from commmand line 'java -jar dist/ichthyop-stable-3.jar'
+Double click on the JAR file or run it from commmand line 'java -jar ichthyop-3.3.jar'
 
 ===================
 License information
@@ -76,19 +65,15 @@ For details about the GNU General Public License, please see http://www.gnu.org/
 
 ================================
 Description of files and folders
-The folder is organized as a Netbeans Java project (www.netbeans.org).
 
 % Files
-manifest.mf --> Manifest file to build the JAR file
-build.xml --> Ant build file
+ichthyop-3.3.jar, java exectuable
 readme.txt --> this document
 
 % Directories
-src --> Ichthyop source code
 cfg --> Ichthyop configuration folder
 lib --> Necessary libraries to run the program
 input --> Basic NetCDF input files used for the examples
-nbproject --> Netbeans configuration files
 
 =====================
 Changes log (history)
