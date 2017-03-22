@@ -54,8 +54,6 @@ package org.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -63,10 +61,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-import java.util.logging.Level;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.table.AbstractTableModel;
@@ -127,11 +122,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
         setDefaultRenderer(Object.class, new ParamTableCellRenderer());
 
         for (int row = 0; row < model.getRowCount(); row++) {
-            Parameter xparam = new Parameter(getParameterKey(row));
+            Parameter parameter = model.getParameter(row);
             Object value = model.getValueAt(row, 1);
-            switch (xparam.getFormat()) {
+            switch (parameter.getFormat()) {
                 case COMBO:
-                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(xparam.getAcceptedValues())));
+                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(parameter.getAcceptedValues())));
                     break;
                 case INTEGER:
                     editorModel.addEditorForRow(row, new IntegerEditor());
@@ -164,10 +159,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new ListEditor());
                     break;
                 case TEXTFILE:
-                    editorModel.addEditorForRow(row, new TextFileEditor(xparam.getTemplate()));
+                    editorModel.addEditorForRow(row, new TextFileEditor(parameter.getTemplate()));
                     break;
                 case ZONEFILE:
-                    editorModel.addEditorForRow(row, new ZoneEditor(xparam.getTemplate()));
+                    editorModel.addEditorForRow(row, new ZoneEditor(parameter.getTemplate()));
                     break;
                 case LONLAT:
                     editorModel.addEditorForRow(row, new LonLatEditor());
@@ -183,71 +178,20 @@ public class ParameterTable extends JMultiCellEditorsTable {
             getCellEditor().stopCellEditing();
         }
     }
-
-    /*
-     * This method picks good column sizes.
-     * If all column heads are wider than the column's cells'
-     * contents, then you can just use column.sizeWidthToFit().
-     */
-    public void adjustColumnSizes() {
-
-        getModel();
-        if (!(getModel().getRowCount() > 0)) {
-            return;
-        }
-        TableColumn column;
-        Component comp;
-        int headerWidth;
-        int cellWidth;
-        Object[] longValues = model.getLongValues();
-        TableCellRenderer headerRenderer = getTableHeader().getDefaultRenderer();
-
-        for (int i = 0; i < getModel().getColumnCount(); i++) {
-            column = getColumnModel().getColumn(i);
-
-            comp = headerRenderer.getTableCellRendererComponent(
-                    null, column.getHeaderValue(),
-                    false, false, 0, 0);
-            headerWidth = comp.getPreferredSize().width;
-            try {
-                comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
-            } catch (Exception ex) {
-                java.util.logging.Logger.getAnonymousLogger().log(Level.WARNING, ex.toString());
-            }
-            cellWidth = comp.getPreferredSize().width;
-
-            column.setPreferredWidth(Math.max(headerWidth, cellWidth));
-        }
-    }
-
-    public String getParameterKey(int row) {
-        String key = "";
-        if (row >= 0) {
-            key = model.getTableParameter(row).getParameter().getKey();
-        }
-        return key;
-    }
-
-    public String getParameterValue(int row) {
-        String value = "";
-        if (row >= 0) {
-            value = model.getTableParameter(row).getValue();
-        }
-        return value;
+    
+    Parameter getParameter(int row) {
+        return model.getParameter(row);
     }
 
     public class ParameterTableModel extends AbstractTableModel {
 
-        private ParameterSet block;
-        private TableParameter[] data;
-        final public static String NAME_HEADER = "Name";
-        final public static String VALUE_HEADER = "Value";
-        private final String[] HEADERS = new String[]{NAME_HEADER, VALUE_HEADER};
+        private final Parameter[] parameters;
+        private final String[] HEADERS = new String[]{"Name", "Value(s)"};
         private JUndoManager undoManager;
 
-        ParameterTableModel(ParameterSet block) {
-            this.block = block;
-            data = createData();
+        ParameterTableModel(ParameterSet set) {
+            List<Parameter> tmp = set.getParameters();
+            parameters = tmp.toArray(new Parameter[tmp.size()]);
             addUndoableEditListener(undoManager = new JUndoManager());
         }
 
@@ -258,7 +202,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
         @Override
         public int getRowCount() {
-            return data.length;
+            return parameters.length;
         }
 
         @Override
@@ -266,17 +210,16 @@ public class ParameterTable extends JMultiCellEditorsTable {
             return HEADERS[col];
         }
 
+        Parameter getParameter(int row) {
+            return parameters[row];
+        }
+        
+
         @Override
         public Object getValueAt(int row, int col) {
-            if (col == 0) {
-                return data[row].getLongName();
-            } else {
-                return data[row].getValue();
-            }
-        }
-
-        TableParameter getTableParameter(int row) {
-            return data[row];
+            return (col == 0)
+                    ? parameters[row].getLongName()
+                    : parameters[row].getValue();
         }
 
         @Override
@@ -284,14 +227,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
             return getValueAt(0, c).getClass();
         }
 
-        /*
-         * Don't need to implement this method unless your table's
-         * editable.
-         */
+       
         @Override
         public boolean isCellEditable(int row, int col) {
-            //Note that the data/cell address is constant,
-            //no matter where the cell appears onscreen.
+            // Only values are editable
             return col == 1;
         }
 
@@ -314,12 +253,12 @@ public class ParameterTable extends JMultiCellEditorsTable {
             }
             UndoableEditListener listeners[] = getListeners(UndoableEditListener.class);
             if (undoable == false || listeners == null) {
-                data[row].setValue(value.toString());
+                parameters[row].setValue(value.toString());
                 fireTableCellUpdated(row, column);
                 return;
             }
 
-            data[row].setValue(value.toString());
+            parameters[row].setValue(value.toString());
             fireTableCellUpdated(row, column);
             JvCellEdit cellEdit = new JvCellEdit(this, oldValue, value, row, column);
             UndoableEditEvent editEvent = new UndoableEditEvent(this, cellEdit);
@@ -330,37 +269,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
         private void addUndoableEditListener(UndoableEditListener listener) {
             listenerList.add(UndoableEditListener.class, listener);
-        }
-
-        private TableParameter[] createData() {
-
-            Collection<Parameter> list = block.getParameters();
-            List<TableParameter> listData = new ArrayList();
-            TableParameter[] tableData;
-            int i = 0;
-            for (Parameter xparam : list) {
-                listData.add(new TableParameter(xparam));
-            }
-            tableData = new TableParameter[listData.size()];
-            for (TableParameter arr : listData) {
-                tableData[i++] = arr;
-            }
-            return tableData;
-        }
-
-        private Object[] getLongValues() {
-
-            String[] longuest = new String[]{"", ""};
-            Collection<Parameter> list = block.getParameters();
-            for (Parameter xparam : list) {
-                if (xparam.getLongName().length() > longuest[0].length()) {
-                    longuest[0] = xparam.getLongName();
-                }
-                if (xparam.getValue().length() > longuest[1].length()) {
-                    longuest[1] = xparam.getValue();
-                }
-            }
-            return longuest;
         }
     }
 
@@ -383,34 +291,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
             }
             comp.setBackground(Color.WHITE);
             return comp;
-        }
-    }
-
-    private class TableParameter {
-
-        private final Parameter xparameter;
-        private String value;
-
-        TableParameter(Parameter xparameter) {
-            this.xparameter = xparameter;
-            this.value = xparameter.getValue();
-        }
-
-        Parameter getParameter() {
-            return xparameter;
-        }
-
-        String getLongName() {
-            return xparameter.getLongName();
-        }
-
-        String getValue() {
-            return value;
-        }
-
-        void setValue(String value) {
-            this.value = value;
-            xparameter.setValue(value);
         }
     }
 

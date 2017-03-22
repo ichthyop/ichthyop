@@ -288,12 +288,12 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     //Selection got filtered away.
                     return;
                 }
-                Parameter xparam = new Parameter(getTable().getParameterKey(table.convertRowIndexToModel(viewRow)));
-                String title = getResourceMap().getString("pnlParameterInfo.border.title") + " " + xparam.getLongName();
+                Parameter parameter = getTable().getParameter(table.convertRowIndexToModel(viewRow));
+                String title = getResourceMap().getString("pnlParameterInfo.border.title") + " " + parameter.getLongName();
                 pnlParameterInfo.setBorder(BorderFactory.createTitledBorder(title));
                 StringBuilder info = new StringBuilder("<html><i><p>");
-                if (null != xparam.getDescription()) {
-                    info.append(xparam.getDescription());
+                if (null != parameter.getDescription()) {
+                    info.append(parameter.getDescription());
                 } else {
                     info.append(getResourceMap().getString("noDescription.text"));
                 }
