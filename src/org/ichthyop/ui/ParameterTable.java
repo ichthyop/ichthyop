@@ -118,12 +118,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
-
         setDefaultRenderer(Object.class, new ParamTableCellRenderer());
 
         for (int row = 0; row < model.getRowCount(); row++) {
             Parameter parameter = model.getParameter(row);
-            Object value = model.getValueAt(row, 1);
             switch (parameter.getFormat()) {
                 case COMBO:
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(parameter.getAcceptedValues())));
@@ -138,13 +136,13 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(new String[]{"true", "false"})));
                     break;
                 case DURATION:
-                    editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION, value));
+                    editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION, parameter.getValue()));
                     break;
                 case HOUR:
-                    editorModel.addEditorForRow(row, new HourEditor(value));
+                    editorModel.addEditorForRow(row, new HourEditor(parameter.getValue()));
                     break;
                 case DATE:
-                    editorModel.addEditorForRow(row, new DateEditor(DateEditor.DATE, value));
+                    editorModel.addEditorForRow(row, new DateEditor(DateEditor.DATE, parameter.getValue()));
                     break;
                 case FILE:
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.FILES_ONLY));
