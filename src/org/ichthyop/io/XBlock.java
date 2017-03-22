@@ -67,6 +67,7 @@ import org.jdom2.Element;
  *
  * @author pverley
  */
+@Deprecated
 public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
 
     public final static String BLOCK = "block";

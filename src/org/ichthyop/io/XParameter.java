@@ -61,6 +61,7 @@ import org.jdom2.Element;
  *
  * @author pverley
  */
+@Deprecated
 public class XParameter extends org.jdom2.Element {
 
     final public static String PARAMETER = "parameter";

@@ -67,7 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import org.ichthyop.Version;
-import org.ichthyop.io.OldConfigurationFile;
+import org.ichthyop.io.ConfigurationFile;
 import org.ichthyop.util.Separator;
 import org.ichthyop.util.StringUtil;
 
@@ -89,7 +89,7 @@ public class ParameterManager extends AbstractManager {
     public void setConfigurationFile(File file) throws Exception {
         parameters.clear();
         if (file.getName().endsWith(".xml")) {
-            OldConfigurationFile cfg = new OldConfigurationFile(file);
+            ConfigurationFile cfg = new ConfigurationFile(file);
             cfg.load();
             cfg.upgrade();
             HashMap<String, String> xmlMap = cfg.toProperties(true);

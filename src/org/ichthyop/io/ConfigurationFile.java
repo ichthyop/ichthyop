@@ -76,7 +76,8 @@ import org.ichthyop.Version;
 import org.ichthyop.util.StringUtil;
 import org.jdom2.JDOMException;
 
-public class OldConfigurationFile extends IchthyopLinker {
+@Deprecated
+public class ConfigurationFile extends IchthyopLinker {
 
     private File file;
     private Document structure;
@@ -86,11 +87,11 @@ public class OldConfigurationFile extends IchthyopLinker {
     public final static String VERSION = "version";
     public final static String DATE = "date";
 
-    public OldConfigurationFile(File file) {
+    public ConfigurationFile(File file) {
         this.file = file;
     }
 
-    public OldConfigurationFile(URL url) {
+    public ConfigurationFile(URL url) {
         try {
             SAXBuilder sxb = new SAXBuilder();
             Element racine = sxb.build(url).getRootElement();
@@ -457,7 +458,7 @@ public class OldConfigurationFile extends IchthyopLinker {
      * Upgrade the 3.1 configuration file to 3.2
      */
     private void u31To32() throws Exception {
-        OldConfigurationFile cfg32 = new OldConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
         String treepath, newTreepath;
         /*
          * Update block action.lethal_temp
@@ -488,7 +489,7 @@ public class OldConfigurationFile extends IchthyopLinker {
      * Upgrade the 3.0b configuration file to 3.1
      */
     private void u30bTo31() throws Exception {
-        OldConfigurationFile cfg31 = new OldConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
+        ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
         String treepath, newTreepath;
         /*
          * Add the density_file parameter in the action.buoyancy block
