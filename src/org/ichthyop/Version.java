@@ -67,9 +67,9 @@ public class Version {
     final public static Version V30B = new Version("3.0b", "2010/07/08");
     final public static Version V31 = new Version("3.1", "2012/11/19");
     final public static Version V32 = new Version("3.2", "2012/11/20");
-    final public static Version V33B = new Version("3.3b", "2017/03/01");
+    final public static Version V33 = new Version("3.3", "2017/03/23");
     //
-    final public static Version[] VALUES = new Version[]{V30B, V31, V32, V33B};
+    final public static Version[] VALUES = new Version[]{V30B, V31, V32, V33};
     //
     private final String number;
     private final String date;

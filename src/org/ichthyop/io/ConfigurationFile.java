@@ -133,14 +133,13 @@ public class ConfigurationFile extends IchthyopLinker {
     public void upgrade() {
         try {
             if (getVersion().priorTo(Version.V31)) {
-
                 u30bTo31();
 
             }
             if (getVersion().priorTo(Version.V32)) {
                 u31To32();
             }
-            if (getVersion().priorTo(Version.V33B)) {
+            if (getVersion().priorTo(Version.V33)) {
                 u32To33();
             }
         } catch (Exception ex) {
@@ -439,17 +438,36 @@ public class ConfigurationFile extends IchthyopLinker {
      * Upgrade the 3.2 configuration file to 3.3
      */
     private void u32To33() throws Exception {
-        //@TODO
-        getLogger().warning("The automatic upgrade of the configuration file from v3.2 to v3.3 is not implemented yet. Ichthyop will update the version number but parts of your configuration may not work anymore. Sorry for the inconvenience.");
+
+        ConfigurationFile cfg33 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.3.xml"));
+        /*
+         * Update linear growth 
+         */
+        if (null != getBlock(BlockType.ACTION, "action.growth")) {
+            if (null == getBlock(BlockType.ACTION, "action.growth").getXParameter("stage_tags")) {
+                getBlock(BlockType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(BlockType.ACTION, "action.growth", "stage_tags"));
+            }
+            if (null == getBlock(BlockType.ACTION, "action.growth").getXParameter("stage_thresholds")) {
+                getBlock(BlockType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(BlockType.ACTION, "action.growth", "stage_thresholds"));
+            }
+        }
+        
+        /*
+         * Delete generic larva stages definition
+         */
+        if (null != getBlock(BlockType.OPTION, "app.particle_length")) {
+            removeBlock(BlockType.ACTION, "app.particle_length");
+        }
+
         /*
          * Update version number and date
          */
-        setVersion(Version.V33B);
+        setVersion(Version.V33);
         StringBuilder str = new StringBuilder(getDescription());
         str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
         str.append(" File updated to version ");
-        str.append(Version.V33B);
+        str.append(Version.V33);
         str.append('.');
         setDescription(str.toString());
     }
@@ -458,7 +476,8 @@ public class ConfigurationFile extends IchthyopLinker {
      * Upgrade the 3.1 configuration file to 3.2
      */
     private void u31To32() throws Exception {
-        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        // cfg-generic_3.3.xml is not a mistake
+        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.3.xml"));
         String treepath, newTreepath;
         /*
          * Update block action.lethal_temp
