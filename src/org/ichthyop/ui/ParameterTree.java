@@ -77,11 +77,11 @@ import org.ichthyop.manager.SimulationManager;
  *
  * @author pverley
  */
-public class BlockTree extends JTree {
+public class ParameterTree extends JTree {
 
-    private HashMap<String, ParameterSet> blockMap;
+    private HashMap<String, ParameterSet> map;
 
-    public BlockTree() {
+    public ParameterTree() {
         super(new Object[]{});
     }
 
@@ -132,18 +132,18 @@ public class BlockTree extends JTree {
     }
 
     public Set<String> keySet() {
-        return blockMap.keySet();
+        return map.keySet();
     }
 
     public void put(String key, ParameterSet variable) {
-        if (blockMap != null) {
-            blockMap.put(key, variable);
+        if (map != null) {
+            map.put(key, variable);
         }
     }
 
     public ParameterSet get(String key) {
-        if (blockMap != null) {
-            return blockMap.get(key);
+        if (map != null) {
+            return map.get(key);
         }
         return null;
     }
@@ -168,7 +168,7 @@ public class BlockTree extends JTree {
         setModel(new DefaultTreeModel(root));
         List<String> keys = Arrays.asList(getSimulationManager().getParameterManager().getParameterSets());
         Collections.reverse(keys);
-        blockMap = new HashMap(keys.size());
+        map = new HashMap(keys.size());
         for (String key : keys) {
             insertIntoTree(new ParameterSet(key));
         }
@@ -230,7 +230,7 @@ public class BlockTree extends JTree {
     public void remove(DefaultMutableTreeNode node) {
         if (node != null && !node.isRoot()) {
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-            blockMap.remove(nodeToTreePath(node));
+            map.remove(nodeToTreePath(node));
             getDModel().removeNodeFromParent(node);
             if (parent != null && parent.isLeaf()) {
                 remove(parent);
@@ -244,7 +244,7 @@ public class BlockTree extends JTree {
 
     public void insertIntoTree(ParameterSet block, int leafIndex, boolean isVisible) {
 
-        blockMap.put(block.getTreePath(), block);
+        map.put(block.getTreePath(), block);
         String[] treePath = block.getTreePath().split("/");
         DefaultMutableTreeNode node = insertNodeInParent(getRoot(), treePath[0]);
         if (treePath.length > 1) {
@@ -285,8 +285,8 @@ public class BlockTree extends JTree {
         return key.toString();
     }
 
-    public ParameterSet getSelectedBlock() {
-        return blockMap.get(getTreePath());
+    public ParameterSet getParameterSet() {
+        return map.get(getTreePath());
     }
 
     public String getTreePath() {
@@ -338,7 +338,7 @@ public class BlockTree extends JTree {
         Icon iconLeaf, iconRoot, iconNode, iconNodeExpanded;
 
         TreeRenderer() {
-            ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(BlockTree.class);
+            ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(ParameterTree.class);
             iconLeaf = resourceMap.getIcon("Tree.icon.leaf");
             iconRoot = resourceMap.getIcon("Tree.icon.root");
             iconNode = resourceMap.getIcon("Tree.icon.node");

@@ -78,7 +78,6 @@ import org.jdesktop.application.Task;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
-import org.ichthyop.io.BlockType;
 import org.ichthyop.io.Parameter;
 import org.ichthyop.io.ParameterSet;
 import org.ichthyop.manager.SimulationManager;
@@ -98,32 +97,32 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     }
 
     private void addActionListeners() {
-        ckBoxBlock.addActionListener(this);
+        ckBoxNode.addActionListener(this);
         btnRedo.addActionListener(this);
         btnUndo.addActionListener(this);
     }
 
     @Action
     public void expand() {
-        blockTree.expandAll();
+        parameterTree.expandAll();
     }
 
     @Action
     public void collapse() {
-        blockTree.collapseAll();
+        parameterTree.collapseAll();
     }
 
     private ParameterTable getTable() {
         return (ParameterTable) table;
     }
 
-    private void setupBlockPanel(ParameterSet pset) throws Exception {
+    private void setupParameterPanel(ParameterSet pset) throws Exception {
 
-        if (pset.getType().equals(BlockType.OPTION)) {
-            ckBoxBlock.setVisible(false);
+        if (pset.getType().equals(ParameterSet.Type.OPTION)) {
+            ckBoxNode.setVisible(false);
         } else {
-            ckBoxBlock.setVisible(true);
-            ckBoxBlock.setSelected(pset.isEnabled());
+            ckBoxNode.setVisible(true);
+            ckBoxNode.setSelected(pset.isEnabled());
         }
 
         StringBuilder info = new StringBuilder("<html>");
@@ -142,38 +141,38 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnUndo.getAction().setEnabled(false);
         btnRedo.getAction().setEnabled(false);
         getTable().setModel(pset, this);
-        setParameterEditorEnabled(pset.getType().equals(BlockType.OPTION) ? true : pset.isEnabled());
+        setParameterEditorEnabled(pset.getType().equals(ParameterSet.Type.OPTION) ? true : pset.isEnabled());
     }
 
     @Action
-    public void setBlockEnabled() {
-        blockTree.getSelectedBlock().setEnabled(ckBoxBlock.isSelected());
-        setParameterEditorEnabled(ckBoxBlock.isSelected());
-        ensureSingleBlockSelection(BlockType.DATASET);
-        ensureSingleBlockSelection(BlockType.RELEASE);
+    public void setNodeEnabled() {
+        parameterTree.getParameterSet().setEnabled(ckBoxNode.isSelected());
+        setParameterEditorEnabled(ckBoxNode.isSelected());
+        ensureSingleNodeSelection(ParameterSet.Type.DATASET);
+        ensureSingleNodeSelection(ParameterSet.Type.RELEASE);
         firePropertyChange("configurationFile", null, null);
     }
 
-    private void ensureSingleBlockSelection(BlockType type) {
-        ParameterSet selectedBlock = blockTree.getSelectedBlock();
-        if (selectedBlock.getType().equals(type)) {
-            /* If the selected block is newly enable, we
-            deactivate all the others blocks with same type */
-            if (selectedBlock.isEnabled()) {
-                for (String block : getSimulationManager().getParameterManager().getParameterSets()) {
-                    ParameterSet set = new ParameterSet(block);
-                    if (set.getType().equals(type) && !set.getKey().equals(selectedBlock.getKey())) {
-                        blockTree.get(set.getTreePath()).setEnabled(false);
+    private void ensureSingleNodeSelection(ParameterSet.Type type) {
+        ParameterSet selectedSet = parameterTree.getParameterSet();
+        if (selectedSet.getType().equals(type)) {
+            /* If the selected node is newly enable, we
+            deactivate all the others nodes with same type */
+            if (selectedSet.isEnabled()) {
+                for (String key : getSimulationManager().getParameterManager().getParameterSets()) {
+                    ParameterSet otherSet = new ParameterSet(key);
+                    if (otherSet.getType().equals(type) && !otherSet.getKey().equals(selectedSet.getKey())) {
+                        parameterTree.get(otherSet.getTreePath()).setEnabled(false);
                     }
                 }
             } else {
-                /* Warn user in case no block of this type is enable */
+                /* Warn user in case no set of this type is enable */
                 StringBuilder msg = new StringBuilder();
-                msg.append(getResourceMap().getString("noBlockEnabled.text.part1"));
+                msg.append(getResourceMap().getString("noNodeEnabled.text.part1"));
                 msg.append(" <");
                 msg.append(type.toString());
                 msg.append("> ");
-                msg.append(getResourceMap().getString("noBlockEnabled.text.part2"));
+                msg.append(getResourceMap().getString("noNodeEnabled.text.part2"));
                 JOptionPane.showMessageDialog(this, msg.toString());
             }
         }
@@ -201,10 +200,10 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
         ShowConfigEditorsTask() {
             super(Application.getInstance());
-            blockTree.setEnabled(false);
+            parameterTree.setEnabled(false);
             busyLabel.setText(getResourceMap().getString("ShowConfigEditorsTask.loading.text"));
             busyLabel.setBusy(true);
-            pnlBlock.setVisible(false);
+            pnlParameterSet.setVisible(false);
             pnlEditors.setLayout(new StackLayout());
             pnlEditors.add(busyLabel, StackLayout.TOP);
         }
@@ -212,10 +211,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         @Override
         protected Object doInBackground() throws Exception {
 
-            DefaultMutableTreeNode node = blockTree.getSelectedNode();
+            DefaultMutableTreeNode node = parameterTree.getSelectedNode();
             if (node != null && node.isLeaf()) {
-                ParameterSet block = blockTree.getSelectedBlock();
-                setupBlockPanel(block);
+                setupParameterPanel(parameterTree.getParameterSet());
             } else {
                 cancel(true);
             }
@@ -224,7 +222,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
         @Override
         protected void succeeded(Object o) {
-            pnlBlock.setVisible(true);
+            pnlParameterSet.setVisible(true);
             splitPaneCfg.setRightComponent(scrollPaneEditors);
         }
 
@@ -232,12 +230,12 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         protected void finished() {
             busyLabel.setBusy(false);
             pnlEditors.remove(busyLabel);
-            blockTree.setEnabled(true);
+            parameterTree.setEnabled(true);
         }
 
         @Override
         protected void cancelled() {
-            splitPaneCfg.setRightComponent(pnlNoBlockSelected);
+            splitPaneCfg.setRightComponent(pnlNoNodeSelected);
         }
     }
 
@@ -259,7 +257,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     //Selection got filtered away.
                     return;
                 }
-                ParameterSet pset = blockTree.getSelectedBlock();
+                ParameterSet pset = parameterTree.getParameterSet();
                 Parameter parameter = getTable().getParameter(table.convertRowIndexToModel(viewRow));
                 StringBuilder info = new StringBuilder("<html>");
                 info.append("<p>Set of parameters: ");
@@ -314,17 +312,17 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         }
     }
 
-    public Task loadBlockTree() {
-        return new CreateBlockTreeTask(IchthyopApp.getApplication());
+    public Task loadParameterTree() {
+        return new CreateParameterTreeTask(IchthyopApp.getApplication());
     }
 
-    private class CreateBlockTreeTask extends SFTask {
+    private class CreateParameterTreeTask extends SFTask {
 
         private String cfgTitle, cfgDescription, cfgVersion;
 
-        CreateBlockTreeTask(Application instance) {
+        CreateParameterTreeTask(Application instance) {
             super(instance);
-            blockTree.setVisible(false);
+            parameterTree.setVisible(false);
             textFieldTitle.getDocument().removeDocumentListener(titleDL);
             textAreaDescription.getDocument().removeDocumentListener(descriptionDL);
         }
@@ -334,16 +332,15 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             cfgTitle = getSimulationManager().getParameterManager().getConfigurationTitle();
             cfgDescription = getSimulationManager().getParameterManager().getConfigurationDescription();
             cfgVersion = getSimulationManager().getParameterManager().getConfigurationVersion().toString();
-            blockTree.createModel();
+            parameterTree.createModel();
             return null;
         }
 
         @Override
         void onSuccess(Object result) {
             setVisible(true);
-            blockTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-            blockTree.addTreeSelectionListener(JConfigurationPanel.this);
-            //blockTree.setNodeVisible(blockTree.getRoot().getFirstLeaf());
+            parameterTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+            parameterTree.addTreeSelectionListener(JConfigurationPanel.this);
         }
 
         @Override
@@ -353,7 +350,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
 
         @Override
         protected void finished() {
-            blockTree.setVisible(true);
+            parameterTree.setVisible(true);
             textFieldTitle.setText(cfgTitle);
             if (null != cfgDescription) {
                 textAreaDescription.setText(cfgDescription);
@@ -365,7 +362,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             }
             textFieldTitle.getDocument().addDocumentListener(titleDL);
             textAreaDescription.getDocument().addDocumentListener(descriptionDL);
-            splitPaneCfg.setRightComponent(pnlNoBlockSelected);
+            splitPaneCfg.setRightComponent(pnlNoNodeSelected);
         }
     }
 
@@ -378,9 +375,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
      */
     private void initComponents() {
 
-        blockEditor = new javax.swing.JPanel();
-        pnlNoBlockSelected = new javax.swing.JPanel();
-        lblSelectBlock = new javax.swing.JLabel();
+        parameterEditor = new javax.swing.JPanel();
+        pnlNoNodeSelected = new javax.swing.JPanel();
+        lblSelectNode = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         lblTitle = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
@@ -391,44 +388,44 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         textFieldVersion = new javax.swing.JTextField();
         busyLabel = new JXBusyLabel(new Dimension(100, 100));
         splitPaneCfg = new javax.swing.JSplitPane();
-        pnlBlockTree = new javax.swing.JPanel();
+        pnlParameterTree = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        blockTree = new org.ichthyop.ui.BlockTree();
+        parameterTree = new org.ichthyop.ui.ParameterTree();
         jToolBar1 = new javax.swing.JToolBar();
         btnExpand = new javax.swing.JButton();
         btnCollapse = new javax.swing.JButton();
         scrollPaneEditors = new javax.swing.JScrollPane();
         pnlEditors = new javax.swing.JPanel();
-        pnlBlock = new javax.swing.JPanel();
+        pnlParameterSet = new javax.swing.JPanel();
         pnlInfo = new javax.swing.JPanel();
         lblInfo = new javax.swing.JLabel();
-        ckBoxBlock = new javax.swing.JCheckBox();
+        ckBoxNode = new javax.swing.JCheckBox();
         pnlParameters = new javax.swing.JPanel();
         btnUndo = new javax.swing.JButton();
         btnRedo = new javax.swing.JButton();
         scrollPaneTable = new javax.swing.JScrollPane();
         table = new org.ichthyop.ui.ParameterTable();
 
-        blockEditor.setName("blockEditor");
+        parameterEditor.setName("parameterEditor");
 
-        javax.swing.GroupLayout blockEditorLayout = new javax.swing.GroupLayout(blockEditor);
-        blockEditor.setLayout(blockEditorLayout);
-        blockEditorLayout.setHorizontalGroup(
-                blockEditorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout parameterEditorLayout = new javax.swing.GroupLayout(parameterEditor);
+        parameterEditor.setLayout(parameterEditorLayout);
+        parameterEditorLayout.setHorizontalGroup(
+                parameterEditorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGap(0, 650, Short.MAX_VALUE)
         );
-        blockEditorLayout.setVerticalGroup(
-                blockEditorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        parameterEditorLayout.setVerticalGroup(
+                parameterEditorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGap(0, 574, Short.MAX_VALUE)
         );
 
-        pnlNoBlockSelected.setName("pnlNoBlockSelected");
+        pnlNoNodeSelected.setName("pnlNoNodeSelected");
 
-        lblSelectBlock.setFont(new java.awt.Font("DejaVu Sans", 1, 16));
-        lblSelectBlock.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblSelectBlock.setText("Select a block in the tree.");
-        lblSelectBlock.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        lblSelectBlock.setName("lblSelectBlock");
+        lblSelectNode.setFont(new java.awt.Font("DejaVu Sans", 1, 16));
+        lblSelectNode.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblSelectNode.setText("Select a node in the tree.");
+        lblSelectNode.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        lblSelectNode.setName("lblSelectNode");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuration details"));
         jPanel1.setName("jPanel1");
@@ -491,23 +488,23 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout pnlNoBlockSelectedLayout = new javax.swing.GroupLayout(pnlNoBlockSelected);
-        pnlNoBlockSelected.setLayout(pnlNoBlockSelectedLayout);
-        pnlNoBlockSelectedLayout.setHorizontalGroup(
-                pnlNoBlockSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(lblSelectBlock, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)
-                        .addGroup(pnlNoBlockSelectedLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlNoNodeSelectedLayout = new javax.swing.GroupLayout(pnlNoNodeSelected);
+        pnlNoNodeSelected.setLayout(pnlNoNodeSelectedLayout);
+        pnlNoNodeSelectedLayout.setHorizontalGroup(
+                pnlNoNodeSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(lblSelectNode, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)
+                        .addGroup(pnlNoNodeSelectedLayout.createSequentialGroup()
                                 .addGap(12, 12, 12)
                                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(12, 12, 12))
         );
-        pnlNoBlockSelectedLayout.setVerticalGroup(
-                pnlNoBlockSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(pnlNoBlockSelectedLayout.createSequentialGroup()
+        pnlNoNodeSelectedLayout.setVerticalGroup(
+                pnlNoNodeSelectedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pnlNoNodeSelectedLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblSelectBlock, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE))
+                                .addComponent(lblSelectNode, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE))
         );
 
         busyLabel.setText("jXBusyLabel1");
@@ -528,13 +525,13 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         splitPaneCfg.setDividerLocation(250);
         splitPaneCfg.setName("splitPaneCfg");
 
-        pnlBlockTree.setName("pnlBlockTree");
+        pnlParameterTree.setName("pnlParameterTree");
 
         jScrollPane1.setName("jScrollPane1");
 
-        blockTree.setName("blockTree");
-        blockTree.setRootVisible(true);
-        jScrollPane1.setViewportView(blockTree);
+        parameterTree.setName("parameterTree");
+        parameterTree.setRootVisible(true);
+        jScrollPane1.setViewportView(parameterTree);
 
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
@@ -555,20 +552,20 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnCollapse.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(btnCollapse);
 
-        javax.swing.GroupLayout pnlBlockTreeLayout = new javax.swing.GroupLayout(pnlBlockTree);
-        pnlBlockTree.setLayout(pnlBlockTreeLayout);
-        pnlBlockTreeLayout.setHorizontalGroup(
-                pnlBlockTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(pnlBlockTreeLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlParameterTreeLayout = new javax.swing.GroupLayout(pnlParameterTree);
+        pnlParameterTree.setLayout(pnlParameterTreeLayout);
+        pnlParameterTreeLayout.setHorizontalGroup(
+                pnlParameterTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pnlParameterTreeLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlBlockTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(pnlParameterTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
                                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE))
                                 .addContainerGap())
         );
-        pnlBlockTreeLayout.setVerticalGroup(
-                pnlBlockTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockTreeLayout.createSequentialGroup()
+        pnlParameterTreeLayout.setVerticalGroup(
+                pnlParameterTreeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlParameterTreeLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 493, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -576,36 +573,36 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                                 .addContainerGap())
         );
 
-        splitPaneCfg.setLeftComponent(pnlBlockTree);
+        splitPaneCfg.setLeftComponent(pnlParameterTree);
 
         scrollPaneEditors.setName("scrollPaneEditors");
 
         pnlEditors.setName("pnlEditors");
 
-        pnlBlock.setName("pnlBlock");
+        pnlParameterSet.setName("pnlParameterSet");
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(JConfigurationPanel.class);
         pnlInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(resourceMap.getString("pnlInfo.border.title")));
         pnlInfo.setName("pnlInfo");
 
         lblInfo.setText("Select a node or a parameter to display some help.");
-        lblInfo.setName("lblBlockInfo");
+        lblInfo.setName("lblInfo");
 
-        ckBoxBlock.setAction(actionMap.get("setBlockEnabled"));
-        ckBoxBlock.setName("ckBoxBlock");
+        ckBoxNode.setAction(actionMap.get("setNodeEnabled"));
+        ckBoxNode.setName("ckBoxNode");
 
-        javax.swing.GroupLayout pnlBlockInfoLayout = new javax.swing.GroupLayout(pnlInfo);
-        pnlInfo.setLayout(pnlBlockInfoLayout);
-        pnlBlockInfoLayout.setHorizontalGroup(
-                pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(pnlBlockInfoLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlInfoLayout = new javax.swing.GroupLayout(pnlInfo);
+        pnlInfo.setLayout(pnlInfoLayout);
+        pnlInfoLayout.setHorizontalGroup(
+                pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pnlInfoLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 626, Short.MAX_VALUE)
                                 .addContainerGap())
         );
-        pnlBlockInfoLayout.setVerticalGroup(
-                pnlBlockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockInfoLayout.createSequentialGroup()
+        pnlInfoLayout.setVerticalGroup(
+                pnlInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlInfoLayout.createSequentialGroup()
                                 .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
                                 .addContainerGap())
         );
@@ -654,23 +651,23 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout pnlBlockLayout = new javax.swing.GroupLayout(pnlBlock);
-        pnlBlock.setLayout(pnlBlockLayout);
-        pnlBlockLayout.setHorizontalGroup(
-                pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBlockLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlParameterLayout = new javax.swing.GroupLayout(pnlParameterSet);
+        pnlParameterSet.setLayout(pnlParameterLayout);
+        pnlParameterLayout.setHorizontalGroup(
+                pnlParameterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlParameterLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(ckBoxBlock, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(pnlParameterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(ckBoxNode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(pnlInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addContainerGap())
         );
-        pnlBlockLayout.setVerticalGroup(
-                pnlBlockLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(pnlBlockLayout.createSequentialGroup()
+        pnlParameterLayout.setVerticalGroup(
+                pnlParameterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pnlParameterLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(ckBoxBlock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(ckBoxNode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(pnlInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -682,11 +679,11 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         pnlEditors.setLayout(pnlEditorsLayout);
         pnlEditorsLayout.setHorizontalGroup(
                 pnlEditorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(pnlBlock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pnlParameterSet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         pnlEditorsLayout.setVerticalGroup(
                 pnlEditorsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(pnlBlock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pnlParameterSet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         scrollPaneEditors.setViewportView(pnlEditors);
@@ -715,28 +712,28 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         firePropertyChange("configurationFile", null, null);
     }
 
-    private javax.swing.JPanel blockEditor;
-    private org.ichthyop.ui.BlockTree blockTree;
+    private javax.swing.JPanel parameterEditor;
+    private org.ichthyop.ui.ParameterTree parameterTree;
     private javax.swing.JButton btnCollapse;
     private javax.swing.JButton btnExpand;
     private javax.swing.JButton btnRedo;
     private javax.swing.JButton btnUndo;
     private org.jdesktop.swingx.JXBusyLabel busyLabel;
-    private javax.swing.JCheckBox ckBoxBlock;
+    private javax.swing.JCheckBox ckBoxNode;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblInfo;
     private javax.swing.JLabel lblDescription;
-    private javax.swing.JLabel lblSelectBlock;
+    private javax.swing.JLabel lblSelectNode;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblVersion;
-    private javax.swing.JPanel pnlBlock;
+    private javax.swing.JPanel pnlParameterSet;
     private javax.swing.JPanel pnlInfo;
-    private javax.swing.JPanel pnlBlockTree;
+    private javax.swing.JPanel pnlParameterTree;
     private javax.swing.JPanel pnlEditors;
-    private javax.swing.JPanel pnlNoBlockSelected;
+    private javax.swing.JPanel pnlNoNodeSelected;
     private javax.swing.JPanel pnlParameters;
     private javax.swing.JScrollPane scrollPaneEditors;
     private javax.swing.JScrollPane scrollPaneTable;
@@ -745,7 +742,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     private javax.swing.JTextArea textAreaDescription;
     private javax.swing.JTextField textFieldTitle;
     private javax.swing.JTextField textFieldVersion;
-    private final HashMap<String, JUndoManager> undoManagers = new HashMap();
 
     private final DocumentListener titleDL = new DocumentListener() {
         @Override

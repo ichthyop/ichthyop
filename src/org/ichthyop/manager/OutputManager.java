@@ -59,7 +59,6 @@ import org.ichthyop.event.LastStepEvent;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.TypeZone;
 import org.ichthyop.event.SetupEvent;
-import org.ichthyop.io.BlockType;
 import java.io.IOException;
 import ucar.nc2.NetcdfFileWriteable;
 import org.ichthyop.event.LastStepListener;
@@ -245,7 +244,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         /* Write all parameters */
         for (String key : getConfiguration().getParameterSets()) {
             ParameterSet parameterSet = new ParameterSet(key);
-            if (!parameterSet.getType().equals(BlockType.OPTION)) {
+            if (!parameterSet.getType().equals(ParameterSet.Type.OPTION)) {
                 ncOut.addGlobalAttribute(parameterSet.getKey() + ".enabed", String.valueOf(parameterSet.isEnabled()));
             }
             if (parameterSet.isEnabled()) {

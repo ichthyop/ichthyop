@@ -933,7 +933,7 @@ public class IchthyopView extends FrameView
         btnSimulationRun.getAction().setEnabled(true);
         btnPreview.getAction().setEnabled(true);
         setMainTitle();
-        return pnlConfiguration.loadBlockTree();
+        return pnlConfiguration.loadParameterTree();
     }
 
     private UpdateManager getUpdateManager() {

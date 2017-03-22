@@ -107,9 +107,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return model.getUndoManager();
     }
 
-    public void setModel(ParameterSet block, TableModelListener l) {
+    public void setModel(ParameterSet parameterSet, TableModelListener l) {
         getModel().removeTableModelListener(l);
-        setModel(model = new ParameterTableModel(block));
+        setModel(model = new ParameterTableModel(parameterSet));
         setEditors();
         getModel().addTableModelListener(l);
     }
@@ -280,13 +280,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
             Component comp = super.getTableCellRendererComponent(table,
                     value, isSelected, hasFocus, row, column);
 
-            if (!table.isEnabled()) {
-                comp.setForeground(Color.LIGHT_GRAY);
-                comp.setBackground(Color.WHITE);
-                return comp;
-            } else {
-                comp.setForeground(Color.BLACK);
-            }
+            comp.setForeground(table.isEnabled() ? Color.BLACK : Color.LIGHT_GRAY);
             comp.setBackground(Color.WHITE);
             return comp;
         }
@@ -316,14 +310,12 @@ public class ParameterTable extends JMultiCellEditorsTable {
         @Override
         public void undo() throws CannotUndoException {
             super.undo();
-
             tableModel.setValueAt(oldValue, row, column, false);
         }
 
         @Override
         public void redo() throws CannotUndoException {
             super.redo();
-
             tableModel.setValueAt(newValue, row, column, false);
         }
     }

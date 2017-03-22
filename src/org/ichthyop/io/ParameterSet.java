@@ -72,10 +72,10 @@ public class ParameterSet extends IchthyopLinker {
         return key;
     }
 
-    public BlockType getType() {
+    public Type getType() {
         return getConfiguration().isNull(key + ".type")
-                ? BlockType.OPTION
-                : BlockType.getType(getConfiguration().getString(key + ".type"));
+                ? Type.OPTION
+                : Type.getType(getConfiguration().getString(key + ".type"));
     }
 
     public String getTreePath() {
@@ -104,4 +104,25 @@ public class ParameterSet extends IchthyopLinker {
         }
         return parameters;
     }
+    
+    public enum Type {
+
+    OPTION,
+    ACTION,
+    RELEASE,
+    DATASET;
+
+    public static Type getType(String value) {
+        for (Type type : values()) {
+            if (type.toString().equals(value))
+                return type;
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
+}
 }

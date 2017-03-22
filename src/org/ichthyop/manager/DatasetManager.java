@@ -55,8 +55,8 @@ package org.ichthyop.manager;
 import java.io.IOException;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
-import org.ichthyop.io.BlockType;
 import org.ichthyop.dataset.IDataset;
+import org.ichthyop.io.ParameterSet;
 
 /**
  *
@@ -95,10 +95,10 @@ public class DatasetManager extends AbstractManager {
             }
         }
         if (n == 0) {
-            throw new NullPointerException("Could not find any " + BlockType.DATASET.toString() + " block in the configuration file.");
+            throw new NullPointerException("Could not find any " + ParameterSet.Type.DATASET.toString() + " block in the configuration file.");
         }
         if (n > 1) {
-            throw new IOException("Found several " + BlockType.DATASET.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
+            throw new IOException("Found several " + ParameterSet.Type.DATASET.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
         }
     }
 
