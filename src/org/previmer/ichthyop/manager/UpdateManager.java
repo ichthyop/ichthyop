@@ -9,13 +9,11 @@ import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.Version;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.SetupEvent;
-import org.previmer.ichthyop.exception.InvalidVersionNumberException;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.ConfigurationFile;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.io.XBlock;
 import org.previmer.ichthyop.io.XParameter;
-import org.previmer.ichthyop.ui.IchthyopApp;
 
 /**
  *
@@ -71,12 +69,29 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the 3.2 configuration file to 3.3
      */
     private void u32To33() throws Exception {
-        //@TODO
-        getLogger().warning("The automatic upgrade of the configuration file from v3.2 to v3.3 is not implemented yet. Ichthyop will update the version number but parts of your configuration may not work anymore. Sorry for the inconvenience.");
+        ConfigurationFile cfg33 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        /*
+         * Update linear growth 
+         */
+        if (null != getXBlock(BlockType.ACTION, "action.growth")) {
+            if (null == getXBlock(BlockType.ACTION, "action.growth").getXParameter("stage_tags")) {
+                getXBlock(BlockType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(BlockType.ACTION, "action.growth", "stage_tags"));
+            }
+            if (null == getXBlock(BlockType.ACTION, "action.growth").getXParameter("stage_thresholds")) {
+                getXBlock(BlockType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(BlockType.ACTION, "action.growth", "stage_thresholds"));
+            }
+        }
+
+        /*
+         * Delete generic larva stages definition
+         */
+        if (null != getXBlock(BlockType.OPTION, "app.particle_length")) {
+            getConfigurationFile().removeBlock(BlockType.ACTION, "app.particle_length");
+        }
         /*
          * Update version number and date
          */
-        getConfigurationFile().setVersion(getApplicationVersion());
+        getConfigurationFile().setVersion(Version.V33B);
         StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
         str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
@@ -272,7 +287,6 @@ public class UpdateManager extends AbstractManager {
     public boolean versionMismatch() throws Exception {
         Version appVersion = getApplicationVersion();
         Version cfgVersion = getConfigurationVersion();
-        validateVersion(cfgVersion);
         try {
             return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
                     || !(appVersion.getDate().equals(cfgVersion.getDate()));
@@ -297,15 +311,5 @@ public class UpdateManager extends AbstractManager {
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
         // does nothing
-    }
-
-    private void validateVersion(Version testedVersion) {
-
-        for (Version version : Version.VALUES) {
-            if (version.getNumber().equals(testedVersion.getNumber())) {
-                return;
-            }
-        }
-        throw new InvalidVersionNumberException("Version number " + testedVersion + " is not identified as a valid ichthyop version number.");
     }
 }

@@ -88,7 +88,7 @@
     <block type="option">
         <key>app.output</key>
         <description>Block of options that controls the record of the particle tracks in NetCDF ouput files.</description>
-        <tree_path>IO/Output</tree_path>
+        <tree_path>Output</tree_path>
         <parameters>
             <parameter>
                 <key>file_prefix</key>
@@ -126,7 +126,7 @@
     <block type="dataset">
         <key>dataset.mars_2d_opendap</key>
         <enabled>true</enabled>
-        <tree_path>IO/Input/MARS 2D OpenDAP</tree_path>
+        <tree_path>Dataset/MARS 2D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MARS model, 2D simulation and OpenDAP access.</description>
         <parameters>
             <parameter>
@@ -252,7 +252,7 @@
     <block type="dataset">
         <key>dataset.mars_3d_opendap</key>
         <enabled>false</enabled>
-        <tree_path>IO/Input/MARS 3D OpenDAP</tree_path>
+        <tree_path>Dataset/MARS 3D OpenDAP</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MARS model, 3D simulation and OpenDAP access.</description>
         <parameters>
             <parameter>
@@ -420,7 +420,7 @@
     <block type="dataset">
         <key>dataset.mars_2d</key>
         <enabled>false</enabled>
-        <tree_path>IO/Input/MARS 2D</tree_path>
+        <tree_path>Dataset/MARS 2D</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MARS model, 2D simulation and local NetCDF files.</description>
         <parameters>
             <parameter>
@@ -562,7 +562,7 @@
     <block type="dataset">
         <key>dataset.mars_3d</key>
         <enabled>false</enabled>
-        <tree_path>IO/Input/MARS 3D</tree_path>
+        <tree_path>Dataset/MARS 3D</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MARS model, 3D simulation and local NetCDF files.</description>
         <parameters>
             <parameter>
@@ -745,7 +745,7 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_2d</key>
-        <tree_path>IO/Input/ROMS 2D</tree_path>
+        <tree_path>Dataset/ROMS 2D</tree_path>
         <enabled>false</enabled>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 2D simulation and local NetCDF files.</description>
         <parameters>
@@ -916,7 +916,7 @@
     </block>
     <block type="dataset">
         <key>dataset.roms_3d</key>
-        <tree_path>IO/Input/ROMS 3D</tree_path>
+        <tree_path>Dataset/ROMS 3D</tree_path>
         <enabled>false</enabled>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 3D simulation and local NetCDF files.</description>
         <parameters>
@@ -1121,9 +1121,188 @@
         </parameters>
     </block>
     <block type="dataset">
+        <key>dataset.roms_3d_opendap</key>
+        <tree_path>Dataset/ROMS 3D OpenDAP</tree_path>
+        <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for ROMS model (Rutgers or UCLA), 3D simulation and local NetCDF files.</description>
+        <parameters>
+            <parameter>
+                <key>opendap_url</key>
+                <long_name>OpenDAP URL</long_name>
+                <value></value>
+                <description>ROMS OpenDAP URL</description>
+            </parameter>
+            <parameter>
+                <key>shrink_domain</key>
+                <long_name>Shrink simulated domain</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lat</key>
+                <long_name>Latitude of Northwest corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lon</key>
+                <long_name>Longitude of Northwest corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lat</key>
+                <long_name>Latitude of Southeast corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lon</key>
+                <long_name>Longitude of Southeast corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>field_dim_eta</key>
+                <long_name>Dimension in the ETA-direction</long_name>
+                <value>eta_rho</value>
+                <default>eta_rho</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_xi</key>
+                <long_name>Dimension in the XI-direction</long_name>
+                <value>xi_rho</value>
+                <default>xi_rho</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_z</key>
+                <long_name>Dimension in the vertical direction</long_name>
+                <value>s_rho</value>
+                <default>s_rho</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_time</key>
+                <long_name>Dimension in time</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_bathy</key>
+                <long_name>Bathymetry at Rho points</long_name>
+                <value>h</value>
+                <default>h</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lat</key>
+                <long_name>Latitude of Rho points</long_name>
+                <value>lat_rho</value>
+                <default>lat_rho</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lon</key>
+                <long_name>Longitude of Rho points</long_name>
+                <value>lon_rho</value>
+                <default>lon_rho</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_mask</key>
+                <long_name>Mask on Rho points</long_name>
+                <value>mask_rho</value>
+                <default>mask_rho</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_pm</key>
+                <long_name>Curvilinear coordinate metric in XI</long_name>
+                <value>pm</value>
+                <default>pm</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_pn</key>
+                <long_name>Curvilinear coordinate metric in ETA</long_name>
+                <value>pn</value>
+                <default>pn</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>scrum_time</value>
+                <default>scrum_time</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_zeta</key>
+                <long_name>Averaged free-surface</long_name>
+                <value>zeta</value>
+                <default>zeta</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_u</key>
+                <long_name>U-momentum component</long_name>
+                <value>u</value>
+                <default>u</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_v</key>
+                <long_name>V-momentum component</long_name>
+                <value>v</value>
+                <default>v</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_csr</key>
+                <long_name>S-coordinate stretching curves at Rho points</long_name>
+                <value>Cs_r</value>
+                <default>Cs_r</default>
+                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
+            </parameter>
+            <parameter>
+                <key>field_csw</key>
+                <long_name>S-coordinate stretching curves at W-points</long_name>
+                <value>Cs_w</value>
+                <default>Cs_w</default>
+                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
+            </parameter>
+            <parameter>
+                <key>field_hc</key>
+                <long_name>S-coordinate critical depth</long_name>
+                <value>hc</value>
+                <default>hc</default>
+                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.dataset.Roms3dOpendapDataset</value>
+                <default>org.previmer.ichthyop.dataset.Roms3dOpendapDataset</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this dataset.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="dataset">
         <key>dataset.nemo</key>
-        <tree_path>IO/Input/OPA NEMO</tree_path>
-        <enabled>false</enabled>
+        <tree_path>Dataset/OPA NEMO</tree_path>
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for OPA NEMO model, 3D simulation and local NetCDF files. It is assumed that the grid information is split in three distincts files: mask file (x, y, z dimensions and land-ocean mask), zgr file (depth T point, depth W point and e3t), hgr file (e1t, e2t, e1v and e2u variables). If theses fields are all recorded in a single file, it is not a problem, just type the same file pattern for the three files. The application expects to find lon and lat variables in "gridT" files, U and time variables and time dimension in "gridU" files and V variable in "gridV" files. Again, just provide the same file pattern for the three types of files if all the variables are recorded within the same file.</description>
         <parameters>
             <parameter>
@@ -1357,11 +1536,560 @@
                 <default>vomecrty</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
+            <parameter>
+                <key>gridw_pattern</key>
+                <long_name>gridW file pattern</long_name>
+                <value>*gridW*.nc</value>
+                <default>*gridW*.nc</default>
+                <description>Filename filter for identifying the "gridW" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the meridional velocity variable.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_w</key>
+                <long_name>Vertical velocity</long_name>
+                <value>vovecrtz</value>
+                <default>vovecrtz</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
                 <value>org.previmer.ichthyop.dataset.NemoDataset</value>
                 <default>org.previmer.ichthyop.dataset.NemoDataset</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this dataset.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="dataset">
+        <key>dataset.mercator2d</key>
+        <tree_path>Dataset/MERCATOR2D</tree_path>
+        <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MECATOR 2D model</description>
+        <parameters>
+            <parameter>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>input</value>
+                <format>path</format>
+                <default>input</default>
+                <description>Folder containing the MERCATOR NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>gridu_pattern</key>
+                <long_name>gridU file pattern</long_name>
+                <value>*gridU*.nc</value>
+                <default>*gridU*.nc</default>
+                <description>Filename filter for identifying the "gridU" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the time dimension, the time variable and the zonal velocity variable.</description>
+            </parameter>
+            <parameter>
+                <key>gridv_pattern</key>
+                <long_name>gridV file pattern</long_name>
+                <value>*gridV*.nc</value>
+                <default>*gridV*.nc</default>
+                <description>Filename filter for identifying the "gridV" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the meridional velocity variable.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lat</key>
+                <long_name>Latitude of Rho points</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lon</key>
+                <long_name>Longitude of Rho points</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time_counter</value>
+                <default>time</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_u</key>
+                <long_name>Zonal velocity</long_name>
+                <value>u</value>
+                <default>u</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_v</key>
+                <long_name>Meridional velocity</long_name>
+                <value>v</value>
+                <default>v</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.dataset.Mercator2dDataset</value>
+                <default>org.previmer.ichthyop.dataset.Mercator2dDataset</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this dataset.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="dataset">
+        <key>dataset.noveltis</key>
+        <tree_path>Dataset/Noveltis</tree_path>
+        <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for NOVELTIS model, 3D simulation and local NetCDF files.</description>
+        <parameters>
+            <parameter>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>input</value>
+                <default>input</default>
+                <format>path</format>
+                <description>Folder containing the ROMS NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>file_filter</key>
+                <long_name>File filter</long_name>
+                <value>*.nc</value>
+                <default>*.nc</default>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>skip_sorting</key>
+                <long_name>Skip NetCDF file sorting</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
+            </parameter>
+            <parameter>
+                <key>shrink_domain</key>
+                <long_name>Shrink simulated domain</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lat</key>
+                <long_name>Latitude of Northwest corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lon</key>
+                <long_name>Longitude of Northwest corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lat</key>
+                <long_name>Latitude of Southeast corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lon</key>
+                <long_name>Longitude of Southeast corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>field_dim_lon</key>
+                <long_name>Longitude dimension</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_lat</key>
+                <long_name>Latitude dimension</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_z</key>
+                <long_name>Vertical dimension</long_name>
+                <value>level</value>
+                <default>level</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_time</key>
+                <long_name>Dimension in time</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_bathy</key>
+                <long_name>Bathymetry</long_name>
+                <value>h0</value>
+                <default>h0</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_sigma</key>
+                <long_name>Ocean sigma coordinates</long_name>
+                <value>sig</value>
+                <default>sig</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lon</key>
+                <long_name>Longitude variable</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lat</key>
+                <long_name>Latitude variable</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_time</key>
+                <long_name>Time variable</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_u</key>
+                <long_name>Eastward sea water velocity</long_name>
+                <value>u</value>
+                <default>u</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_v</key>
+                <long_name>Northward sea water velocity</long_name>
+                <value>v</value>
+                <default>v</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.dataset.NoveltisDataset</value>
+                <default>org.previmer.ichthyop.dataset.NoveltisDataset</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this dataset.</description>
+            </parameter>
+        </parameters>
+    </block>
+    <block type="dataset">
+        <key>dataset.oscar</key>
+        <tree_path>Dataset/OSCAR</tree_path>
+        <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for OSCAR model</description>
+        <parameters>
+            <parameter>
+                <key>source</key>
+                <long_name>Source of the dataset</long_name>
+                <value>OpenDAP URL</value>
+                <format>combo</format>
+                <accepted>Local NetCDF files</accepted>
+                <accepted>OpenDAP URL</accepted>
+                <default>OpenDAP URL</default>
+                <description>Select whether the Oscar dataset must be read from local NetCDF files (parameters Input path and File filter) or remote OpenDAP URL (parameter OpenDAP URL)</description>
+            </parameter>
+            <parameter>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>input</value>
+                <format>path</format>
+                <default>input</default>
+                <description>Folder containing the OSCAR NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>file_filter</key>
+                <long_name>File filter</long_name>
+                <value>*.nc</value>
+                <default>*.nc</default>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>opendap_url</key>
+                <long_name>OpenDAP URL</long_name>
+                <value>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/FOR_LAS_ALL_OSCAR_L4_OC_third-deg_FOR_LAS.nc</value>
+                <default>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/FOR_LAS_ALL_OSCAR_L4_OC_third-deg_FOR_LAS.nc</default>
+                <description>OpenDAP URL of the OSCAR dataset. You can check the validity of the given URL by typing it in the URL adress bar of your web browser and appending ".html" at the end of the URL.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_lat</key>
+                <long_name>Dimension in the latitudinal direction</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_lon</key>
+                <long_name>Dimension in the longitudinal direction</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_time</key>
+                <long_name>Dimension in time</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lat</key>
+                <long_name>Latitude of Rho points</long_name>
+                <value>latitude</value>
+                <default>latitude</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lon</key>
+                <long_name>Longitude of Rho points</long_name>
+                <value>longitude</value>
+                <default>longitude</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_time</key>
+                <long_name>Averaged time since initialization</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_u</key>
+                <long_name>Zonal velocity</long_name>
+                <value>u</value>
+                <default>u</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_v</key>
+                <long_name>Meridional velocity</long_name>
+                <value>v</value>
+                <default>v</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.dataset.OscarDataset</value>
+                <default>org.previmer.ichthyop.dataset.OscarDataset</default>
+                <format>class</format>
+                <description>The Java class called by the application to implement this dataset.</description>
+            </parameter>
+        </parameters>
+    </block>
+        <block type="dataset">
+        <key>dataset.symphonie</key>
+        <tree_path>Dataset/Symphonie</tree_path>
+        <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for Symphonie model, 3D simulation and local NetCDF files.</description>
+        <parameters>
+            <parameter>
+                <key>input_path</key>
+                <long_name>Input path</long_name>
+                <value>input</value>
+                <default>input</default>
+                <format>path</format>
+                <description>Folder containing the Symphonie NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
+            </parameter>
+            <parameter>
+                <key>file_filter</key>
+                <long_name>File filter</long_name>
+                <value>symphonie_med_199803*.nc</value>
+                <default>*.nc</default>
+                <description>Filename filter. Accepted metacharacters * (for any String) and ? (for any single character). Let's say the input files you want to use for the simulation are in a folder with many other files (not necessarily NetCDF format), but they all have the same prefix. Your file filter will look like prefix*.nc</description>
+            </parameter>
+            <parameter>
+                <key>grid_file</key>
+                <long_name>Grid file</long_name>
+                <value>input/symphonie_med_grid.nc</value>
+                <default>input/symphonie_med_grid.nc</default>
+                <format>file</format>
+                <description>Grid file for SYMPHONIE configuration.</description>
+            </parameter>
+            <parameter>
+                <key>skip_sorting</key>
+                <long_name>Skip NetCDF file sorting</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
+            </parameter>
+            <parameter>
+                <key>shrink_domain</key>
+                <long_name>Shrink simulated domain</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lat</key>
+                <long_name>Latitude of Northwest corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>north-west-corner.lon</key>
+                <long_name>Longitude of Northwest corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lat</key>
+                <long_name>Latitude of Southeast corner [North degree]</long_name>
+                <value>0.0</value>
+                <description>Set the latitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>south-east-corner.lon</key>
+                <long_name>Longitude of Southeast corner [East degree]</long_name>
+                <value>0.0</value>
+                <description>Set the longitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+                <format>lonlat</format>
+                <default>0.0</default>
+            </parameter>
+            <parameter>
+                <key>field_dim_ni</key>
+                <long_name>Dimension ni_t</long_name>
+                <value>ni_t</value>
+                <default>ni_t</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_nj</key>
+                <long_name>Dimension nj_t</long_name>
+                <value>nj_t</value>
+                <default>nj_t</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_nk</key>
+                <long_name>Dimension nk_t</long_name>
+                <value>nk_t</value>
+                <default>nk_t</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_dim_time</key>
+                <long_name>Dimension in time</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_bathy</key>
+                <long_name>Bathymetry at T points</long_name>
+                <value>hm_w</value>
+                <default>hm_w</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lat</key>
+                <long_name>Latitude of T points</long_name>
+                <value>latitude_t</value>
+                <default>latitude_t</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_lon</key>
+                <long_name>Longitude of T points</long_name>
+                <value>longitude_t</value>
+                <default>longitude_t</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_mask</key>
+                <long_name>Mask at T points</long_name>
+                <value>mask_t</value>
+                <default>mask_t</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_dx</key>
+                <long_name>Variable dx_v</long_name>
+                <value>dx_v</value>
+                <default>dx_v</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_dy</key>
+                <long_name>Variable dy_u</long_name>
+                <value>dy_u</value>
+                <default>dy_u</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_dxdy</key>
+                <long_name>Variable dxdy_t</long_name>
+                <value>dxdy_t</value>
+                <default>dxdy_t</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_time</key>
+                <long_name>Time variable</long_name>
+                <value>time</value>
+                <default>time</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_depth_t</key>
+                <long_name>Variable depth_t</long_name>
+                <value>depth_t</value>
+                <default>depth_t</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_depth_w</key>
+                <long_name>Variable depth_w</long_name>
+                <value>depth_w</value>
+                <default>depth_w</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_u</key>
+                <long_name>Zonal velocity</long_name>
+                <value>u</value>
+                <default>u</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_v</key>
+                <long_name>Meridional velocity</long_name>
+                <value>v</value>
+                <default>v</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>field_var_ssh</key>
+                <long_name>Sea surface height</long_name>
+                <value>ssh-ib</value>
+                <default>ssh-ib</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter hidden="true">
+                <key>class_name</key>
+                <long_name>Java Class file</long_name>
+                <value>org.previmer.ichthyop.dataset.SymphonieDataset</value>
+                <default>org.previmer.ichthyop.dataset.SymphonieDataset</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
@@ -2210,7 +2938,7 @@
             </parameter>
         </parameters>
     </block>
-     <block type="action">
+    <block type="action">
         <key>action.recruitment.stain</key>
         <tree_path>Biology/Recruitment/In stain</tree_path>
         <enabled>false</enabled>
