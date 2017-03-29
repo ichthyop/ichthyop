@@ -54,7 +54,6 @@
 package org.ichthyop.release;
 
 import org.ichthyop.Zone;
-import org.ichthyop.TypeZone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.event.ReleaseEvent;
 import org.ichthyop.io.ReleaseZoneTracker;
@@ -80,9 +79,9 @@ public class ZoneRelease extends AbstractRelease {
         is3D = getSimulationManager().getDataset().is3D();
 
         /* Load release zones*/
-        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("release.zone.zone_file"), TypeZone.RELEASE);
-        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE))
-                ? getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).size()
+        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("release.zone.zone_file"), Zone.Type.RELEASE);
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE))
+                ? getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE).size()
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
         getSimulationManager().getOutputManager().addPredefinedTracker(ReleaseZoneTracker.class);
@@ -99,7 +98,7 @@ public class ZoneRelease extends AbstractRelease {
         xmax = 0.d;
         ymax = 0.d;
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-            Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
+            Zone zone = getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE).get(i_zone);
             xmin = Math.min(xmin, zone.getXmin());
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());

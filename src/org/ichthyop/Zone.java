@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop;
 
 import java.awt.Color;
@@ -92,7 +91,7 @@ public class Zone extends IchthyopLinker {
     /**
      * The type of zone (release, recruitment, etc.)
      */
-    private final TypeZone type;
+    private final Type type;
     /**
      * Lower bathymetric line [meter]
      */
@@ -138,7 +137,7 @@ public class Zone extends IchthyopLinker {
      * @param key, the name of the zone
      * @param index, the index of the zone
      */
-    public Zone(TypeZone type, String key, int index) {
+    public Zone(Type type, String key, int index) {
         this.polygon = new ArrayList();
         this.type = type;
         this.key = key;
@@ -165,7 +164,7 @@ public class Zone extends IchthyopLinker {
 
     /**
      * Returns the name of the zone.
-     * 
+     *
      * @return the name of the zone
      */
     public String getKey() {
@@ -358,7 +357,7 @@ public class Zone extends IchthyopLinker {
      * @see ichthyop.util.Constant for details about the labels characterizing
      * the type of zone.
      */
-    public TypeZone getType() {
+    public Type getType() {
         return type;
     }
 
@@ -460,4 +459,25 @@ public class Zone extends IchthyopLinker {
         return zoneStr.toString();
     }
     //---------- End of class
+
+    public enum Type {
+
+        RELEASE(0),
+        RECRUITMENT(1);
+
+        private final int code;
+
+        Type(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
+    }
 }

@@ -66,7 +66,6 @@ import java.util.Iterator;
 import javax.swing.JPanel;
 
 /** local import */
-import org.ichthyop.TypeZone;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.manager.SimulationManager;
@@ -416,7 +415,7 @@ public class SimulationUI extends JPanel {
                 Color color = getColor(getSimulationManager().getDataset().getBathy(i, j));
                 boolean found = false;
                 ArrayList<Zone> listZones = new ArrayList();
-                for (TypeZone typeZone : TypeZone.values()) {
+                for (Zone.Type typeZone : Zone.Type.values()) {
                     if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
                         listZones.addAll(getSimulationManager().getZoneManager().getZones(typeZone));
                     }

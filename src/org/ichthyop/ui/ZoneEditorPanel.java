@@ -67,7 +67,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.EventObject;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,16 +82,14 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.event.CellEditorListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import org.jdesktop.application.ResourceMap;
 import org.ichthyop.Template;
-import org.ichthyop.TypeZone;
+import org.ichthyop.Zone;
 import org.ichthyop.io.IOTools;
 import org.ichthyop.io.XZone;
 import org.ichthyop.io.XZone.XPoint;
@@ -300,7 +297,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private void updateZone(XZone zone) {
         zone.setEnabled(ckBoxEnabled.isSelected());
         zone.setColor(btnColor.getBackground());
-        zone.setType((TypeZone) cbBoxType.getSelectedItem());
+        zone.setType((Zone.Type) cbBoxType.getSelectedItem());
         zone.setBathyMaskEnabled(ckBoxBathyMask.isSelected());
         zone.setInshoreLine(Float.valueOf(txtFieldInshore.getText()));
         zone.setOffshoreLine(Float.valueOf(txtFieldOffshore.getText()));
@@ -827,7 +824,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
         cbBoxType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbBoxType.setName("cbBoxType"); // NOI18N
-        cbBoxType.setModel(new DefaultComboBoxModel(TypeZone.values()));
+        cbBoxType.setModel(new DefaultComboBoxModel(Zone.Type.values()));
 
         javax.swing.GroupLayout pnlTypeZoneLayout = new javax.swing.GroupLayout(pnlTypeZone);
         pnlTypeZone.setLayout(pnlTypeZoneLayout);

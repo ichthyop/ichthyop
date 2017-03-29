@@ -53,7 +53,7 @@
 
 package org.ichthyop.io;
 
-import org.ichthyop.TypeZone;
+import org.ichthyop.Zone;
 import org.ichthyop.manager.OutputManager.NCDimFactory;
 import org.ichthyop.manager.PropertyManager;
 import org.ichthyop.IchthyopLinker;
@@ -144,7 +144,7 @@ public abstract class AbstractTracker extends IchthyopLinker {
         addDimension(dimFactory.getDrifterDimension());
     }
 
-    public void addZoneDimension(TypeZone type) {
+    public void addZoneDimension(Zone.Type type) {
         addDimension(dimFactory.getZoneDimension(type));
     }
 

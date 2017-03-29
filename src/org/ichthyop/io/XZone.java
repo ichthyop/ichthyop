@@ -53,7 +53,7 @@
 
 package org.ichthyop.io;
 
-import org.ichthyop.TypeZone;
+import org.ichthyop.Zone;
 import org.ichthyop.GridPoint;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class XZone extends org.jdom2.Element {
         super(ZONE);
         setKey(key);
         setEnabled(true);
-        setType(TypeZone.RELEASE);
+        setType(Zone.Type.RELEASE);
         addPoint(0, "0.0", "0.0");
         addPoint(1, "0.0", "0.0");
         addPoint(2, "0.0", "0.0");
@@ -147,9 +147,9 @@ public class XZone extends org.jdom2.Element {
         getChild(ENABLED).setText(String.valueOf(enabled));
     }
 
-    public TypeZone getTypeZone() {
+    public Zone.Type getTypeZone() {
 
-        for (TypeZone type : TypeZone.values()) {
+        for (Zone.Type type : Zone.Type.values()) {
             if (type.toString().equals(getChildTextNormalize(TYPE_ZONE))) {
                 return type;
             }
@@ -157,7 +157,7 @@ public class XZone extends org.jdom2.Element {
         return null;
     }
 
-    public void setType(TypeZone type) {
+    public void setType(Zone.Type type) {
         if (null == getChild(TYPE_ZONE)) {
             addContent(new Element(TYPE_ZONE));
         }

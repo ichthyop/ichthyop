@@ -57,7 +57,6 @@ import java.io.File;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.LastStepEvent;
 import org.ichthyop.event.NextStepEvent;
-import org.ichthyop.TypeZone;
 import org.ichthyop.event.SetupEvent;
 import java.io.IOException;
 import ucar.nc2.NetcdfFileWriteable;
@@ -198,7 +197,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         int iZone = 0;
         zoneAreas = new ArrayList();
-        for (TypeZone type : TypeZone.values()) {
+        for (Zone.Type type : Zone.Type.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     zoneAreas.add(iZone, makeZoneArea(zone));
@@ -573,7 +572,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public class NCDimFactory {
 
         private Dimension time, drifter;
-        private HashMap<TypeZone, Dimension> zoneDimension;
+        private HashMap<Zone.Type, Dimension> zoneDimension;
         private HashMap<String, Dimension> dimensions;
 
         public Dimension createDimension(Dimension dim) {
@@ -606,7 +605,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return drifter;
         }
 
-        public Dimension getZoneDimension(TypeZone type) {
+        public Dimension getZoneDimension(Zone.Type type) {
             if (null == zoneDimension) {
                 zoneDimension = new HashMap();
             }

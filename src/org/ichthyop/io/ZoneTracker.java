@@ -55,7 +55,6 @@ package org.ichthyop.io;
 
 import java.util.Iterator;
 import java.util.List;
-import org.ichthyop.TypeZone;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.ZoneParticle;
@@ -80,14 +79,14 @@ public class ZoneTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addCustomDimension(new Dimension("type_zone", TypeZone.values().length));
+        addCustomDimension(new Dimension("type_zone", Zone.Type.values().length));
     }
 
     @Override
     Array createArray() {
-        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), TypeZone.values().length);
+        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), Zone.Type.values().length);
         // Initialises zone array with -99
-        for (int iZone = 0; iZone < TypeZone.values().length; iZone++) {
+        for (int iZone = 0; iZone < Zone.Type.values().length; iZone++) {
             for (int iP = 0; iP < getNParticle(); iP++) {
                 array.set(0, iP, iZone, -99);
             }
@@ -102,7 +101,7 @@ public class ZoneTracker extends AbstractTracker {
         while (iter.hasNext()) {
             particle = iter.next();
             Index index = getArray().getIndex();
-            for (TypeZone type : TypeZone.values()) {
+            for (Zone.Type type : Zone.Type.values()) {
                 index.set(0, particle.getIndex(), type.getCode());
                 getArray().setInt(index, ZoneParticle.getNumZone(particle, type));
             }
@@ -112,7 +111,7 @@ public class ZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
 
-        for (TypeZone type : TypeZone.values()) {
+        for (Zone.Type type : Zone.Type.values()) {
             addAttribute(new Attribute("type_zone " + type.getCode(), type.toString()));
             List<Zone> zones = getSimulationManager().getZoneManager().getZones(type);
             if (null != zones) {

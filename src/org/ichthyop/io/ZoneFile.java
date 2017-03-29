@@ -52,7 +52,7 @@
  */
 package org.ichthyop.io;
 
-import org.ichthyop.TypeZone;
+import org.ichthyop.Zone;
 import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -63,8 +63,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ichthyop.IchthyopLinker;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -72,7 +70,6 @@ import org.jdom2.JDOMException;
 import org.jdom2.filter.Filter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
-import org.ichthyop.manager.SimulationManager;
 
 public class ZoneFile extends IchthyopLinker {
 
@@ -140,7 +137,7 @@ public class ZoneFile extends IchthyopLinker {
         structure.getRootElement().removeChildren(XZone.ZONE);
     }
 
-    private Iterable getZones(TypeZone type) {
+    private Iterable getZones(Zone.Type type) {
         ArrayList<XZone> list = new ArrayList();
         for (XZone xblock : zones.values()) {
             if (xblock.getTypeZone().equals(type)) {
@@ -174,7 +171,7 @@ public class ZoneFile extends IchthyopLinker {
         return listBlock;
     }
 
-    private List<XZone> readZones(final TypeZone type) {
+    private List<XZone> readZones(Zone.Type type) {
 
         Filter filtre = new Filter() {
 

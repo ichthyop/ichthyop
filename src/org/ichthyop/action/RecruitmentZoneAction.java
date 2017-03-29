@@ -53,7 +53,7 @@
 
 package org.ichthyop.action;
 
-import org.ichthyop.TypeZone;
+import org.ichthyop.Zone.Type;
 import org.ichthyop.util.Constant;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.io.RecruitmentZoneTracker;
@@ -104,7 +104,7 @@ public class RecruitmentZoneAction extends AbstractAction {
             lengthMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_length");
         }
         stopMovingOnceRecruited = getConfiguration().getBoolean("action.recruitment.zone.stop_moving");
-        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("action.recruitment.zone.zone_file"), TypeZone.RECRUITMENT);
+        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("action.recruitment.zone.zone_file"), Type.RECRUITMENT);
         boolean addTracker = true;
         try {
             addTracker = getConfiguration().getBoolean("action.recruitment.zone.recruited_tracker");
@@ -138,7 +138,7 @@ public class RecruitmentZoneAction extends AbstractAction {
             return;
         }
 
-        int numCurrentZone = ZoneParticle.getNumZone(particle, TypeZone.RECRUITMENT);
+        int numCurrentZone = ZoneParticle.getNumZone(particle, Type.RECRUITMENT);
         if ((numCurrentZone != -1) && !RecruitableParticle.isRecruited(particle, numCurrentZone)) {
 
             if (satisfyRecruitmentCriterion(particle)) {

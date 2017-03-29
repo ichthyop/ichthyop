@@ -54,7 +54,6 @@
 package org.ichthyop.manager;
 
 import org.ichthyop.Zone;
-import org.ichthyop.TypeZone;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -75,7 +74,7 @@ import org.ichthyop.io.ZoneFile;
 public class ZoneManager extends AbstractManager {
 
     private static ZoneManager zoneManager = new ZoneManager();
-    private HashMap<TypeZone, ArrayList<Zone>> map;
+    private HashMap<Zone.Type, ArrayList<Zone>> map;
 
     public static ZoneManager getInstance() {
         return zoneManager;
@@ -90,7 +89,7 @@ public class ZoneManager extends AbstractManager {
         map.clear();
     }
 
-    public void loadZonesFromFile(String filename, TypeZone type) throws Exception {
+    public void loadZonesFromFile(String filename, Zone.Type type) throws Exception {
 
         String pathname = IOTools.resolveFile(filename);
         File f = new File(pathname);
@@ -124,7 +123,7 @@ public class ZoneManager extends AbstractManager {
         }
     }
 
-    public ArrayList<Zone> getZones(TypeZone type) {
+    public ArrayList<Zone> getZones(Zone.Type type) {
         return map.get(type);
     }
 

@@ -55,7 +55,6 @@ package org.ichthyop.io;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.ichthyop.TypeZone;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.RecruitableParticle;
@@ -79,7 +78,7 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addZoneDimension(TypeZone.RECRUITMENT);
+        addZoneDimension(Zone.Type.RECRUITMENT);
     }
 
     @Override
@@ -112,6 +111,6 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     }
 
     private ArrayList<Zone> getZones() {
-        return getSimulationManager().getZoneManager().getZones(TypeZone.RECRUITMENT);
+        return getSimulationManager().getZoneManager().getZones(Zone.Type.RECRUITMENT);
     }
 }

@@ -54,7 +54,6 @@
 package org.ichthyop.io;
 
 import java.util.List;
-import org.ichthyop.TypeZone;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.ZoneParticle;
@@ -94,7 +93,7 @@ public class ReleaseZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
 
-        List<Zone> zones = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE);
+        List<Zone> zones = getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE);
         if (null != zones) {
             for (Zone zone : zones) {
                 addAttribute(new Attribute("release_zone " + zone.getIndex(), zone.getKey()));
@@ -111,7 +110,7 @@ public class ReleaseZoneTracker extends AbstractTracker {
         // Only write release zone when particle is released
         for (int i = nPopTm1; i < nNow; i++) {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
-            getArray().setInt(getIndex().set(particle.getIndex()), ZoneParticle.getNumZone(particle, TypeZone.RELEASE));
+            getArray().setInt(getIndex().set(particle.getIndex()), ZoneParticle.getNumZone(particle, Zone.Type.RELEASE));
         }
         nPopTm1 = nNow;
 
