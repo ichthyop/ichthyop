@@ -14,6 +14,7 @@ import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import ucar.ma2.Array;
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -56,27 +57,27 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Zonal component of the velocity field at current time
      */
-    private float[][][] u_tp0;
+    private Array u_tp0;
     /**
      * Zonal component of the velocity field at time t + dt
      */
-    private float[][][] u_tp1;
+    private Array u_tp1;
     /**
      * Meridional component of the velocity field at current time
      */
-    private float[][][] v_tp0;
+    private Array v_tp0;
     /**
      * Meridional component of the velocity field at time t + dt
      */
-    private float[][][] v_tp1;
+    private Array v_tp1;
     /**
      * Vertical component of the velocity field at current time
      */
-    private float[][][] w_tp0;
+    private Array w_tp0;
     /**
      * Vertical component of the velocity field at time t + dt
      */
-    private float[][][] w_tp1;
+    private Array w_tp1;
     /**
      * Depth at rho point
      */
@@ -495,6 +496,7 @@ public class NemoDataset extends AbstractDataset {
         double dz = kz - (double) k;
         double CO = 0.d;
         double co, x;
+        Index index = u_tp0.getIndex();
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -502,9 +504,10 @@ public class NemoDataset extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!(Float.isNaN(u_tp0[k + kk][j + jj][i + ii - 1]))) {
-                        x = (1.d - x_euler) * u_tp0[k + kk][j + jj][i + ii - 1]
-                                + x_euler * u_tp1[k + kk][j + jj][i + ii - 1];
+                    index.set(k + kk, j + jj, i + ii - 1);
+                    if (!(Double.isNaN(u_tp0.getDouble(index)))) {
+                        x = (1.d - x_euler) * u_tp0.getDouble(index)
+                                + x_euler * u_tp1.getDouble(index);
                         du += x * co / e2u[j + jj][i + ii - 1];
                     }
                 }
@@ -535,6 +538,7 @@ public class NemoDataset extends AbstractDataset {
         double dz = kz - (double) k;
         double CO = 0.d;
         double co, x;
+        Index index = w_tp0.getIndex();
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
@@ -542,8 +546,9 @@ public class NemoDataset extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (.5d - (double) kk - dz));
                     CO += co;
-                    x = (1.d - x_euler) * w_tp0[k + kk][j + jj][i + ii]
-                            + x_euler * w_tp1[k + kk][j + jj][i + ii];
+                    index.set(k + kk, j + jj, i + ii);
+                    x = (1.d - x_euler) * w_tp0.getDouble(index)
+                            + x_euler * w_tp1.getDouble(index);
                     dw += 2.d * x * co
                             / (gdepW[Math.max(k + kk - 1, 0)]
                             - gdepW[Math.min(k + kk + 1, nz)]);
@@ -553,7 +558,7 @@ public class NemoDataset extends AbstractDataset {
         if (CO != 0) {
             dw /= CO;
         }
-        
+
         /*double dwr = get_dWrz(pGrid, time);
          float err = (float) Math.abs((dwr - dw) / dwr);
          System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);*/
@@ -578,6 +583,7 @@ public class NemoDataset extends AbstractDataset {
         double dz = kz - (double) k;
         double CO = 0.d;
         double co, x;
+        Index index = v_tp0.getIndex();
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
@@ -585,9 +591,10 @@ public class NemoDataset extends AbstractDataset {
                             * (.5d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    if (!Float.isNaN(v_tp0[k + kk][j + jj - 1][i + ii])) {
-                        x = (1.d - x_euler) * v_tp0[k + kk][j + jj - 1][i + ii]
-                                + x_euler * v_tp1[k + kk][j + jj - 1][i + ii];
+                    index.set(k + kk, j + jj - 1, i + ii);
+                    if (!Double.isNaN(v_tp0.getDouble(index))) {
+                        x = (1.d - x_euler) * v_tp0.getDouble(index)
+                                + x_euler * v_tp1.getDouble(index);
                         dv += x * co / e1v[j + jj - 1][i + ii];
                     }
                 }
@@ -638,28 +645,33 @@ public class NemoDataset extends AbstractDataset {
      * Ws(i, j, k) = W(i, j, k) - Wgrid(i, j, k)
      * </pre>
      */
-    private float[][][] computeW() {
+    private Array computeW() {
 
         double[][][] Huon = new double[nz][ny][nx];
         double[][][] Hvom = new double[nz][ny][nx];
 
         //---------------------------------------------------
         // Calculation Coeff Huon & Hvom
+        Index index;
         for (int k = nz; k-- > 0;) {
+            index = u_tp1.getIndex();
             for (int i = 0; i < nx - 1; i++) {
                 for (int j = 0; j < ny; j++) {
 //                    Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i] * Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
-                    Huon[k][j][i] = Double.isNaN(u_tp1[k][j][i])
+                    index.set(k, j, i);
+                    Huon[k][j][i] = Double.isNaN(u_tp1.getDouble(index))
                             ? 0.f
-                            : u_tp1[k][j][i] * e2u[j][i] * e3u[k][j][i];
+                            : u_tp1.getDouble(index) * e2u[j][i] * e3u[k][j][i];
                 }
             }
+            index = v_tp1.getIndex();
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny - 1; j++) {
 //                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                    Hvom[k][j][i] = Double.isNaN(v_tp1[k][j][i])
+                    index.set(k, j, i);
+                    Hvom[k][j][i] = Double.isNaN(v_tp1.getDouble(index))
                             ? 0.f
-                            : v_tp1[k][j][i] * e1v[j][i] * e3v[k][j][i];
+                            : v_tp1.getDouble(index) * e1v[j][i] * e3v[k][j][i];
                 }
             }
         }
@@ -716,13 +728,15 @@ public class NemoDataset extends AbstractDataset {
 
         //---------------------------------------------------
         // w * dxu * dyv
-        float[][][] w = new float[nz + 1][ny][nx];
+        //float[][][] w = new float[nz + 1][ny][nx];
+        Array w = new ArrayDouble.D3(nz + 1, ny, nx);
+        index = w.getIndex();
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w[k][j][i] = isInWater(i, j, k)
+                    w.setDouble(index.set(k, j, i), isInWater(i, j, k)
                             ? (float) (w_double[k][j][i] / (e1t[j][i] * e2t[j][i]))
-                            : 0.f;
+                            : 0.f);
                 }
             }
         }
@@ -1041,8 +1055,7 @@ public class NemoDataset extends AbstractDataset {
         double time_tp0 = time_tp1;
 
         try {
-            u_tp1 = (float[][][]) ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).
-                    flip(1).reduce().copyToNDJavaArray();
+            u_tp1 = ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).flip(1).reduce();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -1050,8 +1063,7 @@ public class NemoDataset extends AbstractDataset {
         }
 
         try {
-            v_tp1 = (float[][][]) ncV.findVariable(strV).read(origin, new int[]{1, nz, ny - 1, nx}).
-                    flip(1).reduce().copyToNDJavaArray();
+            v_tp1 = ncV.findVariable(strV).read(origin, new int[]{1, nz, ny - 1, nx}).flip(1).reduce();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -1072,8 +1084,7 @@ public class NemoDataset extends AbstractDataset {
         }
         if (readW) {
             try {
-                w_tp1 = (float[][][]) ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).
-                        flip(1).reduce().copyToNDJavaArray();
+                w_tp1 = ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).flip(1).reduce();
             } catch (IOException | InvalidRangeException ex) {
                 IOException ioex = new IOException("Error reading W variable. " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());
