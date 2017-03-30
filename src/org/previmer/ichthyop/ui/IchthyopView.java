@@ -260,7 +260,7 @@ public class IchthyopView extends FrameView
             for (int iStep = 0; iStep < wmsMapper.getNbSteps(); iStep++) {
                 setProgress((float) (iStep + 1) / wmsMapper.getNbSteps());
                 publish(new Painter[]{wmsMapper.getPainterForStep(iStep), wmsMapper.getTimePainter(iStep)});
-                //Thread.sleep(500);
+                Thread.sleep(500);
             }
             return null;
         }
