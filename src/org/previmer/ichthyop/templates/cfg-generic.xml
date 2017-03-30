@@ -2657,37 +2657,6 @@
             </parameter>
         </parameters>
     </block>
-    <block type="option">
-        <key>app.particle_length</key>
-        <tree_path>Biology/Early-life stages</tree_path>
-        <description>Block of options for setting up particle's early-life stages. The pre-defined early life stages are egg, yolk-sac larva and feeding larva. Particles change stages at pre-defined length thresholds that can be adjusted in this block.</description>
-        <parameters>
-            <parameter>
-                <key>initial_length</key>
-                <long_name>Initial length [millimeter]</long_name>
-                <value>0.025</value>
-                <default>0.025</default>
-                <format>float</format>
-                <description>Initial length [millimeter] of the egg.</description>
-            </parameter>
-            <parameter>
-                <key>hatch_length</key>
-                <long_name>Hatch length [millimeter]</long_name>
-                <value>2.8</value>
-                <default>2.8</default>
-                <format>float</format>
-                <description>Threshold length [millimeter] between egg and yolk-sac larva.</description>
-            </parameter>
-            <parameter>
-                <key>yolk2feeding_length</key>
-                <long_name>Yolk-sac to feeding larva threshold [millimeter]</long_name>
-                <value>4.5</value>
-                <default>4.5</default>
-                <format>float</format>
-                <description>Threshold length [millimeter] between yolk-sac larva and feeding larva.</description>
-            </parameter>
-        </parameters>
-    </block>
     <block type="action">
         <key>action.lethal_temp</key>
         <tree_path>Biology/Lethal temperature</tree_path>
@@ -2809,6 +2778,22 @@
                 <value>temp</value>
                 <default>temp</default>
                 <description>The name of the temperature variable (case sensitive) in the hydrodynamic dataset.</description>
+            </parameter>
+                        <parameter>
+                <key>stage_tags</key>
+                <long_name>Tags of the stages</long_name>
+                <value>"egg" "yolk-sac larva" "feeding larva"</value>
+                <default>"egg" "yolk-sac larva" "feeding larva"</default>
+                <format>list</format>
+                <description>Names of each physiological stage of the larva life history. No matter what you set, Ichthyop assumes that the first stage corresponds to egg stage.</description>
+            </parameter>
+            <parameter>
+                <key>stage_thresholds</key>
+                <long_name>Initial length of the stages [millimetre]</long_name>
+                <value>"0.025" "2.8" "4.5"</value>
+                <default>"0.025" "2.8" "4.5"</default>
+                <format>list</format>
+                <description>Initial length for each physiological stage of the larva life history, in millimetre. Ichthyop assumes that the first length provided corresponds to the egg length.</description>
             </parameter>
             <parameter hidden="true">
                 <key>length_tracker</key>

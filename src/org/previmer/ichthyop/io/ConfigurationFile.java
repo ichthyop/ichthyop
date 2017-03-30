@@ -34,6 +34,7 @@ public class ConfigurationFile {
 
     public ConfigurationFile(URL url) {
         try {
+            this.file = new File(url.toURI());
             SAXBuilder sxb = new SAXBuilder();
             Element racine = sxb.build(url).getRootElement();
             racine.detach();

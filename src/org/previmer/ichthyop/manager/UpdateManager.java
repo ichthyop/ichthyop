@@ -70,6 +70,7 @@ public class UpdateManager extends AbstractManager {
      */
     private void u32To33() throws Exception {
         ConfigurationFile cfg33 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        cfg33.load();
         /*
          * Update linear growth 
          */
