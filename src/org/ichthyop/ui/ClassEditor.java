@@ -77,17 +77,14 @@ public class ClassEditor extends DefaultCellEditor {
 
     JComboBox cbBox;
 
-    public ClassEditor() {
+    public ClassEditor() throws Exception {
         super(new JComboBox());
         cbBox = (JComboBox) getComponent();
         String packageName = Simulation.class.getPackage().getName();
         DefaultComboBoxModel model = new DefaultComboBoxModel();
         for (Class aClass : getClasses(packageName)) {
-            try {
-                if (null != aClass && null != aClass.getCanonicalName()) {
-                    model.addElement(aClass.getCanonicalName());
-                }
-            } catch (Exception ex) {
+            if (null != aClass && null != aClass.getCanonicalName()) {
+                model.addElement(aClass.getCanonicalName());
             }
         }
         cbBox.setModel(model);
@@ -99,7 +96,7 @@ public class ClassEditor extends DefaultCellEditor {
      * @param packageName Le nom du package à lister
      * @return La liste des classes
      */
-    private List<Class> getClasses(String pckgname) {
+    private List<Class> getClasses(String pckgname) throws Exception {
         // Création de la liste qui sera retournée
         ArrayList<Class> classes = new ArrayList();
 
@@ -129,7 +126,8 @@ public class ClassEditor extends DefaultCellEditor {
      * @param packageName Le nom du package
      * @return La liste des classes
      */
-    private Collection<Class> scanDirectory(String directory, String packageName) {
+    private Collection<Class> scanDirectory(String directory, String packageName) throws Exception {
+        
         ArrayList<Class> classes = new ArrayList();
 
         // On génère le chemin absolu du package
@@ -146,11 +144,7 @@ public class ClassEditor extends DefaultCellEditor {
             File[] liste = rep.listFiles(filter);
             // Pour chaque classe présente dans le package, on l'ajoute à la liste
             for (int i = 0; i < liste.length; i++) {
-                try {
-                    classes.add(Class.forName(packageName + "." + liste[i].getName().split("\\.")[0]));
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(ClassEditor.class.getName()).log(Level.WARNING, null, ex);
-                }
+                classes.add(Class.forName(packageName + "." + liste[i].getName().split("\\.")[0]));
             }
             File[] subdirectories = rep.listFiles(new FileFilter() {
                 @Override
@@ -175,7 +169,7 @@ public class ClassEditor extends DefaultCellEditor {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private Collection<Class> scanJar(String jar, String packageName) {
+    private Collection<Class> scanJar(String jar, String packageName) throws Exception {
         try {
             ArrayList<Class> classes = new ArrayList();
 
@@ -191,15 +185,8 @@ public class ClassEditor extends DefaultCellEditor {
                         && element.getName().endsWith(".class")) {
 
                     String nomFichier = element.getName().substring(packageName.length() + 1);
-
-                    try {
-                        classes.add(Class.forName(packageName + "." + nomFichier.split("\\.")[0]));
-                    } catch (ClassNotFoundException ex) {
-                        Logger.getLogger(ClassEditor.class.getName()).log(Level.WARNING, null, ex);
-                    }
-
+                    classes.add(Class.forName(packageName + "." + nomFichier.split("\\.")[0]));
                 }
-
             }
 
             return classes;

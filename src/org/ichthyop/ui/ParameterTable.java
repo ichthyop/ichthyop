@@ -107,14 +107,14 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return model.getUndoManager();
     }
 
-    public void setModel(ParameterSet parameterSet, TableModelListener l) {
+    public void setModel(ParameterSet parameterSet, TableModelListener l) throws Exception {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(parameterSet));
         setEditors();
         getModel().addTableModelListener(l);
     }
 
-    private void setEditors() {
+    private void setEditors() throws Exception {
 
         RowEditorModel editorModel = new RowEditorModel();
         setRowEditorModel(editorModel);
