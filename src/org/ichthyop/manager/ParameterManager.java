@@ -375,7 +375,7 @@ public class ParameterManager extends AbstractManager {
                 error("Could not convert to Boolean parameter " + getString(key), ex);
             }
         } else if (warning) {
-            warning("Could not find Boolean parameter " + key + ". Osmose assumes it is false.");
+            warning("Could not find Boolean parameter " + key + ". Ichthyop assumes it is false.");
         }
 
         return false;
