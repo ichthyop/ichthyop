@@ -53,7 +53,7 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Mask: water = 1, cost = 0
      */
-    private byte[][][] maskRho;//, masku, maskv;
+    private int[][][] maskRho;//, masku, maskv;
     /**
      * Zonal component of the velocity field at current time
      */
@@ -157,26 +157,69 @@ public class NemoDataset extends AbstractDataset {
      */
     private void readConstantField() throws Exception {
 
-        int[] origin = new int[]{jpo, ipo};
-        int[] size = new int[]{ny, nx};
         NetcdfFile nc;
         nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
-        //fichier *byte*mask*
-        lonRho = (float[][]) nc.findVariable(strLon).read(origin, size).
-                copyToNDJavaArray();
-        latRho = (float[][]) nc.findVariable(strLat).read(origin, size).
-                copyToNDJavaArray();
-        nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
-        maskRho = (byte[][][]) nc.findVariable(strMask).read(new int[]{0,
-            0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-                copyToNDJavaArray();
-        /*masku = (byte[][][]) nc.findVariable("umask").read(new int[]{0,
-         0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-         copyToNDJavaArray();
-         maskv = (byte[][][]) nc.findVariable("vmask").read(new int[]{0,
-         0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce().
-         copyToNDJavaArray();*/
+        lonRho = new float[ny][nx];
+        latRho = new float[ny][nx];
+        Array arrLon, arrLat;
+        Index index;
+        switch (nc.findVariable(strLon).getShape().length) {
+            case 2:
+                int[] origin = new int[]{jpo, ipo};
+                int[] size = new int[]{ny, nx};
+                arrLon = nc.findVariable(strLon).read(origin, size);
+                arrLat = nc.findVariable(strLat).read(origin, size);
+                index = arrLon.getIndex();
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        index.set(j, i);
+                        lonRho[j][i] = arrLon.getFloat(index);
+                        latRho[j][i] = arrLat.getFloat(index);
+                        System.out.println(latRho[j][i] + " " + lonRho[j][i]);
+                    }
+                }
+                break;
+            case 1:
+                arrLon = nc.findVariable(strLon).read(new int[]{ipo}, new int[]{nx});
+                arrLat = nc.findVariable(strLon).read(new int[]{jpo}, new int[]{ny});
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        lonRho[j][i] = arrLon.getFloat(arrLon.getIndex().set(i));
+                        latRho[j][i] = arrLat.getFloat(arrLat.getIndex().set(j));
+                    }
+                }
+                break;
+            default:
+                throw new IOException("Latitude and longitude variables are expected to have either one or two dimensions.");
+        }
+        
+        if (!isGridInfoInOneFile) {
+            nc.close();
+            nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
+        }
+        maskRho = new int[nz][ny][nx];
+        Array arrMask;
+        switch (nc.findVariable(strMask).getShape().length) {
+            case 4:
+                arrMask = nc.findVariable(strMask).read(new int[]{0,
+                    0, jpo, ipo}, new int[]{1, nz, ny, nx}).flip(1).reduce();
+                break;
+            case 3:
+                arrMask = nc.findVariable(strMask).read(new int[]{0, jpo, ipo}, new int[]{nz, ny, nx}).flip(1).reduce();
+                break;
+            default:
+                throw new IOException("Mask variable is expected to have either three or four dimensions.");
+        }
+        index = arrMask.getIndex();
+        for (int k = 0; k < nz; k++) {
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    maskRho[k][j][i] = arrMask.getInt(index.set(k, j, i));
+                }
+            }
+        }
+        
         if (!isGridInfoInOneFile) {
             nc.close();
             nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
@@ -768,16 +811,13 @@ public class NemoDataset extends AbstractDataset {
 
         NetcdfFile nc;
         Array arrLon, arrLat;
-        try {
-            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
-            arrLon = nc.findVariable(strLon).read();
-            arrLat = nc.findVariable(strLat).read();
-            if (arrLon.getElementType() == float.class) {
-                lonRho = (float[][]) arrLon.copyToNDJavaArray();
-                latRho = (float[][]) arrLat.copyToNDJavaArray();
-            } else {
-                lonRho = new float[ny][nx];
-                latRho = new float[ny][nx];
+        nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
+        arrLon = nc.findVariable(strLon).read().reduce();
+        arrLat = nc.findVariable(strLat).read().reduce();
+        lonRho = new float[ny][nx];
+        latRho = new float[ny][nx];
+        switch (arrLon.getShape().length) {
+            case 2:
                 Index index = arrLon.getIndex();
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
@@ -786,11 +826,20 @@ public class NemoDataset extends AbstractDataset {
                         latRho[j][i] = arrLat.getFloat(index);
                     }
                 }
-            }
-            nc.close();
-        } catch (IOException e) {
-            throw new IOException(e);
+                break;
+            case 1:
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        lonRho[j][i] = arrLon.getFloat(arrLon.getIndex().set(i));
+                        latRho[j][i] = arrLat.getFloat(arrLat.getIndex().set(j));
+                    }
+                }
+                break;
+            default:
+                throw new IOException("Latitude and longitude variables are expected to have either one or two dimensions.");
         }
+        nc.close();
+
     }
 
     /*
