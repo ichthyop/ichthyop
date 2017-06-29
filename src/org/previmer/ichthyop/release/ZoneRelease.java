@@ -38,50 +38,78 @@ public class ZoneRelease extends AbstractRelease {
         getSimulationManager().getOutputManager().addPredefinedTracker(ReleaseZoneTracker.class);
     }
 
-    @Override
-    public int release(ReleaseEvent event) throws Exception {
+    /**
+     * Computes and returns the number of particles per release zone,
+     * proportionally to zone extents.
+     *
+     * @return the number of particles per release zone.
+     */
+    private int[] dispatchParticles() {
 
-        double xmin, xmax, ymin, ymax;
-        double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
-        /** Reduces the release area function of the user-defined zones */
-        xmin = Double.MAX_VALUE;
-        ymin = Double.MAX_VALUE;
-        xmax = 0.d;
-        ymax = 0.d;
+        double areaTot = 0;
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
             Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
-            xmin = Math.min(xmin, zone.getXmin());
-            xmax = Math.max(xmax, zone.getXmax());
-            ymin = Math.min(ymin, zone.getYmin());
-            ymax = Math.max(ymax, zone.getYmax());
-            if (is3D) {
-                upDepth = Math.min(upDepth, zone.getUpperDepth());
-                lowDepth = Math.max(lowDepth, zone.getLowerDepth());
-            } else {
-                upDepth = lowDepth = Double.NaN;
+            areaTot += zone.getArea();
+        }
+
+        // assign number of particles per zone proportionnaly to zone extents
+        int[] nParticlePerZone = new int[nbReleaseZones];
+        int nParticleSum = 0;
+        for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
+            Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
+            nParticlePerZone[i_zone] = (int) Math.round(nParticles * zone.getArea() / areaTot);
+            nParticleSum += nParticlePerZone[i_zone];
+        }
+
+        // adjust number of particles per zones in case rounding did not match
+        // exactly expected number of particles.
+        int sign = (int) Math.signum(nParticles - nParticleSum);
+        if (sign != 0) {
+            for (int i = 0; i < Math.abs(nParticles - nParticleSum); i++) {
+                nParticlePerZone[i % nbReleaseZones] += sign;
             }
         }
 
+        return nParticlePerZone;
+    }
+
+    @Override
+    public int release(ReleaseEvent event) throws Exception {
+
+        int[] nParticlePerZone = dispatchParticles();
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
-        for (int p = 0; p < nParticles; p++) {
-            /** Instantiate a new Particle */
-            int DROP_MAX = 2000;
-            IParticle particle = null;
-            int counter = 0;
-            while (null == particle) {
-                if (counter++ > DROP_MAX) {
-                    throw new NullPointerException("{Zone Release} Unable to release particle. Check out the zone definitions.");
-                }
-                double x = xmin + Math.random() * (xmax - xmin);
-                double y = ymin + Math.random() * (ymax - ymin);
-                double depth = Double.NaN;
-                if (is3D) {
-                    depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
-                }
-                particle = ParticleFactory.createZoneParticle(index, x, y, depth);
+
+        for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
+            Zone zone = getSimulationManager().getZoneManager().getZones(TypeZone.RELEASE).get(i_zone);
+            double xmin = zone.getXmin();
+            double xmax = zone.getXmax();
+            double ymin = zone.getYmin();
+            double ymax = zone.getYmax();
+            double upDepth = 0, lowDepth = 0;
+            if (is3D) {
+                upDepth = zone.getUpperDepth();
+                lowDepth = zone.getLowerDepth();
             }
-            getSimulationManager().getSimulation().getPopulation().add(particle);
-            index++;
+            // release particles randomly within the zone
+            for (int p = 0; p < nParticlePerZone[i_zone]; p++) {
+                int DROP_MAX = 2000;
+                IParticle particle = null;
+                int counter = 0;
+                while (null == particle) {
+                    if (counter++ > DROP_MAX) {
+                        throw new NullPointerException("Unable to release particle in release zone " + zone.getIndex() + ". Check out the zone definitions.");
+                    }
+                    double x = xmin + Math.random() * (xmax - xmin);
+                    double y = ymin + Math.random() * (ymax - ymin);
+                    double depth = Double.NaN;
+                    if (is3D) {
+                        depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
+                    }
+                    particle = ParticleFactory.createZoneParticle(index, x, y, depth);
+                }
+                getSimulationManager().getSimulation().getPopulation().add(particle);
+                index++;
+            }
         }
 
         return index;

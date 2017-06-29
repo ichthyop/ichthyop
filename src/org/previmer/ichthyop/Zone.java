@@ -77,6 +77,10 @@ public class Zone extends SimulationManagerAccessor {
      * Whether to enable the bathymetric mask.
      */
     private boolean enabledBathyMask;
+    /**
+     * Zone area in km2
+     */
+    private double area = -1;
 
     /**
      * Creates a new zone.
@@ -112,7 +116,7 @@ public class Zone extends SimulationManagerAccessor {
 
     /**
      * Returns the name of the zone.
-     * 
+     *
      * @return the name of the zone
      */
     public String getKey() {
@@ -229,13 +233,15 @@ public class Zone extends SimulationManagerAccessor {
 
     public double getArea() {
 
-        IDataset dataset = getSimulationManager().getDataset();
-        double area = 0.d;
-        for (int i = 0; i < dataset.get_nx(); i++) {
-            for (int j = 0; j < dataset.get_ny(); j++) {
-                if (dataset.isInWater(i, j)) {
-                    if (isGridPointInZone(i, j)) {
-                        area += dataset.getdeta(j, i) * dataset.getdxi(j, i) * 1e-6;
+        if (area < 0) {
+            IDataset dataset = getSimulationManager().getDataset();
+            area = 0.d;
+            for (int i = 0; i < dataset.get_nx(); i++) {
+                for (int j = 0; j < dataset.get_ny(); j++) {
+                    if (dataset.isInWater(i, j)) {
+                        if (isGridPointInZone(i, j)) {
+                            area += dataset.getdeta(j, i) * dataset.getdxi(j, i) * 1e-6;
+                        }
                     }
                 }
             }
