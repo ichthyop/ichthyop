@@ -232,6 +232,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
             }
         }
+        
+        // for tiny zones include at least one point, the barycenter of the zone
+        // not satisfactory solution, this fix should be improved
+        if (list.isEmpty()) {
+            Point2D xy = new Point2D.Float(
+                    (float) (0.5 * (zone.getXmin() + zone.getXmax())),
+                    (float) (0.5 * (zone.getYmin() + zone.getYmax())));
+            list.add(xy);
+        }
 
         return list;
     }

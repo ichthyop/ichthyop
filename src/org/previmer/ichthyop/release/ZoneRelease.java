@@ -4,6 +4,7 @@
  */
 package org.previmer.ichthyop.release;
 
+import java.util.logging.Level;
 import org.previmer.ichthyop.*;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.event.ReleaseEvent;
@@ -68,6 +69,10 @@ public class ZoneRelease extends AbstractRelease {
             for (int i = 0; i < Math.abs(nParticles - nParticleSum); i++) {
                 nParticlePerZone[i % nbReleaseZones] += sign;
             }
+        }
+        
+        for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
+            if (nParticlePerZone[i_zone] == 0) getLogger().log(Level.WARNING, "Release zone {0} has not been attributed any particle. It may be too small compared to other release zones or its definition may be flawed.", i_zone);
         }
 
         return nParticlePerZone;
