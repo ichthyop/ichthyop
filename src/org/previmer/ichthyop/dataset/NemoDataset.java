@@ -187,7 +187,7 @@ public class NemoDataset extends AbstractDataset {
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k, j + jpo, i + ipo));
+                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k + 1, j + jpo, i + ipo));
                 }
             }
         }
@@ -268,7 +268,7 @@ public class NemoDataset extends AbstractDataset {
             for (int i = 0; i < nx; i++) {
                 // First we initialize e3t with e3t_0
                 for (int k = 0; k < nz; k++) {
-                    e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k));
+                    e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k+1));
                 }
                 // From NEMO to Ichthyop grid, we remove the deepest z level
                 // as it is always ocean bottom in NEMO and we flip z-axis
@@ -332,7 +332,7 @@ public class NemoDataset extends AbstractDataset {
         for (int k = 0; k < nz; k++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    index.set(k, j + jpo, i + ipo);
+                    index.set(k + 1, j + jpo, i + ipo);
                     field[k][j][i] = array.getDouble(index);
                 }
             }
@@ -351,7 +351,7 @@ public class NemoDataset extends AbstractDataset {
         index = array.getIndex();
         gdepT = new double[nz];
         for (int k = 0; k < nz; k++) {
-            index.set(k);
+            index.set(k + 1);
             gdepT[k] = array.getDouble(index);
         }
         /*
@@ -363,7 +363,7 @@ public class NemoDataset extends AbstractDataset {
             array = nc.findVariable(str_gdepW).read().reduce().flip(0);
             index = array.getIndex();
             for (int k = 0; k < nz + 1; k++) {
-                index.set(k);
+                index.set(k + 1);
                 gdepW[k] = array.getDouble(index);
             }
         } else {
@@ -1739,8 +1739,10 @@ public class NemoDataset extends AbstractDataset {
         double bathy = 0.d;
         if (isInWater(i, j, nz - 1)) {
             for (int k = 0; k < nz; k++) {
-                bathy += maskRho[k][j][i] * e3t[k][j][i];
-                //System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + bathy);
+                bathy += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i])
+                        ? 0.d
+                        : maskRho[k][j][i] * e3t[k][j][i];
+                //System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + e3t[k][j][i] + " " + bathy);
             }
             return bathy;
         }
