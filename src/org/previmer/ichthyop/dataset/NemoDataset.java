@@ -333,7 +333,9 @@ public class NemoDataset extends AbstractDataset {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
                     index.set(k + 1, j + jpo, i + ipo);
-                    field[k][j][i] = array.getDouble(index);
+                    field[k][j][i] = Double.isNaN(array.getDouble(index))
+                            ? 0.d
+                            : array.getDouble(index);
                 }
             }
         }
@@ -853,8 +855,8 @@ public class NemoDataset extends AbstractDataset {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
-        if (!findParameter("enhanced()_mode")) {
-            getLogger().warning("Ichthyop assumes that the NEMO NetCDF files must be opened in enhanced() mode (scale,offset,missing).");
+        if (!findParameter("enhanced_mode")) {
+            getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         }
         time_arrow = timeArrow();
     }
