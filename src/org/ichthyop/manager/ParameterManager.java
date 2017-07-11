@@ -104,7 +104,7 @@ public class ParameterManager extends AbstractManager {
             }
             File tmp = new File(mainFilename);
             warning("XML format deprecated. Configuration file {0} has been converted to CSV format {1}", new String[]{file.getName(), tmp.getName()});
-            save();
+            saveParameters(mainFilename, false);
         } else if (file.getName().endsWith(".json")) {
             loadParameters(file.getAbsolutePath(), 0, true);
             mainFilename = file.getAbsolutePath();
@@ -144,23 +144,47 @@ public class ParameterManager extends AbstractManager {
         setString("configuration.title", longName);
     }
 
-    public void save() throws IOException, FileNotFoundException {
+    public void saveParamters() throws IOException, FileNotFoundException {
+        saveParameters(mainFilename);
+    }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(mainFilename))) {
+    public void saveParameters(String filename) throws IOException, FileNotFoundException {
+        saveParameters(filename, filename.endsWith(".json"));
+    }
+
+    public void saveParameters(String filename, boolean json) throws IOException, FileNotFoundException {
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             String newline = System.getProperty("line.separator");
+            if (json) {
+                StringBuilder str = new StringBuilder();
+                str.append("{").append(newline);
+                writer.write(str.toString());
+            }
             List<String> keys = new ArrayList(parameters.keySet());
             Collections.sort(keys);
+            int i = 0;
             for (String key : keys) {
+                i++;
                 StringBuilder str = new StringBuilder();
+                if (json) {
+                    str.append("    ");
+                }
                 str.append("\"").append(key).append("\"");
-                str.append(getParameter(key).keySeparator);
+                str.append(json ? ": " : getParameter(key).keySeparator);
                 String value = getParameter(key).value;
                 if (StringUtil.isNotString(value) | StringUtil.isQuoted(value)) {
                     str.append(value);
                 } else {
                     str.append("\"").append(value).append("\"");
                 }
+                if (json && (i != keys.size())) str.append(",");
                 str.append(newline);
+                writer.write(str.toString());
+            }
+            if (json) {
+                StringBuilder str = new StringBuilder();
+                str.append("}").append(newline);
                 writer.write(str.toString());
             }
         }
@@ -639,11 +663,11 @@ public class ParameterManager extends AbstractManager {
         private void parse(String line) {
             key = value = null;
             if (null == keySeparator) {
-                keySeparator = Separator.guess(line, Separator.EQUALS).toString();
+                keySeparator = Separator.guess(line, Separator.COMA).toString();
             }
             split(line);
             if (null == valueSeparator) {
-                valueSeparator = Separator.guess(value, Separator.SEMICOLON).toString();
+                valueSeparator = Separator.guess(value, Separator.COMA).toString();
             }
             value = clean(value);
         }

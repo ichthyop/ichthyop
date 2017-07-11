@@ -696,7 +696,8 @@ public class IchthyopView extends FrameView
                 }
             }
             try {
-                IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
+                getSimulationManager().getParameterManager().saveParameters(file.getAbsolutePath());
+                //IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
                 untitled = false;
                 StringBuilder sb = new StringBuilder();
                 sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.prefix"));
@@ -737,7 +738,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected Object doInBackground() throws Exception {
-            getSimulationManager().getParameterManager().save();
+            getSimulationManager().getParameterManager().saveParamters();
             getSimulationManager().setConfigurationFile(getSimulationManager().getConfigurationFile());
             return null;
         }
