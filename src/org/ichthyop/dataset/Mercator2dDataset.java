@@ -373,12 +373,17 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public void loadParameters() {
 
+        /* barrier.n, 2017-08-02
+         * changing the name of the arguments:
+         * "field_var_lon" to "dataset.mercator2d.field_var_lon" and so on
+         */
+
         // Variable names
-        strLon = getConfiguration().getString("field_var_lon");
-        strLat = getConfiguration().getString("field_var_lat");
-        strU = getConfiguration().getString("field_var_u");
-        strV = getConfiguration().getString("field_var_v");
-        strTime = getConfiguration().getString("field_var_time");
+        strLon = getConfiguration().getString("dataset.mercator2d.field_var_lon");
+        strLat = getConfiguration().getString("dataset.mercator2d.field_var_lat");
+        strU = getConfiguration().getString("dataset.mercator2d.field_var_u");
+        strV = getConfiguration().getString("dataset.mercator2d.field_var_v");
+        strTime = getConfiguration().getString("dataset.mercator2d.field_var_time");
         // Time arrow
         time_arrow = timeArrow();
     }
@@ -474,7 +479,7 @@ public class Mercator2dDataset extends AbstractDataset {
         }
 
         try {
-            if (ncV.findVariable(strU).getShape().length > 3) {
+            if (ncV.findVariable(strV).getShape().length > 3) {
                 v_tp1 = (double[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
             } else {
                 v_tp1 = (double[][]) ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
@@ -751,8 +756,12 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
+        /* barrier.n, 2017-08-02> adding the last two lines for zonal checking */
         return ((pGrid[1] > (ny - 2.0f))
-                || (pGrid[1] < 1.0f));
+                || (pGrid[1] < 1.0f)
+                || (pGrid[0] < 1.0f)
+                || (pGrid[0] > (nx - 2.0f))
+                );
     }
 
 //////////

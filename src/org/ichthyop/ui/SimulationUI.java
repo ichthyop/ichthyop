@@ -201,7 +201,7 @@ public class SimulationUI extends JPanel {
      * @param h the height of the component
      */
     private void drawBackground(Graphics2D g2, int w, int h) {
-
+        
         background = g2.getDeviceConfiguration().createCompatibleImage(w, h);
         Graphics2D graphic = background.createGraphics();
         graphic.setColor(new Color(223, 212, 200));
