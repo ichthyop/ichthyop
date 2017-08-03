@@ -697,8 +697,12 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
+        /* barrier.n, 2017-08-02> adding the last two lines for zonal checking */
         return ((pGrid[1] > (ny - 2.0f))
-                || (pGrid[1] < 1.0f));
+                || (pGrid[1] < 1.0f)
+                || (pGrid[0] < 1.0f)
+                || (pGrid[0] > (nx - 2.0f))
+                );
     }
 
 //////////
