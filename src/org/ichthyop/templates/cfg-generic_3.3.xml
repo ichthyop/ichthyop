@@ -1726,6 +1726,14 @@
                 <description>Folder containing the MERCATOR NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
             </parameter>
             <parameter>
+                <key>longitude_tore</key>
+                <long_name>Zonal periodicity</long_name>
+                <value>true</value>
+                <format>boolean</format>
+                <default>*true</default>
+                <description>True if the domain is zonally periodical</description>
+            </parameter>
+            <parameter>
                 <key>gridu_pattern</key>
                 <long_name>gridU file pattern</long_name>
                 <value>*gridU*.nc</value>

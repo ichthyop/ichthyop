@@ -1186,9 +1186,13 @@
 "dataset.mercator2d.input_path.description"="Folder containing the MERCATOR NetCDF files. Relative pathnames are supported. For instance, input or input/ or ./input or ./input/ are equivalent. Notice the application ignores the subfolders and can only see the files located in this folder that matches the File filter."
 "dataset.mercator2d.input_path.format"="path"
 "dataset.mercator2d.input_path.longname"="Input path"
-"dataset.mercator2d.parameters"=["input_path", "gridu_pattern", "gridv_pattern", "field_var_lat", "field_var_lon", "field_var_time", "field_var_u", "field_var_v", "class_name"]
+"dataset.mercator2d.parameters"=["input_path", "gridu_pattern", "gridv_pattern", "field_var_lat", "field_var_lon", "field_var_time", "field_var_u", "field_var_v", "class_name", "longitude_tore]
 "dataset.mercator2d.treepath"="Dataset/MERCATOR2D"
 "dataset.mercator2d.type"="dataset"
+"dataset.mercator2d.longitude_tore"="true"
+"dataset.mercator2d.longitude_tore.description"="True if the domain is zonally periodical"
+"dataset.mercator2d.longitude_tore.format"="boolean"
+"dataset.mercator2d.longitude_tore.longname"="Zonal periodicity"
 "dataset.nemo.byte_mask_pattern"="*mask*.nc"
 "dataset.nemo.byte_mask_pattern.description"="Filename filter for identifying the mask NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the dimensions x, y, z and the variable land/ocean mask at T points"
 "dataset.nemo.byte_mask_pattern.format"="text"
