@@ -94,6 +94,9 @@ public class Mercator2dDataset extends AbstractDataset {
     private List<String> listUFiles, listVFiles;
     private NetcdfFile ncU, ncV;
 
+     /** Whether horizontal periodicity should be applied */
+    boolean xTore=true;
+
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -327,6 +330,10 @@ public class Mercator2dDataset extends AbstractDataset {
         strTime = getParameter("field_var_time");
         // Time arrow
         time_arrow = timeArrow();
+
+        // Longitudinal toricity (barrier.n)
+        xTore = Boolean.valueOf(getParameter("longitude_tore"));
+
     }
 
     /**
@@ -698,11 +705,8 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public boolean isOnEdge(double[] pGrid) {
         /* barrier.n, 2017-08-02> adding the last two lines for zonal checking */
-        return ((pGrid[1] > (ny - 2.0f))
-                || (pGrid[1] < 1.0f)
-                || (pGrid[0] < 1.0f)
-                || (pGrid[0] > (nx - 2.0f))
-                );
+        return (!xTore && (pGrid[0] > (nx - 2.d)) || (!xTore && (pGrid[0] < 1.d))
+                || (pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
     }
 
 //////////

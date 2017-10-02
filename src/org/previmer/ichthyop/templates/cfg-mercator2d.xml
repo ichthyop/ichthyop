@@ -111,6 +111,14 @@
         <description>Block of options for managing the hydrodynamic dataset. Pre-defined block for MECATOR 2D model</description>
         <parameters>
             <parameter>
+                <key>longitude_tore</key>
+                <long_name>Zonal periodicity</long_name>
+                <value>true</value>
+                <format>boolean</format>
+                <default>*true</default>
+                <description>True if the domain is zonally periodical</description>
+            </parameter>
+            <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
                 <value>input</value>
