@@ -125,7 +125,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     public String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getString(block_key + "." + key);
+        return getConfiguration().getString(block_key + "." + key);
     }
 
     public String getFileLocation() {
@@ -135,7 +135,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private String makeFileLocation() throws IOException {
 
         String filename = IOTools.resolvePath(getParameter("output_path"));
-        if (!getParameter("file_prefix").isEmpty()) {
+
+        if (!getConfiguration().isNull(block_key + ".file_prefix")) {
             filename += getParameter("file_prefix") + "_";
         }
         filename += getSimulationManager().getId() + ".nc";
@@ -373,19 +374,22 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private List<String> getUserTrackers() throws Exception {
-        String userTrackers = getParameter("trackers");
-        try {
-            String[] tokens = userTrackers.split("\"");
-            List<String> variables = new ArrayList();
-            for (String token : tokens) {
-                if (!token.trim().isEmpty()) {
-                    variables.add(token.trim());
+
+        if (!getConfiguration().isNull(block_key + ".trackers")) {
+            try {
+                String[] tokens = getParameter("trackers").split("\"");
+                List<String> variables = new ArrayList();
+                for (String token : tokens) {
+                    if (!token.trim().isEmpty()) {
+                        variables.add(token.trim());
+                    }
                 }
+                return variables;
+            } catch (Exception ex) {
+                return null;
             }
-            return variables;
-        } catch (Exception ex) {
-            return null;
         }
+        return null;
     }
 
     private void addCustomTrackers(List<String> variables) {
