@@ -62,7 +62,7 @@ import org.ichthyop.particle.IParticle;
 public class BathyTracker extends FloatTracker {
 
     @Override
-    float getValue(IParticle particle) {
+    public float getValue(IParticle particle) {
         double[] pGrid = {particle.getX(), particle.getY(), particle.getZ()};
         return (float) getSimulationManager().getDataset().getBathy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }

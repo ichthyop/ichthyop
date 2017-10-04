@@ -52,9 +52,8 @@
  */
 package org.ichthyop.action;
 
-import org.ichthyop.io.ETracker;
+import org.ichthyop.io.FloatTracker;
 import org.ichthyop.io.LengthTracker;
-import org.ichthyop.particle.DebParticle;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.LengthParticle;
 import org.ichthyop.particle.ParticleMortality;
@@ -83,9 +82,11 @@ public class DebGrowthAction extends AbstractAction {
     private double shape_larvae; // size related conversion params
     private double E_init; // Réserve initiale
     private double Vj; // Structure at mouth opening (yolk_to_feeding)
-
     private double dt;
-    
+    private static final String E = "DEB_E"; // Réserve
+    private static final String V = "DEB_V"; // Structure
+    private static final String E_R = "DEB_E_R"; // Maturité
+
     @Override
     public String getKey() {
         return "action.growthDeb";
@@ -125,22 +126,13 @@ public class DebGrowthAction extends AbstractAction {
         food_field = getConfiguration().getString("action.growthDeb.food_field");
         getSimulationManager().getDataset().requireVariable(food_field, getClass());
 
-        boolean addTracker = true;
-        try {
-            addTracker = getConfiguration().getBoolean("action.growthDeb.length_tracker");
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addTracker) {
+        if (getConfiguration().isNull("action.growthDeb.length_tracker")
+                || getConfiguration().getBoolean("action.growthDeb.length_tracker")) {
             getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
         }
-        addTracker = true;
-        try {
-            addTracker = getConfiguration().getBoolean("action.growthDeb.E_tracker");
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addTracker) {
+
+        if (getConfiguration().isNull("action.growthDeb.E_tracker")
+                || getConfiguration().getBoolean("action.growthDeb.E_tracker")) {
             getSimulationManager().getOutputManager().addPredefinedTracker(ETracker.class);
         }
     }
@@ -148,20 +140,20 @@ public class DebGrowthAction extends AbstractAction {
     @Override
     public void init(IParticle particle) {
         LengthParticle.setLength(particle, length_init);
-        DebParticle.setE(particle, E_init);
-        DebParticle.setE_R(particle, 0);
-        DebParticle.setV(particle, Math.pow(shape_larvae * length_init, 3));
+        setE(particle, E_init);
+        setE_R(particle, 0);
+        setV(particle, Math.pow(shape_larvae * length_init, 3));
     }
 
     @Override
     public void execute(IParticle particle) {
         double temp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double food = getSimulationManager().getDataset().get(food_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        double[] res_deb = grow(dt, DebParticle.getE(particle), DebParticle.getV(particle), DebParticle.getE_R(particle), Vj, temp, food);
-        DebParticle.setE(particle, res_deb[0]);
-        DebParticle.setV(particle, res_deb[1]);
-        DebParticle.setE_R(particle, res_deb[2]);
-        LengthParticle.setLength(particle, computeLength(DebParticle.getV(particle)));
+        double[] res_deb = grow(dt, getE(particle), getV(particle), getE_R(particle), Vj, temp, food);
+        setE(particle, res_deb[0]);
+        setV(particle, res_deb[1]);
+        setE_R(particle, res_deb[2]);
+        LengthParticle.setLength(particle, computeLength(getV(particle)));
 
         if (res_deb[3] == 0) {
             particle.kill(ParticleMortality.STARVATION);
@@ -226,6 +218,38 @@ public class DebGrowthAction extends AbstractAction {
 
         double[] res = {E, V, E_R, (double) starvation};
         return res;
+    }
+
+    private double getE(IParticle particle) {
+        return (double) getAttribute(particle, E);
+    }
+
+    private void setE(IParticle particle, double E) {
+        setAttribute(particle, DebGrowthAction.E, E);
+    }
+
+    private double getV(IParticle particle) {
+        return (double) getAttribute(particle, DebGrowthAction.V);
+    }
+
+    private void setV(IParticle particle, double V) {
+        setAttribute(particle, DebGrowthAction.V, V);
+    }
+
+    private double getE_R(IParticle particle) {
+        return (double) getAttribute(particle, DebGrowthAction.E_R);
+    }
+
+    public void setE_R(IParticle particle, double E_R) {
+        setAttribute(particle, DebGrowthAction.E_R, E_R);
+    }
+
+    public class ETracker extends FloatTracker {
+
+        @Override
+        public float getValue(IParticle particle) {
+            return (float) getE(particle);
+        }
     }
 
 }

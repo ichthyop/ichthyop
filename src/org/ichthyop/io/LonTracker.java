@@ -62,7 +62,7 @@ import org.ichthyop.particle.IParticle;
 public class LonTracker extends FloatTracker {
 
     @Override
-    float getValue(IParticle particle) {
+    public float getValue(IParticle particle) {
         float lon = (float) particle.getLon();
         return lon > 180 ? lon - 360.f : lon;
     }

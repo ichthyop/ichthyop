@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import org.ichthyop.IchthyopLinker;
@@ -61,7 +60,7 @@ import org.ichthyop.particle.IParticle;
  * @author pverley
  */
 public abstract class AbstractAction extends IchthyopLinker {
-    
+
     abstract public String getKey();
 
     abstract public void loadParameters() throws Exception;
@@ -69,4 +68,12 @@ public abstract class AbstractAction extends IchthyopLinker {
     abstract public void execute(IParticle particle);
 
     abstract public void init(IParticle particle);
+
+    public Object getAttribute(IParticle particle, String key) {
+        return particle.get(getClass().getName() + "." + key);
+    }
+    
+    public void setAttribute(IParticle particle, String key, Object value) {
+        particle.set(getClass().getName() + "." + key, value);
+    }
 }

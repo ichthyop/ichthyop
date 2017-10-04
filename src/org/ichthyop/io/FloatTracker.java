@@ -65,9 +65,9 @@ import ucar.ma2.DataType;
  */
 public abstract class FloatTracker extends AbstractTracker {
     
-    abstract float getValue(IParticle particle);
+    abstract public float getValue(IParticle particle);
     
-    FloatTracker() {
+    public FloatTracker() {
         super(DataType.FLOAT);
     }
 

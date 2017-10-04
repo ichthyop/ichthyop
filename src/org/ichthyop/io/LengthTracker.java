@@ -62,7 +62,7 @@ import org.ichthyop.particle.LengthParticle;
 public class LengthTracker extends FloatTracker {
 
     @Override
-    float getValue(IParticle particle) {
+    public float getValue(IParticle particle) {
         return (float) LengthParticle.getLength(particle);
     }
 }

@@ -62,7 +62,7 @@ import org.ichthyop.particle.IParticle;
 public class LatTracker extends FloatTracker {
 
     @Override
-    float getValue(IParticle particle) {
+    public float getValue(IParticle particle) {
         return (float) particle.getLat();
     }
 }
