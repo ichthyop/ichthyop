@@ -79,8 +79,8 @@ public class LevyWalkAction extends AbstractAction {
         alphaV = getConfiguration().getDouble("action.levywalk.alpha_v");
         depthmax = getConfiguration().getDouble("action.levywalk.depthmax");
         if (depthmax > 0) depthmax *= -1.d;
-        hEnabled = getConfiguration().getBoolean("enabled_h");
-        vEnabled = getConfiguration().getBoolean("enabled_v");
+        hEnabled = getConfiguration().getBoolean("action.levywalk.enabled_h");
+        vEnabled = getConfiguration().getBoolean("action.levywalk.enabled_v");
         rd1 = new MTRandom();
         rd2 = new MTRandom(2L * System.currentTimeMillis());
         rd3 = new MTRandom(System.currentTimeMillis() / 2L);
