@@ -266,13 +266,14 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
-        double jy = Math.max(0.00001f, Math.min(yRho, (double) ny - 1.00001f));
-
-        int i = (int) Math.floor(xRho);
+        double jy = Math.max(0.00001d, Math.min(yRho, (double) ny - 1.00001d));
+        double ix = xTore ? xRho : Math.max(0.00001d, Math.min(xRho, (double) nx - 1.00001d));
+        
+        int i = (int) Math.floor(ix);
         int j = (int) Math.floor(jy);
         double lat = 0.d;
         double lon = 0.d;
-        double dx = xRho - (double) i;
+        double dx = ix - (double) i;
         double dy = jy - (double) j;
         double co;
         for (int ii = 0; ii < 2; ii++) {
