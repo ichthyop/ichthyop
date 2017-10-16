@@ -57,15 +57,15 @@ package org.ichthyop.xml;
  *
  * @author pverley
  */
-public enum BlockType {
+public enum SubsetType {
 
     OPTION,
     ACTION,
     RELEASE,
     DATASET;
 
-    public static BlockType getType(String value) {
-        for (BlockType type : values()) {
+    public static SubsetType getType(String value) {
+        for (SubsetType type : values()) {
             if (type.toString().equals(value))
                 return type;
         }

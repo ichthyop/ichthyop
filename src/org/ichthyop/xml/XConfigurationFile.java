@@ -226,9 +226,9 @@ public class XConfigurationFile extends IchthyopLinker {
 
     public List<XParameter> getParameters() {
         List<XParameter> list = new ArrayList();
-        for (XParameterSubset xblock : map.values()) {
-            if (xblock.isEnabled()) {
-                for (XParameter xparam : xblock.getXParameters()) {
+        for (XParameterSubset xsubset : map.values()) {
+            if (xsubset.isEnabled()) {
+                for (XParameter xparam : xsubset.getXParameters()) {
                     list.add(xparam);
                 }
             }
@@ -236,43 +236,43 @@ public class XConfigurationFile extends IchthyopLinker {
         return list;
     }
 
-    public XParameter getXParameter(BlockType type, String blockKey, String key) {
-        return map.get(new BlockId(type, blockKey).toString()).getXParameter(key);
+    public XParameter getXParameter(SubsetType type, String subsetKey, String key) {
+        return map.get(new SubsetId(type, subsetKey).toString()).getXParameter(key);
     }
 
-    public void removeAllBlocks() {
+    public void removeSubsets() {
         structure.getRootElement().removeChildren(XParameterSubset.BLOCK);
     }
 
-    public Iterable<XParameterSubset> getAllBlocks() {
+    public Iterable<XParameterSubset> getSubsets() {
         return map.values();
     }
 
-    public Iterable<XParameterSubset> getBlocks(BlockType type) {
+    public Iterable<XParameterSubset> getSubset(SubsetType type) {
         ArrayList<XParameterSubset> list = new ArrayList();
-        for (XParameterSubset xblock : map.values()) {
-            if (xblock.getType().equals(type)) {
-                list.add(xblock);
+        for (XParameterSubset xsubset : map.values()) {
+            if (xsubset.getType().equals(type)) {
+                list.add(xsubset);
             }
         }
         return list;
     }
 
-    public XParameterSubset getBlock(final BlockType type, final String key) {
-        return map.get(new BlockId(type, key).toString());
+    public XParameterSubset getSubset(final SubsetType type, final String key) {
+        return map.get(new SubsetId(type, key).toString());
     }
 
-    public boolean containsBlock(final BlockType type, final String key) {
-        return map.containsKey(new BlockId(type, key).toString());
+    public boolean containsSubset(final SubsetType type, final String key) {
+        return map.containsKey(new SubsetId(type, key).toString());
     }
 
-    public List<XParameterSubset> readBlocks() throws IOException {
+    public List<XParameterSubset> readSubsets() throws IOException {
         List<Element> list = structure.getRootElement().getChildren(XParameterSubset.BLOCK);
-        List<XParameterSubset> listBlock = new ArrayList(list.size());
+        List<XParameterSubset> listSubset = new ArrayList(list.size());
         for (Element elt : list) {
-            listBlock.add(new XParameterSubset(elt));
+            listSubset.add(new XParameterSubset(elt));
         }
-        return listBlock;
+        return listSubset;
     }
 
     public HashMap<String, String> toProperties(boolean extended) throws IOException {
@@ -281,18 +281,18 @@ public class XConfigurationFile extends IchthyopLinker {
         parameters.put("configuration.title", getTitle());
         parameters.put("configuration.description", StringUtil.removeQuotes(getDescription()));
         parameters.put("configuration.version", getVersion().toString());
-        parameters.put("configuration.subsets", listBlocks());
-        for (XParameterSubset block : readBlocks()) {
-            String bkey = block.getKey().toLowerCase();
-            if (block.getType() != BlockType.OPTION) {
-                parameters.put(bkey + ".enabled", String.valueOf(block.isEnabled()));
-                parameters.put(bkey + ".type", block.getType().toString());
+        parameters.put("configuration.subsets", listSubsets());
+        for (XParameterSubset subset : readSubsets()) {
+            String bkey = subset.getKey().toLowerCase();
+            if (subset.getType() != SubsetType.OPTION) {
+                parameters.put(bkey + ".enabled", String.valueOf(subset.isEnabled()));
+                parameters.put(bkey + ".type", subset.getType().toString());
             }
             if (extended) {
-                parameters.put(bkey + ".description", StringUtil.removeQuotes(block.getDescription()));
-                parameters.put(bkey + ".treepath", block.getTreePath());
+                parameters.put(bkey + ".description", StringUtil.removeQuotes(subset.getDescription()));
+                parameters.put(bkey + ".treepath", subset.getTreePath());
             }
-            block.getXParameters().forEach((parameter) -> {
+            subset.getXParameters().forEach((parameter) -> {
                 StringBuilder key;
                 String pkey = parameter.getKey().toLowerCase();
                 if (extended) {
@@ -310,24 +310,24 @@ public class XConfigurationFile extends IchthyopLinker {
                 key = new StringBuilder(bkey).append(".").append(pkey);
                 parameters.put(key.toString(), handleArray(StringUtil.nullify(parameter.getValue())));
                 key = new StringBuilder(bkey).append(".parameters");
-                parameters.put(key.toString(), listParameters(block));
+                parameters.put(key.toString(), listParameters(subset));
             });
         }
 
         return parameters;
     }
 
-    private String listBlocks() throws IOException {
+    private String listSubsets() throws IOException {
         List<String> list = new ArrayList();
-        for (XParameterSubset block : readBlocks()) {
-            list.add(block.getKey().toLowerCase());
+        for (XParameterSubset subset : readSubsets()) {
+            list.add(subset.getKey().toLowerCase());
         }
         return handleArray(list.toArray(new String[list.size()]));
     }
 
-    private String listParameters(XParameterSubset block) {
+    private String listParameters(XParameterSubset subset) {
         List<String> list = new ArrayList();
-        for (XParameter param : block.getXParameters()) {
+        for (XParameter param : subset.getXParameters()) {
             list.add(param.getKey());
         }
         return handleArray(list.toArray(new String[list.size()]));
@@ -358,7 +358,7 @@ public class XConfigurationFile extends IchthyopLinker {
         }
     }
 
-    public List<XParameterSubset> readBlocks(final BlockType type) {
+    public List<XParameterSubset> readSubsets(final SubsetType type) {
 
         Filter filtre = new Filter() {
 
@@ -408,30 +408,30 @@ public class XConfigurationFile extends IchthyopLinker {
         return list;
     }
 
-    public void updateBlockKey(String newKey, XParameterSubset xblock) {
-        map.remove(xblock.getKey());
-        xblock.setKey(newKey);
-        map.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
+    public void updateSubsetKey(String newKey, XParameterSubset xsubset) {
+        map.remove(xsubset.getKey());
+        xsubset.setKey(newKey);
+        map.put(new SubsetId(xsubset.getType(), xsubset.getKey()).toString(), xsubset);
     }
 
     private HashMap<String, XParameterSubset> createMap() throws Exception {
         HashMap<String, XParameterSubset> lmap = new HashMap();
-        for (XParameterSubset xblock : readBlocks()) {
-            lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
+        for (XParameterSubset xsubset : readSubsets()) {
+            lmap.put(new SubsetId(xsubset.getType(), xsubset.getKey()).toString(), xsubset);
         }
         return lmap;
     }
 
-    public void addBlock(Content child) {
-        XParameterSubset block = (XParameterSubset) child.detach();
-        block.prepairForWriting();
-        structure.getRootElement().addContent(block);
-        map.put(new BlockId(block.getType(), block.getKey()).toString(), block);
+    public void addSubset(Content child) {
+        XParameterSubset subset = (XParameterSubset) child.detach();
+        subset.prepairForWriting();
+        structure.getRootElement().addContent(subset);
+        map.put(new SubsetId(subset.getType(), subset.getKey()).toString(), subset);
     }
 
-    public void removeBlock(final BlockType type, final String key) {
+    public void removeSubset(final SubsetType type, final String key) {
         map.remove(key);
-        structure.getRootElement().removeContent(getBlock(type, key));
+        structure.getRootElement().removeContent(getSubset(type, key));
     }
 
     /*
@@ -443,20 +443,20 @@ public class XConfigurationFile extends IchthyopLinker {
         /*
          * Update linear growth 
          */
-        if (null != getBlock(BlockType.ACTION, "action.growth")) {
-            if (null == getBlock(BlockType.ACTION, "action.growth").getXParameter("stage_tags")) {
-                getBlock(BlockType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(BlockType.ACTION, "action.growth", "stage_tags"));
+        if (null != getSubset(SubsetType.ACTION, "action.growth")) {
+            if (null == getSubset(SubsetType.ACTION, "action.growth").getXParameter("stage_tags")) {
+                getSubset(SubsetType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(SubsetType.ACTION, "action.growth", "stage_tags"));
             }
-            if (null == getBlock(BlockType.ACTION, "action.growth").getXParameter("stage_thresholds")) {
-                getBlock(BlockType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(BlockType.ACTION, "action.growth", "stage_thresholds"));
+            if (null == getSubset(SubsetType.ACTION, "action.growth").getXParameter("stage_thresholds")) {
+                getSubset(SubsetType.ACTION, "action.growth").addXParameter(cfg33.getXParameter(SubsetType.ACTION, "action.growth", "stage_thresholds"));
             }
         }
         
         /*
          * Delete generic larva stages definition
          */
-        if (null != getBlock(BlockType.OPTION, "app.particle_length")) {
-            removeBlock(BlockType.ACTION, "app.particle_length");
+        if (null != getSubset(SubsetType.OPTION, "app.particle_length")) {
+            removeSubset(SubsetType.ACTION, "app.particle_length");
         }
 
         /*
@@ -480,16 +480,16 @@ public class XConfigurationFile extends IchthyopLinker {
         XConfigurationFile cfg32 = new XConfigurationFile(Template.getTemplateURL("cfg-generic_3.3.xml"));
         String treepath, newTreepath;
         /*
-         * Update block action.lethal_temp
+         * Update subset action.lethal_temp
          */
-        if (null != getBlock(BlockType.ACTION, "action.lethal_temp")) {
-            treepath = getBlock(BlockType.ACTION, "action.lethal_temp").getTreePath();
+        if (null != getSubset(SubsetType.ACTION, "action.lethal_temp")) {
+            treepath = getSubset(SubsetType.ACTION, "action.lethal_temp").getTreePath();
             newTreepath = treepath.startsWith("Advanced")
                     ? "Advanced/Biology/Lethal temperatures"
                     : "Biology/Lethal temperatures";
-            removeBlock(BlockType.ACTION, "action.lethal_temp");
-            addBlock(cfg32.getBlock(BlockType.ACTION, "action.lethal_temp"));
-            getBlock(BlockType.ACTION, "action.lethal_temp").setTreePath(newTreepath);
+            removeSubset(SubsetType.ACTION, "action.lethal_temp");
+            addSubset(cfg32.getSubset(SubsetType.ACTION, "action.lethal_temp"));
+            getSubset(SubsetType.ACTION, "action.lethal_temp").setTreePath(newTreepath);
         }
         /*
          * Update version number and date
@@ -511,124 +511,124 @@ public class XConfigurationFile extends IchthyopLinker {
         XConfigurationFile cfg31 = new XConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
         String treepath, newTreepath;
         /*
-         * Add the density_file parameter in the action.buoyancy block
+         * Add the density_file parameter in the action.buoyancy subset
          */
-        if (null != getBlock(BlockType.ACTION, "action.buoyancy")) {
-            if (null == getBlock(BlockType.ACTION, "action.buoyancy").getXParameter("density_file")) {
-                getBlock(BlockType.ACTION, "action.buoyancy").addXParameter(cfg31.getXParameter(BlockType.ACTION, "action.buoyancy", "density_file"));
+        if (null != getSubset(SubsetType.ACTION, "action.buoyancy")) {
+            if (null == getSubset(SubsetType.ACTION, "action.buoyancy").getXParameter("density_file")) {
+                getSubset(SubsetType.ACTION, "action.buoyancy").addXParameter(cfg31.getXParameter(SubsetType.ACTION, "action.buoyancy", "density_file"));
             }
         }
 
         /*
-         * Update the recruitment in zone block
+         * Update the recruitment in zone subset
          */
-        if (null != getBlock(BlockType.ACTION, "action.recruitment")) {
-            getXParameter(BlockType.ACTION, "action.recruitment", "class_name").setValue(org.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
-            treepath = getBlock(BlockType.ACTION, "action.recruitment").getTreePath();
+        if (null != getSubset(SubsetType.ACTION, "action.recruitment")) {
+            getXParameter(SubsetType.ACTION, "action.recruitment", "class_name").setValue(org.ichthyop.action.RecruitmentZoneAction.class.getCanonicalName());
+            treepath = getSubset(SubsetType.ACTION, "action.recruitment").getTreePath();
             newTreepath = treepath.startsWith("Advanced")
                     ? "Advanced/Biology/Recruitment/In zones"
                     : "Biology/Recruitment/In zones";
-            getBlock(BlockType.ACTION, "action.recruitment").setTreePath(newTreepath);
-            updateBlockKey("action.recruitment.zone", getBlock(BlockType.ACTION, "action.recruitment"));
+            getSubset(SubsetType.ACTION, "action.recruitment").setTreePath(newTreepath);
+            updateSubsetKey("action.recruitment.zone", getSubset(SubsetType.ACTION, "action.recruitment"));
         }
         /*
-         * Add the recruitment in stain block
+         * Add the recruitment in stain subset
          */
-        if (!containsBlock(BlockType.ACTION, "action.recruitment.stain")) {
-            addBlock(cfg31.getBlock(BlockType.ACTION, "action.recruitment.stain").detach());
-            treepath = getBlock(BlockType.ACTION, "action.recruitment.zone").getTreePath();
+        if (!containsSubset(SubsetType.ACTION, "action.recruitment.stain")) {
+            addSubset(cfg31.getSubset(SubsetType.ACTION, "action.recruitment.stain").detach());
+            treepath = getSubset(SubsetType.ACTION, "action.recruitment.zone").getTreePath();
             newTreepath = treepath.startsWith("Advanced")
                     ? "Advanced/Biology/Recruitment/In stain"
                     : "Biology/Recruitment/In stain";
-            getBlock(BlockType.ACTION, "action.recruitment.stain").setTreePath(newTreepath);
+            getSubset(SubsetType.ACTION, "action.recruitment.stain").setTreePath(newTreepath);
         }
         /*
-         * Add the coastline behavior block
+         * Add the coastline behavior subset
          */
-        if (!containsBlock(BlockType.OPTION, "app.transport")) {
-            addBlock(cfg31.getBlock(BlockType.OPTION, "app.transport").detach());
-            treepath = getBlock(BlockType.ACTION, "action.advection").getTreePath();
+        if (!containsSubset(SubsetType.OPTION, "app.transport")) {
+            addSubset(cfg31.getSubset(SubsetType.OPTION, "app.transport").detach());
+            treepath = getSubset(SubsetType.ACTION, "action.advection").getTreePath();
             newTreepath = treepath.startsWith("Advanced")
                     ? "Advanced/Transport/General"
                     : "Transport/General";
-            getBlock(BlockType.OPTION, "app.transport").setTreePath(newTreepath);
+            getSubset(SubsetType.OPTION, "app.transport").setTreePath(newTreepath);
         }
         /*
          * Update MARS OpendDAP URL
          */
-        if (null != getBlock(BlockType.DATASET, "dataset.mars_2d_opendap")) {
-            getXParameter(BlockType.DATASET, "dataset.mars_2d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
+        if (null != getSubset(SubsetType.DATASET, "dataset.mars_2d_opendap")) {
+            getXParameter(SubsetType.DATASET, "dataset.mars_2d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
         }
-        if (null != getBlock(BlockType.DATASET, "dataset.mars_3d_opendap")) {
-            getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
+        if (null != getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap")) {
+            getXParameter(SubsetType.DATASET, "dataset.mars_3d_opendap", "opendap_url").setValue("http://tds1.ifremer.fr/thredds/dodsC/PREVIMER-MANGA4000-MARS3DF1-FOR_FULL_TIME_SERIE");
         }
         /*
          * Update MARS Generelized Sigma parameters
          */
-        if (null != getBlock(BlockType.DATASET, "dataset.mars_3d")) {
-            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_hc")) {
-                getBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_hc"));
+        if (null != getSubset(SubsetType.DATASET, "dataset.mars_3d")) {
+            if (null == getSubset(SubsetType.DATASET, "dataset.mars_3d").getXParameter("field_var_hc")) {
+                getSubset(SubsetType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.mars_3d", "field_var_hc"));
             }
-            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_a")) {
-                getBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_a"));
+            if (null == getSubset(SubsetType.DATASET, "dataset.mars_3d").getXParameter("field_var_a")) {
+                getSubset(SubsetType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.mars_3d", "field_var_a"));
             }
-            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d").getXParameter("field_var_b")) {
-                getBlock(BlockType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d", "field_var_b"));
+            if (null == getSubset(SubsetType.DATASET, "dataset.mars_3d").getXParameter("field_var_b")) {
+                getSubset(SubsetType.DATASET, "dataset.mars_3d").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.mars_3d", "field_var_b"));
             }
         }
-        if (null != getBlock(BlockType.DATASET, "dataset.mars_3d_opendap")) {
-            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_hc")) {
-                getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_hc"));
+        if (null != getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap")) {
+            if (null == getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_hc")) {
+                getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.mars_3d_opendap", "field_var_hc"));
             }
-            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_a")) {
-                getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_a"));
+            if (null == getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_a")) {
+                getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.mars_3d_opendap", "field_var_a"));
             }
-            if (null == getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_b")) {
-                getBlock(BlockType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.mars_3d_opendap", "field_var_b"));
+            if (null == getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap").getXParameter("field_var_b")) {
+                getSubset(SubsetType.DATASET, "dataset.mars_3d_opendap").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.mars_3d_opendap", "field_var_b"));
             }
         }
         /*
          * Update OPA NEMO parameters
          */
-        if (null != getBlock(BlockType.DATASET, "dataset.nemo")) {
-            if (null == getBlock(BlockType.DATASET, "dataset.nemo").getXParameter("field_var_e3u")) {
-                getBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3u"));
+        if (null != getSubset(SubsetType.DATASET, "dataset.nemo")) {
+            if (null == getSubset(SubsetType.DATASET, "dataset.nemo").getXParameter("field_var_e3u")) {
+                getSubset(SubsetType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.nemo", "field_var_e3u"));
             }
-            if (null == getBlock(BlockType.DATASET, "dataset.nemo").getXParameter("field_var_e3v")) {
-                getBlock(BlockType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.nemo", "field_var_e3v"));
+            if (null == getSubset(SubsetType.DATASET, "dataset.nemo").getXParameter("field_var_e3v")) {
+                getSubset(SubsetType.DATASET, "dataset.nemo").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.nemo", "field_var_e3v"));
             }
         }
         /*
-         * Add skip_sorting option in Dataset blocks
+         * Add skip_sorting option in Dataset subsets
          */
-        for (XParameterSubset xblock : getBlocks(BlockType.DATASET)) {
-            if (null == xblock.getXParameter("skip_sorting")) {
-                if (null != cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting")) {
-                    xblock.addXParameter(cfg31.getXParameter(BlockType.DATASET, xblock.getKey(), "skip_sorting"));
+        for (XParameterSubset xsubset : getSubset(SubsetType.DATASET)) {
+            if (null == xsubset.getXParameter("skip_sorting")) {
+                if (null != cfg31.getXParameter(SubsetType.DATASET, xsubset.getKey(), "skip_sorting")) {
+                    xsubset.addXParameter(cfg31.getXParameter(SubsetType.DATASET, xsubset.getKey(), "skip_sorting"));
                 }
             }
         }
         /*
          * Fix lethal_temperature_larva value 12.0 instead of 12.O  
          */
-        if (null != getBlock(BlockType.ACTION, "action.lethal_temp")) {
+        if (null != getSubset(SubsetType.ACTION, "action.lethal_temp")) {
             try {
-                float f = Float.valueOf(getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
+                float f = Float.valueOf(getXParameter(SubsetType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
             } catch (NumberFormatException ex) {
-                getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").setValue("12.0");
+                getXParameter(SubsetType.ACTION, "action.lethal_temp", "lethal_temperature_larva").setValue("12.0");
             }
         }
         /*
          * Add grid_file parameter in ROMS configuration
          */
-        if (null != getBlock(BlockType.DATASET, "dataset.roms_2d")) {
-            if (null == getBlock(BlockType.DATASET, "dataset.roms_2d").getXParameter("grid_file")) {
-                getBlock(BlockType.DATASET, "dataset.roms_2d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_2d", "grid_file"));
+        if (null != getSubset(SubsetType.DATASET, "dataset.roms_2d")) {
+            if (null == getSubset(SubsetType.DATASET, "dataset.roms_2d").getXParameter("grid_file")) {
+                getSubset(SubsetType.DATASET, "dataset.roms_2d").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.roms_2d", "grid_file"));
             }
         }
-        if (null != getBlock(BlockType.DATASET, "dataset.roms_3d")) {
-            if (null == getBlock(BlockType.DATASET, "dataset.roms_3d").getXParameter("grid_file")) {
-                getBlock(BlockType.DATASET, "dataset.roms_3d").addXParameter(cfg31.getXParameter(BlockType.DATASET, "dataset.roms_3d", "grid_file"));
+        if (null != getSubset(SubsetType.DATASET, "dataset.roms_3d")) {
+            if (null == getSubset(SubsetType.DATASET, "dataset.roms_3d").getXParameter("grid_file")) {
+                getSubset(SubsetType.DATASET, "dataset.roms_3d").addXParameter(cfg31.getXParameter(SubsetType.DATASET, "dataset.roms_3d", "grid_file"));
             }
         }
         /*
@@ -645,29 +645,29 @@ public class XConfigurationFile extends IchthyopLinker {
     }
 }
 
-class BlockId {
+class SubsetId {
 
-    private final BlockType blockType;
-    private final String blockKey;
+    private final SubsetType subsetType;
+    private final String subsetKey;
 
-    BlockId(BlockType type, String blockName) {
-        this.blockType = type;
-        this.blockKey = blockName;
+    SubsetId(SubsetType type, String subsetKey) {
+        this.subsetType = type;
+        this.subsetKey = subsetKey;
     }
 
-    private BlockType getBlockType() {
-        return blockType;
+    private SubsetType getSubsetType() {
+        return subsetType;
     }
 
-    private String getBlockKey() {
-        return blockKey.trim().toLowerCase();
+    private String getSubsetKey() {
+        return subsetKey.trim().toLowerCase();
     }
 
     @Override
     public String toString() {
-        StringBuilder id = new StringBuilder(getBlockType().toString());
+        StringBuilder id = new StringBuilder(getSubsetType().toString());
         id.append('/');
-        id.append(getBlockKey());
+        id.append(getSubsetKey());
         return id.toString();
     }
 }

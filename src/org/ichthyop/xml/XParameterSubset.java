@@ -70,49 +70,49 @@ import org.jdom2.Element;
 @Deprecated
 public class XParameterSubset extends org.jdom2.Element implements Comparable<XParameterSubset> {
 
-    public final static String BLOCK = "block";
+    public final static String BLOCK = "subset";
     final public static String KEY = "key";
     final public static String TREEPATH = "tree_path";
     final public static String ENABLED = "enabled";
     final public static String TYPE = "type";
     public final static String PARAMETERS = "parameters";
     public final static String DESCRIPTION = "description";
-    private final BlockType block_type;
+    private final SubsetType subset_type;
     private HashMap<String, XParameter> map;
     private List<String> sortedKey;
 
     public XParameterSubset(Element element) throws IOException {
         super(BLOCK);
-        this.block_type = getType(element);
-        if (null == block_type) {
-            throw new IllegalArgumentException("Unknow type for block " + element.getChildText(TREEPATH));
+        this.subset_type = getType(element);
+        if (null == subset_type) {
+            throw new IllegalArgumentException("Unknow type for subset " + element.getChildText(TREEPATH));
         }
-        this.setAttribute(TYPE, block_type.toString());
+        this.setAttribute(TYPE, subset_type.toString());
         if (element != null) {
             addContent(element.cloneContent());
             map = createMap();
         }
     }
 
-    public XParameterSubset(BlockType block_type, Element element) {
+    public XParameterSubset(SubsetType subset_type, Element element) {
         super(BLOCK);
-        this.block_type = block_type;
-        this.setAttribute(TYPE, block_type.toString());
+        this.subset_type = subset_type;
+        this.setAttribute(TYPE, subset_type.toString());
         if (element != null) {
             addContent(element.cloneContent());
             map = createMap();
         }
     }
 
-    public BlockType getType() {
-        return block_type;
+    public SubsetType getType() {
+        return subset_type;
     }
 
-    private BlockType getType(Element element) {
+    private SubsetType getType(Element element) {
         if (null != element && null != element.getAttribute(TYPE)) {
-            return BlockType.getType(element.getAttribute(TYPE).getValue());
+            return SubsetType.getType(element.getAttribute(TYPE).getValue());
         } else {
-            return BlockType.OPTION;
+            return SubsetType.OPTION;
         }
     }
 
@@ -203,13 +203,13 @@ public class XParameterSubset extends org.jdom2.Element implements Comparable<XP
     }
 
     @Override
-    public int compareTo(XParameterSubset block) {
-        return getKey().compareTo(block.getKey());
+    public int compareTo(XParameterSubset subset) {
+        return getKey().compareTo(subset.getKey());
     }
 
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder("Block: ");
+        StringBuilder str = new StringBuilder("Subset: ");
         str.append(getKey());
         str.append(" (");
         str.append(getType());
