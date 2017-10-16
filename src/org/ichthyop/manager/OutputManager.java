@@ -76,8 +76,6 @@ import org.ichthyop.output.LonTracker;
 import org.ichthyop.output.MortalityTracker;
 import org.ichthyop.output.TimeTracker;
 import org.ichthyop.output.CustomTracker;
-import org.ichthyop.ui.param.ParameterSubset;
-import org.ichthyop.ui.param.Parameter;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -235,27 +233,19 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     private void addGlobalAttributes() {
 
-        /* Add transport dimension */
-        String dim = getSimulationManager().getDataset().is3D()
-                ? "3d"
-                : "2d";
-        ncOut.addGlobalAttribute("transport_dimension", dim);
-
-        /* Write all parameters */
-        for (String key : getConfiguration().getParameterSets()) {
-            ParameterSubset parameterSet = new ParameterSubset(key);
-            if (!parameterSet.getType().equals(ParameterSubset.Type.OPTION)) {
-                ncOut.addGlobalAttribute(parameterSet.getKey() + ".enabed", String.valueOf(parameterSet.isEnabled()));
-            }
-            if (parameterSet.isEnabled()) {
-                for (Parameter param : parameterSet.getParameters()) {
-                    ncOut.addGlobalAttribute(param.getKey(), param.getValue());
+        // Write parameters from enabled subsets
+        for (String subsetKey : getConfiguration().getParameterSubsets()) {
+            if (!getConfiguration().canFind(subsetKey + ".enabled") || getConfiguration().getBoolean(subsetKey + ".enabled", false)) {
+                for (String paramKey : getConfiguration().getArrayString(subsetKey + ".parameters")) {
+                    String key = subsetKey + "." + paramKey;
+                    ncOut.addGlobalAttribute(key, getConfiguration().getString(key));
                 }
             }
         }
+        
 
-        /* Add the corresponding xml file */
-        ncOut.addGlobalAttribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath());
+        // Add the corresponding configuration file 
+        ncOut.addGlobalAttribute("cfgfile", getConfiguration().getMainFile());
     }
 
     private List<Point2D> makeZoneArea(Zone zone) {

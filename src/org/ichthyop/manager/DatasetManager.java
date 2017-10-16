@@ -73,7 +73,7 @@ public class DatasetManager extends AbstractManager {
     private void instantiateDataset() throws Exception {
 
         int n = 0;
-        String[] keys = getConfiguration().getParameterSets();
+        String[] keys = getConfiguration().getParameterSubsets();
         for (String key : keys) {
             if (getConfiguration().canFind(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {

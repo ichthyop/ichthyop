@@ -77,8 +77,8 @@ import org.jdesktop.application.Task;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
-import org.ichthyop.ui.param.Parameter;
-import org.ichthyop.ui.param.ParameterSubset;
+import org.ichthyop.ui.param.UIParameter;
+import org.ichthyop.ui.param.UIParameterSubset;
 import org.ichthyop.manager.SimulationManager;
 
 /**
@@ -115,9 +115,9 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         return (ParameterTable) table;
     }
 
-    private void setupParameterPanel(ParameterSubset pset) throws Exception {
+    private void setupParameterPanel(UIParameterSubset pset) throws Exception {
 
-        if (pset.getType().equals(ParameterSubset.Type.OPTION)) {
+        if (pset.getType().equals(UIParameterSubset.Type.OPTION)) {
             ckBoxNode.setVisible(false);
         } else {
             ckBoxNode.setVisible(true);
@@ -140,26 +140,26 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         btnUndo.getAction().setEnabled(false);
         btnRedo.getAction().setEnabled(false);
         getTable().setModel(pset, this);
-        setParameterEditorEnabled(pset.getType().equals(ParameterSubset.Type.OPTION) ? true : pset.isEnabled());
+        setParameterEditorEnabled(pset.getType().equals(UIParameterSubset.Type.OPTION) ? true : pset.isEnabled());
     }
 
     @Action
     public void setNodeEnabled() {
         parameterTree.getParameterSet().setEnabled(ckBoxNode.isSelected());
         setParameterEditorEnabled(ckBoxNode.isSelected());
-        ensureSingleNodeSelection(ParameterSubset.Type.DATASET);
-        ensureSingleNodeSelection(ParameterSubset.Type.RELEASE);
+        ensureSingleNodeSelection(UIParameterSubset.Type.DATASET);
+        ensureSingleNodeSelection(UIParameterSubset.Type.RELEASE);
         firePropertyChange("configurationFile", null, null);
     }
 
-    private void ensureSingleNodeSelection(ParameterSubset.Type type) {
-        ParameterSubset selectedSet = parameterTree.getParameterSet();
+    private void ensureSingleNodeSelection(UIParameterSubset.Type type) {
+        UIParameterSubset selectedSet = parameterTree.getParameterSet();
         if (selectedSet.getType().equals(type)) {
             /* If the selected node is newly enable, we
             deactivate all the others nodes with same type */
             if (selectedSet.isEnabled()) {
-                for (String key : getSimulationManager().getParameterManager().getParameterSets()) {
-                    ParameterSubset otherSet = new ParameterSubset(key);
+                for (String key : getSimulationManager().getParameterManager().getParameterSubsets()) {
+                    UIParameterSubset otherSet = new UIParameterSubset(key);
                     if (otherSet.getType().equals(type) && !otherSet.getKey().equals(selectedSet.getKey())) {
                         parameterTree.get(otherSet.getTreePath()).setEnabled(false);
                     }
@@ -257,8 +257,8 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                     //Selection got filtered away.
                     return;
                 }
-                ParameterSubset pset = parameterTree.getParameterSet();
-                Parameter parameter = getTable().getParameter(table.convertRowIndexToModel(viewRow));
+                UIParameterSubset pset = parameterTree.getParameterSet();
+                UIParameter parameter = getTable().getParameter(table.convertRowIndexToModel(viewRow));
                 StringBuilder info = new StringBuilder("<html>");
                 info.append("<p>Set of parameters: ");
                 info.append(pset.getTreePath());

@@ -93,7 +93,7 @@ public class ParameterManager extends AbstractManager {
             cfg.load();
             cfg.upgrade();
             HashMap<String, String> xmlMap = cfg.toProperties(true);
-            mainFilename = file.getAbsolutePath().replaceAll("xml$", "csv");
+            mainFilename = file.getAbsolutePath().replaceAll("xml$", "cfg");
             int i = 1;
             for (Entry<String, String> entry : xmlMap.entrySet()) {
                 Parameter parameter = new Parameter(i, mainFilename);
@@ -103,7 +103,7 @@ public class ParameterManager extends AbstractManager {
                 i++;
             }
             File tmp = new File(mainFilename);
-            warning("XML format deprecated. Configuration file {0} has been converted to CSV format {1}", new String[]{file.getName(), tmp.getName()});
+            warning("XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), tmp.getName()});
             saveParameters(mainFilename, false);
         } else if (file.getName().endsWith(".json")) {
             loadParameters(file.getAbsolutePath(), 0, true);
@@ -573,7 +573,7 @@ public class ParameterManager extends AbstractManager {
         }
     }
 
-    public String[] getParameterSets() {
+    public String[] getParameterSubsets() {
         return getArrayString("configuration.subsets");
     }
 

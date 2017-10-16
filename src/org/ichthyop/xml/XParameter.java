@@ -55,7 +55,6 @@ package org.ichthyop.xml;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.ichthyop.ui.param.ParameterFormat;
 import org.jdom2.Element;
 
 /**
@@ -74,11 +73,9 @@ public class XParameter extends org.jdom2.Element {
     final public static String ACCEPTED = "accepted";
     final public static String TEMPLATE = "template";
     private Element value;
-    private final ParameterFormat param_format;
 
     XParameter(Element xparameter) {
         super(PARAMETER);
-        param_format = getFormat(xparameter);
         if (xparameter != null) {
             addContent(xparameter.cloneContent());
             value = getChild(VALUE);
@@ -101,13 +98,17 @@ public class XParameter extends org.jdom2.Element {
         }
     }
 
-    public ParameterFormat getFormat() {
-        return param_format;
+    public String getFormat() {
+        if (null != getChild(FORMAT)) {
+            return getChildTextNormalize(FORMAT);
+        } else {
+            return "text";
+        }
     }
 
     public String[] getAcceptedValues() {
         List<String> list = new ArrayList();
-        if (getFormat().equals(ParameterFormat.COMBO)) {
+        if (null != getChildren(ACCEPTED)) {
             try {
                 for (Object elt : getChildren(ACCEPTED)) {
                     list.add(((Element) elt).getTextNormalize());
@@ -116,14 +117,6 @@ public class XParameter extends org.jdom2.Element {
             }
         }
         return list.toArray(new String[list.size()]);
-    }
-
-    private ParameterFormat getFormat(Element element) {
-        if (null != element && null != element.getChild(FORMAT)) {
-            return ParameterFormat.getFormat(element.getChild(FORMAT).getValue());
-        } else {
-            return ParameterFormat.TEXT;
-        }
     }
 
     @Override
@@ -136,7 +129,7 @@ public class XParameter extends org.jdom2.Element {
     }
 
     public String getTemplate() {
-        if (null != getChildTextNormalize(TEMPLATE)) {
+        if (null != getChild(TEMPLATE)) {
             return getChildTextNormalize(TEMPLATE);
         } else {
             return null;

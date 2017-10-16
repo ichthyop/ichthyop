@@ -52,19 +52,17 @@
  */
 package org.ichthyop.ui.param;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class ParameterSubset extends IchthyopLinker {
+public class UIParameter extends IchthyopLinker {
 
     final private String key;
 
-    public ParameterSubset(String key) {
+    public UIParameter(String key) {
         this.key = key;
     }
 
@@ -72,22 +70,10 @@ public class ParameterSubset extends IchthyopLinker {
         return key;
     }
 
-    public Type getType() {
-        return getConfiguration().isNull(key + ".type")
-                ? Type.OPTION
-                : Type.getType(getConfiguration().getString(key + ".type"));
-    }
-
-    public String getTreePath() {
-        return getConfiguration().getString(key + ".treepath");
-    }
-
-    public boolean isEnabled() {
-        return getConfiguration().getBoolean(key + ".enabled", false);
-    }
-
-    public void setEnabled(boolean enabled) {
-        getConfiguration().setString(key + ".enabled", Boolean.toString(enabled));
+    public String getLongName() {
+        return getConfiguration().isNull(key + ".longname")
+                ? key
+                : getConfiguration().getString(key + ".longname");
     }
 
     public String getDescription() {
@@ -96,33 +82,31 @@ public class ParameterSubset extends IchthyopLinker {
                 : getConfiguration().getString(key + ".description");
     }
 
-    public List<Parameter> getParameters() {
-        String[] pkeys = getConfiguration().getArrayString(key + ".parameters");
-        List<Parameter> parameters = new ArrayList(pkeys.length);
-        for (String pkey : pkeys) {
-            parameters.add(new Parameter(key + "." + pkey));
+    public String getFormat() {
+        return getConfiguration().isNull(key + ".format")
+                ? "text"
+                : getConfiguration().getString(key + ".format");
+    }
+
+    public String[] getAcceptedValues() {
+        if (!getConfiguration().isNull(key + ".accepted")) {
+            return getConfiguration().getArrayString(key + ".accepted");
         }
-        return parameters;
-    }
-    
-    public enum Type {
+        return new String[]{};
 
-    OPTION,
-    ACTION,
-    RELEASE,
-    DATASET;
-
-    public static Type getType(String value) {
-        for (Type type : values()) {
-            if (type.toString().equals(value))
-                return type;
-        }
-        return null;
     }
 
-    @Override
-    public String toString() {
-        return name().toLowerCase();
+    public String getValue() {
+        return getConfiguration().getString(key);
     }
-}
+
+    public void setValue(String value) {
+        getConfiguration().setString(key, value);
+    }
+
+    public String getTemplate() {
+        return getConfiguration().isNull(key + ".template")
+                ? null
+                : getConfiguration().getString(key + ".template");
+    }
 }

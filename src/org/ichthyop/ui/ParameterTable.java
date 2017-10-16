@@ -69,8 +69,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import org.ichthyop.ui.param.Parameter;
-import org.ichthyop.ui.param.ParameterSubset;
+import org.ichthyop.ui.param.UIParameter;
+import org.ichthyop.ui.param.UIParameterSubset;
 
 /*
  *
@@ -107,7 +107,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return model.getUndoManager();
     }
 
-    public void setModel(ParameterSubset parameterSet, TableModelListener l) throws Exception {
+    public void setModel(UIParameterSubset parameterSet, TableModelListener l) throws Exception {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(parameterSet));
         setEditors();
@@ -121,50 +121,51 @@ public class ParameterTable extends JMultiCellEditorsTable {
         setDefaultRenderer(Object.class, new ParamTableCellRenderer());
 
         for (int row = 0; row < model.getRowCount(); row++) {
-            Parameter parameter = model.getParameter(row);
-            switch (parameter.getFormat()) {
-                case COMBO:
+            UIParameter parameter = model.getParameter(row);
+            switch (parameter.getFormat().toLowerCase()) {
+                case "combo":
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(parameter.getAcceptedValues())));
                     break;
-                case INTEGER:
+                case "integer":
                     editorModel.addEditorForRow(row, new IntegerEditor());
                     break;
-                case FLOAT:
+                case "float":
                     editorModel.addEditorForRow(row, new FloatEditor());
                     break;
-                case BOOLEAN:
+                case "boolean":
                     editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(new String[]{"true", "false"})));
                     break;
-                case DURATION:
+                case "duration":
                     editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION, parameter.getValue()));
                     break;
-                case HOUR:
+                case "hour":
                     editorModel.addEditorForRow(row, new HourEditor(parameter.getValue()));
                     break;
-                case DATE:
+                case "date":
                     editorModel.addEditorForRow(row, new DateEditor(DateEditor.DATE, parameter.getValue()));
                     break;
-                case FILE:
+                case "file":
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.FILES_ONLY));
                     break;
-                case PATH:
+                case "path":
                     editorModel.addEditorForRow(row, new FileEditor(JFileChooser.DIRECTORIES_ONLY));
                     break;
-                case CLASS:
+                case "class":
                     editorModel.addEditorForRow(row, new ClassEditor());
                     break;
-                case LIST:
+                case "list":
                     editorModel.addEditorForRow(row, new ListEditor());
                     break;
-                case TEXTFILE:
+                case "textfile":
                     editorModel.addEditorForRow(row, new TextFileEditor(parameter.getTemplate()));
                     break;
-                case ZONEFILE:
+                case "zonefile":
                     editorModel.addEditorForRow(row, new ZoneEditor(parameter.getTemplate()));
                     break;
-                case LONLAT:
+                case "lonlat":
                     editorModel.addEditorForRow(row, new LonLatEditor());
                     break;
+                case "text":
                 default:
                     editorModel.addEditorForRow(row, new StringCellEditor());
             }
@@ -176,20 +177,20 @@ public class ParameterTable extends JMultiCellEditorsTable {
             getCellEditor().stopCellEditing();
         }
     }
-    
-    Parameter getParameter(int row) {
+
+    UIParameter getParameter(int row) {
         return model.getParameter(row);
     }
 
     public class ParameterTableModel extends AbstractTableModel {
 
-        private final Parameter[] parameters;
+        private final UIParameter[] parameters;
         private final String[] HEADERS = new String[]{"Name", "Value(s)"};
         private JUndoManager undoManager;
 
-        ParameterTableModel(ParameterSubset set) {
-            List<Parameter> tmp = set.getParameters();
-            parameters = tmp.toArray(new Parameter[tmp.size()]);
+        ParameterTableModel(UIParameterSubset set) {
+            List<UIParameter> tmp = set.getParameters();
+            parameters = tmp.toArray(new UIParameter[tmp.size()]);
             addUndoableEditListener(undoManager = new JUndoManager());
         }
 
@@ -208,10 +209,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
             return HEADERS[col];
         }
 
-        Parameter getParameter(int row) {
+        UIParameter getParameter(int row) {
             return parameters[row];
         }
-        
 
         @Override
         public Object getValueAt(int row, int col) {
@@ -225,7 +225,6 @@ public class ParameterTable extends JMultiCellEditorsTable {
             return getValueAt(0, c).getClass();
         }
 
-       
         @Override
         public boolean isCellEditable(int row, int col) {
             // Only values are editable

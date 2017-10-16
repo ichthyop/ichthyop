@@ -94,7 +94,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
 
     private void instantiateReleaseProcess() throws Exception {
 
-        String[] keys = getConfiguration().getParameterSets();
+        String[] keys = getConfiguration().getParameterSubsets();
         for (String key : keys) {
             if (getConfiguration().canFind(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("release")) {

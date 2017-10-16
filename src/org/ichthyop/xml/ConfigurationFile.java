@@ -299,7 +299,7 @@ public class ConfigurationFile extends IchthyopLinker {
                     key = new StringBuilder(bkey).append(".").append(pkey).append(".longname");
                     parameters.put(key.toString(), parameter.getLongName());
                     key = new StringBuilder(bkey).append(".").append(pkey).append(".format");
-                    parameters.put(key.toString(), StringUtil.nullify(parameter.getFormat().toString()));
+                    parameters.put(key.toString(), parameter.getFormat());
                     key = new StringBuilder(bkey).append(".").append(pkey).append(".description");
                     parameters.put(key.toString(), StringUtil.removeQuotes(StringUtil.nullify(parameter.getDescription())));
                     if (parameter.getAcceptedValues().length > 0) {
