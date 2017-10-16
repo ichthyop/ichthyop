@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.xml;
 
 import org.ichthyop.Zone;
@@ -91,6 +90,10 @@ public class XZone extends org.jdom2.Element {
 
     public XZone(String key) {
         super(ZONE);
+        init(key);
+    }
+
+    private void init(String key) {
         setKey(key);
         setEnabled(true);
         setType(Zone.Type.RELEASE);
@@ -328,7 +331,7 @@ public class XZone extends org.jdom2.Element {
             return getChildTextNormalize(LON);
         }
 
-        public void setLon(String lon) {
+        private void setLon(String lon) {
             if (null == getChild(LON)) {
                 addContent(new Element(LON));
             }
@@ -339,18 +342,18 @@ public class XZone extends org.jdom2.Element {
             return getChildTextNormalize(LAT);
         }
 
-        public void setLat(String lat) {
+        private void setLat(String lat) {
             if (null == getChild(LAT)) {
                 addContent(new Element(LAT));
             }
             getChild(LAT).setText(lat);
         }
 
-        public int getIndex() {
+        private int getIndex() {
             return Integer.valueOf(getChildTextNormalize(INDEX));
         }
 
-        public void setIndex(int index) {
+        private void setIndex(int index) {
             if (null == getChild(INDEX)) {
                 addContent(new Element(INDEX));
             }

@@ -77,7 +77,7 @@ import org.ichthyop.util.StringUtil;
 import org.jdom2.JDOMException;
 
 @Deprecated
-public class ConfigurationFile extends IchthyopLinker {
+public class XConfigurationFile extends IchthyopLinker {
 
     private File file;
     private Document structure;
@@ -87,11 +87,11 @@ public class ConfigurationFile extends IchthyopLinker {
     public final static String VERSION = "version";
     public final static String DATE = "date";
 
-    public ConfigurationFile(File file) {
+    public XConfigurationFile(File file) {
         this.file = file;
     }
 
-    public ConfigurationFile(URL url) {
+    public XConfigurationFile(URL url) {
         try {
             SAXBuilder sxb = new SAXBuilder();
             Element racine = sxb.build(url).getRootElement();
@@ -439,7 +439,7 @@ public class ConfigurationFile extends IchthyopLinker {
      */
     private void u32To33() throws Exception {
 
-        ConfigurationFile cfg33 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.3.xml"));
+        XConfigurationFile cfg33 = new XConfigurationFile(Template.getTemplateURL("cfg-generic_3.3.xml"));
         /*
          * Update linear growth 
          */
@@ -477,7 +477,7 @@ public class ConfigurationFile extends IchthyopLinker {
      */
     private void u31To32() throws Exception {
         // cfg-generic_3.3.xml is not a mistake
-        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.3.xml"));
+        XConfigurationFile cfg32 = new XConfigurationFile(Template.getTemplateURL("cfg-generic_3.3.xml"));
         String treepath, newTreepath;
         /*
          * Update block action.lethal_temp
@@ -508,7 +508,7 @@ public class ConfigurationFile extends IchthyopLinker {
      * Upgrade the 3.0b configuration file to 3.1
      */
     private void u30bTo31() throws Exception {
-        ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
+        XConfigurationFile cfg31 = new XConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
         String treepath, newTreepath;
         /*
          * Add the density_file parameter in the action.buoyancy block

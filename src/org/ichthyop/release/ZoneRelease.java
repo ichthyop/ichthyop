@@ -79,7 +79,7 @@ public class ZoneRelease extends AbstractRelease {
         is3D = getSimulationManager().getDataset().is3D();
 
         /* Load release zones*/
-        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("release.zone.zone_file"), Zone.Type.RELEASE);
+        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("release.zone.zone_file"), Zone.Type.RELEASE);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE))
                 ? getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE).size()
                 : 0;

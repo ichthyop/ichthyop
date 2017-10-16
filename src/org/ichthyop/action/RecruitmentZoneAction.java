@@ -104,7 +104,7 @@ public class RecruitmentZoneAction extends AbstractAction {
             lengthMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_length");
         }
         stopMovingOnceRecruited = getConfiguration().getBoolean("action.recruitment.zone.stop_moving");
-        getSimulationManager().getZoneManager().loadZonesFromFile(getConfiguration().getString("action.recruitment.zone.zone_file"), Type.RECRUITMENT);
+        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("action.recruitment.zone.zone_file"), Type.RECRUITMENT);
         boolean addTracker = true;
         try {
             addTracker = getConfiguration().getBoolean("action.recruitment.zone.recruited_tracker");

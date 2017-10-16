@@ -52,7 +52,6 @@
  */
 package org.ichthyop.xml;
 
-import org.ichthyop.Zone;
 import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -67,11 +66,10 @@ import org.ichthyop.IchthyopLinker;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.filter.Filter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 
-public class ZoneFile extends IchthyopLinker {
+public class XZoneFile extends IchthyopLinker {
 
     private File file;
     private Document structure;
@@ -79,7 +77,7 @@ public class ZoneFile extends IchthyopLinker {
     private final static String ZONES = "zones";
     private List<String> sortedKey;
 
-    public ZoneFile(File file) {
+    public XZoneFile(File file) {
         this.file = file;
         if (file.exists()) {
             load();
@@ -137,16 +135,6 @@ public class ZoneFile extends IchthyopLinker {
         structure.getRootElement().removeChildren(XZone.ZONE);
     }
 
-    private Iterable getZones(Zone.Type type) {
-        ArrayList<XZone> list = new ArrayList();
-        for (XZone xblock : zones.values()) {
-            if (xblock.getTypeZone().equals(type)) {
-                list.add(xblock);
-            }
-        }
-        return list;
-    }
-
     public Collection<XZone> getZones() {
         List<XZone> list = new ArrayList(zones.values().size());
         if (null != sortedKey) {
@@ -169,56 +157,6 @@ public class ZoneFile extends IchthyopLinker {
             listBlock.add(new XZone(elt));
         }
         return listBlock;
-    }
-
-    private List<XZone> readZones(Zone.Type type) {
-
-        Filter filtre = new Filter() {
-
-            @Override
-            public boolean matches(Object obj) {
-                if (!(obj instanceof Element)) {
-                    return false;
-                }
-                Element element = (Element) obj;
-                return element.getChildTextNormalize(XZone.TYPE_ZONE).equals(type.toString());
-            }
-
-            @Override
-            public List filter(List list) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Object filter(Object o) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Filter negate() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Filter or(Filter filter) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Filter and(Filter filter) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public Filter refine(Filter filter) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-        List<XZone> list = new ArrayList();
-        for (Object elt : structure.getRootElement().getContent(filtre)) {
-            list.add(new XZone((Element) elt));
-        }
-        return list;
     }
 
     private HashMap<String, XZone> createMap() {

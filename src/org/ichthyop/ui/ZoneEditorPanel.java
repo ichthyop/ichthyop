@@ -93,7 +93,7 @@ import org.ichthyop.Zone;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.xml.XZone;
 import org.ichthyop.xml.XZone.XPoint;
-import org.ichthyop.xml.ZoneFile;
+import org.ichthyop.xml.XZoneFile;
 import org.ichthyop.manager.SimulationManager;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 
@@ -176,7 +176,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     public void loadZonesFromFile(File file) throws Exception {
         lblFile.setText(file.getAbsolutePath());
         lblFile.setToolTipText(lblFile.getText());
-        zoneFile = new ZoneFile(file);
+        zoneFile = new XZoneFile(file);
         DefaultTableModel model = new DefaultTableModel();
         Vector dummyHeader = new Vector();
         dummyHeader.addElement("");
@@ -1383,7 +1383,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JFormattedTextField txtFieldOffshore;
     private javax.swing.JFormattedTextField txtFieldUpperDepth;
     // End of variables declaration//GEN-END:variables
-    private ZoneFile zoneFile;
+    private XZoneFile zoneFile;
     private XZone zone;
     private boolean hasZoneChanged = false;
     private JDialog dialogHowto;

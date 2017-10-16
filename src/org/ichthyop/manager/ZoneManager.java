@@ -65,7 +65,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.ichthyop.util.IOTools;
-import org.ichthyop.xml.ZoneFile;
+import org.ichthyop.xml.XZoneFile;
 
 /**
  *
@@ -73,11 +73,11 @@ import org.ichthyop.xml.ZoneFile;
  */
 public class ZoneManager extends AbstractManager {
 
-    private static ZoneManager zoneManager = new ZoneManager();
-    private HashMap<Zone.Type, ArrayList<Zone>> map;
+    private static final ZoneManager ZONE_MANAGER = new ZoneManager();
+    private final HashMap<Zone.Type, ArrayList<Zone>> map;
 
     public static ZoneManager getInstance() {
-        return zoneManager;
+        return ZONE_MANAGER;
     }
 
     private ZoneManager() {
@@ -89,7 +89,7 @@ public class ZoneManager extends AbstractManager {
         map.clear();
     }
 
-    public void loadZonesFromFile(String filename, Zone.Type type) throws Exception {
+    public void loadZonesFromXMLFile(String filename, Zone.Type type) throws Exception {
 
         String pathname = IOTools.resolveFile(filename);
         File f = new File(pathname);
@@ -100,7 +100,7 @@ public class ZoneManager extends AbstractManager {
             throw new IOException("Zone file " + pathname + " cannot be read.");
         }
 
-        ZoneFile zoneFile = new ZoneFile(f);
+        XZoneFile zoneFile = new XZoneFile(f);
         if (!map.containsKey(type)) {
             map.put(type, new ArrayList());
         }
