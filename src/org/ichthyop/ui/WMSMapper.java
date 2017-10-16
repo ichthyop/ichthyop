@@ -105,7 +105,7 @@ import org.jdesktop.swingx.painter.Painter;
 import org.ichthyop.calendar.Day360Calendar;
 import org.ichthyop.dataset.IDataset;
 import org.ichthyop.calendar.InterannualCalendar;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
 import org.ichthyop.manager.TimeManager;
 import ucar.ma2.Array;

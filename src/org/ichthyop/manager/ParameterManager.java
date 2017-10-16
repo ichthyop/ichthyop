@@ -67,7 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import org.ichthyop.Version;
-import org.ichthyop.io.ConfigurationFile;
+import org.ichthyop.input.xml.ConfigurationFile;
 import org.ichthyop.util.Separator;
 import org.ichthyop.util.StringUtil;
 

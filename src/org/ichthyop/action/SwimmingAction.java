@@ -60,7 +60,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.particle.IParticle;
 
 /**

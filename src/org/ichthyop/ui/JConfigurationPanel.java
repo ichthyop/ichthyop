@@ -77,8 +77,8 @@ import org.jdesktop.application.Task;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
-import org.ichthyop.io.Parameter;
-import org.ichthyop.io.ParameterSet;
+import org.ichthyop.input.Parameter;
+import org.ichthyop.input.ParameterSet;
 import org.ichthyop.manager.SimulationManager;
 
 /**

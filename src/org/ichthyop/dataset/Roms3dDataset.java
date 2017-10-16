@@ -56,8 +56,8 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.List;
 import org.ichthyop.event.NextStepEvent;
-import org.ichthyop.io.IOTools;
-import static org.ichthyop.io.IOTools.isDirectory;
+import org.ichthyop.util.IOTools;
+import static org.ichthyop.util.IOTools.isDirectory;
 
 /**
  *

@@ -69,8 +69,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import org.ichthyop.io.Parameter;
-import org.ichthyop.io.ParameterSet;
+import org.ichthyop.input.Parameter;
+import org.ichthyop.input.ParameterSet;
 
 /*
  *

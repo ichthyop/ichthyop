@@ -64,7 +64,7 @@ import javax.swing.JOptionPane;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.Task;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
 import org.ichthyop.ui.logging.LogLevel;
 import org.ichthyop.util.MetaFilenameFilter;

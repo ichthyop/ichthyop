@@ -68,7 +68,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import org.ichthyop.io.ParameterSet;
+import org.ichthyop.input.ParameterSet;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.ichthyop.manager.SimulationManager;

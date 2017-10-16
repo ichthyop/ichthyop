@@ -82,7 +82,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.jdesktop.application.ResourceMap;
 import org.ichthyop.Template;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
 
 /**

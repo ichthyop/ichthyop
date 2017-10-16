@@ -64,7 +64,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ichthyop.calendar.InterannualCalendar;
 import org.ichthyop.dataset.RequiredExternalVariable;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.util.MetaFilenameFilter;
 import org.ichthyop.util.NCComparator;

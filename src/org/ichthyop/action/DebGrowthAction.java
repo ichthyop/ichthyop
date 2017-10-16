@@ -52,8 +52,8 @@
  */
 package org.ichthyop.action;
 
-import org.ichthyop.io.FloatTracker;
-import org.ichthyop.io.LengthTracker;
+import org.ichthyop.output.FloatTracker;
+import org.ichthyop.output.LengthTracker;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.LengthParticle;
 import org.ichthyop.particle.ParticleMortality;

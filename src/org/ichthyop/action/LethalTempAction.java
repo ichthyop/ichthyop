@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.ParticleMortality;
 import org.ichthyop.particle.StageParticle;

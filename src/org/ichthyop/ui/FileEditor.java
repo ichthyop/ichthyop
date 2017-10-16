@@ -69,7 +69,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 
 public class FileEditor extends AbstractCellEditor
         implements TableCellEditor, ActionListener {

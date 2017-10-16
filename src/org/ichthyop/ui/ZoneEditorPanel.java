@@ -90,10 +90,10 @@ import javax.swing.table.DefaultTableModel;
 import org.jdesktop.application.ResourceMap;
 import org.ichthyop.Template;
 import org.ichthyop.Zone;
-import org.ichthyop.io.IOTools;
-import org.ichthyop.io.XZone;
-import org.ichthyop.io.XZone.XPoint;
-import org.ichthyop.io.ZoneFile;
+import org.ichthyop.util.IOTools;
+import org.ichthyop.input.xml.XZone;
+import org.ichthyop.input.xml.XZone.XPoint;
+import org.ichthyop.input.xml.ZoneFile;
 import org.ichthyop.manager.SimulationManager;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 

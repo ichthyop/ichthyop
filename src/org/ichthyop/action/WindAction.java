@@ -61,7 +61,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Properties;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 
 /**
  *

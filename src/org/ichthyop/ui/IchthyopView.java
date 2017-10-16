@@ -92,7 +92,7 @@ import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;

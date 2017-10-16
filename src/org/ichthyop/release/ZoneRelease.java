@@ -56,8 +56,8 @@ package org.ichthyop.release;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.event.ReleaseEvent;
-import org.ichthyop.io.ReleaseZoneTracker;
-import org.ichthyop.io.ZoneTracker;
+import org.ichthyop.output.ReleaseZoneTracker;
+import org.ichthyop.output.ZoneTracker;
 import org.ichthyop.particle.ParticleFactory;
 
 /**

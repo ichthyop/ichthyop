@@ -56,7 +56,7 @@ import java.io.IOException;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.dataset.IDataset;
-import org.ichthyop.io.ParameterSet;
+import org.ichthyop.input.ParameterSet;
 
 /**
  *

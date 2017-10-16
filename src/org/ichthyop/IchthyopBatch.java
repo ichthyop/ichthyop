@@ -54,7 +54,7 @@ package org.ichthyop;
 
 import java.io.File;
 import java.util.logging.Level;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 
 /**
  *

@@ -57,7 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.ichthyop.event.NextStepEvent;
-import org.ichthyop.io.IOTools;
+import org.ichthyop.util.IOTools;
 import org.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;

@@ -52,8 +52,8 @@
  */
 package org.ichthyop.action;
 
-import org.ichthyop.io.LengthTracker;
-import org.ichthyop.io.StageTracker;
+import org.ichthyop.output.LengthTracker;
+import org.ichthyop.output.StageTracker;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.LengthParticle;
 import org.ichthyop.particle.StageParticle;

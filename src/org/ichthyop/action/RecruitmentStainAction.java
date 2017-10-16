@@ -57,7 +57,7 @@ import org.ichthyop.util.Constant;
 import org.ichthyop.particle.RecruitableParticle;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.dataset.DatasetUtil;
-import org.ichthyop.io.RecruitmentStainTracker;
+import org.ichthyop.output.RecruitmentStainTracker;
 import org.ichthyop.particle.LengthParticle;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
