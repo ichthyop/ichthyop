@@ -91,9 +91,9 @@ import org.jdesktop.application.ResourceMap;
 import org.ichthyop.Template;
 import org.ichthyop.Zone;
 import org.ichthyop.util.IOTools;
-import org.ichthyop.input.xml.XZone;
-import org.ichthyop.input.xml.XZone.XPoint;
-import org.ichthyop.input.xml.ZoneFile;
+import org.ichthyop.xml.XZone;
+import org.ichthyop.xml.XZone.XPoint;
+import org.ichthyop.xml.ZoneFile;
 import org.ichthyop.manager.SimulationManager;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 

@@ -69,8 +69,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import org.ichthyop.input.Parameter;
-import org.ichthyop.input.ParameterSet;
+import org.ichthyop.ui.param.Parameter;
+import org.ichthyop.ui.param.ParameterSubset;
 
 /*
  *
@@ -107,7 +107,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         return model.getUndoManager();
     }
 
-    public void setModel(ParameterSet parameterSet, TableModelListener l) throws Exception {
+    public void setModel(ParameterSubset parameterSet, TableModelListener l) throws Exception {
         getModel().removeTableModelListener(l);
         setModel(model = new ParameterTableModel(parameterSet));
         setEditors();
@@ -187,7 +187,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         private final String[] HEADERS = new String[]{"Name", "Value(s)"};
         private JUndoManager undoManager;
 
-        ParameterTableModel(ParameterSet set) {
+        ParameterTableModel(ParameterSubset set) {
             List<Parameter> tmp = set.getParameters();
             parameters = tmp.toArray(new Parameter[tmp.size()]);
             addUndoableEditListener(undoManager = new JUndoManager());

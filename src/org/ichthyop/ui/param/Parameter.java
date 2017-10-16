@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,70 +50,63 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.manager;
+package org.ichthyop.ui.param;
 
-import java.io.IOException;
-import org.ichthyop.event.InitializeEvent;
-import org.ichthyop.event.SetupEvent;
-import org.ichthyop.dataset.IDataset;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class DatasetManager extends AbstractManager {
+public class Parameter extends IchthyopLinker {
 
-    final private static DatasetManager DATASET_MANAGER = new DatasetManager();
-    private IDataset dataset;
+    final private String key;
 
-    public static DatasetManager getInstance() {
-        return DATASET_MANAGER;
+    public Parameter(String key) {
+        this.key = key;
     }
 
-    private void instantiateDataset() throws Exception {
+    public String getKey() {
+        return key;
+    }
 
-        int n = 0;
-        String[] keys = getConfiguration().getParameterSets();
-        for (String key : keys) {
-            if (getConfiguration().canFind(key + ".type")
-                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
-                if (getConfiguration().getBoolean(key + ".enabled")) {
-                    String className = getConfiguration().getString(key + ".class_name");
-                    try {
-                        dataset = (IDataset) Class.forName(className).newInstance();
-                        n++;
-                    } catch (Exception ex) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Dataset instantiation failed ==> ");
-                        sb.append(ex.toString());
-                        InstantiationException ieex = new InstantiationException(sb.toString());
-                        ieex.setStackTrace(ex.getStackTrace());
-                        throw ieex;
-                    }
-                }
-            }
+    public String getLongName() {
+        return getConfiguration().isNull(key + ".longname")
+                ? key
+                : getConfiguration().getString(key + ".longname");
+    }
+
+    public String getDescription() {
+        return getConfiguration().isNull(key + ".description")
+                ? null
+                : getConfiguration().getString(key + ".description");
+    }
+
+    public ParameterFormat getFormat() {
+        return getConfiguration().isNull(key + ".format")
+                ? ParameterFormat.TEXT
+                : ParameterFormat.getFormat(getConfiguration().getString(key + ".format"));
+    }
+
+    public String[] getAcceptedValues() {
+        if (getFormat().equals(ParameterFormat.COMBO) && !getConfiguration().isNull(key + ".accepted")) {
+            return getConfiguration().getArrayString(key + ".accepted");
         }
-        if (n == 0) {
-            throw new NullPointerException("Could not find any DATASET subset in the configuration file.");
-        }
-        if (n > 1) {
-            throw new IOException("Found several DATASET subsets enabled in the configuration file. Please only keep one enabled.");
-        }
+        return new String[]{};
+
     }
 
-    public IDataset getDataset() {
-        return dataset;
+    public String getValue() {
+        return getConfiguration().getString(key);
     }
 
-    @Override
-    public void setupPerformed(SetupEvent e) throws Exception {
-        instantiateDataset();
-        getDataset().setUp();
+    public void setValue(String value) {
+        getConfiguration().setString(key, value);
     }
 
-    @Override
-    public void initializePerformed(InitializeEvent e) throws Exception {
-        getSimulationManager().getTimeManager().addNextStepListener(getDataset());
-        getDataset().init();
+    public String getTemplate() {
+        return getConfiguration().isNull(key + ".template")
+                ? null
+                : getConfiguration().getString(key + ".template");
     }
 }

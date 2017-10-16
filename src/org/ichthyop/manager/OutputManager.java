@@ -76,8 +76,8 @@ import org.ichthyop.output.LonTracker;
 import org.ichthyop.output.MortalityTracker;
 import org.ichthyop.output.TimeTracker;
 import org.ichthyop.output.CustomTracker;
-import org.ichthyop.input.ParameterSet;
-import org.ichthyop.input.Parameter;
+import org.ichthyop.ui.param.ParameterSubset;
+import org.ichthyop.ui.param.Parameter;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -243,8 +243,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* Write all parameters */
         for (String key : getConfiguration().getParameterSets()) {
-            ParameterSet parameterSet = new ParameterSet(key);
-            if (!parameterSet.getType().equals(ParameterSet.Type.OPTION)) {
+            ParameterSubset parameterSet = new ParameterSubset(key);
+            if (!parameterSet.getType().equals(ParameterSubset.Type.OPTION)) {
                 ncOut.addGlobalAttribute(parameterSet.getKey() + ".enabed", String.valueOf(parameterSet.isEnabled()));
             }
             if (parameterSet.isEnabled()) {

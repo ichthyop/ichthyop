@@ -50,70 +50,96 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.manager;
 
-import java.io.IOException;
-import org.ichthyop.event.InitializeEvent;
-import org.ichthyop.event.SetupEvent;
-import org.ichthyop.dataset.IDataset;
+package org.ichthyop.xml;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.ichthyop.ui.param.ParameterFormat;
+import org.jdom2.Element;
 
 /**
  *
  * @author pverley
  */
-public class DatasetManager extends AbstractManager {
+@Deprecated
+public class XParameter extends org.jdom2.Element {
 
-    final private static DatasetManager DATASET_MANAGER = new DatasetManager();
-    private IDataset dataset;
+    final public static String PARAMETER = "parameter";
+    final public static String KEY = "key";
+    final public static String LONGNAME = "long_name";
+    final public static String VALUE = "value";
+    final public static String DESCRIPTION = "description";
+    final public static String FORMAT = "format";
+    final public static String ACCEPTED = "accepted";
+    final public static String TEMPLATE = "template";
+    private Element value;
+    private final ParameterFormat param_format;
 
-    public static DatasetManager getInstance() {
-        return DATASET_MANAGER;
+    XParameter(Element xparameter) {
+        super(PARAMETER);
+        param_format = getFormat(xparameter);
+        if (xparameter != null) {
+            addContent(xparameter.cloneContent());
+            value = getChild(VALUE);
+        }
     }
 
-    private void instantiateDataset() throws Exception {
+    public String getKey() {
+        return getChildTextNormalize(KEY);
+    }
 
-        int n = 0;
-        String[] keys = getConfiguration().getParameterSets();
-        for (String key : keys) {
-            if (getConfiguration().canFind(key + ".type")
-                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
-                if (getConfiguration().getBoolean(key + ".enabled")) {
-                    String className = getConfiguration().getString(key + ".class_name");
-                    try {
-                        dataset = (IDataset) Class.forName(className).newInstance();
-                        n++;
-                    } catch (Exception ex) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Dataset instantiation failed ==> ");
-                        sb.append(ex.toString());
-                        InstantiationException ieex = new InstantiationException(sb.toString());
-                        ieex.setStackTrace(ex.getStackTrace());
-                        throw ieex;
-                    }
+    public String getLongName() {
+        return getChildTextNormalize(LONGNAME);
+    }
+
+    public String getDescription() {
+        if (null != getChild(DESCRIPTION)) {
+            return getChildTextNormalize(DESCRIPTION);
+        } else {
+            return null;
+        }
+    }
+
+    public ParameterFormat getFormat() {
+        return param_format;
+    }
+
+    public String[] getAcceptedValues() {
+        List<String> list = new ArrayList();
+        if (getFormat().equals(ParameterFormat.COMBO)) {
+            try {
+                for (Object elt : getChildren(ACCEPTED)) {
+                    list.add(((Element) elt).getTextNormalize());
                 }
+            } catch (NullPointerException e) {
             }
         }
-        if (n == 0) {
-            throw new NullPointerException("Could not find any DATASET subset in the configuration file.");
-        }
-        if (n > 1) {
-            throw new IOException("Found several DATASET subsets enabled in the configuration file. Please only keep one enabled.");
-        }
+        return list.toArray(new String[list.size()]);
     }
 
-    public IDataset getDataset() {
-        return dataset;
+    private ParameterFormat getFormat(Element element) {
+        if (null != element && null != element.getChild(FORMAT)) {
+            return ParameterFormat.getFormat(element.getChild(FORMAT).getValue());
+        } else {
+            return ParameterFormat.TEXT;
+        }
     }
 
     @Override
-    public void setupPerformed(SetupEvent e) throws Exception {
-        instantiateDataset();
-        getDataset().setUp();
+    public String getValue() {
+        return value.getTextNormalize();
     }
 
-    @Override
-    public void initializePerformed(InitializeEvent e) throws Exception {
-        getSimulationManager().getTimeManager().addNextStepListener(getDataset());
-        getDataset().init();
+    public void setValue(String str) {
+        value.setText(str);
+    }
+
+    public String getTemplate() {
+        if (null != getChildTextNormalize(TEMPLATE)) {
+            return getChildTextNormalize(TEMPLATE);
+        } else {
+            return null;
+        }
     }
 }

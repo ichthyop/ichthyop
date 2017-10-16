@@ -50,70 +50,30 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.manager;
 
-import java.io.IOException;
-import org.ichthyop.event.InitializeEvent;
-import org.ichthyop.event.SetupEvent;
-import org.ichthyop.dataset.IDataset;
+package org.ichthyop.xml;
 
 /**
  *
  * @author pverley
  */
-public class DatasetManager extends AbstractManager {
+public enum BlockType {
 
-    final private static DatasetManager DATASET_MANAGER = new DatasetManager();
-    private IDataset dataset;
+    OPTION,
+    ACTION,
+    RELEASE,
+    DATASET;
 
-    public static DatasetManager getInstance() {
-        return DATASET_MANAGER;
-    }
-
-    private void instantiateDataset() throws Exception {
-
-        int n = 0;
-        String[] keys = getConfiguration().getParameterSets();
-        for (String key : keys) {
-            if (getConfiguration().canFind(key + ".type")
-                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
-                if (getConfiguration().getBoolean(key + ".enabled")) {
-                    String className = getConfiguration().getString(key + ".class_name");
-                    try {
-                        dataset = (IDataset) Class.forName(className).newInstance();
-                        n++;
-                    } catch (Exception ex) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Dataset instantiation failed ==> ");
-                        sb.append(ex.toString());
-                        InstantiationException ieex = new InstantiationException(sb.toString());
-                        ieex.setStackTrace(ex.getStackTrace());
-                        throw ieex;
-                    }
-                }
-            }
+    public static BlockType getType(String value) {
+        for (BlockType type : values()) {
+            if (type.toString().equals(value))
+                return type;
         }
-        if (n == 0) {
-            throw new NullPointerException("Could not find any DATASET subset in the configuration file.");
-        }
-        if (n > 1) {
-            throw new IOException("Found several DATASET subsets enabled in the configuration file. Please only keep one enabled.");
-        }
-    }
-
-    public IDataset getDataset() {
-        return dataset;
+        return null;
     }
 
     @Override
-    public void setupPerformed(SetupEvent e) throws Exception {
-        instantiateDataset();
-        getDataset().setUp();
-    }
-
-    @Override
-    public void initializePerformed(InitializeEvent e) throws Exception {
-        getSimulationManager().getTimeManager().addNextStepListener(getDataset());
-        getDataset().init();
+    public String toString() {
+        return name().toLowerCase();
     }
 }

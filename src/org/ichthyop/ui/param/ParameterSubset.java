@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,70 +50,79 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.manager;
+package org.ichthyop.ui.param;
 
-import java.io.IOException;
-import org.ichthyop.event.InitializeEvent;
-import org.ichthyop.event.SetupEvent;
-import org.ichthyop.dataset.IDataset;
+import java.util.ArrayList;
+import java.util.List;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class DatasetManager extends AbstractManager {
+public class ParameterSubset extends IchthyopLinker {
 
-    final private static DatasetManager DATASET_MANAGER = new DatasetManager();
-    private IDataset dataset;
+    final private String key;
 
-    public static DatasetManager getInstance() {
-        return DATASET_MANAGER;
+    public ParameterSubset(String key) {
+        this.key = key;
     }
 
-    private void instantiateDataset() throws Exception {
-
-        int n = 0;
-        String[] keys = getConfiguration().getParameterSets();
-        for (String key : keys) {
-            if (getConfiguration().canFind(key + ".type")
-                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
-                if (getConfiguration().getBoolean(key + ".enabled")) {
-                    String className = getConfiguration().getString(key + ".class_name");
-                    try {
-                        dataset = (IDataset) Class.forName(className).newInstance();
-                        n++;
-                    } catch (Exception ex) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Dataset instantiation failed ==> ");
-                        sb.append(ex.toString());
-                        InstantiationException ieex = new InstantiationException(sb.toString());
-                        ieex.setStackTrace(ex.getStackTrace());
-                        throw ieex;
-                    }
-                }
-            }
-        }
-        if (n == 0) {
-            throw new NullPointerException("Could not find any DATASET subset in the configuration file.");
-        }
-        if (n > 1) {
-            throw new IOException("Found several DATASET subsets enabled in the configuration file. Please only keep one enabled.");
-        }
+    public String getKey() {
+        return key;
     }
 
-    public IDataset getDataset() {
-        return dataset;
+    public Type getType() {
+        return getConfiguration().isNull(key + ".type")
+                ? Type.OPTION
+                : Type.getType(getConfiguration().getString(key + ".type"));
+    }
+
+    public String getTreePath() {
+        return getConfiguration().getString(key + ".treepath");
+    }
+
+    public boolean isEnabled() {
+        return getConfiguration().getBoolean(key + ".enabled", false);
+    }
+
+    public void setEnabled(boolean enabled) {
+        getConfiguration().setString(key + ".enabled", Boolean.toString(enabled));
+    }
+
+    public String getDescription() {
+        return getConfiguration().isNull(key + ".description")
+                ? null
+                : getConfiguration().getString(key + ".description");
+    }
+
+    public List<Parameter> getParameters() {
+        String[] pkeys = getConfiguration().getArrayString(key + ".parameters");
+        List<Parameter> parameters = new ArrayList(pkeys.length);
+        for (String pkey : pkeys) {
+            parameters.add(new Parameter(key + "." + pkey));
+        }
+        return parameters;
+    }
+    
+    public enum Type {
+
+    OPTION,
+    ACTION,
+    RELEASE,
+    DATASET;
+
+    public static Type getType(String value) {
+        for (Type type : values()) {
+            if (type.toString().equals(value))
+                return type;
+        }
+        return null;
     }
 
     @Override
-    public void setupPerformed(SetupEvent e) throws Exception {
-        instantiateDataset();
-        getDataset().setUp();
+    public String toString() {
+        return name().toLowerCase();
     }
-
-    @Override
-    public void initializePerformed(InitializeEvent e) throws Exception {
-        getSimulationManager().getTimeManager().addNextStepListener(getDataset());
-        getDataset().init();
-    }
+}
 }

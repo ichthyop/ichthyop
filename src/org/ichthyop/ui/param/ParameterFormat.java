@@ -50,70 +50,52 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.manager;
 
-import java.io.IOException;
-import org.ichthyop.event.InitializeEvent;
-import org.ichthyop.event.SetupEvent;
-import org.ichthyop.dataset.IDataset;
+package org.ichthyop.ui.param;
 
 /**
  *
  * @author pverley
  */
-public class DatasetManager extends AbstractManager {
+public enum ParameterFormat {
+    
+    TEXT("value not set yet"),
+    DATE("year 2000 month 01 day 01 at 00:00"),
+    DURATION("0000 day(s) 01 hour(s) 00 minute(s)"),
+    HOUR("12:00"),
+    FLOAT("0.0"),
+    INTEGER("0"),
+    COMBO("value not set yet"),
+    BOOLEAN("true"),
+    FILE("file not set yet"),
+    PATH(System.getProperty("user.dir")),
+    TEXTFILE(System.getProperty("user.dir")),
+    CLASS("class not set yet"),
+    LIST("value not set yet"),
+    ZONEFILE(System.getProperty("user.dir")),
+    LONLAT("0.0");
+    
+    private String defaultValue;
 
-    final private static DatasetManager DATASET_MANAGER = new DatasetManager();
-    private IDataset dataset;
-
-    public static DatasetManager getInstance() {
-        return DATASET_MANAGER;
-    }
-
-    private void instantiateDataset() throws Exception {
-
-        int n = 0;
-        String[] keys = getConfiguration().getParameterSets();
-        for (String key : keys) {
-            if (getConfiguration().canFind(key + ".type")
-                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
-                if (getConfiguration().getBoolean(key + ".enabled")) {
-                    String className = getConfiguration().getString(key + ".class_name");
-                    try {
-                        dataset = (IDataset) Class.forName(className).newInstance();
-                        n++;
-                    } catch (Exception ex) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Dataset instantiation failed ==> ");
-                        sb.append(ex.toString());
-                        InstantiationException ieex = new InstantiationException(sb.toString());
-                        ieex.setStackTrace(ex.getStackTrace());
-                        throw ieex;
-                    }
-                }
-            }
-        }
-        if (n == 0) {
-            throw new NullPointerException("Could not find any DATASET subset in the configuration file.");
-        }
-        if (n > 1) {
-            throw new IOException("Found several DATASET subsets enabled in the configuration file. Please only keep one enabled.");
-        }
-    }
-
-    public IDataset getDataset() {
-        return dataset;
+    ParameterFormat(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     @Override
-    public void setupPerformed(SetupEvent e) throws Exception {
-        instantiateDataset();
-        getDataset().setUp();
+    public String toString() {
+        return name().toLowerCase();
     }
 
-    @Override
-    public void initializePerformed(InitializeEvent e) throws Exception {
-        getSimulationManager().getTimeManager().addNextStepListener(getDataset());
-        getDataset().init();
+    public static ParameterFormat getFormat(String formatStr) {
+        for (ParameterFormat type : values()) {
+            if (type.toString().equals(formatStr))
+                return type;
+        }
+        return null;
     }
+
+    public String getDefault() {
+        return defaultValue;
+    }
+
 }

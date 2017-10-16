@@ -59,13 +59,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
-import org.ichthyop.input.xml.XZone;
-import org.ichthyop.input.xml.XZone.XPoint;
+import org.ichthyop.xml.XZone;
+import org.ichthyop.xml.XZone.XPoint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.ichthyop.util.IOTools;
-import org.ichthyop.input.xml.ZoneFile;
+import org.ichthyop.xml.ZoneFile;
 
 /**
  *

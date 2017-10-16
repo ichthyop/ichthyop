@@ -68,7 +68,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import org.ichthyop.input.ParameterSet;
+import org.ichthyop.ui.param.ParameterSubset;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
 import org.ichthyop.manager.SimulationManager;
@@ -79,7 +79,7 @@ import org.ichthyop.manager.SimulationManager;
  */
 public class ParameterTree extends JTree {
 
-    private HashMap<String, ParameterSet> map;
+    private HashMap<String, ParameterSubset> map;
 
     public ParameterTree() {
         super(new Object[]{});
@@ -135,13 +135,13 @@ public class ParameterTree extends JTree {
         return map.keySet();
     }
 
-    public void put(String key, ParameterSet variable) {
+    public void put(String key, ParameterSubset variable) {
         if (map != null) {
             map.put(key, variable);
         }
     }
 
-    public ParameterSet get(String key) {
+    public ParameterSubset get(String key) {
         if (map != null) {
             return map.get(key);
         }
@@ -170,7 +170,7 @@ public class ParameterTree extends JTree {
         Collections.reverse(keys);
         map = new HashMap(keys.size());
         for (String key : keys) {
-            insertIntoTree(new ParameterSet(key));
+            insertIntoTree(new ParameterSubset(key));
         }
         setCellRenderer(new TreeRenderer());
     }
@@ -221,7 +221,7 @@ public class ParameterTree extends JTree {
         return parent.getIndex(node);
     }
 
-    public void refresh(DefaultMutableTreeNode node, ParameterSet block) {
+    public void refresh(DefaultMutableTreeNode node, ParameterSubset block) {
         int leafIndex = getLeafIndex(node);
         remove(node);
         insertIntoTree(block, leafIndex, true);
@@ -238,11 +238,11 @@ public class ParameterTree extends JTree {
         }
     }
 
-    public void insertIntoTree(ParameterSet block) {
+    public void insertIntoTree(ParameterSubset block) {
         insertIntoTree(block, 0, false);
     }
 
-    public void insertIntoTree(ParameterSet block, int leafIndex, boolean isVisible) {
+    public void insertIntoTree(ParameterSubset block, int leafIndex, boolean isVisible) {
 
         map.put(block.getTreePath(), block);
         String[] treePath = block.getTreePath().split("/");
@@ -285,7 +285,7 @@ public class ParameterTree extends JTree {
         return key.toString();
     }
 
-    public ParameterSet getParameterSet() {
+    public ParameterSubset getParameterSet() {
         return map.get(getTreePath());
     }
 
