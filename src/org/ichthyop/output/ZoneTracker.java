@@ -79,14 +79,15 @@ public class ZoneTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addCustomDimension(new Dimension("type_zone", Zone.Type.values().length));
+        addCustomDimension(new Dimension("zones", getSimulationManager().getZoneManager().getClassnames().size()));
     }
 
     @Override
     Array createArray() {
-        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), Zone.Type.values().length);
+        int nzones = getSimulationManager().getZoneManager().getClassnames().size();
+        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), nzones);
         // Initialises zone array with -99
-        for (int iZone = 0; iZone < Zone.Type.values().length; iZone++) {
+        for (int iZone = 0; iZone < nzones; iZone++) {
             for (int iP = 0; iP < getNParticle(); iP++) {
                 array.set(0, iP, iZone, -99);
             }
@@ -98,12 +99,15 @@ public class ZoneTracker extends AbstractTracker {
     public void track() {
         IParticle particle;
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        List<String> classnames = getSimulationManager().getZoneManager().getClassnames();
         while (iter.hasNext()) {
             particle = iter.next();
             Index index = getArray().getIndex();
-            for (Zone.Type type : Zone.Type.values()) {
-                index.set(0, particle.getIndex(), type.getCode());
-                getArray().setInt(index, ZoneParticle.getNumZone(particle, type));
+            int iclass=0;
+            for (String classname : classnames) {
+                index.set(0, particle.getIndex(), iclass);
+                getArray().setInt(index, ZoneParticle.getNumZone(particle, classname));
+                iclass++;
             }
         }
     }
@@ -111,16 +115,20 @@ public class ZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
 
-        for (Zone.Type type : Zone.Type.values()) {
-            addAttribute(new Attribute("type_zone " + type.getCode(), type.toString()));
-            List<Zone> zones = getSimulationManager().getZoneManager().getZones(type);
+        int iclass=0;
+        List<String> classnames = getSimulationManager().getZoneManager().getClassnames();
+        for (String classname : classnames) {
+            String simplename = classname.substring(classname.lastIndexOf(".")+1).toLowerCase();
+            addAttribute(new Attribute("zones " + iclass, simplename));
+            List<Zone> zones = getSimulationManager().getZoneManager().getZones(classname);
             if (null != zones) {
                 for (Zone zone : zones) {
-                    addAttribute(new Attribute(type.toString() + "_zone " + zone.getIndex(), zone.getKey()));
+                    addAttribute(new Attribute(simplename + " " + zone.getIndex(), zone.getKey()));
                 }
             } else {
-                addAttribute(new Attribute(type.toString() + "_zone", "none for this run"));
+                addAttribute(new Attribute(simplename, "none for this run"));
             }
+            iclass++;
         }
         // Particle not released yet set to -99
         addAttribute(new Attribute("not_released_yet", -99));

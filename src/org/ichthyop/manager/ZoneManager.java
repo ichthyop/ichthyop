@@ -62,8 +62,11 @@ import org.ichthyop.event.SetupEvent;
 import org.ichthyop.xml.XZone;
 import org.ichthyop.xml.XZone.XPoint;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import static org.ichthyop.IchthyopLinker.getSimulationManager;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.xml.XZoneFile;
 
@@ -74,7 +77,7 @@ import org.ichthyop.xml.XZoneFile;
 public class ZoneManager extends AbstractManager {
 
     private static final ZoneManager ZONE_MANAGER = new ZoneManager();
-    private final HashMap<Zone.Type, ArrayList<Zone>> map;
+    private final HashMap<String, ArrayList<Zone>> map;
 
     public static ZoneManager getInstance() {
         return ZONE_MANAGER;
@@ -89,7 +92,7 @@ public class ZoneManager extends AbstractManager {
         map.clear();
     }
 
-    public void loadZonesFromXMLFile(String filename, Zone.Type type) throws Exception {
+    public void loadZonesFromXMLFile(String filename, String classname) throws Exception {
 
         String pathname = IOTools.resolveFile(filename);
         File f = new File(pathname);
@@ -101,13 +104,12 @@ public class ZoneManager extends AbstractManager {
         }
 
         XZoneFile zoneFile = new XZoneFile(f);
-        if (!map.containsKey(type)) {
-            map.put(type, new ArrayList());
-        }
+        map.put(classname, new ArrayList());
+        
         for (XZone xzone : zoneFile.getZones()) {
-            if (xzone.getTypeZone().equals(type) && xzone.isEnabled()) {
-                int index = map.get(type).size();
-                Zone zone = new Zone(xzone.getTypeZone(), xzone.getKey(), index);
+            if (xzone.isEnabled()) {
+                int index = map.get(classname).size();
+                Zone zone = new Zone(xzone.getKey(), index);
                 zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());
                 zone.setOffshoreLine(xzone.getOffshoreLine());
                 zone.setInshoreLine(xzone.getInshoreLine());
@@ -118,13 +120,19 @@ public class ZoneManager extends AbstractManager {
                 for (XPoint point : xzone.getPolygon()) {
                     zone.addPoint(point.createRhoPoint());
                 }
-                map.get(type).add(zone);
+                map.get(classname).add(zone);
             }
         }
     }
 
-    public ArrayList<Zone> getZones(Zone.Type type) {
-        return map.get(type);
+    public ArrayList<Zone> getZones(String classname) {
+        return map.get(classname);
+    }
+    
+    public List<String> getClassnames() {
+        ArrayList classnames = new ArrayList(map.keySet());
+        Collections.sort(classnames);
+        return classnames;
     }
 
     @Override

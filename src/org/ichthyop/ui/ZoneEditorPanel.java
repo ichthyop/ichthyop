@@ -208,7 +208,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         removeChangeListeners(this, this);
         setPanelZoneEnabled(true);
         ckBoxEnabled.setSelected(zone.isEnabled());
-        cbBoxType.setSelectedItem(zone.getTypeZone());
+        //cbBoxType.setSelectedItem(zone.getTypeZone());
         repaintBtnColor(zone.getColor());
         txtFieldUpperDepth.setValue(zone.getUpperDepth());
         txtFieldLowerDepth.setValue(zone.getLowerDepth());
@@ -297,7 +297,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private void updateZone(XZone zone) {
         zone.setEnabled(ckBoxEnabled.isSelected());
         zone.setColor(btnColor.getBackground());
-        zone.setType((Zone.Type) cbBoxType.getSelectedItem());
+        //zone.setType((Zone.Type) cbBoxType.getSelectedItem());
         zone.setBathyMaskEnabled(ckBoxBathyMask.isSelected());
         zone.setInshoreLine(Float.valueOf(txtFieldInshore.getText()));
         zone.setOffshoreLine(Float.valueOf(txtFieldOffshore.getText()));
@@ -822,9 +822,8 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlTypeZone.setBorder(javax.swing.BorderFactory.createTitledBorder("Type of zone"));
         pnlTypeZone.setName("pnlTypeZone"); // NOI18N
 
-        cbBoxType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbBoxType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "deprecated" }));
         cbBoxType.setName("cbBoxType"); // NOI18N
-        cbBoxType.setModel(new DefaultComboBoxModel(Zone.Type.values()));
 
         javax.swing.GroupLayout pnlTypeZoneLayout = new javax.swing.GroupLayout(pnlTypeZone);
         pnlTypeZone.setLayout(pnlTypeZoneLayout);

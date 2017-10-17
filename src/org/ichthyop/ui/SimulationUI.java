@@ -415,9 +415,9 @@ public class SimulationUI extends JPanel {
                 Color color = getColor(getSimulationManager().getDataset().getBathy(i, j));
                 boolean found = false;
                 ArrayList<Zone> listZones = new ArrayList();
-                for (Zone.Type typeZone : Zone.Type.values()) {
-                    if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
-                        listZones.addAll(getSimulationManager().getZoneManager().getZones(typeZone));
+                for (String classname : getSimulationManager().getZoneManager().getClassnames()) {
+                    if (null != getSimulationManager().getZoneManager().getZones(classname)) {
+                        listZones.addAll(getSimulationManager().getZoneManager().getZones(classname));
                     }
                 }
                 Iterator<Zone> iter = listZones.iterator();

@@ -66,7 +66,6 @@ import org.ichthyop.particle.ParticleFactory;
 public class BottomRelease extends AbstractRelease {
 
  private int nbReleaseZones, nParticles;
-    private boolean is3D;
 
     @Override
     public void loadParameters() throws Exception {
@@ -74,13 +73,11 @@ public class BottomRelease extends AbstractRelease {
         /* Get number of particles to release */
         nParticles = getConfiguration().getInt("release.bottom.number_particles");
 
-        /* Check whether 2D or 3D simulation */
-        is3D = true;
-
         /* Load release zones*/
-        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("release.bottom.zone_file"), Zone.Type.RELEASE);
-        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE))
-                ? getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE).size()
+        String classname = getClass().getCanonicalName();
+        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("release.bottom.zone_file"), classname);
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(classname))
+                ? getSimulationManager().getZoneManager().getZones(classname).size()
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
     }
@@ -89,14 +86,14 @@ public class BottomRelease extends AbstractRelease {
     public int release(ReleaseEvent event) throws Exception {
 
         double xmin, xmax, ymin, ymax;
-        double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
         /** Reduces the release area function of the user-defined zones */
         xmin = Double.MAX_VALUE;
         ymin = Double.MAX_VALUE;
         xmax = 0.d;
         ymax = 0.d;
+        String classname = getClass().getCanonicalName();
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-            Zone zone = getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE).get(i_zone);
+            Zone zone = getSimulationManager().getZoneManager().getZones(classname).get(i_zone);
             xmin = Math.min(xmin, zone.getXmin());
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());
@@ -115,7 +112,7 @@ public class BottomRelease extends AbstractRelease {
                 }
                 double x = xmin + Math.random() * (xmax - xmin);
                 double y = ymin + Math.random() * (ymax - ymin);
-                particle = ParticleFactory.createBottomParticle(index, x, y);
+                particle = ParticleFactory.createBottomParticle(index, x, y, classname);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;

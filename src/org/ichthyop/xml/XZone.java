@@ -96,7 +96,6 @@ public class XZone extends org.jdom2.Element {
     private void init(String key) {
         setKey(key);
         setEnabled(true);
-        setType(Zone.Type.RELEASE);
         addPoint(0, "0.0", "0.0");
         addPoint(1, "0.0", "0.0");
         addPoint(2, "0.0", "0.0");
@@ -148,23 +147,6 @@ public class XZone extends org.jdom2.Element {
             addContent(new Element(ENABLED));
         }
         getChild(ENABLED).setText(String.valueOf(enabled));
-    }
-
-    public Zone.Type getTypeZone() {
-
-        for (Zone.Type type : Zone.Type.values()) {
-            if (type.toString().equals(getChildTextNormalize(TYPE_ZONE))) {
-                return type;
-            }
-        }
-        return null;
-    }
-
-    public void setType(Zone.Type type) {
-        if (null == getChild(TYPE_ZONE)) {
-            addContent(new Element(TYPE_ZONE));
-        }
-        getChild(TYPE_ZONE).setText(type.toString());
     }
 
     public Element getBathyMask() {

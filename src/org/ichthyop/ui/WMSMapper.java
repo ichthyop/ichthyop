@@ -523,13 +523,13 @@ public class WMSMapper extends JXMapKit {
                 try {
                     Variable varZone = nc.findVariable("zone" + iZone);
                     ArrayFloat.D2 zoneEdge = (D2) varZone.read();
-                    String type = varZone.findAttribute("type").getStringValue();
+                    String classname = varZone.findAttribute("classname").getStringValue();
                     String color = varZone.findAttribute("color").getStringValue();
                     for (int i = 0; i < zoneEdge.getShape()[0]; i++) {
                         points.add(new Point2D.Float(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
                     }
                     WMSMapper.DrawableZone zone = new WMSMapper.DrawableZone(points, color);
-                    lzones.put(type + "_zone" + iZone, zone);
+                    lzones.put(classname + "_zone" + iZone, zone);
 
                 } catch (IOException ex) {
                     Logger.getLogger(WMSMapper.class

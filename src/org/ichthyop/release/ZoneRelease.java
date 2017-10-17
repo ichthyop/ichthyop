@@ -79,9 +79,10 @@ public class ZoneRelease extends AbstractRelease {
         is3D = getSimulationManager().getDataset().is3D();
 
         /* Load release zones*/
-        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("release.zone.zone_file"), Zone.Type.RELEASE);
-        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE))
-                ? getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE).size()
+        String classname = getClass().getCanonicalName();
+        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("release.zone.zone_file"), classname);
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(classname))
+                ? getSimulationManager().getZoneManager().getZones(classname).size()
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
         getSimulationManager().getOutputManager().addPredefinedTracker(ReleaseZoneTracker.class);
@@ -97,8 +98,9 @@ public class ZoneRelease extends AbstractRelease {
         ymin = Double.MAX_VALUE;
         xmax = 0.d;
         ymax = 0.d;
+        String classname = getClass().getCanonicalName();
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-            Zone zone = getSimulationManager().getZoneManager().getZones(Zone.Type.RELEASE).get(i_zone);
+            Zone zone = getSimulationManager().getZoneManager().getZones(classname).get(i_zone);
             xmin = Math.min(xmin, zone.getXmin());
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());
@@ -127,7 +129,7 @@ public class ZoneRelease extends AbstractRelease {
                 if (is3D) {
                     depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
                 }
-                particle = ParticleFactory.createZoneParticle(index, x, y, depth);
+                particle = ParticleFactory.createZoneParticle(index, x, y, depth, classname);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;

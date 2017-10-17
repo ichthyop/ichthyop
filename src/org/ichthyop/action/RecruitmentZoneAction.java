@@ -50,10 +50,8 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
-import org.ichthyop.Zone.Type;
 import org.ichthyop.util.Constant;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.output.RecruitmentZoneTracker;
@@ -82,12 +80,12 @@ public class RecruitmentZoneAction extends AbstractAction {
     private float lengthMinAtRecruitment;
     private boolean isAgeCriterion;
     private boolean stopMovingOnceRecruited;
-    
+
     @Override
     public String getKey() {
         return "action.recruitment.zone";
     }
-    
+
     @Override
     public void loadParameters() throws Exception {
 
@@ -104,7 +102,7 @@ public class RecruitmentZoneAction extends AbstractAction {
             lengthMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_length");
         }
         stopMovingOnceRecruited = getConfiguration().getBoolean("action.recruitment.zone.stop_moving");
-        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("action.recruitment.zone.zone_file"), Type.RECRUITMENT);
+        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("action.recruitment.zone.zone_file"), getClass().getCanonicalName());
         boolean addTracker = true;
         try {
             addTracker = getConfiguration().getBoolean("action.recruitment.zone.recruited_tracker");
@@ -127,7 +125,7 @@ public class RecruitmentZoneAction extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        // Nothing to do
+        RecruitableParticle.init(particle);
     }
 
     @Override
@@ -138,7 +136,7 @@ public class RecruitmentZoneAction extends AbstractAction {
             return;
         }
 
-        int numCurrentZone = ZoneParticle.getNumZone(particle, Type.RECRUITMENT);
+        int numCurrentZone = ZoneParticle.getNumZone(particle, getClass().getCanonicalName());
         if ((numCurrentZone != -1) && !RecruitableParticle.isRecruited(particle, numCurrentZone)) {
 
             if (satisfyRecruitmentCriterion(particle)) {

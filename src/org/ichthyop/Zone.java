@@ -89,10 +89,6 @@ public class Zone extends IchthyopLinker {
      */
     private final ArrayList<GridPoint> polygon;
     /**
-     * The type of zone (release, recruitment, etc.)
-     */
-    private final Type type;
-    /**
      * Lower bathymetric line [meter]
      */
     private float inshoreLine;
@@ -133,13 +129,11 @@ public class Zone extends IchthyopLinker {
     /**
      * Creates a new zone.
      *
-     * @param type, the type of zone
      * @param key, the name of the zone
      * @param index, the index of the zone
      */
-    public Zone(Type type, String key, int index) {
+    public Zone(String key, int index) {
         this.polygon = new ArrayList();
-        this.type = type;
         this.key = key;
         this.index = index;
     }
@@ -214,8 +208,7 @@ public class Zone extends IchthyopLinker {
             /* make sure the point belongs to the simulated domain */
             if (rhoPoint.getX() < 0 || rhoPoint.getY() < 0) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(getType());
-                sb.append(" zone \"");
+                sb.append("Zone \"");
                 sb.append(getKey());
                 sb.append("\". Initialization error. Point [lon: ");
                 sb.append(rhoPoint.getLon());
@@ -230,8 +223,7 @@ public class Zone extends IchthyopLinker {
         if (enabledThickness) {
             if (lowerDepth < upperDepth) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(getType());
-                sb.append(" zone \"");
+                sb.append("Zone \"");
                 sb.append(getKey());
                 sb.append("\". Thickness error. Lower depth (");
                 sb.append(lowerDepth);
@@ -246,8 +238,7 @@ public class Zone extends IchthyopLinker {
         if (enabledBathyMask) {
             if (offshoreLine < inshoreLine) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(getType());
-                sb.append(" zone \"");
+                sb.append("Zone \"");
                 sb.append(getKey());
                 sb.append("\". Bathymetric mask error. Offshore line (");
                 sb.append(offshoreLine);
@@ -351,17 +342,6 @@ public class Zone extends IchthyopLinker {
     }
 
     /**
-     * Gets the type of zone, release or recruitment.
-     *
-     * @return an int characterizing the type of zone.
-     * @see ichthyop.util.Constant for details about the labels characterizing
-     * the type of zone.
-     */
-    public Type getType() {
-        return type;
-    }
-
-    /**
      * Gets the index of the zone.
      *
      * @return a positive integer, the index of the zone.
@@ -430,9 +410,8 @@ public class Zone extends IchthyopLinker {
 
     @Override
     public String toString() {
-        StringBuilder zoneStr = new StringBuilder(getType().toString());
-        zoneStr.append(' ');
-        zoneStr.append("zone ");
+        StringBuilder zoneStr = new StringBuilder();
+        zoneStr.append("Zone ");
         zoneStr.append(getIndex());
         zoneStr.append('\n');
         zoneStr.append("  Polygon [");
@@ -459,25 +438,4 @@ public class Zone extends IchthyopLinker {
         return zoneStr.toString();
     }
     //---------- End of class
-
-    public enum Type {
-
-        RELEASE(0),
-        RECRUITMENT(1);
-
-        private final int code;
-
-        Type(int code) {
-            this.code = code;
-        }
-
-        public int getCode() {
-            return code;
-        }
-
-        @Override
-        public String toString() {
-            return name().toLowerCase();
-        }
-    }
 }

@@ -196,20 +196,18 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         int iZone = 0;
         zoneAreas = new ArrayList();
-        for (Zone.Type type : Zone.Type.values()) {
-            if (null != getSimulationManager().getZoneManager().getZones(type)) {
-                for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
-                    zoneAreas.add(iZone, makeZoneArea(zone));
-                    Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
-                    ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
-                    ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getKey());
-                    ncOut.addVariableAttribute("zone" + iZone, "unit", "x and y coordinates of the center of the cells in the zone");
-                    ncOut.addVariableAttribute("zone" + iZone, "type", zone.getType().toString());
-                    String color = zone.getColor().toString();
-                    color = color.substring(color.lastIndexOf("["));
-                    ncOut.addVariableAttribute("zone" + iZone, "color", color);
-                    iZone++;
-                }
+        for (String classname : getSimulationManager().getZoneManager().getClassnames()) {
+            for (Zone zone : getSimulationManager().getZoneManager().getZones(classname)) {
+                zoneAreas.add(iZone, makeZoneArea(zone));
+                Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
+                ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
+                ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getKey());
+                ncOut.addVariableAttribute("zone" + iZone, "unit", "x and y coordinates of the center of the cells in the zone");
+                ncOut.addVariableAttribute("zone" + iZone, "classname", classname);
+                String color = zone.getColor().toString();
+                color = color.substring(color.lastIndexOf("["));
+                ncOut.addVariableAttribute("zone" + iZone, "color", color);
+                iZone++;
             }
         }
         ncOut.addGlobalAttribute("nb_zones", iZone);
@@ -242,7 +240,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
             }
         }
-        
 
         // Add the corresponding configuration file 
         ncOut.addGlobalAttribute("cfgfile", getConfiguration().getMainFile());
@@ -566,7 +563,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public class NCDimFactory {
 
         private Dimension time, drifter;
-        private HashMap<Zone.Type, Dimension> zoneDimension;
+        private HashMap<String, Dimension> zoneDimension;
         private HashMap<String, Dimension> dimensions;
 
         public Dimension createDimension(Dimension dim) {
@@ -599,17 +596,17 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return drifter;
         }
 
-        public Dimension getZoneDimension(Zone.Type type) {
+        public Dimension getZoneDimension(String classname) {
             if (null == zoneDimension) {
                 zoneDimension = new HashMap();
             }
-            if (null == zoneDimension.get(type)) {
-                String name = type.toString() + "_zone";
-                Dimension zoneDim = ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size());
-                zoneDimension.put(type, zoneDim);
+            if (null == zoneDimension.get(classname)) {
+                String name = "zone_" + classname.substring(classname.lastIndexOf(".")+1).toLowerCase();
+                Dimension zoneDim = ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(classname).size());
+                zoneDimension.put(classname, zoneDim);
                 dimensions.put(zoneDim.getName(), zoneDim);
             }
-            return zoneDimension.get(type);
+            return zoneDimension.get(classname);
         }
 
         public void resetDimensions() {

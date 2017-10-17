@@ -144,8 +144,8 @@ public abstract class AbstractTracker extends IchthyopLinker {
         addDimension(dimFactory.getDrifterDimension());
     }
 
-    public void addZoneDimension(Zone.Type type) {
-        addDimension(dimFactory.getZoneDimension(type));
+    public void addZoneDimension(String classname) {
+        addDimension(dimFactory.getZoneDimension(classname));
     }
 
     public List<Dimension> getDimensions() {

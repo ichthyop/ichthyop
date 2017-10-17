@@ -53,7 +53,7 @@
 package org.ichthyop.particle;
 
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.Zone;
+import org.ichthyop.action.RecruitmentZoneAction;
 
 /**
  *
@@ -68,8 +68,8 @@ public class RecruitableParticle extends IchthyopLinker {
     public static void init(IParticle particle) {
         particle.set(NEW_RECRUITED, false);
         particle.set(RECRUITMENT_ZONE, -1);
-        boolean[] recruited = (null != getSimulationManager().getZoneManager().getZones(Zone.Type.RECRUITMENT))
-                ? new boolean[getSimulationManager().getZoneManager().getZones(Zone.Type.RECRUITMENT).size()]
+        boolean[] recruited = (null != getSimulationManager().getZoneManager().getZones(RecruitmentZoneAction.class.getCanonicalName()))
+                ? new boolean[getSimulationManager().getZoneManager().getZones(RecruitmentZoneAction.class.getCanonicalName()).size()]
                 : new boolean[1];
         particle.set(RECRUITED, recruited);
     }

@@ -55,7 +55,9 @@ package org.ichthyop.output;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import org.ichthyop.Zone;
+import org.ichthyop.action.RecruitmentZoneAction;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.RecruitableParticle;
 import ucar.ma2.Array;
@@ -78,7 +80,7 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addZoneDimension(Zone.Type.RECRUITMENT);
+        addZoneDimension(RecruitmentZoneAction.class.getCanonicalName());
     }
 
     @Override
@@ -90,10 +92,11 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     public void track() {
         IParticle particle;
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
+        List<Zone> zones = getZones();
         while (iter.hasNext()) {
             particle = iter.next();
             Index index = getArray().getIndex();
-            for (Zone zone : getZones()) {
+            for (Zone zone : zones) {
                 index.set(0, particle.getIndex(), zone.getIndex());
                 int recruited = RecruitableParticle.isRecruited(particle, zone.getIndex())
                         ? 1
@@ -106,11 +109,11 @@ public class RecruitmentZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
         for (Zone zone : getZones()) {
-            addAttribute(new Attribute("recruitment zone " + zone.getIndex(), zone.getKey()));
+            addAttribute(new Attribute(zone.getKey(), zone.getIndex()));
         }
     }
 
     private ArrayList<Zone> getZones() {
-        return getSimulationManager().getZoneManager().getZones(Zone.Type.RECRUITMENT);
+        return getSimulationManager().getZoneManager().getZones(RecruitmentZoneAction.class.getCanonicalName());
     }
 }
