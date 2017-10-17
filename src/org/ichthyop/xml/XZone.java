@@ -156,6 +156,10 @@ public class XZone extends org.jdom2.Element {
     public Element getThickness() {
         return getChild(THICKNESS);
     }
+    
+    public String getColorAsString() {
+        return getChildTextNormalize(COLOR);
+    }
 
     public Color getColor() {
         if (null == getChild(COLOR)) {

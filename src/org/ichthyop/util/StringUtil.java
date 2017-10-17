@@ -52,6 +52,10 @@
  */
 package org.ichthyop.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  *
  * @author pverley
@@ -84,6 +88,31 @@ public class StringUtil {
     
     public static String removeQuotes(String str) {
         return str.replaceAll("[\"'\u2018\u2019\u201c\u201d\u201f]", "");
+    }
+    
+    public static String handleArray(String[] values) {
+
+        String[] array = new String[values.length];
+        for (int k = 0; k < array.length; k++) {
+            array[k] = isNotString(values[k]) ? values[k] : "\"" + values[k] + "\"";
+        }
+        return Arrays.toString(array);
+    }
+
+    public static String handleArray(String value) {
+        String[] tokens = value.split("\"");
+        List<String> list = new ArrayList();
+        for (String token : tokens) {
+            String str = token.trim();
+            if (!str.isEmpty()) {
+                list.add(isNotString(str) ? str : "\"" + str + "\"");
+            }
+        }
+        if (list.size() > 1) {
+            return Arrays.toString(list.toArray(new String[list.size()]));
+        } else {
+            return value;
+        }
     }
     
 }

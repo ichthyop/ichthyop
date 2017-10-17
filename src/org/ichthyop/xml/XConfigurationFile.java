@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -304,11 +303,11 @@ public class XConfigurationFile extends IchthyopLinker {
                     parameters.put(key.toString(), StringUtil.removeQuotes(StringUtil.nullify(parameter.getDescription())));
                     if (parameter.getAcceptedValues().length > 0) {
                         key = new StringBuilder(bkey).append(".").append(pkey).append(".accepted");
-                        parameters.put(key.toString(), handleArray(parameter.getAcceptedValues()));
+                        parameters.put(key.toString(), StringUtil.handleArray(parameter.getAcceptedValues()));
                     }
                 }
                 key = new StringBuilder(bkey).append(".").append(pkey);
-                parameters.put(key.toString(), handleArray(StringUtil.nullify(parameter.getValue())));
+                parameters.put(key.toString(), StringUtil.handleArray(StringUtil.nullify(parameter.getValue())));
                 key = new StringBuilder(bkey).append(".parameters");
                 parameters.put(key.toString(), listParameters(subset));
             });
@@ -322,7 +321,7 @@ public class XConfigurationFile extends IchthyopLinker {
         for (XParameterSubset subset : readSubsets()) {
             list.add(subset.getKey().toLowerCase());
         }
-        return handleArray(list.toArray(new String[list.size()]));
+        return StringUtil.handleArray(list.toArray(new String[list.size()]));
     }
 
     private String listParameters(XParameterSubset subset) {
@@ -330,33 +329,10 @@ public class XConfigurationFile extends IchthyopLinker {
         for (XParameter param : subset.getXParameters()) {
             list.add(param.getKey());
         }
-        return handleArray(list.toArray(new String[list.size()]));
+        return StringUtil.handleArray(list.toArray(new String[list.size()]));
     }
 
-    private String handleArray(String[] values) {
-
-        String[] array = new String[values.length];
-        for (int k = 0; k < array.length; k++) {
-            array[k] = StringUtil.isNotString(values[k]) ? values[k] : "\"" + values[k] + "\"";
-        }
-        return Arrays.toString(array);
-    }
-
-    private String handleArray(String value) {
-        String[] tokens = value.split("\"");
-        List<String> list = new ArrayList();
-        for (String token : tokens) {
-            String str = token.trim();
-            if (!str.isEmpty()) {
-                list.add(StringUtil.isNotString(str) ? str : "\"" + str + "\"");
-            }
-        }
-        if (list.size() > 1) {
-            return Arrays.toString(list.toArray(new String[list.size()]));
-        } else {
-            return value;
-        }
-    }
+   
 
     public List<XParameterSubset> readSubsets(final SubsetType type) {
 

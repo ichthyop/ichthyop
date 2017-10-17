@@ -61,8 +61,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.util.StringUtil;
+import org.ichthyop.xml.XZone.XPoint;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -187,5 +190,36 @@ public class XZoneFile extends IchthyopLinker {
         zones.remove(oldKey);
         zone.setKey(newKey);
         zones.put(newKey, zone);
+    }
+    
+    public HashMap<String, String> toProperties() throws IOException {
+        
+        HashMap<String, String> parameters = new LinkedHashMap();
+        int index = 0;
+        for (XZone zone : zones.values()) {
+            String zkey = "zone" + index;
+            parameters.put(zkey + ".name", zone.getKey());
+            parameters.put(zkey + ".enabled", String.valueOf(zone.isEnabled()));
+            String[] lat = new String[zone.getPolygon().size()];
+            String[] lon = new String[lat.length];
+            int i = 0;
+            for (XPoint point : zone.getPolygon()) {
+                lat[i] = point.getLat();
+                lon[i] = point.getLon();
+                i++;
+            }
+            parameters.put(zkey+".latitude",  StringUtil.handleArray(lat));
+            parameters.put(zkey+".longitude",  StringUtil.handleArray(lon));
+            parameters.put(zkey+".bathymetry", String.valueOf(zone.isBathyMaskEnabled()));
+            parameters.put(zkey+".bathymetry.inshore", StringUtil.nullify(String.valueOf(zone.getInshoreLine())));
+            parameters.put(zkey+".bathymetry.offshore", StringUtil.nullify(String.valueOf(zone.getOffshoreLine())));
+            parameters.put(zkey+".depth", String.valueOf(zone.isThicknessEnabled()));
+            parameters.put(zkey+".depth.lower", StringUtil.nullify(String.valueOf(zone.getLowerDepth())));
+            parameters.put(zkey+".depth.upper", StringUtil.nullify(String.valueOf(zone.getUpperDepth())));
+            parameters.put(zkey+".color", zone.getColorAsString());
+            index++;
+        }
+        
+        return parameters;
     }
 }
