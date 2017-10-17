@@ -128,7 +128,7 @@ public class RecruitmentStainAction extends AbstractAction {
     
     @Override
     public void init(IParticle particle) {
-        // Nothing to do
+        RecruitableParticle.init(particle);
     }
 
     @Override

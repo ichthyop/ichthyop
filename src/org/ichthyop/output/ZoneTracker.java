@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.output;
 
 import java.util.Iterator;
@@ -103,7 +102,7 @@ public class ZoneTracker extends AbstractTracker {
         while (iter.hasNext()) {
             particle = iter.next();
             Index index = getArray().getIndex();
-            int iclass=0;
+            int iclass = 0;
             for (String classname : classnames) {
                 index.set(0, particle.getIndex(), iclass);
                 getArray().setInt(index, ZoneParticle.getNumZone(particle, classname));
@@ -115,15 +114,15 @@ public class ZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
 
-        int iclass=0;
+        int iclass = 0;
         List<String> classnames = getSimulationManager().getZoneManager().getClassnames();
         for (String classname : classnames) {
-            String simplename = classname.substring(classname.lastIndexOf(".")+1).toLowerCase();
-            addAttribute(new Attribute("zones " + iclass, simplename));
+            String simplename = classname.substring(classname.lastIndexOf(".") + 1);
+            addAttribute(new Attribute("zones@" + simplename, iclass));
             List<Zone> zones = getSimulationManager().getZoneManager().getZones(classname);
             if (null != zones) {
                 for (Zone zone : zones) {
-                    addAttribute(new Attribute(simplename + " " + zone.getIndex(), zone.getKey()));
+                    addAttribute(new Attribute(simplename + "@" + zone.getKey(), zone.getIndex()));
                 }
             } else {
                 addAttribute(new Attribute(simplename, "none for this run"));

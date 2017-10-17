@@ -62,10 +62,6 @@ public class LengthParticle extends IchthyopLinker {
 
     private final static String LENGTH = "length";
 
-    public static void init(IParticle particle) {
-        particle.set(LENGTH, 0.d);
-    }
-
     public static double getLength(IParticle particle) {
         return particle.getDouble(LENGTH);
     }
