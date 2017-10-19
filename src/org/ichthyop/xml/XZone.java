@@ -52,7 +52,6 @@
  */
 package org.ichthyop.xml;
 
-import org.ichthyop.Zone;
 import org.ichthyop.GridPoint;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -155,10 +154,6 @@ public class XZone extends org.jdom2.Element {
 
     public Element getThickness() {
         return getChild(THICKNESS);
-    }
-    
-    public String getColorAsString() {
-        return getChildTextNormalize(COLOR);
     }
 
     public Color getColor() {

@@ -75,7 +75,6 @@ import org.ichthyop.Version;
 import org.ichthyop.util.StringUtil;
 import org.jdom2.JDOMException;
 
-@Deprecated
 public class XConfigurationFile extends IchthyopLinker {
 
     private File file;

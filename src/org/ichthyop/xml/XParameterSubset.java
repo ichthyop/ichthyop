@@ -67,10 +67,9 @@ import org.jdom2.Element;
  *
  * @author pverley
  */
-@Deprecated
 public class XParameterSubset extends org.jdom2.Element implements Comparable<XParameterSubset> {
 
-    public final static String BLOCK = "subset";
+    public final static String BLOCK = "block";
     final public static String KEY = "key";
     final public static String TREEPATH = "tree_path";
     final public static String ENABLED = "enabled";

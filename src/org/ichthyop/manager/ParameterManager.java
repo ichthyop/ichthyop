@@ -70,6 +70,7 @@ import org.ichthyop.Version;
 import org.ichthyop.xml.XConfigurationFile;
 import org.ichthyop.util.Separator;
 import org.ichthyop.util.StringUtil;
+import org.ichthyop.xml.XZoneFile;
 
 /**
  *
@@ -87,33 +88,57 @@ public class ParameterManager extends AbstractManager {
     }
 
     public void setConfigurationFile(File file) throws Exception {
+        File mainFile = file;
+        inputPathname = mainFile.getParent();
         parameters.clear();
-        if (file.getName().endsWith(".xml")) {
-            XConfigurationFile cfg = new XConfigurationFile(file);
-            cfg.load();
-            cfg.upgrade();
-            HashMap<String, String> xmlMap = cfg.toProperties(true);
-            mainFilename = file.getAbsolutePath().replaceAll("xml$", "cfg");
-            int i = 1;
-            for (Entry<String, String> entry : xmlMap.entrySet()) {
-                Parameter parameter = new Parameter(i, mainFilename);
-                parameter.parse(entry.toString());
-                parameters.put(parameter.key, parameter);
-                debug(parameter.toString());
-                i++;
-            }
-            File tmp = new File(mainFilename);
-            warning("XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), tmp.getName()});
-            saveParameters(mainFilename, false);
-        } else if (file.getName().endsWith(".json")) {
-            loadParameters(file.getAbsolutePath(), 0, true);
-            mainFilename = file.getAbsolutePath();
-        } else {
-            loadParameters(file.getAbsolutePath(), 0, false);
-            mainFilename = file.getAbsolutePath();
+        // convert old XML format
+        if (mainFile.getName().endsWith(".xml")) {
+            mainFile = XMLToCFG(mainFile);
         }
+        // load parameters
+        loadParameters(mainFile.getAbsolutePath(), 0, mainFile.getName().endsWith(".json"));
+        mainFilename = mainFile.getAbsolutePath();
+    }
 
-        inputPathname = file.getParent();
+    private File XMLToCFG(File file) throws Exception {
+        XConfigurationFile cfg = new XConfigurationFile(file);
+        cfg.load();
+        cfg.upgrade();
+        HashMap<String, String> rawParamMap = cfg.toProperties(true);
+        HashMap<String, Parameter> paramMap = new HashMap();
+        String paramFilename = file.getAbsolutePath().replaceAll("xml$", "cfg");
+        int i = 1;
+        for (Entry<String, String> entry : rawParamMap.entrySet()) {
+            Parameter parameter = new Parameter(i, paramFilename);
+            parameter.parse(entry.toString());
+            paramMap.put(parameter.key, parameter);
+            debug(parameter.toString());
+            i++;
+        }
+        // check for old XML zone file
+        for (String key : paramMap.keySet()) {
+            if (key.toLowerCase().endsWith("zone_file") && paramMap.get(key).value.endsWith(".xml")) {
+                File zfile = new File((paramMap.get(key).value));
+                String zoneFilename = zfile.getAbsolutePath().replaceAll("xml$", "cfg");
+                paramMap.get(key).value = zoneFilename;
+                if (!zfile.exists()) continue;
+                HashMap<String, String> rawZoneMap = new XZoneFile(zfile).toProperties();
+                HashMap<String, Parameter> zoneMap = new HashMap();
+                i = 1;
+                for (Entry<String, String> entry : rawZoneMap.entrySet()) {
+                    Parameter parameter = new Parameter(i, zoneFilename);
+                    parameter.parse(entry.toString());
+                    zoneMap.put(parameter.key, parameter);
+                    debug(parameter.toString());
+                    i++;
+                }
+                warning("XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(zoneFilename).getName()});
+                saveParameters(zoneMap, zoneFilename, false);
+            }
+        }
+        warning("XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), new File(paramFilename).getName()});
+        saveParameters(paramMap, paramFilename, false);
+        return new File(paramFilename);
     }
 
     public String getMainFile() {
@@ -149,10 +174,10 @@ public class ParameterManager extends AbstractManager {
     }
 
     public void saveParameters(String filename) throws IOException, FileNotFoundException {
-        saveParameters(filename, filename.endsWith(".json"));
+        saveParameters(parameters, filename, filename.endsWith(".json"));
     }
 
-    public void saveParameters(String filename, boolean json) throws IOException, FileNotFoundException {
+    private void saveParameters(HashMap<String, Parameter> parameters, String filename, boolean json) throws IOException, FileNotFoundException {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             String newline = System.getProperty("line.separator");
@@ -171,14 +196,16 @@ public class ParameterManager extends AbstractManager {
                     str.append("    ");
                 }
                 str.append("\"").append(key).append("\"");
-                str.append(json ? ": " : getParameter(key).keySeparator);
-                String value = getParameter(key).value;
+                str.append(json ? ": " : parameters.get(key).keySeparator);
+                String value = parameters.get(key).value;
                 if (StringUtil.isNotString(value) | StringUtil.isQuoted(value)) {
                     str.append(value);
                 } else {
                     str.append("\"").append(value).append("\"");
                 }
-                if (json && (i != keys.size())) str.append(",");
+                if (json && (i != keys.size())) {
+                    str.append(",");
+                }
                 str.append(newline);
                 writer.write(str.toString());
             }
@@ -188,7 +215,7 @@ public class ParameterManager extends AbstractManager {
                 writer.write(str.toString());
             }
         }
-        info("Configuration file {0} has been saved.", mainFilename);
+        info("Configuration file {0} has been saved.", filename);
     }
 
     @Override

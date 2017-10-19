@@ -210,13 +210,13 @@ public class XZoneFile extends IchthyopLinker {
             }
             parameters.put(zkey+".latitude",  StringUtil.handleArray(lat));
             parameters.put(zkey+".longitude",  StringUtil.handleArray(lon));
-            parameters.put(zkey+".bathymetry", String.valueOf(zone.isBathyMaskEnabled()));
+            parameters.put(zkey+".bathymetry.enabled", String.valueOf(zone.isBathyMaskEnabled()));
             parameters.put(zkey+".bathymetry.inshore", StringUtil.nullify(String.valueOf(zone.getInshoreLine())));
             parameters.put(zkey+".bathymetry.offshore", StringUtil.nullify(String.valueOf(zone.getOffshoreLine())));
-            parameters.put(zkey+".depth", String.valueOf(zone.isThicknessEnabled()));
+            parameters.put(zkey+".depth.enabled", String.valueOf(zone.isThicknessEnabled()));
             parameters.put(zkey+".depth.lower", StringUtil.nullify(String.valueOf(zone.getLowerDepth())));
             parameters.put(zkey+".depth.upper", StringUtil.nullify(String.valueOf(zone.getUpperDepth())));
-            parameters.put(zkey+".color", zone.getColorAsString());
+            parameters.put(zkey+".color", String.valueOf(zone.getColor().getRGB()));
             index++;
         }
         
