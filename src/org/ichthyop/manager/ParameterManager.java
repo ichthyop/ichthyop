@@ -95,9 +95,12 @@ public class ParameterManager extends AbstractManager {
         if (mainFile.getName().endsWith(".xml")) {
             mainFile = XMLToCFG(mainFile);
         }
-        // load parameters
-        loadParameters(mainFile.getAbsolutePath(), 0, mainFile.getName().endsWith(".json"));
         mainFilename = mainFile.getAbsolutePath();
+        // load parameters
+        boolean JSON = mainFilename.endsWith(".json");
+        loadParameters(mainFilename, 0, JSON);
+        // check for old XML zone file
+        zoneXMLToCFG(JSON);        
     }
 
     private File XMLToCFG(File file) throws Exception {
@@ -115,16 +118,26 @@ public class ParameterManager extends AbstractManager {
             debug(parameter.toString());
             i++;
         }
-        // check for old XML zone file
-        for (String key : paramMap.keySet()) {
-            if (key.toLowerCase().endsWith("zone_file") && paramMap.get(key).value.endsWith(".xml")) {
-                File zfile = new File((paramMap.get(key).value));
+        warning("[Configuration] XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), new File(paramFilename).getName()});
+        saveParameters(paramMap, paramFilename, false);
+        return new File(paramFilename);
+    }
+
+    private void zoneXMLToCFG(boolean JSON) throws Exception {
+
+        boolean mainHasChanged = false;
+        for (String key : parameters.keySet()) {
+            if (key.toLowerCase().endsWith("zone_file") && getString(key).endsWith(".xml")) {
+                File zfile = new File(getString(key));
                 String zoneFilename = zfile.getAbsolutePath().replaceAll("xml$", "cfg");
-                paramMap.get(key).value = zoneFilename;
-                if (!zfile.exists()) continue;
+                setString(key, zoneFilename);
+                mainHasChanged = true;
+                if (!zfile.exists()) {
+                    continue;
+                }
                 HashMap<String, String> rawZoneMap = new XZoneFile(zfile).toProperties();
                 HashMap<String, Parameter> zoneMap = new HashMap();
-                i = 1;
+                int i = 1;
                 for (Entry<String, String> entry : rawZoneMap.entrySet()) {
                     Parameter parameter = new Parameter(i, zoneFilename);
                     parameter.parse(entry.toString());
@@ -132,13 +145,13 @@ public class ParameterManager extends AbstractManager {
                     debug(parameter.toString());
                     i++;
                 }
-                warning("XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(zoneFilename).getName()});
-                saveParameters(zoneMap, zoneFilename, false);
+                warning("[Configuration] XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(zoneFilename).getName()});
+                saveParameters(zoneMap, zoneFilename, JSON);
             }
         }
-        warning("XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), new File(paramFilename).getName()});
-        saveParameters(paramMap, paramFilename, false);
-        return new File(paramFilename);
+        if (mainHasChanged) {
+            saveParameters(mainFilename);
+        }
     }
 
     public String getMainFile() {
@@ -215,7 +228,7 @@ public class ParameterManager extends AbstractManager {
                 writer.write(str.toString());
             }
         }
-        info("Configuration file {0} has been saved.", filename);
+        info("[Configuration] Configuration file {0} has been saved.", filename);
     }
 
     @Override
@@ -299,7 +312,7 @@ public class ParameterManager extends AbstractManager {
         if (parameters.containsKey(lkey)) {
             return parameters.get(lkey);
         } else {
-            error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
+            error("[Configuration] Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
         }
         return null;
     }
@@ -368,7 +381,7 @@ public class ParameterManager extends AbstractManager {
         try {
             return Integer.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert to Integer parameter " + getString(key), ex);
+            error("[Configuration] Could not convert to Integer parameter " + getString(key), ex);
         }
         return Integer.MIN_VALUE;
     }
@@ -386,7 +399,7 @@ public class ParameterManager extends AbstractManager {
         try {
             return Float.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert to Float parameter " + getString(key), ex);
+            error("[Configuration] Could not convert to Float parameter " + getString(key), ex);
         }
         return Float.NaN;
     }
@@ -404,7 +417,7 @@ public class ParameterManager extends AbstractManager {
         try {
             return Double.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert to Double parameter " + getString(key), ex);
+            error("[Configuration] Could not convert to Double parameter " + getString(key), ex);
         }
         return Double.NaN;
     }
@@ -423,10 +436,10 @@ public class ParameterManager extends AbstractManager {
             try {
                 return Boolean.valueOf(getString(key));
             } catch (NumberFormatException ex) {
-                error("Could not convert to Boolean parameter " + getString(key), ex);
+                error("[Configuration] Could not convert to Boolean parameter " + getString(key), ex);
             }
         } else if (warning) {
-            warning("Could not find Boolean parameter " + key + ". Ichthyop assumes it is false.");
+            warning("[Configuration] Could not find Boolean parameter " + key + ". Ichthyop assumes it is false.");
         }
 
         return false;
@@ -461,7 +474,7 @@ public class ParameterManager extends AbstractManager {
             }
             return ai;
         } catch (NumberFormatException ex) {
-            error("Could not convert to array of Integer parameter " + getString(key), ex);
+            error("[Configuration] Could not convert to array of Integer parameter " + getString(key), ex);
         }
         return null;
     }
@@ -483,7 +496,7 @@ public class ParameterManager extends AbstractManager {
             }
             return af;
         } catch (NumberFormatException ex) {
-            error("Could not convert to array of Float parameter " + getString(key), ex);
+            error("[Configuration] Could not convert to array of Float parameter " + getString(key), ex);
         }
         return null;
     }
@@ -505,7 +518,7 @@ public class ParameterManager extends AbstractManager {
             }
             return ad;
         } catch (NumberFormatException ex) {
-            error("Could not convert to array of Double parameter " + getString(key), ex);
+            error("[Configuration] Could not convert to array of Double parameter " + getString(key), ex);
         }
         return null;
     }
@@ -557,7 +570,7 @@ public class ParameterManager extends AbstractManager {
         try {
             bfIn = new BufferedReader(new FileReader(filename));
         } catch (FileNotFoundException ex) {
-            error("Could not find Ichthyop configuration file: " + filename, ex);
+            error("[Configuration] Could not find Ichthyop configuration file: " + filename, ex);
         }
         StringBuilder msg = new StringBuilder();
         StringBuilder space = new StringBuilder();
@@ -596,7 +609,7 @@ public class ParameterManager extends AbstractManager {
                 iline++;
             }
         } catch (IOException ex) {
-            error("Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
+            error("[Configuration] Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
         }
     }
 
@@ -728,7 +741,7 @@ public class ParameterManager extends AbstractManager {
 
             // make sure the line contains at least one semi-colon (key;value)
             if (!line.contains(keySeparator)) {
-                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
+                error("[Configuration] Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
             }
             // extract the key and remove leading and trailing double quotes
             key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim().replaceAll("^\"|\"$", "");
