@@ -64,6 +64,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.util.StringUtil;
 import org.ichthyop.xml.XZone.XPoint;
 import org.jdom2.Document;

@@ -97,10 +97,9 @@ public class ParameterManager extends AbstractManager {
         }
         mainFilename = mainFile.getAbsolutePath();
         // load parameters
-        boolean JSON = mainFilename.endsWith(".json");
-        loadParameters(mainFilename, 0, JSON);
+        loadParameters(mainFilename, 0, null);
         // check for old XML zone file
-        zoneXMLToCFG(JSON);        
+        zoneXMLToCFG();
     }
 
     private File XMLToCFG(File file) throws Exception {
@@ -119,11 +118,11 @@ public class ParameterManager extends AbstractManager {
             i++;
         }
         warning("[Configuration] XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), new File(paramFilename).getName()});
-        saveParameters(paramMap, paramFilename, false);
+        saveParameters(paramMap, paramFilename);
         return new File(paramFilename);
     }
 
-    private void zoneXMLToCFG(boolean JSON) throws Exception {
+    private void zoneXMLToCFG() throws Exception {
 
         boolean mainHasChanged = false;
         for (String key : parameters.keySet()) {
@@ -146,7 +145,7 @@ public class ParameterManager extends AbstractManager {
                     i++;
                 }
                 warning("[Configuration] XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(zoneFilename).getName()});
-                saveParameters(zoneMap, zoneFilename, JSON);
+                saveParameters(zoneMap, zoneFilename);
             }
         }
         if (mainHasChanged) {
@@ -187,14 +186,15 @@ public class ParameterManager extends AbstractManager {
     }
 
     public void saveParameters(String filename) throws IOException, FileNotFoundException {
-        saveParameters(parameters, filename, filename.endsWith(".json"));
+        saveParameters(parameters, filename);
     }
 
-    private void saveParameters(HashMap<String, Parameter> parameters, String filename, boolean json) throws IOException, FileNotFoundException {
+    private void saveParameters(HashMap<String, Parameter> parameters, String filename) throws IOException, FileNotFoundException {
 
+        boolean JSON = filename.endsWith(".json");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             String newline = System.getProperty("line.separator");
-            if (json) {
+            if (JSON) {
                 StringBuilder str = new StringBuilder();
                 str.append("{").append(newline);
                 writer.write(str.toString());
@@ -203,26 +203,28 @@ public class ParameterManager extends AbstractManager {
             Collections.sort(keys);
             int i = 0;
             for (String key : keys) {
+                // skip runtime parameters
+                if (parameters.get(key).runtime) continue;
                 i++;
                 StringBuilder str = new StringBuilder();
-                if (json) {
+                if (JSON) {
                     str.append("    ");
                 }
                 str.append("\"").append(key).append("\"");
-                str.append(json ? ": " : parameters.get(key).keySeparator);
+                str.append(JSON ? ": " : parameters.get(key).keySeparator);
                 String value = parameters.get(key).value;
                 if (StringUtil.isNotString(value) | StringUtil.isQuoted(value)) {
                     str.append(value);
                 } else {
                     str.append("\"").append(value).append("\"");
                 }
-                if (json && (i != keys.size())) {
+                if (JSON && (i != keys.size())) {
                     str.append(",");
                 }
                 str.append(newline);
                 writer.write(str.toString());
             }
-            if (json) {
+            if (JSON) {
                 StringBuilder str = new StringBuilder();
                 str.append("}").append(newline);
                 writer.write(str.toString());
@@ -280,7 +282,7 @@ public class ParameterManager extends AbstractManager {
     public List<String> findKeys(String filter) {
 
         // Add \Q \E around substrings of fileMask that are not meta-characters
-        String regexpPattern = filter.replaceAll("[^\\*\\?]+", "\\\\Q$0\\\\E");
+        String regexpPattern = filter.toLowerCase().replaceAll("[^\\*\\?]+", "\\\\Q$0\\\\E");
         // Replace all "*" by the corresponding java regex meta-characters
         regexpPattern = regexpPattern.replaceAll("\\*", ".*");
         // Replace all "?" by the corresponding java regex meta-characters
@@ -563,8 +565,9 @@ public class ParameterManager extends AbstractManager {
      * function. Zero for the main configuration file, one for a file loaded
      * from the main configuration file, etc.
      */
-    private void loadParameters(String filename, int depth, boolean json) {
+    private void loadParameters(String filename, int depth, String classname) {
 
+        boolean JSON = filename.endsWith(".json");
         BufferedReader bfIn = null;
         // Open the buffer
         try {
@@ -590,10 +593,14 @@ public class ParameterManager extends AbstractManager {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
                 if (!(line.length() <= 1)) {
-                    Parameter entry = json
+                    Parameter entry = JSON
                             ? new Parameter(iline, filename, ":", ",")
                             : new Parameter(iline, filename);
                     entry.parse(line);
+                    if (null != classname && !classname.trim().isEmpty()) {
+                        entry.key = classname.toLowerCase() + "." + entry.key;
+                        entry.runtime = true;
+                    }
                     if (parameters.containsKey(entry.key)) {
                         warning("{0}Ichthyop will ignore parameter {1}", new Object[]{space, entry});
                         warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
@@ -602,7 +609,7 @@ public class ParameterManager extends AbstractManager {
                         parameters.put(entry.key, entry);
                         debug("[configuration] " + space + entry.toString());
                         if (entry.key.startsWith("ichthyop.configuration")) {
-                            loadParameters(getFile(entry.key), depth + 1, json);
+                            loadParameters(getFile(entry.key), depth + 1, classname);
                         }
                     }
                 }
@@ -611,6 +618,10 @@ public class ParameterManager extends AbstractManager {
         } catch (IOException ex) {
             error("[Configuration] Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
         }
+    }
+
+    public void appendRuntimeParameters(String filename, String classname) {
+        loadParameters(filename, 0, classname);
     }
 
     public String[] getParameterSubsets() {
@@ -654,6 +665,11 @@ public class ParameterManager extends AbstractManager {
          * keySeparator value1 valueSeparator value2 valueSeparator value3</i>
          */
         private String valueSeparator;
+        /**
+         * Whether this parameter is loaded at runtime and should be discarded
+         * when saving configuration to file
+         */
+        private boolean runtime = false;
 
         /**
          * Create a new parameter out of the given line.

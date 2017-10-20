@@ -50,25 +50,19 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
+import java.awt.Color;
 import org.ichthyop.Zone;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
-import org.ichthyop.xml.XZone;
-import org.ichthyop.xml.XZone.XPoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import static org.ichthyop.IchthyopLinker.getSimulationManager;
-import org.ichthyop.util.IOTools;
-import org.ichthyop.xml.XZoneFile;
+import org.ichthyop.GridPoint;
+import org.ichthyop.ui.LonLatConverter;
 
 /**
  *
@@ -92,43 +86,46 @@ public class ZoneManager extends AbstractManager {
         map.clear();
     }
 
-    public void loadZonesFromXMLFile(String filename, String classname) throws Exception {
+    public void loadZones(String filename, String classname) throws Exception {
 
-        String pathname = IOTools.resolveFile(filename);
-        File f = new File(pathname);
-        if (!f.isFile()) {
-            throw new FileNotFoundException("Zone file " + pathname + " not found.");
-        }
-        if (!f.canRead()) {
-            throw new IOException("Zone file " + pathname + " cannot be read.");
-        }
-
-        XZoneFile zoneFile = new XZoneFile(f);
-        map.put(classname, new ArrayList());
-        
-        for (XZone xzone : zoneFile.getZones()) {
-            if (xzone.isEnabled()) {
-                int index = map.get(classname).size();
-                Zone zone = new Zone(xzone.getKey(), index);
-                zone.setBathyMaskEnabled(xzone.isBathyMaskEnabled());
-                zone.setOffshoreLine(xzone.getOffshoreLine());
-                zone.setInshoreLine(xzone.getInshoreLine());
-                zone.setThicknessEnabled(xzone.isThicknessEnabled());
-                zone.setLowerDepth(xzone.getLowerDepth());
-                zone.setUpperDepth(xzone.getUpperDepth());
-                zone.setColor(xzone.getColor());
-                for (XPoint point : xzone.getPolygon()) {
-                    zone.addPoint(point.createRhoPoint());
+        ArrayList<Zone> zones = new ArrayList();
+        getConfiguration().appendRuntimeParameters(filename, classname);
+        int index = 0;
+        for (String zname : getConfiguration().findKeys(classname + ".zone*.name")) {
+            String zkey = zname.substring(0, zname.lastIndexOf(".name"));
+            if (getConfiguration().getBoolean(zkey + ".enabled")) {
+                Zone zone = new Zone(getConfiguration().getString(zkey + ".name"), index);
+                zone.setBathyMaskEnabled(getConfiguration().getBoolean(zkey + ".bathymetry.enabled"));
+                zone.setOffshoreLine(getConfiguration().getFloat(zkey + ".bathymetry.offshore"));
+                zone.setInshoreLine(getConfiguration().getFloat(zkey + ".bathymetry.inshore"));
+                zone.setThicknessEnabled(getConfiguration().getBoolean(zkey + ".depth.enabled"));
+                zone.setLowerDepth(getConfiguration().getFloat(zkey + ".depth.lower"));
+                zone.setUpperDepth(getConfiguration().getFloat(zkey + ".depth.upper"));
+                zone.setColor(new Color(getConfiguration().getInt(zkey + ".color")));
+                String[] slat = getConfiguration().getArrayString(zkey + ".latitude");
+                String[] slon = getConfiguration().getArrayString(zkey + ".longitude");
+                if (slat.length != slon.length) {
+                    error("Longitude and latitude vectors must have same length", new IOException("Zone " + zone.getKey() + " definition error"));
                 }
-                map.get(classname).add(zone);
+                for (int k = 0; k < slat.length; k++) {
+                    GridPoint rhoPoint = new GridPoint(false);
+                    double lat = Double.valueOf(LonLatConverter.convert(slat[k], LonLatConverter.LonLatFormat.DecimalDeg));
+                    double lon = Double.valueOf(LonLatConverter.convert(slon[k], LonLatConverter.LonLatFormat.DecimalDeg));
+                    rhoPoint.setLat(lat);
+                    rhoPoint.setLon(lon);
+                    zone.addPoint(rhoPoint);
+                }
+                zones.add(zone);
+                index++;
             }
         }
+        map.put(classname, zones);
     }
 
     public ArrayList<Zone> getZones(String classname) {
         return map.get(classname);
     }
-    
+
     public List<String> getClassnames() {
         ArrayList classnames = new ArrayList(map.keySet());
         Collections.sort(classnames);

@@ -75,7 +75,7 @@ public class BottomRelease extends AbstractRelease {
 
         /* Load release zones*/
         String classname = getClass().getCanonicalName();
-        getSimulationManager().getZoneManager().loadZonesFromXMLFile(getConfiguration().getString("release.bottom.zone_file"), classname);
+        getSimulationManager().getZoneManager().loadZones(getConfiguration().getString("release.bottom.zone_file"), classname);
         nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(classname))
                 ? getSimulationManager().getZoneManager().getZones(classname).size()
                 : 0;
