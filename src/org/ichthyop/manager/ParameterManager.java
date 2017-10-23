@@ -97,7 +97,7 @@ public class ParameterManager extends AbstractManager {
         }
         mainFilename = mainFile.getAbsolutePath();
         // load parameters
-        loadParameters(mainFilename, 0, null);
+        loadParameters(mainFilename, 0);
         // check for old XML zone file
         zoneXMLToCFG();
     }
@@ -181,10 +181,6 @@ public class ParameterManager extends AbstractManager {
         setString("configuration.title", longName);
     }
 
-    public void saveParamters() throws IOException, FileNotFoundException {
-        saveParameters(mainFilename);
-    }
-
     public void saveParameters(String filename) throws IOException, FileNotFoundException {
         saveParameters(parameters, filename);
     }
@@ -203,8 +199,6 @@ public class ParameterManager extends AbstractManager {
             Collections.sort(keys);
             int i = 0;
             for (String key : keys) {
-                // skip runtime parameters
-                if (parameters.get(key).runtime) continue;
                 i++;
                 StringBuilder str = new StringBuilder();
                 if (JSON) {
@@ -565,7 +559,7 @@ public class ParameterManager extends AbstractManager {
      * function. Zero for the main configuration file, one for a file loaded
      * from the main configuration file, etc.
      */
-    private void loadParameters(String filename, int depth, String classname) {
+    private void loadParameters(String filename, int depth) {
 
         boolean JSON = filename.endsWith(".json");
         BufferedReader bfIn = null;
@@ -597,10 +591,6 @@ public class ParameterManager extends AbstractManager {
                             ? new Parameter(iline, filename, ":", ",")
                             : new Parameter(iline, filename);
                     entry.parse(line);
-                    if (null != classname && !classname.trim().isEmpty()) {
-                        entry.key = classname.toLowerCase() + "." + entry.key;
-                        entry.runtime = true;
-                    }
                     if (parameters.containsKey(entry.key)) {
                         warning("{0}Ichthyop will ignore parameter {1}", new Object[]{space, entry});
                         warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
@@ -609,7 +599,7 @@ public class ParameterManager extends AbstractManager {
                         parameters.put(entry.key, entry);
                         debug("[configuration] " + space + entry.toString());
                         if (entry.key.startsWith("ichthyop.configuration")) {
-                            loadParameters(getFile(entry.key), depth + 1, classname);
+                            loadParameters(getFile(entry.key), depth + 1);
                         }
                     }
                 }
@@ -618,10 +608,6 @@ public class ParameterManager extends AbstractManager {
         } catch (IOException ex) {
             error("[Configuration] Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
         }
-    }
-
-    public void appendRuntimeParameters(String filename, String classname) {
-        loadParameters(filename, 0, classname);
     }
 
     public String[] getParameterSubsets() {
@@ -665,11 +651,6 @@ public class ParameterManager extends AbstractManager {
          * keySeparator value1 valueSeparator value2 valueSeparator value3</i>
          */
         private String valueSeparator;
-        /**
-         * Whether this parameter is loaded at runtime and should be discarded
-         * when saving configuration to file
-         */
-        private boolean runtime = false;
 
         /**
          * Create a new parameter out of the given line.
@@ -704,7 +685,7 @@ public class ParameterManager extends AbstractManager {
         Parameter(String key, String value) {
             this.key = key;
             this.value = value;
-            this.source = "command line";
+            this.source = null;
             this.iline = -1;
         }
 
@@ -718,10 +699,28 @@ public class ParameterManager extends AbstractManager {
          */
         private void parse(String line) {
             key = value = null;
+            // key separator
             if (null == keySeparator) {
                 keySeparator = Separator.guess(line, Separator.COMA).toString();
             }
-            split(line);
+            // make sure the line contains at least one semi-colon (key;value)
+            if (!line.contains(keySeparator)) {
+                error("[Configuration] Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
+            }
+            // extract the key and remove leading and trailing double quotes
+            key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim().replaceAll("^\"|\"$", "");
+            // extract the value
+            try {
+                value = line.substring(line.indexOf(keySeparator) + 1).trim();
+            } catch (StringIndexOutOfBoundsException ex) {
+                // set value to "null"
+                value = "null";
+            }
+            // set empty value to "null"
+            if (value.isEmpty()) {
+                value = "null";
+            }
+            // value separator
             if (null == valueSeparator) {
                 valueSeparator = Separator.guess(value, Separator.COMA).toString();
             }
@@ -746,34 +745,6 @@ public class ParameterManager extends AbstractManager {
             }
         }
 
-        /**
-         * Splits the given line into a key and a value, using the
-         * {@code keySeparator}. Sends and error message if the line cannot be
-         * split.
-         *
-         * @param line, the line to be split into a key and a value.
-         */
-        private void split(String line) {
-
-            // make sure the line contains at least one semi-colon (key;value)
-            if (!line.contains(keySeparator)) {
-                error("[Configuration] Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
-            }
-            // extract the key and remove leading and trailing double quotes
-            key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim().replaceAll("^\"|\"$", "");
-            // extract the value
-            try {
-                value = line.substring(line.indexOf(keySeparator) + 1).trim();
-            } catch (StringIndexOutOfBoundsException ex) {
-                // set value to "null"
-                value = "null";
-            }
-            // set empty value to "null"
-            if (value.isEmpty()) {
-                value = "null";
-            }
-        }
-
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder();
@@ -781,7 +752,7 @@ public class ParameterManager extends AbstractManager {
             str.append(" = ");
             str.append(value);
             str.append(" (from ");
-            str.append(source);
+            str.append((null != source) ? source : "runtime");
             if (iline >= 0) {
                 str.append(" line ");
                 str.append(iline);

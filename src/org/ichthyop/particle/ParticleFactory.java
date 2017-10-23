@@ -125,7 +125,7 @@ public class ParticleFactory extends IchthyopLinker {
         return particle;
     }
 
-    public static IParticle createZoneParticle(int index, double x, double y, double depth, String classname) {
+    public static IParticle createZoneParticle(int index, double x, double y, double depth, String zoneprefix) {
         Particle particle = new Particle();
         particle.setIndex(index);
         particle.setX(x);
@@ -148,7 +148,7 @@ public class ParticleFactory extends IchthyopLinker {
                 return null;
             }
         }
-        int numReleaseZone = ZoneParticle.getNumZone(particle, classname);
+        int numReleaseZone = ZoneParticle.getNumZone(particle, zoneprefix);
         if (numReleaseZone == -1) {
             return null;
         }
@@ -157,7 +157,7 @@ public class ParticleFactory extends IchthyopLinker {
         return particle;
     }
 
-    public static IParticle createBottomParticle(int index, double x, double y, String classname) {
+    public static IParticle createBottomParticle(int index, double x, double y, String zoneprefix) {
 
         Particle particle = new Particle();
         particle.setIndex(index);
@@ -176,7 +176,7 @@ public class ParticleFactory extends IchthyopLinker {
         /*
          * Test wether the grid point is inside one of the release zones
          */
-        int numReleaseZone = ZoneParticle.getNumZone(particle, classname);
+        int numReleaseZone = ZoneParticle.getNumZone(particle, zoneprefix);
         if (numReleaseZone == -1) {
             return null;
         }

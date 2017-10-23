@@ -738,7 +738,7 @@ public class IchthyopView extends FrameView
 
         @Override
         protected Object doInBackground() throws Exception {
-            getSimulationManager().getParameterManager().saveParamters();
+            getSimulationManager().getParameterManager().saveParameters(getSimulationManager().getConfigurationFile().getAbsolutePath());
             getSimulationManager().setConfigurationFile(getSimulationManager().getConfigurationFile());
             return null;
         }

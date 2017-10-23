@@ -78,12 +78,12 @@ public class ZoneTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addCustomDimension(new Dimension("zones", getSimulationManager().getZoneManager().getClassnames().size()));
+        addCustomDimension(new Dimension("zones", getSimulationManager().getZoneManager().getPrefixes().size()));
     }
 
     @Override
     Array createArray() {
-        int nzones = getSimulationManager().getZoneManager().getClassnames().size();
+        int nzones = getSimulationManager().getZoneManager().getPrefixes().size();
         ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), nzones);
         // Initialises zone array with -99
         for (int iZone = 0; iZone < nzones; iZone++) {
@@ -98,14 +98,14 @@ public class ZoneTracker extends AbstractTracker {
     public void track() {
         IParticle particle;
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        List<String> classnames = getSimulationManager().getZoneManager().getClassnames();
+        List<String> prefixes = getSimulationManager().getZoneManager().getPrefixes();
         while (iter.hasNext()) {
             particle = iter.next();
             Index index = getArray().getIndex();
             int iclass = 0;
-            for (String classname : classnames) {
+            for (String prefix : prefixes) {
                 index.set(0, particle.getIndex(), iclass);
-                getArray().setInt(index, ZoneParticle.getNumZone(particle, classname));
+                getArray().setInt(index, ZoneParticle.getNumZone(particle, prefix));
                 iclass++;
             }
         }
@@ -115,17 +115,16 @@ public class ZoneTracker extends AbstractTracker {
     public void addRuntimeAttributes() {
 
         int iclass = 0;
-        List<String> classnames = getSimulationManager().getZoneManager().getClassnames();
-        for (String classname : classnames) {
-            String simplename = classname.substring(classname.lastIndexOf(".") + 1);
-            addAttribute(new Attribute("zones@" + simplename, iclass));
-            List<Zone> zones = getSimulationManager().getZoneManager().getZones(classname);
+        List<String> prefixes = getSimulationManager().getZoneManager().getPrefixes();
+        for (String prefix : prefixes) {
+            addAttribute(new Attribute("zones@" + prefix, iclass));
+            List<Zone> zones = getSimulationManager().getZoneManager().getZones(prefix);
             if (null != zones) {
                 for (Zone zone : zones) {
-                    addAttribute(new Attribute(simplename + "@" + zone.getKey(), zone.getIndex()));
+                    addAttribute(new Attribute(prefix + "@" + zone.getKey(), zone.getIndex()));
                 }
             } else {
-                addAttribute(new Attribute(simplename, "none for this run"));
+                addAttribute(new Attribute(prefix, "none for this run"));
             }
             iclass++;
         }

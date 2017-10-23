@@ -80,6 +80,7 @@ public class RecruitmentZoneAction extends AbstractAction {
     private float lengthMinAtRecruitment;
     private boolean isAgeCriterion;
     private boolean stopMovingOnceRecruited;
+     private String zonePrefix;
 
     @Override
     public String getKey() {
@@ -102,7 +103,8 @@ public class RecruitmentZoneAction extends AbstractAction {
             lengthMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_length");
         }
         stopMovingOnceRecruited = getConfiguration().getBoolean("action.recruitment.zone.stop_moving");
-        getSimulationManager().getZoneManager().loadZones(getConfiguration().getString("action.recruitment.zone.zone_file"), getClass().getCanonicalName());
+        zonePrefix = getConfiguration().getString("action.recruitment.zone.zone_prefix");
+        getSimulationManager().getZoneManager().loadZones(zonePrefix);
         boolean addTracker = true;
         try {
             addTracker = getConfiguration().getBoolean("action.recruitment.zone.recruited_tracker");
@@ -136,7 +138,7 @@ public class RecruitmentZoneAction extends AbstractAction {
             return;
         }
 
-        int numCurrentZone = ZoneParticle.getNumZone(particle, getClass().getCanonicalName());
+        int numCurrentZone = ZoneParticle.getNumZone(particle, zonePrefix);
         if ((numCurrentZone != -1) && !RecruitableParticle.isRecruited(particle, numCurrentZone)) {
 
             if (satisfyRecruitmentCriterion(particle)) {

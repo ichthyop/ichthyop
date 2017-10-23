@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.output;
 
 import java.util.List;
@@ -94,7 +93,7 @@ public class ReleaseZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
 
-        List<Zone> zones = getSimulationManager().getZoneManager().getZones(ZoneRelease.class.getCanonicalName());
+        List<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("release.zone.zone_prefix"));
         if (null != zones) {
             for (Zone zone : zones) {
                 addAttribute(new Attribute(zone.getKey(), zone.getIndex()));
@@ -108,10 +107,11 @@ public class ReleaseZoneTracker extends AbstractTracker {
     public void track() {
 
         int nNow = getSimulationManager().getSimulation().getPopulation().size();
+        String zoneprefix = getConfiguration().getString("release.zone.zone_prefix");
         // Only write release zone when particle is released
         for (int i = nPopTm1; i < nNow; i++) {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
-            getArray().setInt(getIndex().set(particle.getIndex()), ZoneParticle.getNumZone(particle, ZoneRelease.class.getCanonicalName()));
+            getArray().setInt(getIndex().set(particle.getIndex()), ZoneParticle.getNumZone(particle, zoneprefix));
         }
         nPopTm1 = nNow;
 
@@ -120,10 +120,10 @@ public class ReleaseZoneTracker extends AbstractTracker {
             disable();
         }
     }
-    
+
     @Override
     public int[] origin(int index_record) {
         // No time dimension, only drifter dimension that starts at zero
-        return new int[] {0};
+        return new int[]{0};
     }
 }

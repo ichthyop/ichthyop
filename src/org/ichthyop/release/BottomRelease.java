@@ -66,6 +66,7 @@ import org.ichthyop.particle.ParticleFactory;
 public class BottomRelease extends AbstractRelease {
 
  private int nbReleaseZones, nParticles;
+  private String zonePrefix;
 
     @Override
     public void loadParameters() throws Exception {
@@ -74,10 +75,10 @@ public class BottomRelease extends AbstractRelease {
         nParticles = getConfiguration().getInt("release.bottom.number_particles");
 
         /* Load release zones*/
-        String classname = getClass().getCanonicalName();
-        getSimulationManager().getZoneManager().loadZones(getConfiguration().getString("release.bottom.zone_file"), classname);
-        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(classname))
-                ? getSimulationManager().getZoneManager().getZones(classname).size()
+        zonePrefix = getConfiguration().getString("release.zone.zone_prefix");
+        getSimulationManager().getZoneManager().loadZones(zonePrefix);
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(zonePrefix))
+                ? getSimulationManager().getZoneManager().getZones(zonePrefix).size()
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
     }
@@ -91,9 +92,8 @@ public class BottomRelease extends AbstractRelease {
         ymin = Double.MAX_VALUE;
         xmax = 0.d;
         ymax = 0.d;
-        String classname = getClass().getCanonicalName();
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-            Zone zone = getSimulationManager().getZoneManager().getZones(classname).get(i_zone);
+            Zone zone = getSimulationManager().getZoneManager().getZones(zonePrefix).get(i_zone);
             xmin = Math.min(xmin, zone.getXmin());
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());
@@ -112,7 +112,7 @@ public class BottomRelease extends AbstractRelease {
                 }
                 double x = xmin + Math.random() * (xmax - xmin);
                 double y = ymin + Math.random() * (ymax - ymin);
-                particle = ParticleFactory.createBottomParticle(index, x, y, classname);
+                particle = ParticleFactory.createBottomParticle(index, x, y, zonePrefix);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;

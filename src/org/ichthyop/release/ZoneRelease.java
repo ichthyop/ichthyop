@@ -68,6 +68,7 @@ public class ZoneRelease extends AbstractRelease {
 
     private int nbReleaseZones, nParticles;
     private boolean is3D;
+    private String zonePrefix;
 
     @Override
     public void loadParameters() throws Exception {
@@ -79,16 +80,17 @@ public class ZoneRelease extends AbstractRelease {
         is3D = getSimulationManager().getDataset().is3D();
 
         /* Load release zones*/
-        String classname = getClass().getCanonicalName();
-        getSimulationManager().getZoneManager().loadZones(getConfiguration().getFile("release.zone.zone_file"), classname);
-        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(classname))
-                ? getSimulationManager().getZoneManager().getZones(classname).size()
+        zonePrefix = getConfiguration().getString("release.zone.zone_prefix");
+        getSimulationManager().getZoneManager().loadZones(zonePrefix);
+        nbReleaseZones = (null != getSimulationManager().getZoneManager().getZones(zonePrefix))
+                ? getSimulationManager().getZoneManager().getZones(zonePrefix).size()
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
         getSimulationManager().getOutputManager().addPredefinedTracker(ReleaseZoneTracker.class);
     }
 
     @Override
+    
     public int release(ReleaseEvent event) throws Exception {
 
         double xmin, xmax, ymin, ymax;
@@ -98,9 +100,8 @@ public class ZoneRelease extends AbstractRelease {
         ymin = Double.MAX_VALUE;
         xmax = 0.d;
         ymax = 0.d;
-        String classname = getClass().getCanonicalName();
         for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-            Zone zone = getSimulationManager().getZoneManager().getZones(classname).get(i_zone);
+            Zone zone = getSimulationManager().getZoneManager().getZones(zonePrefix).get(i_zone);
             xmin = Math.min(xmin, zone.getXmin());
             xmax = Math.max(xmax, zone.getXmax());
             ymin = Math.min(ymin, zone.getYmin());
@@ -129,7 +130,7 @@ public class ZoneRelease extends AbstractRelease {
                 if (is3D) {
                     depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
                 }
-                particle = ParticleFactory.createZoneParticle(index, x, y, depth, classname);
+                particle = ParticleFactory.createZoneParticle(index, x, y, depth, zonePrefix);
             }
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;

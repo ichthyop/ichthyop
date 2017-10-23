@@ -86,12 +86,12 @@ public class ZoneManager extends AbstractManager {
         map.clear();
     }
 
-    public void loadZones(String filename, String classname) throws Exception {
+    public void loadZones(String prefix) throws Exception {
 
         ArrayList<Zone> zones = new ArrayList();
-        getConfiguration().appendRuntimeParameters(filename, classname);
+        
         int index = 0;
-        for (String zname : getConfiguration().findKeys(classname + ".zone*.name")) {
+        for (String zname : getConfiguration().findKeys(prefix + ".zone*.name")) {
             String zkey = zname.substring(0, zname.lastIndexOf(".name"));
             if (getConfiguration().getBoolean(zkey + ".enabled")) {
                 Zone zone = new Zone(getConfiguration().getString(zkey + ".name"), index);
@@ -119,17 +119,17 @@ public class ZoneManager extends AbstractManager {
                 index++;
             }
         }
-        map.put(classname, zones);
+        map.put(prefix, zones);
     }
 
-    public ArrayList<Zone> getZones(String classname) {
-        return map.get(classname);
+    public ArrayList<Zone> getZones(String prefix) {
+        return map.get(prefix);
     }
 
-    public List<String> getClassnames() {
-        ArrayList classnames = new ArrayList(map.keySet());
-        Collections.sort(classnames);
-        return classnames;
+    public List<String> getPrefixes() {
+        ArrayList prefixes = new ArrayList(map.keySet());
+        Collections.sort(prefixes);
+        return prefixes;
     }
 
     @Override
