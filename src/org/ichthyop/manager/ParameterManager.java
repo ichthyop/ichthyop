@@ -107,19 +107,19 @@ public class ParameterManager extends AbstractManager {
         cfg.load();
         cfg.upgrade();
         HashMap<String, String> rawParamMap = cfg.toProperties(true);
-        HashMap<String, Parameter> paramMap = new HashMap();
-        String paramFilename = file.getAbsolutePath().replaceAll("xml$", "cfg");
+        List<Parameter> cfgparam = new ArrayList();
+        String filename = file.getAbsolutePath().replaceAll("xml$", "cfg");
         int i = 1;
         for (Entry<String, String> entry : rawParamMap.entrySet()) {
-            Parameter parameter = new Parameter(i, paramFilename);
+            Parameter parameter = new Parameter(i, filename);
             parameter.parse(entry.toString());
-            paramMap.put(parameter.key, parameter);
+            cfgparam.add(parameter);
             debug(parameter.toString());
             i++;
         }
-        warning("[Configuration] XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), new File(paramFilename).getName()});
-        saveParameters(paramMap, paramFilename);
-        return new File(paramFilename);
+        warning("[Configuration] XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), new File(filename).getName()});
+        saveParameters(cfgparam, filename);
+        return new File(filename);
     }
 
     private void zoneXMLToCFG() throws Exception {
@@ -133,7 +133,7 @@ public class ParameterManager extends AbstractManager {
         boolean mainHasChanged = false;
         for (String key : zkeys) {
             File zfile = new File(getFile(key));
-            String zoneFilename = zfile.getAbsolutePath().replaceAll("xml$", "cfg");
+            String filename = zfile.getAbsolutePath().replaceAll("xml$", "cfg");
             // rename parameter zone_file in zone_prefix
             String prefix = key.toLowerCase().substring(0, key.lastIndexOf("."));
             Parameter prefixP = parameters.remove(key);
@@ -151,27 +151,24 @@ public class ParameterManager extends AbstractManager {
             // add new parameter ichthyop.configuration.${prefix}
             Parameter zoneP = new Parameter(-1, prefixP.source, prefixP.keySeparator, prefixP.valueSeparator);
             zoneP.key = "ichthyop.configuration." + prefix;
-            zoneP.value = zoneFilename;
+            zoneP.value = filename;
             parameters.put(zoneP.key, zoneP);
             warning("[configuration] Added new parameter " + zoneP);
             // load xml zone definition
             HashMap<String, String> rawZoneMap = new XZoneFile(zfile).toProperties();
-            HashMap<String, Parameter> zones = new HashMap();
             int i = 1;
             for (Entry<String, String> entry : rawZoneMap.entrySet()) {
-                Parameter parameter = new Parameter(i, zoneFilename);
+                Parameter parameter = new Parameter(i, filename);
                 parameter.parse(entry.toString());
                 parameter.key = prefix + "." + parameter.key;
-                zones.put(parameter.key, parameter);
+                parameters.put(parameter.key, parameter);
                 debug(parameter.toString());
                 i++;
             }
-            warning("[Configuration] XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(zoneFilename).getName()});
-            saveParameters(zones, zoneFilename);
-            parameters.putAll(zones);
+            warning("[Configuration] XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(filename).getName()});
         }
         if (mainHasChanged) {
-            saveParameters(mainFilename);
+            saveParameters();
         }
     }
 
@@ -203,11 +200,39 @@ public class ParameterManager extends AbstractManager {
         setString("configuration.title", longName);
     }
 
-    public void saveParameters(String filename) throws IOException, FileNotFoundException {
-        saveParameters(parameters, filename);
+    public void updateSource(String source) {
+
+        for (Parameter parameter : parameters.values()) {
+            if (parameter.source.equals(mainFilename)) {
+                parameter.source = source;
+            }
+        }
     }
 
-    private void saveParameters(HashMap<String, Parameter> parameters, String filename) throws IOException, FileNotFoundException {
+    /**
+     * Save all the parameters in their corresponding file sources.
+     *
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    public void saveParameters() throws IOException, FileNotFoundException {
+
+        // find sources
+        HashMap<String, List<Parameter>> parametersBySource = new HashMap();
+        for (Parameter parameter : parameters.values()) {
+            if (!parametersBySource.containsKey(parameter.source)) {
+                parametersBySource.put(parameter.source, new ArrayList());
+            }
+            parametersBySource.get(parameter.source).add(parameter);
+        }
+
+        // save parameters for every source
+        for (String source : parametersBySource.keySet()) {
+            saveParameters(parametersBySource.get(source), source);
+        }
+    }
+
+    private void saveParameters(List<Parameter> parameters, String filename) throws IOException, FileNotFoundException {
 
         boolean JSON = filename.endsWith(".json");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -217,24 +242,22 @@ public class ParameterManager extends AbstractManager {
                 str.append("{").append(newline);
                 writer.write(str.toString());
             }
-            List<String> keys = new ArrayList(parameters.keySet());
-            Collections.sort(keys);
+            Collections.sort(parameters, (Parameter p1, Parameter p2) -> p1.key.compareTo(p2.key));
             int i = 0;
-            for (String key : keys) {
+            for (Parameter parameter : parameters) {
                 i++;
                 StringBuilder str = new StringBuilder();
                 if (JSON) {
                     str.append("    ");
                 }
-                str.append("\"").append(key).append("\"");
-                str.append(JSON ? ": " : parameters.get(key).keySeparator);
-                String value = parameters.get(key).value;
-                if (StringUtil.isNotString(value) | StringUtil.isQuoted(value)) {
-                    str.append(value);
+                str.append("\"").append(parameter.key).append("\"");
+                str.append(JSON ? ": " : parameter.keySeparator);
+                if (StringUtil.isNotString(parameter.value) | StringUtil.isQuoted(parameter.value)) {
+                    str.append(parameter.value);
                 } else {
-                    str.append("\"").append(value).append("\"");
+                    str.append("\"").append(parameter.value).append("\"");
                 }
-                if (JSON && (i != keys.size())) {
+                if (JSON && (i != parameters.size())) {
                     str.append(",");
                 }
                 str.append(newline);
@@ -651,7 +674,7 @@ public class ParameterManager extends AbstractManager {
         /**
          * Path of the configuration file containing the parameter.
          */
-        private final String source;
+        private String source;
         /**
          * The line of the parameter in the configuration file.
          */
