@@ -61,68 +61,71 @@ import org.ichthyop.IchthyopLinker;
  * @author pverley
  */
 public class UIParameterSubset extends IchthyopLinker {
-
+    
     final private String key;
-
+    
     public UIParameterSubset(String key) {
         this.key = key;
     }
-
+    
     public String getKey() {
         return key;
     }
-
+    
     public Type getType() {
         return getConfiguration().isNull(key + ".type")
                 ? Type.OPTION
                 : Type.getType(getConfiguration().getString(key + ".type"));
     }
-
+    
     public String getTreePath() {
         return getConfiguration().getString(key + ".treepath");
     }
-
+    
     public boolean isEnabled() {
         return getConfiguration().getBoolean(key + ".enabled", false);
     }
-
+    
     public void setEnabled(boolean enabled) {
         getConfiguration().setString(key + ".enabled", Boolean.toString(enabled));
     }
-
+    
     public String getDescription() {
         return getConfiguration().isNull(key + ".description")
                 ? null
                 : getConfiguration().getString(key + ".description");
     }
-
+    
     public List<UIParameter> getParameters() {
         String[] pkeys = getConfiguration().getArrayString(key + ".parameters");
         List<UIParameter> parameters = new ArrayList(pkeys.length);
         for (String pkey : pkeys) {
-            parameters.add(new UIParameter(key + "." + pkey));
+            if (getConfiguration().canFind(key + "." + pkey)) {
+                parameters.add(new UIParameter(key + "." + pkey));
+            }
         }
         return parameters;
     }
     
     public enum Type {
-
-    OPTION,
-    ACTION,
-    RELEASE,
-    DATASET;
-
-    public static Type getType(String value) {
-        for (Type type : values()) {
-            if (type.toString().equals(value))
-                return type;
+        
+        OPTION,
+        ACTION,
+        RELEASE,
+        DATASET;
+        
+        public static Type getType(String value) {
+            for (Type type : values()) {
+                if (type.toString().equals(value)) {
+                    return type;
+                }
+            }
+            return null;
         }
-        return null;
+        
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
     }
-
-    @Override
-    public String toString() {
-        return name().toLowerCase();
-    }
-}
 }

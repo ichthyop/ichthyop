@@ -134,14 +134,23 @@ public class ParameterManager extends AbstractManager {
         for (String key : zkeys) {
             File zfile = new File(getFile(key));
             String filename = zfile.getAbsolutePath().replaceAll("xml$", "cfg");
-            // rename parameter zone_file in zone_prefix
+            // add parameter zone_prefix
             String prefix = key.toLowerCase().substring(0, key.lastIndexOf("."));
-            Parameter prefixP = parameters.remove(key);
+            Parameter zonefileP = parameters.remove(key);
             warning("[configuration] Removed deprecated parameter " + key);
+            Parameter prefixP = new Parameter(zonefileP.iline, zonefileP.source, zonefileP.keySeparator, zonefileP.valueSeparator);
             prefixP.key = prefix + ".zone_prefix";
             prefixP.value = prefix;
             parameters.put(prefixP.key, prefixP);
             warning("[configuration] Added new parameter " + prefixP);
+            if (!isNull(prefix + ".parameters")) {
+                String[] zparam = getArrayString(prefix + ".parameters");
+                for (int k = 0; k < zparam.length; k++) {
+                    if ("zone_file".equals(zparam[k])) {
+                        zparam[k] = "zone_prefix";
+                    }
+                }
+            }
             // configuration file has changed
             mainHasChanged = true;
             // XML zone file does not exist
@@ -155,12 +164,15 @@ public class ParameterManager extends AbstractManager {
             parameters.put(zoneP.key, zoneP);
             warning("[configuration] Added new parameter " + zoneP);
             // load xml zone definition
-            HashMap<String, String> rawZoneMap = new XZoneFile(zfile).toProperties();
+            HashMap<String, String> rawZoneMap = new XZoneFile(zfile).toProperties(prefix, true);
             int i = 1;
             for (Entry<String, String> entry : rawZoneMap.entrySet()) {
                 Parameter parameter = new Parameter(i, filename);
                 parameter.parse(entry.toString());
-                parameter.key = prefix + "." + parameter.key;
+                if (parameter.key.equals("configuration.subsets")) {
+                    parameters.get("configuration.subsets").value = parameter.value;
+                    continue;
+                }
                 parameters.put(parameter.key, parameter);
                 debug(parameter.toString());
                 i++;

@@ -58,13 +58,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.util.StringUtil;
 import org.ichthyop.xml.XZone.XPoint;
 import org.jdom2.Document;
@@ -192,14 +192,15 @@ public class XZoneFile extends IchthyopLinker {
         zone.setKey(newKey);
         zones.put(newKey, zone);
     }
-    
-    public HashMap<String, String> toProperties() throws IOException {
-        
+
+    public HashMap<String, String> toProperties(String prefix, boolean extended) throws IOException {
+
         HashMap<String, String> parameters = new LinkedHashMap();
         int index = 0;
         for (XZone zone : zones.values()) {
-            String zkey = "zone" + index;
-            parameters.put(zkey + ".name", zone.getKey());
+            String zkey = prefix + ".zone" + index;
+            String name = zone.getKey().trim().isEmpty() ? "Zone" + index : zone.getKey().trim();
+            parameters.put(zkey + ".name", name);
             parameters.put(zkey + ".enabled", String.valueOf(zone.isEnabled()));
             String[] lat = new String[zone.getPolygon().size()];
             String[] lon = new String[lat.length];
@@ -209,18 +210,58 @@ public class XZoneFile extends IchthyopLinker {
                 lon[i] = point.getLon();
                 i++;
             }
-            parameters.put(zkey+".latitude",  StringUtil.handleArray(lat));
-            parameters.put(zkey+".longitude",  StringUtil.handleArray(lon));
-            parameters.put(zkey+".bathymetry.enabled", String.valueOf(zone.isBathyMaskEnabled()));
-            parameters.put(zkey+".bathymetry.inshore", StringUtil.nullify(String.valueOf(zone.getInshoreLine())));
-            parameters.put(zkey+".bathymetry.offshore", StringUtil.nullify(String.valueOf(zone.getOffshoreLine())));
-            parameters.put(zkey+".depth.enabled", String.valueOf(zone.isThicknessEnabled()));
-            parameters.put(zkey+".depth.lower", StringUtil.nullify(String.valueOf(zone.getLowerDepth())));
-            parameters.put(zkey+".depth.upper", StringUtil.nullify(String.valueOf(zone.getUpperDepth())));
-            parameters.put(zkey+".color", String.valueOf(zone.getColor().getRGB()));
+            parameters.put(zkey + ".latitude", StringUtil.handleArray(lat));
+            parameters.put(zkey + ".longitude", StringUtil.handleArray(lon));
+            parameters.put(zkey + ".bathymetry.enabled", String.valueOf(zone.isBathyMaskEnabled()));
+            parameters.put(zkey + ".bathymetry.inshore", StringUtil.nullify(String.valueOf(zone.getInshoreLine())));
+            parameters.put(zkey + ".bathymetry.offshore", StringUtil.nullify(String.valueOf(zone.getOffshoreLine())));
+            parameters.put(zkey + ".depth.enabled", String.valueOf(zone.isThicknessEnabled()));
+            parameters.put(zkey + ".depth.lower", StringUtil.nullify(String.valueOf(zone.getLowerDepth())));
+            parameters.put(zkey + ".depth.upper", StringUtil.nullify(String.valueOf(zone.getUpperDepth())));
+            parameters.put(zkey + ".color", String.valueOf(zone.getColor().getRGB()));
+            if (extended) {
+                parameters.put(zkey + ".name.longname", "Name of the zone");
+                parameters.put(zkey + ".name.description", "Name of the zone (alphanumerical characters only).");
+                parameters.put(zkey + ".latitude.format", "lonlat");
+                parameters.put(zkey + ".latitude.longname", "Polygon latitudes");
+                parameters.put(zkey + ".latitude.description", "Vector of latitudes of the polygonal chain.");
+                parameters.put(zkey + ".longitude.format", "lonlat");
+                parameters.put(zkey + ".longitude.longname", "Polygon longitudes");
+                parameters.put(zkey + ".longitude.description", "Vector of longitudes of the polygonal chain.");
+                parameters.put(zkey + ".bathymetry.enabled.format", "boolean");
+                parameters.put(zkey + ".bathymetry.enabled.longname", "Enabled bathymetry mask");
+                parameters.put(zkey + ".bathymetry.enabled.description", "Whether to refine the zone definition by specifying inshore and offshore bathymetry lines.");
+                parameters.put(zkey + ".bathymetry.inshore.format", "float");
+                parameters.put(zkey + ".bathymetry.inshore.longname", "Inshore bathymetry line (meter)");
+                parameters.put(zkey + ".bathymetry.inshore.description", "Inshore bathymetry line (meter) to refine the zone definition.");
+                parameters.put(zkey + ".bathymetry.offshore.format", "float");
+                parameters.put(zkey + ".bathymetry.offshore.longname", "Offshore bathymetry line (meter)");
+                parameters.put(zkey + ".bathymetry.offshore.description", "Offshore bathymetry line (meter) to refine the zone definition.");
+                parameters.put(zkey + ".depth.enabled.format", "boolean");
+                parameters.put(zkey + ".depth.enabled.longname", "Crop zone vertical extension");
+                parameters.put(zkey + ".depth.enabled.description", "Whether to crop the zone vertical extension in 3D simulation. By default the zone covers the whole water column.");
+                parameters.put(zkey + ".depth.upper.format", "float");
+                parameters.put(zkey + ".depth.upper.longname", "Upper depth (meter)");
+                parameters.put(zkey + ".depth.upper.description", "Upper depth (close surface), in meter below surface level, of the zone.");
+                parameters.put(zkey + ".depth.lower.format", "float");
+                parameters.put(zkey + ".depth.lower.longname", "Lower depth (meter)");
+                parameters.put(zkey + ".depth.lower.description", "Lower depth (close bottom), in meter below surface level, of the zone.");
+                parameters.put(zkey + ".parameters", StringUtil.handleArray(new String[]{
+                    "name",
+                    "latitude", "longitude",
+                    "bathymetry.enabled", "bathymetry.inshore", "bathymetry.offshore",
+                    "depth.enabled", "depth.upper", "depth.lower"
+                }));
+                parameters.put(zkey + ".treepath", "Zones/" + prefix + "/zone" + index);
+                parameters.put(zkey + ".description", "Zone definition linked to submodel " + prefix);
+                String[] subsets = getConfiguration().getParameterSubsets();
+                String[] newsubsets = Arrays.copyOf(subsets, subsets.length + 1);
+                newsubsets[subsets.length] = zkey;
+                parameters.put("configuration.subsets", StringUtil.handleArray(newsubsets));
+            }
             index++;
         }
-        
+
         return parameters;
     }
 }
