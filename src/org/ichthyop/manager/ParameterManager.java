@@ -124,29 +124,51 @@ public class ParameterManager extends AbstractManager {
 
     private void zoneXMLToCFG() throws Exception {
 
-        boolean mainHasChanged = false;
+        List<String> zkeys = new ArrayList();
         for (String key : parameters.keySet()) {
             if (key.toLowerCase().endsWith("zone_file") && getString(key).endsWith(".xml")) {
-                File zfile = new File(getString(key));
-                String zoneFilename = zfile.getAbsolutePath().replaceAll("xml$", "cfg");
-                setString(key, zoneFilename);
-                mainHasChanged = true;
-                if (!zfile.exists()) {
-                    continue;
-                }
-                HashMap<String, String> rawZoneMap = new XZoneFile(zfile).toProperties();
-                HashMap<String, Parameter> zoneMap = new HashMap();
-                int i = 1;
-                for (Entry<String, String> entry : rawZoneMap.entrySet()) {
-                    Parameter parameter = new Parameter(i, zoneFilename);
-                    parameter.parse(entry.toString());
-                    zoneMap.put(parameter.key, parameter);
-                    debug(parameter.toString());
-                    i++;
-                }
-                warning("[Configuration] XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(zoneFilename).getName()});
-                saveParameters(zoneMap, zoneFilename);
+                zkeys.add(key);
             }
+        }
+        boolean mainHasChanged = false;
+        for (String key : zkeys) {
+            File zfile = new File(getFile(key));
+            String zoneFilename = zfile.getAbsolutePath().replaceAll("xml$", "cfg");
+            // rename parameter zone_file in zone_prefix
+            String prefix = key.toLowerCase().substring(0, key.lastIndexOf("."));
+            Parameter prefixP = parameters.remove(key);
+            warning("[configuration] Removed deprecated parameter " + key);
+            prefixP.key = prefix + ".zone_prefix";
+            prefixP.value = prefix;
+            parameters.put(prefixP.key, prefixP);
+            warning("[configuration] Added new parameter " + prefixP);
+            // configuration file has changed
+            mainHasChanged = true;
+            // XML zone file does not exist
+            if (!zfile.exists()) {
+                continue;
+            }
+            // add new parameter ichthyop.configuration.${prefix}
+            Parameter zoneP = new Parameter(-1, prefixP.source, prefixP.keySeparator, prefixP.valueSeparator);
+            zoneP.key = "ichthyop.configuration." + prefix;
+            zoneP.value = zoneFilename;
+            parameters.put(zoneP.key, zoneP);
+            warning("[configuration] Added new parameter " + zoneP);
+            // load xml zone definition
+            HashMap<String, String> rawZoneMap = new XZoneFile(zfile).toProperties();
+            HashMap<String, Parameter> zones = new HashMap();
+            int i = 1;
+            for (Entry<String, String> entry : rawZoneMap.entrySet()) {
+                Parameter parameter = new Parameter(i, zoneFilename);
+                parameter.parse(entry.toString());
+                parameter.key = prefix + "." + parameter.key;
+                zones.put(parameter.key, parameter);
+                debug(parameter.toString());
+                i++;
+            }
+            warning("[Configuration] XML format deprecated. Zone file {0} has been converted to CFG format {1}", new String[]{zfile.getName(), new File(zoneFilename).getName()});
+            saveParameters(zones, zoneFilename);
+            parameters.putAll(zones);
         }
         if (mainHasChanged) {
             saveParameters(mainFilename);
