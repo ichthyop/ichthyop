@@ -246,11 +246,16 @@ public class XZoneFile extends IchthyopLinker {
                 parameters.put(zkey + ".depth.lower.format", "float");
                 parameters.put(zkey + ".depth.lower.longname", "Lower depth (meter)");
                 parameters.put(zkey + ".depth.lower.description", "Lower depth (close bottom), in meter below surface level, of the zone.");
+                parameters.put(zkey + ".color.format", "integer");
+                parameters.put(zkey + ".color.longname", "Color of the zone");
+                parameters.put(zkey + ".color.description", "Integer representation of the color of the zone.");
+                
                 parameters.put(zkey + ".parameters", StringUtil.handleArray(new String[]{
                     "name",
                     "latitude", "longitude",
                     "bathymetry.enabled", "bathymetry.inshore", "bathymetry.offshore",
-                    "depth.enabled", "depth.upper", "depth.lower"
+                    "depth.enabled", "depth.upper", "depth.lower",
+                    "color"
                 }));
                 parameters.put(zkey + ".treepath", "Zones/" + prefix + "/zone" + index);
                 parameters.put(zkey + ".description", "Zone definition linked to submodel " + prefix);
