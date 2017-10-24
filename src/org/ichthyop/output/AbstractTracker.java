@@ -53,7 +53,6 @@
 
 package org.ichthyop.output;
 
-import org.ichthyop.Zone;
 import org.ichthyop.manager.OutputManager.NCDimFactory;
 import org.ichthyop.manager.PropertyManager;
 import org.ichthyop.IchthyopLinker;

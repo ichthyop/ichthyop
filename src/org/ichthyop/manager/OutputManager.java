@@ -201,12 +201,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 zoneAreas.add(iZone, makeZoneArea(zone));
                 Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
                 ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
-                ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getKey());
+                ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getName());
                 ncOut.addVariableAttribute("zone" + iZone, "unit", "x and y coordinates of the center of the cells in the zone");
-                ncOut.addVariableAttribute("zone" + iZone, "prefix", prefix);
-                String color = zone.getColor().toString();
-                color = color.substring(color.lastIndexOf("["));
-                ncOut.addVariableAttribute("zone" + iZone, "color", color);
+                ncOut.addVariableAttribute("zone" + iZone, "key", zone.getKey());
+                ncOut.addVariableAttribute("zone" + iZone, "color", zone.getColor().getRGB());
                 iZone++;
             }
         }

@@ -54,7 +54,6 @@ package org.ichthyop.particle;
 
 import java.io.IOException;
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.Zone;
 
 /**
  *

@@ -64,18 +64,16 @@ import org.ichthyop.IchthyopLinker;
 public class ZoneParticle extends IchthyopLinker {
 
     public static int getNumZone(IParticle particle, String zoneprefix) {
-        int nZone = -1;
-        boolean foundZone = false;
+
         if (null != getSimulationManager().getZoneManager().getZones(zoneprefix)) {
-            Iterator iter = getSimulationManager().getZoneManager().getZones(zoneprefix).iterator();
-            while (!foundZone && iter.hasNext()) {
-                Zone znTmp = (Zone) iter.next();
-                if (znTmp.isParticleInZone(particle)) {
-                    nZone = znTmp.getIndex();
-                    foundZone = true;
+            int index = 0;
+            for (Zone zone : getSimulationManager().getZoneManager().getZones(zoneprefix)) {
+                if (zone.isParticleInZone(particle)) {
+                    return index;
                 }
+                index++;
             }
         }
-        return nZone;
+        return -1;
     }
 }

@@ -52,6 +52,7 @@
  */
 package org.ichthyop;
 
+import java.awt.Color;
 import java.util.logging.Level;
 import ml.options.OptionSet;
 import ml.options.Options;

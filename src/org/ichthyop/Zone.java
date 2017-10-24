@@ -85,6 +85,10 @@ import org.ichthyop.dataset.IDataset;
 public class Zone extends IchthyopLinker {
 
     /**
+     * Parameter key of the zone definition in the CFG file
+     */
+    private final String key;
+    /**
      * A list of {@code GridPoint} that defines the a geographical area.
      */
     private final ArrayList<GridPoint> polygon;
@@ -104,14 +108,10 @@ public class Zone extends IchthyopLinker {
      * [meter]
      */
     private float upperDepth;
-    /**
-     * Zone index
-     */
-    int index;
     /*
      * Zone name in the configuration file
      */
-    private final String key;
+    private String name;
     /**
      * Zone color (RGB)
      */
@@ -129,13 +129,11 @@ public class Zone extends IchthyopLinker {
     /**
      * Creates a new zone.
      *
-     * @param key, the name of the zone
-     * @param index, the index of the zone
+     * @param key, the key of the zone
      */
-    public Zone(String key, int index) {
+    public Zone(String key) {
         this.polygon = new ArrayList();
         this.key = key;
-        this.index = index;
     }
 
     /**
@@ -155,14 +153,22 @@ public class Zone extends IchthyopLinker {
     public Color getColor() {
         return color;
     }
+    
+    public String getKey() {
+        return key;
+    }
 
     /**
      * Returns the name of the zone.
      *
      * @return the name of the zone
      */
-    public String getKey() {
-        return key;
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setThicknessEnabled(boolean enabled) {
@@ -209,7 +215,7 @@ public class Zone extends IchthyopLinker {
             if (rhoPoint.getX() < 0 || rhoPoint.getY() < 0) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Zone \"");
-                sb.append(getKey());
+                sb.append(getName());
                 sb.append("\". Initialization error. Point [lon: ");
                 sb.append(rhoPoint.getLon());
                 sb.append(" ; lat: ");
@@ -224,7 +230,7 @@ public class Zone extends IchthyopLinker {
             if (lowerDepth < upperDepth) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Zone \"");
-                sb.append(getKey());
+                sb.append(getName());
                 sb.append("\". Thickness error. Lower depth (");
                 sb.append(lowerDepth);
                 sb.append("m) must be deeper than upper depth (");
@@ -239,7 +245,7 @@ public class Zone extends IchthyopLinker {
             if (offshoreLine < inshoreLine) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Zone \"");
-                sb.append(getKey());
+                sb.append(getName());
                 sb.append("\". Bathymetric mask error. Offshore line (");
                 sb.append(offshoreLine);
                 sb.append("m) must be deeper than inshore line (");
@@ -342,15 +348,6 @@ public class Zone extends IchthyopLinker {
     }
 
     /**
-     * Gets the index of the zone.
-     *
-     * @return a positive integer, the index of the zone.
-     */
-    public int getIndex() {
-        return index;
-    }
-
-    /**
      * Gets the smallest x-coordinate of the demarcation points.
      *
      * @return a double, the x-coordinate of the demarcation point closest to
@@ -412,7 +409,7 @@ public class Zone extends IchthyopLinker {
     public String toString() {
         StringBuilder zoneStr = new StringBuilder();
         zoneStr.append("Zone ");
-        zoneStr.append(getIndex());
+        zoneStr.append(name);
         zoneStr.append('\n');
         zoneStr.append("  Polygon [");
         for (GridPoint point : polygon) {

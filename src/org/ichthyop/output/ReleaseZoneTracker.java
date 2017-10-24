@@ -95,8 +95,10 @@ public class ReleaseZoneTracker extends AbstractTracker {
 
         List<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("release.zone.zone_prefix"));
         if (null != zones) {
+            int izone = 0;
             for (Zone zone : zones) {
-                addAttribute(new Attribute(zone.getKey(), zone.getIndex()));
+                addAttribute(new Attribute(zone.getName(), izone));
+                izone++;
             }
         }
         // Particle not released yet set to -99

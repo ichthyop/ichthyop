@@ -128,7 +128,7 @@ import ucar.nc2.dataset.NetcdfDataset;
 public class WMSMapper extends JXMapKit {
 
     private List<GeoPosition> region;
-    private HashMap<String, WMSMapper.DrawableZone> zones;
+    private List<DrawableZone> zones;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private NetcdfFile nc;
     private Variable vlon, vlat, pcolorVariable, vtime, vmortality;
@@ -472,7 +472,7 @@ public class WMSMapper extends JXMapKit {
         return region;
     }
 
-    HashMap<String, WMSMapper.DrawableZone> getZones() {
+    List<DrawableZone> getZones() {
         if (null == zones) {
             zones = readZones();
         }
@@ -514,8 +514,8 @@ public class WMSMapper extends JXMapKit {
         return lregion;
     }
 
-    private HashMap<String, WMSMapper.DrawableZone> readZones() {
-        HashMap<String, WMSMapper.DrawableZone> lzones = new HashMap();
+    private List<DrawableZone> readZones() {
+        List<WMSMapper.DrawableZone> lzones = new ArrayList();
         if (null != nc.findGlobalAttribute("nb_zones")) {
             int nbZones = nc.findGlobalAttribute("nb_zones").getNumericValue().intValue();
             for (int iZone = 0; iZone < nbZones; iZone++) {
@@ -523,13 +523,12 @@ public class WMSMapper extends JXMapKit {
                 try {
                     Variable varZone = nc.findVariable("zone" + iZone);
                     ArrayFloat.D2 zoneEdge = (D2) varZone.read();
-                    String classname = varZone.findAttribute("classname").getStringValue();
-                    String color = varZone.findAttribute("color").getStringValue();
+                    int color = varZone.findAttribute("color").getNumericValue().intValue();
                     for (int i = 0; i < zoneEdge.getShape()[0]; i++) {
                         points.add(new Point2D.Float(zoneEdge.get(i, 0), zoneEdge.get(i, 1)));
                     }
-                    WMSMapper.DrawableZone zone = new WMSMapper.DrawableZone(points, color);
-                    lzones.put(classname + "_zone" + iZone, zone);
+                    DrawableZone zone = new DrawableZone(points, color);
+                    lzones.add(zone);
 
                 } catch (IOException ex) {
                     Logger.getLogger(WMSMapper.class
@@ -545,7 +544,9 @@ public class WMSMapper extends JXMapKit {
         Color color = zone.getColor();
         Color fillColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 30);
         Color edgeColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 70);
+        int i = 0;
         for (Point2D pt : zone.getPoints()) {
+            if ((i++)%4 == 0) continue;
             Polygon polygon = new Polygon();
             addCellPoint(map, polygon, pt.getX() - 0.5, pt.getY() - 0.5);
             addCellPoint(map, polygon, pt.getX() + 0.5, pt.getY() - 0.5);
@@ -561,7 +562,7 @@ public class WMSMapper extends JXMapKit {
     private void drawZones(Graphics2D g, JXMapViewer map) {
 
         if (null != getSimulationManager().getDataset()) {
-            for (WMSMapper.DrawableZone zone : getZones().values()) {
+            for (WMSMapper.DrawableZone zone : getZones()) {
                 drawZone(zone, g, map);
             }
         }
@@ -1321,12 +1322,12 @@ public class WMSMapper extends JXMapKit {
 
     class DrawableZone {
 
-        private List<Point2D.Float> points;
-        private Color color;
+        private final List<Point2D.Float> points;
+        private final Color color;
 
-        DrawableZone(List<Point2D.Float> points, String color) {
+        DrawableZone(List<Point2D.Float> points, int color) {
             this.points = points;
-            this.color = getColor(color);
+            this.color = new Color(color);
         }
 
         public Color getColor() {
@@ -1335,23 +1336,6 @@ public class WMSMapper extends JXMapKit {
 
         public List<Point2D.Float> getPoints() {
             return points;
-        }
-
-        private Color getColor(String strColor) {
-
-            if (null == strColor) {
-                return Color.WHITE;
-            }
-            strColor = strColor.substring(1, strColor.length() - 1);
-            String[] rgb = strColor.split(",");
-            if (rgb.length != 3) {
-                return Color.WHITE;
-            }
-            int red = Integer.valueOf(rgb[0].substring(rgb[0].indexOf("=") + 1));
-            int green = Integer.valueOf(rgb[1].substring(rgb[1].indexOf("=") + 1));
-            int blue = Integer.valueOf(rgb[2].substring(rgb[2].indexOf("=") + 1));
-            return new Color(red, green, blue);
-
         }
     }
 

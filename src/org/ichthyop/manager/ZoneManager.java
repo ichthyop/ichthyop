@@ -94,7 +94,8 @@ public class ZoneManager extends AbstractManager {
         for (String zname : getConfiguration().findKeys(prefix + ".zone*.name")) {
             String zkey = zname.substring(0, zname.lastIndexOf(".name"));
             if (getConfiguration().getBoolean(zkey + ".enabled")) {
-                Zone zone = new Zone(getConfiguration().getString(zkey + ".name"), index);
+                Zone zone = new Zone(zkey);
+                zone.setName(getConfiguration().getString(zkey + ".name"));
                 zone.setBathyMaskEnabled(getConfiguration().getBoolean(zkey + ".bathymetry.enabled"));
                 zone.setOffshoreLine(getConfiguration().getFloat(zkey + ".bathymetry.offshore"));
                 zone.setInshoreLine(getConfiguration().getFloat(zkey + ".bathymetry.inshore"));
@@ -105,7 +106,7 @@ public class ZoneManager extends AbstractManager {
                 String[] slat = getConfiguration().getArrayString(zkey + ".latitude");
                 String[] slon = getConfiguration().getArrayString(zkey + ".longitude");
                 if (slat.length != slon.length) {
-                    error("Longitude and latitude vectors must have same length", new IOException("Zone " + zone.getKey() + " definition error"));
+                    error("Longitude and latitude vectors must have same length", new IOException("Zone " + zone.getName() + " definition error"));
                 }
                 for (int k = 0; k < slat.length; k++) {
                     GridPoint rhoPoint = new GridPoint(false);

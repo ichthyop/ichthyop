@@ -102,11 +102,11 @@ public class ZoneTracker extends AbstractTracker {
         while (iter.hasNext()) {
             particle = iter.next();
             Index index = getArray().getIndex();
-            int iclass = 0;
+            int iprefix = 0;
             for (String prefix : prefixes) {
-                index.set(0, particle.getIndex(), iclass);
-                getArray().setInt(index, ZoneParticle.getNumZone(particle, prefix));
-                iclass++;
+                index.set(0, particle.getIndex(), iprefix);
+                getArray().setInt(index, ZoneParticle.getNumZone(particle, prefix));          
+                iprefix++;
             }
         }
     }
@@ -120,11 +120,13 @@ public class ZoneTracker extends AbstractTracker {
             addAttribute(new Attribute("zones@" + prefix, iclass));
             List<Zone> zones = getSimulationManager().getZoneManager().getZones(prefix);
             if (null != zones) {
+                int izone = 0;
                 for (Zone zone : zones) {
-                    addAttribute(new Attribute(prefix + "@" + zone.getKey(), zone.getIndex()));
+                    addAttribute(new Attribute(prefix + "@" + zone.getName(), izone));
+                    izone++;
                 }
             } else {
-                addAttribute(new Attribute(prefix, "none for this run"));
+                addAttribute(new Attribute(prefix, "none"));
             }
             iclass++;
         }
