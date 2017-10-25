@@ -55,6 +55,7 @@ package org.ichthyop.manager;
 import java.awt.Color;
 import org.ichthyop.Zone;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import org.ichthyop.GridPoint;
+import org.ichthyop.particle.IParticle;
 import org.ichthyop.ui.LonLatConverter;
 
 /**
@@ -88,13 +90,24 @@ public class ZoneManager extends AbstractManager {
 
     public void loadZones(String prefix) throws Exception {
 
+        if (map.containsKey(prefix)) {
+            warning("Zones with such prefix have already be loaded.", new IOException("Zone prefix " + prefix + " duplicated"));
+            return;
+        }
+
         ArrayList<Zone> zones = new ArrayList();
-        
-        int index = 0;
-        for (String zname : getConfiguration().findKeys(prefix + ".zone*.name")) {
+        double index = map.keySet().size() + 1;
+        List<String> keys = getConfiguration().findKeys(prefix + ".zone*.name");
+        int ndecim = String.valueOf(keys.size()).length();
+        DecimalFormat df = new DecimalFormat();
+        df.setMinimumFractionDigits(ndecim);
+        df.setMaximumFractionDigits(ndecim);
+        double incr = Math.pow(10.d, -ndecim);
+        for (String zname : keys) {
             String zkey = zname.substring(0, zname.lastIndexOf(".name"));
             if (getConfiguration().getBoolean(zkey + ".enabled")) {
-                Zone zone = new Zone(zkey);
+                index += incr;
+                Zone zone = new Zone(zkey, Float.valueOf(df.format(index)));
                 zone.setName(getConfiguration().getString(zkey + ".name"));
                 zone.setBathyMaskEnabled(getConfiguration().getBoolean(zkey + ".bathymetry.enabled"));
                 zone.setOffshoreLine(getConfiguration().getFloat(zkey + ".bathymetry.offshore"));
@@ -116,11 +129,39 @@ public class ZoneManager extends AbstractManager {
                     rhoPoint.setLon(lon);
                     zone.addPoint(rhoPoint);
                 }
+                if (zones.contains(zone)) {
+                    error("Zones must have unique names", new IOException("Zone " + zone.getName() + " already exists"));
+                }
                 zones.add(zone);
-                index++;
             }
         }
         map.put(prefix, zones);
+    }
+
+    public Float[] findZones(IParticle particle, String prefix) {
+
+        List<Float> indexes = new ArrayList();
+        if (null != getZones(prefix)) {
+            for (Zone zone : getZones(prefix)) {
+                if (zone.isParticleInZone(particle)) {
+                    indexes.add(zone.getIndex());
+                }
+            }
+        }
+        return indexes.toArray(new Float[indexes.size()]);
+    }
+
+    public Float[] findZones(IParticle particle) {
+
+        List<Float> indexes = new ArrayList();
+        for (String prefix : getPrefixes()) {
+            for (Zone zone : getZones(prefix)) {
+                if (zone.isParticleInZone(particle)) {
+                    indexes.add(zone.getIndex());
+                }
+            }
+        }
+        return indexes.toArray(new Float[indexes.size()]);
     }
 
     public ArrayList<Zone> getZones(String prefix) {

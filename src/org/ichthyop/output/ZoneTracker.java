@@ -56,9 +56,8 @@ import java.util.Iterator;
 import java.util.List;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.ZoneParticle;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayInt;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -71,7 +70,7 @@ import ucar.nc2.Dimension;
 public class ZoneTracker extends AbstractTracker {
 
     public ZoneTracker() {
-        super(DataType.INT);
+        super(DataType.FLOAT);
     }
 
     @Override
@@ -84,13 +83,13 @@ public class ZoneTracker extends AbstractTracker {
     @Override
     Array createArray() {
         int nzones = getSimulationManager().getZoneManager().getPrefixes().size();
-        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), nzones);
+        ArrayFloat.D3 array = new ArrayFloat.D3(1, getNParticle(), nzones);
         // Initialises zone array with -99
-        for (int iZone = 0; iZone < nzones; iZone++) {
-            for (int iP = 0; iP < getNParticle(); iP++) {
-                array.set(0, iP, iZone, -99);
-            }
-        }
+//        for (int iZone = 0; iZone < nzones; iZone++) {
+//            for (int iP = 0; iP < getNParticle(); iP++) {
+//                array.set(0, iP, iZone, Float.NaN);
+//            }
+//        }
         return array;
     }
 
@@ -98,15 +97,13 @@ public class ZoneTracker extends AbstractTracker {
     public void track() {
         IParticle particle;
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        List<String> prefixes = getSimulationManager().getZoneManager().getPrefixes();
         while (iter.hasNext()) {
             particle = iter.next();
-            Index index = getArray().getIndex();
-            int iprefix = 0;
-            for (String prefix : prefixes) {
-                index.set(0, particle.getIndex(), iprefix);
-                getArray().setInt(index, ZoneParticle.getNumZone(particle, prefix));          
-                iprefix++;
+            Float[] zindexes = getSimulationManager().getZoneManager().findZones(particle);
+            Index aindex = getArray().getIndex();
+            for (float zindex : zindexes) {
+                aindex.set(0, particle.getIndex(), (int) Math.floor(zindex) - 1);
+                getArray().setFloat(aindex, zindex);
             }
         }
     }
@@ -114,25 +111,11 @@ public class ZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
 
-        int iclass = 0;
         List<String> prefixes = getSimulationManager().getZoneManager().getPrefixes();
         for (String prefix : prefixes) {
-            addAttribute(new Attribute("zones@" + prefix, iclass));
-            List<Zone> zones = getSimulationManager().getZoneManager().getZones(prefix);
-            if (null != zones) {
-                int izone = 0;
-                for (Zone zone : zones) {
-                    addAttribute(new Attribute(prefix + "@" + zone.getName(), izone));
-                    izone++;
-                }
-            } else {
-                addAttribute(new Attribute(prefix, "none"));
+            for (Zone zone : getSimulationManager().getZoneManager().getZones(prefix)) {
+                addAttribute(new Attribute(zone.getName(), zone.getIndex()));
             }
-            iclass++;
         }
-        // Particle not released yet set to -99
-        addAttribute(new Attribute("not_released_yet", -99));
-        // Particle out of zone set to -1
-        addAttribute(new Attribute("out_of_zone", -1));
     }
 }

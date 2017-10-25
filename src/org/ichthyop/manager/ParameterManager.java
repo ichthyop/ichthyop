@@ -62,6 +62,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -150,6 +151,7 @@ public class ParameterManager extends AbstractManager {
                         zparam[k] = "zone_prefix";
                     }
                 }
+                setString(prefix + ".parameters", StringUtil.handleArray(zparam));
             }
             // configuration file has changed
             mainHasChanged = true;

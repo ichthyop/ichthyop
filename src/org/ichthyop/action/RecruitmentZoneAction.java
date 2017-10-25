@@ -58,7 +58,6 @@ import org.ichthyop.output.RecruitmentZoneTracker;
 import org.ichthyop.output.ZoneTracker;
 import org.ichthyop.particle.LengthParticle;
 import org.ichthyop.particle.RecruitableParticle;
-import org.ichthyop.particle.ZoneParticle;
 
 /**
  *
@@ -80,7 +79,7 @@ public class RecruitmentZoneAction extends AbstractAction {
     private float lengthMinAtRecruitment;
     private boolean isAgeCriterion;
     private boolean stopMovingOnceRecruited;
-     private String zonePrefix;
+    private String zonePrefix;
 
     @Override
     public String getKey() {
@@ -138,18 +137,21 @@ public class RecruitmentZoneAction extends AbstractAction {
             return;
         }
 
-        int numCurrentZone = ZoneParticle.getNumZone(particle, zonePrefix);
-        if ((numCurrentZone != -1) && !RecruitableParticle.isRecruited(particle, numCurrentZone)) {
-
-            if (satisfyRecruitmentCriterion(particle)) {
-                timeInZone = (RecruitableParticle.getNumRecruitmentZone(particle) == numCurrentZone)
-                        ? timeInZone + getSimulationManager().getTimeManager().get_dt()
-                        : 0;
-                RecruitableParticle.setNumRecruitmentZone(particle, numCurrentZone);
-                RecruitableParticle.setNewRecruited(particle, timeInZone >= durationMinInRecruitArea);
-                RecruitableParticle.setRecruited(particle, numCurrentZone, timeInZone >= durationMinInRecruitArea);
+        Float[] indexes = getSimulationManager().getZoneManager().findZones(particle, zonePrefix);
+        for (float index : indexes) {
+            if (!RecruitableParticle.isRecruited(particle, index)) {
+                if (satisfyRecruitmentCriterion(particle)) {
+                    timeInZone = (RecruitableParticle.getCurrentRecruimentZone(particle) == index)
+                            ? timeInZone + getSimulationManager().getTimeManager().get_dt()
+                            : 0;
+                    RecruitableParticle.setCurrentRecruimentZone(particle, index);
+                    if (timeInZone >= durationMinInRecruitArea) {
+                        RecruitableParticle.recruit(particle, index);
+                    }
+                }
             }
         }
+
     }
 
     private boolean satisfyRecruitmentCriterion(IParticle particle) {

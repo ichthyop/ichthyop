@@ -52,8 +52,9 @@
  */
 package org.ichthyop.particle;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.action.RecruitmentZoneAction;
 
 /**
  *
@@ -62,53 +63,35 @@ import org.ichthyop.action.RecruitmentZoneAction;
 public class RecruitableParticle extends IchthyopLinker {
 
     private static final String RECRUITED = "recruited";
-    private static final String NEW_RECRUITED = "new_recruited";
-    private static final String RECRUITMENT_ZONE = "recruitment_zone";
+    private static final String CURRENT_RECRUITMENT_ZONE = "current_recruitment_zone";
 
     public static void init(IParticle particle) {
-        particle.set(NEW_RECRUITED, false);
-        particle.set(RECRUITMENT_ZONE, -1);
-        boolean[] recruited = (null != getSimulationManager().getZoneManager().getZones(RecruitmentZoneAction.class.getCanonicalName()))
-                ? new boolean[getSimulationManager().getZoneManager().getZones(RecruitmentZoneAction.class.getCanonicalName()).size()]
-                : new boolean[1];
-        particle.set(RECRUITED, recruited);
+        particle.set(RECRUITED, new ArrayList());
+        particle.set(CURRENT_RECRUITMENT_ZONE, Float.NaN);
     }
 
     public static boolean isRecruited(IParticle particle) {
-
-        boolean[] recruited = (boolean[]) particle.get(RECRUITED);
-        for (boolean bln : recruited) {
-            if (bln) {
-                return true;
-            }
-        }
-        return false;
+        return !((List) particle.get(RECRUITED)).isEmpty();
     }
 
-    public static boolean isRecruited(IParticle particle, int numZone) {
-        boolean[] recruited = (boolean[]) particle.get(RECRUITED);
-        return recruited[numZone];
+    public static boolean isRecruited(IParticle particle, float indexZone) {
+        List<Float> zones = (List<Float>) particle.get(RECRUITED);
+        return zones.contains(indexZone);
+    }
+    
+    public static float getCurrentRecruimentZone(IParticle particle) {
+        return (float) particle.get(CURRENT_RECRUITMENT_ZONE);
+    }
+    
+    public static void setCurrentRecruimentZone(IParticle particle, float indexZone) {
+        particle.set(CURRENT_RECRUITMENT_ZONE, indexZone);
     }
 
-    public static boolean isNewRecruited(IParticle particle) {
-        return (boolean) particle.get(NEW_RECRUITED);
+    public static List<Float> getRecruimentZones(IParticle particle) {
+        return (List<Float>) particle.get(RECRUITED);
     }
 
-    public static void setNewRecruited(IParticle particle, boolean recruited) {
-        particle.set(NEW_RECRUITED, recruited);
-    }
-
-    public static int getNumRecruitmentZone(IParticle particle) {
-        return particle.getInt(RECRUITMENT_ZONE);
-    }
-
-    public static void setNumRecruitmentZone(IParticle particle, int numZone) {
-        particle.set(RECRUITMENT_ZONE, numZone);
-    }
-
-    public static void setRecruited(IParticle particle, int num_zone, boolean recruited) {
-        boolean[] recruitedZone = (boolean[]) particle.get(RECRUITED);
-        recruitedZone[num_zone] = recruited;
-        particle.set(RECRUITED, recruitedZone);
+    public static void recruit(IParticle particle, float indexZone) {
+        ((List<Float>) particle.get(RECRUITED)).add(indexZone);
     }
 }

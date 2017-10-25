@@ -54,70 +54,31 @@
 package org.ichthyop.output;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import org.ichthyop.Zone;
-import org.ichthyop.action.RecruitmentZoneAction;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.RecruitableParticle;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayInt;
-import ucar.ma2.DataType;
-import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 
 /**
  *
  * @author Philippe Verley (philippe dot verley at ird dot fr)
  */
-public class RecruitmentZoneTracker extends AbstractTracker {
-
-    public RecruitmentZoneTracker() {
-        super(DataType.INT);
-    }
+public class RecruitmentZoneTracker extends FloatTracker {
 
     @Override
-    void setDimensions() {
-        addTimeDimension();
-        addDrifterDimension();
-        addZoneDimension(RecruitmentZoneAction.class.getCanonicalName());
-    }
-
-    @Override
-    Array createArray() {
-        return new ArrayInt.D3(1, getNParticle(), getZones().size());
-    }
-
-    @Override
-    public void track() {
-        IParticle particle;
-        Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
-        List<Zone> zones = getZones();
-        int izone = 0;
-        while (iter.hasNext()) {
-            particle = iter.next();
-            Index index = getArray().getIndex();
-            for (Zone zone : zones) {
-                index.set(0, particle.getIndex(), izone);
-                int recruited = RecruitableParticle.isRecruited(particle, izone)
-                        ? 1
-                        : 0;
-                getArray().setInt(index, recruited);
-                izone++;
-            }
+    public float getValue(IParticle particle) {
+        float index = RecruitableParticle.getCurrentRecruimentZone(particle);
+        if (!Float.isNaN(index) && RecruitableParticle.isRecruited(particle, index)) {
+            return index;
         }
+        return Float.NaN;
     }
 
     @Override
     public void addRuntimeAttributes() {
-        int izone = 0;
-        for (Zone zone : getZones()) {
-            addAttribute(new Attribute(zone.getName(), izone));
-            izone++;
+        ArrayList<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("action.recruitment.zone.zone_prefix"));
+        for (Zone zone : zones) {
+            addAttribute(new Attribute(zone.getName(), zone.getIndex()));
         }
-    }
-
-    private ArrayList<Zone> getZones() {
-        return getSimulationManager().getZoneManager().getZones(getConfiguration().getString("action.recruitment.zone.zone_prefix"));
     }
 }

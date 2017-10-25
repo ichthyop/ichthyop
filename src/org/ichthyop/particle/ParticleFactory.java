@@ -147,8 +147,7 @@ public class ParticleFactory extends IchthyopLinker {
                 return null;
             }
         }
-        int numReleaseZone = ZoneParticle.getNumZone(particle, zoneprefix);
-        if (numReleaseZone == -1) {
+        if (getSimulationManager().getZoneManager().findZones(particle, zoneprefix).length == 0) {
             return null;
         }
         particle.grid2Geo();
@@ -175,8 +174,7 @@ public class ParticleFactory extends IchthyopLinker {
         /*
          * Test wether the grid point is inside one of the release zones
          */
-        int numReleaseZone = ZoneParticle.getNumZone(particle, zoneprefix);
-        if (numReleaseZone == -1) {
+        if (getSimulationManager().getZoneManager().findZones(particle, zoneprefix).length == 0) {
             return null;
         }
         /*

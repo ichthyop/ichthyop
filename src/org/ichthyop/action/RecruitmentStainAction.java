@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import org.ichthyop.util.Constant;
@@ -74,8 +73,8 @@ public class RecruitmentStainAction extends AbstractAction {
      */
     private static int durationMinInRecruitArea;
     /**
-     * Duration [second] presently spent by the particule within the
-     * current zone.
+     * Duration [second] presently spent by the particule within the current
+     * zone.
      */
     private float ageMinAtRecruitment;
     private float lengthMinAtRecruitment;
@@ -86,7 +85,7 @@ public class RecruitmentStainAction extends AbstractAction {
     private double thickness_stain;
     private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    
+
     @Override
     public String getKey() {
         return "action.recruitment.stain";
@@ -125,7 +124,7 @@ public class RecruitmentStainAction extends AbstractAction {
             getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentStainTracker.class);
         }
     }
-    
+
     @Override
     public void init(IParticle particle) {
         RecruitableParticle.init(particle);
@@ -141,7 +140,7 @@ public class RecruitmentStainAction extends AbstractAction {
 
         if (!RecruitableParticle.isRecruited(particle)) {
             if (satisfyRecruitmentCriterion(particle) && isParticleInsideStain(particle)) {
-                RecruitableParticle.setRecruited(particle, 0, true);
+                RecruitableParticle.recruit(particle, 0);
             }
         }
     }

@@ -54,6 +54,7 @@ package org.ichthyop;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Objects;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.dataset.IDataset;
 
@@ -88,6 +89,8 @@ public class Zone extends IchthyopLinker {
      * Parameter key of the zone definition in the CFG file
      */
     private final String key;
+
+    private final float index;
     /**
      * A list of {@code GridPoint} that defines the a geographical area.
      */
@@ -129,11 +132,17 @@ public class Zone extends IchthyopLinker {
     /**
      * Creates a new zone.
      *
-     * @param key, the key of the zone
+     * @param key, a unique key of the zone
+     * @param index, a unique index of the zone
      */
-    public Zone(String key) {
+    public Zone(String key, float index) {
         this.polygon = new ArrayList();
         this.key = key;
+        this.index = index;
+    }
+
+    public float getIndex() {
+        return index;
     }
 
     /**
@@ -153,7 +162,7 @@ public class Zone extends IchthyopLinker {
     public Color getColor() {
         return color;
     }
-    
+
     public String getKey() {
         return key;
     }
@@ -166,7 +175,7 @@ public class Zone extends IchthyopLinker {
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
@@ -434,5 +443,19 @@ public class Zone extends IchthyopLinker {
 
         return zoneStr.toString();
     }
-    //---------- End of class
+
+    @Override
+    public boolean equals(Object object) {
+        if (null != object && object instanceof Zone) {
+            return this.name.equals(((Zone) object).name);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 79 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
 }

@@ -55,10 +55,8 @@ package org.ichthyop.output;
 import java.util.List;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.ZoneParticle;
-import org.ichthyop.release.ZoneRelease;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayInt;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 
@@ -71,7 +69,7 @@ public class ReleaseZoneTracker extends AbstractTracker {
     private int nPopTm1;
 
     public ReleaseZoneTracker() {
-        super(DataType.INT);
+        super(DataType.FLOAT);
         nPopTm1 = 0;
     }
 
@@ -82,10 +80,10 @@ public class ReleaseZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        Array array = new ArrayInt.D1(getNParticle());
-        // Particle not released yet set to -99
+        Array array = new ArrayFloat.D1(getNParticle());
+        // Particle not released yet set to NaN
         for (int i = 0; i < getNParticle(); i++) {
-            array.setInt(i, -99);
+            array.setFloat(i, Float.NaN);
         }
         return array;
     }
@@ -95,14 +93,12 @@ public class ReleaseZoneTracker extends AbstractTracker {
 
         List<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("release.zone.zone_prefix"));
         if (null != zones) {
-            int izone = 0;
             for (Zone zone : zones) {
-                addAttribute(new Attribute(zone.getName(), izone));
-                izone++;
+                addAttribute(new Attribute(zone.getName(), zone.getIndex()));
             }
         }
-        // Particle not released yet set to -99
-        addAttribute(new Attribute("not_released_yet", -99));
+        // Particle not released yet set to NaN
+        addAttribute(new Attribute("not_released_yet", Float.NaN));
     }
 
     @Override
@@ -113,7 +109,8 @@ public class ReleaseZoneTracker extends AbstractTracker {
         // Only write release zone when particle is released
         for (int i = nPopTm1; i < nNow; i++) {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
-            getArray().setInt(getIndex().set(particle.getIndex()), ZoneParticle.getNumZone(particle, zoneprefix));
+            Float[] indexes = getSimulationManager().getZoneManager().findZones(particle, zoneprefix);
+            getArray().setFloat(getIndex().set(particle.getIndex()), indexes[0]);
         }
         nPopTm1 = nNow;
 
