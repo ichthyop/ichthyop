@@ -53,7 +53,7 @@
 package org.ichthyop.output;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import ucar.ma2.Array;
@@ -77,20 +77,20 @@ public class ZoneTracker extends AbstractTracker {
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addCustomDimension(new Dimension("zones", getSimulationManager().getZoneManager().getPrefixes().size()));
+        addCustomDimension(new Dimension("zones", getNPrefix()));
     }
 
     @Override
     Array createArray() {
-        int nzones = getSimulationManager().getZoneManager().getPrefixes().size();
-        ArrayFloat.D3 array = new ArrayFloat.D3(1, getNParticle(), nzones);
-        // Initialises zone array with -99
-//        for (int iZone = 0; iZone < nzones; iZone++) {
-//            for (int iP = 0; iP < getNParticle(); iP++) {
-//                array.set(0, iP, iZone, Float.NaN);
-//            }
-//        }
-        return array;
+        return new ArrayFloat.D3(1, getNParticle(), getNPrefix());
+    }
+    
+    private int getNPrefix() {
+        LinkedHashSet prefix = new LinkedHashSet();
+        for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
+            prefix.add(Math.floor(zone.getIndex()));
+        }
+        return prefix.size();
     }
 
     @Override
@@ -111,11 +111,8 @@ public class ZoneTracker extends AbstractTracker {
     @Override
     public void addRuntimeAttributes() {
 
-        List<String> prefixes = getSimulationManager().getZoneManager().getPrefixes();
-        for (String prefix : prefixes) {
-            for (Zone zone : getSimulationManager().getZoneManager().getZones(prefix)) {
-                addAttribute(new Attribute(zone.getName(), zone.getIndex()));
-            }
+        for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
+            addAttribute(new Attribute(zone.getName(), zone.getIndex()));
         }
     }
 }

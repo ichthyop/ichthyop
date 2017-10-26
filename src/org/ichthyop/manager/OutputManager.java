@@ -208,17 +208,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         int iZone = 0;
         zoneAreas = new ArrayList();
-        for (String prefix : getSimulationManager().getZoneManager().getPrefixes()) {
-            for (Zone zone : getSimulationManager().getZoneManager().getZones(prefix)) {
-                zoneAreas.add(iZone, zoneToPointCloud(zone));
-                Dimension zoneDim = ncOut.addDimension(null, "zone" + iZone, zoneAreas.get(iZone).size());
-                ncOut.addVariable(null, "zone" + iZone, DataType.FLOAT, Arrays.asList(new Dimension[]{zoneDim, latlonDim}));
-                ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("long_name", zone.getName()));
-                ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("unit", "latitude longitude coordinates of the center of the cells in the zone"));
-                ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("key", zone.getKey()));
-                ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("color", zone.getColor().getRGB()));
-                iZone++;
-            }
+        for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
+            zoneAreas.add(iZone, zoneToPointCloud(zone));
+            Dimension zoneDim = ncOut.addDimension(null, "zone" + iZone, zoneAreas.get(iZone).size());
+            ncOut.addVariable(null, "zone" + iZone, DataType.FLOAT, Arrays.asList(new Dimension[]{zoneDim, latlonDim}));
+            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("long_name", zone.getName()));
+            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("unit", "latitude longitude coordinates of the center of the cells in the zone"));
+            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("key", zone.getKey()));
+            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("color", zone.getColor().getRGB()));
+            iZone++;
         }
         ncOut.addGroupAttribute(null, new Attribute("number_of_zones", iZone));
     }
@@ -257,14 +255,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private List<GeoPosition> zoneToPointCloud(Zone zone) {
         List<GeoPosition> list = new ArrayList();
 
-        int imin = (int) Math.floor(zone.getXmin());
-        int imax = (int) Math.ceil(zone.getXmax());
-        int jmin = (int) Math.floor(zone.getYmin());
-        int jmax = (int) Math.ceil(zone.getYmax());
-
-        for (int i = imin; i < imax; i += 2) {
-            for (int j = jmin; j < jmax; j += 2) {
-                if (zone.isGridPointInZone(i, j)) {
+        for (int i = 0; i < getSimulationManager().getDataset().get_nx(); i += 2) {
+            for (int j = 0; j < getSimulationManager().getDataset().get_ny(); j += 2) {
+                if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
                     double[] latlon = getSimulationManager().getDataset().xy2latlon(i, j);
                     list.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
                 }
@@ -604,7 +597,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public class NCDimFactory {
 
         private Dimension time, drifter;
-        private HashMap<String, Dimension> zoneDimension;
         private HashMap<String, Dimension> dimensions;
 
         public Dimension createDimension(Dimension dim) {
@@ -637,23 +629,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return drifter;
         }
 
-        public Dimension getZoneDimension(String classname) {
-            if (null == zoneDimension) {
-                zoneDimension = new HashMap();
-            }
-            if (null == zoneDimension.get(classname)) {
-                String name = "zone_" + classname.substring(classname.lastIndexOf(".") + 1).toLowerCase();
-                Dimension zoneDim = ncOut.addDimension(null, name, getSimulationManager().getZoneManager().getZones(classname).size());
-                zoneDimension.put(classname, zoneDim);
-                dimensions.put(zoneDim.getName(), zoneDim);
-            }
-            return zoneDimension.get(classname);
-        }
-
         public void resetDimensions() {
             time = null;
             drifter = null;
-            zoneDimension = null;
             dimensions = new HashMap();
         }
     }

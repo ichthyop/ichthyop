@@ -53,7 +53,7 @@
 
 package org.ichthyop.output;
 
-import java.util.ArrayList;
+import java.util.List;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.RecruitableParticle;
@@ -76,7 +76,7 @@ public class RecruitmentZoneTracker extends FloatTracker {
 
     @Override
     public void addRuntimeAttributes() {
-        ArrayList<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("action.recruitment.zone.zone_prefix"));
+        List<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("action.recruitment.zone.zone_prefix"));
         for (Zone zone : zones) {
             addAttribute(new Attribute(zone.getName(), zone.getIndex()));
         }

@@ -60,11 +60,11 @@ import org.ichthyop.manager.ParameterManager;
 
 public class IchthyopLinker extends IchthyopLogger {
 
-    public static SimulationManager getSimulationManager() {
+    final public static SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
     
-    public ParameterManager getConfiguration() {
+    final public ParameterManager getConfiguration() {
         return SimulationManager.getInstance().getParameterManager();
     }
 }

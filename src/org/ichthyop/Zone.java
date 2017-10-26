@@ -53,10 +53,11 @@
 package org.ichthyop;
 
 import java.awt.Color;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Objects;
-import org.ichthyop.particle.IParticle;
 import org.ichthyop.dataset.IDataset;
+import org.ichthyop.ui.LonLatConverter;
 
 /**
  * <p>
@@ -92,42 +93,45 @@ public class Zone extends IchthyopLinker {
 
     private final float index;
     /**
-     * A list of {@code GridPoint} that defines the a geographical area.
+     * List of geographical coordinates that defines an area
      */
-    private final ArrayList<GridPoint> polygon;
+    private final double[] lat;
+    private final double[] lon;
     /**
      * Lower bathymetric line [meter]
      */
-    private float inshoreLine;
+    private final float inshoreLine;
     /**
      * Higher bathymetric line [meter]
      */
-    private float offshoreLine;
+    private final float offshoreLine;
     /**
      * [meter]
      */
-    private float lowerDepth;
+    private final float lowerDepth;
     /**
      * [meter]
      */
-    private float upperDepth;
+    private final float upperDepth;
     /*
      * Zone name in the configuration file
      */
-    private String name;
+    private final String name;
     /**
      * Zone color (RGB)
      */
-    private Color color;
+    private final Color color;
     /**
      * Whether to consider the (vertical) thickness of the zone. Not enabled
      * means that the zone covers all the water column.
      */
-    private boolean enabledThickness;
+    private final boolean enabledThickness;
     /**
      * Whether to enable the bathymetric mask.
      */
-    private boolean enabledBathyMask;
+    private final boolean enabledBathyMask;
+
+    private double area;
 
     /**
      * Creates a new zone.
@@ -136,22 +140,50 @@ public class Zone extends IchthyopLinker {
      * @param index, a unique index of the zone
      */
     public Zone(String key, float index) {
-        this.polygon = new ArrayList();
         this.key = key;
         this.index = index;
-    }
-
-    public float getIndex() {
-        return index;
+        // initializes variables
+        String slat[] = getConfiguration().getArrayString(key + ".latitude");
+        lat = new double[slat.length + 1];
+        for (int k = 0; k < slat.length; k++) {
+            lat[k] = Double.valueOf(LonLatConverter.convert(slat[k], LonLatConverter.LonLatFormat.DecimalDeg));
+        }
+        lat[slat.length] = lat[0];
+        String slon[] = getConfiguration().getArrayString(key + ".longitude");
+        lon = new double[slon.length + 1];
+        for (int k = 0; k < slon.length; k++) {
+            lon[k] = Double.valueOf(LonLatConverter.convert(slon[k], LonLatConverter.LonLatFormat.DecimalDeg));
+        }
+        lon[slon.length] = lon[0];
+        name = getConfiguration().getString(key + ".name");
+        enabledBathyMask = getConfiguration().getBoolean(key + ".bathymetry.enabled");
+        inshoreLine = getConfiguration().getFloat(key + ".bathymetry.inshore");
+        offshoreLine = getConfiguration().getFloat(key + ".bathymetry.offshore");
+        enabledThickness = getConfiguration().getBoolean(key + ".depth.enabled");
+        lowerDepth = getConfiguration().getFloat(key + ".depth.lower");
+        upperDepth = getConfiguration().getFloat(key + ".depth.upper");
+        color = new Color(getConfiguration().getInt(key + ".color"));
     }
 
     /**
-     * Sets the color of the zone
+     * Returns a unique index for the zone
      *
-     * @param color, the color of the zone
+     * @return the index of the zone
      */
-    public void setColor(Color color) {
-        this.color = color;
+    public float getIndex() {
+        return index;
+    }
+    
+    public String getPrefix() {
+        return key.substring(0, key.lastIndexOf("."));
+    }
+
+    public boolean isEnabledBathyMask() {
+        return enabledBathyMask;
+    }
+
+    public boolean isEnabledDepthMask() {
+        return enabledThickness;
     }
 
     /**
@@ -176,30 +208,6 @@ public class Zone extends IchthyopLinker {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setThicknessEnabled(boolean enabled) {
-        enabledThickness = enabled;
-    }
-
-    public void setBathyMaskEnabled(boolean enabled) {
-        enabledBathyMask = enabled;
-    }
-
-    public void setInshoreLine(float inshoreLine) {
-        this.inshoreLine = inshoreLine;
-    }
-
-    public void setOffshoreLine(float offshoreLine) {
-        this.offshoreLine = offshoreLine;
-    }
-
-    public void setLowerDepth(float lowerDepth) {
-        this.lowerDepth = lowerDepth;
-    }
-
     public float getUpperDepth() {
         return upperDepth;
     }
@@ -208,210 +216,71 @@ public class Zone extends IchthyopLinker {
         return lowerDepth;
     }
 
-    public void setUpperDepth(float upperDepth) {
-        this.upperDepth = upperDepth;
+    public double[] getLat() {
+        return lat;
     }
 
-    public void addPoint(GridPoint point) {
-        polygon.add(point);
+    public double[] getLon() {
+        return lon;
     }
 
-    public void init() throws Exception {
-
-        for (GridPoint rhoPoint : polygon) {
-            rhoPoint.geo2Grid();
-            /* make sure the point belongs to the simulated domain */
-            if (rhoPoint.getX() < 0 || rhoPoint.getY() < 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Zone \"");
-                sb.append(getName());
-                sb.append("\". Initialization error. Point [lon: ");
-                sb.append(rhoPoint.getLon());
-                sb.append(" ; lat: ");
-                sb.append(rhoPoint.getLat());
-                sb.append("] is out of domain.");
-                throw new IllegalArgumentException(sb.toString());
-            }
-        }
-
-        /* make sure the layer thickness is properly defined */
-        if (enabledThickness) {
-            if (lowerDepth < upperDepth) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Zone \"");
-                sb.append(getName());
-                sb.append("\". Thickness error. Lower depth (");
-                sb.append(lowerDepth);
-                sb.append("m) must be deeper than upper depth (");
-                sb.append(upperDepth);
-                sb.append("m)");
-                throw new IllegalArgumentException(sb.toString());
-            }
-        }
-
-        /* make sure bathy mask is correctly defined */
-        if (enabledBathyMask) {
-            if (offshoreLine < inshoreLine) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Zone \"");
-                sb.append(getName());
-                sb.append("\". Bathymetric mask error. Offshore line (");
-                sb.append(offshoreLine);
-                sb.append("m) must be deeper than inshore line (");
-                sb.append(inshoreLine);
-                sb.append("m)");
-                throw new IllegalArgumentException(sb.toString());
-            }
-        }
-
-        /* Closes the polygon adding first point as last point */
-        polygon.add((GridPoint) polygon.get(0).clone());
+    public float getInshoreLine() {
+        return inshoreLine;
     }
 
-    public boolean isParticleInZone(IParticle particle) {
-
-        boolean isInZone = true;
-        if (!getSimulationManager().getDataset().isInWater(particle.getGridCoordinates())) {
-            return false;
-        }
-        if (particle.getGridCoordinates().length > 2 && enabledThickness) {
-            isInZone = isDepthInLayer(Math.abs(particle.getDepth()));
-        }
-        if (enabledBathyMask) {
-            isInZone = isInZone && isXYBetweenBathyLines(particle.getX(), particle.getY());
-        }
-        isInZone = isInZone && isXYInPolygon(particle.getX(), particle.getY());
-
-        return isInZone;
+    public float getOffshoreLine() {
+        return inshoreLine;
     }
 
-    public double getArea() {
+    public void init() {
 
+        // lon & lat same length
+        if (lat.length != lon.length) {
+            error("Longitude and latitude vectors must have same length", new IOException(key + " definition error"));
+        }
+
+        // upper depth > lower depth
+        if (enabledThickness && (lowerDepth < upperDepth)) {
+            error("Lower depth must be deeper than upper depth", new IOException(key + " definition error"));
+        }
+
+        // inshore line > offshore line
+        if (enabledBathyMask && (offshoreLine < inshoreLine)) {
+            error("Offshore line must be deeper than inshore line", new IOException(key + " definition error"));
+        }
+
+        // compute area in km2
+        area = 0.d;
         IDataset dataset = getSimulationManager().getDataset();
-        double area = 0.d;
         for (int i = 0; i < dataset.get_nx(); i++) {
             for (int j = 0; j < dataset.get_ny(); j++) {
                 if (dataset.isInWater(i, j)) {
-                    if (isGridPointInZone(i, j)) {
+                    if (getSimulationManager().getZoneManager().isInside(i, j, key)) {
                         area += dataset.getdeta(j, i) * dataset.getdxi(j, i) * 1e-6;
                     }
                 }
             }
         }
+    }
+
+    public double getArea() {
         return area;
     }
 
-    private boolean isDepthInLayer(double depth) {
-        return depth <= lowerDepth & depth >= upperDepth;
+    public double getLonMin() {
+        return min(lon);
     }
 
-    public boolean isGridPointInZone(double x, double y) {
-        boolean isIn = true;
-        if (!getSimulationManager().getDataset().isInWater(new double[]{x, y})) {
-            return false;
-        }
-        if (enabledBathyMask) {
-            isIn = isXYBetweenBathyLines(x, y);
-        }
-        return isIn && isXYInPolygon(x, y);
+    public double getLatMin() {
+        return min(lat);
     }
 
-    private boolean isXYBetweenBathyLines(double x, double y) {
-        return (getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
-                > inshoreLine
-                & getSimulationManager().getDataset().getBathy((int) Math.round(x), (int) Math.round(y))
-                < offshoreLine);
+    public double getLonMax() {
+        return max(lon);
     }
 
-    private boolean isXYInPolygon(double x, double y) {
-
-        int inc, crossings;
-        double dx1, dx2, dxy;
-
-        crossings = 0;
-
-        for (int k = 0; k < polygon.size() - 1; k++) {
-            if (polygon.get(k).getX() != polygon.get(k + 1).getX()) {
-                dx1 = x - polygon.get(k).getX();
-                dx2 = polygon.get(k + 1).getX() - x;
-                dxy = dx2 * (y - polygon.get(k).getY()) - dx1 * (polygon.get(k + 1).getY() - y);
-                inc = 0;
-                if ((polygon.get(k).getX() == x) & (polygon.get(k).getY() == y)) {
-                    crossings = 1;
-                } else if (((dx1 == 0.) & (y >= polygon.get(k).getY()))
-                        | ((dx2 == 0.) & (y >= polygon.get(k + 1).getY()))) {
-                    inc = 1;
-                } else if ((dx1 * dx2 > 0.)
-                        & ((polygon.get(k + 1).getX() - polygon.get(k).getX()) * dxy >= 0.)) {
-                    inc = 2;
-                }
-                if (polygon.get(k + 1).getX() > polygon.get(k).getX()) {
-                    crossings += inc;
-                } else {
-                    crossings -= inc;
-                }
-            }
-        }
-
-        return (crossings != 0);
-    }
-
-    /**
-     * Gets the smallest x-coordinate of the demarcation points.
-     *
-     * @return a double, the x-coordinate of the demarcation point closest to
-     * the grid origin.
-     */
-    public double getXmin() {
-
-        double xmin = polygon.get(0).getX();
-        for (int k = 0; k < polygon.size() - 1; k++) {
-            xmin = Math.min(xmin, polygon.get(k).getX());
-        }
-        return xmin;
-    }
-
-    /**
-     * Gets the smallest y-coordinate of the demarcation points.
-     *
-     * @return a double, the y-coordinate of the demarcation point closest to
-     * the grid origin.
-     */
-    public double getYmin() {
-
-        double ymin = polygon.get(0).getY();
-        for (int i = 1; i < polygon.size() - 1; i++) {
-            ymin = Math.min(ymin, polygon.get(i).getY());
-        }
-        return ymin;
-    }
-
-    /**
-     * Gets the biggest x-coordinate of the demarcation points.
-     *
-     * @return a double, the x-coordinate of the demarcation point farthest from
-     * the grid origin.
-     */
-    public double getXmax() {
-        double xmax = polygon.get(0).getX();
-        for (int i = 1; i < polygon.size() - 1; i++) {
-            xmax = Math.max(xmax, polygon.get(i).getX());
-        }
-        return xmax;
-    }
-
-    /**
-     * Gets the biggest y-coordinate of the demarcation points.
-     *
-     * @return a double, the y-coordinate of the demarcation point farthest from
-     * the grid origin.
-     */
-    public double getYmax() {
-        double ymax = polygon.get(0).getY();
-        for (int i = 1; i < polygon.size() - 1; i++) {
-            ymax = Math.max(ymax, polygon.get(i).getY());
-        }
-        return ymax;
+    public double getLatMax() {
+        return max(lat);
     }
 
     @Override
@@ -419,26 +288,33 @@ public class Zone extends IchthyopLinker {
         StringBuilder zoneStr = new StringBuilder();
         zoneStr.append("Zone ");
         zoneStr.append(name);
-        zoneStr.append('\n');
-        zoneStr.append("  Polygon [");
-        for (GridPoint point : polygon) {
-            zoneStr.append(point.toString());
+        zoneStr.append("\n  Polygon [ ");
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(3);
+        for (int k = 0; k < lat.length; k++) {
+            zoneStr.append("(");
+            zoneStr.append(df.format(lat[k]));
             zoneStr.append(" ");
+            zoneStr.append(df.format(lon[k]));
+            zoneStr.append(") ");
         }
         zoneStr.append(']');
-        zoneStr.append('\n');
-        zoneStr.append("  Shore-lines (");
-        zoneStr.append(inshoreLine);
-        zoneStr.append("m, ");
-        zoneStr.append(offshoreLine);
-        zoneStr.append("m)\n  Depth-lines (");
-        zoneStr.append(upperDepth);
-        zoneStr.append("m, ");
-        zoneStr.append(lowerDepth);
-        zoneStr.append("m)");
-        zoneStr.append('\n');
-        zoneStr.append("  Area ");
-        zoneStr.append((float) getArea());
+        if (this.enabledBathyMask) {
+            zoneStr.append("\n  Bathymetry mask ");
+            zoneStr.append(inshoreLine);
+            zoneStr.append("m, ");
+            zoneStr.append(offshoreLine);
+            zoneStr.append("m");
+        }
+        if (this.enabledThickness) {
+            zoneStr.append("\n  Depth ");
+            zoneStr.append(upperDepth);
+            zoneStr.append("m, ");
+            zoneStr.append(lowerDepth);
+            zoneStr.append("m");
+        }
+        zoneStr.append("\n  Area ");
+        zoneStr.append(df.format(area));
         zoneStr.append(" km2");
 
         return zoneStr.toString();
@@ -458,4 +334,21 @@ public class Zone extends IchthyopLinker {
         hash = 79 * hash + Objects.hashCode(this.name);
         return hash;
     }
+
+    private double min(double[] array) {
+        double min = array[0];
+        for (double d : array) {
+            min = Math.min(d, min);
+        }
+        return min;
+    }
+
+    private double max(double[] array) {
+        double max = array[0];
+        for (double d : array) {
+            max = Math.max(d, max);
+        }
+        return max;
+    }
+
 }

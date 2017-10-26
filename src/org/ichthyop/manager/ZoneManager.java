@@ -52,19 +52,18 @@
  */
 package org.ichthyop.manager;
 
-import java.awt.Color;
 import org.ichthyop.Zone;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import org.ichthyop.GridPoint;
+import static org.ichthyop.IchthyopLinker.getSimulationManager;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.ui.LonLatConverter;
 
 /**
  *
@@ -73,7 +72,7 @@ import org.ichthyop.ui.LonLatConverter;
 public class ZoneManager extends AbstractManager {
 
     private static final ZoneManager ZONE_MANAGER = new ZoneManager();
-    private final HashMap<String, ArrayList<Zone>> map;
+    private final HashMap<String, Zone> zones;
 
     public static ZoneManager getInstance() {
         return ZONE_MANAGER;
@@ -81,22 +80,25 @@ public class ZoneManager extends AbstractManager {
 
     private ZoneManager() {
         super();
-        map = new HashMap();
+        zones = new HashMap();
     }
 
     public void cleanup() {
-        map.clear();
+        zones.clear();
     }
 
     public void loadZones(String prefix) throws Exception {
 
-        if (map.containsKey(prefix)) {
-            warning("Zones with such prefix have already be loaded.", new IOException("Zone prefix " + prefix + " duplicated"));
-            return;
+        LinkedHashSet set = new LinkedHashSet();
+        for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
+            if (prefix.equals(zone.getPrefix())) {
+                warning("Zones with such prefix have already be loaded.", new IOException("Zone prefix " + prefix + " duplicated"));
+                return;
+            }
+            set.add(Math.floor(zone.getIndex()));
         }
+        double index = set.size() + 1;
 
-        ArrayList<Zone> zones = new ArrayList();
-        double index = map.keySet().size() + 1;
         List<String> keys = getConfiguration().findKeys(prefix + ".zone*.name");
         int ndecim = String.valueOf(keys.size()).length();
         DecimalFormat df = new DecimalFormat();
@@ -108,44 +110,78 @@ public class ZoneManager extends AbstractManager {
             if (getConfiguration().getBoolean(zkey + ".enabled")) {
                 index += incr;
                 Zone zone = new Zone(zkey, Float.valueOf(df.format(index)));
-                zone.setName(getConfiguration().getString(zkey + ".name"));
-                zone.setBathyMaskEnabled(getConfiguration().getBoolean(zkey + ".bathymetry.enabled"));
-                zone.setOffshoreLine(getConfiguration().getFloat(zkey + ".bathymetry.offshore"));
-                zone.setInshoreLine(getConfiguration().getFloat(zkey + ".bathymetry.inshore"));
-                zone.setThicknessEnabled(getConfiguration().getBoolean(zkey + ".depth.enabled"));
-                zone.setLowerDepth(getConfiguration().getFloat(zkey + ".depth.lower"));
-                zone.setUpperDepth(getConfiguration().getFloat(zkey + ".depth.upper"));
-                zone.setColor(new Color(getConfiguration().getInt(zkey + ".color")));
-                String[] slat = getConfiguration().getArrayString(zkey + ".latitude");
-                String[] slon = getConfiguration().getArrayString(zkey + ".longitude");
-                if (slat.length != slon.length) {
-                    error("Longitude and latitude vectors must have same length", new IOException("Zone " + zone.getName() + " definition error"));
+                if (zones.containsKey(zone.getKey())) {
+                    error("Zones must have unique name", new IOException("Zone " + zone.getName() + " already exists"));
                 }
-                for (int k = 0; k < slat.length; k++) {
-                    GridPoint rhoPoint = new GridPoint(false);
-                    double lat = Double.valueOf(LonLatConverter.convert(slat[k], LonLatConverter.LonLatFormat.DecimalDeg));
-                    double lon = Double.valueOf(LonLatConverter.convert(slon[k], LonLatConverter.LonLatFormat.DecimalDeg));
-                    rhoPoint.setLat(lat);
-                    rhoPoint.setLon(lon);
-                    zone.addPoint(rhoPoint);
-                }
-                if (zones.contains(zone)) {
-                    error("Zones must have unique names", new IOException("Zone " + zone.getName() + " already exists"));
-                }
-                zones.add(zone);
+                zones.put(zkey, zone);
             }
         }
-        map.put(prefix, zones);
+    }
+
+    private boolean isInside(IParticle particle, String key) {
+        Zone zone = zones.get(key);
+        boolean inside = true;
+        if (particle.getGridCoordinates().length > 2 && zone.isEnabledDepthMask()) {
+            double depth = Math.abs(particle.getDepth());
+            inside = depth <= zone.getLowerDepth() & depth >= zone.getUpperDepth();
+        }
+        return inside && isInside(particle.getLat(), particle.getLon(), key);
+    }
+
+    private boolean isInside(double lat, double lon, String key) {
+        Zone zone = zones.get(key);
+        boolean inside = true;
+        if (zone.isEnabledBathyMask()) {
+            double[] xy = getSimulationManager().getDataset().latlon2xy(lat, lon);
+            double bathy = getSimulationManager().getDataset().getBathy((int) Math.round(xy[0]), (int) Math.round(xy[1]));
+            inside = (bathy > zone.getInshoreLine()) & (bathy < zone.getOffshoreLine());
+        }
+        return inside && isInside(lat, lon, zone.getLat(), zone.getLon());
+    }
+
+    public boolean isInside(int i, int j, String key) {
+        double[] latlon = getSimulationManager().getDataset().xy2latlon(i, j);
+        return isInside(latlon[0], latlon[1], key);
+    }
+
+    /*
+     * Return true if the given point is contained inside the boundary. See:
+     * http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+     */
+    public boolean isInside(double lat0, double lon0, double[] lat, double[] lon) {
+        int i;
+        int j;
+        boolean result = false;
+        for (i = 0, j = lat.length - 1; i < lat.length; j = i++) {
+            if ((lat[i] > lat0) != (lat[j] > lat0)
+                    && (lon0 < (lon[j] - lon[i]) * (lat0 - lat[i]) / (lat[j] - lat[i]) + lon[i])) {
+                result = !result;
+            }
+        }
+        return result;
+    }
+
+    public Collection<Zone> getZones() {
+        return zones.values();
+    }
+
+    public List<Zone> getZones(String prefix) {
+        List<Zone> pzones = new ArrayList();
+        for (Zone zone : zones.values()) {
+            if (prefix.equals(zone.getPrefix())) {
+                pzones.add(zone);
+            }
+        }
+        return pzones;
     }
 
     public Float[] findZones(IParticle particle, String prefix) {
 
         List<Float> indexes = new ArrayList();
-        if (null != getZones(prefix)) {
-            for (Zone zone : getZones(prefix)) {
-                if (zone.isParticleInZone(particle)) {
-                    indexes.add(zone.getIndex());
-                }
+        for (Zone zone : zones.values()) {
+            String zprefix = zone.getKey().substring(0, zone.getKey().lastIndexOf("."));
+            if (zprefix.equals(prefix) && isInside(particle, zone.getKey())) {
+                indexes.add(zone.getIndex());
             }
         }
         return indexes.toArray(new Float[indexes.size()]);
@@ -154,24 +190,12 @@ public class ZoneManager extends AbstractManager {
     public Float[] findZones(IParticle particle) {
 
         List<Float> indexes = new ArrayList();
-        for (String prefix : getPrefixes()) {
-            for (Zone zone : getZones(prefix)) {
-                if (zone.isParticleInZone(particle)) {
-                    indexes.add(zone.getIndex());
-                }
+        for (Zone zone : zones.values()) {
+            if (isInside(particle, zone.getKey())) {
+                indexes.add(zone.getIndex());
             }
         }
         return indexes.toArray(new Float[indexes.size()]);
-    }
-
-    public ArrayList<Zone> getZones(String prefix) {
-        return map.get(prefix);
-    }
-
-    public List<String> getPrefixes() {
-        ArrayList prefixes = new ArrayList(map.keySet());
-        Collections.sort(prefixes);
-        return prefixes;
     }
 
     @Override
@@ -183,11 +207,10 @@ public class ZoneManager extends AbstractManager {
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
-        for (List<Zone> listZone : map.values()) {
-            for (Zone zone : listZone) {
-                zone.init();
-            }
+        for (Zone zone : zones.values()) {
+            zone.init();
         }
+
         info("Zone manager initialization [OK]");
     }
 }

@@ -50,22 +50,28 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.ui;
 
-/** import AWT */
+/**
+ * import AWT
+ */
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
-/** import java.util */
-import java.util.ArrayList;
+/**
+ * import java.util
+ */
 
-/** import Swing */
+/**
+ * import Swing
+ */
 import java.util.Iterator;
 import javax.swing.JPanel;
 
-/** local import */
+/**
+ * local import
+ */
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.manager.SimulationManager;
@@ -73,12 +79,12 @@ import org.ichthyop.manager.SimulationManager;
 /**
  * The class is the graphical component that display the steps of the simulation
  * on screen. The background of the simulation (cost line + bathymetry) is
- * painted in a {@code BufferedImage} with inner class {@code CellUI}.
- * The particles are represented by inner object {@code ParticleUI}.
- * The class provides method to transform grid coordinates into screen
- * coordinates.
+ * painted in a {@code BufferedImage} with inner class {@code CellUI}. The
+ * particles are represented by inner object {@code ParticleUI}. The class
+ * provides method to transform grid coordinates into screen coordinates.
  *
- * <p>Copyright: Copyright (c) 2007 - Free software under GNU GPL</p>
+ * <p>
+ * Copyright: Copyright (c) 2007 - Free software under GNU GPL</p>
  *
  *
  * @author P.Verley
@@ -111,8 +117,7 @@ public class SimulationUI extends JPanel {
      */
     private static double lonmax;
     /**
-     * BufferedImage in which the background (cost + bathymetry) has been
-     * drawn.
+     * BufferedImage in which the background (cost + bathymetry) has been drawn.
      */
     private static BufferedImage background;
     /**
@@ -152,9 +157,9 @@ public class SimulationUI extends JPanel {
     }
 
     /**
-     * Paints the current step of the simulation.
-     * Redraws the background if the size of the component has changed and
-     * draws the location of the particles on screen.
+     * Paints the current step of the simulation. Redraws the background if the
+     * size of the component has changed and draws the location of the particles
+     * on screen.
      *
      * @param g the <code>Graphics</code> object to protect
      */
@@ -166,7 +171,9 @@ public class SimulationUI extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHints(hints);
-        /** Clear the graphics */
+        /**
+         * Clear the graphics
+         */
         g2.clearRect(0, 0, w, h);
 
         /* Redraw the background when size changed */
@@ -201,7 +208,7 @@ public class SimulationUI extends JPanel {
      * @param h the height of the component
      */
     private void drawBackground(Graphics2D g2, int w, int h) {
-        
+
         background = g2.getDeviceConfiguration().createCompatibleImage(w, h);
         Graphics2D graphic = background.createGraphics();
         graphic.setColor(new Color(223, 212, 200));
@@ -333,12 +340,12 @@ public class SimulationUI extends JPanel {
 //////////
     //////////////////////////////////////////////////////////////////////////////
     /**
-     * This class is the graphical representation of a grid cell on screen.
-     * It is a quadrilateral with an associated color, drawn around a specified
-     * point, the center of the cell.
-     * The class provides all the methods to transform the grid cell coordinates
-     * into screen coordinates. The color is determined function of the
-     * bathymetry or the color of the zones, depending on the display options.
+     * This class is the graphical representation of a grid cell on screen. It
+     * is a quadrilateral with an associated color, drawn around a specified
+     * point, the center of the cell. The class provides all the methods to
+     * transform the grid cell coordinates into screen coordinates. The color is
+     * determined function of the bathymetry or the color of the zones,
+     * depending on the display options.
      */
     private class CellUI extends Polygon {
 
@@ -358,8 +365,8 @@ public class SimulationUI extends JPanel {
         ///////////////////////////////
         /**
          * The (x-screen, y-screen) coordinates of the quadrilateral.
-         * point[0:3][0:1] first dimension refers to the number of points (4
-         * in this case) and the second dimension, the (x, y) coordinates.
+         * point[0:3][0:1] first dimension refers to the number of points (4 in
+         * this case) and the second dimension, the (x, y) coordinates.
          */
         private int[][] points;
 
@@ -405,6 +412,7 @@ public class SimulationUI extends JPanel {
 
         /**
          * Determines the color of cell(i, j), depending on the display option.
+         *
          * @param i an int, the i-coordinate of the cell
          * @param j an int, the j-coordinate of the cell
          * @return the Color of the cell
@@ -412,24 +420,12 @@ public class SimulationUI extends JPanel {
         private Color getColor(int i, int j) {
 
             if (getSimulationManager().getDataset().isInWater(i, j)) {
-                Color color = getColor(getSimulationManager().getDataset().getBathy(i, j));
-                boolean found = false;
-                ArrayList<Zone> listZones = new ArrayList();
-                for (String prefix : getSimulationManager().getZoneManager().getPrefixes()) {
-                    if (null != getSimulationManager().getZoneManager().getZones(prefix)) {
-                        listZones.addAll(getSimulationManager().getZoneManager().getZones(prefix));
+                for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
+                    if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
+                        return zone.getColor();
                     }
                 }
-                Iterator<Zone> iter = listZones.iterator();
-                Zone zone;
-                while (!found && iter.hasNext()) {
-                    zone = iter.next();
-                    if (zone.isGridPointInZone(i, j)) {
-                        color = zone.getColor();
-                        found = true;
-                    }
-                }
-                return (color);
+                return getColor(getSimulationManager().getDataset().getBathy(i, j));
             } else {
                 return Color.darkGray;
             }
@@ -437,6 +433,7 @@ public class SimulationUI extends JPanel {
 
         /**
          * Gets the color of the cell as a funtion of the bathymetry
+         *
          * @param depth a double, the bathymetry at cell's location.
          * @return the Color of the cell.
          */
@@ -498,6 +495,7 @@ public class SimulationUI extends JPanel {
 
         /**
          * Ensures that float {@code x} belongs to [0, 1]
+         *
          * @param x any float
          * @return <code>x</code> if between 0 and 1, the closest boundary
          * otherwise.
