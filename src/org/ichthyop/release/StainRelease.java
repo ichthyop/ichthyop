@@ -118,7 +118,7 @@ public class StainRelease extends AbstractRelease {
                 if (depth > 0) {
                     depth *= -1.d;
                 }
-                particlePatch = ParticleFactory.createGeoParticle(index, point.getLongitude(), point.getLatitude(), depth);
+                particlePatch = ParticleFactory.getInstance().createGeoParticle(index, point.getLongitude(), point.getLatitude(), depth);
             }
             getSimulationManager().getSimulation().getPopulation().add(particlePatch);
             index++;

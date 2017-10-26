@@ -128,7 +128,7 @@ public class ZoneManager extends AbstractManager {
         return inside && isInside(particle.getLat(), particle.getLon(), key);
     }
 
-    private boolean isInside(double lat, double lon, String key) {
+    public boolean isInside(double lat, double lon, String key) {
         Zone zone = zones.get(key);
         boolean inside = true;
         if (zone.isEnabledBathyMask()) {

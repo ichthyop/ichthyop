@@ -127,9 +127,9 @@ public class TxtFileRelease extends AbstractRelease {
                     if (depth > 0) {
                         depth *= -1;
                     }
-                    particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1], depth);
+                    particle = ParticleFactory.getInstance().createGeoParticle(index, coord[0], coord[1], depth);
                 } else {
-                    particle = ParticleFactory.createGeoParticle(index, coord[0], coord[1]);
+                    particle = ParticleFactory.getInstance().createGeoParticle(index, coord[0], coord[1]);
                 }
                 if (null != particle) {
                     //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());

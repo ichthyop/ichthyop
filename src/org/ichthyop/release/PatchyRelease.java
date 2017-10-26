@@ -50,9 +50,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.release;
 
+import java.io.IOException;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.event.ReleaseEvent;
@@ -65,8 +65,8 @@ import org.ichthyop.particle.ParticleFactory;
  */
 public class PatchyRelease extends AbstractRelease {
 
-    private int nb_patches;
-    private int nb_agregated;
+    private int npatch;
+    private int nagregated;
     private double radius_patch, thickness_patch;
     private int nbReleaseZones;
     private boolean is3D;
@@ -77,8 +77,8 @@ public class PatchyRelease extends AbstractRelease {
     public void loadParameters() throws Exception {
 
         /* retrieve patches parameters */
-        nb_patches = getConfiguration().getInt("release.patches.number_patches");
-        nb_agregated = getConfiguration().getInt("release.patches.number_agregated");
+        npatch = getConfiguration().getInt("release.patches.number_patches");
+        nagregated = getConfiguration().getInt("release.patches.number_agregated");
         radius_patch = getConfiguration().getFloat("release.patches.radius_patch");
         thickness_patch = getConfiguration().getFloat("release.patches.thickness_patch");
 
@@ -93,71 +93,79 @@ public class PatchyRelease extends AbstractRelease {
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
     }
+    
+    /**
+     * Computes and returns the number of particles per release zone,
+     * proportionally to zone extents.
+     *
+     * @return the number of particles per release zone.
+     */
+    int[] dispatchParticles() {
+
+        double areaTot = 0;
+        for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
+            areaTot += zone.getArea();
+        }
+
+        // assign number of particles per zone proportionnaly to zone extents
+        int[] nPatchPerZone = new int[nbReleaseZones];
+        int nPatchesSum = 0;
+        int i_zone = 0;
+        for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
+            nPatchPerZone[i_zone] = (int) Math.round(npatch * zone.getArea() / areaTot);
+            nPatchesSum += nPatchPerZone[i_zone];
+            i_zone++;
+        }
+
+        // adjust number of particles per zones in case rounding did not match
+        // exactly expected number of particles.
+        int sign = (int) Math.signum(npatch - nPatchesSum);
+        if (sign != 0) {
+            for (int i = 0; i < Math.abs(npatch - nPatchesSum); i++) {
+                nPatchPerZone[i % nbReleaseZones] += sign;
+            }
+        }
+
+        for (i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
+            if (nPatchPerZone[i_zone] == 0) {
+                warning("Release zone {0} has not been attributed any particle. It may be too small compared to other release zones or its definition may be flawed.", i_zone);
+            }
+        }
+
+        return nPatchPerZone;
+    }
 
     @Override
     public int release(ReleaseEvent event) throws Exception {
 
-        double xmin, xmax, ymin, ymax;
-        double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
-        /** Reduces the release area function of the user-defined zones */
-        xmin = Double.MAX_VALUE;
-        ymin = Double.MAX_VALUE;
-        xmax = 0.d;
-        ymax = 0.d;
-        for (int i_zone = 0; i_zone < nbReleaseZones; i_zone++) {
-            Zone zone = getSimulationManager().getZoneManager().getZones(zonePrefix).get(i_zone);
-            xmin = Math.min(xmin, zone.getXmin());
-            xmax = Math.max(xmax, zone.getXmax());
-            ymin = Math.min(ymin, zone.getYmin());
-            ymax = Math.max(ymax, zone.getYmax());
-            if (is3D) {
-                upDepth = Math.min(upDepth, zone.getUpperDepth());
-                lowDepth = Math.max(lowDepth, zone.getLowerDepth());
-            } else {
-                upDepth = lowDepth = Double.NaN;
-            }
-        }
-
+        int[] nParticlePerZone = dispatchParticles();
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
-        for (int p = 0; p < nb_patches; p++) {
-            /** Instantiate a new Particle */
-            int DROP_MAX = 2000;
-            IParticle particle = null;
-            int counter = 0;
-            while (null == particle) {
-                if (counter++ > DROP_MAX) {
-                    throw new NullPointerException("[patchy release] Unable to release particle. Check out the zone definitions.");
-                }
-                double x = xmin + Math.random() * (xmax - xmin);
-                double y = ymin + Math.random() * (ymax - ymin);
-                double depth = Double.NaN;
-                if (is3D) {
-                    depth = -1.d * (upDepth + Math.random() * (lowDepth - upDepth));
-                }
-                particle = ParticleFactory.createZoneParticle(index, x, y, depth, zonePrefix);
-            }
-            getSimulationManager().getSimulation().getPopulation().add(particle);
-            index++;
-            for (int f = 0; f < nb_agregated - 1; f++) {
-
-                IParticle particlePatch = null;
-                counter = 0;
-                while (null == particlePatch) {
-
-                    if (counter++ > DROP_MAX) {
-                        throw new NullPointerException("[patchy release] Unable to release particle. Check out the patchy release definition.");
-                    }
-                    double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
-                    double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
-                    double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
-                    double depth = Double.NaN;
-                    if (is3D) {
-                        depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
-                    }
-                    particlePatch = ParticleFactory.createGeoParticle(index, lon, lat, depth);
-                }
-                getSimulationManager().getSimulation().getPopulation().add(particlePatch);
+        int i_zone = 0;
+        for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
+            // release particles randomly within the zone
+            for (int p = 0; p < nParticlePerZone[i_zone]; p++) {
+                IParticle particle = ParticleFactory.getInstance().createZoneParticle(index, zone, false);
+                getSimulationManager().getSimulation().getPopulation().add(particle);
                 index++;
+                for (int f = 0; f < nagregated - 1; f++) {
+                    IParticle particlePatch = null;
+                    int counter = 0;
+                    while (null == particlePatch) {
+                        if (counter++ > 2000) {
+                            error("Unable to release particle in zone " + zone.getKey(), new IOException("Too many failed attempts"));
+                        }
+                        double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+                        double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
+                        double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
+                        double depth = Double.NaN;
+                        if (is3D) {
+                            depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
+                        }
+                        particlePatch = ParticleFactory.getInstance().createGeoParticle(index, lon, lat, depth);
+                    }
+                    getSimulationManager().getSimulation().getPopulation().add(particlePatch);
+                    index++;
+                }
             }
         }
         return index;
@@ -165,6 +173,6 @@ public class PatchyRelease extends AbstractRelease {
 
     @Override
     public int getNbParticles() {
-        return nb_patches * nb_agregated;
+        return npatch * nagregated;
     }
 }

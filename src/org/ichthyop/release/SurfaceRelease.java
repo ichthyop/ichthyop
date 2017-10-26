@@ -64,34 +64,19 @@ import org.ichthyop.particle.ParticleFactory;
 public class SurfaceRelease extends AbstractRelease {
     
     private int nParticles;
-    private boolean is3D;
 
     @Override
     public void loadParameters() throws Exception {
         nParticles = getConfiguration().getInt("release.surface.number_particles");
-        is3D = getSimulationManager().getDataset().is3D();
     }
 
     @Override
     public int release(ReleaseEvent event) throws Exception {
         
-        int DROP_MAX = 2000;
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
-        int nx = getSimulationManager().getDataset().get_nx();
-        int ny = getSimulationManager().getDataset().get_ny();
         
         for (int p = 0; p < nParticles; p++) {
-            IParticle particle = null;
-            int counter = 0;
-            while (null == particle) {
-
-                if (counter++ > DROP_MAX) {
-                    throw new NullPointerException("[release surface] Unable to release particle.");
-                }
-                double x = Math.random() * (nx - 1);
-                double y = Math.random() * (ny - 1);
-                particle = ParticleFactory.createSurfaceParticle(index, x, y, is3D);
-            }
+            IParticle particle = ParticleFactory.getInstance().createSurfaceParticle(index);
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
         }

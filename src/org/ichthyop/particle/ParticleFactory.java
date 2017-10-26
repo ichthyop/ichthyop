@@ -54,6 +54,7 @@ package org.ichthyop.particle;
 
 import java.io.IOException;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.Zone;
 
 /**
  *
@@ -61,7 +62,14 @@ import org.ichthyop.IchthyopLinker;
  */
 public class ParticleFactory extends IchthyopLinker {
 
-    public static IParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) throws IOException {
+    final private static ParticleFactory PARTICLE_FACTORY = new ParticleFactory();
+    final private int ATTEMPT_MAX = 2000;
+
+    public static ParticleFactory getInstance() {
+        return PARTICLE_FACTORY;
+    }
+
+    public IParticle createGeoParticle(int index, double lon, double lat, double depth, ParticleMortality mortality) throws IOException {
 
         Particle particle = new Particle();
         particle.setIndex(index);
@@ -99,89 +107,78 @@ public class ParticleFactory extends IchthyopLinker {
         return particle;
     }
 
-    public static IParticle createGeoParticle(int index, double lon, double lat, double depth) throws IOException {
+    public IParticle createGeoParticle(int index, double lon, double lat, double depth) throws IOException {
         return createGeoParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
     }
 
-    public static IParticle createGeoParticle(int index, double lon, double lat) throws IOException {
+    public IParticle createGeoParticle(int index, double lon, double lat) throws IOException {
         return createGeoParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
     }
 
-    public static IParticle createSurfaceParticle(int index, double x, double y, boolean is3D) {
+    public IParticle createSurfaceParticle(int index) {
         Particle particle = new Particle();
         particle.setIndex(index);
-        particle.setX(x);
-        particle.setY(y);
-        if (is3D) {
-            particle.setZ(getSimulationManager().getDataset().depth2z(x, y, 0.));
-        } else {
+        if (!getSimulationManager().getDataset().is3D()) {
             particle.make2D();
         }
-        if (!particle.isInWater() || particle.isOnEdge()) {
-            return null;
-        }
-        particle.grid2Geo();
-        return particle;
-    }
-
-    public static IParticle createZoneParticle(int index, double x, double y, double depth, String zoneprefix) {
-        Particle particle = new Particle();
-        particle.setIndex(index);
-        particle.setX(x);
-        particle.setY(y);
-        particle.setDepth(depth);
-        /* bugfixing 2011/06/28
-         * setDepth but z unset and then calling isInWater ==> crash
-         * phv 2011/09/25: wondering wether the make2D should not occur before
-         * the geo2grid, to be checked...
-         */
-        if (Double.isNaN(depth)) {
-            particle.make2D();
-        }
-        particle.geo2Grid();
-        if (!particle.isInWater() || particle.isOnEdge()) {
-            return null;
-        }
-        if (!Double.isNaN(depth)) {
-            if (getSimulationManager().getDataset().getDepthMax(particle.getX(), particle.getY()) > depth || depth > 0) {
-                return null;
+        int nx = getSimulationManager().getDataset().get_nx();
+        int ny = getSimulationManager().getDataset().get_ny();
+        int attempt = 0;
+        while (attempt++ < ATTEMPT_MAX) {
+            double[] xy = new double[]{Math.random() * (nx - 1), Math.random() * (ny - 1)};
+            if (getSimulationManager().getDataset().isInWater(xy)
+                    && !getSimulationManager().getDataset().isOnEdge(xy)) {
+                particle.setX(xy[0]);
+                particle.setY(xy[1]);
+                if (getSimulationManager().getDataset().is3D()) {
+                    particle.setZ(getSimulationManager().getDataset().depth2z(xy[0], xy[1], 0.));
+                }
+                particle.grid2Geo();
+                return particle;
             }
         }
-        if (getSimulationManager().getZoneManager().findZones(particle, zoneprefix).length == 0) {
-            return null;
-        }
-        particle.grid2Geo();
-        particle.geo2Grid();
-        return particle;
+
+        error("Unable to release particle at surface", new IOException("Too many failed attempts"));
+        return null;
     }
 
-    public static IParticle createBottomParticle(int index, double x, double y, String zoneprefix) {
+    public IParticle createZoneParticle(int index, Zone zone, boolean bottom) {
 
         Particle particle = new Particle();
         particle.setIndex(index);
-        particle.setX(x);
-        particle.setY(y);
-        /*
-         * Make sure the particle is released at the bottom, ie z = 0
-         */
-        particle.setZ(0);
-        /*
-         * Test wether the grid point is on land or at the edge of the domain
-         */
-        if (!particle.isInWater() || particle.isOnEdge()) {
-            return null;
+        if (!getSimulationManager().getDataset().is3D()) {
+            particle.make2D();
         }
-        /*
-         * Test wether the grid point is inside one of the release zones
-         */
-        if (getSimulationManager().getZoneManager().findZones(particle, zoneprefix).length == 0) {
-            return null;
+        int attempt = 0;
+        double lat, lon;
+        while (attempt++ < ATTEMPT_MAX) {
+            lat = zone.getLatMin() + Math.random() * (zone.getLatMax() - zone.getLatMin());
+            lon = zone.getLonMin() + Math.random() * (zone.getLonMax() - zone.getLonMin());
+            double[] xy = getSimulationManager().getDataset().latlon2xy(lat, lon);
+            boolean valid = getSimulationManager().getDataset().isInWater(xy)
+                    && !getSimulationManager().getDataset().isOnEdge(xy)
+                    && getSimulationManager().getZoneManager().isInside(lat, lon, zone.getKey());
+            if (valid) {
+                particle.setLat(lat);
+                particle.setLon(lon);
+                double upperdepth, lowerdepth;
+                if (bottom) {
+                    upperdepth = lowerdepth = Math.abs(getSimulationManager().getDataset().getDepthMax(xy[0], xy[1]));
+                }
+                else if (zone.isEnabledDepthMask()) {
+                    upperdepth = zone.getUpperDepth();
+                    lowerdepth = zone.getLowerDepth();
+                } else {
+                    upperdepth = 0.d;
+                    lowerdepth = Math.abs(getSimulationManager().getDataset().getDepthMax(xy[0], xy[1]));
+                }
+                particle.setDepth(-1.d * (upperdepth + Math.random() * (lowerdepth - upperdepth)));
+                particle.geo2Grid();
+                return particle;
+            }
         }
-        /*
-         * Converts (x, y, z) into (lon, lat, depth)
-         */
-        particle.grid2Geo();
-        return particle;
+        error("Unable to release particle in zone " + zone.getKey(), new IOException("Too many failed attempts"));
+        return null;
     }
 
     private static boolean inside(double d, double dmin, double dmax) {

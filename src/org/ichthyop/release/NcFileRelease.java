@@ -155,7 +155,7 @@ public class NcFileRelease extends AbstractRelease {
                 }
             }
 
-            particle = ParticleFactory.createGeoParticle(index, lon, lat, depth, ParticleMortality.getMortality(mortalityArr.get(rank, i)));
+            particle = ParticleFactory.getInstance().createGeoParticle(index, lon, lat, depth, ParticleMortality.getMortality(mortalityArr.get(rank, i)));
             getSimulationManager().getSimulation().getPopulation().add(particle);
             index++;
         }
