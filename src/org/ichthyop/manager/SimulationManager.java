@@ -52,7 +52,6 @@
  */
 package org.ichthyop.manager;
 
-import org.jdom2.JDOMException;
 import org.ichthyop.Simulation;
 import org.ichthyop.dataset.IDataset;
 import org.ichthyop.event.InitializeEvent;
@@ -60,15 +59,12 @@ import org.ichthyop.event.InitializeListener;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.event.SetupListener;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
-import org.jdom2.input.SAXBuilder;
 import org.ichthyop.calendar.InterannualCalendar;
 import org.ichthyop.logging.IchthyopLogger;
 import org.ichthyop.logging.StdoutHandler;
@@ -133,7 +129,6 @@ public class SimulationManager extends IchthyopLogger {
         if (null != file) {
             getParameterManager().setConfigurationFile(file);
             cfgFile = new File(getParameterManager().getMainFile());
-            mobiliseManagers();
         }
     }
 
@@ -220,27 +215,33 @@ public class SimulationManager extends IchthyopLogger {
      * initialization events will be called in the same order they are called
      * here.
      */
-    private void mobiliseManagers() {
+    public void addListenersToManagers() {
         /* the very first one, since most of the other managers will need it
          later on */
-        getDatasetManager();
+        addSetupListener(getDatasetManager());
+        addInitializeListener(getDatasetManager());
 
         /* Time manager must come after the release manager because the 
          calculation of the simulation duration required the release schedule */
-        getReleaseManager();
-        getTimeManager();
+        addSetupListener(getReleaseManager());
+        addInitializeListener(getReleaseManager());
+        addSetupListener(getTimeManager());
+        addInitializeListener(getTimeManager());
 
         /* It'd better come after TimeManager in case some actions need to
          access some time information */
-        getActionManager();
+        addSetupListener(getActionManager());
+        addInitializeListener(getActionManager());
 
         /* Zone manager must be called  after the action manager and the
          release manager */
-        getZoneManager();
+        addSetupListener(getZoneManager());
+        addInitializeListener(getZoneManager());
 
         /* the very last one, because it sums up all the setup info in order
          to record it in the NetCDF output file */
-        getOutputManager();
+        addSetupListener(getOutputManager());
+        addInitializeListener(getOutputManager());
     }
 
     public void setup() throws Exception {

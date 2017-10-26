@@ -61,10 +61,4 @@ import org.ichthyop.event.SetupListener;
  *
  * @author pverley
  */
-public abstract class AbstractManager extends IchthyopLinker implements SetupListener, InitializeListener {
-
-    AbstractManager() {
-        getSimulationManager().addSetupListener(this);
-        getSimulationManager().addInitializeListener(this);
-    }
-}
+public abstract class AbstractManager extends IchthyopLinker implements SetupListener, InitializeListener {}

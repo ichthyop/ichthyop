@@ -74,6 +74,7 @@ public class Launcher extends IchthyopLinker {
 
         // Initialize the logger
         getSimulationManager().setupLogger();
+        getSimulationManager().addListenersToManagers();
 
         // Check for input arguments
         if (args.length > 0) {
