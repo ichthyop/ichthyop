@@ -82,7 +82,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     private double latMin, lonMin, latMax, lonMax;
     double dt_HyMo, time_tp1;
     int rank;
-    float[][] bathymetry;
+    double[][] bathymetry;
     //NetcdfFile nc;
     int nbTimeRecords;
     boolean xTore = true;
@@ -180,6 +180,15 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Initializes u[0] & v[0] for the mask
         u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
         v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
+        
+         // bathy
+        bathymetry = new double[ny][nx];
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                int k = this.getDeepestLevel(i, j);
+                bathymetry[j][i] = getDepth(i, j, k) - 0.5 * ddepth[k];
+            }
+        }
     }
 
     @Override
@@ -268,7 +277,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     public double[] xy2latlon(double xRho, double yRho) {
         double jy = Math.max(0.00001d, Math.min(yRho, (double) ny - 1.00001d));
         double ix = xTore ? xRho : Math.max(0.00001d, Math.min(xRho, (double) nx - 1.00001d));
-        
+
         int i = (int) Math.floor(ix);
         int j = (int) Math.floor(jy);
         double lat = 0.d;
@@ -331,17 +340,21 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     @Override
     public double getDepthMax(double x, double y) {
 
+        return getDepth(x, y, getDeepestLevel(x, y));
+    }
+    
+    private int getDeepestLevel(double x, double y) {
         int ix = (int) Math.round(x);
         int jy = (int) Math.round(y);
         if (isInWater(ix, jy, 0)) {
             for (int k = 0; k < nz; k++) {
                 if (!isInWater(ix, jy, k)) {
-                    return getDepth(x, y, Math.max(0, k - 1));
+                    return Math.max(0, k - 1);
                 }
             }
-            return getDepth(x, y, nz - 1);
+            return nz - 1;
         }
-        return 0.d;
+        return 0;
     }
 
     private double weight(double[] xyz, int[] ijk, int p) {
@@ -498,7 +511,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double getBathy(int i, int j) {
-        return -1;//-1*bathymetry[j][i];
+        return bathymetry[j][i];
     }
 
     @Override

@@ -229,7 +229,7 @@ public class Zone extends IchthyopLinker {
     }
 
     public float getOffshoreLine() {
-        return inshoreLine;
+        return offshoreLine;
     }
 
     public void init() {
