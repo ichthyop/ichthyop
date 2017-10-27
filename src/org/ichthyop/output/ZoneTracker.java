@@ -99,9 +99,9 @@ public class ZoneTracker extends AbstractTracker {
         Iterator<IParticle> iter = getSimulationManager().getSimulation().getPopulation().iterator();
         while (iter.hasNext()) {
             particle = iter.next();
-            Float[] zindexes = getSimulationManager().getZoneManager().findZones(particle);
             Index aindex = getArray().getIndex();
-            for (float zindex : zindexes) {
+            for (String key : getSimulationManager().getZoneManager().findZones(particle)) {
+                float zindex = getSimulationManager().getZoneManager().getZone(key).getIndex();
                 aindex.set(0, particle.getIndex(), (int) Math.floor(zindex) - 1);
                 getArray().setFloat(aindex, zindex);
             }

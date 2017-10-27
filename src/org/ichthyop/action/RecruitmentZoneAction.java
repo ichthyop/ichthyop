@@ -137,8 +137,8 @@ public class RecruitmentZoneAction extends AbstractAction {
             return;
         }
 
-        Float[] indexes = getSimulationManager().getZoneManager().findZones(particle, zonePrefix);
-        for (float index : indexes) {
+        for (String key : getSimulationManager().getZoneManager().findZones(particle, zonePrefix)) {
+            float index = getSimulationManager().getZoneManager().getZone(key).getIndex();
             if (!RecruitableParticle.isRecruited(particle, index)) {
                 if (satisfyRecruitmentCriterion(particle)) {
                     timeInZone = (RecruitableParticle.getCurrentRecruimentZone(particle) == index)

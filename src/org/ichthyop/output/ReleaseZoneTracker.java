@@ -109,8 +109,9 @@ public class ReleaseZoneTracker extends AbstractTracker {
         // Only write release zone when particle is released
         for (int i = nPopTm1; i < nNow; i++) {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
-            Float[] indexes = getSimulationManager().getZoneManager().findZones(particle, zoneprefix);
-            getArray().setFloat(getIndex().set(particle.getIndex()), indexes[0]);
+            List<String> keys = getSimulationManager().getZoneManager().findZones(particle, zoneprefix);
+            float index = getSimulationManager().getZoneManager().getZone(keys.get(0)).getIndex();
+            getArray().setFloat(getIndex().set(particle.getIndex()), index);
         }
         nPopTm1 = nNow;
 

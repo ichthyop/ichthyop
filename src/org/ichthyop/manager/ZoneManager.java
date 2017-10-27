@@ -174,28 +174,32 @@ public class ZoneManager extends AbstractManager {
         }
         return pzones;
     }
+    
+    public Zone getZone(String key) {
+        return zones.get(key);
+    }
 
-    public Float[] findZones(IParticle particle, String prefix) {
+    public List<String> findZones(IParticle particle, String prefix) {
 
-        List<Float> indexes = new ArrayList();
+        List<String> keys = new ArrayList();
         for (Zone zone : zones.values()) {
             String zprefix = zone.getKey().substring(0, zone.getKey().lastIndexOf("."));
             if (zprefix.equals(prefix) && isInside(particle, zone.getKey())) {
-                indexes.add(zone.getIndex());
+                keys.add(zone.getKey());
             }
         }
-        return indexes.toArray(new Float[indexes.size()]);
+        return keys;
     }
 
-    public Float[] findZones(IParticle particle) {
+    public List<String> findZones(IParticle particle) {
 
-        List<Float> indexes = new ArrayList();
+        List<String> keys = new ArrayList();
         for (Zone zone : zones.values()) {
             if (isInside(particle, zone.getKey())) {
-                indexes.add(zone.getIndex());
+                keys.add(zone.getKey());
             }
         }
-        return indexes.toArray(new Float[indexes.size()]);
+        return keys;
     }
 
     @Override
