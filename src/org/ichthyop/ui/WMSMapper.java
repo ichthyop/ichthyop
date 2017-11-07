@@ -52,13 +52,6 @@
  */
 package org.ichthyop.ui;
 
-import de.micromata.opengis.kml.v_2_2_0.Document;
-import de.micromata.opengis.kml.v_2_2_0.Folder;
-import de.micromata.opengis.kml.v_2_2_0.IconStyle;
-import de.micromata.opengis.kml.v_2_2_0.Kml;
-import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
-import de.micromata.opengis.kml.v_2_2_0.Placemark;
-import de.micromata.opengis.kml.v_2_2_0.Style;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -130,36 +123,20 @@ public class WMSMapper extends JXMapKit {
     private Variable vlon, vlat, pcolorVariable, vtime, vmortality;
     boolean canRepaint = false;
     private Painter bgPainter;
-    boolean loadFromHeap = false;
     private double defaultLat = 48.38, defaultLon = -4.62;
     private int defaultZoom = 10;
     private Calendar calendar;
-    private Kml kml;
-    private Document kmlDocument;
-    private Folder kmlMainFolder;
     private double[] time;
     private int nbSteps;
-    private List<String> colors;
     private Color defaultColor = Color.WHITE;
     private int particlePixel = 1;
-    /**
-     * Lightest color of the color range.
-     */
     private Color colormin = Color.BLUE;
-    /**
-     * Intermediate color of the color range.
-     */
     private Color colormed = Color.YELLOW;
-    /**
-     * Darkest color of the color range.
-     */
     private Color colormax = Color.RED;
     private float valmin = 0;
     private float valmed = 50;
     private float valmax = 100;
     private Painter colorbarPainter;
-    final private Color bottom = new Color(0, 0, 150);
-    final private Color surface = Color.CYAN;
 
     public WMSMapper() {
 
@@ -849,86 +826,7 @@ public class WMSMapper extends JXMapKit {
             getSimulationManager().warning("[mapping] Error reading NetCDF \"lon\" or \"lat\" or \"mortality\" variables for particle " + index);
         }
         return list;
-    }
-
-    public void createKML() {
-        kml = KmlFactory.createKml();
-        kmlDocument = kml.createAndSetDocument().withName(getFile().getName()).withOpen(true);
-        final Style style = kmlDocument.createAndAddStyle().withId("randomColorIcon");
-        final IconStyle iconstyle = style.createAndSetIconStyle().withColor("ffff3df0").withScale(particlePixel / 10.d);
-        iconstyle.createAndSetIcon().withHref("http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
-        kmlMainFolder = kmlDocument.createAndAddFolder();
-        colors = new ArrayList();
-    }
-
-    public boolean marshalAndKMZ() throws IOException {
-        File kmzFile = new File(getKMZPath());
-        if (kmzFile.exists()) {
-            kmzFile.delete();
-        }
-        return kml.marshalAsKmz(getKMZPath());
-    }
-
-    public String getKMZPath() {
-        return getFile().getPath().replace(".nc", ".kmz");
-    }
-
-    public void writeKMLStep(int i) {
-
-        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        SimpleDateFormat dtFormat2 = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        Folder stepFolder = new Folder();
-        dtFormat.setCalendar(calendar);
-        dtFormat2.setCalendar(calendar);
-        stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
-        if (getTime(i).before(getTime(i + 1))) {
-            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
-        } else {
-            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i + 1))).withEnd(dtFormat.format(getTime(i)));
-        }
-        for (WMSMapper.DrawableParticle particle : getParticles(i)) {
-            String coord = Double.toString(particle.getLongitude()) + "," + Double.toString(particle.getLatitude());
-            Placemark placeMark = stepFolder.createAndAddPlacemark();
-            String styleURL = "#" + createStyle(particle);
-            placeMark.withStyleUrl(styleURL).createAndSetPoint().addToCoordinates(coord);
-        }
-        kmlMainFolder.addToFeature(stepFolder);
-    }
-
-    private String createStyle(WMSMapper.DrawableParticle particle) {
-        String color = colorForKML(getColor(particle.getColorValue()));
-        if (!colors.contains(color)) {
-            colors.add(color);
-            Style style = kmlDocument.createAndAddStyle().withId("IconStyle" + color);
-            IconStyle iconstyle = style.createAndSetIconStyle().withColor(color).withScale(particlePixel / 10.d);
-            iconstyle.createAndSetIcon().withHref("http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png");
-        }
-        return "IconStyle" + color;
-    }
-
-    private String colorForKML(Color color) {
-        int red = color.getRed();
-        int green = color.getGreen();
-        int blue = color.getBlue();
-        StringBuilder hexColor = new StringBuilder(8);
-        hexColor.append("ff");
-        String hR = Integer.toHexString(red);
-        if (hR.length() < 2) {
-            hR = "0" + hR;
-        }
-        String hB = Integer.toHexString(blue);
-        if (hB.length() < 2) {
-            hB = "0" + hB;
-        }
-        String hG = Integer.toHexString(green);
-        if (hG.length() < 2) {
-            hG = "0" + hG;
-        }
-        hexColor.append(hB);
-        hexColor.append(hG);
-        hexColor.append(hR);
-        return hexColor.toString();
-    }
+    }  
 
     /**
      * Saves the snapshot of the specified component as a PNG picture. The name
@@ -943,7 +841,7 @@ public class WMSMapper extends JXMapKit {
         new Thread(new WMSMapper.ImageWriter(index, bi)).start();
     }
 
-    Date getTime(int index) {
+    private Date getTime(int index) {
         if (index > nbSteps - 1) {
             double dt = time[1] - time[0];
             long ltime = (long) (time[0] + index * dt) * 1000L;

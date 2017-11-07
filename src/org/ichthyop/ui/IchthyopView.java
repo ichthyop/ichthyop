@@ -99,6 +99,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import org.ichthyop.Template;
+import org.ichthyop.output.ExportToKML;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.swingx.painter.Painter;
@@ -218,6 +219,8 @@ public class IchthyopView extends FrameView
 
     private class ExportToKMZTask extends SFTask {
 
+        private final ExportToKML kmlExport;
+
         ExportToKMZTask(Application instance) {
             super(instance);
             setMessage(resourceMap.getString("exportToKMZ.msg.init"));
@@ -228,18 +231,16 @@ public class IchthyopView extends FrameView
             btnCloseNC.getAction().setEnabled(false);
             btnCancelMapping.getAction().setEnabled(true);
             setColorbarPanelEnabled(false);
+            kmlExport = new ExportToKML(outputFile.getAbsolutePath());
         }
 
         @Override
         protected Object doInBackground() throws Exception {
-            wmsMapper.createKML();
             setMessage(resourceMap.getString("exportToKMZ.msg.exporting"), true, Level.INFO);
-            for (int i = 0; i < wmsMapper.getNbSteps(); i++) {
-                setProgress((float) (i + 1) / wmsMapper.getNbSteps());
-                wmsMapper.writeKMLStep(i);
-            }
+            kmlExport.init();
+            kmlExport.writeKML();
             setMessage(resourceMap.getString("exportToKMZ.msg.compressing"), true, Level.INFO);
-            wmsMapper.marshalAndKMZ();
+            kmlExport.toKMZ();
             return null;
         }
 
@@ -256,7 +257,7 @@ public class IchthyopView extends FrameView
 
         @Override
         void onSuccess(Object o) {
-            setMessage(resourceMap.getString("exportToKMZ.msg.exported") + " " + wmsMapper.getKMZPath(), false, LogLevel.COMPLETE);
+            setMessage(resourceMap.getString("exportToKMZ.msg.exported") + " " + kmlExport.getKMZ(), false, LogLevel.COMPLETE);
         }
 
         @Override
