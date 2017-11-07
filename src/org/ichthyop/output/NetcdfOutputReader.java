@@ -107,8 +107,12 @@ public class NetcdfOutputReader extends IchthyopLinker {
     }
 
     public String getColorVariableLongname() {
-        String unit = nc.findVariable(colorVariableName).findAttribute("unit").getStringValue();
-        return colorVariableName + " (" + unit + ")";
+        try {
+            String unit = nc.findVariable(colorVariableName).findAttribute("unit").getStringValue();
+            return colorVariableName + " (" + unit + ")";
+        } catch (Exception ex) {
+        }
+        return colorVariableName;
     }
 
     public void init() {
@@ -251,39 +255,34 @@ public class NetcdfOutputReader extends IchthyopLinker {
 
         List<DrawableParticle> list = new ArrayList();
         try {
+            int nparticle = nc.findDimension("drifter").getLength();
             Variable vlon = nc.findVariable("lon");
-            ArrayFloat.D1 arrLon = (ArrayFloat.D1) vlon.read(new int[]{itime, 0}, new int[]{1, vlon.getShape(1)}).reduce(0);
+            ArrayFloat.D1 arrLon = (ArrayFloat.D1) vlon.read(new int[]{itime, 0}, new int[]{1, nparticle}).reduce();
             Variable vlat = nc.findVariable("lat");
-            ArrayFloat.D1 arrLat = (ArrayFloat.D1) vlat.read(new int[]{itime, 0}, new int[]{1, vlat.getShape(1)}).reduce(0);
+            ArrayFloat.D1 arrLat = (ArrayFloat.D1) vlat.read(new int[]{itime, 0}, new int[]{1, nparticle}).reduce();
             Variable vmortality = nc.findVariable("mortality");
-            ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{itime, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
-            Variable variable = nc.findVariable(colorVariableName);
-            Array arrColorVariable = null;
-            if (null != variable) {
-                if (variable.getFullName().equals("time")) {
+            ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{itime, 0}, new int[]{1, nparticle}).reduce();
+            // read custom colorbar variable
+            if (null != colorVariableName && null != nc.findVariable(colorVariableName)) {
+                Variable variable = nc.findVariable(colorVariableName);
+                Array arrColorVariable = null;
+                if (colorVariableName.equals("time")) {
                     arrColorVariable = variable.read(new int[]{itime}, new int[]{1}).reduce();
                 } else {
-                    arrColorVariable = variable.read(new int[]{itime, 0}, new int[]{1, variable.getShape(1)}).reduce();
+                    arrColorVariable = variable.read(new int[]{itime, 0}, new int[]{1, nparticle}).reduce();
+                }
+                for (int iparticle = 0; iparticle < nparticle; iparticle++) {
+                    float value = arrColorVariable.getSize() < 2 ? arrColorVariable.getFloat(0) : arrColorVariable.getFloat(iparticle);
+                    list.add(new DrawableParticle(arrLon.get(iparticle), arrLat.get(iparticle),
+                            value, arrMortality.get(iparticle) == 0));
+                }
+            } else {
+                for (int iparticle = 0; iparticle < nparticle; iparticle++) {
+                    list.add(new DrawableParticle(arrLon.get(iparticle), arrLat.get(iparticle),
+                            Float.NaN, arrMortality.get(iparticle) == 0));
                 }
             }
-            int length = arrLon.getShape()[0];
-            for (int i = 0; i < length; i++) {
-                float lon = arrLon.get(i);
-                if (arrMortality.get(i) == 0) {
-                    if (null != arrColorVariable) {
-                        if (arrColorVariable.getSize() < 2) {
-                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
-                        } else {
-                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
-                        }
-                    } else {
-                        list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
-                    }
-                } else {
-                    list.add(new DrawableParticle(lon, arrLat.get(i)));
-                }
-            }
-        } catch (IOException | InvalidRangeException ex) {
+        } catch (Exception ex) {
             warning("[output] Error reading NetCDF \"lon\" or \"lat\" or \"mortality\" variables for particle " + itime, ex);
         }
         return list;
@@ -363,7 +362,6 @@ public class NetcdfOutputReader extends IchthyopLinker {
             double stdDeviation = getStandardDeviation(dataset, mean);
             float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
             float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
-            //System.out.println("min: " + getMin(dataset) + " max: " + getMax(dataset));
             return new float[]{lower, upper};
         }
     }

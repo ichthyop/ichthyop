@@ -55,6 +55,7 @@ public class ZoneRelease extends AbstractRelease {
         int i_zone = 0;
         for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
             nParticlePerZone[i_zone] = (int) Math.round(nParticles * zone.getArea() / areaTot);
+            System.out.println(i_zone + " " + nParticlePerZone[i_zone]);
             nParticleSum += nParticlePerZone[i_zone];
             i_zone++;
         }
@@ -85,11 +86,13 @@ public class ZoneRelease extends AbstractRelease {
         int i_zone = 0;
         for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
             // release particles randomly within the zone
+            System.out.println("RELEASING " + nParticlePerZone[i_zone] + " IN ZONE " + zone.getKey());
             for (int p = 0; p < nParticlePerZone[i_zone]; p++) {
                 IParticle particle = ParticleFactory.getInstance().createZoneParticle(index, zone);
                 getSimulationManager().getSimulation().getPopulation().add(particle);
                 index++;
             }
+            i_zone++;
         }
         return index;
     }

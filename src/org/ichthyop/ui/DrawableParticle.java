@@ -62,26 +62,20 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 public class DrawableParticle extends GeoPosition {
 
     private final float colorValue;
-    private final boolean isLiving;
+    private final boolean alive;
 
-    public DrawableParticle(float lon, float lat, float colorValue) {
+    public DrawableParticle(float lon, float lat, float colorValue, boolean alive) {
         super(lat, lon);
         this.colorValue = colorValue;
-        isLiving = true;
-    }
-
-    public DrawableParticle(float lon, float lat) {
-        super(lat, lon);
-        isLiving = false;
-        colorValue = Float.NaN;
+        this.alive = alive;
     }
 
     public float getColorValue() {
         return colorValue;
     }
 
-    public boolean isLiving() {
-        return isLiving;
+    public boolean isAlive() {
+        return alive;
     }
 
 }

@@ -232,7 +232,7 @@ public class WMSMapper extends JXMapKit {
 
     private Painter getPainterParticles(int itime) {
 
-        final List<DrawableParticle> listParticles = ncout.readParticles(itime);
+        List<DrawableParticle> listParticles = ncout.readParticles(itime);
 
         Painter particleLayer = new Painter<JXMapViewer>() {
             @Override
@@ -329,7 +329,7 @@ public class WMSMapper extends JXMapKit {
 
         //create a polygon
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
-        if (particle.isLiving()) {
+        if (particle.isAlive()) {
             Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), particlePixel, particlePixel);
             g.setColor(getColor(particle.getColorValue()));
             g.fill(ellipse);
@@ -382,8 +382,9 @@ public class WMSMapper extends JXMapKit {
 
     public void setColorbar(String variable, float valmin, float valmed, float valmax, Color colormin, Color colormed, Color colormax) {
 
+        ncout.setColorVariableName(variable);
         CompoundPainter cp = new CompoundPainter();
-        if (null != variable && !variable.toLowerCase().contains("none")) {
+        if (null != variable) {
             this.valmin = valmin;
             this.valmed = valmed;
             this.valmax = valmax;
