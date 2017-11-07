@@ -142,7 +142,7 @@ public class ParticleFactory extends IchthyopLinker {
         return null;
     }
 
-    public IParticle createZoneParticle(int index, Zone zone, boolean bottom) {
+    public IParticle createZoneParticle(int index, Zone zone) {
 
         Particle particle = new Particle();
         particle.setIndex(index);
@@ -162,15 +162,17 @@ public class ParticleFactory extends IchthyopLinker {
                 particle.setLat(lat);
                 particle.setLon(lon);
                 double upperdepth, lowerdepth;
-                if (bottom) {
-                    upperdepth = lowerdepth = Math.abs(getSimulationManager().getDataset().getDepthMax(xy[0], xy[1]));
-                }
-                else if (zone.isEnabledDepthMask()) {
-                    upperdepth = zone.getUpperDepth();
-                    lowerdepth = zone.getLowerDepth();
+                double depthmax = Math.abs(getSimulationManager().getDataset().getDepthMax(xy[0], xy[1]));
+                if (zone.isEnabledDepthMask()) {
+                    if (zone.getUpperDepth() > depthmax) {
+                        upperdepth = lowerdepth = depthmax;
+                    } else {
+                        upperdepth = zone.getUpperDepth();
+                        lowerdepth = zone.getLowerDepth();
+                    }
                 } else {
                     upperdepth = 0.d;
-                    lowerdepth = Math.abs(getSimulationManager().getDataset().getDepthMax(xy[0], xy[1]));
+                    lowerdepth = depthmax;
                 }
                 particle.setDepth(-1.d * (upperdepth + Math.random() * (lowerdepth - upperdepth)));
                 particle.geo2Grid();

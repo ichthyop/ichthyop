@@ -144,7 +144,7 @@ public class PatchyRelease extends AbstractRelease {
         for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
             // release particles randomly within the zone
             for (int p = 0; p < nParticlePerZone[i_zone]; p++) {
-                IParticle particle = ParticleFactory.getInstance().createZoneParticle(index, zone, false);
+                IParticle particle = ParticleFactory.getInstance().createZoneParticle(index, zone);
                 getSimulationManager().getSimulation().getPopulation().add(particle);
                 index++;
                 for (int f = 0; f < nagregated - 1; f++) {

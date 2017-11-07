@@ -110,8 +110,10 @@ public class ReleaseZoneTracker extends AbstractTracker {
         for (int i = nPopTm1; i < nNow; i++) {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
             List<String> keys = getSimulationManager().getZoneManager().findZones(particle, zoneprefix);
-            float index = getSimulationManager().getZoneManager().getZone(keys.get(0)).getIndex();
-            getArray().setFloat(getIndex().set(particle.getIndex()), index);
+            if (!keys.isEmpty()) {
+                float index = getSimulationManager().getZoneManager().getZone(keys.get(0)).getIndex();
+                getArray().setFloat(getIndex().set(particle.getIndex()), index);
+            }
         }
         nPopTm1 = nNow;
 

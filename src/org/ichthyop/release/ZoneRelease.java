@@ -19,16 +19,12 @@ public class ZoneRelease extends AbstractRelease {
 
     private int nbReleaseZones, nParticles;
     private String zonePrefix;
-    private boolean bottom;
 
     @Override
     public void loadParameters() throws Exception {
 
         // get number of particles to release
         nParticles = getConfiguration().getInt("release.zone.number_particles");
-
-        // bottom release
-        bottom = getConfiguration().getBoolean("release.zone.bottom");
 
         // load release zones
         zonePrefix = getConfiguration().getString("release.zone.zone_prefix");
@@ -90,7 +86,7 @@ public class ZoneRelease extends AbstractRelease {
         for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
             // release particles randomly within the zone
             for (int p = 0; p < nParticlePerZone[i_zone]; p++) {
-                IParticle particle = ParticleFactory.getInstance().createZoneParticle(index, zone, bottom);
+                IParticle particle = ParticleFactory.getInstance().createZoneParticle(index, zone);
                 getSimulationManager().getSimulation().getPopulation().add(particle);
                 index++;
             }

@@ -86,7 +86,7 @@ import org.ichthyop.ui.LonLatConverter;
  */
 public class Zone extends IchthyopLinker {
 
-    /**
+    /*
      * Parameter key of the zone definition in the CFG file
      */
     private final String key;
@@ -97,7 +97,7 @@ public class Zone extends IchthyopLinker {
      */
     private final double[] lat;
     private final double[] lon;
-    /**
+    /*
      * Lower bathymetric line [meter]
      */
     private final float inshoreLine;
@@ -105,7 +105,7 @@ public class Zone extends IchthyopLinker {
      * Higher bathymetric line [meter]
      */
     private final float offshoreLine;
-    /**
+    /*
      * [meter]
      */
     private final float lowerDepth;
@@ -121,16 +121,18 @@ public class Zone extends IchthyopLinker {
      * Zone color (RGB)
      */
     private final Color color;
-    /**
+    /*
      * Whether to consider the (vertical) thickness of the zone. Not enabled
      * means that the zone covers all the water column.
      */
     private final boolean enabledThickness;
-    /**
+    /*
      * Whether to enable the bathymetric mask.
      */
     private final boolean enabledBathyMask;
-
+    /*
+     * Horizontal extent of the zone in km2
+     */
     private double area;
 
     /**
