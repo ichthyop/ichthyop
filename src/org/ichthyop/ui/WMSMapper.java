@@ -58,11 +58,8 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Ellipse2D;
@@ -72,9 +69,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -92,23 +87,9 @@ import org.jdesktop.swingx.mapviewer.empty.EmptyTileFactory;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.ichthyop.calendar.Day360Calendar;
-import org.ichthyop.calendar.InterannualCalendar;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
-import org.ichthyop.manager.TimeManager;
-import ucar.ma2.Array;
-import ucar.ma2.ArrayDouble;
-import ucar.ma2.ArrayDouble.D0;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayFloat.D2;
-import ucar.ma2.ArrayInt;
-import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
-import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
+import org.ichthyop.output.NetcdfOutputReader;
 
 /**
  *
@@ -116,19 +97,17 @@ import ucar.nc2.dataset.NetcdfDataset;
  */
 public class WMSMapper extends JXMapKit {
 
+    private NetcdfOutputReader ncout;
+    private String imgfolder;
     private List<GeoPosition> edge;
     private List<DrawableZone> zones;
     private List<GeoPosition> mask;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    private NetcdfFile nc;
-    private Variable vlon, vlat, pcolorVariable, vtime, vmortality;
     boolean canRepaint = false;
     private Painter bgPainter;
     private double defaultLat = 48.38, defaultLon = -4.62;
     private int defaultZoom = 10;
-    private Calendar calendar;
     private double[] time;
-    private int ntime;
     private Color defaultColor = Color.WHITE;
     private int particlePixel = 1;
     private Color colormin = Color.BLUE;
@@ -146,6 +125,10 @@ public class WMSMapper extends JXMapKit {
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
         //getMainMap().addMouseMotionListener(new LonLatTracker());
+    }
+
+    public NetcdfOutputReader getNcOut() {
+        return ncout;
     }
 
     public void setWMS(String wmsURL) {
@@ -167,221 +150,89 @@ public class WMSMapper extends JXMapKit {
         setZoom(defaultZoom);
     }
 
-    public int getNTime() {
-        return ntime;
-    }
-
     public void init() {
 
-        ntime = nc.getUnlimitedDimension().getLength();
+        if (null != ncout) {
 
-        double lonmin = Double.MAX_VALUE;
-        double lonmax = -lonmin;
-        double latmin = Double.MAX_VALUE;
-        double latmax = -latmin;
-
-        for (GeoPosition gp : getEdge()) {
-            if (gp.getLongitude() >= lonmax) {
-                lonmax = gp.getLongitude();
-            }
-            if (gp.getLongitude() <= lonmin) {
-                lonmin = gp.getLongitude();
-            }
-            if (gp.getLatitude() >= latmax) {
-                latmax = gp.getLatitude();
-            }
-            if (gp.getLatitude() <= latmin) {
-                latmin = gp.getLatitude();
-            }
-        }
-
-        double double_tmp;
-        if (lonmin > lonmax) {
-            double_tmp = lonmin;
-            lonmin = lonmax;
-            lonmax = double_tmp;
-        }
-
-        if (latmin > latmax) {
-            double_tmp = latmin;
-            latmin = latmax;
-            latmax = double_tmp;
-        }
-
-        defaultLat = 0.5d * (latmin + latmax);
-        defaultLon = 0.5d * (lonmin + lonmax);
-        setAddressLocation(new GeoPosition(defaultLat, defaultLon));
-
-        //double dlon_meter = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
-        double dlat_meter = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
-
-        defaultZoom = (int) Math.round(1.17 * Math.log(dlat_meter * 1.25) - 4.8);
-        setZoom(defaultZoom);
-
-        vlon = nc.findVariable("lon");
-        vlat = nc.findVariable("lat");
-        vmortality = nc.findVariable("mortality");
-        vtime = nc.findVariable("time");
-        // Set origin of time
-        Calendar calendar_o = Calendar.getInstance();
-        int year_o = 1;
-        int month_o = Calendar.JANUARY;
-        int day_o = 1;
-        int hour_o = 0;
-        int minute_o = 0;
-        if (null != vtime.findAttribute("origin")) {
-            try {
-                SimpleDateFormat dFormat = TimeManager.INPUT_DATE_FORMAT;
-                dFormat.setCalendar(calendar_o);
-                calendar_o.setTime(dFormat.parse(vtime.findAttribute("origin").getStringValue()));
-                year_o = calendar_o.get(Calendar.YEAR);
-                month_o = calendar_o.get(Calendar.MONTH);
-                day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
-                hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
-                minute_o = calendar_o.get(Calendar.MINUTE);
-            } catch (ParseException ex) {
-                // Something went wrong, default origin of time
-                // set to 0001/01/01 00:00
-            }
-        }
-        if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
-            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
+            defaultLat = 0.5d * (ncout.getLatmin() + ncout.getLatmax());
+            defaultLon = 0.5d * (ncout.getLonmin() + ncout.getLonmax());
+            //double dlon_meter = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
+            double dlat_meter = Math.abs(ncout.getLatmax() - ncout.getLatmin()) * ONE_DEG_LATITUDE_IN_METER;
+            defaultZoom = (int) Math.round(1.17 * Math.log(dlat_meter * 1.25) - 4.8);
         } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
-        }
-
-        time = new double[ntime];
-        for (int i = 0; i < ntime; i++) {
-            time[i] = readTime(i);
-        }
-
-        bgPainter = getPainterBackground();
-    }
-
-    public File getFolder() {
-        return new File(getFile().getAbsolutePath().substring(0, getFile().getAbsolutePath().lastIndexOf(".nc")));
-    }
-
-    public File getFile() {
-        if (null != nc) {
-            return new File(nc.getLocation());
-        } else {
-            return null;
-        }
-    }
-
-    public void setFile(File ncfile) throws IOException {
-
-        edge = null;
-        zones = null;
-
-        if (ncfile != null && ncfile.isFile()) {
-            nc = NetcdfDataset.openFile(ncfile.getAbsolutePath(), null);
-            init();
-            CompoundPainter cp = new CompoundPainter();
-            cp.setPainters(getPainterBackground());
-            cp.setCacheable(false);
-            getMainMap().setOverlayPainter(cp);
-
-        } else {
-            nc = null;
             defaultLat = 48.38;
             defaultLon = -4.62;
             defaultZoom = 10;
+        }
+
+        setAddressLocation(new GeoPosition(defaultLat, defaultLon));
+        setZoom(defaultZoom);
+
+    }
+
+    public File getFolder() {
+        return new File(imgfolder);
+    }
+
+    public void reset() {
+        // close previous output file
+        if (null != ncout) {
+            ncout.close();
+        }
+        ncout = null;
+        imgfolder = null;
+        edge = null;
+        zones = null;
+        mask = null;
+        time = null;
+        defaultLat = 48.38;
+        defaultLon = -4.62;
+        defaultZoom = 10;
+        bgPainter = null;
+//        colorbarPainter = null;
+        getMainMap().setOverlayPainter(null);
+        setAddressLocation(new GeoPosition(defaultLat, defaultLon));
+        setZoom(defaultZoom);
+    }
+
+    public void loadFile(String ncfile) throws IOException {
+
+        // close previous output file
+        if (null != ncout) {
+            ncout.close();
+        }
+
+        if (ncfile != null) {
+            ncout = new NetcdfOutputReader(ncfile);
+            ncout.init();
+            imgfolder = ncfile.substring(0, ncfile.lastIndexOf(".nc"));
+            edge = ncout.readEdge();
+            zones = ncout.readZones();
+            mask = ncout.readMask();
+            time = ncout.readTime();
+            //
+            defaultLat = 0.5d * (ncout.getLatmin() + ncout.getLatmax());
+            defaultLon = 0.5d * (ncout.getLonmin() + ncout.getLonmax());
+//            double dlon_meter = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
+            double dlat_meter = Math.abs(ncout.getLatmax() - ncout.getLatmin()) * ONE_DEG_LATITUDE_IN_METER;
+            defaultZoom = (int) Math.round(1.17 * Math.log(dlat_meter * 1.25) - 4.8);
+            //
+            bgPainter = getPainterBackground();
+            CompoundPainter cp = new CompoundPainter();
+            cp.setPainters(bgPainter);
+            cp.setCacheable(false);
+            getMainMap().setOverlayPainter(cp);
+
             setAddressLocation(new GeoPosition(defaultLat, defaultLon));
             setZoom(defaultZoom);
-            getMainMap().setOverlayPainter(null);
-        }
-    }
-
-    public String[] getVariableList() {
-        List<String> list = new ArrayList();
-        list.add("None");
-        list.add("time");
-        for (Variable variable : nc.getVariables()) {
-            List<Dimension> dimensions = variable.getDimensions();
-            boolean excluded = (dimensions.size() != 2);
-            if (!excluded) {
-                excluded = !(dimensions.get(0).getName().equals("time") && dimensions.get(1).getName().equals("drifter"));
-            }
-            if (!excluded) {
-                list.add(variable.getName());
-            }
-        }
-        return list.toArray(new String[list.size()]);
-    }
-
-    public float[] getRange(String variable) throws IOException {
-
-        Array array = nc.findVariable(variable).read();
-
-        float[] dataset = (float[]) array.get1DJavaArray(Float.class);
-        if (variable.equals("time")) {
-            if (dataset[0] > dataset[dataset.length - 1]) {
-                return new float[]{dataset[dataset.length - 1], dataset[0]};
-            } else {
-                return new float[]{dataset[0], dataset[dataset.length - 1]};
-            }
         } else {
-            double mean = getMean(dataset);
-            double stdDeviation = getStandardDeviation(dataset, mean);
-            float lower = (float) Math.max((float) (mean - 2 * stdDeviation), getMin(dataset));
-            float upper = (float) Math.min((float) (mean + 2 * stdDeviation), getMax(dataset));
-            //System.out.println("min: " + getMin(dataset) + " max: " + getMax(dataset));
-            return new float[]{lower, upper};
+            reset();
         }
-    }
-
-    private double getMin(float[] dataset) {
-        float min = Float.MAX_VALUE;
-        for (float num : dataset) {
-            if (num < min) {
-                min = num;
-            }
-        }
-        return min;
-    }
-
-    private double getMax(float[] dataset) {
-        float max = -1 * Float.MAX_VALUE;
-        for (float num : dataset) {
-            if (num > max) {
-                max = num;
-            }
-        }
-        return max;
-    }
-
-    private double getMean(float[] dataset) {
-        double sum = 0;
-        for (double num : dataset) {
-            if (!Double.isNaN(num)) {
-                sum += num;
-            }
-        }
-        return sum / dataset.length;
-    }
-
-    private double getSquareSum(float[] dataset) {
-        double sum = 0;
-        for (double num : dataset) {
-            if (!Double.isNaN(num)) {
-                sum += num * num;
-            }
-        }
-        return sum;
-    }
-
-    private double getStandardDeviation(float[] dataset, double mean) {
-        // Return standard deviation of all the items that have been entered.
-        // Value will be Double.NaN if count == 0.
-        double squareSum = getSquareSum(dataset);
-        return Math.sqrt(squareSum / dataset.length - mean * mean);
     }
 
     private Painter getPainterParticles(int itime) {
 
-        final List<DrawableParticle> listParticles = getParticles(itime);
+        final List<DrawableParticle> listParticles = ncout.readParticles(itime);
 
         Painter particleLayer = new Painter<JXMapViewer>() {
             @Override
@@ -441,24 +292,9 @@ public class WMSMapper extends JXMapKit {
         return bgOverlay;
     }
 
-    private List<GeoPosition> getEdge() {
-        if (null == edge) {
-            edge = new ArrayList();
-            try {
-                ArrayFloat.D2 regionEdge = (D2) nc.findVariable("edge").read();
-                for (int i = 0; i < regionEdge.getShape()[0]; i++) {
-                    edge.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
-                }
-            } catch (IOException ex) {
-                getSimulationManager().warning("[mapping] Failed to read NetCDF variable \"edge\"");
-            }
-        }
-        return edge;
-    }
-
     private void drawEdge(Graphics2D g, JXMapViewer map) {
 
-        for (GeoPosition gp : getEdge()) {
+        for (GeoPosition gp : edge) {
             Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
             Rectangle2D rectangle = new Rectangle2D.Double(pt.getX() + 2, pt.getY() - 2, 4, 4);
             g.setColor(Color.WHITE);
@@ -466,36 +302,11 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
-    private List<DrawableZone> getZones() {
-        if (null == zones) {
-            zones = new ArrayList();
-            if (null != nc.findGlobalAttribute("number_of_zones")) {
-                int nbZones = nc.findGlobalAttribute("number_of_zones").getNumericValue().intValue();
-                for (int iZone = 0; iZone < nbZones; iZone++) {
-                    try {
-                        List<GeoPosition> points = new ArrayList();
-                        Variable varZone = nc.findVariable("zone" + iZone);
-                        ArrayFloat.D2 arrZone = (D2) varZone.read();
-                        int color = varZone.findAttribute("color").getNumericValue().intValue();
-                        for (int i = 0; i < arrZone.getShape()[0]; i++) {
-                            points.add(new GeoPosition(arrZone.get(i, 0), arrZone.get(i, 1)));
-                        }
-                        DrawableZone zone = new DrawableZone(points, color);
-                        zones.add(zone);
-                    } catch (IOException ex) {
-                        getSimulationManager().warning("[mapping] Failed to read NetCDF variable \"zone" + iZone + "\"");
-                    }
-                }
-            }
-        }
-        return zones;
-    }
-
     private void drawZones(Graphics2D g, JXMapViewer map) {
 
-        for (DrawableZone zone : getZones()) {
-            Color alphacolor = new Color(zone.color.getRed(), zone.color.getGreen(), zone.color.getBlue(), 70);
-            for (GeoPosition gp : zone.coordinates) {
+        for (DrawableZone zone : zones) {
+            Color alphacolor = new Color(zone.getColor().getRed(), zone.getColor().getGreen(), zone.getColor().getBlue(), 70);
+            for (GeoPosition gp : zone.getPoints()) {
                 Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
                 Rectangle2D rectangle = new Rectangle2D.Double(pt.getX() + 1, pt.getY() - 1, 2, 2);
                 g.setColor(alphacolor);
@@ -504,43 +315,14 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
-    private void addGeoPoint(JXMapViewer map, Polygon polygon, GeoPosition gp) {
-        Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
-        polygon.addPoint((int) pt.getX(), (int) pt.getY());
-    }
-
-    private void addCellPoint(JXMapViewer map, Polygon polygon, double x, double y) {
-        double[] pos = getSimulationManager().getDataset().xy2latlon(x, y);
-        addGeoPoint(map, polygon, new GeoPosition(pos[0], pos[1]));
-    }
-
     private void drawMask(Graphics2D g, JXMapViewer map) {
 
-        for (GeoPosition gp : getMask()) {
+        for (GeoPosition gp : mask) {
             Point2D pt = map.getTileFactory().geoToPixel(gp, map.getZoom());
             Rectangle2D rectangle = new Rectangle2D.Double(pt.getX() + 1, pt.getY() - 1, 2, 2);
             g.setColor(new Color(64, 64, 64, 70));
             g.fill(rectangle);
         }
-    }
-
-    private List<GeoPosition> getMask() {
-        if (null == mask) {
-            mask = new ArrayList();
-            try {
-                ArrayFloat.D2 maskVar = (D2) nc.findVariable("mask").read();
-                for (int i = 0; i < maskVar.getShape()[0]; i++) {
-                    mask.add(new GeoPosition(maskVar.get(i, 0), maskVar.get(i, 1)));
-                }
-            } catch (IOException ex) {
-                getSimulationManager().warning("[mapping] Failed to read NetCDF variable \"mask\"");
-            }
-        }
-        return mask;
-    }
-
-    private SimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
     }
 
     private void drawParticle(Graphics2D g, JXMapViewer map, DrawableParticle particle) {
@@ -602,22 +384,15 @@ public class WMSMapper extends JXMapKit {
 
         CompoundPainter cp = new CompoundPainter();
         if (null != variable && !variable.toLowerCase().contains("none")) {
-            pcolorVariable = nc.findVariable(variable);
-            if (null != pcolorVariable) {
-                this.valmin = valmin;
-                this.valmed = valmed;
-                this.valmax = valmax;
-                this.colormin = colormin;
-                this.colormed = colormed;
-                this.colormax = colormax;
-                colorbarPainter = getPainterColorbar();
-                cp.setPainters(bgPainter, colorbarPainter);
-            } else {
-                colorbarPainter = null;
-                cp.setPainters(bgPainter);
-            }
+            this.valmin = valmin;
+            this.valmed = valmed;
+            this.valmax = valmax;
+            this.colormin = colormin;
+            this.colormed = colormed;
+            this.colormax = colormax;
+            colorbarPainter = getPainterColorbar();
+            cp.setPainters(bgPainter, colorbarPainter);
         } else {
-            pcolorVariable = null;
             colorbarPainter = null;
             cp.setPainters(bgPainter);
         }
@@ -648,7 +423,7 @@ public class WMSMapper extends JXMapKit {
                 g.fill(bar);
 
                 SimpleDateFormat dtFormat = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-                dtFormat.setCalendar(calendar);
+                dtFormat.setCalendar(ncout.getCalendar());
                 String time = "Time: " + dtFormat.format(getTime(index));
                 FontRenderContext context = g.getFontRenderContext();
                 Font font = new Font("Dialog", Font.PLAIN, 11);
@@ -720,21 +495,7 @@ public class WMSMapper extends JXMapKit {
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 
-                String vname = pcolorVariable.getName();
-                try {
-                    List<Attribute> attributes = pcolorVariable.getAttributes();
-
-                    for (Attribute attribute : attributes) {
-                        if (attribute.getName().equals("unit")) {
-                            vname += " (" + attribute.getStringValue() + ")";
-                            break;
-                        }
-                    }
-                } catch (Exception e) {
-                    // do nothing, unit will not be displayed
-                }
-
-                layout = new TextLayout(vname, font, context);
+                layout = new TextLayout(ncout.getColorVariableLongname(), font, context);
                 Rectangle2D bounds = layout.getBounds();
                 text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
                 text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
@@ -779,61 +540,14 @@ public class WMSMapper extends JXMapKit {
         return Math.max(Math.min(1.f, x), 0.f);
     }
 
-    private double readTime(int index) {
-        double timeD = 0.d;
-        try {
-            ArrayDouble.D0 arrTime = (D0) vtime.read(new int[]{index}, new int[]{1}).reduce();
-            timeD = arrTime.get();
-        } catch (IOException | InvalidRangeException ex) {
-            getSimulationManager().warning("[mapping] Error reading NetCDF \"time\" variable.");
-        }
-        return timeD;
-    }
-
-    private List<DrawableParticle> getParticles(int index) {
-        List<DrawableParticle> list = new ArrayList();
-        try {
-            ArrayFloat.D1 arrLon = (ArrayFloat.D1) vlon.read(new int[]{index, 0}, new int[]{1, vlon.getShape(1)}).reduce(0);
-            ArrayFloat.D1 arrLat = (ArrayFloat.D1) vlat.read(new int[]{index, 0}, new int[]{1, vlat.getShape(1)}).reduce(0);
-            ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
-            Array arrColorVariable = null;
-            if (null != pcolorVariable) {
-                if (pcolorVariable.getFullName().equals("time")) {
-                    arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
-                } else {
-                    arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
-                }
-            }
-            int length = arrLon.getShape()[0];
-            for (int i = 0; i < length; i++) {
-                float lon = arrLon.get(i);
-                if (arrMortality.get(i) == 0) {
-                    if (null != arrColorVariable) {
-                        if (arrColorVariable.getSize() < 2) {
-                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
-                        } else {
-                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
-                        }
-                    } else {
-                        list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
-                    }
-                } else {
-                    list.add(new DrawableParticle(lon, arrLat.get(i)));
-                }
-            }
-        } catch (IOException | InvalidRangeException ex) {
-            getSimulationManager().warning("[mapping] Error reading NetCDF \"lon\" or \"lat\" or \"mortality\" variables for particle " + index);
-        }
-        return list;
-    }
-
-    private Date getTime(int index) {
-        if (index > ntime - 1) {
+    private Date getTime(int itime) {
+        Calendar calendar = ncout.getCalendar();
+        if (itime > time.length - 1) {
             double dt = time[1] - time[0];
-            long ltime = (long) (time[0] + index * dt) * 1000L;
+            long ltime = (long) (time[0] + itime * dt) * 1000L;
             calendar.setTimeInMillis(ltime);
         } else {
-            calendar.setTimeInMillis((long) (time[index] * 1000L));
+            calendar.setTimeInMillis((long) (time[itime] * 1000L));
         }
         return calendar.getTime();
 
@@ -853,10 +567,10 @@ public class WMSMapper extends JXMapKit {
 
         @Override
         public void run() {
-            dtFormat.setCalendar(calendar);
-            StringBuilder filename = new StringBuilder(getFile().getParent());
+            dtFormat.setCalendar(ncout.getCalendar());
+            StringBuilder filename = new StringBuilder(ncout.getFile().getParent());
             filename.append(File.separator);
-            String id = getFile().getName().substring(0, getFile().getName().indexOf(".nc"));
+            String id = ncout.getFile().getName().substring(0, ncout.getFile().getName().indexOf(".nc"));
             filename.append(id);
             filename.append(File.separator);
             filename.append(id);
@@ -1025,70 +739,6 @@ public class WMSMapper extends JXMapKit {
         @Override
         protected void startLoading(Tile tile) {
             // noop
-        }
-    }
-
-    class DrawableParticle extends GeoPosition {
-
-        private final float colorValue;
-        private final boolean isLiving;
-
-        DrawableParticle(float lon, float lat, float colorValue) {
-            super(lat, lon);
-            this.colorValue = colorValue;
-            isLiving = true;
-        }
-
-        private DrawableParticle(float lon, float lat) {
-            super(lat, lon);
-            isLiving = false;
-            colorValue = Float.NaN;
-        }
-
-        public float getColorValue() {
-            return colorValue;
-        }
-
-        public boolean isLiving() {
-            return isLiving;
-        }
-    }
-
-    class DrawableZone {
-
-        private final List<GeoPosition> coordinates;
-        private final Color color;
-
-        DrawableZone(List<GeoPosition> coordinates, int color) {
-            this.coordinates = coordinates;
-            this.color = new Color(color);
-        }
-    }
-
-    private class LonLatTracker extends MouseMotionAdapter {
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-            java.awt.Dimension dim = getMainMap().getTileFactory().getMapSize(getMainMap().getZoom());
-            int tileSize = getMainMap().getTileFactory().getTileSize(getMainMap().getZoom());
-            float wMap = dim.width;
-            float hMap = dim.height;
-            Rectangle view = getMainMap().getViewportBounds();
-            float x0Map = view.x;
-            float y0Map = view.y;
-            float hPnl = view.height;
-            float wPnl = view.width;
-            float xPnl = e.getX();
-            float yPnl = e.getY();
-
-            float xMap = x0Map + (xPnl / wPnl) * wMap;
-            float yMap = y0Map + (yPnl / hPnl) * hMap;
-            Point2D pt = new Point2D.Float(xMap, yMap);
-
-            System.out.println(x0Map + " " + y0Map + " - " + pt);
-
-            GeoPosition gp = getMainMap().getTileFactory().pixelToGeo(pt, getMainMap().getZoom());
-            System.out.println("MouseEvent " + e.getPoint() + " " + gp);
         }
     }
 }

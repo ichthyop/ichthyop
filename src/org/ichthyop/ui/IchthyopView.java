@@ -311,7 +311,7 @@ public class IchthyopView extends FrameView
         @Override
         protected Object doInBackground() throws Exception {
             
-            mapper.setFile(wmsMapper.getFile());
+            mapper.loadFile(outputFile.getAbsolutePath());
             mapper.setZoom(wmsMapper.getMainMap().getZoom());
             mapper.setCenterPosition(wmsMapper.getCenterPosition());
 
@@ -326,8 +326,8 @@ public class IchthyopView extends FrameView
 
             /* Create painters */
             setMessage(resourceMap.getString("createMaps.msg.start"), true, Level.INFO);
-            for (itime = 0; itime < mapper.getNTime(); itime++) {
-                setProgress((float) (itime + 1) / mapper.getNTime());
+            for (itime = 0; itime < mapper.getNcOut().getNTime(); itime++) {
+                setProgress((float) (itime + 1) / mapper.getNcOut().getNTime());
                 mapper.draw(itime, size, bounds);
             }
             return null;
@@ -402,7 +402,7 @@ public class IchthyopView extends FrameView
         outputFile = null;
         lblNC.setText(getResourceMap().getString("lblNC.text"));
         lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
-        wmsMapper.setFile(null);
+        wmsMapper.loadFile(null);
         btnMapping.getAction().setEnabled(false);
         btnExportToKMZ.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
@@ -415,7 +415,7 @@ public class IchthyopView extends FrameView
         getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openNcMapping.msg.opened"), outputFile.getAbsolutePath()});
         lblNC.setText(outputFile.getName());
         lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
-        wmsMapper.setFile(outputFile);
+        wmsMapper.loadFile(outputFile.getAbsolutePath());
         wmsMapper.setVisible(!taskPaneMapping.isCollapsed());
         lblMapping.setVisible(false);
         btnMapping.getAction().setEnabled(true);
@@ -423,7 +423,7 @@ public class IchthyopView extends FrameView
         btnExportToKMZ.getAction().setEnabled(true);
         setMainTitle();
         setColorbarPanelEnabled(true);
-        cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getVariableList()));
+        cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getNcOut().getVariables()));
     }
 
     public void closeFolderAnimation() {
@@ -1031,8 +1031,8 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private SimulationUI getSimulationUI() {
-        return (SimulationUI) pnlSimulationUI;
+    private SimulationPreviewPanel getSimulationUI() {
+        return (SimulationPreviewPanel) pnlSimulationUI;
     }
 
     @Action
@@ -1454,7 +1454,7 @@ public class IchthyopView extends FrameView
                 return null;
             }
             setMessage(resourceMap.getString("autoRangeColorbar.msg.range"), true, Level.INFO);
-            return wmsMapper.getRange(variable);
+            return wmsMapper.getNcOut().getRange(variable);
         }
 
         @Override
@@ -1603,7 +1603,7 @@ public class IchthyopView extends FrameView
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
         scrollPaneSimulationUI = new javax.swing.JScrollPane();
-        pnlSimulationUI = new SimulationUI();
+        pnlSimulationUI = new SimulationPreviewPanel();
         btnExit = new javax.swing.JButton();
         pnlLogo = new org.jdesktop.swingx.JXPanel();
         hyperLinkLogo = new org.jdesktop.swingx.JXHyperlink();
@@ -2584,7 +2584,7 @@ public class IchthyopView extends FrameView
                 taskPaneSimulation.setCollapsed(true);
                 taskPaneAnimation.setCollapsed(true);
                 taskPaneConfiguration.setCollapsed(true);
-                wmsMapper.setVisible(null != wmsMapper.getFile());
+                wmsMapper.setVisible(null != outputFile);
                 lblMapping.setVisible(true);
             } else {
                 wmsMapper.setVisible(false);

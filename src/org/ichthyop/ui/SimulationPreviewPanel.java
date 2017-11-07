@@ -56,7 +56,6 @@ package org.ichthyop.ui;
  * import AWT
  */
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -66,14 +65,12 @@ import java.awt.image.BufferedImage;
 /**
  * import Swing
  */
-import java.util.Iterator;
 import javax.swing.JPanel;
 
 /**
  * local import
  */
 import org.ichthyop.Zone;
-import org.ichthyop.particle.IParticle;
 import org.ichthyop.manager.SimulationManager;
 
 /**
@@ -91,7 +88,7 @@ import org.ichthyop.manager.SimulationManager;
  * @see inner class CellUI
  * @see inner class ParticleUI
  */
-public class SimulationUI extends JPanel {
+public class SimulationPreviewPanel extends JPanel {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -135,7 +132,7 @@ public class SimulationUI extends JPanel {
      * Constructs an empty <code>SimulationUI</code>, intializes the range of
      * the domain and the {@code RenderingHints}.
      */
-    public SimulationUI() {
+    public SimulationPreviewPanel() {
 
         hi = -1;
         wi = -1;
@@ -184,20 +181,6 @@ public class SimulationUI extends JPanel {
         }
         /* Draw the background into the graphics */
         g2.drawImage(background, 0, 0, this);
-
-        /* Draw the particles */
-        if (getSimulationManager().getSimulation().getPopulation() != null) {
-            ParticleUI particleUI = new ParticleUI();
-            Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();
-            while (it.hasNext()) {
-                IParticle particle = (IParticle) it.next();
-                if (particle.isLiving()) {
-                    particleUI.draw(particle.getGridCoordinates(), w, h);
-                    g2.setColor(particleUI.getColor());
-                    g2.fill(particleUI);
-                }
-            }
-        }
     }
 
     /**
@@ -457,54 +440,6 @@ public class SimulationUI extends JPanel {
 
         }
         //---------- End of class CellUI
-    }
-
-    //////////////////////////////////////////////////////////////////////////////
-    /**
-     * This class is the graphical representation of a {@code Particle} object.
-     * The Particle is represented by an {@code Ellipse2D} with an associated
-     * color.
-     */
-    private class ParticleUI extends Ellipse2D.Double {
-
-        ////////////////////////////
-        // Definition of the methods
-        ////////////////////////////
-        /**
-         * Draws the particle at specified grid point
-         *
-         * @param data a float[] (xgrid, ygrid) particle's coordinate.
-         * @param w the width of the component
-         * @param h the height of the component
-         */
-        private void draw(double[] data, int w, int h) {
-
-            int[] corner = grid2Screen(data[0], data[1], w, h);
-            //setFrame(corner[0] - 1, corner[1] - 1, 2, 2);
-            setFrame(corner[0], corner[1], 1, 1);
-        }
-
-        /**
-         * Gets the color of the particle.
-         *
-         * @return the Color of the particle
-         */
-        private Color getColor() {
-            return Color.WHITE;
-        }
-
-        /**
-         * Ensures that float {@code x} belongs to [0, 1]
-         *
-         * @param x any float
-         * @return <code>x</code> if between 0 and 1, the closest boundary
-         * otherwise.
-         */
-        private float bound(float x) {
-
-            return Math.max(Math.min(1.f, x), 0.f);
-        }
-        //---------- End of class ParticleUI
     }
     //---------- End of class
 }
