@@ -130,7 +130,7 @@ public class NetcdfTiledVariable extends AbstractTiledVariable {
                     break;
             }
 
-            debug("Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
+            //debug("Reading NetCDF variable {0} from file {1} at rank {2} tile {3} ({4} : {5})", new Object[]{variable.getFullName(), nc.getLocation(), rank, tag, Arrays.toString(origin), Arrays.toString(shape)});
             try {
                 return variable.read(origin, shape).reduce();
             } catch (IOException | InvalidRangeException ex) {

@@ -155,9 +155,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             File fileBase = new File(strFileBase);
             filePart.renameTo(fileBase);
             info("[output] Closed NetCDF output file.");
-        } catch (Exception ex) {
-            warning("[output] Error closing NetCDF output file.");
-            debug(ex.toString());
+        } catch (IOException ex) {
+            warning("[output] Error closing NetCDF output file.", ex);
         }
     }
 
@@ -366,8 +365,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     AbstractTracker tracker = (AbstractTracker) trackerClass.newInstance();
                     trackers.add(tracker);
                 } catch (InstantiationException | IllegalAccessException ex) {
-                    warning("[output] Error adding NetCDF variable \"" + trackerClass.getSimpleName() + "\". The variable will not be recorded.");
-                    debug(ex.toString());
+                    warning("[output] Error adding NetCDF variable \"" + trackerClass.getSimpleName() + "\". The variable will not be recorded.", ex);
                 }
             }
         }
@@ -431,8 +429,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    warning("Error tracking variable \"" + tracker.getName() + "\". The variable will no longer be recorded in the NetCDF output file.");
-                    debug(ex.toString());
+                    warning("Error tracking variable \"" + tracker.getName() + "\". The variable will no longer be recorded in the NetCDF output file.", ex);
                     continue;
                 }
                 /* Write the current time step in the NetCDF file */
@@ -441,8 +438,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 } catch (IOException | InvalidRangeException ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
-                    warning("Error writing variable \"" + tracker.getName() + "\". The variable will no longer be recorded in the NetCDF output file.");
-                    debug(ex.toString());
+                    warning("Error writing variable \"" + tracker.getName() + "\". The variable will no longer be recorded in the NetCDF output file.", ex);
                 }
             }
         }
@@ -479,8 +475,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 ncOut.addVariable(null, tracker.getName(), tracker.getDataType(), tracker.getDimensions());
             } catch (Exception ex) {
                 errTrackers.add(tracker);
-                warning("[output] Error adding variable \"" + tracker.getName() + "\" in NetCDF output file. The variable will not be recorded.");
-                debug(ex.toString());
+                warning("[output] Error adding variable \"" + tracker.getName() + "\" in NetCDF output file. The variable will not be recorded.", ex);
             }
         }
 
@@ -529,16 +524,14 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         try {
             writeEdge();
         } catch (IOException | InvalidRangeException ex) {
-            warning("[output] Error writing NetCDF \"edge\" variable. It may affect the mapping process.");
-            debug(ex.toString());
+            warning("[output] Error writing NetCDF \"edge\" variable. It may affect the mapping process.", ex);
         }
 
         // write masked cells
         try {
             writeMask();
         } catch (IOException | InvalidRangeException ex) {
-            warning("[output] Error writing NetCDF \"mask\" variable. It may affect the mapping process.");
-            debug(ex.toString());
+            warning("[output] Error writing NetCDF \"mask\" variable. It may affect the mapping process.", ex);
         }
 
         // write zone areas
@@ -546,8 +539,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             try {
                 writeZone(index);
             } catch (IOException | InvalidRangeException ex) {
-                warning("[output] Error writing NetCDF \"zone " + index + "\" variable. It may affect the mapping process.");
-                debug(ex.toString());
+                warning("[output] Error writing NetCDF \"zone " + index + "\" variable. It may affect the mapping process.", ex);
             }
         }
     }

@@ -70,9 +70,14 @@ public class IchthyopLogger {
         ICHTHYOPLOGGER.log(Level.SEVERE, msg, ex);
         //System.exit(1);
     }
-
+    
     final public void warning(String msg) {
         ICHTHYOPLOGGER.warning(msg);
+    }
+
+    final public void warning(String msg, Exception ex) {
+        ICHTHYOPLOGGER.warning(msg);
+        ICHTHYOPLOGGER.log(Level.FINE, null, ex);
     }
 
     final public void warning(String msg, Object param) {
@@ -97,6 +102,10 @@ public class IchthyopLogger {
 
     final public void debug(String msg) {
         ICHTHYOPLOGGER.log(Level.FINE, msg);
+    }
+    
+    final public void debug(Exception ex) {
+        ICHTHYOPLOGGER.log(Level.FINE, null, ex);
     }
 
     final public void debug(String msg, Object param) {

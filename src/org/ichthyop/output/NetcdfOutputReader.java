@@ -187,7 +187,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
         try {
             nc.close();
         } catch (IOException ex) {
-            debug(ex.toString());
+            debug(ex);
         }
     }
 
@@ -204,7 +204,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
                 edge.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
             }
         } catch (IOException ex) {
-            warning("[output] Failed to read NetCDF variable \"edge\"");
+            warning("[output] Failed to read NetCDF variable \"edge\"", ex);
         }
 
         return edge;
@@ -226,7 +226,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
                     }
                     zones.add(zone);
                 } catch (IOException ex) {
-                    warning("[output] Failed to read NetCDF variable \"zone" + iZone + "\"");
+                    warning("[output] Failed to read NetCDF variable \"zone" + iZone + "\"", ex);
                 }
             }
         }
@@ -242,7 +242,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
                 mask.add(new GeoPosition(maskVar.get(i, 0), maskVar.get(i, 1)));
             }
         } catch (IOException ex) {
-            warning("[output] Failed to read NetCDF variable \"mask\"");
+            warning("[output] Failed to read NetCDF variable \"mask\"", ex);
         }
         return mask;
     }
@@ -284,7 +284,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
                 }
             }
         } catch (IOException | InvalidRangeException ex) {
-            warning("[output] Error reading NetCDF \"lon\" or \"lat\" or \"mortality\" variables for particle " + itime);
+            warning("[output] Error reading NetCDF \"lon\" or \"lat\" or \"mortality\" variables for particle " + itime, ex);
         }
         return list;
     }
@@ -295,7 +295,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
             ArrayDouble.D0 arrTime = (ArrayDouble.D0) nc.findVariable("time").read(new int[]{itime}, new int[]{1}).reduce();
             timeD = arrTime.get();
         } catch (IOException | InvalidRangeException ex) {
-            warning("[output] Error reading NetCDF \"time\" variable.");
+            warning("[output] Error reading NetCDF \"time\" variable.", ex);
         }
         return timeD;
     }
@@ -305,7 +305,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
         try {
             return (double[]) nc.findVariable("time").read().copyTo1DJavaArray();
         } catch (IOException ex) {
-            warning("[output] Error reading NetCDF \"time\" variable.");
+            warning("[output] Error reading NetCDF \"time\" variable.", ex);
         }
         return null;
     }

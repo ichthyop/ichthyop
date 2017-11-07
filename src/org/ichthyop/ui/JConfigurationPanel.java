@@ -281,7 +281,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                 lblInfo.setText(info.toString());
             } catch (Exception ex) {
                 lblInfo.setText(getResourceMap().getString("noDescription.text"));
-                SimulationManager.getInstance().warning(ex.toString());
+                SimulationManager.getInstance().debug(ex);
             }
         }
     }
