@@ -80,6 +80,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
+import javax.swing.CellRendererPane;
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
@@ -127,7 +128,7 @@ public class WMSMapper extends JXMapKit {
     private int defaultZoom = 10;
     private Calendar calendar;
     private double[] time;
-    private int nbSteps;
+    private int ntime;
     private Color defaultColor = Color.WHITE;
     private int particlePixel = 1;
     private Color colormin = Color.BLUE;
@@ -166,13 +167,13 @@ public class WMSMapper extends JXMapKit {
         setZoom(defaultZoom);
     }
 
-    public int getNbSteps() {
-        return nbSteps;
+    public int getNTime() {
+        return ntime;
     }
 
     public void init() {
 
-        nbSteps = nc.getUnlimitedDimension().getLength();
+        ntime = nc.getUnlimitedDimension().getLength();
 
         double lonmin = Double.MAX_VALUE;
         double lonmax = -lonmin;
@@ -249,12 +250,12 @@ public class WMSMapper extends JXMapKit {
             calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
 
-        time = new double[nbSteps];
-        for (int i = 0; i < nbSteps; i++) {
+        time = new double[ntime];
+        for (int i = 0; i < ntime; i++) {
             time[i] = readTime(i);
         }
 
-        bgPainter = getBgPainter();
+        bgPainter = getPainterBackground();
     }
 
     public File getFolder() {
@@ -269,33 +270,19 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
-    public void drawBackground() {
-        CompoundPainter cp = new CompoundPainter();
-        if (null != colorbarPainter) {
-            cp.setPainters(getBgPainter(), colorbarPainter);
-        } else {
-            cp.setPainters(getBgPainter());
-        }
-        cp.setCacheable(false);
-        getMainMap().setOverlayPainter(cp);
-    }
-
-    public void setFile(File ncfile) {
+    public void setFile(File ncfile) throws IOException {
 
         edge = null;
         zones = null;
 
         if (ncfile != null && ncfile.isFile()) {
-            try {
-                nc = NetcdfDataset.openFile(ncfile.getAbsolutePath(), null);
-                init();
-                CompoundPainter cp = new CompoundPainter();
-                cp.setPainters(getBgPainter());
-                cp.setCacheable(false);
-                getMainMap().setOverlayPainter(cp);
-            } catch (IOException ex) {
-                SimulationManager.getLogger().log(Level.SEVERE, null, ex);
-            }
+            nc = NetcdfDataset.openFile(ncfile.getAbsolutePath(), null);
+            init();
+            CompoundPainter cp = new CompoundPainter();
+            cp.setPainters(getPainterBackground());
+            cp.setCacheable(false);
+            getMainMap().setOverlayPainter(cp);
+
         } else {
             nc = null;
             defaultLat = 48.38;
@@ -392,9 +379,9 @@ public class WMSMapper extends JXMapKit {
         return Math.sqrt(squareSum / dataset.length - mean * mean);
     }
 
-    Painter getPainterForStep(int index) {
+    private Painter getPainterParticles(int itime) {
 
-        final List<WMSMapper.DrawableParticle> listParticles = getParticles(index);
+        final List<DrawableParticle> listParticles = getParticles(itime);
 
         Painter particleLayer = new Painter<JXMapViewer>() {
             @Override
@@ -403,9 +390,8 @@ public class WMSMapper extends JXMapKit {
                 //convert from viewport to world bitmap
                 Rectangle rect = map.getViewportBounds();
                 g.translate(-rect.x, -rect.y);
-
-                //drawRegion(g, map);
-                for (WMSMapper.DrawableParticle particle : listParticles) {
+                // draw particles
+                for (DrawableParticle particle : listParticles) {
                     drawParticle(g, map, particle);
                 }
                 g.dispose();
@@ -414,18 +400,31 @@ public class WMSMapper extends JXMapKit {
         return particleLayer;
     }
 
-    void map(Painter particleLayer, Painter timeLayer) {
+    void draw(int itime, java.awt.Dimension s, Rectangle r) throws IOException {
+
+        setBounds(r);
+        setSize(s);
+
+        // new compound painter for partiles, time stamp and colorbar
         CompoundPainter cp = new CompoundPainter();
         if (colorbarPainter != null) {
-            cp.setPainters(bgPainter, particleLayer, timeLayer, colorbarPainter);
+            cp.setPainters(bgPainter, getPainterParticles(itime), getPainterTimestamp(itime), colorbarPainter);
         } else {
-            cp.setPainters(bgPainter, particleLayer, timeLayer);
+            cp.setPainters(bgPainter, getPainterParticles(itime), getPainterTimestamp(itime));
         }
         cp.setCacheable(false);
         getMainMap().setOverlayPainter(cp);
+
+        // Paint graphics in BufferedImage 
+        BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = bi.getGraphics();
+        CellRendererPane crp = new CellRendererPane();
+        crp.add(this);
+        crp.paintComponent(g, this, crp, getBounds());
+        new Thread(new ImageWriter(itime, bi)).start();
     }
 
-    private Painter<JXMapViewer> getBgPainter() {
+    private Painter<JXMapViewer> getPainterBackground() {
         Painter<JXMapViewer> bgOverlay = new Painter<JXMapViewer>() {
             @Override
             public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
@@ -540,11 +539,11 @@ public class WMSMapper extends JXMapKit {
         return mask;
     }
 
-    SimulationManager getSimulationManager() {
+    private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
     }
 
-    private void drawParticle(Graphics2D g, JXMapViewer map, WMSMapper.DrawableParticle particle) {
+    private void drawParticle(Graphics2D g, JXMapViewer map, DrawableParticle particle) {
 
         //create a polygon
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
@@ -611,7 +610,7 @@ public class WMSMapper extends JXMapKit {
                 this.colormin = colormin;
                 this.colormed = colormed;
                 this.colormax = colormax;
-                colorbarPainter = getColorbarPainter();
+                colorbarPainter = getPainterColorbar();
                 cp.setPainters(bgPainter, colorbarPainter);
             } else {
                 colorbarPainter = null;
@@ -626,7 +625,7 @@ public class WMSMapper extends JXMapKit {
         getMainMap().setOverlayPainter(cp);
     }
 
-    Painter getTimePainter(final int index) {
+    private Painter getPainterTimestamp(int index) {
 
         Painter<JXMapViewer> timePainter = new Painter<JXMapViewer>() {
             @Override
@@ -669,7 +668,7 @@ public class WMSMapper extends JXMapKit {
         return timePainter;
     }
 
-    private Painter<JXMapViewer> getColorbarPainter() {
+    private Painter<JXMapViewer> getPainterColorbar() {
 
         Painter<JXMapViewer> clrbarPainter;
         clrbarPainter = new Painter<JXMapViewer>() {
@@ -758,7 +757,7 @@ public class WMSMapper extends JXMapKit {
         return clrbarPainter;
     }
 
-    void drawText(Graphics2D g2, float x, float y, String text) {
+    private void drawText(Graphics2D g2, float x, float y, String text) {
 
         if (text != null && text.length() > 0) {
             FontRenderContext context = g2.getFontRenderContext();
@@ -799,7 +798,7 @@ public class WMSMapper extends JXMapKit {
             ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                if (pcolorVariable.getName().equals("time")) {
+                if (pcolorVariable.getFullName().equals("time")) {
                     arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
                 } else {
                     arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
@@ -811,38 +810,25 @@ public class WMSMapper extends JXMapKit {
                 if (arrMortality.get(i) == 0) {
                     if (null != arrColorVariable) {
                         if (arrColorVariable.getSize() < 2) {
-                            list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
+                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(0)));
                         } else {
-                            list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
+                            list.add(new DrawableParticle(lon, arrLat.get(i), arrColorVariable.getFloat(i)));
                         }
                     } else {
-                        list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i), Float.NaN));
+                        list.add(new DrawableParticle(lon, arrLat.get(i), Float.NaN));
                     }
                 } else {
-                    list.add(new WMSMapper.DrawableParticle(lon, arrLat.get(i)));
+                    list.add(new DrawableParticle(lon, arrLat.get(i)));
                 }
             }
         } catch (IOException | InvalidRangeException ex) {
             getSimulationManager().warning("[mapping] Error reading NetCDF \"lon\" or \"lat\" or \"mortality\" variables for particle " + index);
         }
         return list;
-    }  
-
-    /**
-     * Saves the snapshot of the specified component as a PNG picture. The name
-     * of the picture includes the current time of the simulation.
-     * @param index
-     */
-    public void screen2File(int index) {
-
-        BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics g = bi.getGraphics();
-        paintAll(g);
-        new Thread(new WMSMapper.ImageWriter(index, bi)).start();
     }
 
     private Date getTime(int index) {
-        if (index > nbSteps - 1) {
+        if (index > ntime - 1) {
             double dt = time[1] - time[0];
             long ltime = (long) (time[0] + index * dt) * 1000L;
             calendar.setTimeInMillis(ltime);
@@ -980,6 +966,7 @@ public class WMSMapper extends JXMapKit {
 
         /**
          * Creates a new instance of EmptyTileFactory using the specified info.
+         *
          * @param info
          */
         public OfflineTileFactory(TileFactoryInfo info) {
@@ -1012,7 +999,7 @@ public class WMSMapper extends JXMapKit {
          * @param x The tile's x position on the world map.
          * @param y The tile's y position on the world map.
          * @param zoom The current zoom level.
-         * @return 
+         * @return
          */
         @Override
         public Tile getTile(int x, int y, int zoom) {

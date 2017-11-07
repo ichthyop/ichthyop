@@ -54,7 +54,9 @@ package org.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
@@ -102,7 +104,6 @@ import org.ichthyop.Template;
 import org.ichthyop.output.ExportToKML;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
-import org.jdesktop.swingx.painter.Painter;
 import org.ichthyop.ui.logging.LogLevel;
 import org.ichthyop.util.MetaFilenameFilter;
 
@@ -275,31 +276,47 @@ public class IchthyopView extends FrameView
         return createMapTask = new CreateMapTask(getApplication());
     }
 
-    private class CreateMapTask extends SFTask<Object, Painter[]> {
+    private class CreateMapTask extends SFTask {
 
-        private int index;
+        private final WMSMapper mapper;
+        private final Rectangle bounds;
+        private final Dimension size;
+        private int itime;
 
         CreateMapTask(Application instance) {
             super(instance);
             applyColorbarSettings();
-            wmsMapper.setDefaultColor(btnParticleColor.getForeground());
-            wmsMapper.setParticlePixel((Integer) spinnerParticleSize.getValue());
-            wmsMapper.setZoomButtonsVisible(false);
-            wmsMapper.setZoomSliderVisible(false);
             btnMapping.getAction().setEnabled(false);
             btnExportToKMZ.getAction().setEnabled(false);
             btnOpenNC.getAction().setEnabled(false);
             btnCloseNC.getAction().setEnabled(false);
             btnCancelMapping.getAction().setEnabled(true);
             setColorbarPanelEnabled(false);
-            index = 0;
+            itime = 0;
+            size = wmsMapper.getSize();
+            bounds = wmsMapper.getBounds();
+            // mapper
+            mapper = new WMSMapper();
+            mapper.setDefaultColor(btnParticleColor.getForeground());
+            mapper.setParticlePixel((Integer) spinnerParticleSize.getValue());
+            mapper.setZoomButtonsVisible(false);
+            mapper.setZoomSliderVisible(false);
+            mapper.setPreferredSize(size);
+            mapper.setSize(size);
+            mapper.setBounds(bounds);
+            mapper.doLayout();
+            mapper.repaint();
         }
 
         @Override
         protected Object doInBackground() throws Exception {
+            
+            mapper.setFile(wmsMapper.getFile());
+            mapper.setZoom(wmsMapper.getMainMap().getZoom());
+            mapper.setCenterPosition(wmsMapper.getCenterPosition());
 
             /* Delete existing pictures in folder */
-            File wmsfolder = wmsMapper.getFolder();
+            File wmsfolder = mapper.getFolder();
             if (null != wmsfolder && wmsfolder.isDirectory()) {
                 for (File picture : wmsfolder.listFiles(new MetaFilenameFilter("*.png"))) {
                     picture.delete();
@@ -309,29 +326,15 @@ public class IchthyopView extends FrameView
 
             /* Create painters */
             setMessage(resourceMap.getString("createMaps.msg.start"), true, Level.INFO);
-            for (int iStep = 0; iStep < wmsMapper.getNbSteps(); iStep++) {
-                setProgress((float) (iStep + 1) / wmsMapper.getNbSteps());
-                publish(new Painter[]{wmsMapper.getPainterForStep(iStep), wmsMapper.getTimePainter(iStep)});
-                if (getProgress() % 10 == 0) {
-                    Thread.sleep(500);
-                }
+            for (itime = 0; itime < mapper.getNTime(); itime++) {
+                setProgress((float) (itime + 1) / mapper.getNTime());
+                mapper.draw(itime, size, bounds);
             }
             return null;
         }
 
         @Override
-        protected void process(List<Painter[]> painters) {
-            for (Painter[] painter : painters) {
-                wmsMapper.map(painter[0], painter[1]);
-                wmsMapper.screen2File(index++);
-            }
-        }
-
-        @Override
         protected void finished() {
-            wmsMapper.setZoomButtonsVisible(true);
-            wmsMapper.setZoomSliderVisible(true);
-            wmsMapper.drawBackground();
             btnMapping.getAction().setEnabled(true);
             btnExportToKMZ.getAction().setEnabled(true);
             btnCancelMapping.getAction().setEnabled(false);
@@ -345,7 +348,7 @@ public class IchthyopView extends FrameView
             StringBuilder sb = new StringBuilder();
             sb.append(resourceMap.getString("mapping.text"));
             sb.append(" ");
-            sb.append(index);
+            sb.append(itime);
             sb.append(" ");
             sb.append(resourceMap.getString("createMaps.msg.succeeded"));
             setMessage(sb.toString(), false, LogLevel.COMPLETE);
@@ -378,7 +381,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void openNcMapping() {
+    public void openNcMapping() throws IOException {
         File file = (null == outputFile)
                 ? new File(System.getProperty("user.dir"))
                 : outputFile.getParentFile();
@@ -393,7 +396,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public void closeNetCDF() {
+    public void closeNetCDF() throws IOException {
 
         getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("closeNetCDF.msg.closed"), outputFile.getAbsolutePath()});
         outputFile = null;
@@ -407,7 +410,7 @@ public class IchthyopView extends FrameView
         setColorbarPanelEnabled(false);
     }
 
-    public void openNetCDF() {
+    public void openNetCDF() throws IOException {
 
         getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openNcMapping.msg.opened"), outputFile.getAbsolutePath()});
         lblNC.setText(outputFile.getName());
@@ -1166,7 +1169,11 @@ public class IchthyopView extends FrameView
         protected void finished() {
             if (!isFailed()) {
                 outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
-                openNetCDF();
+                try {
+                    openNetCDF();
+                } catch (IOException ex) {
+                    Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, "Failed to open NetCDF output file", ex);
+                }
             }
             getFrame().setTitle(title);
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
