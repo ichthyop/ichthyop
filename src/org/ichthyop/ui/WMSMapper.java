@@ -70,8 +70,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -116,7 +114,7 @@ public class WMSMapper extends JXMapKit {
     private float valmin = 0;
     private float valmax = 100;
     private Painter colorbarPainter;
-    private final Color[] rainbow = new Color[]{Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.PINK};
+    
 
     public WMSMapper() {
 
@@ -446,56 +444,35 @@ public class WMSMapper extends JXMapKit {
             public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
                 g = (Graphics2D) g.create();
 
-                int wbar = 300;
-                int hbar = 20;
+                int wbar = 400;
+                int hbar = 30;
                 int xbar = (w - wbar) - hbar;
                 int ybar = h - 3 * hbar / 2;
-                float x = 1.f / (colorbar.length - 1);
 
                 g.translate(xbar, ybar);
-                // black countour
-                Rectangle2D bar = new Rectangle2D.Double(0, 0.0, wbar, hbar);
-                g.setColor(Color.BLACK);
-                g.draw(bar);
-                // left round corner
-                Ellipse2D corner = new Ellipse2D.Double(-0.5f * hbar, 0.f, hbar, hbar);
-                g.setColor(Color.BLACK);
-                g.draw(corner);
-                g.setColor(colorbar[0]);
-                g.fill(corner);
-                // right round corner
-                corner = new Ellipse2D.Double(wbar - 0.5 * hbar, 0.0, hbar, hbar);
-                g.setColor(Color.BLACK);
-                g.draw(corner);
-                g.setColor(colorbar[colorbar.length - 1]);
-                g.fill(corner);
-                // gradients
-                for (int i = 0; i < colorbar.length - 1; i++) {
-                    GradientPaint painter = new GradientPaint((i + 0.2f) * x * wbar, 0, colorbar[i], (i + 0.8f) * x * wbar, hbar, colorbar[i + 1]);
-                    g.setPaint(painter);
-                    g.fill(new Rectangle2D.Double(i * x * wbar, 0.0, x * wbar, hbar));
-                }
+                Colorbars.draw(g, colorbar, wbar, hbar);
 
                 FontRenderContext context = g.getFontRenderContext();
                 Font font = new Font("Dialog", Font.PLAIN, 11);
                 TextLayout layout = new TextLayout(String.valueOf(valmin), font, context);
 
                 float text_x = 10;
-                float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                //float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                float text_y = -10;
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 
                 layout = new TextLayout(ncout.getColorVariableLongname(), font, context);
                 Rectangle2D bounds = layout.getBounds();
                 text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
-                text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                //text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 
                 layout = new TextLayout(String.valueOf(valmax), font, context);
                 bounds = layout.getBounds();
                 text_x = (float) (wbar - bounds.getWidth() - 10);
-                text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+                // = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 

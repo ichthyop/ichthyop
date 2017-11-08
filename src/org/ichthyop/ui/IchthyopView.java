@@ -71,6 +71,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -81,23 +82,43 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
 import javax.swing.Timer;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Task;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import org.ichthyop.Template;
@@ -106,6 +127,10 @@ import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.ichthyop.ui.logging.LogLevel;
 import org.ichthyop.util.MetaFilenameFilter;
+import org.jdesktop.swingx.JXHyperlink;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTitledPanel;
 
 /**
  * The application's main frame.
@@ -1200,9 +1225,7 @@ public class IchthyopView extends FrameView
         savePreference(animationSpeed, animationSpeed.getValue());
         savePreference(spinnerParticleSize, spinnerParticleSize.getValue());
         savePreference(btnParticleColor, btnParticleColor.getForeground());
-        savePreference(btnColorMin, btnColorMin.getForeground());
-        savePreference(btnColorMed, btnColorMed.getForeground());
-        savePreference(btnColorMax, btnColorMax.getForeground());
+        savePreference(colorbarChooser, colorbarChooser.getSelectedIndex());
         savePreference(txtFieldMin, txtFieldMin.getValue());
         savePreference(txtFieldMax, txtFieldMax.getValue());
     }
@@ -1250,17 +1273,9 @@ public class IchthyopView extends FrameView
         if (property != null) {
             btnParticleColor.setForeground((Color) property);
         }
-        property = restorePreference(btnColorMin);
+        property = restorePreference(colorbarChooser);
         if (property != null) {
-            btnColorMin.setForeground((Color) property);
-        }
-        property = restorePreference(btnColorMed);
-        if (property != null) {
-            btnColorMed.setForeground((Color) property);
-        }
-        property = restorePreference(btnColorMax);
-        if (property != null) {
-            btnColorMax.setForeground((Color) property);
+            colorbarChooser.setSelectedIndex((Integer) property);
         }
         property = restorePreference(txtFieldMin);
         if (property != null) {
@@ -1277,8 +1292,8 @@ public class IchthyopView extends FrameView
     private Object restorePreference(Component bean) {
         try {
             return getContext().getLocalStorage().load(beanFilename(bean));
-        } catch (IOException ex) {
-            //getLogger().log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            getSimulationManager().debug(ex);
             return null;
         }
     }
@@ -1406,10 +1421,8 @@ public class IchthyopView extends FrameView
         String vname = (String) cbBoxVariable.getSelectedItem();
         float vmin = Float.valueOf(txtFieldMin.getText());
         float vmax = Float.valueOf(txtFieldMax.getText());
-        Color cmin = btnColorMin.getForeground();
-        Color cmed = btnColorMed.getForeground();
-        Color cmax = btnColorMax.getForeground();
-        mapper.setColorbar(vname.toLowerCase().contains("none") ? null : vname, vmin, vmax, new Color[] {cmin, cmed, cmax});
+        Color[] colorbar = Colorbars.ALL.get((int) colorbarChooser.getSelectedItem());
+        mapper.setColorbar(vname.toLowerCase().contains("none") ? null : vname, vmin, vmax, colorbar);
     }
 
     @Action
@@ -1480,9 +1493,7 @@ public class IchthyopView extends FrameView
         cbBoxVariable.setEnabled(enabled);
         txtFieldMin.setEnabled(enabled);
         txtFieldMax.setEnabled(enabled);
-        btnColorMin.setEnabled(enabled);
-        btnColorMed.setEnabled(enabled);
-        btnColorMax.setEnabled(enabled);
+        colorbarChooser.setEnabled(enabled);
         btnAutoRange.getAction().setEnabled(enabled && !((String) cbBoxVariable.getSelectedItem()).equals("None"));
         btnApplyColorbar.getAction().setEnabled(enabled);
         spinnerParticleSize.setEnabled(enabled);
@@ -1493,352 +1504,351 @@ public class IchthyopView extends FrameView
      */
     private void initComponents() {
 
-        mainPanel = new javax.swing.JPanel();
-        splitPane = new javax.swing.JSplitPane();
-        leftSplitPane = new javax.swing.JSplitPane();
-        titledPanelSteps = new org.jdesktop.swingx.JXTitledPanel();
-        stepsScrollPane = new javax.swing.JScrollPane();
-        stepsPanel = new javax.swing.JPanel();
-        taskPaneConfiguration = new org.jdesktop.swingx.JXTaskPane();
-        pnlFile = new javax.swing.JPanel();
-        lblCfgFile = new javax.swing.JLabel();
-        btnNewCfgFile = new javax.swing.JButton();
-        btnOpenCfgFile = new javax.swing.JButton();
-        btnSaveCfgFile = new javax.swing.JButton();
-        btnSaveAsCfgFile = new javax.swing.JButton();
-        btnCloseCfgFile = new javax.swing.JButton();
-        taskPaneSimulation = new org.jdesktop.swingx.JXTaskPane();
-        pnlSimulation = new javax.swing.JPanel();
-        btnPreview = new javax.swing.JToggleButton();
-        btnSimulationRun = new javax.swing.JButton();
-        ckBoxDrawGrid = new javax.swing.JCheckBox();
-        taskPaneMapping = new org.jdesktop.swingx.JXTaskPane();
-        pnlMapping = new javax.swing.JPanel();
-        btnMapping = new javax.swing.JButton();
-        btnCancelMapping = new javax.swing.JButton();
-        btnOpenNC = new javax.swing.JButton();
-        pnlWMS = new javax.swing.JPanel();
-        cbBoxWMS = new javax.swing.JComboBox();
-        lblWMS = new javax.swing.JLabel();
-        lblNC = new javax.swing.JLabel();
-        btnCloseNC = new javax.swing.JButton();
-        btnExportToKMZ = new javax.swing.JButton();
-        pnlColor = new javax.swing.JPanel();
-        pnlColorBar = new javax.swing.JPanel();
-        lblVariable = new javax.swing.JLabel();
-        cbBoxVariable = new javax.swing.JComboBox();
-        lblMin = new javax.swing.JLabel();
-        lblMax = new javax.swing.JLabel();
-        txtFieldMax = new javax.swing.JFormattedTextField();
-        btnAutoRange = new javax.swing.JButton();
-        btnApplyColorbar = new javax.swing.JButton();
-        btnColorMin = new javax.swing.JButton();
-        btnColorMax = new javax.swing.JButton();
-        txtFieldMin = new javax.swing.JFormattedTextField();
-        btnColorMed = new javax.swing.JButton();
-        lblColor = new javax.swing.JLabel();
-        btnParticleColor = new javax.swing.JButton();
-        lblColor1 = new javax.swing.JLabel();
-        spinnerParticleSize = new javax.swing.JSpinner();
-        taskPaneAnimation = new org.jdesktop.swingx.JXTaskPane();
-        pnlAnimation = new javax.swing.JPanel();
-        lblFramePerSecond = new javax.swing.JLabel();
-        animationSpeed = new javax.swing.JSpinner();
-        btnDeleteMaps = new javax.swing.JButton();
-        btnSaveAsMaps = new javax.swing.JButton();
-        lblAnimationSpeed = new javax.swing.JLabel();
-        btnOpenAnimation = new javax.swing.JButton();
-        lblFolder = new javax.swing.JLabel();
-        sliderTime = new javax.swing.JSlider();
-        lblTime = new javax.swing.JLabel();
-        jToolBar1 = new javax.swing.JToolBar();
-        btnFirst = new javax.swing.JButton();
-        btnPrevious = new javax.swing.JButton();
-        btnAnimationBW = new javax.swing.JButton();
-        btnAnimationStop = new javax.swing.JButton();
-        btnAnimationFW = new javax.swing.JButton();
-        btnNext = new javax.swing.JButton();
-        btnLast = new javax.swing.JButton();
-        btnAnimatedGif = new javax.swing.JButton();
-        ckBoxReverseTime = new javax.swing.JCheckBox();
-        titledPanelLogger = new org.jdesktop.swingx.JXTitledPanel();
+        mainPanel = new JPanel();
+        splitPane = new JSplitPane();
+        leftSplitPane = new JSplitPane();
+        titledPanelSteps = new JXTitledPanel();
+        stepsScrollPane = new JScrollPane();
+        stepsPanel = new JPanel();
+        taskPaneConfiguration = new JXTaskPane();
+        pnlFile = new JPanel();
+        lblCfgFile = new JLabel();
+        btnNewCfgFile = new JButton();
+        btnOpenCfgFile = new JButton();
+        btnSaveCfgFile = new JButton();
+        btnSaveAsCfgFile = new JButton();
+        btnCloseCfgFile = new JButton();
+        taskPaneSimulation = new JXTaskPane();
+        pnlSimulation = new JPanel();
+        btnPreview = new JToggleButton();
+        btnSimulationRun = new JButton();
+        ckBoxDrawGrid = new JCheckBox();
+        taskPaneMapping = new JXTaskPane();
+        pnlMapping = new JPanel();
+        btnMapping = new JButton();
+        btnCancelMapping = new JButton();
+        btnOpenNC = new JButton();
+        pnlWMS = new JPanel();
+        cbBoxWMS = new JComboBox();
+        lblWMS = new JLabel();
+        lblNC = new JLabel();
+        btnCloseNC = new JButton();
+        btnExportToKMZ = new JButton();
+        pnlColor = new JPanel();
+        pnlColorBar = new JPanel();
+        lblVariable = new JLabel();
+        cbBoxVariable = new JComboBox();
+        lblMin = new JLabel();
+        lblMax = new JLabel();
+        txtFieldMax = new JFormattedTextField();
+        btnAutoRange = new JButton();
+        btnApplyColorbar = new JButton();
+        txtFieldMin = new JFormattedTextField();
+        colorbarChooser = new ColorbarChooser();
+        lblColorbarChooser = new JLabel();
+        lblColor = new JLabel();
+        btnParticleColor = new JButton();
+        lblColor1 = new JLabel();
+        spinnerParticleSize = new JSpinner();
+        taskPaneAnimation = new JXTaskPane();
+        pnlAnimation = new JPanel();
+        lblFramePerSecond = new JLabel();
+        animationSpeed = new JSpinner();
+        btnDeleteMaps = new JButton();
+        btnSaveAsMaps = new JButton();
+        lblAnimationSpeed = new JLabel();
+        btnOpenAnimation = new JButton();
+        lblFolder = new JLabel();
+        sliderTime = new JSlider();
+        lblTime = new JLabel();
+        jToolBar1 = new JToolBar();
+        btnFirst = new JButton();
+        btnPrevious = new JButton();
+        btnAnimationBW = new JButton();
+        btnAnimationStop = new JButton();
+        btnAnimationFW = new JButton();
+        btnNext = new JButton();
+        btnLast = new JButton();
+        btnAnimatedGif = new JButton();
+        ckBoxReverseTime = new JCheckBox();
+        titledPanelLogger = new JXTitledPanel();
         loggerScrollPane = new org.ichthyop.ui.LoggerScrollPane();
-        titledPanelMain = new org.jdesktop.swingx.JXTitledPanel();
-        jScrollPane3 = new javax.swing.JScrollPane();
+        titledPanelMain = new JXTitledPanel();
+        jScrollPane3 = new JScrollPane();
         gradientPanel = new org.ichthyop.ui.GradientPanel();
-        menuBar = new javax.swing.JMenuBar();
-        javax.swing.JMenu configurationMenu = new javax.swing.JMenu();
-        newMenuItem = new javax.swing.JMenuItem();
-        openMenuItem = new javax.swing.JMenuItem();
-        closeMenuItem = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        saveMenuItem = new javax.swing.JMenuItem();
-        saveAsMenuItem = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JSeparator();
-        javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
-        simulationMenu = new javax.swing.JMenu();
-        simulationMenuItem = new javax.swing.JMenuItem();
-        previewMenuItem = new javax.swing.JMenuItem();
-        mappingMenu = new javax.swing.JMenu();
-        mapMenuItem = new javax.swing.JMenuItem();
-        exportToKMZMenuItem = new javax.swing.JMenuItem();
-        cancelMapMenuItem = new javax.swing.JMenuItem();
-        jSeparator13 = new javax.swing.JPopupMenu.Separator();
-        openNCMenuItem = new javax.swing.JMenuItem();
-        animationMenu = new javax.swing.JMenu();
-        startFWMenuItem = new javax.swing.JMenuItem();
-        stopMenuItem = new javax.swing.JMenuItem();
-        startBWMenuItem = new javax.swing.JMenuItem();
-        jSeparator15 = new javax.swing.JPopupMenu.Separator();
-        openAnimationMenuItem = new javax.swing.JMenuItem();
-        jSeparator14 = new javax.swing.JPopupMenu.Separator();
-        saveasMapsMenuItem = new javax.swing.JMenuItem();
-        deleteMenuItem = new javax.swing.JMenuItem();
-        javax.swing.JMenu helpMenu = new javax.swing.JMenu();
-        javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
-        scrollPaneSimulationUI = new javax.swing.JScrollPane();
+        menuBar = new JMenuBar();
+        JMenu configurationMenu = new JMenu();
+        newMenuItem = new JMenuItem();
+        openMenuItem = new JMenuItem();
+        closeMenuItem = new JMenuItem();
+        jSeparator2 = new JPopupMenu.Separator();
+        saveMenuItem = new JMenuItem();
+        saveAsMenuItem = new JMenuItem();
+        jSeparator1 = new JSeparator();
+        JMenuItem exitMenuItem = new JMenuItem();
+        simulationMenu = new JMenu();
+        simulationMenuItem = new JMenuItem();
+        previewMenuItem = new JMenuItem();
+        mappingMenu = new JMenu();
+        mapMenuItem = new JMenuItem();
+        exportToKMZMenuItem = new JMenuItem();
+        cancelMapMenuItem = new JMenuItem();
+        jSeparator13 = new JPopupMenu.Separator();
+        openNCMenuItem = new JMenuItem();
+        animationMenu = new JMenu();
+        startFWMenuItem = new JMenuItem();
+        stopMenuItem = new JMenuItem();
+        startBWMenuItem = new JMenuItem();
+        jSeparator15 = new JPopupMenu.Separator();
+        openAnimationMenuItem = new JMenuItem();
+        jSeparator14 = new JPopupMenu.Separator();
+        saveasMapsMenuItem = new JMenuItem();
+        deleteMenuItem = new JMenuItem();
+        JMenu helpMenu = new JMenu();
+        JMenuItem aboutMenuItem = new JMenuItem();
+        scrollPaneSimulationUI = new JScrollPane();
         pnlSimulationUI = new SimulationPreviewPanel();
-        btnExit = new javax.swing.JButton();
-        pnlLogo = new org.jdesktop.swingx.JXPanel();
-        hyperLinkLogo = new org.jdesktop.swingx.JXHyperlink();
+        btnExit = new JButton();
+        pnlLogo = new JXPanel();
+        hyperLinkLogo = new JXHyperlink();
 
-        mainPanel.setName("mainPanel"); // NOI18N
+        mainPanel.setName("mainPanel");
 
         splitPane.setDividerLocation(490);
-        splitPane.setName("splitPane"); // NOI18N
+        splitPane.setName("splitPane");
         splitPane.setOneTouchExpandable(true);
 
-        leftSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        leftSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
         leftSplitPane.setResizeWeight(1.0);
-        leftSplitPane.setName("leftSplitPane"); // NOI18N
+        leftSplitPane.setName("leftSplitPane");
         leftSplitPane.setOneTouchExpandable(true);
 
         org.jdesktop.application.ResourceMap ivResourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopView.class);
-        titledPanelSteps.setTitle(ivResourceMap.getString("titledPanelSteps.title")); // NOI18N
+        titledPanelSteps.setTitle(ivResourceMap.getString("titledPanelSteps.title"));
         titledPanelSteps.setMinimumSize(new java.awt.Dimension(200, 200));
-        titledPanelSteps.setName("titledPanelSteps"); // NOI18N
+        titledPanelSteps.setName("titledPanelSteps");
 
-        stepsScrollPane.setName("stepsScrollPane"); // NOI18N
+        stepsScrollPane.setName("stepsScrollPane");
         stepsScrollPane.setPreferredSize(new java.awt.Dimension(300, 400));
 
-        stepsPanel.setName("stepsPanel"); // NOI18N
+        stepsPanel.setName("stepsPanel");
 
         taskPaneConfiguration.setAnimated(false);
-        taskPaneConfiguration.setIcon(ivResourceMap.getIcon("step.Configuration.icon")); // NOI18N
-        taskPaneConfiguration.setTitle(ivResourceMap.getString("step.Configuration.text")); // NOI18N
-        taskPaneConfiguration.setName("taskPaneConfiguration"); // NOI18N
+        taskPaneConfiguration.setIcon(ivResourceMap.getIcon("step.Configuration.icon"));
+        taskPaneConfiguration.setTitle(ivResourceMap.getString("step.Configuration.text"));
+        taskPaneConfiguration.setName("taskPaneConfiguration");
         taskPaneConfiguration.addPropertyChangeListener(this::taskPaneConfigurationPropertyChange);
 
-        pnlFile.setName("pnlFile"); // NOI18N
+        pnlFile.setName("pnlFile");
         pnlFile.setOpaque(false);
 
-        lblCfgFile.setName("lblCfgFile"); // NOI18N
+        lblCfgFile.setName("lblCfgFile");
 
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(IchthyopView.class, this);
-        btnNewCfgFile.setAction(actionMap.get("newConfigurationFile")); // NOI18N
+        ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(IchthyopView.class, this);
+        btnNewCfgFile.setAction(actionMap.get("newConfigurationFile"));
         btnNewCfgFile.setFocusable(false);
-        btnNewCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnNewCfgFile.setName("btnNewCfgFile"); // NOI18N
-        btnNewCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnNewCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnNewCfgFile.setName("btnNewCfgFile");
+        btnNewCfgFile.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        btnOpenCfgFile.setAction(actionMap.get("openConfigurationFile")); // NOI18N
+        btnOpenCfgFile.setAction(actionMap.get("openConfigurationFile"));
         btnOpenCfgFile.setFocusable(false);
-        btnOpenCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnOpenCfgFile.setName("btnOpenCfgFile"); // NOI18N
-        btnOpenCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnOpenCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnOpenCfgFile.setName("btnOpenCfgFile");
+        btnOpenCfgFile.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        btnSaveCfgFile.setAction(actionMap.get("saveConfigurationFile")); // NOI18N
+        btnSaveCfgFile.setAction(actionMap.get("saveConfigurationFile"));
         btnSaveCfgFile.setFocusable(false);
-        btnSaveCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnSaveCfgFile.setName("btnSaveCfgFile"); // NOI18N
-        btnSaveCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnSaveCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnSaveCfgFile.setName("btnSaveCfgFile");
+        btnSaveCfgFile.setVerticalTextPosition(SwingConstants.BOTTOM);
         btnSaveCfgFile.getAction().setEnabled(false);
 
-        btnSaveAsCfgFile.setAction(actionMap.get("saveAsConfigurationFile")); // NOI18N
+        btnSaveAsCfgFile.setAction(actionMap.get("saveAsConfigurationFile"));
         btnSaveAsCfgFile.setFocusable(false);
-        btnSaveAsCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnSaveAsCfgFile.setName("btnSaveAsCfgFile"); // NOI18N
-        btnSaveAsCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnSaveAsCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnSaveAsCfgFile.setName("btnSaveAsCfgFile");
+        btnSaveAsCfgFile.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        btnCloseCfgFile.setAction(actionMap.get("closeConfigurationFile")); // NOI18N
+        btnCloseCfgFile.setAction(actionMap.get("closeConfigurationFile"));
         btnCloseCfgFile.setFocusable(false);
-        btnCloseCfgFile.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnCloseCfgFile.setName("btnCloseCfgFile"); // NOI18N
-        btnCloseCfgFile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnCloseCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnCloseCfgFile.setName("btnCloseCfgFile");
+        btnCloseCfgFile.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        javax.swing.GroupLayout pnlFileLayout = new javax.swing.GroupLayout(pnlFile);
+        GroupLayout pnlFileLayout = new GroupLayout(pnlFile);
         pnlFile.setLayout(pnlFileLayout);
         pnlFileLayout.setHorizontalGroup(
-                pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlFileLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(lblCfgFile, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(lblCfgFile, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                                         .addGroup(pnlFileLayout.createSequentialGroup()
                                                 .addComponent(btnNewCfgFile)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnOpenCfgFile)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnCloseCfgFile))
                                         .addGroup(pnlFileLayout.createSequentialGroup()
                                                 .addComponent(btnSaveCfgFile)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnSaveAsCfgFile)))
                                 .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
-                pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlFileLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addComponent(btnOpenCfgFile)
                                         .addComponent(btnNewCfgFile)
                                         .addComponent(btnCloseCfgFile))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(pnlFileLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(btnSaveCfgFile)
                                         .addComponent(btnSaveAsCfgFile))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(lblCfgFile)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneConfiguration.add(pnlFile);
 
         taskPaneSimulation.setAnimated(false);
-        taskPaneSimulation.setIcon(ivResourceMap.getIcon("step.Simulation.icon")); // NOI18N
-        taskPaneSimulation.setTitle(ivResourceMap.getString("step.Simulation.text")); // NOI18N
-        taskPaneSimulation.setName("taskPaneSimulation"); // NOI18N
+        taskPaneSimulation.setIcon(ivResourceMap.getIcon("step.Simulation.icon"));
+        taskPaneSimulation.setTitle(ivResourceMap.getString("step.Simulation.text"));
+        taskPaneSimulation.setName("taskPaneSimulation");
         taskPaneSimulation.addPropertyChangeListener(this::taskPaneSimulationPropertyChange);
 
-        pnlSimulation.setName("pnlSimulation"); // NOI18N
+        pnlSimulation.setName("pnlSimulation");
         pnlSimulation.setOpaque(false);
 
-        btnPreview.setAction(actionMap.get("previewSimulation")); // NOI18N
+        btnPreview.setAction(actionMap.get("previewSimulation"));
         btnPreview.setFocusable(false);
-        btnPreview.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnPreview.setName("btnPreview"); // NOI18N
-        btnPreview.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnPreview.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnPreview.setName("btnPreview");
+        btnPreview.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        btnSimulationRun.setAction(actionMap.get("simulationRun")); // NOI18N
+        btnSimulationRun.setAction(actionMap.get("simulationRun"));
         btnSimulationRun.setFocusable(false);
-        btnSimulationRun.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnSimulationRun.setName("btnSimulationRun"); // NOI18N
-        btnSimulationRun.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnSimulationRun.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnSimulationRun.setName("btnSimulationRun");
+        btnSimulationRun.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        ckBoxDrawGrid.setText(ivResourceMap.getString("ckBoxDrawGrid.text")); // NOI18N
-        ckBoxDrawGrid.setName("ckBoxDrawGrid"); // NOI18N
+        ckBoxDrawGrid.setText(ivResourceMap.getString("ckBoxDrawGrid.text"));
+        ckBoxDrawGrid.setName("ckBoxDrawGrid");
         ckBoxDrawGrid.addActionListener(this::ckBoxDrawGridActionPerformed);
 
-        javax.swing.GroupLayout pnlSimulationLayout = new javax.swing.GroupLayout(pnlSimulation);
+        GroupLayout pnlSimulationLayout = new GroupLayout(pnlSimulation);
         pnlSimulation.setLayout(pnlSimulationLayout);
         pnlSimulationLayout.setHorizontalGroup(
-                pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlSimulationLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(pnlSimulationLayout.createSequentialGroup()
                                                 .addComponent(btnPreview)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnSimulationRun))
                                         .addComponent(ckBoxDrawGrid))
                                 .addContainerGap(188, Short.MAX_VALUE))
         );
         pnlSimulationLayout.setVerticalGroup(
-                pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlSimulationLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlSimulationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(btnSimulationRun)
                                         .addComponent(btnPreview))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
                                 .addComponent(ckBoxDrawGrid)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneSimulation.add(pnlSimulation);
 
         taskPaneMapping.setAnimated(false);
-        taskPaneMapping.setIcon(ivResourceMap.getIcon("step.Mapping.icon")); // NOI18N
-        taskPaneMapping.setTitle(ivResourceMap.getString("step.Mapping.text")); // NOI18N
-        taskPaneMapping.setName("taskPaneMapping"); // NOI18N
+        taskPaneMapping.setIcon(ivResourceMap.getIcon("step.Mapping.icon"));
+        taskPaneMapping.setTitle(ivResourceMap.getString("step.Mapping.text"));
+        taskPaneMapping.setName("taskPaneMapping");
         taskPaneMapping.addPropertyChangeListener(this::taskPaneMappingPropertyChange);
 
-        pnlMapping.setName("pnlMapping"); // NOI18N
+        pnlMapping.setName("pnlMapping");
         pnlMapping.setOpaque(false);
 
-        btnMapping.setAction(actionMap.get("createMaps")); // NOI18N
-        btnMapping.setName("btnMapping"); // NOI18N
+        btnMapping.setAction(actionMap.get("createMaps"));
+        btnMapping.setName("btnMapping");
 
-        btnCancelMapping.setAction(actionMap.get("cancelMapping")); // NOI18N
-        btnCancelMapping.setName("btnCancelMapping"); // NOI18N
+        btnCancelMapping.setAction(actionMap.get("cancelMapping"));
+        btnCancelMapping.setName("btnCancelMapping");
 
-        btnOpenNC.setAction(actionMap.get("openNcMapping")); // NOI18N
-        btnOpenNC.setName("btnOpenNC"); // NOI18N
+        btnOpenNC.setAction(actionMap.get("openNcMapping"));
+        btnOpenNC.setName("btnOpenNC");
 
-        pnlWMS.setBorder(javax.swing.BorderFactory.createTitledBorder("Web Map Service"));
-        pnlWMS.setName("pnlWMS"); // NOI18N
+        pnlWMS.setBorder(BorderFactory.createTitledBorder("Web Map Service"));
+        pnlWMS.setName("pnlWMS");
         pnlWMS.setOpaque(false);
 
-        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Offline", "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&"}));
-        cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
-        cbBoxWMS.setName("cbBoxWMS"); // NOI18N
+        cbBoxWMS.setModel(new DefaultComboBoxModel(new String[]{"Offline", "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&"}));
+        cbBoxWMS.setAction(actionMap.get("changeWMS"));
+        cbBoxWMS.setName("cbBoxWMS");
 
-        lblWMS.setName("lblWMS"); // NOI18N
+        lblWMS.setName("lblWMS");
 
-        javax.swing.GroupLayout pnlWMSLayout = new javax.swing.GroupLayout(pnlWMS);
+        GroupLayout pnlWMSLayout = new GroupLayout(pnlWMS);
         pnlWMS.setLayout(pnlWMSLayout);
         pnlWMSLayout.setHorizontalGroup(
-                pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlWMSLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlWMSLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(lblWMS)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(cbBoxWMS, 0, 372, Short.MAX_VALUE)
                                 .addContainerGap())
         );
         pnlWMSLayout.setVerticalGroup(
-                pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlWMSLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlWMSLayout.createSequentialGroup()
-                                .addGroup(pnlWMSLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addGroup(pnlWMSLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblWMS)
-                                        .addComponent(cbBoxWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(cbBoxWMS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblNC.setFont(ivResourceMap.getFont("lblNC.font")); // NOI18N
-        lblNC.setText(ivResourceMap.getString("lblNC.text")); // NOI18N
-        lblNC.setName("lblNC"); // NOI18N
+        lblNC.setFont(ivResourceMap.getFont("lblNC.font"));
+        lblNC.setText(ivResourceMap.getString("lblNC.text"));
+        lblNC.setName("lblNC");
 
-        btnCloseNC.setAction(actionMap.get("closeNetCDF")); // NOI18N
-        btnCloseNC.setName("btnCloseNC"); // NOI18N
+        btnCloseNC.setAction(actionMap.get("closeNetCDF"));
+        btnCloseNC.setName("btnCloseNC");
 
-        btnExportToKMZ.setAction(actionMap.get("exportToKMZ")); // NOI18N
-        btnExportToKMZ.setName("btnExportToKMZ"); // NOI18N
+        btnExportToKMZ.setAction(actionMap.get("exportToKMZ"));
+        btnExportToKMZ.setName("btnExportToKMZ");
 
-        pnlColor.setBorder(javax.swing.BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColor.border.title"))); // NOI18N
-        pnlColor.setName("pnlColor"); // NOI18N
+        pnlColor.setBorder(BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColor.border.title")));
+        pnlColor.setName("pnlColor");
         pnlColor.setOpaque(false);
 
-        pnlColorBar.setBorder(javax.swing.BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColorBar.border.title"))); // NOI18N
-        pnlColorBar.setName("pnlColorBar"); // NOI18N
+        pnlColorBar.setBorder(BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColorBar.border.title")));
+        pnlColorBar.setName("pnlColorBar");
         pnlColorBar.setOpaque(false);
 
-        lblVariable.setText(ivResourceMap.getString("lblVariable.text")); // NOI18N
-        lblVariable.setName("lblVariable"); // NOI18N
+        lblVariable.setText(ivResourceMap.getString("lblVariable.text"));
+        lblVariable.setName("lblVariable");
 
-        cbBoxVariable.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"None"}));
-        cbBoxVariable.setAction(actionMap.get("changeColorbarVariable")); // NOI18N
-        cbBoxVariable.setName("cbBoxVariable"); // NOI18N
+        cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
+        cbBoxVariable.setAction(actionMap.get("changeColorbarVariable"));
+        cbBoxVariable.setName("cbBoxVariable");
 
-        lblMin.setText(ivResourceMap.getString("lblMin.text")); // NOI18N
-        lblMin.setName("lblMin"); // NOI18N
+        lblMin.setText(ivResourceMap.getString("lblMin.text"));
+        lblMin.setName("lblMin");
 
-        lblMax.setText(ivResourceMap.getString("lblMax.text")); // NOI18N
-        lblMax.setName("lblMax"); // NOI18N
+        lblMax.setText(ivResourceMap.getString("lblMax.text"));
+        lblMax.setName("lblMax");
 
-        txtFieldMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.###"))));
-        txtFieldMax.setName("txtFieldMax"); // NOI18N
+        txtFieldMax.setFormatterFactory(new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat("###0.###"))));
+        txtFieldMax.setName("txtFieldMax");
         NumberFormat floatFormat = NumberFormat.getNumberInstance(Locale.US);
         floatFormat.setGroupingUsed(false);
         NumberFormatter floatFormatter = new NumberFormatter(floatFormat);
@@ -1846,195 +1856,174 @@ public class IchthyopView extends FrameView
         txtFieldMax.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
         txtFieldMax.setValue(100.f);
 
-        btnAutoRange.setAction(actionMap.get("autoRangeColorbar")); // NOI18N
-        btnAutoRange.setName("btnAutoRange"); // NOI18N
+        btnAutoRange.setAction(actionMap.get("autoRangeColorbar"));
+        btnAutoRange.setName("btnAutoRange");
 
-        btnApplyColorbar.setAction(actionMap.get("applyColorbarSettings")); // NOI18N
-        btnApplyColorbar.setName("btnApplyColorbar"); // NOI18N
+        btnApplyColorbar.setAction(actionMap.get("applyColorbarSettings"));
+        btnApplyColorbar.setName("btnApplyColorbar");
 
-        btnColorMin.setForeground(ivResourceMap.getColor("btnColorMin.foreground")); // NOI18N
-        btnColorMin.setIcon(ivResourceMap.getIcon("btnColorMin.icon")); // NOI18N
-        btnColorMin.setText(ivResourceMap.getString("btnColorMin.text")); // NOI18N
-        btnColorMin.setName("btnColorMin"); // NOI18N
-        btnColorMin.addActionListener(this::btnColorMinActionPerformed);
-
-        btnColorMax.setForeground(ivResourceMap.getColor("btnColorMax.foreground")); // NOI18N
-        btnColorMax.setIcon(ivResourceMap.getIcon("btnColorMax.icon")); // NOI18N
-        btnColorMax.setText(ivResourceMap.getString("btnColorMax.text")); // NOI18N
-        btnColorMax.setName("btnColorMax"); // NOI18N
-        btnColorMax.addActionListener(this::btnColorMaxActionPerformed);
-
-        txtFieldMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
-        txtFieldMin.setName("txtFieldMin"); // NOI18N
+        txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(new NumberFormatter()));
+        txtFieldMin.setName("txtFieldMin");
         txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
         txtFieldMin.setValue(0.f);
 
-        btnColorMed.setForeground(ivResourceMap.getColor("btnColorMed.foreground")); // NOI18N
-        btnColorMed.setIcon(ivResourceMap.getIcon("btnColorMed.icon")); // NOI18N
-        btnColorMed.setText(ivResourceMap.getString("btnColorMed.text")); // NOI18N
-        btnColorMed.setName("btnColorMed"); // NOI18N
-        btnColorMed.addActionListener(this::btnColorMedActionPerformed);
+        lblColorbarChooser.setText("Colorbar");
+        lblColorbarChooser.setName("lblColorbarChooser");
 
-        javax.swing.GroupLayout pnlColorBarLayout = new javax.swing.GroupLayout(pnlColorBar);
+        GroupLayout pnlColorBarLayout = new GroupLayout(pnlColorBar);
         pnlColorBar.setLayout(pnlColorBarLayout);
         pnlColorBarLayout.setHorizontalGroup(
-                pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlColorBarLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
                                         .addGroup(pnlColorBarLayout.createSequentialGroup()
                                                 .addComponent(lblVariable)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(cbBoxVariable, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(cbBoxVariable, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                         .addGroup(pnlColorBarLayout.createSequentialGroup()
                                                 .addComponent(btnAutoRange)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnApplyColorbar))
                                         .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                        .addComponent(lblMin)
-                                                                        .addComponent(lblMax))
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                                        .addComponent(txtFieldMax)
-                                                                        .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(btnColorMed)
-                                                        .addComponent(btnColorMax)
-                                                        .addComponent(btnColorMin))))
+                                                .addComponent(lblMin)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(txtFieldMin)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblMax)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(txtFieldMax))
+                                        .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                                .addComponent(lblColorbarChooser)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(colorbarChooser)))
                                 .addContainerGap(84, Short.MAX_VALUE))
         );
         pnlColorBarLayout.setVerticalGroup(
-                pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblVariable)
-                                        .addComponent(cbBoxVariable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblMin)
-                                        .addComponent(btnColorMin)
-                                        .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnColorMed))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(txtFieldMax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(lblMax)
-                                        .addComponent(btnColorMax))
+                                        .addComponent(cbBoxVariable, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addGap(16, 16, 16)
-                                .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblMin)
+                                        .addComponent(txtFieldMin, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lblMax)
+                                        .addComponent(txtFieldMax, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGap(16, 16, 16)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblColorbarChooser)
+                                        .addComponent(colorbarChooser))
+                                .addGap(16, 16, 16)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(btnAutoRange)
                                         .addComponent(btnApplyColorbar))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblColor.setText(ivResourceMap.getString("lblColor.text")); // NOI18N
-        lblColor.setName("lblColor"); // NOI18N
+        lblColor.setText(ivResourceMap.getString("lblColor.text"));
+        lblColor.setName("lblColor");
 
-        btnParticleColor.setForeground(ivResourceMap.getColor("btnParticleColor.foreground")); // NOI18N
-        btnParticleColor.setIcon(ivResourceMap.getIcon("btnParticleColor.icon")); // NOI18N
-        btnParticleColor.setText(ivResourceMap.getString("btnParticleColor.text")); // NOI18N
-        btnParticleColor.setName("btnParticleColor"); // NOI18N
+        btnParticleColor.setForeground(ivResourceMap.getColor("btnParticleColor.foreground"));
+        btnParticleColor.setIcon(ivResourceMap.getIcon("btnParticleColor.icon"));
+        btnParticleColor.setText(ivResourceMap.getString("btnParticleColor.text"));
+        btnParticleColor.setName("btnParticleColor");
         btnParticleColor.addActionListener(this::btnParticleColorActionPerformed);
 
-        lblColor1.setText(ivResourceMap.getString("lblColor1.text")); // NOI18N
-        lblColor1.setName("lblColor1"); // NOI18N
+        lblColor1.setText(ivResourceMap.getString("lblColor1.text"));
+        lblColor1.setName("lblColor1");
 
-        spinnerParticleSize.setModel(new javax.swing.SpinnerNumberModel(1, 1, 10, 1));
-        spinnerParticleSize.setName("spinnerParticleSize"); // NOI18N
+        spinnerParticleSize.setModel(new SpinnerNumberModel(1, 1, 10, 1));
+        spinnerParticleSize.setName("spinnerParticleSize");
         spinnerParticleSize.addChangeListener(this::spinnerParticleSizeStateChanged);
 
-        javax.swing.GroupLayout pnlColorLayout = new javax.swing.GroupLayout(pnlColor);
+        GroupLayout pnlColorLayout = new GroupLayout(pnlColor);
         pnlColor.setLayout(pnlColorLayout);
         pnlColorLayout.setHorizontalGroup(
-                pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlColorLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(pnlColorBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(pnlColorBar, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addGroup(pnlColorLayout.createSequentialGroup()
                                                 .addComponent(lblColor)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnParticleColor)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(lblColor1)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(spinnerParticleSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
                                 .addContainerGap())
         );
         pnlColorLayout.setVerticalGroup(
-                pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlColorLayout.createSequentialGroup()
-                                .addGroup(pnlColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblColor)
                                         .addComponent(btnParticleColor)
                                         .addComponent(lblColor1)
-                                        .addComponent(spinnerParticleSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(pnlColorBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(pnlColorBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout pnlMappingLayout = new javax.swing.GroupLayout(pnlMapping);
+        GroupLayout pnlMappingLayout = new GroupLayout(pnlMapping);
         pnlMapping.setLayout(pnlMappingLayout);
         pnlMappingLayout.setHorizontalGroup(
-                pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlMappingLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(pnlWMS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(pnlWMS, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addGroup(pnlMappingLayout.createSequentialGroup()
                                                 .addComponent(btnMapping)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnExportToKMZ))
                                         .addGroup(pnlMappingLayout.createSequentialGroup()
                                                 .addComponent(btnOpenNC)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnCloseNC))
                                         .addComponent(lblNC)
                                         .addComponent(btnCancelMapping)
-                                        .addComponent(pnlColor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(pnlColor, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addContainerGap())
         );
         pnlMappingLayout.setVerticalGroup(
-                pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlMappingLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(pnlColor, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(pnlColor, GroupLayout.PREFERRED_SIZE, 325, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(btnMapping)
                                         .addComponent(btnExportToKMZ))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(btnCancelMapping)
                                 .addGap(12, 12, 12)
-                                .addGroup(pnlMappingLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(btnOpenNC)
                                         .addComponent(btnCloseNC))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(lblNC)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlWMS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addComponent(pnlWMS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneMapping.add(pnlMapping);
 
         taskPaneAnimation.setAnimated(false);
-        taskPaneAnimation.setIcon(ivResourceMap.getIcon("step.Animation.icon")); // NOI18N
-        taskPaneAnimation.setTitle(ivResourceMap.getString("step.Animation.text")); // NOI18N
-        taskPaneAnimation.setName("taskPaneAnimation"); // NOI18N
+        taskPaneAnimation.setIcon(ivResourceMap.getIcon("step.Animation.icon"));
+        taskPaneAnimation.setTitle(ivResourceMap.getString("step.Animation.text"));
+        taskPaneAnimation.setName("taskPaneAnimation");
         taskPaneAnimation.addPropertyChangeListener(this::taskPaneAnimationPropertyChange);
 
-        pnlAnimation.setName("pnlAnimation"); // NOI18N
+        pnlAnimation.setName("pnlAnimation");
         pnlAnimation.setOpaque(false);
 
-        lblFramePerSecond.setName("lblFramePerSecond"); // NOI18N
+        lblFramePerSecond.setName("lblFramePerSecond");
         lblFramePerSecond.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -2042,425 +2031,425 @@ public class IchthyopView extends FrameView
             }
         });
 
-        animationSpeed.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(1.5f), Float.valueOf(0.5f), Float.valueOf(24.0f), Float.valueOf(0.1f)));
-        animationSpeed.setToolTipText(ivResourceMap.getString("animationSpeed.toolTipText")); // NOI18N
+        animationSpeed.setModel(new SpinnerNumberModel(Float.valueOf(1.5f), Float.valueOf(0.5f), Float.valueOf(24.0f), Float.valueOf(0.1f)));
+        animationSpeed.setToolTipText(ivResourceMap.getString("animationSpeed.toolTipText"));
         animationSpeed.setFocusable(false);
         animationSpeed.setMaximumSize(new java.awt.Dimension(77, 30));
-        animationSpeed.setName("animationSpeed"); // NOI18N
+        animationSpeed.setName("animationSpeed");
         animationSpeed.addChangeListener(this::animationSpeedStateChanged);
 
-        btnDeleteMaps.setAction(actionMap.get("deleteMaps")); // NOI18N
+        btnDeleteMaps.setAction(actionMap.get("deleteMaps"));
         btnDeleteMaps.setFocusable(false);
-        btnDeleteMaps.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnDeleteMaps.setName("btnDeleteMaps"); // NOI18N
-        btnDeleteMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnDeleteMaps.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnDeleteMaps.setName("btnDeleteMaps");
+        btnDeleteMaps.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        btnSaveAsMaps.setAction(actionMap.get("saveasMaps")); // NOI18N
+        btnSaveAsMaps.setAction(actionMap.get("saveasMaps"));
         btnSaveAsMaps.setFocusable(false);
-        btnSaveAsMaps.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        btnSaveAsMaps.setName("btnSaveAsMaps"); // NOI18N
-        btnSaveAsMaps.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnSaveAsMaps.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnSaveAsMaps.setName("btnSaveAsMaps");
+        btnSaveAsMaps.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        lblAnimationSpeed.setText(ivResourceMap.getString("lblAnimationSpeed.text")); // NOI18N
-        lblAnimationSpeed.setName("lblAnimationSpeed"); // NOI18N
+        lblAnimationSpeed.setText(ivResourceMap.getString("lblAnimationSpeed.text"));
+        lblAnimationSpeed.setName("lblAnimationSpeed");
 
-        btnOpenAnimation.setAction(actionMap.get("openFolderAnimation")); // NOI18N
-        btnOpenAnimation.setName("btnOpenAnimation"); // NOI18N
-        btnOpenAnimation.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnOpenAnimation.setAction(actionMap.get("openFolderAnimation"));
+        btnOpenAnimation.setName("btnOpenAnimation");
+        btnOpenAnimation.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        lblFolder.setFont(ivResourceMap.getFont("lblFolder.font")); // NOI18N
-        lblFolder.setText(ivResourceMap.getString("lblFolder.text")); // NOI18N
-        lblFolder.setName("lblFolder"); // NOI18N
+        lblFolder.setFont(ivResourceMap.getFont("lblFolder.font"));
+        lblFolder.setText(ivResourceMap.getString("lblFolder.text"));
+        lblFolder.setName("lblFolder");
 
         sliderTime.setValue(0);
-        sliderTime.setName("sliderTime"); // NOI18N
+        sliderTime.setName("sliderTime");
         sliderTime.addChangeListener(this::sliderTimeStateChanged);
 
-        lblTime.setFont(ivResourceMap.getFont("lblTime.font")); // NOI18N
-        lblTime.setText(ivResourceMap.getString("lblTime.text")); // NOI18N
-        lblTime.setName("lblTime"); // NOI18N
+        lblTime.setFont(ivResourceMap.getFont("lblTime.font"));
+        lblTime.setText(ivResourceMap.getString("lblTime.text"));
+        lblTime.setName("lblTime");
 
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
-        jToolBar1.setName("jToolBar1"); // NOI18N
+        jToolBar1.setName("jToolBar1");
 
-        btnFirst.setAction(actionMap.get("first")); // NOI18N
+        btnFirst.setAction(actionMap.get("first"));
         btnFirst.setFocusable(false);
-        btnFirst.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnFirst.setName("btnFirst"); // NOI18N
-        btnFirst.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnFirst.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnFirst.setName("btnFirst");
+        btnFirst.setVerticalTextPosition(SwingConstants.BOTTOM);
         jToolBar1.add(btnFirst);
 
-        btnPrevious.setAction(actionMap.get("previous")); // NOI18N
+        btnPrevious.setAction(actionMap.get("previous"));
         btnPrevious.setFocusable(false);
-        btnPrevious.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnPrevious.setName("btnPrevious"); // NOI18N
-        btnPrevious.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnPrevious.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnPrevious.setName("btnPrevious");
+        btnPrevious.setVerticalTextPosition(SwingConstants.BOTTOM);
         jToolBar1.add(btnPrevious);
 
-        btnAnimationBW.setAction(actionMap.get("startAnimationBW")); // NOI18N
-        btnAnimationBW.setText(ivResourceMap.getString("btnAnimationBW.text")); // NOI18N
+        btnAnimationBW.setAction(actionMap.get("startAnimationBW"));
+        btnAnimationBW.setText(ivResourceMap.getString("btnAnimationBW.text"));
         btnAnimationBW.setFocusable(false);
-        btnAnimationBW.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAnimationBW.setName("btnAnimationBW"); // NOI18N
-        btnAnimationBW.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAnimationBW.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnAnimationBW.setName("btnAnimationBW");
+        btnAnimationBW.setVerticalTextPosition(SwingConstants.BOTTOM);
         jToolBar1.add(btnAnimationBW);
 
-        btnAnimationStop.setAction(actionMap.get("stopAnimation")); // NOI18N
-        btnAnimationStop.setText(ivResourceMap.getString("btnAnimationStop.text")); // NOI18N
+        btnAnimationStop.setAction(actionMap.get("stopAnimation"));
+        btnAnimationStop.setText(ivResourceMap.getString("btnAnimationStop.text"));
         btnAnimationStop.setFocusable(false);
-        btnAnimationStop.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAnimationStop.setName("btnAnimationStop"); // NOI18N
-        btnAnimationStop.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAnimationStop.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnAnimationStop.setName("btnAnimationStop");
+        btnAnimationStop.setVerticalTextPosition(SwingConstants.BOTTOM);
         jToolBar1.add(btnAnimationStop);
 
-        btnAnimationFW.setAction(actionMap.get("startAnimationFW")); // NOI18N
-        btnAnimationFW.setText(ivResourceMap.getString("btnAnimationFW.text")); // NOI18N
+        btnAnimationFW.setAction(actionMap.get("startAnimationFW"));
+        btnAnimationFW.setText(ivResourceMap.getString("btnAnimationFW.text"));
         btnAnimationFW.setFocusable(false);
-        btnAnimationFW.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAnimationFW.setName("btnAnimationFW"); // NOI18N
-        btnAnimationFW.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAnimationFW.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnAnimationFW.setName("btnAnimationFW");
+        btnAnimationFW.setVerticalTextPosition(SwingConstants.BOTTOM);
         jToolBar1.add(btnAnimationFW);
 
-        btnNext.setAction(actionMap.get("next")); // NOI18N
+        btnNext.setAction(actionMap.get("next"));
         btnNext.setFocusable(false);
-        btnNext.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnNext.setName("btnNext"); // NOI18N
-        btnNext.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnNext.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnNext.setName("btnNext");
+        btnNext.setVerticalTextPosition(SwingConstants.BOTTOM);
         jToolBar1.add(btnNext);
 
-        btnLast.setAction(actionMap.get("last")); // NOI18N
+        btnLast.setAction(actionMap.get("last"));
         btnLast.setFocusable(false);
-        btnLast.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnLast.setName("btnLast"); // NOI18N
-        btnLast.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnLast.setHorizontalTextPosition(SwingConstants.CENTER);
+        btnLast.setName("btnLast");
+        btnLast.setVerticalTextPosition(SwingConstants.BOTTOM);
         jToolBar1.add(btnLast);
 
-        btnAnimatedGif.setAction(actionMap.get("createAnimatedGif")); // NOI18N
-        btnAnimatedGif.setName("btnAnimatedGif"); // NOI18N
-        btnAnimatedGif.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAnimatedGif.setAction(actionMap.get("createAnimatedGif"));
+        btnAnimatedGif.setName("btnAnimatedGif");
+        btnAnimatedGif.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        ckBoxReverseTime.setText(ivResourceMap.getString("ckBoxReverseTime.text")); // NOI18N
-        ckBoxReverseTime.setName("ckBoxReverseTime"); // NOI18N
+        ckBoxReverseTime.setText(ivResourceMap.getString("ckBoxReverseTime.text"));
+        ckBoxReverseTime.setName("ckBoxReverseTime");
 
-        javax.swing.GroupLayout pnlAnimationLayout = new javax.swing.GroupLayout(pnlAnimation);
+        GroupLayout pnlAnimationLayout = new GroupLayout(pnlAnimation);
         pnlAnimation.setLayout(pnlAnimationLayout);
         pnlAnimationLayout.setHorizontalGroup(
-                pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlAnimationLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(sliderTime, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(sliderTime, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                                         .addComponent(lblTime)
                                         .addGroup(pnlAnimationLayout.createSequentialGroup()
                                                 .addComponent(btnOpenAnimation)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnDeleteMaps)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnSaveAsMaps))
                                         .addComponent(lblFolder)
-                                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                        .addComponent(jToolBar1, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                                         .addGroup(pnlAnimationLayout.createSequentialGroup()
                                                 .addGap(379, 379, 379)
                                                 .addComponent(lblFramePerSecond))
                                         .addGroup(pnlAnimationLayout.createSequentialGroup()
                                                 .addComponent(btnAnimatedGif)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(ckBoxReverseTime))
                                         .addGroup(pnlAnimationLayout.createSequentialGroup()
                                                 .addComponent(lblAnimationSpeed)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(animationSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
                                 .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
-                pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlAnimationLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jToolBar1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
                                 .addComponent(lblTime)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sliderTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(sliderTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(pnlAnimationLayout.createSequentialGroup()
-                                                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(btnOpenAnimation)
                                                         .addComponent(btnDeleteMaps))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                 .addComponent(lblFolder))
                                         .addComponent(btnSaveAsMaps))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addComponent(lblFramePerSecond)
-                                        .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                 .addComponent(btnAnimatedGif)
                                                 .addComponent(ckBoxReverseTime)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(pnlAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lblAnimationSpeed)
-                                        .addComponent(animationSpeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(animationSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addGap(12, 12, 12))
         );
 
         taskPaneAnimation.add(pnlAnimation);
 
-        javax.swing.GroupLayout stepsPanelLayout = new javax.swing.GroupLayout(stepsPanel);
+        GroupLayout stepsPanelLayout = new GroupLayout(stepsPanel);
         stepsPanel.setLayout(stepsPanelLayout);
         stepsPanelLayout.setHorizontalGroup(
-                stepsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(taskPaneConfiguration, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(taskPaneSimulation, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(taskPaneMapping, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(taskPaneAnimation, javax.swing.GroupLayout.PREFERRED_SIZE, 466, javax.swing.GroupLayout.PREFERRED_SIZE)
+                stepsPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(taskPaneConfiguration, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(taskPaneSimulation, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(taskPaneMapping, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(taskPaneAnimation, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
         );
         stepsPanelLayout.setVerticalGroup(
-                stepsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                stepsPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(stepsPanelLayout.createSequentialGroup()
-                                .addComponent(taskPaneConfiguration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(taskPaneSimulation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(taskPaneMapping, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(taskPaneAnimation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(taskPaneConfiguration, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(taskPaneSimulation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(taskPaneMapping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(taskPaneAnimation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         stepsScrollPane.setViewportView(stepsPanel);
 
-        javax.swing.GroupLayout titledPanelStepsLayout = new javax.swing.GroupLayout(titledPanelSteps);
+        GroupLayout titledPanelStepsLayout = new GroupLayout(titledPanelSteps);
         titledPanelSteps.setLayout(titledPanelStepsLayout);
         titledPanelStepsLayout.setHorizontalGroup(
-                titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(stepsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+                titledPanelStepsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(stepsScrollPane, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         titledPanelStepsLayout.setVerticalGroup(
-                titledPanelStepsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(stepsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                titledPanelStepsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(stepsScrollPane, GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
         );
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
 
-        titledPanelLogger.setTitle(ivResourceMap.getString("titledPanelLogger.title")); // NOI18N
-        titledPanelLogger.setName("titledPanelLogger"); // NOI18N
+        titledPanelLogger.setTitle(ivResourceMap.getString("titledPanelLogger.title"));
+        titledPanelLogger.setName("titledPanelLogger");
 
-        loggerScrollPane.setName("loggerScrollPane"); // NOI18N
+        loggerScrollPane.setName("loggerScrollPane");
 
-        javax.swing.GroupLayout titledPanelLoggerLayout = new javax.swing.GroupLayout(titledPanelLogger);
+        GroupLayout titledPanelLoggerLayout = new GroupLayout(titledPanelLogger);
         titledPanelLogger.setLayout(titledPanelLoggerLayout);
         titledPanelLoggerLayout.setHorizontalGroup(
-                titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+                titledPanelLoggerLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(loggerScrollPane, GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         titledPanelLoggerLayout.setVerticalGroup(
-                titledPanelLoggerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(loggerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
+                titledPanelLoggerLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(loggerScrollPane, GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
         );
 
         leftSplitPane.setRightComponent(titledPanelLogger);
 
         splitPane.setLeftComponent(leftSplitPane);
 
-        titledPanelMain.setTitle(ivResourceMap.getString("titledPanelMain.title")); // NOI18N
+        titledPanelMain.setTitle(ivResourceMap.getString("titledPanelMain.title"));
         titledPanelMain.setMinimumSize(new java.awt.Dimension(32, 32));
-        titledPanelMain.setName("titledPanelMain"); // NOI18N
+        titledPanelMain.setName("titledPanelMain");
 
-        jScrollPane3.setName("jScrollPane3"); // NOI18N
+        jScrollPane3.setName("jScrollPane3");
 
-        gradientPanel.setName("gradientPanel"); // NOI18N
+        gradientPanel.setName("gradientPanel");
 
-        javax.swing.GroupLayout gradientPanelLayout = new javax.swing.GroupLayout(gradientPanel);
+        GroupLayout gradientPanelLayout = new GroupLayout(gradientPanel);
         gradientPanel.setLayout(gradientPanelLayout);
         gradientPanelLayout.setHorizontalGroup(
-                gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                gradientPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGap(0, 683, Short.MAX_VALUE)
         );
         gradientPanelLayout.setVerticalGroup(
-                gradientPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                gradientPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGap(0, 489, Short.MAX_VALUE)
         );
 
         jScrollPane3.setViewportView(gradientPanel);
         createMainPanel();
 
-        javax.swing.GroupLayout titledPanelMainLayout = new javax.swing.GroupLayout(titledPanelMain);
+        GroupLayout titledPanelMainLayout = new GroupLayout(titledPanelMain);
         titledPanelMain.setLayout(titledPanelMainLayout);
         titledPanelMainLayout.setHorizontalGroup(
-                titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
+                titledPanelMainLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
         );
         titledPanelMainLayout.setVerticalGroup(
-                titledPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+                titledPanelMainLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
         );
 
         splitPane.setRightComponent(titledPanelMain);
 
-        javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
+        GroupLayout mainPanelLayout = new GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
-                mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 869, Short.MAX_VALUE)
+                mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 869, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
-                mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(splitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
         );
 
-        menuBar.setName("menuBar"); // NOI18N
+        menuBar.setName("menuBar");
 
-        configurationMenu.setText(ivResourceMap.getString("configurationMenu.text")); // NOI18N
-        configurationMenu.setName("configurationMenu"); // NOI18N
+        configurationMenu.setText(ivResourceMap.getString("configurationMenu.text"));
+        configurationMenu.setName("configurationMenu");
 
-        newMenuItem.setAction(actionMap.get("newConfigurationFile")); // NOI18N
-        newMenuItem.setName("newMenuItem"); // NOI18N
+        newMenuItem.setAction(actionMap.get("newConfigurationFile"));
+        newMenuItem.setName("newMenuItem");
         configurationMenu.add(newMenuItem);
 
-        openMenuItem.setAction(actionMap.get("openConfigurationFile")); // NOI18N
-        openMenuItem.setName("openMenuItem"); // NOI18N
+        openMenuItem.setAction(actionMap.get("openConfigurationFile"));
+        openMenuItem.setName("openMenuItem");
         configurationMenu.add(openMenuItem);
 
-        closeMenuItem.setAction(actionMap.get("closeConfigurationFile")); // NOI18N
-        closeMenuItem.setName("closeMenuItem"); // NOI18N
+        closeMenuItem.setAction(actionMap.get("closeConfigurationFile"));
+        closeMenuItem.setName("closeMenuItem");
         configurationMenu.add(closeMenuItem);
 
-        jSeparator2.setName("jSeparator2"); // NOI18N
+        jSeparator2.setName("jSeparator2");
         configurationMenu.add(jSeparator2);
 
-        saveMenuItem.setAction(actionMap.get("saveConfigurationFile")); // NOI18N
-        saveMenuItem.setName("saveMenuItem"); // NOI18N
+        saveMenuItem.setAction(actionMap.get("saveConfigurationFile"));
+        saveMenuItem.setName("saveMenuItem");
         configurationMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setAction(actionMap.get("saveAsConfigurationFile")); // NOI18N
-        saveAsMenuItem.setName("saveAsMenuItem"); // NOI18N
+        saveAsMenuItem.setAction(actionMap.get("saveAsConfigurationFile"));
+        saveAsMenuItem.setName("saveAsMenuItem");
         configurationMenu.add(saveAsMenuItem);
 
-        jSeparator1.setName("jSeparator1"); // NOI18N
+        jSeparator1.setName("jSeparator1");
         configurationMenu.add(jSeparator1);
 
-        exitMenuItem.setAction(actionMap.get("exitApplication")); // NOI18N
-        exitMenuItem.setName("exitMenuItem"); // NOI18N
+        exitMenuItem.setAction(actionMap.get("exitApplication"));
+        exitMenuItem.setName("exitMenuItem");
         configurationMenu.add(exitMenuItem);
 
         menuBar.add(configurationMenu);
 
-        simulationMenu.setText(ivResourceMap.getString("simulationMenu.text")); // NOI18N
-        simulationMenu.setName("simulationMenu"); // NOI18N
+        simulationMenu.setText(ivResourceMap.getString("simulationMenu.text"));
+        simulationMenu.setName("simulationMenu");
 
-        simulationMenuItem.setAction(actionMap.get("simulationRun")); // NOI18N
-        simulationMenuItem.setName("simulationMenuItem"); // NOI18N
+        simulationMenuItem.setAction(actionMap.get("simulationRun"));
+        simulationMenuItem.setName("simulationMenuItem");
         simulationMenu.add(simulationMenuItem);
 
-        previewMenuItem.setAction(actionMap.get("previewSimulation")); // NOI18N
-        previewMenuItem.setName("previewMenuItem"); // NOI18N
+        previewMenuItem.setAction(actionMap.get("previewSimulation"));
+        previewMenuItem.setName("previewMenuItem");
         simulationMenu.add(previewMenuItem);
 
         menuBar.add(simulationMenu);
 
-        mappingMenu.setText(ivResourceMap.getString("mappingMenu.text")); // NOI18N
-        mappingMenu.setName("mappingMenu"); // NOI18N
+        mappingMenu.setText(ivResourceMap.getString("mappingMenu.text"));
+        mappingMenu.setName("mappingMenu");
 
-        mapMenuItem.setAction(actionMap.get("createMaps")); // NOI18N
-        mapMenuItem.setName("mapMenuItem"); // NOI18N
+        mapMenuItem.setAction(actionMap.get("createMaps"));
+        mapMenuItem.setName("mapMenuItem");
         mappingMenu.add(mapMenuItem);
 
-        exportToKMZMenuItem.setAction(actionMap.get("exportToKMZ")); // NOI18N
-        exportToKMZMenuItem.setName("exportToKMZMenuItem"); // NOI18N
+        exportToKMZMenuItem.setAction(actionMap.get("exportToKMZ"));
+        exportToKMZMenuItem.setName("exportToKMZMenuItem");
         mappingMenu.add(exportToKMZMenuItem);
 
-        cancelMapMenuItem.setAction(actionMap.get("cancelMapping")); // NOI18N
-        cancelMapMenuItem.setName("cancelMapMenuItem"); // NOI18N
+        cancelMapMenuItem.setAction(actionMap.get("cancelMapping"));
+        cancelMapMenuItem.setName("cancelMapMenuItem");
         mappingMenu.add(cancelMapMenuItem);
 
-        jSeparator13.setName("jSeparator13"); // NOI18N
+        jSeparator13.setName("jSeparator13");
         mappingMenu.add(jSeparator13);
 
-        openNCMenuItem.setAction(actionMap.get("openNcMapping")); // NOI18N
-        openNCMenuItem.setName("openNCMenuItem"); // NOI18N
+        openNCMenuItem.setAction(actionMap.get("openNcMapping"));
+        openNCMenuItem.setName("openNCMenuItem");
         mappingMenu.add(openNCMenuItem);
 
         menuBar.add(mappingMenu);
 
-        animationMenu.setText(ivResourceMap.getString("animationMenu.text")); // NOI18N
-        animationMenu.setName("animationMenu"); // NOI18N
+        animationMenu.setText(ivResourceMap.getString("animationMenu.text"));
+        animationMenu.setName("animationMenu");
 
-        startFWMenuItem.setAction(actionMap.get("startAnimationFW")); // NOI18N
-        startFWMenuItem.setName("startFWMenuItem"); // NOI18N
+        startFWMenuItem.setAction(actionMap.get("startAnimationFW"));
+        startFWMenuItem.setName("startFWMenuItem");
         animationMenu.add(startFWMenuItem);
 
-        stopMenuItem.setAction(actionMap.get("stopAnimation")); // NOI18N
-        stopMenuItem.setName("stopMenuItem"); // NOI18N
+        stopMenuItem.setAction(actionMap.get("stopAnimation"));
+        stopMenuItem.setName("stopMenuItem");
         animationMenu.add(stopMenuItem);
 
-        startBWMenuItem.setAction(actionMap.get("startAnimationBW")); // NOI18N
-        startBWMenuItem.setName("startBWMenuItem"); // NOI18N
+        startBWMenuItem.setAction(actionMap.get("startAnimationBW"));
+        startBWMenuItem.setName("startBWMenuItem");
         animationMenu.add(startBWMenuItem);
 
-        jSeparator15.setName("jSeparator15"); // NOI18N
+        jSeparator15.setName("jSeparator15");
         animationMenu.add(jSeparator15);
 
-        openAnimationMenuItem.setAction(actionMap.get("openFolderAnimation")); // NOI18N
-        openAnimationMenuItem.setName("openAnimationMenuItem"); // NOI18N
+        openAnimationMenuItem.setAction(actionMap.get("openFolderAnimation"));
+        openAnimationMenuItem.setName("openAnimationMenuItem");
         animationMenu.add(openAnimationMenuItem);
 
-        jSeparator14.setName("jSeparator14"); // NOI18N
+        jSeparator14.setName("jSeparator14");
         animationMenu.add(jSeparator14);
 
-        saveasMapsMenuItem.setAction(actionMap.get("saveasMaps")); // NOI18N
-        saveasMapsMenuItem.setName("saveasMapsMenuItem"); // NOI18N
+        saveasMapsMenuItem.setAction(actionMap.get("saveasMaps"));
+        saveasMapsMenuItem.setName("saveasMapsMenuItem");
         animationMenu.add(saveasMapsMenuItem);
 
-        deleteMenuItem.setAction(actionMap.get("deleteMaps")); // NOI18N
-        deleteMenuItem.setName("deleteMenuItem"); // NOI18N
+        deleteMenuItem.setAction(actionMap.get("deleteMaps"));
+        deleteMenuItem.setName("deleteMenuItem");
         animationMenu.add(deleteMenuItem);
 
         menuBar.add(animationMenu);
 
-        helpMenu.setText(ivResourceMap.getString("helpMenu.text")); // NOI18N
-        helpMenu.setName("helpMenu"); // NOI18N
+        helpMenu.setText(ivResourceMap.getString("helpMenu.text"));
+        helpMenu.setName("helpMenu");
 
-        aboutMenuItem.setAction(actionMap.get("showAboutBox")); // NOI18N
-        aboutMenuItem.setName("aboutMenuItem"); // NOI18N
+        aboutMenuItem.setAction(actionMap.get("showAboutBox"));
+        aboutMenuItem.setName("aboutMenuItem");
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
 
         scrollPaneSimulationUI.setBorder(null);
-        scrollPaneSimulationUI.setName("scrollPaneSimulationUI"); // NOI18N
+        scrollPaneSimulationUI.setName("scrollPaneSimulationUI");
         scrollPaneSimulationUI.setPreferredSize(new java.awt.Dimension(500, 500));
 
         pnlSimulationUI.setBorder(null);
-        pnlSimulationUI.setName("pnlSimulationUI"); // NOI18N
+        pnlSimulationUI.setName("pnlSimulationUI");
         pnlSimulationUI.setPreferredSize(new java.awt.Dimension(500, 500));
 
-        javax.swing.GroupLayout pnlSimulationUILayout = new javax.swing.GroupLayout(pnlSimulationUI);
+        GroupLayout pnlSimulationUILayout = new GroupLayout(pnlSimulationUI);
         pnlSimulationUI.setLayout(pnlSimulationUILayout);
         pnlSimulationUILayout.setHorizontalGroup(
-                pnlSimulationUILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlSimulationUILayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGap(0, 500, Short.MAX_VALUE)
         );
         pnlSimulationUILayout.setVerticalGroup(
-                pnlSimulationUILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlSimulationUILayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGap(0, 500, Short.MAX_VALUE)
         );
 
         scrollPaneSimulationUI.setViewportView(pnlSimulationUI);
 
-        btnExit.setAction(actionMap.get("exitApplication")); // NOI18N
-        btnExit.setName("btnExit"); // NOI18N
+        btnExit.setAction(actionMap.get("exitApplication"));
+        btnExit.setName("btnExit");
 
         pnlLogo.setAlpha(0.4F);
         pnlLogo.setInheritAlpha(false);
-        pnlLogo.setName("pnlLogo"); // NOI18N
+        pnlLogo.setName("pnlLogo");
 
-        hyperLinkLogo.setAction(actionMap.get("browse")); // NOI18N
-        hyperLinkLogo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        hyperLinkLogo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        hyperLinkLogo.setName("hyperLinkLogo"); // NOI18N
-        hyperLinkLogo.setRolloverIcon(ivResourceMap.getIcon("hyperLinkLogo.rolloverIcon")); // NOI18N
-        hyperLinkLogo.setSelectedIcon(ivResourceMap.getIcon("hyperLinkLogo.selectedIcon")); // NOI18N
+        hyperLinkLogo.setAction(actionMap.get("browse"));
+        hyperLinkLogo.setHorizontalAlignment(SwingConstants.CENTER);
+        hyperLinkLogo.setHorizontalTextPosition(SwingConstants.CENTER);
+        hyperLinkLogo.setName("hyperLinkLogo");
+        hyperLinkLogo.setRolloverIcon(ivResourceMap.getIcon("hyperLinkLogo.rolloverIcon"));
+        hyperLinkLogo.setSelectedIcon(ivResourceMap.getIcon("hyperLinkLogo.selectedIcon"));
         hyperLinkLogo.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -2473,20 +2462,20 @@ public class IchthyopView extends FrameView
             }
         });
 
-        javax.swing.GroupLayout pnlLogoLayout = new javax.swing.GroupLayout(pnlLogo);
+        GroupLayout pnlLogoLayout = new GroupLayout(pnlLogo);
         pnlLogo.setLayout(pnlLogoLayout);
         pnlLogoLayout.setHorizontalGroup(
-                pnlLogoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlLogoLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlLogoLayout.createSequentialGroup()
                                 .addGap(0, 33, Short.MAX_VALUE)
-                                .addComponent(hyperLinkLogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(hyperLinkLogo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 33, Short.MAX_VALUE))
         );
         pnlLogoLayout.setVerticalGroup(
-                pnlLogoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                pnlLogoLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(pnlLogoLayout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(hyperLinkLogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(hyperLinkLogo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -2500,12 +2489,12 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private void animationSpeedStateChanged(javax.swing.event.ChangeEvent evt) {
+    private void animationSpeedStateChanged(ChangeEvent evt) {
         JSpinner source = (JSpinner) evt.getSource();
         nbfps = (Float) source.getValue();
     }
 
-    private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {
+    private void sliderTimeStateChanged(ChangeEvent evt) {
         SwingUtilities.invokeLater(() -> {
             replayPanel.setIndex(sliderTime.getValue());
             lblTime.setText(replayPanel.getTime());
@@ -2589,20 +2578,6 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private void btnColorMinActionPerformed(java.awt.event.ActionEvent evt) {
-        final JButton btn = (JButton) evt.getSource();
-        SwingUtilities.invokeLater(() -> {
-            btn.setForeground(chooseColor(btn, btn.getForeground()));
-        });
-    }
-
-    private void btnColorMaxActionPerformed(java.awt.event.ActionEvent evt) {
-        final JButton btn = (JButton) evt.getSource();
-        SwingUtilities.invokeLater(() -> {
-            btn.setForeground(chooseColor(btn, btn.getForeground()));
-        });
-    }
-
     private void btnParticleColorActionPerformed(java.awt.event.ActionEvent evt) {
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(() -> {
@@ -2620,7 +2595,7 @@ public class IchthyopView extends FrameView
         });
     }
 
-    private void spinnerParticleSizeStateChanged(javax.swing.event.ChangeEvent evt) {
+    private void spinnerParticleSizeStateChanged(ChangeEvent evt) {
         JSpinner source = (JSpinner) evt.getSource();
         final int pixel = (Integer) source.getValue();
         SwingUtilities.invokeLater(() -> {
@@ -2632,110 +2607,107 @@ public class IchthyopView extends FrameView
         getSimulationUI().setGridVisible(ckBoxDrawGrid.isSelected());
     }
     // Variables declaration
-    private javax.swing.JMenu animationMenu;
-    private javax.swing.JSpinner animationSpeed;
-    private javax.swing.JButton btnAnimatedGif;
-    private javax.swing.JButton btnAnimationBW;
-    private javax.swing.JButton btnAnimationFW;
-    private javax.swing.JButton btnAnimationStop;
-    private javax.swing.JButton btnApplyColorbar;
-    private javax.swing.JButton btnAutoRange;
-    private javax.swing.JButton btnCancelMapping;
-    private javax.swing.JButton btnCloseCfgFile;
-    private javax.swing.JButton btnCloseNC;
-    private javax.swing.JButton btnColorMax;
-    private javax.swing.JButton btnColorMed;
-    private javax.swing.JButton btnColorMin;
-    private javax.swing.JButton btnDeleteMaps;
-    private javax.swing.JButton btnExit;
-    private javax.swing.JButton btnExportToKMZ;
-    private javax.swing.JButton btnFirst;
-    private javax.swing.JButton btnLast;
-    private javax.swing.JButton btnMapping;
-    private javax.swing.JButton btnNewCfgFile;
-    private javax.swing.JButton btnNext;
-    private javax.swing.JButton btnOpenAnimation;
-    private javax.swing.JButton btnOpenCfgFile;
-    private javax.swing.JButton btnOpenNC;
-    private javax.swing.JButton btnParticleColor;
-    private javax.swing.JToggleButton btnPreview;
-    private javax.swing.JButton btnPrevious;
-    private javax.swing.JButton btnSaveAsCfgFile;
-    private javax.swing.JButton btnSaveAsMaps;
-    private javax.swing.JButton btnSaveCfgFile;
-    private javax.swing.JButton btnSimulationRun;
-    private javax.swing.JMenuItem cancelMapMenuItem;
-    private javax.swing.JComboBox cbBoxVariable;
-    private javax.swing.JComboBox cbBoxWMS;
-    private javax.swing.JCheckBox ckBoxDrawGrid;
-    private javax.swing.JCheckBox ckBoxReverseTime;
-    private javax.swing.JMenuItem closeMenuItem;
-    private javax.swing.JMenuItem deleteMenuItem;
-    private javax.swing.JMenuItem exportToKMZMenuItem;
+    private JMenu animationMenu;
+    private JSpinner animationSpeed;
+    private JButton btnAnimatedGif;
+    private JButton btnAnimationBW;
+    private JButton btnAnimationFW;
+    private JButton btnAnimationStop;
+    private JButton btnApplyColorbar;
+    private JButton btnAutoRange;
+    private JButton btnCancelMapping;
+    private JButton btnCloseCfgFile;
+    private JButton btnCloseNC;
+    private JButton btnDeleteMaps;
+    private JButton btnExit;
+    private JButton btnExportToKMZ;
+    private JButton btnFirst;
+    private JButton btnLast;
+    private JButton btnMapping;
+    private JButton btnNewCfgFile;
+    private JButton btnNext;
+    private JButton btnOpenAnimation;
+    private JButton btnOpenCfgFile;
+    private JButton btnOpenNC;
+    private JButton btnParticleColor;
+    private JToggleButton btnPreview;
+    private JButton btnPrevious;
+    private JButton btnSaveAsCfgFile;
+    private JButton btnSaveAsMaps;
+    private JButton btnSaveCfgFile;
+    private JButton btnSimulationRun;
+    private JMenuItem cancelMapMenuItem;
+    private JComboBox cbBoxVariable;
+    private JComboBox cbBoxWMS;
+    private JCheckBox ckBoxDrawGrid;
+    private JCheckBox ckBoxReverseTime;
+    private JMenuItem closeMenuItem;
+    private JMenuItem deleteMenuItem;
+    private JMenuItem exportToKMZMenuItem;
     private org.ichthyop.ui.GradientPanel gradientPanel;
-    private org.jdesktop.swingx.JXHyperlink hyperLinkLogo;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JPopupMenu.Separator jSeparator13;
-    private javax.swing.JPopupMenu.Separator jSeparator14;
-    private javax.swing.JPopupMenu.Separator jSeparator15;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JToolBar jToolBar1;
-    private javax.swing.JLabel lblAnimationSpeed;
-    private javax.swing.JLabel lblCfgFile;
-    private javax.swing.JLabel lblColor;
-    private javax.swing.JLabel lblColor1;
-    private javax.swing.JLabel lblFolder;
-    private javax.swing.JLabel lblFramePerSecond;
-    private javax.swing.JLabel lblMax;
-    private javax.swing.JLabel lblMin;
-    private javax.swing.JLabel lblNC;
-    private javax.swing.JLabel lblTime;
-    private javax.swing.JLabel lblVariable;
-    private javax.swing.JLabel lblWMS;
-    private javax.swing.JSplitPane leftSplitPane;
+    private JXHyperlink hyperLinkLogo;
+    private JScrollPane jScrollPane3;
+    private JSeparator jSeparator1;
+    private JPopupMenu.Separator jSeparator13;
+    private JPopupMenu.Separator jSeparator14;
+    private JPopupMenu.Separator jSeparator15;
+    private JPopupMenu.Separator jSeparator2;
+    private JToolBar jToolBar1;
+    private JLabel lblAnimationSpeed;
+    private JLabel lblCfgFile;
+    private JLabel lblColor;
+    private JLabel lblColor1;
+    private JLabel lblFolder;
+    private JLabel lblFramePerSecond;
+    private JLabel lblMax;
+    private JLabel lblMin;
+    private JLabel lblNC;
+    private JLabel lblTime;
+    private JLabel lblVariable;
+    private JLabel lblWMS;
+    private JSplitPane leftSplitPane;
     private org.ichthyop.ui.LoggerScrollPane loggerScrollPane;
-    private javax.swing.JPanel mainPanel;
-    private javax.swing.JMenuItem mapMenuItem;
-    private javax.swing.JMenu mappingMenu;
-    private javax.swing.JMenuBar menuBar;
-    private javax.swing.JMenuItem newMenuItem;
-    private javax.swing.JMenuItem openAnimationMenuItem;
-    private javax.swing.JMenuItem openMenuItem;
-    private javax.swing.JMenuItem openNCMenuItem;
-    private javax.swing.JPanel pnlAnimation;
-    private javax.swing.JPanel pnlColor;
-    private javax.swing.JPanel pnlColorBar;
-    private javax.swing.JPanel pnlFile;
-    private org.jdesktop.swingx.JXPanel pnlLogo;
-    private javax.swing.JPanel pnlMapping;
-    private javax.swing.JPanel pnlSimulation;
-    private javax.swing.JPanel pnlSimulationUI;
-    private javax.swing.JPanel pnlWMS;
-    private javax.swing.JMenuItem previewMenuItem;
-    private javax.swing.JMenuItem saveAsMenuItem;
-    private javax.swing.JMenuItem saveMenuItem;
-    private javax.swing.JMenuItem saveasMapsMenuItem;
-    private javax.swing.JScrollPane scrollPaneSimulationUI;
-    private javax.swing.JMenu simulationMenu;
-    private javax.swing.JMenuItem simulationMenuItem;
-    private javax.swing.JSlider sliderTime;
-    private javax.swing.JSpinner spinnerParticleSize;
-    private javax.swing.JSplitPane splitPane;
-    private javax.swing.JMenuItem startBWMenuItem;
-    private javax.swing.JMenuItem startFWMenuItem;
-    private javax.swing.JPanel stepsPanel;
-    private javax.swing.JScrollPane stepsScrollPane;
-    private javax.swing.JMenuItem stopMenuItem;
-    private org.jdesktop.swingx.JXTaskPane taskPaneAnimation;
-    private org.jdesktop.swingx.JXTaskPane taskPaneConfiguration;
-    private org.jdesktop.swingx.JXTaskPane taskPaneMapping;
-    private org.jdesktop.swingx.JXTaskPane taskPaneSimulation;
-    private org.jdesktop.swingx.JXTitledPanel titledPanelLogger;
-    private org.jdesktop.swingx.JXTitledPanel titledPanelMain;
-    private org.jdesktop.swingx.JXTitledPanel titledPanelSteps;
-    private javax.swing.JFormattedTextField txtFieldMax;
-    private javax.swing.JFormattedTextField txtFieldMin;
+    private JPanel mainPanel;
+    private JMenuItem mapMenuItem;
+    private JMenu mappingMenu;
+    private JMenuBar menuBar;
+    private JMenuItem newMenuItem;
+    private JMenuItem openAnimationMenuItem;
+    private JMenuItem openMenuItem;
+    private JMenuItem openNCMenuItem;
+    private JPanel pnlAnimation;
+    private JPanel pnlColor;
+    private JPanel pnlColorBar;
+    private JPanel pnlFile;
+    private JXPanel pnlLogo;
+    private JPanel pnlMapping;
+    private JPanel pnlSimulation;
+    private JPanel pnlSimulationUI;
+    private JPanel pnlWMS;
+    private JMenuItem previewMenuItem;
+    private JMenuItem saveAsMenuItem;
+    private JMenuItem saveMenuItem;
+    private JMenuItem saveasMapsMenuItem;
+    private JScrollPane scrollPaneSimulationUI;
+    private JMenu simulationMenu;
+    private JMenuItem simulationMenuItem;
+    private JSlider sliderTime;
+    private JSpinner spinnerParticleSize;
+    private JSplitPane splitPane;
+    private JMenuItem startBWMenuItem;
+    private JMenuItem startFWMenuItem;
+    private JPanel stepsPanel;
+    private JScrollPane stepsScrollPane;
+    private JMenuItem stopMenuItem;
+    private JXTaskPane taskPaneAnimation;
+    private JXTaskPane taskPaneConfiguration;
+    private JXTaskPane taskPaneMapping;
+    private JXTaskPane taskPaneSimulation;
+    private JXTitledPanel titledPanelLogger;
+    private JXTitledPanel titledPanelMain;
+    private JXTitledPanel titledPanelSteps;
+    private JFormattedTextField txtFieldMax;
+    private JFormattedTextField txtFieldMin;
     private JDialog aboutBox;
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
@@ -2761,6 +2733,8 @@ public class IchthyopView extends FrameView
     private final MouseWheelScroller mouseScroller = new MouseWheelScroller();
     private boolean cfgUntitled = true;
     private boolean animationLoaded = false;
+    private JLabel lblColorbarChooser;
+    private JComboBox colorbarChooser;
 
     private enum TimeDirection {
 
