@@ -211,7 +211,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
         protected Object doInBackground() throws Exception {
 
             DefaultMutableTreeNode node = parameterTree.getSelectedNode();
-            System.out.println("Showing node " + node.toString());
             if (node != null && node.isLeaf()) {
                 setupParameterPanel(parameterTree.getParameterSet());
             } else {
@@ -661,7 +660,6 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
                                         .addComponent(pnlInfo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(ckBoxNode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(pnlParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        
                                 .addContainerGap())
         );
         pnlParameterLayout.setVerticalGroup(

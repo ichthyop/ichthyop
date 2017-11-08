@@ -73,6 +73,7 @@ import java.text.ParseException;
 import java.util.Locale;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
+import org.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -83,7 +84,6 @@ public class FloatEditor extends DefaultCellEditor {
     JFormattedTextField ftf;
     DecimalFormat floatFormat;
     private Float minimum, maximum;
-    private boolean DEBUG = false;
 
     public FloatEditor() {
         this(-1 * Float.MAX_VALUE, Float.MAX_VALUE);
@@ -92,8 +92,8 @@ public class FloatEditor extends DefaultCellEditor {
     public FloatEditor(float min, float max) {
         super(new JFormattedTextField());
         ftf = (JFormattedTextField) getComponent();
-        minimum = new Float(min);
-        maximum = new Float(max);
+        minimum = min;
+        maximum = max;
 
         //Set up the editor for the integer cells.
         //floatFormat = new DecimalFormat("0.######E0");
@@ -113,15 +113,18 @@ public class FloatEditor extends DefaultCellEditor {
         ftf.setFocusLostBehavior(JFormattedTextField.PERSIST);
         ftf.addFocusListener(new FocusListener() {
 
+            @Override
             public void focusGained(FocusEvent e) {
                 SwingUtilities.invokeLater(new Runnable() {
 
+                    @Override
                     public void run() {
                         ftf.selectAll();
                     }
                 });
             }
 
+            @Override
             public void focusLost(FocusEvent e) {
                 // do nothing
             }
@@ -133,6 +136,7 @@ public class FloatEditor extends DefaultCellEditor {
         ftf.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "check");
         ftf.getActionMap().put("check", new AbstractAction() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (!ftf.isEditValid()) { //The text is invalid.
                     if (userSaysRevert()) { //reverted
@@ -170,18 +174,15 @@ public class FloatEditor extends DefaultCellEditor {
         if (o instanceof Float) {
             return o;
         } else if (o instanceof Number) {
-            return new Float(((Number) o).floatValue());
+            return ((Number) o).floatValue();
         } else {
-            if (DEBUG) {
-                System.out.println("getCellEditorValue: o isn't a Number");
-            }
             try {
                 return floatFormat.parseObject(o.toString());
-            } catch (ParseException exc) {
-                System.err.println("getCellEditorValue: can't parse o: " + o);
-                return null;
+            } catch (ParseException ex) {
+                SimulationManager.getInstance().debug(ex);
             }
         }
+        return null;
     }
 
     //Override to check whether the edit is valid,
@@ -206,7 +207,7 @@ public class FloatEditor extends DefaultCellEditor {
         return super.stopCellEditing();
     }
 
-    /**
+    /*
      * Lets the user know that the text they entered is
      * bad. Returns true if the user elects to revert to
      * the last good value.  Otherwise, returns false,

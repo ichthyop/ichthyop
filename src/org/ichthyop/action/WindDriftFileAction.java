@@ -398,7 +398,7 @@ public class WindDriftFileAction extends WindDriftAction {
         double origin = 0;
         try {
             origin = getSimulationManager().getTimeManager().date2seconds(time_origin);
-            System.out.println("origin : " + origin);
+            //System.out.println("origin : " + origin);
         } catch (ParseException ex) {
             IOException pex = new IOException("Error converting initial time of wind dataset into seconds ==> " + ex.toString());
             pex.setStackTrace(ex.getStackTrace());
