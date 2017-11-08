@@ -307,7 +307,7 @@ public class IchthyopView extends FrameView
             if (null != wmsMapper.getNcOut().getColorVariableName()) {
                 applyColorbarSettings(mapper);
             } else {
-                mapper.setColorbar(null, 0, 0, 0, null, null, null);
+                mapper.setColorbar(null, 0, 0, null);
             }
             mapper.setZoomButtonsVisible(false);
             mapper.setZoomSliderVisible(false);
@@ -1204,7 +1204,6 @@ public class IchthyopView extends FrameView
         savePreference(btnColorMed, btnColorMed.getForeground());
         savePreference(btnColorMax, btnColorMax.getForeground());
         savePreference(txtFieldMin, txtFieldMin.getValue());
-        savePreference(txtFieldMed, txtFieldMed.getValue());
         savePreference(txtFieldMax, txtFieldMax.getValue());
     }
 
@@ -1266,10 +1265,6 @@ public class IchthyopView extends FrameView
         property = restorePreference(txtFieldMin);
         if (property != null) {
             txtFieldMin.setValue(property);
-        }
-        property = restorePreference(txtFieldMed);
-        if (property != null) {
-            txtFieldMed.setValue(property);
         }
         property = restorePreference(txtFieldMax);
         if (property != null) {
@@ -1410,12 +1405,11 @@ public class IchthyopView extends FrameView
     private void applyColorbarSettings(WMSMapper mapper) {
         String vname = (String) cbBoxVariable.getSelectedItem();
         float vmin = Float.valueOf(txtFieldMin.getText());
-        float vmed = Float.valueOf(txtFieldMed.getText());
         float vmax = Float.valueOf(txtFieldMax.getText());
         Color cmin = btnColorMin.getForeground();
         Color cmed = btnColorMed.getForeground();
         Color cmax = btnColorMax.getForeground();
-        mapper.setColorbar(vname.toLowerCase().contains("none") ? null : vname, vmin, vmed, vmax, cmin, cmed, cmax);
+        mapper.setColorbar(vname.toLowerCase().contains("none") ? null : vname, vmin, vmax, new Color[] {cmin, cmed, cmax});
     }
 
     @Action
@@ -1465,7 +1459,6 @@ public class IchthyopView extends FrameView
         void onSuccess(float[] result) {
             if (null != result) {
                 txtFieldMin.setValue(result[0]);
-                txtFieldMed.setValue(0.5f * (result[0] + result[1]));
                 txtFieldMax.setValue(result[1]);
                 setMessage(resourceMap.getString("autoRangeColorbar.msg.suggested") + " [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]", false, LogLevel.COMPLETE);
             }
@@ -1486,7 +1479,6 @@ public class IchthyopView extends FrameView
         btnParticleColor.setEnabled(enabled);
         cbBoxVariable.setEnabled(enabled);
         txtFieldMin.setEnabled(enabled);
-        txtFieldMed.setEnabled(enabled);
         txtFieldMax.setEnabled(enabled);
         btnColorMin.setEnabled(enabled);
         btnColorMed.setEnabled(enabled);
@@ -1543,8 +1535,6 @@ public class IchthyopView extends FrameView
         btnColorMin = new javax.swing.JButton();
         btnColorMax = new javax.swing.JButton();
         txtFieldMin = new javax.swing.JFormattedTextField();
-        lblMed = new javax.swing.JLabel();
-        txtFieldMed = new javax.swing.JFormattedTextField();
         btnColorMed = new javax.swing.JButton();
         lblColor = new javax.swing.JLabel();
         btnParticleColor = new javax.swing.JButton();
@@ -1879,14 +1869,6 @@ public class IchthyopView extends FrameView
         txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
         txtFieldMin.setValue(0.f);
 
-        lblMed.setText(ivResourceMap.getString("lblMed.text")); // NOI18N
-        lblMed.setName("lblMed"); // NOI18N
-
-        txtFieldMed.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
-        txtFieldMed.setName("txtFieldMed"); // NOI18N
-        txtFieldMed.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
-        txtFieldMed.setValue(50.f);
-
         btnColorMed.setForeground(ivResourceMap.getColor("btnColorMed.foreground")); // NOI18N
         btnColorMed.setIcon(ivResourceMap.getIcon("btnColorMed.icon")); // NOI18N
         btnColorMed.setText(ivResourceMap.getString("btnColorMed.text")); // NOI18N
@@ -1917,11 +1899,7 @@ public class IchthyopView extends FrameView
                                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                                 .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                                                         .addComponent(txtFieldMax)
-                                                                        .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                        .addComponent(txtFieldMed, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                                        .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                                                .addComponent(lblMed)
-                                                                .addGap(148, 148, 148)))
+                                                                        .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addComponent(btnColorMed)
@@ -1942,8 +1920,6 @@ public class IchthyopView extends FrameView
                                         .addComponent(txtFieldMin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblMed)
-                                        .addComponent(txtFieldMed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(btnColorMed))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(pnlColorBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -2631,7 +2607,7 @@ public class IchthyopView extends FrameView
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(() -> {
             btn.setForeground(chooseColor(btn, btn.getForeground()));
-            wmsMapper.setColorbar(null, 0, 0, 0, null, null, null);
+            wmsMapper.setColorbar(null, 0, 0, null);
             wmsMapper.setDefaultColor(btn.getForeground());
         });
         getLogger().info(resourceMap.getString("btnColor.msg.apply"));
@@ -2712,7 +2688,6 @@ public class IchthyopView extends FrameView
     private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblFramePerSecond;
     private javax.swing.JLabel lblMax;
-    private javax.swing.JLabel lblMed;
     private javax.swing.JLabel lblMin;
     private javax.swing.JLabel lblNC;
     private javax.swing.JLabel lblTime;
@@ -2760,7 +2735,6 @@ public class IchthyopView extends FrameView
     private org.jdesktop.swingx.JXTitledPanel titledPanelMain;
     private org.jdesktop.swingx.JXTitledPanel titledPanelSteps;
     private javax.swing.JFormattedTextField txtFieldMax;
-    private javax.swing.JFormattedTextField txtFieldMed;
     private javax.swing.JFormattedTextField txtFieldMin;
     private JDialog aboutBox;
     private File cfgPath = new File(System.getProperty("user.dir"));

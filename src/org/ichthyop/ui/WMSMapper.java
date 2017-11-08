@@ -70,6 +70,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -110,13 +112,11 @@ public class WMSMapper extends JXMapKit {
     private double[] time;
     private Color defaultColor = Color.WHITE;
     private int particlePixel = 1;
-    private Color colormin = Color.BLUE;
-    private Color colormed = Color.YELLOW;
-    private Color colormax = Color.RED;
+    private Color[] colorbar;
     private float valmin = 0;
-    private float valmed = 50;
     private float valmax = 100;
     private Painter colorbarPainter;
+    private final Color[] rainbow = new Color[]{Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.PINK};
 
     public WMSMapper() {
 
@@ -124,7 +124,6 @@ public class WMSMapper extends JXMapKit {
         setMiniMapVisible(false);
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
-        //getMainMap().addMouseMotionListener(new LonLatTracker());
     }
 
     public NetcdfOutputReader getNcOut() {
@@ -353,22 +352,19 @@ public class WMSMapper extends JXMapKit {
             return defaultColor;
         }
 
-        if (value <= valmed) {
-            float xval = Math.abs(bound((valmed - value) / (valmed - valmin)));
-            return (new Color(((int) (xval * colormin.getRed()
-                    + (1 - xval) * colormed.getRed())),
-                    ((int) (xval * colormin.getGreen()
-                    + (1 - xval) * colormed.getGreen())),
-                    ((int) (xval * colormin.getBlue()
-                    + (1 - xval) * colormed.getBlue()))));
+        int cinf = (int) (bound((value - valmin) / (valmax - valmin)) * (colorbar.length - 1));
+        float valinf = valmin + cinf * (valmax - valmin) / colorbar.length;
+        float valsup = valmin + (cinf + 1) * (valmax - valmin) / colorbar.length;
+        float xval = Math.abs(bound((valsup - value) / (valsup - valinf)));
+        if (cinf >= (colorbar.length - 1)) {
+            return colorbar[cinf];
         } else {
-            float xval = Math.abs(bound((valmax - value) / (valmax - valmed)));
-            return (new Color(((int) (xval * colormed.getRed()
-                    + (1 - xval) * colormax.getRed())),
-                    ((int) (xval * colormed.getGreen()
-                    + (1 - xval) * colormax.getGreen())),
-                    ((int) (xval * colormed.getBlue()
-                    + (1 - xval) * colormax.getBlue()))));
+            return (new Color(((int) (xval * colorbar[cinf].getRed()
+                    + (1 - xval) * colorbar[cinf + 1].getRed())),
+                    ((int) (xval * colorbar[cinf].getGreen()
+                    + (1 - xval) * colorbar[cinf + 1].getGreen())),
+                    ((int) (xval * colorbar[cinf].getBlue()
+                    + (1 - xval) * colorbar[cinf + 1].getBlue()))));
         }
     }
 
@@ -380,20 +376,18 @@ public class WMSMapper extends JXMapKit {
         defaultColor = color;
     }
 
-    public void setColorbar(String variable, float valmin, float valmed, float valmax, Color colormin, Color colormed, Color colormax) {
+    public void setColorbar(String variable, float valmin, float valmax, Color[] colorbar) {
 
         ncout.setColorVariableName(variable);
         CompoundPainter cp = new CompoundPainter();
         if (null != variable) {
             this.valmin = valmin;
-            this.valmed = valmed;
             this.valmax = valmax;
-            this.colormin = colormin;
-            this.colormed = colormed;
-            this.colormax = colormax;
+            this.colorbar = colorbar;
             colorbarPainter = getPainterColorbar();
             cp.setPainters(bgPainter, colorbarPainter);
         } else {
+            this.colorbar = null;
             colorbarPainter = null;
             cp.setPainters(bgPainter);
         }
@@ -456,36 +450,31 @@ public class WMSMapper extends JXMapKit {
                 int hbar = 20;
                 int xbar = (w - wbar) - hbar;
                 int ybar = h - 3 * hbar / 2;
-                float x = Math.abs((valmed - valmin) / (valmax - valmin));
-                float offset = 0.f;
+                float x = 1.f / (colorbar.length - 1);
 
-                Rectangle2D bar = new Rectangle2D.Double(0.0, 0.0, x * wbar, hbar);
                 g.translate(xbar, ybar);
+                // black countour
+                Rectangle2D bar = new Rectangle2D.Double(0, 0.0, wbar, hbar);
                 g.setColor(Color.BLACK);
                 g.draw(bar);
-
+                // left round corner
                 Ellipse2D corner = new Ellipse2D.Double(-0.5f * hbar, 0.f, hbar, hbar);
-                g.draw(corner);
-                g.setColor(colormin);
-                g.fill(corner);
-
-                Paint paint = g.getPaint();
-                GradientPaint painter = new GradientPaint(0, 0, colormin, (x + offset) * wbar, hbar, colormed);
-                g.setPaint(painter);
-                g.fill(bar);
-
-                bar = new Rectangle2D.Double(x * wbar, 0.0, (1 - x) * wbar, hbar);
                 g.setColor(Color.BLACK);
-                g.draw(bar);
-
-                corner = new Ellipse2D.Double(wbar - 0.5 * hbar, 0.0, hbar, hbar);
                 g.draw(corner);
-                g.setColor(colormax);
+                g.setColor(colorbar[0]);
                 g.fill(corner);
-
-                painter = new GradientPaint((x - offset) * wbar, 0, colormed, wbar, hbar, colormax);
-                g.setPaint(painter);
-                g.fill(bar);
+                // right round corner
+                corner = new Ellipse2D.Double(wbar - 0.5 * hbar, 0.0, hbar, hbar);
+                g.setColor(Color.BLACK);
+                g.draw(corner);
+                g.setColor(colorbar[colorbar.length - 1]);
+                g.fill(corner);
+                // gradients
+                for (int i = 0; i < colorbar.length - 1; i++) {
+                    GradientPaint painter = new GradientPaint((i + 0.2f) * x * wbar, 0, colorbar[i], (i + 0.8f) * x * wbar, hbar, colorbar[i + 1]);
+                    g.setPaint(painter);
+                    g.fill(new Rectangle2D.Double(i * x * wbar, 0.0, x * wbar, hbar));
+                }
 
                 FontRenderContext context = g.getFontRenderContext();
                 Font font = new Font("Dialog", Font.PLAIN, 11);
@@ -510,7 +499,7 @@ public class WMSMapper extends JXMapKit {
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 
-                g.setPaint(paint);
+                g.setPaint(g.getPaint());
                 g.translate(-xbar, -ybar);
                 g.dispose();
             }
