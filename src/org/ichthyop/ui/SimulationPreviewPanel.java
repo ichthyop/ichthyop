@@ -52,24 +52,14 @@
  */
 package org.ichthyop.ui;
 
-/**
- * import AWT
- */
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
-/**
- * import java.util
- */
-/**
- * import Swing
- */
 import javax.swing.JPanel;
-
-/**
- * local import
- */
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
 import org.ichthyop.Zone;
 import org.ichthyop.manager.SimulationManager;
 
@@ -117,12 +107,8 @@ public class SimulationPreviewPanel extends JPanel {
      * BufferedImage in which the background (cost + bathymetry) has been drawn.
      */
     private BufferedImage background;
-    /**
-     * Associated {@code RenderingHints} object
-     */
-    private RenderingHints hints = null;
     private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    private int height = 500;
+    private int height;
     private double ratio = 1;
     final private Color bottom = new Color(0, 0, 150);
     final private Color surface = Color.CYAN;
@@ -134,19 +120,11 @@ public class SimulationPreviewPanel extends JPanel {
     /**
      * Constructs an empty <code>SimulationUI</code>, intializes the range of
      * the domain and the {@code RenderingHints}.
+     * @param height
      */
-    public SimulationPreviewPanel() {
-
-        hi = -1;
-        wi = -1;
-
-        hints = new RenderingHints(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
-        hints.put(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        hints.put(RenderingHints.KEY_FRACTIONALMETRICS,
-                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-
+    public SimulationPreviewPanel(int height) {
+        this.height = height;
+        init();
     }
 
 ////////////////////////////
@@ -170,19 +148,16 @@ public class SimulationPreviewPanel extends JPanel {
         int w = getWidth();
 
         Graphics2D g2 = (Graphics2D) g;
-        //g2.setRenderingHints(hints);
-        /**
-         * Clear the graphics
-         */
+        // clear the graphics
         g2.clearRect(0, 0, w, h);
 
-        /* Redraw the background when size changed */
+        // redraw the background when size changed
         if (hi != h || wi != w) {
-            drawBackground(g2, w, h);
+            background = drawBackground(g2, w, h);
             hi = h;
             wi = w;
         }
-        /* Draw the background into the graphics */
+        // draw the background into the graphics
         g2.drawImage(background, 0, 0, this);
     }
 
@@ -193,24 +168,26 @@ public class SimulationPreviewPanel extends JPanel {
      * @param w the width of the component
      * @param h the height of the component
      */
-    private void drawBackground(Graphics2D g2, int w, int h) {
+    private BufferedImage drawBackground(Graphics2D g2, int w, int h) {
 
-        background = g2.getDeviceConfiguration().createCompatibleImage(w, h);
-        Graphics2D graphic = background.createGraphics();
+        BufferedImage bimg = g2.getDeviceConfiguration().createCompatibleImage(w, h);
+        Graphics2D graphic = bimg.createGraphics();
         graphic.setColor(new Color(223, 212, 200));
         graphic.fillRect(0, 0, w, h);
 
+        double csize = Math.max(1.d, Math.ceil(h / getSimulationManager().getDataset().get_ny())) + 1;
         for (int i = getSimulationManager().getDataset().get_nx(); i-- > 0;) {
             for (int j = getSimulationManager().getDataset().get_ny(); j-- > 0;) {
                 double lat = getSimulationManager().getDataset().getLat(i, j);
                 double lon = getSimulationManager().getDataset().getLon(i, j);
                 double x = w * (lon - lonmin) / (lonmax - lonmin);
                 double y = h * (latmax - lat) / (latmax - latmin);
-                Rectangle2D rectangle = new Rectangle2D.Double(x, y, 1, 1);
+                Rectangle2D rectangle = new Rectangle2D.Double(x + 0.5 * csize, y - 0.5 * csize, csize, csize);
                 graphic.setColor(getColor(i, j));
-                graphic.draw(rectangle);
+                graphic.fill(rectangle);
             }
         }
+        return bimg;
     }
 
     public void setHeight(int height) {
@@ -228,25 +205,24 @@ public class SimulationPreviewPanel extends JPanel {
         repaint();
     }
 
-    public void init() {
+    private void init() {
+
+        setBorder(null);
+
+        hi = -1;
+        wi = -1;
 
         latmin = getSimulationManager().getDataset().getLatMin();
         latmax = getSimulationManager().getDataset().getLatMax();
         lonmin = getSimulationManager().getDataset().getLonMin();
         lonmax = getSimulationManager().getDataset().getLonMax();
-
         double avgLat = 0.5d * (latmin + latmax);
-
         double dlon = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
         double dlat = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
-
         ratio = dlon / dlat;
-        /*if (ratio > 1) {
-        width = (int) (height * ratio);
-        } else if (ratio != 0.d) {
-        height = (int) (width / ratio);
-        }*/
-        //setPreferredSize(new Dimension(width, height));
+
+        addMouseListener(ma);
+        addMouseMotionListener(ma);
     }
 
     @Override
@@ -274,39 +250,56 @@ public class SimulationPreviewPanel extends JPanel {
     private Color getColor(int i, int j) {
 
         if (getSimulationManager().getDataset().isInWater(i, j)) {
+            // zone
             for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
                 if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
                     return zone.getColor();
                 }
             }
-            return bathyColor(getSimulationManager().getDataset().getBathy(i, j));
+            // bathymetry
+            double bathymax = Math.abs(getSimulationManager().getDataset().getDepthMax());
+            double bathy =  Math.abs(getSimulationManager().getDataset().getBathy(i, j));
+            double xdepth = (bathymax - bathy) / bathymax;
+            xdepth = Math.max(0, Math.min(xdepth, 1));
+            return (new Color(
+                    (int) (xdepth * surface.getRed() + (1 - xdepth) * bottom.getRed()),
+                    (int) (xdepth * surface.getGreen() + (1 - xdepth) * bottom.getGreen()),
+                    (int) (xdepth * surface.getBlue() + (1 - xdepth) * bottom.getBlue())));
         } else {
+            // land
             return land;
         }
     }
 
-    /**
-     * Gets the color of the cell as a function of the bathymetry
-     *
-     * @param depth a double, the bathymetry at cell's location.
-     * @return the Color of the cell.
-     */
-    private Color bathyColor(double depth) {
+    private final MouseAdapter ma = new MouseAdapter() {
 
-        if (Double.isNaN(depth)) {
-            return Color.WHITE;
-        } else {
-            float xdepth = (float) Math.abs((getSimulationManager().getDataset().getDepthMax() - depth)
-                    / getSimulationManager().getDataset().getDepthMax());
-            xdepth = Math.max(0, Math.min(xdepth, 1));
-            return (new Color((int) (xdepth * surface.getRed()
-                    + (1 - xdepth) * bottom.getRed()),
-                    (int) (xdepth * surface.getGreen()
-                    + (1 - xdepth) * bottom.getGreen()),
-                    (int) (xdepth * surface.getBlue()
-                    + (1 - xdepth) * bottom.getBlue())));
+        private Point origin;
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            origin = new Point(e.getPoint());
         }
-    }
 
-    //---------- End of class
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if (origin != null) {
+                JViewport viewPort = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, SimulationPreviewPanel.this);
+                if (viewPort != null) {
+                    int deltaX = origin.x - e.getX();
+                    int deltaY = origin.y - e.getY();
+
+                    Rectangle view = viewPort.getViewRect();
+                    view.x += deltaX;
+                    view.y += deltaY;
+
+                    SimulationPreviewPanel.this.scrollRectToVisible(view);
+                }
+            }
+        }
+
+    };
 }

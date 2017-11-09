@@ -115,7 +115,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -159,11 +158,12 @@ public class IchthyopView extends FrameView
         saveAsMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
         btnPreview.getAction().setEnabled(false);
-        spinnerHeight.setEnabled(false);
+        sliderPreviewSize.setEnabled(false);
         btnCancelMapping.getAction().setEnabled(false);
         btnMapping.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
         btnExportToKMZ.getAction().setEnabled(false);
+        cbBoxWMS.getAction().setEnabled(false);
         setAnimationToolsEnabled(false);
         setColorbarPanelEnabled(false);
 
@@ -256,6 +256,7 @@ public class IchthyopView extends FrameView
             btnMapping.getAction().setEnabled(false);
             btnExportToKMZ.getAction().setEnabled(false);
             btnCloseNC.getAction().setEnabled(false);
+            cbBoxWMS.getAction().setEnabled(false);
             btnCancelMapping.getAction().setEnabled(true);
             setColorbarPanelEnabled(false);
             kmlExport = new ExportToKML(outputFile.getAbsolutePath());
@@ -279,6 +280,7 @@ public class IchthyopView extends FrameView
             btnExportToKMZ.getAction().setEnabled(true);
             btnCloseNC.getAction().setEnabled(true);
             btnCancelMapping.getAction().setEnabled(false);
+            cbBoxWMS.getAction().setEnabled(true);
             setColorbarPanelEnabled(true);
         }
 
@@ -315,6 +317,7 @@ public class IchthyopView extends FrameView
             btnExportToKMZ.getAction().setEnabled(false);
             btnOpenNC.getAction().setEnabled(false);
             btnCloseNC.getAction().setEnabled(false);
+            cbBoxWMS.getAction().setEnabled(false);
             btnCancelMapping.getAction().setEnabled(true);
             setColorbarPanelEnabled(false);
             itime = 0;
@@ -369,6 +372,7 @@ public class IchthyopView extends FrameView
             btnCancelMapping.getAction().setEnabled(false);
             btnOpenNC.getAction().setEnabled(true);
             btnCloseNC.getAction().setEnabled(true);
+            cbBoxWMS.getAction().setEnabled(true);
             setColorbarPanelEnabled(true);
         }
 
@@ -431,9 +435,13 @@ public class IchthyopView extends FrameView
         outputFile = null;
         lblNC.setText(getResourceMap().getString("lblNC.text"));
         lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
+        cbBoxWMS.setSelectedIndex(0);
         wmsMapper.loadFile(null);
+        wmsMapper.setVisible(false);
+        lblMapping.setVisible(true);
         btnMapping.getAction().setEnabled(false);
         btnExportToKMZ.getAction().setEnabled(false);
+        cbBoxWMS.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
         cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
         setColorbarPanelEnabled(false);
@@ -453,6 +461,7 @@ public class IchthyopView extends FrameView
         setMainTitle();
         setColorbarPanelEnabled(true);
         cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getNcOut().getVariables()));
+        cbBoxWMS.getAction().setEnabled(true);
     }
 
     public void closeFolderAnimation() {
@@ -609,14 +618,9 @@ public class IchthyopView extends FrameView
 
     private void showSimulationPreview() {
         pnlProgress.setVisible(false);
-        //scrollPaneSimulationUI.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        //scrollPaneSimulationUI.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPaneSimulationUI.setPreferredSize(pnlSimulationUI.getSize());
-        scrollPaneSimulationUI.revalidate();
         scrollPaneSimulationUI.setVisible(true);
-        getSimulationUI().init();
-        getSimulationUI().repaintBackground();
-        spinnerHeight.setEnabled(true);
+        scrollPaneSimulationUI.setViewportView(new SimulationPreviewPanel(sliderPreviewSize.getValue()));
+        sliderPreviewSize.setEnabled(true);
     }
 
     private void hideSimulationPreview() {
@@ -624,7 +628,7 @@ public class IchthyopView extends FrameView
         if (!taskPaneSimulation.isCollapsed()) {
             pnlProgress.setVisible(true);
         }
-        spinnerHeight.setEnabled(false);
+        sliderPreviewSize.setEnabled(false);
     }
 
     private class SimulationPreviewTask extends SFTask {
@@ -815,7 +819,7 @@ public class IchthyopView extends FrameView
         pnlConfiguration.setVisible(false);
         lblConfiguration.setVisible(true);
         btnPreview.getAction().setEnabled(false);
-        spinnerHeight.setEnabled(false);
+        sliderPreviewSize.setEnabled(false);
         setMainTitle();
     }
 
@@ -1057,10 +1061,6 @@ public class IchthyopView extends FrameView
         } else {
             hideSimulationPreview();
         }
-    }
-
-    private SimulationPreviewPanel getSimulationUI() {
-        return (SimulationPreviewPanel) pnlSimulationUI;
     }
 
     @Action
@@ -1523,7 +1523,7 @@ public class IchthyopView extends FrameView
         pnlSimulation = new JPanel();
         btnPreview = new JToggleButton();
         btnSimulationRun = new JButton();
-        spinnerHeight = new JSpinner();
+        sliderPreviewSize = new JSlider(100, 3000, 500);
         taskPaneMapping = new JXTaskPane();
         pnlMapping = new JPanel();
         btnMapping = new JButton();
@@ -1608,7 +1608,6 @@ public class IchthyopView extends FrameView
         JMenu helpMenu = new JMenu();
         JMenuItem aboutMenuItem = new JMenuItem();
         scrollPaneSimulationUI = new JScrollPane();
-        pnlSimulationUI = new SimulationPreviewPanel();
         btnExit = new JButton();
         pnlLogo = new JXPanel();
         hyperLinkLogo = new JXHyperlink();
@@ -1681,37 +1680,37 @@ public class IchthyopView extends FrameView
         pnlFile.setLayout(pnlFileLayout);
         pnlFileLayout.setHorizontalGroup(
                 pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlFileLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(lblCfgFile, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-                                .addGroup(pnlFileLayout.createSequentialGroup()
-                                        .addComponent(btnNewCfgFile)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnOpenCfgFile)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnCloseCfgFile))
-                                .addGroup(pnlFileLayout.createSequentialGroup()
-                                        .addComponent(btnSaveCfgFile)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnSaveAsCfgFile)))
-                        .addContainerGap())
+                        .addGroup(pnlFileLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(lblCfgFile, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                        .addGroup(pnlFileLayout.createSequentialGroup()
+                                                .addComponent(btnNewCfgFile)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnOpenCfgFile)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnCloseCfgFile))
+                                        .addGroup(pnlFileLayout.createSequentialGroup()
+                                                .addComponent(btnSaveCfgFile)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnSaveAsCfgFile)))
+                                .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
                 pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlFileLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                .addComponent(btnOpenCfgFile)
-                                .addComponent(btnNewCfgFile)
-                                .addComponent(btnCloseCfgFile))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(btnSaveCfgFile)
-                                .addComponent(btnSaveAsCfgFile))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(lblCfgFile)
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(pnlFileLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                        .addComponent(btnOpenCfgFile)
+                                        .addComponent(btnNewCfgFile)
+                                        .addComponent(btnCloseCfgFile))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(btnSaveCfgFile)
+                                        .addComponent(btnSaveAsCfgFile))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(lblCfgFile)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneConfiguration.add(pnlFile);
@@ -1737,35 +1736,40 @@ public class IchthyopView extends FrameView
         btnSimulationRun.setName("btnSimulationRun");
         btnSimulationRun.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        spinnerHeight.setModel(new SpinnerNumberModel(500, 100, 9990, 10));
-        spinnerHeight.setName("spinnerHeight");
-        spinnerHeight.addChangeListener(this::spinnerHeightStateChanged);
+        sliderPreviewSize.setName("spinnerHeight");
+        sliderPreviewSize.addChangeListener(this::sliderPreviewSizeStateChanged);
+        sliderPreviewSize.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-        lblSpinnerHeight = new JLabel("Heigh");
+        lblPreviewZoom = new JLabel("Zoom");
+        lblPreviewZoom.setHorizontalAlignment(SwingConstants.CENTER);
 
         GroupLayout pnlSimulationLayout = new GroupLayout(pnlSimulation);
         pnlSimulation.setLayout(pnlSimulationLayout);
         pnlSimulationLayout.setHorizontalGroup(
                 pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlSimulationLayout.createSequentialGroup()
-                        .addComponent(btnPreview)
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addComponent(lblSpinnerHeight)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(spinnerHeight))
-                .addComponent(btnSimulationRun)
+                        .addGroup(pnlSimulationLayout.createSequentialGroup()
+                                .addComponent(btnPreview)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(lblPreviewZoom, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(sliderPreviewSize))
+                        )
+                        .addComponent(btnSimulationRun)
         );
         pnlSimulationLayout.setVerticalGroup(
                 pnlSimulationLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnPreview)
-                        .addComponent(lblSpinnerHeight)
-                        .addComponent(spinnerHeight)
-                )
-                .addPreferredGap(ComponentPlacement.UNRELATED)
-                .addComponent(btnSimulationRun)
-                .addContainerGap()
+                        .addContainerGap()
+                        .addGroup(pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(btnPreview)
+                                .addGroup(pnlSimulationLayout.createSequentialGroup()
+                                        .addComponent(lblPreviewZoom)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(sliderPreviewSize)
+                                )
+                        )
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(btnSimulationRun)
+                        .addContainerGap()
         );
 
         taskPaneSimulation.add(pnlSimulation);
@@ -1802,20 +1806,20 @@ public class IchthyopView extends FrameView
         pnlWMS.setLayout(pnlWMSLayout);
         pnlWMSLayout.setHorizontalGroup(
                 pnlWMSLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlWMSLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(lblWMS)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(cbBoxWMS, 0, 372, Short.MAX_VALUE)
-                        .addContainerGap())
+                        .addGroup(pnlWMSLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblWMS)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(cbBoxWMS, 0, 372, Short.MAX_VALUE)
+                                .addContainerGap())
         );
         pnlWMSLayout.setVerticalGroup(
                 pnlWMSLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlWMSLayout.createSequentialGroup()
-                        .addGroup(pnlWMSLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblWMS)
-                                .addComponent(cbBoxWMS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(pnlWMSLayout.createSequentialGroup()
+                                .addGroup(pnlWMSLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblWMS)
+                                        .addComponent(cbBoxWMS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         lblNC.setFont(ivResourceMap.getFont("lblNC.font"));
@@ -1876,52 +1880,52 @@ public class IchthyopView extends FrameView
         pnlColorBar.setLayout(pnlColorBarLayout);
         pnlColorBarLayout.setHorizontalGroup(
                 pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlColorBarLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                        .addComponent(lblVariable)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(cbBoxVariable, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                        .addComponent(btnAutoRange)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnApplyColorbar))
-                                .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                        .addComponent(lblMin)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(txtFieldMin)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(lblMax)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(txtFieldMax))
-                                .addGroup(pnlColorBarLayout.createSequentialGroup()
-                                        .addComponent(lblColorbarChooser)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(colorbarChooser)))
-                        .addContainerGap(84, Short.MAX_VALUE))
+                        .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                                .addComponent(lblVariable)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(cbBoxVariable, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                                .addComponent(btnAutoRange)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnApplyColorbar))
+                                        .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                                .addComponent(lblMin)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(txtFieldMin)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblMax)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(txtFieldMax))
+                                        .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                                .addComponent(lblColorbarChooser)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(colorbarChooser)))
+                                .addContainerGap(84, Short.MAX_VALUE))
         );
         pnlColorBarLayout.setVerticalGroup(
                 pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlColorBarLayout.createSequentialGroup()
-                        .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblVariable)
-                                .addComponent(cbBoxVariable, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addGap(16, 16, 16)
-                        .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblMin)
-                                .addComponent(txtFieldMin, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(lblMax)
-                                .addComponent(txtFieldMax, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addGap(16, 16, 16)
-                        .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblColorbarChooser)
-                                .addComponent(colorbarChooser))
-                        .addGap(16, 16, 16)
-                        .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(btnAutoRange)
-                                .addComponent(btnApplyColorbar))
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(pnlColorBarLayout.createSequentialGroup()
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblVariable)
+                                        .addComponent(cbBoxVariable, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGap(16, 16, 16)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblMin)
+                                        .addComponent(txtFieldMin, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lblMax)
+                                        .addComponent(txtFieldMax, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGap(16, 16, 16)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblColorbarChooser)
+                                        .addComponent(colorbarChooser))
+                                .addGap(16, 16, 16)
+                                .addGroup(pnlColorBarLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(btnAutoRange)
+                                        .addComponent(btnApplyColorbar))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         lblColor.setText(ivResourceMap.getString("lblColor.text"));
@@ -1944,74 +1948,74 @@ public class IchthyopView extends FrameView
         pnlColor.setLayout(pnlColorLayout);
         pnlColorLayout.setHorizontalGroup(
                 pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlColorLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(pnlColorBar, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(pnlColorLayout.createSequentialGroup()
-                                        .addComponent(lblColor)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnParticleColor)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(lblColor1)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap())
+                        .addGroup(pnlColorLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(pnlColorBar, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(pnlColorLayout.createSequentialGroup()
+                                                .addComponent(lblColor)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnParticleColor)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblColor1)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap())
         );
         pnlColorLayout.setVerticalGroup(
                 pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlColorLayout.createSequentialGroup()
-                        .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblColor)
-                                .addComponent(btnParticleColor)
-                                .addComponent(lblColor1)
-                                .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(pnlColorBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(pnlColorLayout.createSequentialGroup()
+                                .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblColor)
+                                        .addComponent(btnParticleColor)
+                                        .addComponent(lblColor1)
+                                        .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(pnlColorBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         GroupLayout pnlMappingLayout = new GroupLayout(pnlMapping);
         pnlMapping.setLayout(pnlMappingLayout);
         pnlMappingLayout.setHorizontalGroup(
                 pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlMappingLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(pnlWMS, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(pnlMappingLayout.createSequentialGroup()
-                                        .addComponent(btnMapping)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnExportToKMZ))
-                                .addGroup(pnlMappingLayout.createSequentialGroup()
-                                        .addComponent(btnOpenNC)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnCloseNC))
-                                .addComponent(lblNC)
-                                .addComponent(btnCancelMapping)
-                                .addComponent(pnlColor, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addContainerGap())
+                        .addGroup(pnlMappingLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(pnlWMS, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(pnlMappingLayout.createSequentialGroup()
+                                                .addComponent(btnMapping)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnExportToKMZ))
+                                        .addGroup(pnlMappingLayout.createSequentialGroup()
+                                                .addComponent(btnOpenNC)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnCloseNC))
+                                        .addComponent(lblNC)
+                                        .addComponent(btnCancelMapping)
+                                        .addComponent(pnlColor, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap())
         );
         pnlMappingLayout.setVerticalGroup(
                 pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlMappingLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(pnlColor, GroupLayout.PREFERRED_SIZE, 325, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(btnMapping)
-                                .addComponent(btnExportToKMZ))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(btnCancelMapping)
-                        .addGap(12, 12, 12)
-                        .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(btnOpenNC)
-                                .addComponent(btnCloseNC))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(lblNC)
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addComponent(pnlWMS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(pnlMappingLayout.createSequentialGroup()
+                                .addContainerGap()
+                        .addComponent(pnlColor)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(btnMapping)
+                                        .addComponent(btnExportToKMZ))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(btnCancelMapping)
+                                .addGap(12, 12, 12)
+                                .addGroup(pnlMappingLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(btnOpenNC)
+                                        .addComponent(btnCloseNC))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(lblNC)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addComponent(pnlWMS, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         taskPaneMapping.add(pnlMapping);
@@ -2138,61 +2142,61 @@ public class IchthyopView extends FrameView
         pnlAnimation.setLayout(pnlAnimationLayout);
         pnlAnimationLayout.setHorizontalGroup(
                 pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(sliderTime, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-                                .addComponent(lblTime)
-                                .addGroup(pnlAnimationLayout.createSequentialGroup()
-                                        .addComponent(btnOpenAnimation)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnDeleteMaps)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnSaveAsMaps))
-                                .addComponent(lblFolder)
-                                .addComponent(jToolBar1, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-                                .addGroup(pnlAnimationLayout.createSequentialGroup()
-                                        .addGap(379, 379, 379)
-                                        .addComponent(lblFramePerSecond))
-                                .addGroup(pnlAnimationLayout.createSequentialGroup()
-                                        .addComponent(btnAnimatedGif)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(ckBoxReverseTime))
-                                .addGroup(pnlAnimationLayout.createSequentialGroup()
-                                        .addComponent(lblAnimationSpeed)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(animationSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap())
+                        .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(sliderTime, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                        .addComponent(lblTime)
+                                        .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                                .addComponent(btnOpenAnimation)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnDeleteMaps)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnSaveAsMaps))
+                                        .addComponent(lblFolder)
+                                        .addComponent(jToolBar1, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                        .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                                .addGap(379, 379, 379)
+                                                .addComponent(lblFramePerSecond))
+                                        .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                                .addComponent(btnAnimatedGif)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(ckBoxReverseTime))
+                                        .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                                .addComponent(lblAnimationSpeed)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(animationSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap())
         );
         pnlAnimationLayout.setVerticalGroup(
                 pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlAnimationLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jToolBar1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addComponent(lblTime)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(sliderTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addGroup(pnlAnimationLayout.createSequentialGroup()
-                                        .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                .addComponent(btnOpenAnimation)
-                                                .addComponent(btnDeleteMaps))
-                                        .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(lblFolder))
-                                .addComponent(btnSaveAsMaps))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                .addComponent(lblFramePerSecond)
+                        .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jToolBar1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addComponent(lblTime)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(sliderTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(pnlAnimationLayout.createSequentialGroup()
+                                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addComponent(btnOpenAnimation)
+                                                        .addComponent(btnDeleteMaps))
+                                                .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(lblFolder))
+                                        .addComponent(btnSaveAsMaps))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                        .addComponent(lblFramePerSecond)
+                                        .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                .addComponent(btnAnimatedGif)
+                                                .addComponent(ckBoxReverseTime)))
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
                                 .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnAnimatedGif)
-                                        .addComponent(ckBoxReverseTime)))
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addGroup(pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblAnimationSpeed)
-                                .addComponent(animationSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addGap(12, 12, 12))
+                                        .addComponent(lblAnimationSpeed)
+                                        .addComponent(animationSpeed, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGap(12, 12, 12))
         );
 
         taskPaneAnimation.add(pnlAnimation);
@@ -2201,22 +2205,22 @@ public class IchthyopView extends FrameView
         stepsPanel.setLayout(stepsPanelLayout);
         stepsPanelLayout.setHorizontalGroup(
                 stepsPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(taskPaneConfiguration, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
-                .addComponent(taskPaneSimulation, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
-                .addComponent(taskPaneMapping, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
-                .addComponent(taskPaneAnimation, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(taskPaneConfiguration, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(taskPaneSimulation, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(taskPaneMapping, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(taskPaneAnimation, GroupLayout.PREFERRED_SIZE, 466, GroupLayout.PREFERRED_SIZE)
         );
         stepsPanelLayout.setVerticalGroup(
                 stepsPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(stepsPanelLayout.createSequentialGroup()
-                        .addComponent(taskPaneConfiguration, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(taskPaneSimulation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(taskPaneMapping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(taskPaneAnimation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(stepsPanelLayout.createSequentialGroup()
+                                .addComponent(taskPaneConfiguration, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(taskPaneSimulation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(taskPaneMapping, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(taskPaneAnimation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         stepsScrollPane.setViewportView(stepsPanel);
@@ -2225,11 +2229,11 @@ public class IchthyopView extends FrameView
         titledPanelSteps.setLayout(titledPanelStepsLayout);
         titledPanelStepsLayout.setHorizontalGroup(
                 titledPanelStepsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(stepsScrollPane, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+                        .addComponent(stepsScrollPane, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         titledPanelStepsLayout.setVerticalGroup(
                 titledPanelStepsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(stepsScrollPane, GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                        .addComponent(stepsScrollPane, GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
         );
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
@@ -2243,11 +2247,11 @@ public class IchthyopView extends FrameView
         titledPanelLogger.setLayout(titledPanelLoggerLayout);
         titledPanelLoggerLayout.setHorizontalGroup(
                 titledPanelLoggerLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(loggerScrollPane, GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+                        .addComponent(loggerScrollPane, GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         titledPanelLoggerLayout.setVerticalGroup(
                 titledPanelLoggerLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(loggerScrollPane, GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
+                        .addComponent(loggerScrollPane, GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
         );
 
         leftSplitPane.setRightComponent(titledPanelLogger);
@@ -2266,11 +2270,11 @@ public class IchthyopView extends FrameView
         gradientPanel.setLayout(gradientPanelLayout);
         gradientPanelLayout.setHorizontalGroup(
                 gradientPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGap(0, 683, Short.MAX_VALUE)
+                        .addGap(0, 683, Short.MAX_VALUE)
         );
         gradientPanelLayout.setVerticalGroup(
                 gradientPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGap(0, 489, Short.MAX_VALUE)
+                        .addGap(0, 489, Short.MAX_VALUE)
         );
 
         jScrollPane3.setViewportView(gradientPanel);
@@ -2280,11 +2284,11 @@ public class IchthyopView extends FrameView
         titledPanelMain.setLayout(titledPanelMainLayout);
         titledPanelMainLayout.setHorizontalGroup(
                 titledPanelMainLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
         );
         titledPanelMainLayout.setVerticalGroup(
                 titledPanelMainLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
         );
 
         splitPane.setRightComponent(titledPanelMain);
@@ -2293,11 +2297,11 @@ public class IchthyopView extends FrameView
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
                 mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 869, Short.MAX_VALUE)
+                        .addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 869, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
                 mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                        .addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
         );
 
         menuBar.setName("menuBar");
@@ -2420,24 +2424,8 @@ public class IchthyopView extends FrameView
 
         scrollPaneSimulationUI.setBorder(null);
         scrollPaneSimulationUI.setName("scrollPaneSimulationUI");
-        scrollPaneSimulationUI.setPreferredSize(new java.awt.Dimension(500, 500));
-
-        pnlSimulationUI.setBorder(null);
-        pnlSimulationUI.setName("pnlSimulationUI");
-        pnlSimulationUI.setPreferredSize(new java.awt.Dimension(500, 500));
-
-        GroupLayout pnlSimulationUILayout = new GroupLayout(pnlSimulationUI);
-        pnlSimulationUI.setLayout(pnlSimulationUILayout);
-        pnlSimulationUILayout.setHorizontalGroup(
-                pnlSimulationUILayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGap(0, 500, Short.MAX_VALUE)
-        );
-        pnlSimulationUILayout.setVerticalGroup(
-                pnlSimulationUILayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGap(0, 500, Short.MAX_VALUE)
-        );
-
-        scrollPaneSimulationUI.setViewportView(pnlSimulationUI);
+        scrollPaneSimulationUI.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPaneSimulationUI.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         btnExit.setAction(actionMap.get("exitApplication"));
         btnExit.setName("btnExit");
@@ -2468,17 +2456,17 @@ public class IchthyopView extends FrameView
         pnlLogo.setLayout(pnlLogoLayout);
         pnlLogoLayout.setHorizontalGroup(
                 pnlLogoLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlLogoLayout.createSequentialGroup()
-                        .addGap(0, 33, Short.MAX_VALUE)
-                        .addComponent(hyperLinkLogo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 33, Short.MAX_VALUE))
+                        .addGroup(pnlLogoLayout.createSequentialGroup()
+                                .addGap(0, 33, Short.MAX_VALUE)
+                                .addComponent(hyperLinkLogo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 33, Short.MAX_VALUE))
         );
         pnlLogoLayout.setVerticalGroup(
                 pnlLogoLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(pnlLogoLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(hyperLinkLogo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGroup(pnlLogoLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(hyperLinkLogo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         setComponent(mainPanel);
@@ -2590,13 +2578,6 @@ public class IchthyopView extends FrameView
         getLogger().info(resourceMap.getString("btnColor.msg.apply"));
     }
 
-    private void btnColorMedActionPerformed(java.awt.event.ActionEvent evt) {
-        final JButton btn = (JButton) evt.getSource();
-        SwingUtilities.invokeLater(() -> {
-            btn.setForeground(chooseColor(btn, btn.getForeground()));
-        });
-    }
-
     private void spinnerParticleSizeStateChanged(ChangeEvent evt) {
         JSpinner source = (JSpinner) evt.getSource();
         final int pixel = (Integer) source.getValue();
@@ -2605,10 +2586,11 @@ public class IchthyopView extends FrameView
         });
     }
 
-    private void spinnerHeightStateChanged(ChangeEvent e) {
-        SpinnerModel numberModel = spinnerHeight.getModel();
-        if (numberModel instanceof SpinnerNumberModel) {
-            getSimulationUI().setHeight((int) ((SpinnerNumberModel) numberModel).getNumber());
+    private void sliderPreviewSizeStateChanged(ChangeEvent e) {
+        JSlider source = (JSlider) e.getSource();
+        if (!source.getValueIsAdjusting()) {
+            SimulationPreviewPanel preview = (SimulationPreviewPanel) scrollPaneSimulationUI.getViewport().getView();
+            preview.setHeight((int) source.getValue());
         }
     }
 
@@ -2645,8 +2627,8 @@ public class IchthyopView extends FrameView
     private JMenuItem cancelMapMenuItem;
     private JComboBox cbBoxVariable;
     private JComboBox cbBoxWMS;
-    private JSpinner spinnerHeight;
-    private JLabel lblSpinnerHeight;
+    private JSlider sliderPreviewSize;
+    private JLabel lblPreviewZoom;
     private JCheckBox ckBoxReverseTime;
     private JMenuItem closeMenuItem;
     private JMenuItem deleteMenuItem;
@@ -2689,7 +2671,6 @@ public class IchthyopView extends FrameView
     private JXPanel pnlLogo;
     private JPanel pnlMapping;
     private JPanel pnlSimulation;
-    private JPanel pnlSimulationUI;
     private JPanel pnlWMS;
     private JMenuItem previewMenuItem;
     private JMenuItem saveAsMenuItem;
