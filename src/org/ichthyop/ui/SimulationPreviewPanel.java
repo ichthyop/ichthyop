@@ -120,6 +120,7 @@ public class SimulationPreviewPanel extends JPanel {
     /**
      * Constructs an empty <code>SimulationUI</code>, intializes the range of
      * the domain and the {@code RenderingHints}.
+     *
      * @param height
      */
     public SimulationPreviewPanel(int height) {
@@ -175,7 +176,9 @@ public class SimulationPreviewPanel extends JPanel {
         graphic.setColor(new Color(223, 212, 200));
         graphic.fillRect(0, 0, w, h);
 
-        double csize = Math.max(1.d, Math.ceil(h / getSimulationManager().getDataset().get_ny())) + 1;
+        double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getDataset().get_ny()));
+        double csizew = Math.max(1.d, Math.ceil(w / getSimulationManager().getDataset().get_nx()));
+        double csize = 2 * Math.max(csizeh, csizew);
         for (int i = getSimulationManager().getDataset().get_nx(); i-- > 0;) {
             for (int j = getSimulationManager().getDataset().get_ny(); j-- > 0;) {
                 double lat = getSimulationManager().getDataset().getLat(i, j);
@@ -258,7 +261,7 @@ public class SimulationPreviewPanel extends JPanel {
             }
             // bathymetry
             double bathymax = Math.abs(getSimulationManager().getDataset().getDepthMax());
-            double bathy =  Math.abs(getSimulationManager().getDataset().getBathy(i, j));
+            double bathy = Math.abs(getSimulationManager().getDataset().getBathy(i, j));
             double xdepth = (bathymax - bathy) / bathymax;
             xdepth = Math.max(0, Math.min(xdepth, 1));
             return (new Color(
@@ -296,7 +299,7 @@ public class SimulationPreviewPanel extends JPanel {
                     view.x += deltaX;
                     view.y += deltaY;
 
-                    SimulationPreviewPanel.this.scrollRectToVisible(view);
+                    scrollRectToVisible(view);
                 }
             }
         }
