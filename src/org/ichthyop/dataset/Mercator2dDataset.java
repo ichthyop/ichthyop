@@ -321,7 +321,7 @@ public class Mercator2dDataset extends AbstractDataset {
      * @return
      */
     @Override
-    public double getdxi(int j, int i) {
+    public double get_dx(int j, int i) {
 
         return dxu[j];
     }
@@ -334,7 +334,7 @@ public class Mercator2dDataset extends AbstractDataset {
      * @return
      */
     @Override
-    public double getdeta(int j, int i) {
+    public double get_dy(int j, int i) {
 
         return dyv;
     }

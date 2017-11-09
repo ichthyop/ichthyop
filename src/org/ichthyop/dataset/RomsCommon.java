@@ -454,12 +454,12 @@ abstract class RomsCommon extends AbstractDataset {
     }
 
     @Override
-    public double getdxi(int j, int i) {
+    public double get_dx(int j, int i) {
         return (pm[j][i] != 0) ? (1 / pm[j][i]) : 0.d;
     }
 
     @Override
-    public double getdeta(int j, int i) {
+    public double get_dy(int j, int i) {
         return (pn[j][i] != 0) ? (1 / pn[j][i]) : 0.d;
     }
 

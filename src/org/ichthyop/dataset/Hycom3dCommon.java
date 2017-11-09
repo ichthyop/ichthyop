@@ -530,12 +530,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     }
 
     @Override
-    public double getdxi(int j, int i) {
+    public double get_dx(int j, int i) {
         return dxu[j];
     }
 
     @Override
-    public double getdeta(int j, int i) {
+    public double get_dy(int j, int i) {
         return dyv;
     }
 

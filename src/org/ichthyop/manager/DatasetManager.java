@@ -108,12 +108,12 @@ public class DatasetManager extends AbstractManager {
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         instantiateDataset();
-        getDataset().setUp();
+        dataset.setUp();
     }
 
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
-        getSimulationManager().getTimeManager().addNextStepListener(getDataset());
-        getDataset().init();
+        getSimulationManager().getTimeManager().addNextStepListener(dataset);
+        dataset.init();
     }
 }

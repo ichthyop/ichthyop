@@ -839,7 +839,7 @@ public class NemoDataset extends AbstractDataset {
      * la définition de e1t et e2t
      */
     @Override
-    public double getdxi(int j, int i) {
+    public double get_dx(int j, int i) {
         return e1t[j][i];
     }
 
@@ -847,7 +847,7 @@ public class NemoDataset extends AbstractDataset {
      * Gets cell dimension [meter] in the ETA-direction.
      */
     @Override
-    public double getdeta(int j, int i) {
+    public double get_dy(int j, int i) {
         return e2t[j][i];
     }
 

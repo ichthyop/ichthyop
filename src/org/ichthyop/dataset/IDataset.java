@@ -95,9 +95,9 @@ public interface IDataset extends NextStepListener {
 
     public int get_nz();
 
-    public double getdxi(int j, int i);
+    public double get_dx(int j, int i);
 
-    public double getdeta(int j, int i);
+    public double get_dy(int j, int i);
 
     public void init() throws Exception;
 

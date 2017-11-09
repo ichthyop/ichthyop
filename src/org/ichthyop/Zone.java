@@ -258,7 +258,7 @@ public class Zone extends IchthyopLinker {
             for (int j = 0; j < dataset.get_ny(); j++) {
                 if (dataset.isInWater(i, j)) {
                     if (getSimulationManager().getZoneManager().isInside(i, j, key)) {
-                        area += dataset.getdeta(j, i) * dataset.getdxi(j, i) * 1e-6;
+                        area += dataset.get_dy(j, i) * dataset.get_dx(j, i) * 1e-6;
                     }
                 }
             }

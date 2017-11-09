@@ -565,12 +565,12 @@ public class NoveltisDataset extends AbstractDataset {
     }
 
     @Override
-    public double getdxi(int j, int i) {
+    public double get_dx(int j, int i) {
         return dxu[j][i];
     }
 
     @Override
-    public double getdeta(int j, int i) {
+    public double get_dy(int j, int i) {
         return dyv[j][i];
     }
 

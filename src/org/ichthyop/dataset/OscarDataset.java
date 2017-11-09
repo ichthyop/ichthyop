@@ -466,12 +466,12 @@ public class OscarDataset extends AbstractDataset {
     }
 
     @Override
-    public double getdxi(int j, int i) {
+    public double get_dx(int j, int i) {
         return dlon[i];
     }
 
     @Override
-    public double getdeta(int j, int i) {
+    public double get_dy(int j, int i) {
         return dlat[j];
     }
 
