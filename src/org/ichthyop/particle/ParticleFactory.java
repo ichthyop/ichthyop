@@ -164,12 +164,8 @@ public class ParticleFactory extends IchthyopLinker {
                 double upperdepth, lowerdepth;
                 double depthmax = Math.abs(getSimulationManager().getDataset().getDepthMax(xy[0], xy[1]));
                 if (zone.isEnabledDepthMask()) {
-                    if (zone.getUpperDepth() > depthmax) {
-                        upperdepth = lowerdepth = depthmax;
-                    } else {
-                        upperdepth = zone.getUpperDepth();
-                        lowerdepth = zone.getLowerDepth();
-                    }
+                    upperdepth = Math.min(depthmax, zone.getUpperDepth());
+                    lowerdepth = Math.min(depthmax, zone.getLowerDepth());
                 } else {
                     upperdepth = 0.d;
                     lowerdepth = depthmax;

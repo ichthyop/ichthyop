@@ -180,8 +180,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Initializes u[0] & v[0] for the mask
         u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
         v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
-        
-         // bathy
+
+        // bathy
         bathymetry = new double[ny][nx];
         for (int i = 0; i < nx; i++) {
             for (int j = 0; j < ny; j++) {
@@ -342,7 +342,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         return getDepth(x, y, getDeepestLevel(x, y));
     }
-    
+
     private int getDeepestLevel(double x, double y) {
         int ix = (int) Math.round(x);
         int jy = (int) Math.round(y);
@@ -571,7 +571,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double getDepthMax() {
-        return -6000.d;
+        return -depthLevel[nz - 1];
     }
 
     @Override
