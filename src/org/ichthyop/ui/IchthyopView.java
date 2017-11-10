@@ -117,7 +117,6 @@ import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -158,12 +157,13 @@ public class IchthyopView extends FrameView
     private float time;
     private Timer progressTimer;
     private File outputFile, outputFolder;
-    private final ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
     private TimeDirection animationDirection;
     private final AnimationMouseWheelScroller animationMouseScroller = new AnimationMouseWheelScroller();
     private final PreviewMouseAdapter previewMouseAdapter = new PreviewMouseAdapter();
     private boolean cfgUntitled = true;
     private boolean animationLoaded = false;
+    private ResourceMap resourceMap;
+    private ActionMap actionMap;
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -175,10 +175,10 @@ public class IchthyopView extends FrameView
         loggerScrollPane.connectToLogger(getLogger());
         statusBar.connectToLogger(getLogger());
         /* Welcome user */
-        getLogger().info(Application.getInstance().getContext().getResourceMap().getString("Application.msg.welcome"));
+        getLogger().info(resourceMap.getString("Application.msg.welcome"));
 
         /* Set frame icon */
-        getFrame().setIconImage(getResourceMap().getImageIcon("Application.icon").getImage());
+        getFrame().setIconImage(resourceMap.getImageIcon("Application.icon").getImage());
 
         /* Disabled some actions */
         closeMenuItem.getAction().setEnabled(false);
@@ -199,258 +199,32 @@ public class IchthyopView extends FrameView
         getApplication().addExitListener(new ConfirmExit());
     }
 
-    private SimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
+    ////////////////
+    // CONFIGURATION
+    ////////////////
+    @Action
+    public Task newConfigurationFile() throws IOException {
+
+        // close any opened configuration file (and save if necessary)
+        closeConfigurationFile();
+
+        // create a temp file with generic template
+        cfgUntitled = true;
+        return loadConfigurationFile(Template.createTemplate());
     }
 
     @Action
-    public void showAboutBox() {
-        if (aboutBox == null) {
-            JFrame mainFrame = IchthyopApp.getApplication().getMainFrame();
-            aboutBox = new IchthyopAboutBox(mainFrame);
-            aboutBox.setLocationRelativeTo(mainFrame);
-        }
-        IchthyopApp.getApplication().show(aboutBox);
-    }
-
-    private void setAnimationToolsEnabled(boolean enabled) {
-        btnSaveAsMaps.getAction().setEnabled(enabled);
-        btnDeleteMaps.getAction().setEnabled(enabled);
-        btnFirst.getAction().setEnabled(enabled);
-        btnPrevious.getAction().setEnabled(enabled);
-        btnAnimationFW.getAction().setEnabled(enabled);
-        btnAnimationBW.getAction().setEnabled(enabled);
-        btnAnimationStop.getAction().setEnabled(enabled);
-        btnNext.getAction().setEnabled(enabled);
-        btnLast.getAction().setEnabled(enabled);
-        btnAnimatedGif.getAction().setEnabled(enabled);
-        ckBoxReverseTime.setEnabled(enabled);
-        if (!enabled) {
-            sliderTime.setValue(0);
-            lblTime.setText(resourceMap.getString("lblTime.text"));
-        }
-        sliderTime.setEnabled(enabled);
-    }
-
-    @Action
-    public void deleteMaps() {
-        stopAnimation();
-        File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
-        StringBuilder message = new StringBuilder(getResourceMap().getString("deleteMaps.dialog.msg.part1"));
-        message.append(" ");
-        message.append(outputFolder.getName());
-        message.append(" ?");
-        message.append('\n');
-        message.append(files2Delete.length);
-        message.append(" ");
-        message.append(getResourceMap().getString("deleteMaps.dialog.msg.part2"));
-        int dialog = JOptionPane.showConfirmDialog(getFrame(), message.toString(), getResourceMap().getString("deleteMaps.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
-        if (dialog == JOptionPane.OK_OPTION) {
-            for (File file : files2Delete) {
-                file.delete();
-            }
-            outputFolder.delete();
-            StringBuilder sb = new StringBuilder();
-            sb.append(resourceMap.getString("animation.text"));
-            sb.append(" ");
-            sb.append(files2Delete.length);
-            sb.append(" ");
-            sb.append(resourceMap.getString("deleteMaps.msg.deleted"));
-            getLogger().log(Level.INFO, sb.toString());
-            closeFolderAnimation();
-        }
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        btnSaveCfgFile.getAction().setEnabled(true);
-    }
-
-    @Action
-    public Task exportToKMZ() {
-        return kmzTask = new ExportToKMZTask(getApplication());
-    }
-
-    private class ExportToKMZTask extends SFTask {
-
-        private final ExportToKML kmlExport;
-
-        ExportToKMZTask(Application instance) {
-            super(instance);
-            setMessage(resourceMap.getString("exportToKMZ.msg.init"));
-            wmsMapper.setAlpha(0.2f);
-            wmsMapper.setEnabled(false);
-            btnMapping.getAction().setEnabled(false);
-            btnExportToKMZ.getAction().setEnabled(false);
-            btnCloseNC.getAction().setEnabled(false);
-            cbBoxWMS.getAction().setEnabled(false);
-            btnCancelMapping.getAction().setEnabled(true);
-            setColorbarPanelEnabled(false);
-            kmlExport = new ExportToKML(outputFile.getAbsolutePath());
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-            setMessage(resourceMap.getString("exportToKMZ.msg.exporting"), true, Level.INFO);
-            kmlExport.init();
-            kmlExport.writeKML();
-            setMessage(resourceMap.getString("exportToKMZ.msg.compressing"), true, Level.INFO);
-            kmlExport.toKMZ();
-            return null;
-        }
-
-        @Override
-        protected void finished() {
-            wmsMapper.setAlpha(1.f);
-            wmsMapper.setEnabled(true);
-            btnMapping.getAction().setEnabled(true);
-            btnExportToKMZ.getAction().setEnabled(true);
-            btnCloseNC.getAction().setEnabled(true);
-            btnCancelMapping.getAction().setEnabled(false);
-            cbBoxWMS.getAction().setEnabled(true);
-            setColorbarPanelEnabled(true);
-        }
-
-        @Override
-        void onSuccess(Object o) {
-            setMessage(resourceMap.getString("exportToKMZ.msg.exported") + " " + kmlExport.getKMZ(), false, LogLevel.COMPLETE);
-        }
-
-        @Override
-        void onFailure(Throwable t) {
-        }
-
-        @Override
-        protected void cancelled() {
-            setMessage(resourceMap.getString("exportToKMZ.msg.cancelled"));
-        }
-    }
-
-    @Action
-    public Task createMaps() {
-        return createMapTask = new CreateMapTask(getApplication());
-    }
-
-    private class CreateMapTask extends SFTask {
-
-        private final WMSMapper mapper;
-        private final Rectangle bounds;
-        private final Dimension size;
-        private int itime;
-
-        CreateMapTask(Application instance) {
-            super(instance);
-            btnMapping.getAction().setEnabled(false);
-            btnExportToKMZ.getAction().setEnabled(false);
-            btnOpenNC.getAction().setEnabled(false);
-            btnCloseNC.getAction().setEnabled(false);
-            cbBoxWMS.getAction().setEnabled(false);
-            btnCancelMapping.getAction().setEnabled(true);
-            setColorbarPanelEnabled(false);
-            itime = 0;
-            size = wmsMapper.getSize();
-            bounds = wmsMapper.getBounds();
-            // mapper
-            mapper = new WMSMapper();
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-
-            mapper.loadFile(outputFile.getAbsolutePath());
-            mapper.setDefaultColor(btnParticleColor.getForeground());
-            mapper.setParticlePixel((Integer) spinnerParticleSize.getValue());
-            if (null != wmsMapper.getNcOut().getColorVariableName()) {
-                applyColorbarSettings(mapper);
-            } else {
-                mapper.setColorbar(null, 0, 0, null);
-            }
-            mapper.setZoomButtonsVisible(false);
-            mapper.setZoomSliderVisible(false);
-            mapper.setZoom(wmsMapper.getMainMap().getZoom());
-            mapper.setCenterPosition(wmsMapper.getCenterPosition());
-            mapper.setPreferredSize(size);
-            mapper.setSize(size);
-            mapper.setBounds(bounds);
-            mapper.doLayout();
-
-            /* Delete existing pictures in folder */
-            File wmsfolder = mapper.getFolder();
-            if (null != wmsfolder && wmsfolder.isDirectory()) {
-                for (File picture : wmsfolder.listFiles(new MetaFilenameFilter("*.png"))) {
-                    picture.delete();
-                }
-                setMessage(resourceMap.getString("createMaps.msg.cleanup"));
-            }
-
-            /* Create painters */
-            setMessage(resourceMap.getString("createMaps.msg.start"), true, Level.INFO);
-            for (itime = 0; itime < mapper.getNcOut().getNTime(); itime++) {
-                setProgress((float) (itime + 1) / mapper.getNcOut().getNTime());
-                mapper.draw(itime, size, bounds);
-            }
-            return null;
-        }
-
-        @Override
-        protected void finished() {
-            btnMapping.getAction().setEnabled(true);
-            btnExportToKMZ.getAction().setEnabled(true);
-            btnCancelMapping.getAction().setEnabled(false);
-            btnOpenNC.getAction().setEnabled(true);
-            btnCloseNC.getAction().setEnabled(true);
-            cbBoxWMS.getAction().setEnabled(true);
-            setColorbarPanelEnabled(true);
-        }
-
-        @Override
-        void onSuccess(Object result) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(resourceMap.getString("mapping.text"));
-            sb.append(" ");
-            sb.append(itime);
-            sb.append(" ");
-            sb.append(resourceMap.getString("createMaps.msg.succeeded"));
-            setMessage(sb.toString(), false, LogLevel.COMPLETE);
-            replayPanel.setFolder(null);
-            taskPaneMapping.setCollapsed(true);
-            // move to animation pane
-            taskPaneAnimation.setCollapsed(false);
-            setAnimationToolsEnabled(false);
-            animationLoaded = false;
-            getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
-        }
-
-        @Override
-        void onFailure(Throwable throwable) {
-            // do nothing
-        }
-
-        @Override
-        protected void cancelled() {
-            setMessage(resourceMap.getString("createMaps.msg.cancelled"));
-        }
-    }
-
-    @Action
-    public void cancelMapping() {
-        createMapTask.cancel(true);
-        kmzTask.cancel(true);
-    }
-
-    @Action
-    public void openNcMapping() throws IOException {
-        File file = (null == outputFile)
-                ? new File(System.getProperty("user.dir"))
-                : outputFile.getParentFile();
-        JFileChooser chooser = new JFileChooser(file);
+    public Task openConfigurationFile() {
+        JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.outputFile"), getResourceMap().getString("Application.outputFile.extension")));
         int returnPath = chooser.showOpenDialog(getFrame());
         if (returnPath == JFileChooser.APPROVE_OPTION) {
-            outputFile = chooser.getSelectedFile();
-            openNetCDF();
+            File file = chooser.getSelectedFile();
+            cfgUntitled = false;
+            loadConfigurationFile(file).execute();
+            cfgPath = chooser.getCurrentDirectory();
         }
+        return null;
     }
 
     @Action
@@ -472,172 +246,168 @@ public class IchthyopView extends FrameView
         setColorbarPanelEnabled(false);
     }
 
-    public void openNetCDF() throws IOException {
-
-        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openNcMapping.msg.opened"), outputFile.getAbsolutePath()});
-        lblNC.setText(outputFile.getName());
-        lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
-        wmsMapper.loadFile(outputFile.getAbsolutePath());
-        wmsMapper.setVisible(!taskPaneMapping.isCollapsed());
-        lblMapping.setVisible(false);
-        btnMapping.getAction().setEnabled(true);
-        btnCloseNC.getAction().setEnabled(true);
-        btnExportToKMZ.getAction().setEnabled(true);
+    public Task loadConfigurationFile(File file) {
+        try {
+            getSimulationManager().setConfigurationFile(file);
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, null, ex);
+            return null;
+        }
+        File cfgFile = getSimulationManager().getConfigurationFile();
+        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openConfigurationFile.msg.opened"), cfgUntitled ? "Untitled configuration" : cfgFile.toString()});
+        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (cfgUntitled ? "Untitled configuration" : cfgFile.toString()));
+        lblCfgFile.setText((cfgUntitled ? "Filename not set yet" : cfgFile.getAbsolutePath()));
+        lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
+        initDone = false;
+        saveAsMenuItem.getAction().setEnabled(true);
+        saveMenuItem.getAction().setEnabled(cfgUntitled);
+        closeMenuItem.getAction().setEnabled(true);
+        btnSimulationRun.getAction().setEnabled(true);
+        btnPreview.getAction().setEnabled(true);
+        sliderPreviewZoom.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
         setMainTitle();
-        setColorbarPanelEnabled(true);
-        cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getNcOut().getVariables()));
-        cbBoxWMS.getAction().setEnabled(true);
-    }
-
-    public void closeFolderAnimation() {
-        lblFolder.setText(getResourceMap().getString("lblFolder.text"));
-        outputFolder = null;
-        replayPanel.setFolder(null);
-        setAnimationToolsEnabled(false);
+        return pnlConfiguration.loadParameterTree();
     }
 
     @Action
-    public Task openFolderAnimation() {
-
-        stopAnimation();
-        File file = (null == outputFolder)
-                ? new File(System.getProperty("user.dir"))
-                : outputFolder;
-        JFileChooser chooser = new JFileChooser(file);
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int returnPath = chooser.showDialog(getFrame(), getResourceMap().getString("openFolderAnimation.dialog.title"));
-        if (returnPath == JFileChooser.APPROVE_OPTION) {
-            return new LoadFolderAnimationTask(getApplication(), chooser.getSelectedFile());
-        }
-        return null;
+    public Task saveConfigurationFile() {
+        return cfgUntitled ? saveAsConfigurationFile() : new SaveCfgFileTask(getApplication());
     }
 
-    private class LoadFolderAnimationTask extends SFTask {
+    private class SaveCfgFileTask extends SFTask {
 
-        private final File folder;
-        int nbPNG = 0;
-
-        LoadFolderAnimationTask(Application instance, File folder) {
+        SaveCfgFileTask(Application instance) {
             super(instance);
-            this.folder = folder;
-            setMessage(resourceMap.getString("openFolderAnimation.msg.opened") + " " + folder.getAbsolutePath());
         }
 
         @Override
         protected Object doInBackground() throws Exception {
-            try {
-                nbPNG = folder.listFiles(new MetaFilenameFilter("*.png")).length;
-                if (nbPNG > 0) {
-                    return null;
-                }
-            } catch (Exception ex) {
-            }
-            throw new NullPointerException(resourceMap.getString("openFolderAnimation.msg.failed") + " " + folder.getAbsolutePath());
+            getSimulationManager().getParameterManager().saveParameters();
+            getSimulationManager().setConfigurationFile(getSimulationManager().getConfigurationFile());
+            return null;
         }
 
         @Override
-        public void onSuccess(Object o) {
-            outputFolder = folder;
-            lblFolder.setText(outputFolder.getName());
-            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
-            replayPanel.setFolder(outputFolder);
-            sliderTime.setMaximum(nbPNG - 1);
-            setAnimationToolsEnabled(true);
-            sliderTime.setValue(0);
-            animationLoaded = true;
-            sliderTime.setValue(0);
-        }
-
-        @Override
-        public void onFailure(Throwable t) {
-            lblFolder.setText(resourceMap.getString("lblFolder.text"));
-            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
-            sliderTime.setMaximum(0);
-            sliderTime.setValue(0);
-            setAnimationToolsEnabled(false);
-            animationLoaded = false;
-            outputFolder = null;
-        }
-
-        @Override
-        protected void finished() {
-            setMainTitle();
-        }
-    }
-
-    @Action
-    public void changeWMS() {
-        wmsMapper.setWMS((String) cbBoxWMS.getSelectedItem());
-    }
-
-    @Action
-    public void saveasMaps() {
-        stopAnimation();
-        getLogger().info(getResourceMap().getString("saveasMaps.msg.launch"));
-        getApplication().show(new ExportMapsView(IchthyopApp.getApplication(), replayPanel.getFolder()));
-    }
-
-    @Action
-    public Task createAnimatedGif() {
-        return new CreateAnimatedGifTask(getApplication());
-    }
-
-    private class CreateAnimatedGifTask extends SFTask {
-
-        CreateAnimatedGifTask(Application instance) {
-            super(instance);
-            stopAnimation();
-            setAnimationToolsEnabled(false);
-            btnOpenAnimation.getAction().setEnabled(false);
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-            AnimatedGifEncoder gif = new AnimatedGifEncoder();
-            String path = replayPanel.getFolder().getAbsolutePath();
-            if (path.endsWith(File.separator)) {
-                path = path.substring(0, path.length() - 1);
-            }
-            path += ".gif";
-            /* Should i ask every time if user agrees to overwrite */
- /*if (new File(path).exists()) {
-             String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
-             int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
-             if (!(dialog == JOptionPane.OK_OPTION)) {
-             cancel(true);
-             return null;
-             }
-             }*/
-            gif.start(path);
-            gif.setDelay((int) (1000 / nbfps));
-            setMessage(resourceMap.getString("createAnimatedGif.msg.start"), true, Level.INFO);
-            List<BufferedImage> pictures = replayPanel.getImages();
-            if (ckBoxReverseTime.isSelected()) {
-                Collections.reverse(pictures);
-            }
-            for (int i = 0; i < pictures.size(); i++) {
-                setProgress((i + 1.f) / pictures.size());
-                gif.addFrame(pictures.get(i));
-            }
-            gif.finish();
-            return path;
-        }
-
-        @Override
-        void onSuccess(Object result) {
-            if (null != result) {
-                setMessage(resourceMap.getString("createAnimatedGif.msg.succeeded") + " " + result, false, LogLevel.COMPLETE);
-            }
+        protected void onSuccess(Object o) {
+            btnSaveCfgFile.getAction().setEnabled(false);
+            cfgUntitled = false;
+            initDone = false;
+            setMessage(resourceMap.getString("saveConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().getName(), false, LogLevel.COMPLETE);
         }
 
         @Override
         void onFailure(Throwable throwable) {
+            // do nothing
         }
+    }
 
-        @Override
-        protected void finished() {
-            setAnimationToolsEnabled(true);
-            btnOpenAnimation.getAction().setEnabled(true);
+    @Action
+    public Task saveAsConfigurationFile() {
+        File cwd = cfgUntitled ? getDefaultCfgPath() : getSimulationManager().getConfigurationFile();
+        JFileChooser fc = new JFileChooser(cwd);
+        fc.setDialogType(JFileChooser.SAVE_DIALOG);
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.setSelectedFile(cwd);
+        int returnVal = fc.showSaveDialog(getFrame());
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            if (file.getAbsolutePath().equals(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
+                JOptionPane.showMessageDialog(fc, getResourceMap().getString("saveAsConfigurationFile.msg.different"), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.OK_OPTION);
+                saveAsConfigurationFile();
+                return null;
+            } else if (file.exists()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(file.toString());
+                sb.append(" ");
+                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.exist"));
+                sb.append("\n");
+                sb.append(getResourceMap().getString("save.msg.overwrite"));
+                int answer = JOptionPane.showConfirmDialog(fc, sb.toString(), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.YES_NO_OPTION);
+                if (answer != JOptionPane.YES_OPTION) {
+                    saveAsConfigurationFile();
+                    return null;
+                }
+            }
+            try {
+                getSimulationManager().getParameterManager().updateSource(file.getAbsolutePath());
+                getSimulationManager().getParameterManager().saveParameters();
+                cfgUntitled = false;
+                StringBuilder sb = new StringBuilder();
+                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.prefix"));
+                sb.append(" ");
+                sb.append(getSimulationManager().getConfigurationFile().getName());
+                sb.append(" ");
+                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.saved"));
+                sb.append(" ");
+                sb.append(file.getName());
+                getLogger().info(sb.toString());
+                return loadConfigurationFile(file);
+            } catch (IOException ex) {
+                getLogger().log(Level.SEVERE, getResourceMap().getString("saveAsConfigurationFile.msg.failed"), ex);
+            }
+
+        }
+        return null;
+    }
+
+    @Action
+    public void closeConfigurationFile() {
+        if (null == getSimulationManager().getConfigurationFile()) {
+            return;
+        }
+        if (savePending()) {
+            int answer = dialogSave();
+            if ((answer == JOptionPane.CANCEL_OPTION) || (answer == JOptionPane.CLOSED_OPTION)) {
+                return;
+            }
+        }
+        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("closeConfigurationFile.msg.finished"), getSimulationManager().getConfigurationFile().toString()});
+        try {
+            getSimulationManager().setConfigurationFile(null);
+        } catch (Exception ex) {
+        }
+        getFrame().setTitle(getResourceMap().getString("Application.title"));
+        lblCfgFile.setText(getResourceMap().getString("lblCfgFile.text"));
+        lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
+        btnSimulationRun.getAction().setEnabled(false);
+        btnSaveAsCfgFile.getAction().setEnabled(false);
+        btnSaveCfgFile.getAction().setEnabled(false);
+        closeMenuItem.getAction().setEnabled(false);
+        pnlConfiguration.setVisible(false);
+        lblConfiguration.setVisible(true);
+        btnPreview.getAction().setEnabled(false);
+        sliderPreviewZoom.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
+        sliderPreviewZoom.setEnabled(false);
+        btnSavePreview.getAction().setEnabled(false);
+        setMainTitle();
+    }
+
+    private boolean savePending() {
+        return btnSaveCfgFile.isEnabled();
+    }
+
+    private int dialogSave() {
+
+        String msg = getResourceMap().getString("dialogSave.msg.save") + " " + getSimulationManager().getConfigurationFile().getName() + " ?";
+        int answer = JOptionPane.showConfirmDialog(getFrame(), msg, getResourceMap().getString("dialogSave.title"), JOptionPane.YES_NO_CANCEL_OPTION);
+        switch (answer) {
+            case JOptionPane.YES_OPTION:
+                btnSaveCfgFile.doClick();
+                break;
+        }
+        return answer;
+    }
+
+    /////////////////////
+    // SIMULATION PREVIEW
+    /////////////////////
+    @Action
+    public void previewSimulation() {
+        taskPaneSimulation.setCollapsed(false);
+        if (!initDone) {
+            getApplication().getContext().getTaskService().execute(new SimulationPreviewTask(getApplication(), btnPreview.isSelected()));
+        } else {
+            showSimulationPreview();
         }
     }
 
@@ -705,360 +475,6 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private File getDefaultCfgPath() {
-        StringBuilder path = new StringBuilder();
-        path.append(System.getProperty("user.dir"));
-        if (!path.toString().endsWith(File.separator)) {
-            path.append(File.separator);
-        }
-        path.append("cfg");
-        path.append(File.separator);
-
-        // generate a file name
-        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd");
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        dtFormat.setCalendar(calendar);
-        path.append(dtFormat.format(calendar.getTime()));
-        path.append("_");
-        String username = System.getProperty("user.name");
-        if (null != username && !username.isEmpty()) {
-            path.append(username);
-            path.append("_");
-
-        }
-        path.append("ichthyop-config.cfg");
-
-        return new File(path.toString());
-    }
-
-    @Action
-    public Task saveAsConfigurationFile() {
-        File cwd = cfgUntitled ? getDefaultCfgPath() : getSimulationManager().getConfigurationFile();
-        JFileChooser fc = new JFileChooser(cwd);
-        fc.setDialogType(JFileChooser.SAVE_DIALOG);
-        fc.setAcceptAllFileFilterUsed(false);
-        fc.setSelectedFile(cwd);
-        int returnVal = fc.showSaveDialog(getFrame());
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            if (file.getAbsolutePath().equals(getSimulationManager().getConfigurationFile().getAbsolutePath())) {
-                JOptionPane.showMessageDialog(fc, getResourceMap().getString("saveAsConfigurationFile.msg.different"), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.OK_OPTION);
-                saveAsConfigurationFile();
-                return null;
-            } else if (file.exists()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(file.toString());
-                sb.append(" ");
-                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.exist"));
-                sb.append("\n");
-                sb.append(getResourceMap().getString("save.msg.overwrite"));
-                int answer = JOptionPane.showConfirmDialog(fc, sb.toString(), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.YES_NO_OPTION);
-                if (answer != JOptionPane.YES_OPTION) {
-                    saveAsConfigurationFile();
-                    return null;
-                }
-            }
-            try {
-                getSimulationManager().getParameterManager().updateSource(file.getAbsolutePath());
-                getSimulationManager().getParameterManager().saveParameters();
-                cfgUntitled = false;
-                StringBuilder sb = new StringBuilder();
-                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.prefix"));
-                sb.append(" ");
-                sb.append(getSimulationManager().getConfigurationFile().getName());
-                sb.append(" ");
-                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.saved"));
-                sb.append(" ");
-                sb.append(file.getName());
-                getLogger().info(sb.toString());
-                return loadConfigurationFile(file);
-            } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, getResourceMap().getString("saveAsConfigurationFile.msg.failed"), ex);
-            }
-
-        }
-        return null;
-    }
-    
-    @Action
-    public Task saveConfigurationFile() {
-        return cfgUntitled ? saveAsConfigurationFile() : new SaveCfgFileTask(getApplication());
-    }
-
-    private class SaveCfgFileTask extends SFTask {
-
-        SaveCfgFileTask(Application instance) {
-            super(instance);
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-            getSimulationManager().getParameterManager().saveParameters();
-            getSimulationManager().setConfigurationFile(getSimulationManager().getConfigurationFile());
-            return null;
-        }
-
-        @Override
-        protected void onSuccess(Object o) {
-            btnSaveCfgFile.getAction().setEnabled(false);
-            cfgUntitled = false;
-            initDone = false;
-            setMessage(resourceMap.getString("saveConfigurationFile.msg.finished") + " " + getSimulationManager().getConfigurationFile().getName(), false, LogLevel.COMPLETE);
-        }
-
-        @Override
-        void onFailure(Throwable throwable) {
-            // do nothing
-        }
-    }
-
-    @Action
-    public void closeConfigurationFile() {
-        if (null == getSimulationManager().getConfigurationFile()) {
-            return;
-        }
-        if (savePending()) {
-            int answer = dialogSave();
-            if ((answer == JOptionPane.CANCEL_OPTION) || (answer == JOptionPane.CLOSED_OPTION)) {
-                return;
-            }
-        }
-        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("closeConfigurationFile.msg.finished"), getSimulationManager().getConfigurationFile().toString()});
-        try {
-            getSimulationManager().setConfigurationFile(null);
-        } catch (Exception ex) {
-        }
-        getFrame().setTitle(getResourceMap().getString("Application.title"));
-        lblCfgFile.setText(getResourceMap().getString("lblCfgFile.text"));
-        lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(12));
-        btnSimulationRun.getAction().setEnabled(false);
-        btnSaveAsCfgFile.getAction().setEnabled(false);
-        btnSaveCfgFile.getAction().setEnabled(false);
-        closeMenuItem.getAction().setEnabled(false);
-        pnlConfiguration.setVisible(false);
-        lblConfiguration.setVisible(true);
-        btnPreview.getAction().setEnabled(false);
-        sliderPreviewZoom.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
-        sliderPreviewZoom.setEnabled(false);
-        btnSavePreview.getAction().setEnabled(false);
-        setMainTitle();
-    }
-
-    private boolean savePending() {
-        return btnSaveCfgFile.isEnabled();
-    }
-
-    private int dialogSave() {
-
-        String msg = getResourceMap().getString("dialogSave.msg.save") + " " + getSimulationManager().getConfigurationFile().getName() + " ?";
-        int answer = JOptionPane.showConfirmDialog(getFrame(), msg, getResourceMap().getString("dialogSave.title"), JOptionPane.YES_NO_CANCEL_OPTION);
-        switch (answer) {
-            case JOptionPane.YES_OPTION:
-                btnSaveCfgFile.doClick();
-                break;
-        }
-        return answer;
-    }
-
-    @Action
-    public Task openConfigurationFile() {
-        JFileChooser chooser = new JFileChooser(cfgPath);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        int returnPath = chooser.showOpenDialog(getFrame());
-        if (returnPath == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            cfgUntitled = false;
-            loadConfigurationFile(file).execute();
-            cfgPath = chooser.getCurrentDirectory();
-        }
-        return null;
-    }
-
-    private Logger getLogger() {
-        return SimulationManager.getLogger();
-    }
-
-    public Task loadConfigurationFile(File file) {
-        try {
-            getSimulationManager().setConfigurationFile(file);
-        } catch (Exception ex) {
-            getLogger().log(Level.SEVERE, null, ex);
-            return null;
-        }
-        File cfgFile = getSimulationManager().getConfigurationFile();
-        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openConfigurationFile.msg.opened"), cfgUntitled ? "Untitled configuration" : cfgFile.toString()});
-        getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (cfgUntitled ? "Untitled configuration" : cfgFile.toString()));
-        lblCfgFile.setText((cfgUntitled ? "Filename not set yet" : cfgFile.getAbsolutePath()));
-        lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
-        initDone = false;
-        saveAsMenuItem.getAction().setEnabled(true);
-        saveMenuItem.getAction().setEnabled(cfgUntitled);
-        closeMenuItem.getAction().setEnabled(true);
-        btnSimulationRun.getAction().setEnabled(true);
-        btnPreview.getAction().setEnabled(true);
-        sliderPreviewZoom.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
-        setMainTitle();
-        return pnlConfiguration.loadParameterTree();
-    }
-
-    @Action
-    public void first() {
-        sliderTime.setValue(0);
-    }
-
-    @Action
-    public void previous() {
-        int index = sliderTime.getValue();
-        if (index == 0) {
-            sliderTime.setValue(sliderTime.getMaximum());
-        } else {
-            sliderTime.setValue(index - 1);
-        }
-    }
-
-    @Action
-    public void next() {
-        int index = sliderTime.getValue();
-        if (index == replayPanel.getIndexMax()) {
-            sliderTime.setValue(0);
-        } else {
-            sliderTime.setValue(index + 1);
-        }
-    }
-
-    @Action
-    public void last() {
-        sliderTime.setValue(replayPanel.getIndexMax());
-    }
-
-    @Action
-    public void startAnimationBW() {
-        animationDirection = TimeDirection.BACKWARD;
-        startAnimation();
-    }
-
-    @Action
-    public void startAnimationFW() {
-        animationDirection = TimeDirection.FORWARD;
-        startAnimation();
-    }
-
-    @Action
-    public void stopAnimation() {
-        if (progressTimer != null && progressTimer.isRunning()) {
-            progressTimer.stop();
-            statusBar.getProgressBar().setValue(0);
-            statusBar.getProgressBar().setVisible(false);
-        }
-        if (animator.isRunning()) {
-            animator.stop();
-            replayPanel.addMouseWheelListener(animationMouseScroller);
-        }
-    }
-
-    private void startAnimation() {
-        if (!animationLoaded) {
-            getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
-        } else if (!animator.isRunning()) {
-            replayPanel.removeMouseWheelListener(animationMouseScroller);
-            animator.setAcceleration(0.002f);
-            btnAnimationFW.setEnabled(true);
-            animator.start();
-        }
-    }
-
-    private void startAccelerationProgress() {
-        progressTimer = new Timer(20, new ProgressAction());
-        progressTimer.start();
-    }
-
-    @Override
-    public void timingEvent(float fraction) {
-        float ellpased_time = (fraction * TEN_MINUTES - time) * nbfps;
-        if (ellpased_time > 1) {
-            time = fraction * TEN_MINUTES;
-            if (animationDirection.equals(TimeDirection.FORWARD)) {
-                next();
-            } else {
-                previous();
-            }
-        }
-    }
-
-    @Override
-    public void begin() {
-        nbfps = (Float) animationSpeed.getValue();
-        time = 0;
-        getLogger().info(getResourceMap().getString("animation.msg.started"));
-        startAccelerationProgress();
-    }
-
-    @Override
-    public void end() {
-        btnOpenAnimation.getAction().setEnabled(true);
-        getLogger().info(getResourceMap().getString("animation.msg.stopped"));
-    }
-
-    @Override
-    public void repeat() {
-    }
-
-    private class ProgressAction implements ActionListener {
-
-        float duration;
-        int progress;
-
-        ProgressAction() {
-            duration = animator.getAcceleration() / 2;
-            statusBar.getProgressBar().setVisible(true);
-            statusBar.getProgressBar().setIndeterminate(false);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            progress = (int) (100.f * animator.getTimingFraction() / duration);
-            statusBar.getProgressBar().setValue(progress);
-            if (progress >= 100) {
-                progressTimer.stop();
-                statusBar.getProgressBar().setVisible(false);
-            }
-        }
-    }
-
-    @Action
-    public void exitApplication() {
-        getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(exitMenuItem, 0, null));
-    }
-
-    @Action
-    public Task newConfigurationFile() throws IOException {
-
-        // close any opened configuration file (and save if necessary)
-        closeConfigurationFile();
-
-        // create a temp file with generic template
-        cfgUntitled = true;
-        return loadConfigurationFile(Template.createTemplate());
-    }
-
-    @Action
-    public void previewSimulation() {
-        if (btnPreview.isSelected()) {
-            if (!initDone) {
-                getApplication().getContext().getTaskService().execute(new SimulationPreviewTask(getApplication(), btnPreview.isSelected()));
-            } else {
-                showSimulationPreview();
-            }
-        } else {
-            hideSimulationPreview();
-        }
-    }
-
-    private String changeExtension(String filename, String extension) {
-        return filename.substring(0, filename.lastIndexOf(".") + 1) + extension;
-    }
-
     @Action
     public void savePreview() {
         File cwd = cfgUntitled ? getDefaultCfgPath() : getSimulationManager().getConfigurationFile();
@@ -1098,6 +514,9 @@ public class IchthyopView extends FrameView
         }
     }
 
+    /////////////////
+    // SIMULATION RUN
+    /////////////////
     @Action
     public Task simulationRun() {
         if (!isRunning) {
@@ -1111,18 +530,6 @@ public class IchthyopView extends FrameView
             simulActionTask.cancel(true);
             return null;
         }
-    }
-
-    private void setMenuEnabled(boolean enabled) {
-        openMenuItem.getAction().setEnabled(enabled);
-        newMenuItem.getAction().setEnabled(enabled);
-        saveAsMenuItem.getAction().setEnabled(enabled);
-        closeMenuItem.getAction().setEnabled(enabled);
-        previewMenuItem.getAction().setEnabled(enabled);
-        savePreviewMenuItem.getAction().setEnabled(enabled);
-        simulationMenuItem.getAction().setEnabled(enabled);
-        openNCMenuItem.getAction().setEnabled(enabled);
-        openAnimationMenuItem.getAction().setEnabled(enabled);
     }
 
     public class SimulationRunTask extends SFTask {
@@ -1250,6 +657,627 @@ public class IchthyopView extends FrameView
         }
     }
 
+    ///////////////
+    // MAPPING MAPS
+    ///////////////
+    @Action
+    public Task createMaps() {
+        return createMapTask = new CreateMapTask(getApplication());
+    }
+
+    private class CreateMapTask extends SFTask {
+
+        private final WMSMapper mapper;
+        private final Rectangle bounds;
+        private final Dimension size;
+        private int itime;
+
+        CreateMapTask(Application instance) {
+            super(instance);
+            btnMapping.getAction().setEnabled(false);
+            btnExportToKMZ.getAction().setEnabled(false);
+            btnOpenNC.getAction().setEnabled(false);
+            btnCloseNC.getAction().setEnabled(false);
+            cbBoxWMS.getAction().setEnabled(false);
+            btnCancelMapping.getAction().setEnabled(true);
+            setColorbarPanelEnabled(false);
+            itime = 0;
+            size = wmsMapper.getSize();
+            bounds = wmsMapper.getBounds();
+            // mapper
+            mapper = new WMSMapper();
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+
+            mapper.loadFile(outputFile.getAbsolutePath());
+            mapper.setDefaultColor(btnParticleColor.getForeground());
+            mapper.setParticlePixel((Integer) spinnerParticleSize.getValue());
+            if (null != wmsMapper.getNcOut().getColorVariableName()) {
+                applyColorbarSettings(mapper);
+            } else {
+                mapper.setColorbar(null, 0, 0, null);
+            }
+            mapper.setZoomButtonsVisible(false);
+            mapper.setZoomSliderVisible(false);
+            mapper.setZoom(wmsMapper.getMainMap().getZoom());
+            mapper.setCenterPosition(wmsMapper.getCenterPosition());
+            mapper.setPreferredSize(size);
+            mapper.setSize(size);
+            mapper.setBounds(bounds);
+            mapper.doLayout();
+
+            /* Delete existing pictures in folder */
+            File wmsfolder = mapper.getFolder();
+            if (null != wmsfolder && wmsfolder.isDirectory()) {
+                for (File picture : wmsfolder.listFiles(new MetaFilenameFilter("*.png"))) {
+                    picture.delete();
+                }
+                setMessage(resourceMap.getString("createMaps.msg.cleanup"));
+            }
+
+            /* Create painters */
+            setMessage(resourceMap.getString("createMaps.msg.start"), true, Level.INFO);
+            for (itime = 0; itime < mapper.getNcOut().getNTime(); itime++) {
+                setProgress((float) (itime + 1) / mapper.getNcOut().getNTime());
+                mapper.draw(itime, size, bounds);
+            }
+            return null;
+        }
+
+        @Override
+        protected void finished() {
+            btnMapping.getAction().setEnabled(true);
+            btnExportToKMZ.getAction().setEnabled(true);
+            btnCancelMapping.getAction().setEnabled(false);
+            btnOpenNC.getAction().setEnabled(true);
+            btnCloseNC.getAction().setEnabled(true);
+            cbBoxWMS.getAction().setEnabled(true);
+            setColorbarPanelEnabled(true);
+        }
+
+        @Override
+        void onSuccess(Object result) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(resourceMap.getString("mapping.text"));
+            sb.append(" ");
+            sb.append(itime);
+            sb.append(" ");
+            sb.append(resourceMap.getString("createMaps.msg.succeeded"));
+            setMessage(sb.toString(), false, LogLevel.COMPLETE);
+            replayPanel.setFolder(null);
+            taskPaneMapping.setCollapsed(true);
+            // move to animation pane
+            taskPaneAnimation.setCollapsed(false);
+            setAnimationToolsEnabled(false);
+            animationLoaded = false;
+            getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+            // do nothing
+        }
+
+        @Override
+        protected void cancelled() {
+            setMessage(resourceMap.getString("createMaps.msg.cancelled"));
+        }
+    }
+
+    @Action
+    public void cancelMapping() {
+        createMapTask.cancel(true);
+        kmzTask.cancel(true);
+    }
+
+    @Action
+    public void openNcMapping() throws IOException {
+        File file = (null == outputFile)
+                ? new File(System.getProperty("user.dir"))
+                : outputFile.getParentFile();
+        JFileChooser chooser = new JFileChooser(file);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.outputFile"), getResourceMap().getString("Application.outputFile.extension")));
+        int returnPath = chooser.showOpenDialog(getFrame());
+        if (returnPath == JFileChooser.APPROVE_OPTION) {
+            outputFile = chooser.getSelectedFile();
+            openNetCDF();
+        }
+    }
+
+    public void openNetCDF() throws IOException {
+
+        getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openNcMapping.msg.opened"), outputFile.getAbsolutePath()});
+        lblNC.setText(outputFile.getName());
+        lblNC.setFont(lblNC.getFont().deriveFont(Font.PLAIN, 12));
+        wmsMapper.loadFile(outputFile.getAbsolutePath());
+        wmsMapper.setVisible(!taskPaneMapping.isCollapsed());
+        lblMapping.setVisible(false);
+        btnMapping.getAction().setEnabled(true);
+        btnCloseNC.getAction().setEnabled(true);
+        btnExportToKMZ.getAction().setEnabled(true);
+        setMainTitle();
+        setColorbarPanelEnabled(true);
+        cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getNcOut().getVariables()));
+        cbBoxWMS.getAction().setEnabled(true);
+    }
+
+    private void applyColorbarSettings(WMSMapper mapper) {
+        String vname = (String) cbBoxVariable.getSelectedItem();
+        float vmin = Float.valueOf(txtFieldMin.getText());
+        float vmax = Float.valueOf(txtFieldMax.getText());
+        Color[] colorbar = Colorbars.ALL.get((int) colorbarChooser.getSelectedItem());
+        mapper.setColorbar(vname.toLowerCase().contains("none") ? null : vname, vmin, vmax, colorbar);
+    }
+
+    @Action
+    public void applyColorbarSettings() {
+        applyColorbarSettings(wmsMapper);
+        getLogger().info(getResourceMap().getString("applyColorbarSettings.msg.applied"));
+    }
+
+    @Action
+    public void changeColorbarVariable() {
+        btnAutoRange.getAction().setEnabled(!((String) cbBoxVariable.getSelectedItem()).equals("None"));
+    }
+
+    @Action
+    public Task autoRangeColorbar() {
+        String varName = (String) cbBoxVariable.getSelectedItem();
+        if (varName.startsWith("None")) {
+            btnAutoRange.setEnabled(false);
+            return null;
+        } else {
+            btnAutoRange.setEnabled(true);
+            return new AutoRangeTask(getApplication(), (String) cbBoxVariable.getSelectedItem());
+        }
+    }
+
+    private class AutoRangeTask extends SFTask<float[], Object> {
+
+        ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+        String variable;
+
+        AutoRangeTask(Application instance, String variable) {
+            super(instance);
+            this.variable = variable;
+        }
+
+        @Override
+        protected float[] doInBackground() throws Exception {
+            if (variable.toLowerCase().equals("none")) {
+                cancel(true);
+                return null;
+            }
+            setMessage(resourceMap.getString("autoRangeColorbar.msg.range"), true, Level.INFO);
+            return wmsMapper.getNcOut().getRange(variable);
+        }
+
+        @Override
+        void onSuccess(float[] result) {
+            if (null != result) {
+                txtFieldMin.setValue(result[0]);
+                txtFieldMax.setValue(result[1]);
+                setMessage(resourceMap.getString("autoRangeColorbar.msg.suggested") + " [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]", false, LogLevel.COMPLETE);
+            }
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+            setMessage(resourceMap.getString("autoRangeColorbar.msg.error") + " " + variable);
+        }
+
+        @Override
+        protected void cancelled() {
+            setMessage(resourceMap.getString("autoRangeColorbar.msg.cancelled"), false, Level.WARNING);
+        }
+    }
+
+    private void setColorbarPanelEnabled(boolean enabled) {
+        btnParticleColor.setEnabled(enabled);
+        cbBoxVariable.setEnabled(enabled);
+        txtFieldMin.setEnabled(enabled);
+        txtFieldMax.setEnabled(enabled);
+        colorbarChooser.setEnabled(enabled);
+        btnAutoRange.getAction().setEnabled(enabled && !((String) cbBoxVariable.getSelectedItem()).equals("None"));
+        btnApplyColorbar.getAction().setEnabled(enabled);
+        spinnerParticleSize.setEnabled(enabled);
+    }
+
+    @Action
+    public void changeWMS() {
+        wmsMapper.setWMS((String) cbBoxWMS.getSelectedItem());
+    }
+
+    //////////////
+    // MAPPING KMZ
+    //////////////
+    @Action
+    public Task exportToKMZ() {
+        return kmzTask = new ExportToKMZTask(getApplication());
+    }
+
+    private class ExportToKMZTask extends SFTask {
+
+        private final ExportToKML kmlExport;
+
+        ExportToKMZTask(Application instance) {
+            super(instance);
+            setMessage(resourceMap.getString("exportToKMZ.msg.init"));
+            wmsMapper.setAlpha(0.2f);
+            wmsMapper.setEnabled(false);
+            btnMapping.getAction().setEnabled(false);
+            btnExportToKMZ.getAction().setEnabled(false);
+            btnCloseNC.getAction().setEnabled(false);
+            cbBoxWMS.getAction().setEnabled(false);
+            btnCancelMapping.getAction().setEnabled(true);
+            setColorbarPanelEnabled(false);
+            kmlExport = new ExportToKML(outputFile.getAbsolutePath());
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            setMessage(resourceMap.getString("exportToKMZ.msg.exporting"), true, Level.INFO);
+            kmlExport.init();
+            kmlExport.writeKML();
+            setMessage(resourceMap.getString("exportToKMZ.msg.compressing"), true, Level.INFO);
+            kmlExport.toKMZ();
+            return null;
+        }
+
+        @Override
+        protected void finished() {
+            wmsMapper.setAlpha(1.f);
+            wmsMapper.setEnabled(true);
+            btnMapping.getAction().setEnabled(true);
+            btnExportToKMZ.getAction().setEnabled(true);
+            btnCloseNC.getAction().setEnabled(true);
+            btnCancelMapping.getAction().setEnabled(false);
+            cbBoxWMS.getAction().setEnabled(true);
+            setColorbarPanelEnabled(true);
+        }
+
+        @Override
+        void onSuccess(Object o) {
+            setMessage(resourceMap.getString("exportToKMZ.msg.exported") + " " + kmlExport.getKMZ(), false, LogLevel.COMPLETE);
+        }
+
+        @Override
+        void onFailure(Throwable t) {
+        }
+
+        @Override
+        protected void cancelled() {
+            setMessage(resourceMap.getString("exportToKMZ.msg.cancelled"));
+        }
+    }
+
+    //////////////
+    // ANIMATION
+    //////////////
+    private void setAnimationToolsEnabled(boolean enabled) {
+        btnSaveAsMaps.getAction().setEnabled(enabled);
+        btnDeleteMaps.getAction().setEnabled(enabled);
+        btnFirst.getAction().setEnabled(enabled);
+        btnPrevious.getAction().setEnabled(enabled);
+        btnAnimationFW.getAction().setEnabled(enabled);
+        btnAnimationBW.getAction().setEnabled(enabled);
+        btnAnimationStop.getAction().setEnabled(enabled);
+        btnNext.getAction().setEnabled(enabled);
+        btnLast.getAction().setEnabled(enabled);
+        btnAnimatedGif.getAction().setEnabled(enabled);
+        ckBoxReverseTime.setEnabled(enabled);
+        if (!enabled) {
+            sliderTime.setValue(0);
+            lblTime.setText(resourceMap.getString("lblTime.text"));
+        }
+        sliderTime.setEnabled(enabled);
+    }
+
+    @Action
+    public void deleteMaps() {
+        stopAnimation();
+        File[] files2Delete = outputFolder.listFiles(new MetaFilenameFilter("*.png"));
+        StringBuilder message = new StringBuilder(getResourceMap().getString("deleteMaps.dialog.msg.part1"));
+        message.append(" ");
+        message.append(outputFolder.getName());
+        message.append(" ?");
+        message.append('\n');
+        message.append(files2Delete.length);
+        message.append(" ");
+        message.append(getResourceMap().getString("deleteMaps.dialog.msg.part2"));
+        int dialog = JOptionPane.showConfirmDialog(getFrame(), message.toString(), getResourceMap().getString("deleteMaps.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
+        if (dialog == JOptionPane.OK_OPTION) {
+            for (File file : files2Delete) {
+                file.delete();
+            }
+            outputFolder.delete();
+            StringBuilder sb = new StringBuilder();
+            sb.append(resourceMap.getString("animation.text"));
+            sb.append(" ");
+            sb.append(files2Delete.length);
+            sb.append(" ");
+            sb.append(resourceMap.getString("deleteMaps.msg.deleted"));
+            getLogger().log(Level.INFO, sb.toString());
+            closeFolderAnimation();
+        }
+    }
+
+    public void closeFolderAnimation() {
+        lblFolder.setText(getResourceMap().getString("lblFolder.text"));
+        outputFolder = null;
+        replayPanel.setFolder(null);
+        setAnimationToolsEnabled(false);
+    }
+
+    @Action
+    public Task openFolderAnimation() {
+
+        stopAnimation();
+        File file = (null == outputFolder)
+                ? new File(System.getProperty("user.dir"))
+                : outputFolder;
+        JFileChooser chooser = new JFileChooser(file);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int returnPath = chooser.showDialog(getFrame(), getResourceMap().getString("openFolderAnimation.dialog.title"));
+        if (returnPath == JFileChooser.APPROVE_OPTION) {
+            return new LoadFolderAnimationTask(getApplication(), chooser.getSelectedFile());
+        }
+        return null;
+    }
+
+    private class LoadFolderAnimationTask extends SFTask {
+
+        private final File folder;
+        int nbPNG = 0;
+
+        LoadFolderAnimationTask(Application instance, File folder) {
+            super(instance);
+            this.folder = folder;
+            setMessage(resourceMap.getString("openFolderAnimation.msg.opened") + " " + folder.getAbsolutePath());
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            try {
+                nbPNG = folder.listFiles(new MetaFilenameFilter("*.png")).length;
+                if (nbPNG > 0) {
+                    return null;
+                }
+            } catch (Exception ex) {
+            }
+            throw new NullPointerException(resourceMap.getString("openFolderAnimation.msg.failed") + " " + folder.getAbsolutePath());
+        }
+
+        @Override
+        public void onSuccess(Object o) {
+            outputFolder = folder;
+            lblFolder.setText(outputFolder.getName());
+            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
+            replayPanel.setFolder(outputFolder);
+            sliderTime.setMaximum(nbPNG - 1);
+            setAnimationToolsEnabled(true);
+            sliderTime.setValue(0);
+            animationLoaded = true;
+            sliderTime.setValue(0);
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            lblFolder.setText(resourceMap.getString("lblFolder.text"));
+            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
+            sliderTime.setMaximum(0);
+            sliderTime.setValue(0);
+            setAnimationToolsEnabled(false);
+            animationLoaded = false;
+            outputFolder = null;
+        }
+
+        @Override
+        protected void finished() {
+            setMainTitle();
+        }
+    }
+
+    @Action
+    public void saveasMaps() {
+        stopAnimation();
+        getLogger().info(getResourceMap().getString("saveasMaps.msg.launch"));
+        getApplication().show(new ExportMapsView(IchthyopApp.getApplication(), replayPanel.getFolder()));
+    }
+
+    @Action
+    public Task createAnimatedGif() {
+        return new CreateAnimatedGifTask(getApplication());
+    }
+
+    private class CreateAnimatedGifTask extends SFTask {
+
+        CreateAnimatedGifTask(Application instance) {
+            super(instance);
+            stopAnimation();
+            setAnimationToolsEnabled(false);
+            btnOpenAnimation.getAction().setEnabled(false);
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            AnimatedGifEncoder gif = new AnimatedGifEncoder();
+            String path = replayPanel.getFolder().getAbsolutePath();
+            if (path.endsWith(File.separator)) {
+                path = path.substring(0, path.length() - 1);
+            }
+            path += ".gif";
+//            if (new File(path).exists()) {
+//                String message = path + " " + resourceMap.getString("createAnimatedGif.dialog.overwrite");
+//                int dialog = JOptionPane.showConfirmDialog(getFrame(), message, resourceMap.getString("createAnimatedGif.dialog.title"), JOptionPane.OK_CANCEL_OPTION);
+//                if (!(dialog == JOptionPane.OK_OPTION)) {
+//                    cancel(true);
+//                    return null;
+//                }
+//            }
+            gif.start(path);
+            gif.setDelay((int) (1000 / nbfps));
+            setMessage(resourceMap.getString("createAnimatedGif.msg.start"), true, Level.INFO);
+            List<BufferedImage> pictures = replayPanel.getImages();
+            if (ckBoxReverseTime.isSelected()) {
+                Collections.reverse(pictures);
+            }
+            for (int i = 0; i < pictures.size(); i++) {
+                setProgress((i + 1.f) / pictures.size());
+                gif.addFrame(pictures.get(i));
+            }
+            gif.finish();
+            return path;
+        }
+
+        @Override
+        void onSuccess(Object result) {
+            if (null != result) {
+                setMessage(resourceMap.getString("createAnimatedGif.msg.succeeded") + " " + result, false, LogLevel.COMPLETE);
+            }
+        }
+
+        @Override
+        void onFailure(Throwable throwable) {
+        }
+
+        @Override
+        protected void finished() {
+            setAnimationToolsEnabled(true);
+            btnOpenAnimation.getAction().setEnabled(true);
+        }
+    }
+
+    @Action
+    public void first() {
+        sliderTime.setValue(0);
+    }
+
+    @Action
+    public void previous() {
+        int index = sliderTime.getValue();
+        if (index == 0) {
+            sliderTime.setValue(sliderTime.getMaximum());
+        } else {
+            sliderTime.setValue(index - 1);
+        }
+    }
+
+    @Action
+    public void next() {
+        int index = sliderTime.getValue();
+        if (index == replayPanel.getIndexMax()) {
+            sliderTime.setValue(0);
+        } else {
+            sliderTime.setValue(index + 1);
+        }
+    }
+
+    @Action
+    public void last() {
+        sliderTime.setValue(replayPanel.getIndexMax());
+    }
+
+    @Action
+    public void startAnimationBW() {
+        animationDirection = TimeDirection.BACKWARD;
+        startAnimation();
+    }
+
+    @Action
+    public void startAnimationFW() {
+        animationDirection = TimeDirection.FORWARD;
+        startAnimation();
+    }
+
+    @Action
+    public void stopAnimation() {
+        if (progressTimer != null && progressTimer.isRunning()) {
+            progressTimer.stop();
+            statusBar.getProgressBar().setValue(0);
+            statusBar.getProgressBar().setVisible(false);
+        }
+        if (animator.isRunning()) {
+            animator.stop();
+            replayPanel.addMouseWheelListener(animationMouseScroller);
+        }
+    }
+
+    private void startAnimation() {
+        if (!animationLoaded) {
+            getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
+        } else if (!animator.isRunning()) {
+            replayPanel.removeMouseWheelListener(animationMouseScroller);
+            animator.setAcceleration(0.002f);
+            btnAnimationFW.setEnabled(true);
+            animator.start();
+        }
+    }
+
+    private void startAccelerationProgress() {
+        progressTimer = new Timer(20, new ProgressAction());
+        progressTimer.start();
+    }
+
+    @Override
+    public void timingEvent(float fraction) {
+        float ellpased_time = (fraction * TEN_MINUTES - time) * nbfps;
+        if (ellpased_time > 1) {
+            time = fraction * TEN_MINUTES;
+            if (animationDirection.equals(TimeDirection.FORWARD)) {
+                next();
+            } else {
+                previous();
+            }
+        }
+    }
+
+    @Override
+    public void begin() {
+        nbfps = (Float) animationSpeed.getValue();
+        time = 0;
+        getLogger().info(getResourceMap().getString("animation.msg.started"));
+        startAccelerationProgress();
+    }
+
+    @Override
+    public void end() {
+        btnOpenAnimation.getAction().setEnabled(true);
+        getLogger().info(getResourceMap().getString("animation.msg.stopped"));
+    }
+
+    @Override
+    public void repeat() {
+    }
+
+    private class ProgressAction implements ActionListener {
+
+        float duration;
+        int progress;
+
+        ProgressAction() {
+            duration = animator.getAcceleration() / 2;
+            statusBar.getProgressBar().setVisible(true);
+            statusBar.getProgressBar().setIndeterminate(false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            progress = (int) (100.f * animator.getTimingFraction() / duration);
+            statusBar.getProgressBar().setValue(progress);
+            if (progress >= 100) {
+                progressTimer.stop();
+                statusBar.getProgressBar().setVisible(false);
+            }
+        }
+    }
+
+    //////////////
+    // PREFERENCES
+    //////////////
     public void savePreferences() {
 
         if (null != getSimulationManager().getConfigurationFile() && !cfgUntitled) {
@@ -1335,8 +1363,36 @@ public class IchthyopView extends FrameView
         }
     }
 
-    public JPanel getMainPanel() {
-        return mainPanel;
+    @Action
+    public void showAboutBox() {
+        if (aboutBox == null) {
+            JFrame mainFrame = IchthyopApp.getApplication().getMainFrame();
+            aboutBox = new IchthyopAboutBox(mainFrame);
+            aboutBox.setLocationRelativeTo(mainFrame);
+        }
+        IchthyopApp.getApplication().show(aboutBox);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        btnSaveCfgFile.getAction().setEnabled(true);
+    }
+
+    @Action
+    public void exitApplication() {
+        getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(exitMenuItem, 0, null));
+    }
+
+    private void setMenuEnabled(boolean enabled) {
+        openMenuItem.getAction().setEnabled(enabled);
+        newMenuItem.getAction().setEnabled(enabled);
+        saveAsMenuItem.getAction().setEnabled(enabled);
+        closeMenuItem.getAction().setEnabled(enabled);
+        previewMenuItem.getAction().setEnabled(enabled);
+        savePreviewMenuItem.getAction().setEnabled(enabled);
+        simulationMenuItem.getAction().setEnabled(enabled);
+        openNCMenuItem.getAction().setEnabled(enabled);
+        openAnimationMenuItem.getAction().setEnabled(enabled);
     }
 
     private void createMainPanel() {
@@ -1438,92 +1494,159 @@ public class IchthyopView extends FrameView
         return JColorChooser.showDialog(component, "", initial);
     }
 
-    private void applyColorbarSettings(WMSMapper mapper) {
-        String vname = (String) cbBoxVariable.getSelectedItem();
-        float vmin = Float.valueOf(txtFieldMin.getText());
-        float vmax = Float.valueOf(txtFieldMax.getText());
-        Color[] colorbar = Colorbars.ALL.get((int) colorbarChooser.getSelectedItem());
-        mapper.setColorbar(vname.toLowerCase().contains("none") ? null : vname, vmin, vmax, colorbar);
-    }
+    private void initMenu() {
 
-    @Action
-    public void applyColorbarSettings() {
-        applyColorbarSettings(wmsMapper);
-        getLogger().info(getResourceMap().getString("applyColorbarSettings.msg.applied"));
-    }
+        // instantiate and init menu items
+        menuBar = new JMenuBar();
+        menuBar.setName("menuBar");
 
-    @Action
-    public void changeColorbarVariable() {
-        btnAutoRange.getAction().setEnabled(!((String) cbBoxVariable.getSelectedItem()).equals("None"));
-    }
+        configurationMenu = new JMenu();
+        configurationMenu.setName("configurationMenu");
+        configurationMenu.setText(resourceMap.getString("configurationMenu.text"));
 
-    @Action
-    public Task autoRangeColorbar() {
-        String varName = (String) cbBoxVariable.getSelectedItem();
-        if (varName.startsWith("None")) {
-            btnAutoRange.setEnabled(false);
-            return null;
-        } else {
-            btnAutoRange.setEnabled(true);
-            return new AutoRangeTask(getApplication(), (String) cbBoxVariable.getSelectedItem());
-        }
-    }
+        newMenuItem = new JMenuItem();
+        newMenuItem.setAction(actionMap.get("newConfigurationFile"));
+        newMenuItem.setName("newMenuItem");
 
-    private class AutoRangeTask extends SFTask<float[], Object> {
+        closeMenuItem = new JMenuItem();
+        openMenuItem = new JMenuItem();
+        openMenuItem.setAction(actionMap.get("openConfigurationFile"));
+        openMenuItem.setName("openMenuItem");
 
-        ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
-        String variable;
+        closeMenuItem.setAction(actionMap.get("closeConfigurationFile"));
+        closeMenuItem.setName("closeMenuItem");
 
-        AutoRangeTask(Application instance, String variable) {
-            super(instance);
-            this.variable = variable;
-        }
+        saveMenuItem = new JMenuItem();
+        saveMenuItem.setAction(actionMap.get("saveConfigurationFile"));
+        saveMenuItem.setName("saveMenuItem");
 
-        @Override
-        protected float[] doInBackground() throws Exception {
-            if (variable.toLowerCase().equals("none")) {
-                cancel(true);
-                return null;
-            }
-            setMessage(resourceMap.getString("autoRangeColorbar.msg.range"), true, Level.INFO);
-            return wmsMapper.getNcOut().getRange(variable);
-        }
+        saveAsMenuItem = new JMenuItem();
+        saveAsMenuItem.setAction(actionMap.get("saveAsConfigurationFile"));
+        saveAsMenuItem.setName("saveAsMenuItem");
 
-        @Override
-        void onSuccess(float[] result) {
-            if (null != result) {
-                txtFieldMin.setValue(result[0]);
-                txtFieldMax.setValue(result[1]);
-                setMessage(resourceMap.getString("autoRangeColorbar.msg.suggested") + " [" + txtFieldMin.getText() + " : " + txtFieldMax.getText() + "]", false, LogLevel.COMPLETE);
-            }
-        }
+        exitMenuItem = new JMenuItem();
+        exitMenuItem.setAction(actionMap.get("exitApplication"));
+        exitMenuItem.setName("exitMenuItem");
 
-        @Override
-        void onFailure(Throwable throwable) {
-            setMessage(resourceMap.getString("autoRangeColorbar.msg.error") + " " + variable);
-        }
+        simulationMenu = new JMenu();
+        simulationMenu.setText(resourceMap.getString("simulationMenu.text"));
+        simulationMenu.setName("simulationMenu");
 
-        @Override
-        protected void cancelled() {
-            setMessage(resourceMap.getString("autoRangeColorbar.msg.cancelled"), false, Level.WARNING);
-        }
-    }
+        simulationMenuItem = new JMenuItem();
+        simulationMenuItem.setAction(actionMap.get("simulationRun"));
+        simulationMenuItem.setName("simulationMenuItem");
 
-    private void setColorbarPanelEnabled(boolean enabled) {
-        btnParticleColor.setEnabled(enabled);
-        cbBoxVariable.setEnabled(enabled);
-        txtFieldMin.setEnabled(enabled);
-        txtFieldMax.setEnabled(enabled);
-        colorbarChooser.setEnabled(enabled);
-        btnAutoRange.getAction().setEnabled(enabled && !((String) cbBoxVariable.getSelectedItem()).equals("None"));
-        btnApplyColorbar.getAction().setEnabled(enabled);
-        spinnerParticleSize.setEnabled(enabled);
+        previewMenuItem = new JMenuItem();
+        previewMenuItem.setAction(actionMap.get("previewSimulation"));
+        previewMenuItem.setName("previewMenuItem");
+
+        savePreviewMenuItem = new JMenuItem();
+        savePreviewMenuItem.setAction(actionMap.get("savePreview"));
+        savePreviewMenuItem.setName("savePreviewMenuItem");
+
+        mappingMenu = new JMenu();
+        mappingMenu.setText(resourceMap.getString("mappingMenu.text"));
+        mappingMenu.setName("mappingMenu");
+
+        mapMenuItem = new JMenuItem();
+        mapMenuItem.setAction(actionMap.get("createMaps"));
+        mapMenuItem.setName("mapMenuItem");
+
+        exportToKMZMenuItem = new JMenuItem();
+        exportToKMZMenuItem.setAction(actionMap.get("exportToKMZ"));
+        exportToKMZMenuItem.setName("exportToKMZMenuItem");
+
+        cancelMapMenuItem = new JMenuItem();
+        cancelMapMenuItem.setAction(actionMap.get("cancelMapping"));
+        cancelMapMenuItem.setName("cancelMapMenuItem");
+
+        openNCMenuItem = new JMenuItem();
+        openNCMenuItem.setAction(actionMap.get("openNcMapping"));
+        openNCMenuItem.setName("openNCMenuItem");
+
+        animationMenu = new JMenu();
+        animationMenu.setText(resourceMap.getString("animationMenu.text"));
+        animationMenu.setName("animationMenu");
+
+        startFWMenuItem = new JMenuItem();
+        startFWMenuItem.setAction(actionMap.get("startAnimationFW"));
+        startFWMenuItem.setName("startFWMenuItem");
+
+        stopMenuItem = new JMenuItem();
+        stopMenuItem.setAction(actionMap.get("stopAnimation"));
+        stopMenuItem.setName("stopMenuItem");
+
+        startBWMenuItem = new JMenuItem();
+        startBWMenuItem.setAction(actionMap.get("startAnimationBW"));
+        startBWMenuItem.setName("startBWMenuItem");
+
+        openAnimationMenuItem = new JMenuItem();
+        openAnimationMenuItem.setAction(actionMap.get("openFolderAnimation"));
+        openAnimationMenuItem.setName("openAnimationMenuItem");
+
+        saveasMapsMenuItem = new JMenuItem();
+        saveasMapsMenuItem.setAction(actionMap.get("saveasMaps"));
+        saveasMapsMenuItem.setName("saveasMapsMenuItem");
+
+        deleteMenuItem = new JMenuItem();
+        deleteMenuItem.setAction(actionMap.get("deleteMaps"));
+        deleteMenuItem.setName("deleteMenuItem");
+
+        helpMenu = new JMenu();
+        helpMenu.setText(resourceMap.getString("helpMenu.text"));
+        helpMenu.setName("helpMenu");
+
+        aboutMenuItem = new JMenuItem();
+        aboutMenuItem.setAction(actionMap.get("showAboutBox"));
+        aboutMenuItem.setName("aboutMenuItem");
+
+        // build menu
+        // configuration
+        configurationMenu.add(newMenuItem);
+        configurationMenu.add(openMenuItem);
+        configurationMenu.add(closeMenuItem);
+        configurationMenu.add(new JSeparator());
+        configurationMenu.add(saveMenuItem);
+        configurationMenu.add(saveAsMenuItem);
+        configurationMenu.add(new JSeparator());
+        configurationMenu.add(exitMenuItem);
+        // simulation
+        simulationMenu.add(simulationMenuItem);
+        simulationMenu.add(previewMenuItem);
+        simulationMenu.add(savePreviewMenuItem);
+        // mapping
+        mappingMenu.add(openNCMenuItem);
+        mappingMenu.add(new JSeparator());
+        mappingMenu.add(mapMenuItem);
+        mappingMenu.add(exportToKMZMenuItem);
+        mappingMenu.add(cancelMapMenuItem);
+        // animation
+        animationMenu.add(startFWMenuItem);
+        animationMenu.add(stopMenuItem);
+        animationMenu.add(startBWMenuItem);
+        animationMenu.add(new JSeparator());
+        animationMenu.add(openAnimationMenuItem);
+        animationMenu.add(saveasMapsMenuItem);
+        animationMenu.add(deleteMenuItem);
+        // help
+        helpMenu.add(aboutMenuItem);
+        // main
+        menuBar.add(configurationMenu);
+        menuBar.add(simulationMenu);
+        menuBar.add(mappingMenu);
+        menuBar.add(animationMenu);
+        menuBar.add(helpMenu);
     }
 
     /**
      * This method is called from within the constructor to initialize the form.
      */
     private void initComponents() {
+
+        resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+        actionMap = Application.getInstance().getContext().getActionMap(IchthyopView.class, this);
+
+        initMenu();
 
         mainPanel = new JPanel();
         splitPane = new JSplitPane();
@@ -1541,7 +1664,7 @@ public class IchthyopView extends FrameView
         btnCloseCfgFile = new JButton();
         taskPaneSimulation = new JXTaskPane();
         pnlSimulation = new JPanel();
-        btnPreview = new JToggleButton();
+        btnPreview = new JButton();
         btnSavePreview = new JButton();
         btnSimulationRun = new JButton();
         sliderPreviewZoom = new JSlider(100, 3000, 500);
@@ -1598,36 +1721,6 @@ public class IchthyopView extends FrameView
         titledPanelMain = new JXTitledPanel();
         rightScrollPane = new JScrollPane();
         gradientPanel = new GradientPanel();
-        menuBar = new JMenuBar();
-        configurationMenu = new JMenu();
-        newMenuItem = new JMenuItem();
-        openMenuItem = new JMenuItem();
-        closeMenuItem = new JMenuItem();
-        cfgMenuSeparator1 = new JSeparator();
-        saveMenuItem = new JMenuItem();
-        saveAsMenuItem = new JMenuItem();
-        cfgMenuSeparator2 = new JSeparator();
-        exitMenuItem = new JMenuItem();
-        simulationMenu = new JMenu();
-        simulationMenuItem = new JMenuItem();
-        previewMenuItem = new JMenuItem();
-        savePreviewMenuItem = new JMenuItem();
-        mappingMenu = new JMenu();
-        mapMenuItem = new JMenuItem();
-        exportToKMZMenuItem = new JMenuItem();
-        cancelMapMenuItem = new JMenuItem();
-        mappingMenuSeparator = new JSeparator();
-        openNCMenuItem = new JMenuItem();
-        animationMenu = new JMenu();
-        startFWMenuItem = new JMenuItem();
-        stopMenuItem = new JMenuItem();
-        startBWMenuItem = new JMenuItem();
-        animMenuSeparator1 = new JSeparator();
-        openAnimationMenuItem = new JMenuItem();
-        saveasMapsMenuItem = new JMenuItem();
-        deleteMenuItem = new JMenuItem();
-        helpMenu = new JMenu();
-        aboutMenuItem = new JMenuItem();
         previewScrollPane = new JScrollPane();
         previewPanel = new SimulationPreviewPanel();
         pnlLogo = new JXPanel();
@@ -1644,8 +1737,7 @@ public class IchthyopView extends FrameView
         leftSplitPane.setName("leftSplitPane");
         leftSplitPane.setOneTouchExpandable(true);
 
-        org.jdesktop.application.ResourceMap ivResourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopView.class);
-        titledPanelSteps.setTitle(ivResourceMap.getString("titledPanelSteps.title"));
+        titledPanelSteps.setTitle(resourceMap.getString("titledPanelSteps.title"));
         titledPanelSteps.setMinimumSize(new java.awt.Dimension(200, 200));
         titledPanelSteps.setName("titledPanelSteps");
 
@@ -1655,8 +1747,8 @@ public class IchthyopView extends FrameView
         stepsPanel.setName("stepsPanel");
 
         taskPaneConfiguration.setAnimated(false);
-        taskPaneConfiguration.setIcon(ivResourceMap.getIcon("step.Configuration.icon"));
-        taskPaneConfiguration.setTitle(ivResourceMap.getString("step.Configuration.text"));
+        taskPaneConfiguration.setIcon(resourceMap.getIcon("step.Configuration.icon"));
+        taskPaneConfiguration.setTitle(resourceMap.getString("step.Configuration.text"));
         taskPaneConfiguration.setName("taskPaneConfiguration");
         taskPaneConfiguration.addPropertyChangeListener(this::taskPaneConfigurationPropertyChange);
 
@@ -1665,7 +1757,6 @@ public class IchthyopView extends FrameView
 
         lblCfgFile.setName("lblCfgFile");
 
-        ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(IchthyopView.class, this);
         btnNewCfgFile.setAction(actionMap.get("newConfigurationFile"));
         btnNewCfgFile.setFocusable(false);
         btnNewCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -1737,8 +1828,8 @@ public class IchthyopView extends FrameView
         taskPaneConfiguration.add(pnlFile);
 
         taskPaneSimulation.setAnimated(false);
-        taskPaneSimulation.setIcon(ivResourceMap.getIcon("step.Simulation.icon"));
-        taskPaneSimulation.setTitle(ivResourceMap.getString("step.Simulation.text"));
+        taskPaneSimulation.setIcon(resourceMap.getIcon("step.Simulation.icon"));
+        taskPaneSimulation.setTitle(resourceMap.getString("step.Simulation.text"));
         taskPaneSimulation.setName("taskPaneSimulation");
         taskPaneSimulation.addPropertyChangeListener(this::taskPaneSimulationPropertyChange);
 
@@ -1767,7 +1858,7 @@ public class IchthyopView extends FrameView
         sliderPreviewZoom.addChangeListener(this::sliderPreviewSizeStateChanged);
         sliderPreviewZoom.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-        lblPreviewZoom = new JLabel(ivResourceMap.getString("lblPreviewZoom.text"));
+        lblPreviewZoom = new JLabel(resourceMap.getString("lblPreviewZoom.text"));
         lblPreviewZoom.setHorizontalAlignment(SwingConstants.CENTER);
 
         GroupLayout pnlSimulationLayout = new GroupLayout(pnlSimulation);
@@ -1805,8 +1896,8 @@ public class IchthyopView extends FrameView
         taskPaneSimulation.add(pnlSimulation);
 
         taskPaneMapping.setAnimated(false);
-        taskPaneMapping.setIcon(ivResourceMap.getIcon("step.Mapping.icon"));
-        taskPaneMapping.setTitle(ivResourceMap.getString("step.Mapping.text"));
+        taskPaneMapping.setIcon(resourceMap.getIcon("step.Mapping.icon"));
+        taskPaneMapping.setTitle(resourceMap.getString("step.Mapping.text"));
         taskPaneMapping.setName("taskPaneMapping");
         taskPaneMapping.addPropertyChangeListener(this::taskPaneMappingPropertyChange);
 
@@ -1852,8 +1943,8 @@ public class IchthyopView extends FrameView
                         .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblNC.setFont(ivResourceMap.getFont("lblNC.font"));
-        lblNC.setText(ivResourceMap.getString("lblNC.text"));
+        lblNC.setFont(resourceMap.getFont("lblNC.font"));
+        lblNC.setText(resourceMap.getString("lblNC.text"));
         lblNC.setName("lblNC");
 
         btnCloseNC.setAction(actionMap.get("closeNetCDF"));
@@ -1862,25 +1953,25 @@ public class IchthyopView extends FrameView
         btnExportToKMZ.setAction(actionMap.get("exportToKMZ"));
         btnExportToKMZ.setName("btnExportToKMZ");
 
-        pnlColor.setBorder(BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColor.border.title")));
+        pnlColor.setBorder(BorderFactory.createTitledBorder(resourceMap.getString("pnlColor.border.title")));
         pnlColor.setName("pnlColor");
         pnlColor.setOpaque(false);
 
-        pnlColorBar.setBorder(BorderFactory.createTitledBorder(ivResourceMap.getString("pnlColorBar.border.title")));
+        pnlColorBar.setBorder(BorderFactory.createTitledBorder(resourceMap.getString("pnlColorBar.border.title")));
         pnlColorBar.setName("pnlColorBar");
         pnlColorBar.setOpaque(false);
 
-        lblVariable.setText(ivResourceMap.getString("lblVariable.text"));
+        lblVariable.setText(resourceMap.getString("lblVariable.text"));
         lblVariable.setName("lblVariable");
 
         cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
         cbBoxVariable.setAction(actionMap.get("changeColorbarVariable"));
         cbBoxVariable.setName("cbBoxVariable");
 
-        lblMin.setText(ivResourceMap.getString("lblMin.text"));
+        lblMin.setText(resourceMap.getString("lblMin.text"));
         lblMin.setName("lblMin");
 
-        lblMax.setText(ivResourceMap.getString("lblMax.text"));
+        lblMax.setText(resourceMap.getString("lblMax.text"));
         lblMax.setName("lblMax");
 
         txtFieldMax.setFormatterFactory(new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat("###0.###"))));
@@ -1958,16 +2049,16 @@ public class IchthyopView extends FrameView
                         .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblParticleColor.setText(ivResourceMap.getString("lblParticleColor.text"));
+        lblParticleColor.setText(resourceMap.getString("lblParticleColor.text"));
         lblParticleColor.setName("lblParticleColor");
 
-        btnParticleColor.setForeground(ivResourceMap.getColor("btnParticleColor.foreground"));
-        btnParticleColor.setIcon(ivResourceMap.getIcon("btnParticleColor.icon"));
-        btnParticleColor.setText(ivResourceMap.getString("btnParticleColor.text"));
+        btnParticleColor.setForeground(resourceMap.getColor("btnParticleColor.foreground"));
+        btnParticleColor.setIcon(resourceMap.getIcon("btnParticleColor.icon"));
+        btnParticleColor.setText(resourceMap.getString("btnParticleColor.text"));
         btnParticleColor.setName("btnParticleColor");
         btnParticleColor.addActionListener(this::btnParticleColorActionPerformed);
 
-        lblParticleSize.setText(ivResourceMap.getString("lblParticleSize.text"));
+        lblParticleSize.setText(resourceMap.getString("lblParticleSize.text"));
         lblParticleSize.setName("lblParticleSize");
 
         spinnerParticleSize.setModel(new SpinnerNumberModel(1, 1, 10, 1));
@@ -2051,8 +2142,8 @@ public class IchthyopView extends FrameView
         taskPaneMapping.add(pnlMapping);
 
         taskPaneAnimation.setAnimated(false);
-        taskPaneAnimation.setIcon(ivResourceMap.getIcon("step.Animation.icon"));
-        taskPaneAnimation.setTitle(ivResourceMap.getString("step.Animation.text"));
+        taskPaneAnimation.setIcon(resourceMap.getIcon("step.Animation.icon"));
+        taskPaneAnimation.setTitle(resourceMap.getString("step.Animation.text"));
         taskPaneAnimation.setName("taskPaneAnimation");
         taskPaneAnimation.addPropertyChangeListener(this::taskPaneAnimationPropertyChange);
 
@@ -2068,7 +2159,7 @@ public class IchthyopView extends FrameView
         });
 
         animationSpeed.setModel(new SpinnerNumberModel(Float.valueOf(1.5f), Float.valueOf(0.5f), Float.valueOf(24.0f), Float.valueOf(0.1f)));
-        animationSpeed.setToolTipText(ivResourceMap.getString("animationSpeed.toolTipText"));
+        animationSpeed.setToolTipText(resourceMap.getString("animationSpeed.toolTipText"));
         animationSpeed.setFocusable(false);
         animationSpeed.setMaximumSize(new java.awt.Dimension(77, 30));
         animationSpeed.setName("animationSpeed");
@@ -2086,23 +2177,23 @@ public class IchthyopView extends FrameView
         btnSaveAsMaps.setName("btnSaveAsMaps");
         btnSaveAsMaps.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        lblAnimationSpeed.setText(ivResourceMap.getString("lblAnimationSpeed.text"));
+        lblAnimationSpeed.setText(resourceMap.getString("lblAnimationSpeed.text"));
         lblAnimationSpeed.setName("lblAnimationSpeed");
 
         btnOpenAnimation.setAction(actionMap.get("openFolderAnimation"));
         btnOpenAnimation.setName("btnOpenAnimation");
         btnOpenAnimation.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        lblFolder.setFont(ivResourceMap.getFont("lblFolder.font"));
-        lblFolder.setText(ivResourceMap.getString("lblFolder.text"));
+        lblFolder.setFont(resourceMap.getFont("lblFolder.font"));
+        lblFolder.setText(resourceMap.getString("lblFolder.text"));
         lblFolder.setName("lblFolder");
 
         sliderTime.setValue(0);
         sliderTime.setName("sliderTime");
         sliderTime.addChangeListener(this::sliderTimeStateChanged);
 
-        lblTime.setFont(ivResourceMap.getFont("lblTime.font"));
-        lblTime.setText(ivResourceMap.getString("lblTime.text"));
+        lblTime.setFont(resourceMap.getFont("lblTime.font"));
+        lblTime.setText(resourceMap.getString("lblTime.text"));
         lblTime.setName("lblTime");
 
         animationToolBar.setFloatable(false);
@@ -2124,7 +2215,7 @@ public class IchthyopView extends FrameView
         animationToolBar.add(btnPrevious);
 
         btnAnimationBW.setAction(actionMap.get("startAnimationBW"));
-        btnAnimationBW.setText(ivResourceMap.getString("btnAnimationBW.text"));
+        btnAnimationBW.setText(resourceMap.getString("btnAnimationBW.text"));
         btnAnimationBW.setFocusable(false);
         btnAnimationBW.setHorizontalTextPosition(SwingConstants.CENTER);
         btnAnimationBW.setName("btnAnimationBW");
@@ -2132,7 +2223,7 @@ public class IchthyopView extends FrameView
         animationToolBar.add(btnAnimationBW);
 
         btnAnimationStop.setAction(actionMap.get("stopAnimation"));
-        btnAnimationStop.setText(ivResourceMap.getString("btnAnimationStop.text"));
+        btnAnimationStop.setText(resourceMap.getString("btnAnimationStop.text"));
         btnAnimationStop.setFocusable(false);
         btnAnimationStop.setHorizontalTextPosition(SwingConstants.CENTER);
         btnAnimationStop.setName("btnAnimationStop");
@@ -2140,7 +2231,7 @@ public class IchthyopView extends FrameView
         animationToolBar.add(btnAnimationStop);
 
         btnAnimationFW.setAction(actionMap.get("startAnimationFW"));
-        btnAnimationFW.setText(ivResourceMap.getString("btnAnimationFW.text"));
+        btnAnimationFW.setText(resourceMap.getString("btnAnimationFW.text"));
         btnAnimationFW.setFocusable(false);
         btnAnimationFW.setHorizontalTextPosition(SwingConstants.CENTER);
         btnAnimationFW.setName("btnAnimationFW");
@@ -2165,7 +2256,7 @@ public class IchthyopView extends FrameView
         btnAnimatedGif.setName("btnAnimatedGif");
         btnAnimatedGif.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        ckBoxReverseTime.setText(ivResourceMap.getString("ckBoxReverseTime.text"));
+        ckBoxReverseTime.setText(resourceMap.getString("ckBoxReverseTime.text"));
         ckBoxReverseTime.setName("ckBoxReverseTime");
 
         GroupLayout pnlAnimationLayout = new GroupLayout(pnlAnimation);
@@ -2268,7 +2359,7 @@ public class IchthyopView extends FrameView
 
         leftSplitPane.setLeftComponent(titledPanelSteps);
 
-        titledPanelLogger.setTitle(ivResourceMap.getString("titledPanelLogger.title"));
+        titledPanelLogger.setTitle(resourceMap.getString("titledPanelLogger.title"));
         titledPanelLogger.setName("titledPanelLogger");
 
         loggerScrollPane.setName("loggerScrollPane");
@@ -2288,7 +2379,7 @@ public class IchthyopView extends FrameView
 
         splitPane.setLeftComponent(leftSplitPane);
 
-        titledPanelMain.setTitle(ivResourceMap.getString("titledPanelMain.title"));
+        titledPanelMain.setTitle(resourceMap.getString("titledPanelMain.title"));
         titledPanelMain.setMinimumSize(new java.awt.Dimension(32, 32));
         titledPanelMain.setName("titledPanelMain");
 
@@ -2334,125 +2425,6 @@ public class IchthyopView extends FrameView
                 .addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
         );
 
-        menuBar.setName("menuBar");
-
-        configurationMenu.setText(ivResourceMap.getString("configurationMenu.text"));
-        configurationMenu.setName("configurationMenu");
-
-        newMenuItem.setAction(actionMap.get("newConfigurationFile"));
-        newMenuItem.setName("newMenuItem");
-        configurationMenu.add(newMenuItem);
-
-        openMenuItem.setAction(actionMap.get("openConfigurationFile"));
-        openMenuItem.setName("openMenuItem");
-        configurationMenu.add(openMenuItem);
-
-        closeMenuItem.setAction(actionMap.get("closeConfigurationFile"));
-        closeMenuItem.setName("closeMenuItem");
-        configurationMenu.add(closeMenuItem);
-
-        cfgMenuSeparator1.setName("cfgMenuSeparator1");
-        configurationMenu.add(cfgMenuSeparator1);
-
-        saveMenuItem.setAction(actionMap.get("saveConfigurationFile"));
-        saveMenuItem.setName("saveMenuItem");
-        configurationMenu.add(saveMenuItem);
-
-        saveAsMenuItem.setAction(actionMap.get("saveAsConfigurationFile"));
-        saveAsMenuItem.setName("saveAsMenuItem");
-        configurationMenu.add(saveAsMenuItem);
-
-        cfgMenuSeparator2.setName("cfgMenuSeparator2");
-        configurationMenu.add(cfgMenuSeparator2);
-
-        exitMenuItem.setAction(actionMap.get("exitApplication"));
-        exitMenuItem.setName("exitMenuItem");
-        configurationMenu.add(exitMenuItem);
-
-        menuBar.add(configurationMenu);
-
-        simulationMenu.setText(ivResourceMap.getString("simulationMenu.text"));
-        simulationMenu.setName("simulationMenu");
-
-        simulationMenuItem.setAction(actionMap.get("simulationRun"));
-        simulationMenuItem.setName("simulationMenuItem");
-        simulationMenu.add(simulationMenuItem);
-
-        previewMenuItem.setAction(actionMap.get("previewSimulation"));
-        previewMenuItem.setName("previewMenuItem");
-        simulationMenu.add(previewMenuItem);
-        
-        savePreviewMenuItem.setAction(actionMap.get("savePreview"));
-        savePreviewMenuItem.setName("savePreviewMenuItem");
-        simulationMenu.add(savePreviewMenuItem);
-        
-        menuBar.add(simulationMenu);
-
-        mappingMenu.setText(ivResourceMap.getString("mappingMenu.text"));
-        mappingMenu.setName("mappingMenu");
-
-        mapMenuItem.setAction(actionMap.get("createMaps"));
-        mapMenuItem.setName("mapMenuItem");
-        mappingMenu.add(mapMenuItem);
-
-        exportToKMZMenuItem.setAction(actionMap.get("exportToKMZ"));
-        exportToKMZMenuItem.setName("exportToKMZMenuItem");
-        mappingMenu.add(exportToKMZMenuItem);
-
-        cancelMapMenuItem.setAction(actionMap.get("cancelMapping"));
-        cancelMapMenuItem.setName("cancelMapMenuItem");
-        mappingMenu.add(cancelMapMenuItem);
-
-        mappingMenuSeparator.setName("mappingMenuSeparator");
-        mappingMenu.add(mappingMenuSeparator);
-
-        openNCMenuItem.setAction(actionMap.get("openNcMapping"));
-        openNCMenuItem.setName("openNCMenuItem");
-        mappingMenu.add(openNCMenuItem);
-
-        menuBar.add(mappingMenu);
-
-        animationMenu.setText(ivResourceMap.getString("animationMenu.text"));
-        animationMenu.setName("animationMenu");
-
-        startFWMenuItem.setAction(actionMap.get("startAnimationFW"));
-        startFWMenuItem.setName("startFWMenuItem");
-        animationMenu.add(startFWMenuItem);
-
-        stopMenuItem.setAction(actionMap.get("stopAnimation"));
-        stopMenuItem.setName("stopMenuItem");
-        animationMenu.add(stopMenuItem);
-
-        startBWMenuItem.setAction(actionMap.get("startAnimationBW"));
-        startBWMenuItem.setName("startBWMenuItem");
-        animationMenu.add(startBWMenuItem);
-
-        animMenuSeparator1.setName("animMenuSeparator1");
-        animationMenu.add(animMenuSeparator1);
-
-        openAnimationMenuItem.setAction(actionMap.get("openFolderAnimation"));
-        openAnimationMenuItem.setName("openAnimationMenuItem");
-        animationMenu.add(openAnimationMenuItem);
-
-        saveasMapsMenuItem.setAction(actionMap.get("saveasMaps"));
-        saveasMapsMenuItem.setName("saveasMapsMenuItem");
-        animationMenu.add(saveasMapsMenuItem);
-
-        deleteMenuItem.setAction(actionMap.get("deleteMaps"));
-        deleteMenuItem.setName("deleteMenuItem");
-        animationMenu.add(deleteMenuItem);
-
-        menuBar.add(animationMenu);
-
-        helpMenu.setText(ivResourceMap.getString("helpMenu.text"));
-        helpMenu.setName("helpMenu");
-
-        aboutMenuItem.setAction(actionMap.get("showAboutBox"));
-        aboutMenuItem.setName("aboutMenuItem");
-        helpMenu.add(aboutMenuItem);
-
-        menuBar.add(helpMenu);
-
         previewScrollPane.setBorder(null);
         previewScrollPane.setWheelScrollingEnabled(true);
         previewScrollPane.setName("scrollPaneSimulationUI");
@@ -2472,8 +2444,8 @@ public class IchthyopView extends FrameView
         hyperLinkLogo.setHorizontalAlignment(SwingConstants.CENTER);
         hyperLinkLogo.setHorizontalTextPosition(SwingConstants.CENTER);
         hyperLinkLogo.setName("hyperLinkLogo");
-        hyperLinkLogo.setRolloverIcon(ivResourceMap.getIcon("hyperLinkLogo.rolloverIcon"));
-        hyperLinkLogo.setSelectedIcon(ivResourceMap.getIcon("hyperLinkLogo.selectedIcon"));
+        hyperLinkLogo.setRolloverIcon(resourceMap.getIcon("hyperLinkLogo.rolloverIcon"));
+        hyperLinkLogo.setSelectedIcon(resourceMap.getIcon("hyperLinkLogo.selectedIcon"));
         hyperLinkLogo.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -2563,9 +2535,7 @@ public class IchthyopView extends FrameView
                 pnlProgress.setVisible(true);
             } else {
                 pnlProgress.setVisible(false);
-                if (btnPreview.isSelected()) {
-                    btnPreview.doClick();
-                }
+                hideSimulationPreview();
             }
             setMainTitle();
         }
@@ -2629,6 +2599,47 @@ public class IchthyopView extends FrameView
     }
 
     ////////////////////////////
+    // utilities
+    ////////////////////////////
+    private SimulationManager getSimulationManager() {
+        return SimulationManager.getInstance();
+    }
+
+    private Logger getLogger() {
+        return SimulationManager.getLogger();
+    }
+
+    private String changeExtension(String filename, String extension) {
+        return filename.substring(0, filename.lastIndexOf(".") + 1) + extension;
+    }
+
+    private File getDefaultCfgPath() {
+        StringBuilder path = new StringBuilder();
+        path.append(System.getProperty("user.dir"));
+        if (!path.toString().endsWith(File.separator)) {
+            path.append(File.separator);
+        }
+        path.append("cfg");
+        path.append(File.separator);
+
+        // generate a file name
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        dtFormat.setCalendar(calendar);
+        path.append(dtFormat.format(calendar.getTime()));
+        path.append("_");
+        String username = System.getProperty("user.name");
+        if (null != username && !username.isEmpty()) {
+            path.append(username);
+            path.append("_");
+
+        }
+        path.append("ichthyop-config.cfg");
+        return new File(path.toString());
+    }
+
+    ////////////////////////////
     // UI components declaration
     ////////////////////////////
     // menu 
@@ -2638,10 +2649,8 @@ public class IchthyopView extends FrameView
     private JMenuItem newMenuItem;
     private JMenuItem openMenuItem;
     private JMenuItem closeMenuItem;
-    private JSeparator cfgMenuSeparator1;
     private JMenuItem saveAsMenuItem;
     private JMenuItem saveMenuItem;
-    private JSeparator cfgMenuSeparator2;
     private JMenuItem exitMenuItem;
     // menu simulation
     private JMenu simulationMenu;
@@ -2653,21 +2662,19 @@ public class IchthyopView extends FrameView
     private JMenuItem mapMenuItem;
     private JMenuItem cancelMapMenuItem;
     private JMenuItem openNCMenuItem;
-    private JSeparator mappingMenuSeparator;
     private JMenuItem exportToKMZMenuItem;
     // menu animation
     private JMenu animationMenu;
     private JMenuItem startBWMenuItem;
     private JMenuItem startFWMenuItem;
     private JMenuItem stopMenuItem;
-    private JSeparator animMenuSeparator1;
     private JMenuItem deleteMenuItem;
     private JMenuItem openAnimationMenuItem;
     private JMenuItem saveasMapsMenuItem;
     // help menu
     private JMenu helpMenu;
     private JMenuItem aboutMenuItem;
-    
+
     // configuration components
     private JXTaskPane taskPaneConfiguration;
     private JPanel pnlFile;
@@ -2684,7 +2691,7 @@ public class IchthyopView extends FrameView
     private JXTaskPane taskPaneSimulation;
     private JPanel pnlSimulation;
     // simulation preview
-    private JToggleButton btnPreview;
+    private JButton btnPreview;
     private JScrollPane previewScrollPane;
     private SimulationPreviewPanel previewPanel;
     private JSlider sliderPreviewZoom;
