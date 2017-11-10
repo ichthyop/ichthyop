@@ -57,6 +57,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
@@ -86,6 +87,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -105,7 +107,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
@@ -124,13 +125,14 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import org.ichthyop.Template;
 import org.ichthyop.output.ExportToKML;
+import org.ichthyop.ui.logging.LogLevel;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
-import org.ichthyop.ui.logging.LogLevel;
 import org.ichthyop.util.MetaFilenameFilter;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
@@ -142,6 +144,26 @@ import org.jdesktop.swingx.JXTitledPanel;
  */
 public class IchthyopView extends FrameView
         implements TimingTarget, PropertyChangeListener {
+
+    // configuration variables
+    private File cfgPath = new File(System.getProperty("user.dir"));
+    private boolean isRunning = false;
+    private Task simulActionTask;
+    private Task createMapTask;
+    private Task kmzTask;
+    private boolean initDone;
+    private final float TEN_MINUTES = 10.f * 60.f;
+    private final Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
+    private float nbfps = 1.f;
+    private float time;
+    private Timer progressTimer;
+    private File outputFile, outputFolder;
+    private final ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+    private TimeDirection animationDirection;
+    private final AnimationMouseWheelScroller animationMouseScroller = new AnimationMouseWheelScroller();
+    private final PreviewMouseAdapter previewMouseAdapter = new PreviewMouseAdapter();
+    private boolean cfgUntitled = true;
+    private boolean animationLoaded = false;
 
     public IchthyopView(SingleFrameApplication app) {
         super(app);
@@ -163,7 +185,8 @@ public class IchthyopView extends FrameView
         saveAsMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
         btnPreview.getAction().setEnabled(false);
-        sliderPreviewSize.setEnabled(false);
+        sliderPreviewZoom.setEnabled(false);
+        btnSavePreview.getAction().setEnabled(false);
         btnCancelMapping.getAction().setEnabled(false);
         btnMapping.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
@@ -174,7 +197,6 @@ public class IchthyopView extends FrameView
 
         /* Add some listeners */
         getApplication().addExitListener(new ConfirmExit());
-        pnlConfiguration.addPropertyChangeListener("configurationFile", this);
     }
 
     private SimulationManager getSimulationManager() {
@@ -395,10 +417,8 @@ public class IchthyopView extends FrameView
             // move to animation pane
             taskPaneAnimation.setCollapsed(false);
             setAnimationToolsEnabled(false);
-            btnAnimationFW.getAction().setEnabled(true);
             animationLoaded = false;
-            lblFolder.setText(wmsMapper.getFolder().getName());
-            lblFolder.setFont(lblFolder.getFont().deriveFont(Font.PLAIN, 12));
+            getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
         }
 
         @Override
@@ -525,7 +545,7 @@ public class IchthyopView extends FrameView
             setAnimationToolsEnabled(true);
             sliderTime.setValue(0);
             animationLoaded = true;
-            startAnimationFW();
+            sliderTime.setValue(0);
         }
 
         @Override
@@ -625,8 +645,9 @@ public class IchthyopView extends FrameView
         pnlProgress.setVisible(false);
         previewScrollPane.setVisible(true);
         previewScrollPane.setPreferredSize(gradientPanel.getSize());
-        previewPanel.init(sliderPreviewSize.getValue());
-        sliderPreviewSize.setEnabled(true);
+        previewPanel.init(sliderPreviewZoom.getValue());
+        sliderPreviewZoom.setEnabled(true);
+        btnSavePreview.getAction().setEnabled(true);
     }
 
     private void hideSimulationPreview() {
@@ -634,7 +655,8 @@ public class IchthyopView extends FrameView
         if (!taskPaneSimulation.isCollapsed()) {
             pnlProgress.setVisible(true);
         }
-        sliderPreviewSize.setEnabled(false);
+        sliderPreviewZoom.setEnabled(false);
+        btnSavePreview.getAction().setEnabled(false);
     }
 
     private class SimulationPreviewTask extends SFTask {
@@ -730,7 +752,7 @@ public class IchthyopView extends FrameView
                 sb.append(" ");
                 sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.exist"));
                 sb.append("\n");
-                sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.overwrite"));
+                sb.append(getResourceMap().getString("save.msg.overwrite"));
                 int answer = JOptionPane.showConfirmDialog(fc, sb.toString(), getResourceMap().getString("saveAsConfigurationFile.Action.text"), JOptionPane.YES_NO_OPTION);
                 if (answer != JOptionPane.YES_OPTION) {
                     saveAsConfigurationFile();
@@ -758,15 +780,7 @@ public class IchthyopView extends FrameView
         }
         return null;
     }
-
-    private File addExtension(File f, String extension) {
-
-        if (!f.isDirectory() && f.getName().endsWith("." + extension)) {
-            return f;
-        }
-        return new File(f.toString() + "." + extension);
-    }
-
+    
     @Action
     public Task saveConfigurationFile() {
         return cfgUntitled ? saveAsConfigurationFile() : new SaveCfgFileTask(getApplication());
@@ -825,8 +839,9 @@ public class IchthyopView extends FrameView
         pnlConfiguration.setVisible(false);
         lblConfiguration.setVisible(true);
         btnPreview.getAction().setEnabled(false);
-        sliderPreviewSize.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
-        sliderPreviewSize.setEnabled(false);
+        sliderPreviewZoom.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
+        sliderPreviewZoom.setEnabled(false);
+        btnSavePreview.getAction().setEnabled(false);
         setMainTitle();
     }
 
@@ -860,31 +875,6 @@ public class IchthyopView extends FrameView
         return null;
     }
 
-    private class FailedTask extends SFTask {
-
-        private final Exception exception;
-
-        FailedTask(Application instance, Exception exception) {
-            super(instance);
-            this.exception = exception;
-        }
-
-        @Override
-        void onSuccess(Object result) {
-            // never happens
-        }
-
-        @Override
-        void onFailure(Throwable throwable) {
-            // do nothing
-        }
-
-        @Override
-        protected Object doInBackground() throws Exception {
-            throw exception;
-        }
-    }
-
     private Logger getLogger() {
         return SimulationManager.getLogger();
     }
@@ -892,15 +882,9 @@ public class IchthyopView extends FrameView
     public Task loadConfigurationFile(File file) {
         try {
             getSimulationManager().setConfigurationFile(file);
-        } catch (Exception e) {
-            try {
-                String msg = resourceMap.getString("openConfigurationFile.msg.error") + " ==> " + e.getMessage();
-                Exception eclone = e.getClass().getConstructor(String.class).newInstance(msg);
-                eclone.setStackTrace(e.getStackTrace());
-                return new FailedTask(getApplication(), eclone);
-            } catch (Exception ex) {
-                return new FailedTask(getApplication(), e);
-            }
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, null, ex);
+            return null;
         }
         File cfgFile = getSimulationManager().getConfigurationFile();
         getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openConfigurationFile.msg.opened"), cfgUntitled ? "Untitled configuration" : cfgFile.toString()});
@@ -913,7 +897,7 @@ public class IchthyopView extends FrameView
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
         btnPreview.getAction().setEnabled(true);
-        sliderPreviewSize.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
+        sliderPreviewZoom.setValue(SimulationPreviewPanel.DEFAULT_SIZE);
         setMainTitle();
         return pnlConfiguration.loadParameterTree();
     }
@@ -969,7 +953,7 @@ public class IchthyopView extends FrameView
         }
         if (animator.isRunning()) {
             animator.stop();
-            replayPanel.addMouseWheelListener(mouseScroller);
+            replayPanel.addMouseWheelListener(animationMouseScroller);
         }
     }
 
@@ -977,7 +961,7 @@ public class IchthyopView extends FrameView
         if (!animationLoaded) {
             getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
         } else if (!animator.isRunning()) {
-            replayPanel.removeMouseWheelListener(mouseScroller);
+            replayPanel.removeMouseWheelListener(animationMouseScroller);
             animator.setAcceleration(0.002f);
             btnAnimationFW.setEnabled(true);
             animator.start();
@@ -1044,7 +1028,7 @@ public class IchthyopView extends FrameView
 
     @Action
     public void exitApplication() {
-        getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(btnExit, 0, null));
+        getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(exitMenuItem, 0, null));
     }
 
     @Action
@@ -1071,6 +1055,49 @@ public class IchthyopView extends FrameView
         }
     }
 
+    private String changeExtension(String filename, String extension) {
+        return filename.substring(0, filename.lastIndexOf(".") + 1) + extension;
+    }
+
+    @Action
+    public void savePreview() {
+        File cwd = cfgUntitled ? getDefaultCfgPath() : getSimulationManager().getConfigurationFile();
+        JFileChooser fc = new JFileChooser(cwd);
+        fc.setDialogType(JFileChooser.SAVE_DIALOG);
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.addChoosableFileFilter(new PNGSaveFilter());
+        String pngfile = cwd.isFile() ? changeExtension(cwd.getAbsolutePath(), "png") : "preview.png";
+        fc.setSelectedFile(new File(pngfile));
+        int returnVal = fc.showSaveDialog(getFrame());
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fc.getSelectedFile();
+                if (file.isDirectory() || !file.getName().toLowerCase().endsWith("png")) {
+                    JOptionPane.showMessageDialog(fc, getResourceMap().getString("savePreview.msg.png"), getResourceMap().getString("savePreview.Action.text"), JOptionPane.OK_OPTION);
+                    savePreview();
+                    return;
+                } else if (file.exists()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(file.getName());
+                    sb.append(" ");
+                    sb.append(getResourceMap().getString("save.msg.overwrite"));
+                    int answer = JOptionPane.showConfirmDialog(fc, sb.toString(), getResourceMap().getString("savePreview.Action.text"), JOptionPane.YES_NO_OPTION);
+                    if (answer != JOptionPane.YES_OPTION) {
+                        savePreview();
+                        return;
+                    }
+                }
+                BufferedImage bi = new BufferedImage(previewPanel.getWidth(), previewPanel.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics g = bi.getGraphics();
+                previewPanel.paint(g);
+                ImageIO.write(bi, "PNG", file);
+                getLogger().log(Level.INFO, "[preview] Simulation preview saved as {0}", file.getName());
+            } catch (IOException ex) {
+                getLogger().log(Level.WARNING, "Failed to save simulation preview", ex);
+            }
+        }
+    }
+
     @Action
     public Task simulationRun() {
         if (!isRunning) {
@@ -1092,6 +1119,7 @@ public class IchthyopView extends FrameView
         saveAsMenuItem.getAction().setEnabled(enabled);
         closeMenuItem.getAction().setEnabled(enabled);
         previewMenuItem.getAction().setEnabled(enabled);
+        savePreviewMenuItem.getAction().setEnabled(enabled);
         simulationMenuItem.getAction().setEnabled(enabled);
         openNCMenuItem.getAction().setEnabled(enabled);
         openAnimationMenuItem.getAction().setEnabled(enabled);
@@ -1307,23 +1335,6 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private class MouseWheelScroller implements MouseWheelListener {
-
-        @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
-            int increment = e.getWheelRotation();
-            if (increment > 0) {
-                for (int i = 0; i < increment; i++) {
-                    next();
-                }
-            } else {
-                for (int i = 0; i < Math.abs(increment); i++) {
-                    previous();
-                }
-            }
-        }
-    }
-
     public JPanel getMainPanel() {
         return mainPanel;
     }
@@ -1345,6 +1356,7 @@ public class IchthyopView extends FrameView
         lblConfiguration.setVisible(true);
         gradientPanel.add(pnlConfiguration);
         pnlConfiguration.setVisible(false);
+        pnlConfiguration.addPropertyChangeListener("configurationFile", this);
         gradientPanel.add(pnlProgress, StackLayout.TOP);
         pnlProgress.setVisible(false);
         gradientPanel.add(previewScrollPane, StackLayout.TOP);
@@ -1459,7 +1471,7 @@ public class IchthyopView extends FrameView
 
     private class AutoRangeTask extends SFTask<float[], Object> {
 
-        ResourceMap resourceMap = Application.getInstance(org.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
+        ResourceMap resourceMap = Application.getInstance(IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
         String variable;
 
         AutoRangeTask(Application instance, String variable) {
@@ -1530,8 +1542,9 @@ public class IchthyopView extends FrameView
         taskPaneSimulation = new JXTaskPane();
         pnlSimulation = new JPanel();
         btnPreview = new JToggleButton();
+        btnSavePreview = new JButton();
         btnSimulationRun = new JButton();
-        sliderPreviewSize = new JSlider(100, 3000, 500);
+        sliderPreviewZoom = new JSlider(100, 3000, 500);
         taskPaneMapping = new JXTaskPane();
         pnlMapping = new JPanel();
         btnMapping = new JButton();
@@ -1555,9 +1568,9 @@ public class IchthyopView extends FrameView
         txtFieldMin = new JFormattedTextField();
         colorbarChooser = new ColorbarChooser();
         lblColorbarChooser = new JLabel();
-        lblColor = new JLabel();
+        lblParticleColor = new JLabel();
         btnParticleColor = new JButton();
-        lblColor1 = new JLabel();
+        lblParticleSize = new JLabel();
         spinnerParticleSize = new JSpinner();
         taskPaneAnimation = new JXTaskPane();
         pnlAnimation = new JPanel();
@@ -1570,7 +1583,7 @@ public class IchthyopView extends FrameView
         lblFolder = new JLabel();
         sliderTime = new JSlider();
         lblTime = new JLabel();
-        jToolBar1 = new JToolBar();
+        animationToolBar = new JToolBar();
         btnFirst = new JButton();
         btnPrevious = new JButton();
         btnAnimationBW = new JButton();
@@ -1581,43 +1594,42 @@ public class IchthyopView extends FrameView
         btnAnimatedGif = new JButton();
         ckBoxReverseTime = new JCheckBox();
         titledPanelLogger = new JXTitledPanel();
-        loggerScrollPane = new org.ichthyop.ui.LoggerScrollPane();
+        loggerScrollPane = new LoggerScrollPane();
         titledPanelMain = new JXTitledPanel();
-        jScrollPane3 = new JScrollPane();
-        gradientPanel = new org.ichthyop.ui.GradientPanel();
+        rightScrollPane = new JScrollPane();
+        gradientPanel = new GradientPanel();
         menuBar = new JMenuBar();
-        JMenu configurationMenu = new JMenu();
+        configurationMenu = new JMenu();
         newMenuItem = new JMenuItem();
         openMenuItem = new JMenuItem();
         closeMenuItem = new JMenuItem();
-        jSeparator2 = new JPopupMenu.Separator();
+        cfgMenuSeparator1 = new JSeparator();
         saveMenuItem = new JMenuItem();
         saveAsMenuItem = new JMenuItem();
-        jSeparator1 = new JSeparator();
-        JMenuItem exitMenuItem = new JMenuItem();
+        cfgMenuSeparator2 = new JSeparator();
+        exitMenuItem = new JMenuItem();
         simulationMenu = new JMenu();
         simulationMenuItem = new JMenuItem();
         previewMenuItem = new JMenuItem();
+        savePreviewMenuItem = new JMenuItem();
         mappingMenu = new JMenu();
         mapMenuItem = new JMenuItem();
         exportToKMZMenuItem = new JMenuItem();
         cancelMapMenuItem = new JMenuItem();
-        jSeparator13 = new JPopupMenu.Separator();
+        mappingMenuSeparator = new JSeparator();
         openNCMenuItem = new JMenuItem();
         animationMenu = new JMenu();
         startFWMenuItem = new JMenuItem();
         stopMenuItem = new JMenuItem();
         startBWMenuItem = new JMenuItem();
-        jSeparator15 = new JPopupMenu.Separator();
+        animMenuSeparator1 = new JSeparator();
         openAnimationMenuItem = new JMenuItem();
-        jSeparator14 = new JPopupMenu.Separator();
         saveasMapsMenuItem = new JMenuItem();
         deleteMenuItem = new JMenuItem();
-        JMenu helpMenu = new JMenu();
-        JMenuItem aboutMenuItem = new JMenuItem();
+        helpMenu = new JMenu();
+        aboutMenuItem = new JMenuItem();
         previewScrollPane = new JScrollPane();
         previewPanel = new SimulationPreviewPanel();
-        btnExit = new JButton();
         pnlLogo = new JXPanel();
         hyperLinkLogo = new JXHyperlink();
 
@@ -1739,17 +1751,23 @@ public class IchthyopView extends FrameView
         btnPreview.setName("btnPreview");
         btnPreview.setVerticalTextPosition(SwingConstants.BOTTOM);
 
+        btnSavePreview.setAction(actionMap.get("savePreview"));
+        btnSavePreview.setFocusable(false);
+        btnSavePreview.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnSavePreview.setName("btnSavePreview");
+        btnSavePreview.setVerticalTextPosition(SwingConstants.BOTTOM);
+
         btnSimulationRun.setAction(actionMap.get("simulationRun"));
         btnSimulationRun.setFocusable(false);
         btnSimulationRun.setHorizontalTextPosition(SwingConstants.RIGHT);
         btnSimulationRun.setName("btnSimulationRun");
         btnSimulationRun.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        sliderPreviewSize.setName("spinnerHeight");
-        sliderPreviewSize.addChangeListener(this::sliderPreviewSizeStateChanged);
-        sliderPreviewSize.setAlignmentY(Component.CENTER_ALIGNMENT);
+        sliderPreviewZoom.setName("sliderPreviewSize");
+        sliderPreviewZoom.addChangeListener(this::sliderPreviewSizeStateChanged);
+        sliderPreviewZoom.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-        lblPreviewZoom = new JLabel("Zoom");
+        lblPreviewZoom = new JLabel(ivResourceMap.getString("lblPreviewZoom.text"));
         lblPreviewZoom.setHorizontalAlignment(SwingConstants.CENTER);
 
         GroupLayout pnlSimulationLayout = new GroupLayout(pnlSimulation);
@@ -1759,9 +1777,11 @@ public class IchthyopView extends FrameView
                 .addGroup(pnlSimulationLayout.createSequentialGroup()
                         .addComponent(btnPreview)
                         .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(btnSavePreview)
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(lblPreviewZoom, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(sliderPreviewSize))
+                                .addComponent(sliderPreviewZoom))
                 )
                 .addComponent(btnSimulationRun)
         );
@@ -1770,10 +1790,11 @@ public class IchthyopView extends FrameView
                 .addContainerGap()
                 .addGroup(pnlSimulationLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(btnPreview)
+                        .addComponent(btnSavePreview)
                         .addGroup(pnlSimulationLayout.createSequentialGroup()
                                 .addComponent(lblPreviewZoom)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(sliderPreviewSize)
+                                .addComponent(sliderPreviewZoom)
                         )
                 )
                 .addPreferredGap(ComponentPlacement.UNRELATED)
@@ -1937,8 +1958,8 @@ public class IchthyopView extends FrameView
                         .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblColor.setText(ivResourceMap.getString("lblColor.text"));
-        lblColor.setName("lblColor");
+        lblParticleColor.setText(ivResourceMap.getString("lblParticleColor.text"));
+        lblParticleColor.setName("lblParticleColor");
 
         btnParticleColor.setForeground(ivResourceMap.getColor("btnParticleColor.foreground"));
         btnParticleColor.setIcon(ivResourceMap.getIcon("btnParticleColor.icon"));
@@ -1946,8 +1967,8 @@ public class IchthyopView extends FrameView
         btnParticleColor.setName("btnParticleColor");
         btnParticleColor.addActionListener(this::btnParticleColorActionPerformed);
 
-        lblColor1.setText(ivResourceMap.getString("lblColor1.text"));
-        lblColor1.setName("lblColor1");
+        lblParticleSize.setText(ivResourceMap.getString("lblParticleSize.text"));
+        lblParticleSize.setName("lblParticleSize");
 
         spinnerParticleSize.setModel(new SpinnerNumberModel(1, 1, 10, 1));
         spinnerParticleSize.setName("spinnerParticleSize");
@@ -1962,11 +1983,11 @@ public class IchthyopView extends FrameView
                         .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(pnlColorBar, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(pnlColorLayout.createSequentialGroup()
-                                        .addComponent(lblColor)
+                                        .addComponent(lblParticleColor)
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addComponent(btnParticleColor)
                                         .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(lblColor1)
+                                        .addComponent(lblParticleSize)
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
                         .addContainerGap())
@@ -1975,9 +1996,9 @@ public class IchthyopView extends FrameView
                 pnlColorLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addGroup(pnlColorLayout.createSequentialGroup()
                         .addGroup(pnlColorLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(lblColor)
+                                .addComponent(lblParticleColor)
                                 .addComponent(btnParticleColor)
-                                .addComponent(lblColor1)
+                                .addComponent(lblParticleSize)
                                 .addComponent(spinnerParticleSize, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(ComponentPlacement.RELATED)
                         .addComponent(pnlColorBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -2084,23 +2105,23 @@ public class IchthyopView extends FrameView
         lblTime.setText(ivResourceMap.getString("lblTime.text"));
         lblTime.setName("lblTime");
 
-        jToolBar1.setFloatable(false);
-        jToolBar1.setRollover(true);
-        jToolBar1.setName("jToolBar1");
+        animationToolBar.setFloatable(false);
+        animationToolBar.setRollover(true);
+        animationToolBar.setName("jToolBar1");
 
         btnFirst.setAction(actionMap.get("first"));
         btnFirst.setFocusable(false);
         btnFirst.setHorizontalTextPosition(SwingConstants.CENTER);
         btnFirst.setName("btnFirst");
         btnFirst.setVerticalTextPosition(SwingConstants.BOTTOM);
-        jToolBar1.add(btnFirst);
+        animationToolBar.add(btnFirst);
 
         btnPrevious.setAction(actionMap.get("previous"));
         btnPrevious.setFocusable(false);
         btnPrevious.setHorizontalTextPosition(SwingConstants.CENTER);
         btnPrevious.setName("btnPrevious");
         btnPrevious.setVerticalTextPosition(SwingConstants.BOTTOM);
-        jToolBar1.add(btnPrevious);
+        animationToolBar.add(btnPrevious);
 
         btnAnimationBW.setAction(actionMap.get("startAnimationBW"));
         btnAnimationBW.setText(ivResourceMap.getString("btnAnimationBW.text"));
@@ -2108,7 +2129,7 @@ public class IchthyopView extends FrameView
         btnAnimationBW.setHorizontalTextPosition(SwingConstants.CENTER);
         btnAnimationBW.setName("btnAnimationBW");
         btnAnimationBW.setVerticalTextPosition(SwingConstants.BOTTOM);
-        jToolBar1.add(btnAnimationBW);
+        animationToolBar.add(btnAnimationBW);
 
         btnAnimationStop.setAction(actionMap.get("stopAnimation"));
         btnAnimationStop.setText(ivResourceMap.getString("btnAnimationStop.text"));
@@ -2116,7 +2137,7 @@ public class IchthyopView extends FrameView
         btnAnimationStop.setHorizontalTextPosition(SwingConstants.CENTER);
         btnAnimationStop.setName("btnAnimationStop");
         btnAnimationStop.setVerticalTextPosition(SwingConstants.BOTTOM);
-        jToolBar1.add(btnAnimationStop);
+        animationToolBar.add(btnAnimationStop);
 
         btnAnimationFW.setAction(actionMap.get("startAnimationFW"));
         btnAnimationFW.setText(ivResourceMap.getString("btnAnimationFW.text"));
@@ -2124,21 +2145,21 @@ public class IchthyopView extends FrameView
         btnAnimationFW.setHorizontalTextPosition(SwingConstants.CENTER);
         btnAnimationFW.setName("btnAnimationFW");
         btnAnimationFW.setVerticalTextPosition(SwingConstants.BOTTOM);
-        jToolBar1.add(btnAnimationFW);
+        animationToolBar.add(btnAnimationFW);
 
         btnNext.setAction(actionMap.get("next"));
         btnNext.setFocusable(false);
         btnNext.setHorizontalTextPosition(SwingConstants.CENTER);
         btnNext.setName("btnNext");
         btnNext.setVerticalTextPosition(SwingConstants.BOTTOM);
-        jToolBar1.add(btnNext);
+        animationToolBar.add(btnNext);
 
         btnLast.setAction(actionMap.get("last"));
         btnLast.setFocusable(false);
         btnLast.setHorizontalTextPosition(SwingConstants.CENTER);
         btnLast.setName("btnLast");
         btnLast.setVerticalTextPosition(SwingConstants.BOTTOM);
-        jToolBar1.add(btnLast);
+        animationToolBar.add(btnLast);
 
         btnAnimatedGif.setAction(actionMap.get("createAnimatedGif"));
         btnAnimatedGif.setName("btnAnimatedGif");
@@ -2163,7 +2184,7 @@ public class IchthyopView extends FrameView
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addComponent(btnSaveAsMaps))
                                 .addComponent(lblFolder)
-                                .addComponent(jToolBar1, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                                .addComponent(animationToolBar, GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                                 .addGroup(pnlAnimationLayout.createSequentialGroup()
                                         .addGap(379, 379, 379)
                                         .addComponent(lblFramePerSecond))
@@ -2181,7 +2202,7 @@ public class IchthyopView extends FrameView
                 pnlAnimationLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addGroup(pnlAnimationLayout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jToolBar1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(animationToolBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addComponent(lblTime)
                         .addPreferredGap(ComponentPlacement.RELATED)
@@ -2271,7 +2292,7 @@ public class IchthyopView extends FrameView
         titledPanelMain.setMinimumSize(new java.awt.Dimension(32, 32));
         titledPanelMain.setName("titledPanelMain");
 
-        jScrollPane3.setName("jScrollPane3");
+        rightScrollPane.setName("rightScrollPane");
 
         gradientPanel.setName("gradientPanel");
 
@@ -2286,18 +2307,18 @@ public class IchthyopView extends FrameView
                 .addGap(0, 489, Short.MAX_VALUE)
         );
 
-        jScrollPane3.setViewportView(gradientPanel);
+        rightScrollPane.setViewportView(gradientPanel);
         createMainPanel();
 
         GroupLayout titledPanelMainLayout = new GroupLayout(titledPanelMain);
         titledPanelMain.setLayout(titledPanelMainLayout);
         titledPanelMainLayout.setHorizontalGroup(
                 titledPanelMainLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
+                .addComponent(rightScrollPane, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
         );
         titledPanelMainLayout.setVerticalGroup(
                 titledPanelMainLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(jScrollPane3, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
+                .addComponent(rightScrollPane, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
         );
 
         splitPane.setRightComponent(titledPanelMain);
@@ -2330,8 +2351,8 @@ public class IchthyopView extends FrameView
         closeMenuItem.setName("closeMenuItem");
         configurationMenu.add(closeMenuItem);
 
-        jSeparator2.setName("jSeparator2");
-        configurationMenu.add(jSeparator2);
+        cfgMenuSeparator1.setName("cfgMenuSeparator1");
+        configurationMenu.add(cfgMenuSeparator1);
 
         saveMenuItem.setAction(actionMap.get("saveConfigurationFile"));
         saveMenuItem.setName("saveMenuItem");
@@ -2341,8 +2362,8 @@ public class IchthyopView extends FrameView
         saveAsMenuItem.setName("saveAsMenuItem");
         configurationMenu.add(saveAsMenuItem);
 
-        jSeparator1.setName("jSeparator1");
-        configurationMenu.add(jSeparator1);
+        cfgMenuSeparator2.setName("cfgMenuSeparator2");
+        configurationMenu.add(cfgMenuSeparator2);
 
         exitMenuItem.setAction(actionMap.get("exitApplication"));
         exitMenuItem.setName("exitMenuItem");
@@ -2360,7 +2381,11 @@ public class IchthyopView extends FrameView
         previewMenuItem.setAction(actionMap.get("previewSimulation"));
         previewMenuItem.setName("previewMenuItem");
         simulationMenu.add(previewMenuItem);
-
+        
+        savePreviewMenuItem.setAction(actionMap.get("savePreview"));
+        savePreviewMenuItem.setName("savePreviewMenuItem");
+        simulationMenu.add(savePreviewMenuItem);
+        
         menuBar.add(simulationMenu);
 
         mappingMenu.setText(ivResourceMap.getString("mappingMenu.text"));
@@ -2378,8 +2403,8 @@ public class IchthyopView extends FrameView
         cancelMapMenuItem.setName("cancelMapMenuItem");
         mappingMenu.add(cancelMapMenuItem);
 
-        jSeparator13.setName("jSeparator13");
-        mappingMenu.add(jSeparator13);
+        mappingMenuSeparator.setName("mappingMenuSeparator");
+        mappingMenu.add(mappingMenuSeparator);
 
         openNCMenuItem.setAction(actionMap.get("openNcMapping"));
         openNCMenuItem.setName("openNCMenuItem");
@@ -2402,15 +2427,12 @@ public class IchthyopView extends FrameView
         startBWMenuItem.setName("startBWMenuItem");
         animationMenu.add(startBWMenuItem);
 
-        jSeparator15.setName("jSeparator15");
-        animationMenu.add(jSeparator15);
+        animMenuSeparator1.setName("animMenuSeparator1");
+        animationMenu.add(animMenuSeparator1);
 
         openAnimationMenuItem.setAction(actionMap.get("openFolderAnimation"));
         openAnimationMenuItem.setName("openAnimationMenuItem");
         animationMenu.add(openAnimationMenuItem);
-
-        jSeparator14.setName("jSeparator14");
-        animationMenu.add(jSeparator14);
 
         saveasMapsMenuItem.setAction(actionMap.get("saveasMaps"));
         saveasMapsMenuItem.setName("saveasMapsMenuItem");
@@ -2441,9 +2463,6 @@ public class IchthyopView extends FrameView
         previewPanel.setBorder(null);
         previewPanel.addMouseListener(previewMouseAdapter);
         previewPanel.addMouseMotionListener(previewMouseAdapter);
-
-        btnExit.setAction(actionMap.get("exitApplication"));
-        btnExit.setName("btnExit");
 
         pnlLogo.setAlpha(0.4F);
         pnlLogo.setInheritAlpha(false);
@@ -2609,8 +2628,189 @@ public class IchthyopView extends FrameView
         }
     }
 
+    ////////////////////////////
+    // UI components declaration
+    ////////////////////////////
+    // menu 
+    private JMenuBar menuBar;
+    // menu configuration
+    private JMenu configurationMenu;
+    private JMenuItem newMenuItem;
+    private JMenuItem openMenuItem;
+    private JMenuItem closeMenuItem;
+    private JSeparator cfgMenuSeparator1;
+    private JMenuItem saveAsMenuItem;
+    private JMenuItem saveMenuItem;
+    private JSeparator cfgMenuSeparator2;
+    private JMenuItem exitMenuItem;
+    // menu simulation
+    private JMenu simulationMenu;
+    private JMenuItem simulationMenuItem;
+    private JMenuItem previewMenuItem;
+    private JMenuItem savePreviewMenuItem;
+    // menu mapping
+    private JMenu mappingMenu;
+    private JMenuItem mapMenuItem;
+    private JMenuItem cancelMapMenuItem;
+    private JMenuItem openNCMenuItem;
+    private JSeparator mappingMenuSeparator;
+    private JMenuItem exportToKMZMenuItem;
+    // menu animation
+    private JMenu animationMenu;
+    private JMenuItem startBWMenuItem;
+    private JMenuItem startFWMenuItem;
+    private JMenuItem stopMenuItem;
+    private JSeparator animMenuSeparator1;
+    private JMenuItem deleteMenuItem;
+    private JMenuItem openAnimationMenuItem;
+    private JMenuItem saveasMapsMenuItem;
+    // help menu
+    private JMenu helpMenu;
+    private JMenuItem aboutMenuItem;
+    
+    // configuration components
+    private JXTaskPane taskPaneConfiguration;
+    private JPanel pnlFile;
+    private JButton btnOpenCfgFile;
+    private JButton btnCloseCfgFile;
+    private JButton btnNewCfgFile;
+    private JButton btnSaveAsCfgFile;
+    private JButton btnSaveCfgFile;
+    private JLabel lblConfiguration;
+    private JLabel lblCfgFile;
+    private final JConfigurationPanel pnlConfiguration = new JConfigurationPanel();
+
+    // simulation
+    private JXTaskPane taskPaneSimulation;
+    private JPanel pnlSimulation;
+    // simulation preview
+    private JToggleButton btnPreview;
+    private JScrollPane previewScrollPane;
+    private SimulationPreviewPanel previewPanel;
+    private JSlider sliderPreviewZoom;
+    private JLabel lblPreviewZoom;
+    private JButton btnSavePreview;
+    // simulation run
+    private JButton btnSimulationRun;
+    private final JRunProgressPanel pnlProgress = new JRunProgressPanel();
+
+    // mapping components
+    private JXTaskPane taskPaneMapping;
+    private JPanel pnlMapping;
+    private JLabel lblMapping;
+    private JPanel pnlWMS;
+    private JPanel pnlColor;
+    private JPanel pnlColorBar;
+    private JButton btnApplyColorbar;
+    private JButton btnAutoRange;
+    private JButton btnCancelMapping;
+    private JButton btnCloseNC;
+    private JButton btnExportToKMZ;
+    private JButton btnMapping;
+    private JButton btnOpenNC;
+    private JButton btnParticleColor;
+    private JComboBox cbBoxVariable;
+    private JComboBox cbBoxWMS;
+    private JLabel lblVariable;
+    private JLabel lblWMS;
+    private JLabel lblParticleColor;
+    private JLabel lblParticleSize;
+    private JLabel lblMax;
+    private JLabel lblMin;
+    private JLabel lblNC;
+    private JFormattedTextField txtFieldMax;
+    private JFormattedTextField txtFieldMin;
+    private JSpinner spinnerParticleSize;
+    private JLabel lblColorbarChooser;
+    private JComboBox colorbarChooser;
+    private final WMSMapper wmsMapper = new WMSMapper();
+
+    // animation components
+    private JXTaskPane taskPaneAnimation;
+    private JPanel pnlAnimation;
+    private JToolBar animationToolBar;
+    private JSpinner animationSpeed;
+    private JButton btnAnimatedGif;
+    private JButton btnAnimationBW;
+    private JButton btnAnimationFW;
+    private JButton btnAnimationStop;
+    private JButton btnDeleteMaps;
+    private JButton btnFirst;
+    private JButton btnLast;
+    private JButton btnNext;
+    private JButton btnOpenAnimation;
+    private JButton btnPrevious;
+    private JButton btnSaveAsMaps;
+    private JCheckBox ckBoxReverseTime;
+    private JLabel lblAnimationSpeed;
+    private JLabel lblFolder;
+    private JLabel lblFramePerSecond;
+    private JLabel lblTime;
+    private JSlider sliderTime;
+    private final ReplayPanel replayPanel = new ReplayPanel();
+    // animation variables
+
+    // containers
+    private JXTitledPanel titledPanelMain;
+    private JPanel mainPanel;
+    private JSplitPane splitPane;
+    // left
+    private JSplitPane leftSplitPane;
+    // steps
+    private JXTitledPanel titledPanelSteps;
+    private JPanel stepsPanel;
+    private JScrollPane stepsScrollPane;
+    // logger
+    private JXTitledPanel titledPanelLogger;
+    private LoggerScrollPane loggerScrollPane;
+    // right
+    private JScrollPane rightScrollPane;
+    private GradientPanel gradientPanel;
+    private JXPanel pnlLogo;
+    private JXHyperlink hyperLinkLogo;
+
+    // about box
+    private JDialog aboutBox;
+
+    // status bar
+    private final JStatusBar statusBar = new JStatusBar();
+
+    // animation mouse wheel scroller
+    private class AnimationMouseWheelScroller implements MouseWheelListener {
+
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            int increment = e.getWheelRotation();
+            if (increment > 0) {
+                for (int i = 0; i < increment; i++) {
+                    next();
+                }
+            } else {
+                for (int i = 0; i < Math.abs(increment); i++) {
+                    previous();
+                }
+            }
+        }
+    }
+
+    // simulation preview png save filter
+    private class PNGSaveFilter extends FileFilter {
+
+        @Override
+        public boolean accept(File f) {
+            String s = f.getName();
+            return f.isDirectory() || s.endsWith(".png") || s.endsWith(".PNG");
+        }
+
+        @Override
+        public String getDescription() {
+            return "*.png,*.PNG";
+        }
+
+    }
+
     // mouse adapter for simulation preview
-    private final MouseAdapter previewMouseAdapter = new MouseAdapter() {
+    private class PreviewMouseAdapter extends MouseAdapter {
 
         private Point origin;
 
@@ -2646,137 +2846,6 @@ public class IchthyopView extends FrameView
             }
         }
     };
-
-    // Variables declaration
-    private JMenu animationMenu;
-    private JSpinner animationSpeed;
-    private JButton btnAnimatedGif;
-    private JButton btnAnimationBW;
-    private JButton btnAnimationFW;
-    private JButton btnAnimationStop;
-    private JButton btnApplyColorbar;
-    private JButton btnAutoRange;
-    private JButton btnCancelMapping;
-    private JButton btnCloseCfgFile;
-    private JButton btnCloseNC;
-    private JButton btnDeleteMaps;
-    private JButton btnExit;
-    private JButton btnExportToKMZ;
-    private JButton btnFirst;
-    private JButton btnLast;
-    private JButton btnMapping;
-    private JButton btnNewCfgFile;
-    private JButton btnNext;
-    private JButton btnOpenAnimation;
-    private JButton btnOpenCfgFile;
-    private JButton btnOpenNC;
-    private JButton btnParticleColor;
-    private JToggleButton btnPreview;
-    private JButton btnPrevious;
-    private JButton btnSaveAsCfgFile;
-    private JButton btnSaveAsMaps;
-    private JButton btnSaveCfgFile;
-    private JButton btnSimulationRun;
-    private JMenuItem cancelMapMenuItem;
-    private JComboBox cbBoxVariable;
-    private JComboBox cbBoxWMS;
-    private JLabel lblPreviewZoom;
-    private JCheckBox ckBoxReverseTime;
-    private JMenuItem closeMenuItem;
-    private JMenuItem deleteMenuItem;
-    private JMenuItem exportToKMZMenuItem;
-    private org.ichthyop.ui.GradientPanel gradientPanel;
-    private JXHyperlink hyperLinkLogo;
-    private JScrollPane jScrollPane3;
-    private JSeparator jSeparator1;
-    private JPopupMenu.Separator jSeparator13;
-    private JPopupMenu.Separator jSeparator14;
-    private JPopupMenu.Separator jSeparator15;
-    private JPopupMenu.Separator jSeparator2;
-    private JToolBar jToolBar1;
-    private JLabel lblAnimationSpeed;
-    private JLabel lblCfgFile;
-    private JLabel lblColor;
-    private JLabel lblColor1;
-    private JLabel lblFolder;
-    private JLabel lblFramePerSecond;
-    private JLabel lblMax;
-    private JLabel lblMin;
-    private JLabel lblNC;
-    private JLabel lblTime;
-    private JLabel lblVariable;
-    private JLabel lblWMS;
-    private JSplitPane leftSplitPane;
-    private org.ichthyop.ui.LoggerScrollPane loggerScrollPane;
-    private JPanel mainPanel;
-    private JMenuItem mapMenuItem;
-    private JMenu mappingMenu;
-    private JMenuBar menuBar;
-    private JMenuItem newMenuItem;
-    private JMenuItem openAnimationMenuItem;
-    private JMenuItem openMenuItem;
-    private JMenuItem openNCMenuItem;
-    private JPanel pnlAnimation;
-    private JPanel pnlColor;
-    private JPanel pnlColorBar;
-    private JPanel pnlFile;
-    private JXPanel pnlLogo;
-    private JPanel pnlMapping;
-    private JPanel pnlSimulation;
-    private JPanel pnlWMS;
-    private JMenuItem previewMenuItem;
-    private JMenuItem saveAsMenuItem;
-    private JMenuItem saveMenuItem;
-    private JMenuItem saveasMapsMenuItem;
-    private JScrollPane previewScrollPane;
-    private SimulationPreviewPanel previewPanel;
-    private JSlider sliderPreviewSize;
-    private JMenu simulationMenu;
-    private JMenuItem simulationMenuItem;
-    private JSlider sliderTime;
-    private JSpinner spinnerParticleSize;
-    private JSplitPane splitPane;
-    private JMenuItem startBWMenuItem;
-    private JMenuItem startFWMenuItem;
-    private JPanel stepsPanel;
-    private JScrollPane stepsScrollPane;
-    private JMenuItem stopMenuItem;
-    private JXTaskPane taskPaneAnimation;
-    private JXTaskPane taskPaneConfiguration;
-    private JXTaskPane taskPaneMapping;
-    private JXTaskPane taskPaneSimulation;
-    private JXTitledPanel titledPanelLogger;
-    private JXTitledPanel titledPanelMain;
-    private JXTitledPanel titledPanelSteps;
-    private JFormattedTextField txtFieldMax;
-    private JFormattedTextField txtFieldMin;
-    private JDialog aboutBox;
-    private File cfgPath = new File(System.getProperty("user.dir"));
-    private boolean isRunning = false;
-    private Task simulActionTask;
-    private Task createMapTask;
-    private Task kmzTask;
-    private boolean initDone;
-    private final ReplayPanel replayPanel = new ReplayPanel();
-    private final float TEN_MINUTES = 10.f * 60.f;
-    private final Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
-    private float nbfps = 1.f;
-    private float time;
-    private Timer progressTimer;
-    private final WMSMapper wmsMapper = new WMSMapper();
-    private File outputFile, outputFolder;
-    private JLabel lblConfiguration;
-    private JLabel lblMapping;
-    private final JConfigurationPanel pnlConfiguration = new JConfigurationPanel();
-    private final JStatusBar statusBar = new JStatusBar();
-    private final JRunProgressPanel pnlProgress = new JRunProgressPanel();
-    private final ResourceMap resourceMap = Application.getInstance(org.ichthyop.ui.IchthyopApp.class).getContext().getResourceMap(IchthyopView.class);
-    private TimeDirection animationDirection;
-    private final MouseWheelScroller mouseScroller = new MouseWheelScroller();
-    private boolean cfgUntitled = true;
-    private boolean animationLoaded = false;
-    private JLabel lblColorbarChooser;
-    private JComboBox colorbarChooser;
 
     private enum TimeDirection {
 

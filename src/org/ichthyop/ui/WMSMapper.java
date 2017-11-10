@@ -54,10 +54,8 @@ package org.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
@@ -75,7 +73,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
-import javax.swing.CellRendererPane;
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
@@ -114,7 +111,6 @@ public class WMSMapper extends JXMapKit {
     private float valmin = 0;
     private float valmax = 100;
     private Painter colorbarPainter;
-    
 
     public WMSMapper() {
 
@@ -227,25 +223,20 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
-    private Painter getPainterParticles(int itime) {
+    private Painter<JXMapViewer> getPainterParticles(int itime) {
 
         List<DrawableParticle> listParticles = ncout.readParticles(itime);
-
-        Painter particleLayer = new Painter<JXMapViewer>() {
-            @Override
-            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-                g = (Graphics2D) g.create();
-                //convert from viewport to world bitmap
-                Rectangle rect = map.getViewportBounds();
-                g.translate(-rect.x, -rect.y);
-                // draw particles
-                for (DrawableParticle particle : listParticles) {
-                    drawParticle(g, map, particle);
-                }
-                g.dispose();
+        return (Graphics2D g, JXMapViewer map, int w, int h) -> {
+            g = (Graphics2D) g.create();
+            //convert from viewport to world bitmap
+            Rectangle rect = map.getViewportBounds();
+            g.translate(-rect.x, -rect.y);
+            // draw particles
+            for (DrawableParticle particle : listParticles) {
+                drawParticle(g, map, particle);
             }
+            g.dispose();
         };
-        return particleLayer;
     }
 
     void draw(int itime, java.awt.Dimension s, Rectangle r) throws IOException {
@@ -253,40 +244,28 @@ public class WMSMapper extends JXMapKit {
         setBounds(r);
         setSize(s);
 
-        // new compound painter for partiles, time stamp and colorbar
-        CompoundPainter cp = new CompoundPainter();
-        if (colorbarPainter != null) {
-            cp.setPainters(bgPainter, getPainterParticles(itime), getPainterTimestamp(itime), colorbarPainter);
-        } else {
-            cp.setPainters(bgPainter, getPainterParticles(itime), getPainterTimestamp(itime));
-        }
-        cp.setCacheable(false);
-        getMainMap().setOverlayPainter(cp);
+        getMainMap().setOverlayPainter(new CompoundPainter(
+                bgPainter,
+                getPainterParticles(itime),
+                getPainterTimestamp(itime),
+                colorbarPainter));
 
-        // Paint graphics in BufferedImage 
+        // paint graphics in BufferedImage 
         BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = bi.getGraphics();
-        CellRendererPane crp = new CellRendererPane();
-        crp.add(this);
-        crp.paintComponent(g, this, crp, getBounds());
+        paint(g);
         new Thread(new ImageWriter(itime, bi)).start();
     }
 
     private Painter<JXMapViewer> getPainterBackground() {
-        Painter<JXMapViewer> bgOverlay = new Painter<JXMapViewer>() {
-            @Override
-            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-                g = (Graphics2D) g.create();
-                //convert from viewport to world bitmap
-                Rectangle rect = map.getViewportBounds();
-                g.translate(-rect.x, -rect.y);
-                drawEdge(g, map);
-                drawMask(g, map);
-                drawZones(g, map);
-                g.dispose();
-            }
+
+        return (Graphics2D g, JXMapViewer map, int w, int h) -> {
+            Rectangle rect = map.getViewportBounds();
+            g.translate(-rect.x, -rect.y);
+            drawEdge(g, map);
+            drawMask(g, map);
+            drawZones(g, map);
         };
-        return bgOverlay;
     }
 
     private void drawEdge(Graphics2D g, JXMapViewer map) {
@@ -324,7 +303,6 @@ public class WMSMapper extends JXMapKit {
 
     private void drawParticle(Graphics2D g, JXMapViewer map, DrawableParticle particle) {
 
-        //create a polygon
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
         if (particle.isAlive()) {
             Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), particlePixel, particlePixel);
@@ -337,7 +315,7 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
-    /**
+    /*
      * Determines the color of the particle as a function of its depth or the
      * sea water temperature (depending on the display option).
      *
@@ -393,96 +371,75 @@ public class WMSMapper extends JXMapKit {
         getMainMap().setOverlayPainter(cp);
     }
 
-    private Painter getPainterTimestamp(int index) {
+    private Painter<JXMapViewer> getPainterTimestamp(int index) {
 
-        Painter<JXMapViewer> timePainter = new Painter<JXMapViewer>() {
-            @Override
-            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
+        return (Graphics2D g, JXMapViewer map, int w, int h) -> {
 
-                g = (Graphics2D) g.create();
-                Paint paint = g.getPaint();
+            int wbar = 300;
+            int hbar = 20;
+            int xbar = hbar / 2;
+            int ybar = h - 3 * hbar / 2;
+            g.translate(xbar, ybar);
 
-                int wbar = 300;
-                int hbar = 20;
-                int xbar = hbar / 2;
-                int ybar = h - 3 * hbar / 2;
+            RoundRectangle2D bar = new RoundRectangle2D.Double(0.0, 0.0, wbar, hbar, hbar, hbar);
+            g.setColor(Color.BLACK);
+            g.draw(bar);
+            g.setColor(Color.WHITE);
+            g.fill(bar);
 
-                RoundRectangle2D bar = new RoundRectangle2D.Double(0.0, 0.0, wbar, hbar, hbar, hbar);
-                g.translate(xbar, ybar);
-                g.setColor(Color.BLACK);
-                g.draw(bar);
+            SimpleDateFormat dtFormat = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+            dtFormat.setCalendar(ncout.getCalendar());
+            FontRenderContext context = g.getFontRenderContext();
+            Font font = new Font("Dialog", Font.PLAIN, 11);
+            TextLayout layout = new TextLayout("Time: " + dtFormat.format(getTime(index)), font, context);
+            Rectangle2D bounds = layout.getBounds();
+            float text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
+            float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+            g.setColor(Color.BLACK);
+            layout.draw(g, text_x, text_y);
 
-                g.setColor(Color.WHITE);
-                g.fill(bar);
-
-                SimpleDateFormat dtFormat = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-                dtFormat.setCalendar(ncout.getCalendar());
-                String time = "Time: " + dtFormat.format(getTime(index));
-                FontRenderContext context = g.getFontRenderContext();
-                Font font = new Font("Dialog", Font.PLAIN, 11);
-                TextLayout layout = new TextLayout(time, font, context);
-
-                Rectangle2D bounds = layout.getBounds();
-                float text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
-                float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
-                g.setColor(Color.BLACK);
-                layout.draw(g, text_x, text_y);
-
-                g.setPaint(paint);
-                g.translate(-xbar, -ybar);
-                g.dispose();
-            }
+            g.translate(-xbar, -ybar);
         };
-        return timePainter;
     }
 
-    private Painter<JXMapViewer> getPainterColorbar() {
+    private Painter getPainterColorbar() {
 
-        Painter<JXMapViewer> clrbarPainter;
-        clrbarPainter = new Painter<JXMapViewer>() {
-            @Override
-            public void paint(Graphics2D g, JXMapViewer map, int w, int h) {
-                g = (Graphics2D) g.create();
+        return (Graphics2D g, Object o, int w, int h) -> {
 
-                int wbar = 400;
-                int hbar = 30;
-                int xbar = (w - wbar) - hbar;
-                int ybar = h - 3 * hbar / 2;
+            int wbar = 400;
+            int hbar = 30;
+            int xbar = (w - wbar) - hbar;
+            int ybar = h - 3 * hbar / 2;
+            g.translate(xbar, ybar);
 
-                g.translate(xbar, ybar);
-                Colorbars.draw(g, colorbar, wbar, hbar);
+            Colorbars.draw(g, colorbar, wbar, hbar);
 
-                FontRenderContext context = g.getFontRenderContext();
-                Font font = new Font("Dialog", Font.PLAIN, 11);
-                TextLayout layout = new TextLayout(String.valueOf(valmin), font, context);
+            FontRenderContext context = g.getFontRenderContext();
+            Font font = new Font("Dialog", Font.PLAIN, 11);
+            // colorbar min
+            TextLayout layout = new TextLayout(String.valueOf(valmin), font, context);
+            float text_x = 10;
+            //float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+            float text_y = -10;
+            g.setColor(Color.BLACK);
+            layout.draw(g, text_x, text_y);
+            // colorbar name
+            layout = new TextLayout(ncout.getColorVariableLongname(), font, context);
+            Rectangle2D bounds = layout.getBounds();
+            text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
+            //text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+            g.setColor(Color.BLACK);
+            layout.draw(g, text_x, text_y);
+            // colorbar max
+            layout = new TextLayout(String.valueOf(valmax), font, context);
+            bounds = layout.getBounds();
+            text_x = (float) (wbar - bounds.getWidth() - 10);
+            // = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
+            g.setColor(Color.BLACK);
+            layout.draw(g, text_x, text_y);
 
-                float text_x = 10;
-                //float text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
-                float text_y = -10;
-                g.setColor(Color.BLACK);
-                layout.draw(g, text_x, text_y);
-
-                layout = new TextLayout(ncout.getColorVariableLongname(), font, context);
-                Rectangle2D bounds = layout.getBounds();
-                text_x = (float) ((wbar - bounds.getWidth()) / 2.0);
-                //text_y = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
-                g.setColor(Color.BLACK);
-                layout.draw(g, text_x, text_y);
-
-                layout = new TextLayout(String.valueOf(valmax), font, context);
-                bounds = layout.getBounds();
-                text_x = (float) (wbar - bounds.getWidth() - 10);
-                // = (float) ((hbar - layout.getAscent() - layout.getDescent()) / 2.0) + layout.getAscent() - layout.getLeading();
-                g.setColor(Color.BLACK);
-                layout.draw(g, text_x, text_y);
-
-                g.setPaint(g.getPaint());
-                g.translate(-xbar, -ybar);
-                g.dispose();
-            }
+            g.translate(-xbar, -ybar);
         };
-
-        return clrbarPainter;
     }
 
     private void drawText(Graphics2D g2, float x, float y, String text) {
@@ -553,48 +510,6 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
-    class NasaTileFactory extends DefaultTileFactory {
-
-        /**
-         * Creates a new instance of IchthyopTileFactory
-         */
-        public NasaTileFactory() {
-            super(new TileFactoryInfo(4, 15, 17, 300, true, true, "", "x", "y", "zoom") {
-                @Override
-                public String getTileUrl(int x, int y, int zoom) {
-                    int zz = 17 - zoom;
-                    int z = (int) Math.pow(2, (double) zz - 1);
-                    return new WMSService().toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
-                }
-            });
-        }
-    }
-
-    class LocalTileFactory extends DefaultTileFactory {
-
-        final String base = "file:/home/pverley/downloads/world.topo.bathy.";
-
-        /**
-         * Creates a new instance of IchthyopTileFactory
-         */
-        LocalTileFactory() {
-            super(new TileFactoryInfo(
-                    0, //min level
-                    8, //max allowed level
-                    10, // max level
-                    256, //tile size
-                    true, true, // x/y orientation is normal
-                    "file:/home/pverley/downloads/world.topo.bathy.", // base url
-                    "x", "y", "z" // url args for x, y & z
-            ) {
-                @Override
-                public String getTileUrl(int x, int y, int zoom) {
-                    return baseURL + x + "x" + y + "x" + "z" + ".jpg";
-                }
-            });
-        }
-    }
-
     class MGDSTileFactory extends DefaultTileFactory {
 
         /**
@@ -635,7 +550,7 @@ public class WMSMapper extends JXMapKit {
          * The empty tile image.
          */
         private BufferedImage emptyTile;
-        private Color ocean = new Color(181, 208, 208);
+        private final Color OCEAN = new Color(181, 208, 208);
 
         /**
          * Creates a new instance of EmptyTileFactory
@@ -659,18 +574,10 @@ public class WMSMapper extends JXMapKit {
             Graphics2D g = emptyTile.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setColor(ocean);
+            g.setColor(OCEAN);
             g.fillRect(0, 0, tileSize, tileSize);
             g.setColor(Color.WHITE);
             g.dispose();
-//            File file = new File("/home/pverley/downloads/seamless_blue_water.jpg");
-//            try {
-//                emptyTile = ImageIO.read(file);
-//            } catch (IOException ex) {
-//                Logger.getLogger(WMSMapper.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//            Graphics2D g = emptyTile.createGraphics();
-//            g.dispose();
         }
 
         /**
