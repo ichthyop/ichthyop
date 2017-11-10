@@ -53,13 +53,9 @@
 package org.ichthyop.ui;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
-import javax.swing.JViewport;
-import javax.swing.SwingUtilities;
 import org.ichthyop.Zone;
 import org.ichthyop.manager.SimulationManager;
 
@@ -113,20 +109,7 @@ public class SimulationPreviewPanel extends JPanel {
     final private Color bottom = new Color(0, 0, 150);
     final private Color surface = Color.CYAN;
     private final Color land = Color.DARK_GRAY;
-
-///////////////
-// Constructors
-///////////////
-    /**
-     * Constructs an empty <code>SimulationUI</code>, intializes the range of
-     * the domain and the {@code RenderingHints}.
-     *
-     * @param height
-     */
-    public SimulationPreviewPanel(int height) {
-        this.height = height;
-        init();
-    }
+    public static final int DEFAULT_SIZE = 500;
 
 ////////////////////////////
 // Definition of the methods
@@ -195,22 +178,12 @@ public class SimulationPreviewPanel extends JPanel {
 
     public void setHeight(int height) {
         this.height = height;
-        repaintBackground();
-    }
-
-    /**
-     * Forces the background to repaint.
-     */
-    public void repaintBackground() {
-
-        hi = -1;
-        wi = -1;
         repaint();
     }
 
-    private void init() {
+    public void init(int height) {
 
-        setBorder(null);
+        this.height = height;
 
         hi = -1;
         wi = -1;
@@ -223,9 +196,6 @@ public class SimulationPreviewPanel extends JPanel {
         double dlon = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
         double dlat = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
         ratio = dlon / dlat;
-
-        addMouseListener(ma);
-        addMouseMotionListener(ma);
     }
 
     @Override
@@ -273,36 +243,4 @@ public class SimulationPreviewPanel extends JPanel {
             return land;
         }
     }
-
-    private final MouseAdapter ma = new MouseAdapter() {
-
-        private Point origin;
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            origin = new Point(e.getPoint());
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            if (origin != null) {
-                JViewport viewPort = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, SimulationPreviewPanel.this);
-                if (viewPort != null) {
-                    int deltaX = origin.x - e.getX();
-                    int deltaY = origin.y - e.getY();
-
-                    Rectangle view = viewPort.getViewRect();
-                    view.x += deltaX;
-                    view.y += deltaY;
-
-                    scrollRectToVisible(view);
-                }
-            }
-        }
-
-    };
 }
