@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.ui;
 
 import java.awt.Component;
@@ -170,7 +169,9 @@ public class ParameterTree extends JTree {
         Collections.reverse(keys);
         map = new HashMap(keys.size());
         for (String key : keys) {
-            insertIntoTree(new UIParameterSubset(key));
+            if (!getSimulationManager().getParameterManager().findKeys(key + ".*").isEmpty()) {
+                insertIntoTree(new UIParameterSubset(key));
+            }
         }
         setCellRenderer(new TreeRenderer());
     }
@@ -297,7 +298,6 @@ public class ParameterTree extends JTree {
         //String fullKey = getRoot().toString() + "/" + key;
         return find(new TreePath(getRoot()), key.split("/"), 0, true);
     }*/
-
     private TreePath find(TreePath parent, Object[] nodes, int depth, boolean byName) {
 
         TreeNode node = (TreeNode) parent.getLastPathComponent();
