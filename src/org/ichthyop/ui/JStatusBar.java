@@ -115,7 +115,7 @@ public class JStatusBar extends JXStatusBar {
         lblFlag.setIcon(getResourceMap().getIcon("lblFlag.icon.grey"));
 
         pnlProgressBar.setLayout(new GridBagLayout());
-        progressBar.setPreferredSize(new Dimension(150, 20));
+        progressBar.setPreferredSize(new Dimension(500, 20));
         JLabel emptyLabel = new JLabel();
         emptyLabel.setOpaque(false);
         pnlProgressBar.add(emptyLabel, new GridBagConstraints(0, 0,

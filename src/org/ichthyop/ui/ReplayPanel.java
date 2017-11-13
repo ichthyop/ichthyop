@@ -60,7 +60,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXImageView;
 import org.ichthyop.util.MetaFilenameFilter;
 
@@ -118,12 +117,6 @@ public class ReplayPanel extends JXImageView {
             for (int i = 0; i < nimg; i++) {
                 images.add(ImageIO.read(pngFiles.get(i)));
                 files.add(pngFiles.get(i));
-                if (i == 1) {
-                    SwingUtilities.invokeLater(() -> {
-                        showImage(0);
-                    });
-
-                }
             }
         }
     }

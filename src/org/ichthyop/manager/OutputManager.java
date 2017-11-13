@@ -238,10 +238,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         // Write parameters from enabled subsets
         for (String subsetKey : getConfiguration().getParameterSubsets()) {
             if (!getConfiguration().canFind(subsetKey + ".enabled") || getConfiguration().getBoolean(subsetKey + ".enabled", false)) {
-                for (String paramKey : getConfiguration().getArrayString(subsetKey + ".parameters")) {
-                    String key = subsetKey + "." + paramKey;
-                    if (getConfiguration().canFind(key)) {
-                        ncOut.addGroupAttribute(null, new Attribute(key, getConfiguration().getString(key)));
+                if (!getConfiguration().isNull(subsetKey + ".parameters")) {
+                    for (String paramKey : getConfiguration().getArrayString(subsetKey + ".parameters")) {
+                        String key = subsetKey + "." + paramKey;
+                        if (getConfiguration().canFind(key)) {
+                            ncOut.addGroupAttribute(null, new Attribute(key, getConfiguration().getString(key)));
+                        }
                     }
                 }
             }
