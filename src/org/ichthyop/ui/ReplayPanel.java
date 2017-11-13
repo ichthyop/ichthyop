@@ -50,22 +50,17 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.ui;
 
 import java.awt.image.BufferedImage;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import org.jdesktop.application.Application;
+import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXImageView;
 import org.ichthyop.util.MetaFilenameFilter;
 
@@ -75,57 +70,67 @@ import org.ichthyop.util.MetaFilenameFilter;
  */
 public class ReplayPanel extends JXImageView {
 
-    private List<BufferedImage> pictures = null;
-    private List<String> pictureNames = null;
-    private Thread picturesFinder = null;
-    private int index;
+    private final List<BufferedImage> images;
+    private final List<File> files;
     private File folder;
-    private ImageIcon bgIcon;
-    private int indexMax;
+    private int nimg;
+    public static final String IMAGE_INDEX = "imageIndex";
+    private final BufferedImage emptyImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 
     public ReplayPanel() {
-        setOpaque(false);
-        pictures = new ArrayList();
-        pictureNames = new ArrayList();
-        setFolder(null);
+        images = new ArrayList();
+        files = new ArrayList();
+        nimg = 0;
+        setImage(emptyImage);
     }
 
-    public List<BufferedImage> getImages() {
-        return pictures;
+    public int getNImage() {
+        return nimg;
     }
 
-    public int getIndexMax() {
-        return indexMax;
-    }
+    public void showImage(int index) {
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-        if (pictures != null && !pictures.isEmpty()) {
-            setImage(pictures.get(getIndex()));
-        }
-    }
-
-    void setFolder(File folder) {
-        this.folder = folder;
-        pictures.clear();
-        pictureNames.clear();
-        indexMax = -1;
-        if (null != folder && folder.isDirectory()) {
-            picturesFinder = new Thread(new PicturesFinderThread(folder, "*.png"));
-            picturesFinder.start();
+        if (images.size() > index) {
+            setImage(images.get(index));
+            firePropertyChange(IMAGE_INDEX, null, timestamp(index));
         } else {
-            bgIcon = Application.getInstance().getContext().getResourceMap(IchthyopView.class).getImageIcon("step.Animation.bgicon");
-            setImage(bgIcon.getImage());
+            setImage(emptyImage);
         }
     }
 
-    public String getTime() {
+    public void clear() {
+        this.folder = null;
+        images.clear();
+        files.clear();
+        nimg = 0;
+        setImage(emptyImage);
+    }
+
+    public void loadImages(File folder) throws IOException {
+        this.folder = folder;
+        images.clear();
+        files.clear();
+        if (null != folder && folder.isDirectory()) {
+            MetaFilenameFilter filter = new MetaFilenameFilter("*.png");
+            List<File> pngFiles = Arrays.asList(folder.listFiles(filter));
+            nimg = pngFiles.size();
+            Collections.sort(pngFiles);
+            for (int i = 0; i < nimg; i++) {
+                images.add(ImageIO.read(pngFiles.get(i)));
+                files.add(pngFiles.get(i));
+                if (i == 1) {
+                    SwingUtilities.invokeLater(() -> {
+                        showImage(0);
+                    });
+
+                }
+            }
+        }
+    }
+
+    private String timestamp(int index) {
         try {
-            String[] tokens = pictureNames.get(index).split("_");
+            String[] tokens = files.get(index).getName().split("_");
             String date = tokens[tokens.length - 1];
             date = date.substring(0, date.indexOf(".png"));
             String[] dateToken = date.split("-");
@@ -145,43 +150,33 @@ public class ReplayPanel extends JXImageView {
         }
     }
 
-    public File getFolder() {
-        return folder;
+    public String toGIF(float nfps, boolean reverse) {
+
+        AnimatedGifEncoder gif = new AnimatedGifEncoder();
+        String filename = folder.getAbsolutePath();
+        if (filename.endsWith(File.separator)) {
+            filename = filename.substring(0, filename.length() - 1);
+        }
+        filename += ".gif";
+        gif.start(filename);
+        gif.setDelay((int) (1000 / nfps));
+        if (reverse) {
+            Collections.reverse(images);
+        }
+        for (BufferedImage img : images) {
+            gif.addFrame(img);
+        }
+        gif.finish();
+        return filename;
     }
 
-    private class PicturesFinderThread implements Runnable {
-
-        String strFilter;
-        File folder;
-
-        PicturesFinderThread(File folder, String strFilter) {
-            this.strFilter = strFilter;
-            this.folder = folder;
+    public void deleteImages() {
+        for (File file : files) {
+            file.delete();
         }
-
-        @Override
-        public void run() {
-
-            try {
-                MetaFilenameFilter filter = new MetaFilenameFilter(strFilter);
-
-                List<File> files = Arrays.asList(folder.listFiles(filter));
-                indexMax = files.size() - 1;
-                Collections.sort(files);
-                int indexTrigger = Math.max(files.size() / 2, 1);
-                for (int i = 0; i < files.size(); i++) {
-                    File file = files.get(i);
-                    BufferedImage image = ImageIO.read(file);
-                    pictures.add(image);
-                    pictureNames.add(file.getName());
-                    if (i > indexTrigger) {
-                        setIndex(0);
-                    }
-
-                }
-            } catch (IOException e) {
-            }
-
+        if (folder.listFiles().length == 0) {
+            folder.delete();
         }
+        clear();
     }
 }
