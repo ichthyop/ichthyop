@@ -111,6 +111,7 @@ public class WMSMapper extends JXMapKit {
     private float valmin = 0;
     private float valmax = 100;
     private Painter colorbarPainter;
+    private Painter emptyPainter;
 
     public WMSMapper() {
 
@@ -118,6 +119,9 @@ public class WMSMapper extends JXMapKit {
         setMiniMapVisible(false);
         setZoomButtonsVisible(true);
         setZoomSliderVisible(true);
+        emptyPainter = (Painter) (Graphics2D gd, Object t, int i, int i1) -> {
+            // does not paint anything
+        };
     }
 
     public NetcdfOutputReader getNcOut() {
@@ -167,27 +171,6 @@ public class WMSMapper extends JXMapKit {
         return new File(imgfolder);
     }
 
-    public void reset() {
-        // close previous output file
-        if (null != ncout) {
-            ncout.close();
-        }
-        ncout = null;
-        imgfolder = null;
-        edge = null;
-        zones = null;
-        mask = null;
-        time = null;
-        defaultLat = 48.38;
-        defaultLon = -4.62;
-        defaultZoom = 10;
-        bgPainter = null;
-//        colorbarPainter = null;
-        getMainMap().setOverlayPainter(null);
-        setAddressLocation(new GeoPosition(defaultLat, defaultLon));
-        setZoom(defaultZoom);
-    }
-
     public void loadFile(String ncfile) throws IOException {
 
         // close previous output file
@@ -195,6 +178,7 @@ public class WMSMapper extends JXMapKit {
             ncout.close();
         }
 
+        CompoundPainter cp = new CompoundPainter();
         if (ncfile != null) {
             ncout = new NetcdfOutputReader(ncfile);
             ncout.init();
@@ -203,24 +187,31 @@ public class WMSMapper extends JXMapKit {
             zones = ncout.readZones();
             mask = ncout.readMask();
             time = ncout.readTime();
-            //
             defaultLat = 0.5d * (ncout.getLatmin() + ncout.getLatmax());
             defaultLon = 0.5d * (ncout.getLonmin() + ncout.getLonmax());
 //            double dlon_meter = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
             double dlat_meter = Math.abs(ncout.getLatmax() - ncout.getLatmin()) * ONE_DEG_LATITUDE_IN_METER;
             defaultZoom = (int) Math.round(1.17 * Math.log(dlat_meter * 1.25) - 4.8);
-            //
             bgPainter = getPainterBackground();
-            CompoundPainter cp = new CompoundPainter();
             cp.setPainters(bgPainter);
-            cp.setCacheable(false);
-            getMainMap().setOverlayPainter(cp);
 
-            setAddressLocation(new GeoPosition(defaultLat, defaultLon));
-            setZoom(defaultZoom);
         } else {
-            reset();
+            ncout = null;
+            imgfolder = null;
+            edge = null;
+            zones = null;
+            mask = null;
+            time = null;
+            defaultLat = 48.38;
+            defaultLon = -4.62;
+            defaultZoom = 10;
+            bgPainter = null;
+            colorbarPainter = null;
         }
+        cp.setCacheable(false);
+        getMainMap().setOverlayPainter(cp);
+        setAddressLocation(new GeoPosition(defaultLat, defaultLon));
+        setZoom(defaultZoom);
     }
 
     private Painter<JXMapViewer> getPainterParticles(int itime) {
@@ -239,16 +230,23 @@ public class WMSMapper extends JXMapKit {
         };
     }
 
-    void draw(int itime, java.awt.Dimension s, Rectangle r) throws IOException {
+    void clear() {
+        CompoundPainter cp = new CompoundPainter();
+        cp.setPainters(
+                null == bgPainter ? emptyPainter : bgPainter,
+                null == colorbarPainter ? emptyPainter : colorbarPainter);
+        cp.setCacheable(false);
+        getMainMap().setOverlayPainter(cp);
+        repaint();
+    }
 
-        setBounds(r);
-        setSize(s);
+    void draw(int itime) throws IOException {
 
         getMainMap().setOverlayPainter(new CompoundPainter(
-                bgPainter,
+                null == bgPainter ? emptyPainter : bgPainter,
                 getPainterParticles(itime),
                 getPainterTimestamp(itime),
-                colorbarPainter));
+                null == colorbarPainter ? emptyPainter : colorbarPainter));
 
         // paint graphics in BufferedImage 
         BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
