@@ -93,7 +93,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
-import javax.swing.Timer;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
@@ -152,13 +151,11 @@ public class IchthyopView extends FrameView
     private final Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
     private float nbfps = 1.f;
     private float time;
-    private Timer progressTimer;
     private File outputFile, outputFolder;
     private TimeDirection animationDirection;
     private final AnimationMouseWheelScroller animationMouseScroller = new AnimationMouseWheelScroller();
     private final PreviewMouseAdapter previewMouseAdapter = new PreviewMouseAdapter();
     private boolean cfgUntitled = true;
-    private boolean animationLoaded = false;
     private ResourceMap resourceMap;
     private ActionMap actionMap;
 
@@ -409,7 +406,7 @@ public class IchthyopView extends FrameView
     }
 
     private void showSimulationPreview() {
-        pnlProgress.setVisible(false);
+        lblSimulation.setVisible(false);
         previewScrollPane.setVisible(true);
         previewScrollPane.setPreferredSize(gradientPanel.getSize());
         previewPanel.init(sliderPreviewZoom.getValue());
@@ -419,9 +416,6 @@ public class IchthyopView extends FrameView
 
     private void hideSimulationPreview() {
         previewScrollPane.setVisible(false);
-        if (!taskPaneSimulation.isCollapsed()) {
-            pnlProgress.setVisible(true);
-        }
         sliderPreviewZoom.setEnabled(false);
         btnSavePreview.getAction().setEnabled(false);
     }
@@ -517,10 +511,6 @@ public class IchthyopView extends FrameView
     @Action
     public Task simulationRun() {
         if (!isRunning) {
-            if (btnPreview.isSelected()) {
-                btnPreview.doClick();
-            }
-            btnCloseNC.doClick();
             return simulActionTask = new SimulationRunTask(getApplication());
         } else {
             simulActionTask.cancel(true);
@@ -537,8 +527,9 @@ public class IchthyopView extends FrameView
         SimulationRunTask(Application instance) {
             super(instance);
             setMessage(resourceMap.getString("simulationRun.msg.started"));
+            hideSimulationPreview();
+            lblSimulation.setVisible(true);
             setMenuEnabled(false);
-            pnlProgress.setupProgress();
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.stop"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.stop"));
             isRunning = true;
@@ -610,7 +601,6 @@ public class IchthyopView extends FrameView
             if (getProgress() > 0) {
                 btnSimulationRun.getAction().setEnabled(true);
             }
-            pnlProgress.printProgress();
             StringBuilder sb = new StringBuilder();
             sb.append("(");
             sb.append(getProgress());
@@ -628,28 +618,23 @@ public class IchthyopView extends FrameView
         @Override
         public void onSuccess(Object obj) {
             setMessage(resourceMap.getString("simulationRun.msg.completed"), false, LogLevel.COMPLETE);
+            outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
+            try {
+                openNetCDF();
+            } catch (IOException ex) {
+                Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, "Failed to open NetCDF output file", ex);
+            }
             taskPaneSimulation.setCollapsed(true);
             taskPaneMapping.setCollapsed(false);
         }
 
         @Override
         protected void finished() {
-            if (!isFailed()) {
-                outputFile = new File(getSimulationManager().getOutputManager().getFileLocation());
-                try {
-                    openNetCDF();
-                } catch (IOException ex) {
-                    Logger.getLogger(IchthyopView.class.getName()).log(Level.SEVERE, "Failed to open NetCDF output file", ex);
-                }
-            }
             getFrame().setTitle(title);
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.play"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.start"));
             setMenuEnabled(true);
             isRunning = false;
-            pnlProgress.hideBars();
-            pnlProgress.resetProgressBar();
-            btnPreview.getAction().setEnabled(true);
         }
     }
 
@@ -677,7 +662,6 @@ public class IchthyopView extends FrameView
             itime = 0;
             wmsMapper.setZoomButtonsVisible(false);
             wmsMapper.setZoomSliderVisible(false);
-            wmsMapper.setVisible(false);
         }
 
         @Override
@@ -709,7 +693,6 @@ public class IchthyopView extends FrameView
             wmsMapper.clear();
             wmsMapper.setZoomButtonsVisible(true);
             wmsMapper.setZoomSliderVisible(true);
-            wmsMapper.setVisible(true);
             btnMapping.getAction().setEnabled(true);
             btnExportToKMZ.getAction().setEnabled(true);
             btnCancelMapping.getAction().setEnabled(false);
@@ -728,12 +711,11 @@ public class IchthyopView extends FrameView
             sb.append(" ");
             sb.append(resourceMap.getString("createMaps.msg.succeeded"));
             setMessage(sb.toString(), false, LogLevel.COMPLETE);
-            taskPaneMapping.setCollapsed(true);
             // move to animation pane
-            taskPaneAnimation.setCollapsed(false);
             setAnimationToolsEnabled(false);
-            animationLoaded = false;
             getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
+            taskPaneMapping.setCollapsed(true);
+            taskPaneAnimation.setCollapsed(false);
         }
 
         @Override
@@ -1031,7 +1013,6 @@ public class IchthyopView extends FrameView
             sliderTime.setMaximum(replayPanel.getNImage() - 1);
             setAnimationToolsEnabled(true);
             sliderTime.setValue(0);
-            animationLoaded = true;
         }
 
         @Override
@@ -1043,7 +1024,6 @@ public class IchthyopView extends FrameView
             sliderTime.setMaximum(0);
             sliderTime.setValue(0);
             setAnimationToolsEnabled(false);
-            animationLoaded = false;
             outputFolder = null;
         }
 
@@ -1156,21 +1136,16 @@ public class IchthyopView extends FrameView
 
     @Action
     public void stopAnimation() {
-        if (progressTimer != null && progressTimer.isRunning()) {
-            progressTimer.stop();
-            statusBar.getProgressBar().setValue(0);
-            statusBar.getProgressBar().setVisible(false);
-        }
         if (animator.isRunning()) {
+            statusBar.setBusy(false);
             animator.stop();
             replayPanel.addMouseWheelListener(animationMouseScroller);
         }
     }
 
     private void startAnimation() {
-        if (!animationLoaded) {
-            getApplication().getContext().getTaskService().execute(new LoadFolderAnimationTask(getApplication(), wmsMapper.getFolder()));
-        } else if (!animator.isRunning()) {
+        if (!animator.isRunning()) {
+            statusBar.setBusy(true);
             replayPanel.removeMouseWheelListener(animationMouseScroller);
             btnAnimationFW.setEnabled(true);
             animator.start();
@@ -1330,9 +1305,15 @@ public class IchthyopView extends FrameView
 
     private void createMainPanel() {
 
+        pnlConfiguration.addPropertyChangeListener("configurationFile", this);
+
         lblConfiguration = new JLabel(getResourceMap().getIcon("lblConfiguration.icon"));
         lblConfiguration.setHorizontalAlignment(JLabel.CENTER);
         lblConfiguration.setVerticalAlignment(JLabel.CENTER);
+
+        lblSimulation = new JLabel(getResourceMap().getIcon("step.Simulation.bgicon"));
+        lblSimulation.setHorizontalAlignment(JLabel.CENTER);
+        lblSimulation.setVerticalAlignment(JLabel.CENTER);
 
         lblMapping = new JLabel(getResourceMap().getIcon("lblMapping.icon"));
         lblMapping.setHorizontalAlignment(JLabel.CENTER);
@@ -1352,9 +1333,8 @@ public class IchthyopView extends FrameView
         lblConfiguration.setVisible(true);
         gradientPanel.add(pnlConfiguration);
         pnlConfiguration.setVisible(false);
-        pnlConfiguration.addPropertyChangeListener("configurationFile", this);
-        gradientPanel.add(pnlProgress, StackLayout.TOP);
-        pnlProgress.setVisible(false);
+        gradientPanel.add(lblSimulation);
+        lblSimulation.setVisible(false);
         gradientPanel.add(previewScrollPane, StackLayout.TOP);
         previewScrollPane.setVisible(false);
         gradientPanel.add(lblMapping, StackLayout.TOP);
@@ -2467,9 +2447,9 @@ public class IchthyopView extends FrameView
                 taskPaneConfiguration.setCollapsed(true);
                 taskPaneAnimation.setCollapsed(true);
                 taskPaneMapping.setCollapsed(true);
-                pnlProgress.setVisible(true);
+                lblSimulation.setVisible(true);
             } else {
-                pnlProgress.setVisible(false);
+                lblSimulation.setVisible(false);
                 hideSimulationPreview();
             }
             setMainTitle();
@@ -2627,6 +2607,7 @@ public class IchthyopView extends FrameView
     // simulation
     private JXTaskPane taskPaneSimulation;
     private JPanel pnlSimulation;
+    private JLabel lblSimulation;
     // simulation preview
     private JButton btnPreview;
     private JScrollPane previewScrollPane;
@@ -2636,7 +2617,6 @@ public class IchthyopView extends FrameView
     private JButton btnSavePreview;
     // simulation run
     private JButton btnSimulationRun;
-    private final JRunProgressPanel pnlProgress = new JRunProgressPanel();
 
     // mapping components
     private JXTaskPane taskPaneMapping;
