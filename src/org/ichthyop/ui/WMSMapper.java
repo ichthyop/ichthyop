@@ -326,10 +326,9 @@ public class WMSMapper extends JXMapKit {
             return defaultColor;
         }
 
-        int cinf = (int) (bound((value - valmin) / (valmax - valmin)) * (colorbar.length - 1));
-        float valinf = valmin + cinf * (valmax - valmin) / colorbar.length;
-        float valsup = valmin + (cinf + 1) * (valmax - valmin) / colorbar.length;
-        float xval = Math.abs(bound((valsup - value) / (valsup - valinf)));
+        float x = bound((value - valmin) / (valmax - valmin)) * (colorbar.length - 1);
+        int cinf = (int) x;
+        float xval = cinf + 1 - x;
         if (cinf >= (colorbar.length - 1)) {
             return colorbar[cinf];
         } else {
