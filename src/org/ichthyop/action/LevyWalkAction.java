@@ -98,8 +98,8 @@ public class LevyWalkAction extends AbstractAction {
             double dt = getSimulationManager().getTimeManager().get_dt();
             int i = (int) Math.round(particle.getX());
             int j = (int) Math.round(particle.getY());
-            double dx = vxy * Math.cos(theta) / getSimulationManager().getDataset().getGrid().get_dx(j, i) * dt;
-            double dy = vxy * Math.sin(theta) / getSimulationManager().getDataset().getGrid().get_dy(j, i) * dt;
+            double dx = vxy * Math.cos(theta) / getSimulationManager().getDataset().getGrid().get_dx(i, j) * dt;
+            double dy = vxy * Math.sin(theta) / getSimulationManager().getDataset().getGrid().get_dy(i, j) * dt;
             particle.increment(new double[]{dx, dy});
         }
 

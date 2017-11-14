@@ -163,12 +163,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        return interpolateIDW(u, pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[1]), (int) Math.round(pGrid[0]));
+        return interpolateIDW(u, pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        return interpolateIDW(v, pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[1]), (int) Math.round(pGrid[0]));
+        return interpolateIDW(v, pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
     @Override
@@ -242,17 +242,17 @@ public abstract class Hycom3dCommon extends AbstractDataset {
                 double dz = getGrid().get_dz(0, 0, k);
                 Huon[k][1] = Double.isNaN(uw.getDouble(ci, cj, k))
                         ? 0.d
-                        : uw.getDouble(ci, cj, k) * getGrid().get_dy(cj, ci) * dz;
+                        : uw.getDouble(ci, cj, k) * getGrid().get_dy(ci, cj) * dz;
                 Huon[k][0] = Double.isNaN(uw.getDouble(cim1, cj, k))
                         ? 0.d
                         : uw.getDouble(cim1, cj, k) * getGrid().get_dy(cj, cim1) * dz;
 
                 Hvom[k][1] = Double.isNaN(vw.getDouble(ci, cj, k))
                         ? 0.d
-                        : vw.getDouble(ci, cj, k) * getGrid().get_dx(cj, ci) * dz;
+                        : vw.getDouble(ci, cj, k) * getGrid().get_dx(ci, cj) * dz;
                 Hvom[k][0] = Double.isNaN(vw.getDouble(ci, cjm1, k))
                         ? 0.d
-                        : vw.getDouble(ci, cjm1, k) * getGrid().get_dx(cjm1, ci) * dz;
+                        : vw.getDouble(ci, cjm1, k) * getGrid().get_dx(ci, cjm1) * dz;
             }
 
             // Find k0, index of the deepest cell in water
@@ -268,8 +268,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             for (int k = getGrid().get_nz() - 1; k > k0; k--) {
                 w.setDouble(k, 0.d);
             }
-            double dy = getGrid().get_dy(cj, ci);
-            double dx = getGrid().get_dx(cj, ci);
+            double dy = getGrid().get_dy(ci, cj);
+            double dx = getGrid().get_dx(ci, cj);
             for (int k = k0; k > 0; k--) {
                 double wtmp = ((k > getGrid().get_nz() - 2) ? 0. : w.getDouble(k + 1)) - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
                 wtmp /= (dx * dy);

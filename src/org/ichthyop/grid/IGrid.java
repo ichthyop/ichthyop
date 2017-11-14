@@ -86,9 +86,9 @@ public interface IGrid {
     
     public int get_j0();
 
-    public double get_dx(int j, int i);
+    public double get_dx(int i, int j);
 
-    public double get_dy(int j, int i);
+    public double get_dy(int i, int j);
     
     public double get_dz(int i, int j, int k);
     
