@@ -112,7 +112,7 @@ public class WindAction extends AbstractAction {
 
         /* for 3D simulation, ckeck whether the particle is close surface */
         if (particle.getZ() >= 0) {
-            double dz = Math.abs(particle.getZ() - (getSimulationManager().getDataset().get_nz() - 1));
+            double dz = Math.abs(particle.getZ() - (getSimulationManager().getDataset().getGrid().get_nz() - 1));
             if (dz > 0.01) {
                 return;
             }
@@ -129,7 +129,7 @@ public class WindAction extends AbstractAction {
             double dt = getSimulationManager().getTimeManager().get_dt();
             double newLon = particle.getLon() + getdlon(intensity, direction, windage, particle.getLat(), dt);
             double newLat = particle.getLat() + getdlat(intensity, direction, windage, dt);
-            double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
+            double[] newPos = getSimulationManager().getDataset().getGrid().latlon2xy(newLat, newLon);
             double[] windincr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
             particle.increment(windincr);
         }

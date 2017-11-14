@@ -53,13 +53,10 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
-import java.util.Arrays;
-import org.ichthyop.ui.LonLatConverter;
-import org.ichthyop.ui.LonLatConverter.LonLatFormat;
+import org.ichthyop.grid.RectilinearGrid;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -67,22 +64,12 @@ import ucar.nc2.Variable;
  */
 public abstract class Hycom3dCommon extends AbstractDataset {
 
-    double[] longitude;
-    double[] latitude;
-    double[] depthLevel;
-    double[] ddepth;
     final int nt = 3;
     NetcdfTiledVariable[] u;
     NetcdfTiledVariable[] v;
     WTiledVariable[] w;
-    int nx, ny, nz;
-    int i0, j0;
-    double[] dxu;
-    double dyv;
-    private double latMin, lonMin, latMax, lonMax;
     double dt_HyMo, time_tp1;
     int rank;
-    double[][] bathymetry;
     //NetcdfFile nc;
     int nbTimeRecords;
     boolean xTore = true;
@@ -106,255 +93,15 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         // Open NetCDF (abstract)
         open();
 
-        // Read whole grid
-        try (NetcdfFile nc = getNC()) {
-            Array array;
-            // Latitude
-            String name = DatasetUtil.findVariable(nc, "latitude");
-            if (null == name) {
-                throw new IOException("Latitude variable not found in HYCOM dataset");
-            }
-            array = nc.findVariable(name).read().reduce();
-            ny = array.getShape()[0];
-            latitude = new double[ny];
-            for (int j = 0; j < ny; j++) {
-                latitude[j] = array.getDouble(j);
-            }
-            j0 = 0;
-            // Longitude
-            name = DatasetUtil.findVariable(nc, "longitude");
-            if (null == name) {
-                throw new IOException("Longitude variable not found in HYCOM dataset");
-            }
-            array = nc.findVariable(name).read().reduce();
-            nx = array.getShape()[0];
-            longitude = new double[nx];
-            for (int i = 0; i < nx; i++) {
-                longitude[i] = array.getDouble(i);
-            }
-            i0 = 0;
-            // Depth
-            name = DatasetUtil.findVariable(nc, "depth");
-            if (null == name) {
-                throw new IOException("Depth variable not found in HYCOM dataset");
-            }
-            array = nc.findVariable(name).read().reduce();
-            nz = array.getShape()[0];
-            depthLevel = new double[nz];
-            for (int k = 0; k < nz; k++) {
-                depthLevel[k] = array.getDouble(k);
-            }
-        }
-
-        // Compute ddepth
-        ddepth = new double[nz];
-        ddepth[0] = 0.5 * Math.abs(depthLevel[0] - depthLevel[1]);
-        ddepth[nz - 1] = 0.5 * Math.abs(depthLevel[nz - 2] - depthLevel[nz - 1]);
-        for (int k = 1; k < nz - 1; k++) {
-            ddepth[k] = 0.5 * Math.abs(depthLevel[k - 1] - depthLevel[k + 1]);
-        }
-
-        // Crop the grid
-        if (getConfiguration().getBoolean(getKey() + ".shrink_domain")) {
-            crop();
-            longitude = Arrays.copyOfRange(longitude, i0, i0 + nx);
-            latitude = Arrays.copyOfRange(latitude, j0, j0 + ny);
-        }
-
-        // Longitudinal toricity
-        xTore = getConfiguration().getBoolean(getKey() + ".longitude_tore");
-
-        // scale factors (assuming regular grid)
-        dyv = 111138.d * (latitude[1] - latitude[0]);
-        dxu = new double[ny];
-        for (int j = 0; j < ny; j++) {
-            dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
-        }
-
-        // Domain geographical extension
-        extent();
+        grid = new RectilinearGrid(getKey() + ".grid");
+        grid.init();
 
         u = new NetcdfTiledVariable[nt];
         v = new NetcdfTiledVariable[nt];
         w = new WTiledVariable[nt];
         // Initializes u[0] & v[0] for the mask
-        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
-        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", nx, ny, nz, i0, j0, 0, 0, tilingh, tilingv);
-
-        // bathy
-        bathymetry = new double[ny][nx];
-        for (int i = 0; i < nx; i++) {
-            for (int j = 0; j < ny; j++) {
-                int k = this.getDeepestLevel(i, j);
-                bathymetry[j][i] = getDepth(i, j, k) - 0.5 * ddepth[k];
-            }
-        }
-    }
-
-    @Override
-    public double[] latlon2xy(double lat, double lon) {
-        boolean found1 = false;
-        boolean found2 = false;
-
-        int ci = nx / 2;
-        int cj = ny / 2;
-        int di = ci / 2;
-        int dj = cj / 2;
-
-        // Find the closet grid point to {lat, lon}
-        while (!(found1 && found2)) {
-            int i = ci;
-            int j = cj;
-            double dmin = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i]);
-            for (int ii = -di; ii <= di; ii += di) {
-                if ((i + ii >= 0) && (i + ii < nx)) {
-                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i + ii]);
-                    if (d < dmin) {
-                        dmin = d;
-                        ci = i + ii;
-                        cj = j;
-                    }
-                }
-            }
-            for (int jj = -dj; jj <= dj; jj += dj) {
-                if ((j + jj >= 0) && (j + jj < ny)) {
-                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j + jj], longitude[i]);
-                    if (d < dmin) {
-                        dmin = d;
-                        ci = i;
-                        cj = j + jj;
-                    }
-                }
-            }
-            if (i == ci && j == cj) {
-                found1 = true;
-                if (dj == 1 && di == 1) {
-                    found2 = true;
-                } else {
-                    di = (int) Math.max(1, di / 2);
-                    dj = (int) Math.max(1, dj / 2);
-                    found1 = false;
-                }
-            }
-        }
-
-        // Refine within cell (ci, cj) by linear interpolation
-        int cip1 = xTore(ci + 1);
-        int cim1 = xTore(ci - 1);
-        int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
-        int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
-        // xgrid
-        double xgrid;
-        if (lon >= longitude[ci]) {
-            double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
-                    ? 360.d + (longitude[cip1] - longitude[ci])
-                    : longitude[cip1] - longitude[ci];
-            double deltax = (lon - longitude[ci]) / dx;
-            xgrid = xTore(ci + deltax);
-        } else {
-            double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d)
-                    ? 360.d + (longitude[ci] - longitude[cim1])
-                    : longitude[ci] - longitude[cim1];
-            double deltax = (lon - longitude[cim1]) / dx;
-            xgrid = xTore(cim1 + deltax);
-        }
-        // ygrid
-        double ygrid;
-        if (lat >= latitude[cj]) {
-            double dy = latitude[cjp1] - latitude[cj];
-            double deltay = (lat - latitude[cj]) / dy;
-            ygrid = (double) cj + deltay;
-        } else {
-            double dy = latitude[cj] - latitude[cjm1];
-            double deltay = (lat - latitude[cjm1]) / dy;
-            ygrid = (double) cjm1 + deltay;
-        }
-
-        return (new double[]{xgrid, ygrid});
-    }
-
-    @Override
-    public double[] xy2latlon(double xRho, double yRho) {
-        double jy = Math.max(0.00001d, Math.min(yRho, (double) ny - 1.00001d));
-        double ix = xTore ? xRho : Math.max(0.00001d, Math.min(xRho, (double) nx - 1.00001d));
-
-        int i = (int) Math.floor(ix);
-        int j = (int) Math.floor(jy);
-        double lat = 0.d;
-        double lon = 0.d;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
-        double co;
-        for (int ii = 0; ii < 2; ii++) {
-            int ci = xTore(i);
-            int cii = xTore(i + ii);
-            for (int jj = 0; jj < 2; jj++) {
-                co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                lat += co * latitude[j + jj];
-                if (Math.abs(longitude[cii] - longitude[ci]) < 180) {
-                    lon += co * longitude[cii];
-                } else {
-                    double dlon = Math.abs(360.d - Math.abs(longitude[cii] - longitude[ci]));
-                    if (longitude[ci] < 0) {
-                        lon += co * (longitude[ci] - dlon);
-                    } else {
-                        lon += co * (longitude[ci] + dlon);
-                    }
-                }
-            }
-        }
-
-        return (new double[]{lat, lon});
-    }
-
-    @Override
-    public double depth2z(double x, double y, double depth) {
-        double z;
-        int lk = 0;
-        while ((lk < nz - 1) && (getDepth(x, y, lk) > depth)) {
-            lk++;
-        }
-        if (lk == 0) {
-            z = 0;
-        } else {
-            double pr = getDepth(x, y, lk);
-            z = Math.max(0.d, (double) lk + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
-        }
-        return (z);
-    }
-
-    @Override
-    public double z2depth(double x, double y, double z) {
-        double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
-        int k = (int) Math.floor(kz);
-        double dz = kz - (double) k;
-
-        double depth = (1.d - dz) * getDepth(x, y, k) + dz * getDepth(x, y, k + 1);
-        return depth;
-    }
-
-    double getDepth(double xRho, double yRho, int k) {
-        return -depthLevel[k];
-    }
-
-    @Override
-    public double getDepthMax(double x, double y) {
-
-        return getDepth(x, y, getDeepestLevel(x, y));
-    }
-
-    private int getDeepestLevel(double x, double y) {
-        int ix = (int) Math.round(x);
-        int jy = (int) Math.round(y);
-        if (isInWater(ix, jy, 0)) {
-            for (int k = 0; k < nz; k++) {
-                if (!isInWater(ix, jy, k)) {
-                    return Math.max(0, k - 1);
-                }
-            }
-            return nz - 1;
-        }
-        return 0;
+        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid().get_nx(), getGrid().get_ny(), getGrid().get_nz(), getGrid().get_i0(), getGrid().get_j0(), 0, 0, tilingh, tilingv);
+        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid().get_nx(), getGrid().get_ny(), getGrid().get_nz(), getGrid().get_i0(), getGrid().get_j0(), 0, 0, tilingh, tilingv);
     }
 
     private double weight(double[] xyz, int[] ijk, int p) {
@@ -366,13 +113,13 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     }
 
     private boolean isOut(int i, int j, int k) {
-        return i < 0 || j < 0 || k < 0 || i > nx - 1 || j > ny - 1 || k > nz - 1;
+        return i < 0 || j < 0 || k < 0 || i > getGrid().get_nx() - 1 || j > getGrid().get_ny() - 1 || k > getGrid().get_nz() - 1;
     }
 
     private double interpolateIDW(AbstractTiledVariable[] tv, double[] pGrid, double time) {
 
         double value = 0.d;
-        boolean coast = isCloseToCost(pGrid);
+        boolean coast = getGrid().isCloseToCost(pGrid);
         int n[] = coast ? new int[]{0, 1} : new int[]{0, 2}; // 8 points
         //int n[] = coast ? new int[]{0, 1} : new int[] {-1, 3}; // 16 points
         //int n[] = coast ? new int[]{0, 1} : new int[] {-2, 4}; // 64 points
@@ -385,7 +132,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
             // pGrid falls on a grid point
             CO = 1.d;
-            i = xTore(i);
+            i = getGrid().xTore(i);
             if (!(Double.isNaN(tv[0].getDouble(i, j, k)) || Double.isNaN(tv[1].getDouble(i, j, k)))) {
                 value = (1.d - dt) * tv[0].getDouble(i, j, k) + dt * tv[1].getDouble(i, j, k);
             }
@@ -393,7 +140,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
             for (int ii = n[0]; ii < n[1]; ii++) {
                 for (int jj = n[0]; jj < n[1]; jj++) {
                     for (int kk = n[0]; kk < n[1]; kk++) {
-                        int ci = xTore(i + ii);
+                        int ci = getGrid().xTore(i + ii);
                         if (isOut(ci, j + jj, k + kk)) {
                             continue;
                         }
@@ -416,252 +163,51 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        return interpolateIDW(u, pGrid, time) / dxu[(int) Math.round(pGrid[1])];
+        return interpolateIDW(u, pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[1]), (int) Math.round(pGrid[0]));
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        return interpolateIDW(v, pGrid, time) / dyv;
+        return interpolateIDW(v, pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[1]), (int) Math.round(pGrid[0]));
     }
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        return interpolateIDW(w, pGrid, time) / ddepth[(int) Math.round(pGrid[2])];
-    }
-
-    @Override
-    public boolean isInWater(double[] pGrid) {
-        if (pGrid.length > 2) {
-            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
-        } else {
-            return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-        }
-    }
-
-    private boolean isInWater(int i, int j, int k) {
-        int ci = xTore(i);
-        return !Double.isNaN(u[0].getDouble(ci, j, k));
-    }
-
-    @Override
-    public boolean isInWater(int i, int j) {
-        return isInWater(i, j, 0);
-    }
-
-    @Override
-    public boolean isCloseToCost(double[] pGrid) {
-        int i, j, ii, jj;
-        i = (int) (Math.round(pGrid[0]));
-        j = (int) (Math.round(pGrid[1]));
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        int ci = xTore(i + ii);
-        return !(isInWater(ci, j) && isInWater(ci, j + jj) && isInWater(i, j + jj));
-    }
-
-    @Override
-    public boolean isOnEdge(double[] pGrid) {
-
-        return (!xTore && (pGrid[0] > (nx - 2.d)) || (!xTore && (pGrid[0] < 1.d))
-                || (pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
-    }
-
-    void extent() {
-
-        //--------------------------------------
-        // Calculate the Physical Space extrema
-        lonMin = Double.MAX_VALUE;
-        lonMax = -lonMin;
-        latMin = Double.MAX_VALUE;
-        latMax = -latMin;
-
-        int i = nx;
-        while (i-- > 0) {
-            if (longitude[i] >= lonMax) {
-                lonMax = longitude[i];
-            }
-            if (longitude[i] <= lonMin) {
-                lonMin = longitude[i];
-            }
-        }
-        int j = ny;
-        while (j-- > 0) {
-            if (latitude[j] >= latMax) {
-                latMax = latitude[j];
-            }
-            if (latitude[j] <= latMin) {
-                latMin = latitude[j];
-            }
-        }
-
-        double double_tmp;
-        if (lonMin > lonMax) {
-            double_tmp = lonMin;
-            lonMin = lonMax;
-            lonMax = double_tmp;
-        }
-
-        if (latMin > latMax) {
-            double_tmp = latMin;
-            latMin = latMax;
-            latMax = double_tmp;
-        }
-        //getLogger().log(Level.INFO, "lonmin {0} lonmax {1} latmin {2} latmax {3}", new Object[]{lonMin, lonMax, latMin, latMax});
+        return interpolateIDW(w, pGrid, time) / getGrid().get_dz((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
     }
 
     @Override
     public double getBathy(int i, int j) {
-        return bathymetry[j][i];
-    }
-
-    @Override
-    public int get_nx() {
-        return nx;
-    }
-
-    @Override
-    public int get_ny() {
-        return ny;
-    }
-
-    @Override
-    public int get_nz() {
-        return nz;
-    }
-
-    @Override
-    public double get_dx(int j, int i) {
-        return dxu[j];
-    }
-
-    @Override
-    public double get_dy(int j, int i) {
-        return dyv;
-    }
-
-    @Override
-    public double getLatMin() {
-        return latMin;
-    }
-
-    @Override
-    public double getLatMax() {
-        return latMax;
-    }
-
-    @Override
-    public double getLonMin() {
-        return lonMin;
-    }
-
-    @Override
-    public double getLonMax() {
-        return lonMax;
-    }
-
-    @Override
-    public double getLon(int i, int j) {
-        return longitude[i];
-    }
-
-    @Override
-    public double getLat(int i, int j) {
-        return latitude[j];
-    }
-
-    @Override
-    public double getDepthMax() {
-        return -depthLevel[nz - 1];
-    }
-
-    @Override
-    public boolean is3D() {
-        return true;
+        return getGrid().getDepthMax(i, j);
     }
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        Variable variable = nc.findVariable(name);
-        int[] origin = null, shape = null;
-        switch (variable.getShape().length) {
-            case 4:
-                origin = new int[]{rank, 0, j0, i0};
-                shape = new int[]{1, nz, ny, nx};
-                break;
-            case 2:
-                origin = new int[]{j0, i0};
-                shape = new int[]{ny, nx};
-                break;
-            case 3:
-                if (!variable.isUnlimited()) {
-                    origin = new int[]{0, j0, i0};
-                    shape = new int[]{nz, ny, nx};
-
-                } else {
-                    origin = new int[]{rank, j0, i0};
-                    shape = new int[]{1, ny, nx};
-                }
-                break;
-        }
-
-        return variable.read(origin, shape).reduce();
-    }
-
-    private int xTore(int i) {
-        if (xTore) {
-            if (i < 0) {
-                return nx + i;
-            }
-            if (i > nx - 1) {
-                return i - nx;
-            }
-        }
-        return i;
-    }
-
-    @Override
-    public double xTore(double x) {
-        if (xTore) {
-            if (x < -0.5d) {
-                return nx + x;
-            }
-            if (x > nx - 0.5d) {
-                return x - nx;
-            }
-        }
-        return x;
-    }
-
-    @Override
-    public double yTore(double y) {
-        return y;
-    }
-
-    void crop() throws IOException {
-
-        float lon1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".north-west-corner.lon"), LonLatFormat.DecimalDeg));
-        float lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".north-west-corner.lat"), LonLatFormat.DecimalDeg));
-        float lon2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".south-east-corner.lon"), LonLatFormat.DecimalDeg));
-        float lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(getKey() + ".south-east-corner.lat"), LonLatFormat.DecimalDeg));
-
-        double[] pGrid1, pGrid2;
-        int ipn, jpn;
-
-        pGrid1 = latlon2xy(lat1, lon1);
-        pGrid2 = latlon2xy(lat2, lon2);
-        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            throw new IOException("Impossible to proportion the simulation area : points out of domain");
-        }
-
-        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
-        i0 = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
-        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
-        j0 = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
-        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
-
-        nx = Math.min(nx, ipn - i0 + 1);
-        ny = Math.min(ny, jpn - j0 + 1);
-        //System.out.println("i0 " + i0 + " nx " + nx + " j0 " + j0 + " ny " + ny);
+//        Variable variable = nc.findVariable(name);
+//        int[] origin = null, shape = null;
+//        switch (variable.getShape().length) {
+//            case 4:
+//                origin = new int[]{rank, 0, j0, i0};
+//                shape = new int[]{1, getGrid().get_nz(), getGrid().get_ny(), getGrid().get_nx()};
+//                break;
+//            case 2:
+//                origin = new int[]{j0, i0};
+//                shape = new int[]{getGrid().get_ny(), getGrid().get_nx()};
+//                break;
+//            case 3:
+//                if (!variable.isUnlimited()) {
+//                    origin = new int[]{0, j0, i0};
+//                    shape = new int[]{getGrid().get_nz(), getGrid().get_ny(), getGrid().get_nx()};
+//
+//                } else {
+//                    origin = new int[]{rank, j0, i0};
+//                    shape = new int[]{1, getGrid().get_ny(), getGrid().get_nx()};
+//                }
+//                break;
+//        }
+//
+//        return variable.read(origin, shape).reduce();
+        return null;
     }
 
     public class WTiledVariable extends AbstractTiledVariable {
@@ -678,52 +224,55 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         @Override
         Array loadTile(int tag) {
 
-            int j = tag / nx;
-            int i = tag % nx;
+            int j = tag / getGrid().get_nx();
+            int i = tag % getGrid().get_nx();
 
-            double[][] Huon = new double[nz][2];
-            double[][] Hvom = new double[nz][2];
+            double[][] Huon = new double[getGrid().get_nz()][2];
+            double[][] Hvom = new double[getGrid().get_nz()][2];
 
             int ci = i, cim1 = i - 1;
             if (i == 0) {
                 ci = xTore ? i : i + 1;
-                cim1 = xTore ? nx - 1 : i;
+                cim1 = xTore ? getGrid().get_nx() - 1 : i;
             }
             int cj = (j == 0) ? j + 1 : j;
             int cjm1 = (j == 0) ? j : j - 1;
 
-            for (int k = 0; k < nz; k++) {
+            for (int k = 0; k < getGrid().get_nz(); k++) {
+                double dz = getGrid().get_dz(0, 0, k);
                 Huon[k][1] = Double.isNaN(uw.getDouble(ci, cj, k))
                         ? 0.d
-                        : uw.getDouble(ci, cj, k) * dyv * ddepth[k];
+                        : uw.getDouble(ci, cj, k) * getGrid().get_dy(cj, ci) * dz;
                 Huon[k][0] = Double.isNaN(uw.getDouble(cim1, cj, k))
                         ? 0.d
-                        : uw.getDouble(cim1, cj, k) * dyv * ddepth[k];
+                        : uw.getDouble(cim1, cj, k) * getGrid().get_dy(cj, cim1) * dz;
 
                 Hvom[k][1] = Double.isNaN(vw.getDouble(ci, cj, k))
                         ? 0.d
-                        : vw.getDouble(ci, cj, k) * dxu[j] * ddepth[k];
+                        : vw.getDouble(ci, cj, k) * getGrid().get_dx(cj, ci) * dz;
                 Hvom[k][0] = Double.isNaN(vw.getDouble(ci, cjm1, k))
                         ? 0.d
-                        : vw.getDouble(ci, cjm1, k) * dxu[cjm1] * ddepth[k];
+                        : vw.getDouble(ci, cjm1, k) * getGrid().get_dx(cjm1, ci) * dz;
             }
 
             // Find k0, index of the deepest cell in water
-            int k0 = nz - 1;
-            for (int k = nz - 1; k > 0; k--) {
+            int k0 = getGrid().get_nz() - 1;
+            for (int k = getGrid().get_nz() - 1; k > 0; k--) {
                 if (!Double.isNaN(uw.getDouble(ci, cj, k))) {
                     k0 = k;
                     break;
                 }
             }
 
-            Array w = new ArrayDouble.D1(nz);
-            for (int k = nz - 1; k > k0; k--) {
+            Array w = new ArrayDouble.D1(getGrid().get_nz());
+            for (int k = getGrid().get_nz() - 1; k > k0; k--) {
                 w.setDouble(k, 0.d);
             }
+            double dy = getGrid().get_dy(cj, ci);
+            double dx = getGrid().get_dx(cj, ci);
             for (int k = k0; k > 0; k--) {
-                double wtmp = ((k > nz - 2) ? 0. : w.getDouble(k + 1)) - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
-                wtmp /= (dyv * dxu[cj]);
+                double wtmp = ((k > getGrid().get_nz() - 2) ? 0. : w.getDouble(k + 1)) - (Huon[k][1] - Huon[k][0] + Hvom[k][1] - Hvom[k][0]);
+                wtmp /= (dx * dy);
                 w.setDouble(k, wtmp);
             }
             w.setDouble(0, 0.d);

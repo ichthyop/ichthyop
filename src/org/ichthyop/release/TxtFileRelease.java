@@ -79,7 +79,7 @@ public class TxtFileRelease extends AbstractRelease {
     public void loadParameters() throws IOException {
 
         textFile = getFile(getConfiguration().getFile("release.txtfile.txtfile"));
-        is3D = getSimulationManager().getDataset().is3D();
+        is3D = getSimulationManager().getDataset().getGrid().is3D();
         nbParticles = readNbParticles();
     }
 

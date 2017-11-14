@@ -345,12 +345,10 @@ public class NoveltisDataset extends AbstractDataset {
         return 2.d * number / (dyv[j][i] + dxu[j][i]);
     }
 
-    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
-    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 2.0f))
                 || (pGrid[0] < 1.0f)
@@ -366,7 +364,6 @@ public class NoveltisDataset extends AbstractDataset {
         return Double.NaN;
     }
 
-    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
@@ -429,7 +426,6 @@ public class NoveltisDataset extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
-    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -524,7 +520,6 @@ public class NoveltisDataset extends AbstractDataset {
         return (isInPolygone);
     }
 
-    @Override
     public boolean isInWater(int i, int j) {
         try {
             return (maskRho[j][i] > 0);
@@ -543,7 +538,6 @@ public class NoveltisDataset extends AbstractDataset {
      * @return <code>true</code> if the grid point is close to cost,
      * <code>false</code> otherwise.
      */
-    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
@@ -554,22 +548,18 @@ public class NoveltisDataset extends AbstractDataset {
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
-    @Override
     public int get_nx() {
         return nx;
     }
 
-    @Override
     public int get_ny() {
         return ny;
     }
 
-    @Override
     public double get_dx(int j, int i) {
         return dxu[j][i];
     }
 
-    @Override
     public double get_dy(int j, int i) {
         return dyv[j][i];
     }
@@ -744,7 +734,6 @@ public class NoveltisDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum latitude [north degree]
      */
-    @Override
     public double getLatMin() {
         return latMin;
     }
@@ -754,7 +743,6 @@ public class NoveltisDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum latitude [north degree]
      */
-    @Override
     public double getLatMax() {
         return latMax;
     }
@@ -764,7 +752,6 @@ public class NoveltisDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum longitude [east degree]
      */
-    @Override
     public double getLonMin() {
         return lonMin;
     }
@@ -774,7 +761,6 @@ public class NoveltisDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum longitude [east degree]
      */
-    @Override
     public double getLonMax() {
         return lonMax;
     }
@@ -784,7 +770,6 @@ public class NoveltisDataset extends AbstractDataset {
      *
      * @return a float, the domain maximum depth [meter]
      */
-    @Override
     public double getDepthMax() {
         return depthMax;
     }
@@ -796,7 +781,6 @@ public class NoveltisDataset extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
-    @Override
     public double getLat(int i, int j) {
         return latRho[j][i];
     }
@@ -808,17 +792,14 @@ public class NoveltisDataset extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-    @Override
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
 
-    @Override
     public int get_nz() {
         return nz;
     }
 
-    @Override
     public boolean is3D() {
         return true;
     }
@@ -872,7 +853,6 @@ public class NoveltisDataset extends AbstractDataset {
         }
     }
 
-    @Override
     public double depth2z(double x, double y, double depth) {
 
         //-----------------------------------------------
@@ -891,7 +871,6 @@ public class NoveltisDataset extends AbstractDataset {
         return (z);
     }
 
-    @Override
     public double z2depth(double x, double y, double z) {
 
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
@@ -938,7 +917,6 @@ public class NoveltisDataset extends AbstractDataset {
         return dw;
     }
 
-    @Override
     public double get_dVy(double[] pGrid, double time) {
         // V points are at the centre of the cells
         
@@ -1034,7 +1012,6 @@ public class NoveltisDataset extends AbstractDataset {
         return (hh);
     }
     
-    @Override
     public double getDepthMax(double x, double y) {
         return getDepth(x, y, nz - 1);
     }
@@ -1244,12 +1221,10 @@ public class NoveltisDataset extends AbstractDataset {
         setAllFieldsTp1AtTime(rank);
     }
 
-    @Override
     public double xTore(double x) {
         return x;
     }
 
-    @Override
     public double yTore(double y) {
         return y;
     }

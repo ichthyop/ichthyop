@@ -159,13 +159,13 @@ public class SimulationPreviewPanel extends JPanel {
         graphic.setColor(new Color(223, 212, 200));
         graphic.fillRect(0, 0, w, h);
 
-        double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getDataset().get_ny()));
-        double csizew = Math.max(1.d, Math.ceil(w / getSimulationManager().getDataset().get_nx()));
+        double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getDataset().getGrid().get_ny()));
+        double csizew = Math.max(1.d, Math.ceil(w / getSimulationManager().getDataset().getGrid().get_nx()));
         double csize = 2 * Math.max(csizeh, csizew);
-        for (int i = getSimulationManager().getDataset().get_nx(); i-- > 0;) {
-            for (int j = getSimulationManager().getDataset().get_ny(); j-- > 0;) {
-                double lat = getSimulationManager().getDataset().getLat(i, j);
-                double lon = getSimulationManager().getDataset().getLon(i, j);
+        for (int i = getSimulationManager().getDataset().getGrid().get_nx(); i-- > 0;) {
+            for (int j = getSimulationManager().getDataset().getGrid().get_ny(); j-- > 0;) {
+                double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
+                double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
                 double x = w * (lon - lonmin) / (lonmax - lonmin);
                 double y = h * (latmax - lat) / (latmax - latmin);
                 Rectangle2D rectangle = new Rectangle2D.Double(x + 0.5 * csize, y - 0.5 * csize, csize, csize);
@@ -188,10 +188,10 @@ public class SimulationPreviewPanel extends JPanel {
         hi = -1;
         wi = -1;
 
-        latmin = getSimulationManager().getDataset().getLatMin();
-        latmax = getSimulationManager().getDataset().getLatMax();
-        lonmin = getSimulationManager().getDataset().getLonMin();
-        lonmax = getSimulationManager().getDataset().getLonMax();
+        latmin = getSimulationManager().getDataset().getGrid().getLatMin();
+        latmax = getSimulationManager().getDataset().getGrid().getLatMax();
+        lonmin = getSimulationManager().getDataset().getGrid().getLonMin();
+        lonmax = getSimulationManager().getDataset().getGrid().getLonMax();
         double avgLat = 0.5d * (latmin + latmax);
         double dlon = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
         double dlat = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
@@ -222,7 +222,7 @@ public class SimulationPreviewPanel extends JPanel {
      */
     private Color getColor(int i, int j) {
 
-        if (getSimulationManager().getDataset().isInWater(i, j)) {
+        if (getSimulationManager().getDataset().getGrid().isInWater(i, j)) {
             // zone
             for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
                 if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
@@ -230,7 +230,7 @@ public class SimulationPreviewPanel extends JPanel {
                 }
             }
             // bathymetry
-            double bathymax = Math.abs(getSimulationManager().getDataset().getDepthMax());
+            double bathymax = Math.abs(getSimulationManager().getDataset().getGrid().getDepthMax());
             double bathy = Math.abs(getSimulationManager().getDataset().getBathy(i, j));
             double xdepth = (bathymax - bathy) / bathymax;
             xdepth = Math.max(0, Math.min(xdepth, 1));

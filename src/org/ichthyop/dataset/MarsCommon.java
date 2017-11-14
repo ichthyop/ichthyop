@@ -282,12 +282,10 @@ public abstract class MarsCommon extends AbstractDataset {
         return 2.d * number / (dyv[j][i] + dxu[j][i]);
     }
 
-    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
-    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 2.0f))
                 || (pGrid[0] < 1.0f)
@@ -295,7 +293,6 @@ public abstract class MarsCommon extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
-    @Override
     public double getBathy(int i, int j) {
         if (isInWater(i, j)) {
             return hRho[j][i];
@@ -303,7 +300,6 @@ public abstract class MarsCommon extends AbstractDataset {
         return Double.NaN;
     }
 
-    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
@@ -367,7 +363,6 @@ public abstract class MarsCommon extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
-    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -463,7 +458,6 @@ public abstract class MarsCommon extends AbstractDataset {
         return (isInPolygone);
     }
 
-    @Override
     public boolean isInWater(int i, int j) {
         try {
             return (maskRho[j][i] > 0);
@@ -482,7 +476,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * @return <code>true</code> if the grid point is close to cost,
      *         <code>false</code> otherwise.
      */
-    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
@@ -493,22 +486,18 @@ public abstract class MarsCommon extends AbstractDataset {
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
-    @Override
     public int get_nx() {
         return nx;
     }
 
-    @Override
     public int get_ny() {
         return ny;
     }
 
-    @Override
     public double get_dx(int j, int i) {
         return dxu[j][i];
     }
 
-    @Override
     public double get_dy(int j, int i) {
         return dyv[j][i];
     }
@@ -682,7 +671,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain minimum latitude.
      * @return a double, the domain minimum latitude [north degree]
      */
-    @Override
     public double getLatMin() {
         return latMin;
     }
@@ -691,7 +679,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain maximum latitude.
      * @return a double, the domain maximum latitude [north degree]
      */
-    @Override
     public double getLatMax() {
         return latMax;
     }
@@ -700,7 +687,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain minimum longitude.
      * @return a double, the domain minimum longitude [east degree]
      */
-    @Override
     public double getLonMin() {
         return lonMin;
     }
@@ -709,7 +695,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain maximum longitude.
      * @return a double, the domain maximum longitude [east degree]
      */
-    @Override
     public double getLonMax() {
         return lonMax;
     }
@@ -718,7 +703,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * Gets domain maximum depth.
      * @return a float, the domain maximum depth [meter]
      */
-    @Override
     public double getDepthMax() {
         return depthMax;
     }
@@ -729,7 +713,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
-    @Override
     public double getLat(int i, int j) {
         return latRho[j][i];
     }
@@ -740,7 +723,6 @@ public abstract class MarsCommon extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-    @Override
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
@@ -762,13 +744,11 @@ public abstract class MarsCommon extends AbstractDataset {
         }
     }
     
-    @Override
     public double xTore(double x) {
         return x;
     }
 
     
-    @Override
     public double yTore(double y) {
         return y;
     }

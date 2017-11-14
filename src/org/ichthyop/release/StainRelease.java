@@ -79,7 +79,7 @@ public class StainRelease extends AbstractRelease {
     public void loadParameters() throws Exception {
 
         /* Check whether 2D or 3D simulation */
-        is3D = getSimulationManager().getDataset().is3D();
+        is3D = getSimulationManager().getDataset().getGrid().is3D();
 
         /* retrieve stain parameters */
         nb_particles = getConfiguration().getInt("release.stain.number_particles");
@@ -95,7 +95,7 @@ public class StainRelease extends AbstractRelease {
     @Override
     public int release(ReleaseEvent event) throws Exception {
 
-        boolean isStainInWater = getSimulationManager().getDataset().isInWater(getSimulationManager().getDataset().latlon2xy(lat_stain, lon_stain));
+        boolean isStainInWater = getSimulationManager().getDataset().getGrid().isInWater(getSimulationManager().getDataset().getGrid().latlon2xy(lat_stain, lon_stain));
         if (!isStainInWater) {
             throw new IOException("[release stain] Center of the stain [lat: " + lat_stain + "; lon: " + lon_stain + "] is not in water or out of the domain. Fixed that in section Release stain.");
         }

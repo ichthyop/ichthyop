@@ -97,21 +97,6 @@ public class Roms2dDataset extends RomsCommon {
     }
 
     @Override
-    public boolean is3D() {
-        return false;
-    }
-
-    @Override
-    public double depth2z(double x, double y, double depth) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-
-    @Override
-    public double z2depth(double x, double y, double z) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-
-    @Override
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
@@ -184,16 +169,6 @@ public class Roms2dDataset extends RomsCommon {
             du /= CO;
         }
         return du;
-    }
-
-    @Override
-    public int get_nz() {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-    
-    @Override
-    public double getDepthMax(double x, double y) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
     @Override

@@ -147,12 +147,10 @@ abstract class Mars3dCommon extends MarsCommon {
         z_w_tp0 = getSigLevels();
     }
 
-    @Override
     public boolean is3D() {
         return true;
     }
 
-    @Override
     public int get_nz() {
         return nz;
     }
@@ -368,7 +366,6 @@ abstract class Mars3dCommon extends MarsCommon {
         }
     }
 
-    @Override
     public double depth2z(double x, double y, double depth) {
 
         //-----------------------------------------------
@@ -387,7 +384,6 @@ abstract class Mars3dCommon extends MarsCommon {
         return (z);
     }
 
-    @Override
     public double z2depth(double x, double y, double z) {
 
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
@@ -530,7 +526,6 @@ abstract class Mars3dCommon extends MarsCommon {
         return (hh);
     }
 
-    @Override
     public double getDepthMax(double x, double y) {
         return getDepth(x, y, 0);
     }

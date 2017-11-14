@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,39 +50,74 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
-package org.ichthyop.dataset;
-
-import org.ichthyop.event.NextStepListener;
-import org.ichthyop.grid.IGrid;
-import ucar.ma2.Array;
-import ucar.nc2.NetcdfFile;
+package org.ichthyop.grid;
 
 /**
  *
  * @author pverley
  */
-public interface IDataset extends NextStepListener {
-
-    public void setUp() throws Exception ;
+public interface IGrid {
     
-    public IGrid getGrid();
+     public double[] latlon2xy(double lat, double lon);
 
-    double get_dUx(double[] pGrid, double time);
+    public double[] xy2latlon(double x, double y);
 
-    double get_dVy(double[] pGrid, double time);
+    public double depth2z(double x, double y, double depth);
 
-    double get_dWz(double[] pGrid, double time);
-
-    public double getBathy(int i, int j);
-
-    public void init() throws Exception;
-
-    public Number get(String variableName, double[] pGrid, double time);
-
-    public void requireVariable(String name, Class requiredBy);
-
-    public void removeRequiredVariable(String name, Class requiredBy);
+    public double z2depth(double x, double y, double z);
     
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception;
+     public boolean isInWater(double[] pGrid);
+
+    public boolean isInWater(int i, int j);
+    
+    public boolean isInWater(int i, int j, int k);
+
+    boolean isCloseToCost(double[] pGrid);
+
+    public boolean isOnEdge(double[] pGrid);
+    
+    public int get_nx();
+
+    public int get_ny();
+
+    public int get_nz();
+    
+    public int get_i0();
+    
+    public int get_j0();
+
+    public double get_dx(int j, int i);
+
+    public double get_dy(int j, int i);
+    
+    public double get_dz(int i, int j, int k);
+    
+    public double getLatMin();
+
+    public double getLatMax();
+
+    public double getLonMin();
+
+    public double getLonMax();
+
+    public double getLon(int i, int j);
+
+    public double getLat(int i, int j);
+    
+    public double getDepth(double x, double y, int k);
+
+    public double getDepthMax();
+    
+    public double getDepthMax(double x, double y);
+    
+    public boolean is3D();
+    
+    public double xTore(double x);
+    
+    public double yTore(double y);
+    
+    public int xTore(int x);
+    
+    public int yTore(int y);
+    
 }

@@ -65,7 +65,7 @@ public class Hycom3dDataset extends Hycom3dCommon {
 
     private List<String> uvFiles;
     private int index;
-    
+
     @Override
     String getKey() {
         return "dataset.hycom_3d";
@@ -93,6 +93,12 @@ public class Hycom3dDataset extends Hycom3dCommon {
         nbTimeRecords = nc.findVariable(name).getShape()[0];
         rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
         time_tp1 = t0;
+
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
+        int nz = getGrid().get_nz();
+        int i0 = getGrid().get_i0();
+        int j0 = getGrid().get_j0();
 
         // t+1
         u[1] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time_tp1, tilingh, tilingv);
@@ -172,11 +178,16 @@ public class Hycom3dDataset extends Hycom3dCommon {
             }
             nc = DatasetUtil.openFile(uvFiles.get(index2), true);
             int nbTimeRecords2 = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-            
+
             rank2 = (1 - time_arrow) / 2 * (nbTimeRecords2 - 1);
         }
         double time_tp2 = DatasetUtil.timeAtRank(nc, "time", rank2);
         nc.close();
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
+        int nz = getGrid().get_nz();
+        int i0 = getGrid().get_i0();
+        int j0 = getGrid().get_j0();
         u[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);
         v[2] = new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);
         w[2] = new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), nx, ny, nz, i0, j0, tilinghw, rank2, time_tp2);

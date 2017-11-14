@@ -349,7 +349,7 @@ public class DatasetUtil extends IchthyopLinker {
         return 1.d;
     }
 
-    static NetcdfFile openFile(String filename, boolean enhanced) throws IOException {
+    public static NetcdfFile openFile(String filename, boolean enhanced) throws IOException {
         NetcdfFile nc;
         nc = NetcdfDataset.openDataset(filename, enhanced, null);
         getLogger().log(Level.FINE, "'{'Dataset'}' Open {0}", filename);

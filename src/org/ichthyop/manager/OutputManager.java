@@ -67,6 +67,7 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.ichthyop.Zone;
 import org.ichthyop.dataset.IDataset;
 import org.ichthyop.event.NextStepListener;
+import org.ichthyop.grid.IGrid;
 import org.ichthyop.output.AbstractTracker;
 import org.ichthyop.output.DepthTracker;
 import org.ichthyop.util.IOTools;
@@ -256,10 +257,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private List<GeoPosition> zoneToPointCloud(Zone zone) {
         List<GeoPosition> list = new ArrayList();
 
-        for (int i = 0; i < getSimulationManager().getDataset().get_nx(); i += 2) {
-            for (int j = 0; j < getSimulationManager().getDataset().get_ny(); j += 2) {
+        for (int i = 0; i < getSimulationManager().getDataset().getGrid().get_nx(); i += 2) {
+            for (int j = 0; j < getSimulationManager().getDataset().getGrid().get_ny(); j += 2) {
                 if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
-                    double[] latlon = getSimulationManager().getDataset().xy2latlon(i, j);
+                    double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(i, j);
                     list.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
                 }
             }
@@ -271,41 +272,41 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private List<GeoPosition> edgeToPointCloud() {
 
         List<GeoPosition> lregion = new ArrayList();
-        IDataset dataset = getSimulationManager().getDataset();
-        for (int i = 1; i < dataset.get_nx(); i += 2) {
-            if (!Double.isNaN(dataset.getLat(i, 0)) && !Double.isNaN(dataset.getLon(i, 0))) {
-                double lon = dataset.getLon(i, 0);
+        IGrid grid = getSimulationManager().getDataset().getGrid();
+        for (int i = 1; i < grid.get_nx(); i += 2) {
+            if (!Double.isNaN(grid.getLat(i, 0)) && !Double.isNaN(grid.getLon(i, 0))) {
+                double lon = grid.getLon(i, 0);
                 if (lon > 180) {
                     lon = lon - 360.d;
                 }
-                lregion.add(new GeoPosition(dataset.getLat(i, 0), lon));
+                lregion.add(new GeoPosition(grid.getLat(i, 0), lon));
             }
         }
-        for (int j = 1; j < dataset.get_ny(); j += 2) {
-            if (!Double.isNaN(dataset.getLat(dataset.get_nx() - 1, j)) && !Double.isNaN(dataset.getLon(dataset.get_nx() - 1, j))) {
-                double lon = dataset.getLon(dataset.get_nx() - 1, j);
+        for (int j = 1; j < grid.get_ny(); j += 2) {
+            if (!Double.isNaN(grid.getLat(grid.get_nx() - 1, j)) && !Double.isNaN(grid.getLon(grid.get_nx() - 1, j))) {
+                double lon = grid.getLon(grid.get_nx() - 1, j);
                 if (lon > 180) {
                     lon = lon - 360.d;
                 }
-                lregion.add(new GeoPosition(dataset.getLat(dataset.get_nx() - 1, j), lon));
+                lregion.add(new GeoPosition(grid.getLat(grid.get_nx() - 1, j), lon));
             }
         }
-        for (int i = dataset.get_nx() - 1; i > 0; i -= 2) {
-            if (!Double.isNaN(dataset.getLat(i, dataset.get_ny() - 1)) && !Double.isNaN(dataset.getLon(i, dataset.get_ny() - 1))) {
-                double lon = dataset.getLon(i, dataset.get_ny() - 1);
+        for (int i = grid.get_nx() - 1; i > 0; i -= 2) {
+            if (!Double.isNaN(grid.getLat(i, grid.get_ny() - 1)) && !Double.isNaN(grid.getLon(i, grid.get_ny() - 1))) {
+                double lon = grid.getLon(i, grid.get_ny() - 1);
                 if (lon > 180) {
                     lon = lon - 360.d;
                 }
-                lregion.add(new GeoPosition(dataset.getLat(i, dataset.get_ny() - 1), lon));
+                lregion.add(new GeoPosition(grid.getLat(i, grid.get_ny() - 1), lon));
             }
         }
-        for (int j = dataset.get_ny() - 1; j > 0; j -= 2) {
-            if (!Double.isNaN(dataset.getLat(0, j)) && !Double.isNaN(dataset.getLon(0, j))) {
-                double lon = dataset.getLon(0, j);
+        for (int j = grid.get_ny() - 1; j > 0; j -= 2) {
+            if (!Double.isNaN(grid.getLat(0, j)) && !Double.isNaN(grid.getLon(0, j))) {
+                double lon = grid.getLon(0, j);
                 if (lon > 180) {
                     lon = lon - 360.d;
                 }
-                lregion.add(new GeoPosition(dataset.getLat(0, j), lon));
+                lregion.add(new GeoPosition(grid.getLat(0, j), lon));
             }
         }
         return lregion;
@@ -314,10 +315,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public List<GeoPosition> maskToPointCloud() {
 
         List<GeoPosition> lmask = new ArrayList();
-        for (int i = 0; i < getSimulationManager().getDataset().get_nx(); i += 2) {
-            for (int j = 0; j < getSimulationManager().getDataset().get_ny(); j += 2) {
-                if (!getSimulationManager().getDataset().isInWater(i, j)) {
-                    double[] latlon = getSimulationManager().getDataset().xy2latlon(i, j);
+        for (int i = 0; i < getSimulationManager().getDataset().getGrid().get_nx(); i += 2) {
+            for (int j = 0; j < getSimulationManager().getDataset().getGrid().get_ny(); j += 2) {
+                if (!getSimulationManager().getDataset().getGrid().isInWater(i, j)) {
+                    double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(i, j);
                     lmask.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
                 }
             }
@@ -357,7 +358,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         trackers.add(new LonTracker());
         trackers.add(new LatTracker());
         trackers.add(new MortalityTracker());
-        if (getSimulationManager().getDataset().is3D()) {
+        if (getSimulationManager().getDataset().getGrid().is3D()) {
             trackers.add(new DepthTracker());
         }
         /* Add trackers requested by external actions */

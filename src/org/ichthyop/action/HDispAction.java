@@ -130,8 +130,8 @@ public class HDispAction extends AbstractAction {
          * Get the current cell (i, j) where the particle is located
          */
         int i = (int) Math.round(pGrid[0]), j = (int) Math.round(pGrid[1]);
-        int nx = getSimulationManager().getDataset().get_nx();
-        int ny = getSimulationManager().getDataset().get_ny();
+        int nx = getSimulationManager().getDataset().getGrid().get_nx();
+        int ny = getSimulationManager().getDataset().getGrid().get_ny();
         i = Math.max(Math.min(i, nx - 1), 0);
         j = Math.max(Math.min(j, ny - 1), 0);
 
@@ -147,7 +147,7 @@ public class HDispAction extends AbstractAction {
             double[] rPos = (pGrid.length > 2)
                     ? new double[]{pGrid[0] + rMove[0], pGrid[1] + rMove[1], pGrid[2]}
                     : new double[]{pGrid[0] + rMove[0], pGrid[1] + rMove[1]};
-            if (getSimulationManager().getDataset().isInWater(rPos)) {
+            if (getSimulationManager().getDataset().getGrid().isInWater(rPos)) {
                 return new double[]{rMove[0], rMove[1]};
             }
         }
@@ -165,11 +165,11 @@ public class HDispAction extends AbstractAction {
     private double[] randomMove(int i, int j, double dt) {
         double Rx = 2.d * random.nextDouble() - 1.d;
         double Ry = 2.d * random.nextDouble() - 1.d;
-        double dL = 0.5d * (getSimulationManager().getDataset().get_dx(j, i) + getSimulationManager().getDataset().get_dy(j, i));
+        double dL = 0.5d * (getSimulationManager().getDataset().getGrid().get_dx(j, i) + getSimulationManager().getDataset().getGrid().get_dy(j, i));
         // abs(dt) because it is negative integer in backward simulation
         double cff = Math.sqrt(2.d * Math.abs(dt)) * epsilon16 * Math.pow(dL, 2.d / 3.d);
-        double dx = Rx * cff / getSimulationManager().getDataset().get_dx(j, i);
-        double dy = Ry * cff / getSimulationManager().getDataset().get_dy(j, i);
+        double dx = Rx * cff / getSimulationManager().getDataset().getGrid().get_dx(j, i);
+        double dy = Ry * cff / getSimulationManager().getDataset().getGrid().get_dy(j, i);
         return new double[]{dx, dy};
     }
 }

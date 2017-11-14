@@ -82,7 +82,6 @@ public abstract class Mars2dCommon extends MarsCommon {
      */
     float[][] v_tp1;
 
-    @Override
     public boolean is3D() {
         return false;
     }
@@ -203,17 +202,14 @@ public abstract class Mars2dCommon extends MarsCommon {
         }
     }
 
-    @Override
     public double depth2z(double x, double y, double depth) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
-    @Override
     public double z2depth(double x, double y, double z) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
-    @Override
     public int get_nz() {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
@@ -224,7 +220,6 @@ public abstract class Mars2dCommon extends MarsCommon {
     }
     
     
-    @Override
     public double getDepthMax(double x, double y) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }

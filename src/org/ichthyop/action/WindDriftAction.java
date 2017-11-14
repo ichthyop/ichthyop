@@ -107,7 +107,7 @@ public class WindDriftAction extends AbstractAction {
         double[] mvt = getDLonLat(particle.getGridCoordinates(), -particle.getDepth(), getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt());
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
-        double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
+        double[] newPos = getSimulationManager().getDataset().getGrid().latlon2xy(newLat, newLon);
         double[] windincr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
         particle.increment(windincr);
 
@@ -115,7 +115,7 @@ public class WindDriftAction extends AbstractAction {
 
     private double[] getDLonLat(double[] pgrid, double depth, double time, double dt) {
         double[] dWi = new double[2];
-        if (getSimulationManager().getDataset().is3D()) {
+        if (getSimulationManager().getDataset().getGrid().is3D()) {
             if (depth > depth_application) {
                 dWi[0] = 0;
                 dWi[1] = 0;
@@ -123,7 +123,7 @@ public class WindDriftAction extends AbstractAction {
             }
         }
         double dx, dy;
-        double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
+        double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
         dx = dt * getSimulationManager().getDataset().get(strUW, pgrid, time).doubleValue() / one_deg_lon_meter;
         dy = dt * getSimulationManager().getDataset().get(strVW, pgrid, time).doubleValue() / ONE_DEG_LATITUDE_IN_METER;

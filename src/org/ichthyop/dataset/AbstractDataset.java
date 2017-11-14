@@ -52,9 +52,11 @@
  */
 package org.ichthyop.dataset;
 
+import org.ichthyop.grid.AbstractRegularGrid;
 import java.util.HashMap;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.grid.IGrid;
 import org.ichthyop.manager.TimeManager;
 import ucar.nc2.NetcdfFile;
 
@@ -65,10 +67,17 @@ import ucar.nc2.NetcdfFile;
 public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
 
     final HashMap<String, RequiredVariable> requiredVariables = new HashMap();
-
+    
+    AbstractRegularGrid grid;
+    
     abstract String getKey();
 
     abstract void loadParameters();
+    
+    @Override
+    public IGrid getGrid() {
+        return grid;
+    }
 
     @Override
     public Number get(String variableName, double[] pGrid, double time) {

@@ -100,7 +100,7 @@ public class OffshoreSwimming extends AbstractAction {
         // Compute barycenter of the coastal cells        
         double[] barycenter = barycenter(coord);
         // Distance from barycenter to particle
-        double[] latlon = getSimulationManager().getDataset().xy2latlon(barycenter[0], barycenter[1]);
+        double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(barycenter[0], barycenter[1]);
         double distance = DatasetUtil.geodesicDistance(latlon[0], latlon[1], particle.getLat(), particle.getLon());
         // Distance swum offsore
         double dswim = velocity * getSimulationManager().getTimeManager().get_dt() / distance;
@@ -118,8 +118,8 @@ public class OffshoreSwimming extends AbstractAction {
         int n = 1;
         // Find coastal cells withing the defined radius
         List<int[]> coord = new ArrayList();
-        int nx = getSimulationManager().getDataset().get_nx();
-        int ny = getSimulationManager().getDataset().get_ny();
+        int nx = getSimulationManager().getDataset().getGrid().get_nx();
+        int ny = getSimulationManager().getDataset().getGrid().get_ny();
         while (true) {
             double dmin = radius, distance;
             for (int i = -n; i < n; i++) {
@@ -183,14 +183,14 @@ public class OffshoreSwimming extends AbstractAction {
     }
 
     private double distance(int i, int j, double lat0, double lon0) {
-        double lat = getSimulationManager().getDataset().getLat(i, j);
-        double lon = getSimulationManager().getDataset().getLon(i, j);
+        double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
+        double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
         return DatasetUtil.geodesicDistance(lat0, lon0, lat, lon);
     }
 
     private boolean coastal(int i, int j) {
 
-        return !getSimulationManager().getDataset().isInWater(i, j);
+        return !getSimulationManager().getDataset().getGrid().isInWater(i, j);
 //        if (!getSimulationManager().getDataset().isInWater(i, j)) {
 //            int ip1 = Math.min(i + 1, getSimulationManager().getDataset().get_nx() - 1);
 //            int jp1 = Math.min(j + 1, getSimulationManager().getDataset().get_ny() - 1);

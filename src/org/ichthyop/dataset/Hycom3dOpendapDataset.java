@@ -85,6 +85,12 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         nbTimeRecords = nc.findVariable(name).getShape()[0];
         rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
         time_tp1 = t0;
+        
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
+        int nz = getGrid().get_nz();
+        int i0 = getGrid().get_i0();
+        int j0 = getGrid().get_j0();
 
         u[1] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time_tp1, tilingh, tilingv);
         v[1] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time_tp1, tilingh, tilingv);
@@ -132,6 +138,11 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
             nc.close();
             return;
         }
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
+        int nz = getGrid().get_nz();
+        int i0 = getGrid().get_i0();
+        int j0 = getGrid().get_j0();
         double time_tp2 = DatasetUtil.timeAtRank(nc, "time", rank2);
         u[2] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);
         v[2] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank2, time_tp2, tilingh, tilingv);

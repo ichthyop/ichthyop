@@ -155,7 +155,6 @@ public class Mercator2dDataset extends AbstractDataset {
         return "dataset.mercator2d";
     }
     
-    @Override
     public boolean is3D() {
         return false;
     }
@@ -320,7 +319,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @param i
      * @return
      */
-    @Override
     public double get_dx(int j, int i) {
 
         return dxu[j];
@@ -333,7 +331,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @param i
      * @return
      */
-    @Override
     public double get_dy(int j, int i) {
 
         return dyv;
@@ -508,7 +505,6 @@ public class Mercator2dDataset extends AbstractDataset {
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
     }
 
-    @Override
     public boolean isInWater(int i, int j) {
         int ci = i;
         if (ci < 0) {
@@ -528,7 +524,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * <code>false</code> otherwise.
      * @see #isInWater(int i, int j)
      */
-    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
@@ -543,7 +538,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @return <code>true</code> if the grid point is close to cost,
      * <code>false</code> otherwise.
      */
-    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, ii, jj;
@@ -561,12 +555,10 @@ public class Mercator2dDataset extends AbstractDataset {
         return !(isInWater(ci, j) && isInWater(ci, j + jj) && isInWater(i, j + jj));
     }
 
-    @Override
     public double depth2z(double x, double y, double depth) {
         throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
-    @Override
     public double z2depth(double x, double y, double z) {
         throw new UnsupportedOperationException("Method not supported in 2D");
     }
@@ -581,7 +573,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @return a double[], the corresponding geographical coordinates (latitude,
      * longitude)
      */
-    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -647,7 +638,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @return a double[], the corresponding grid coordinates (x, y)
      * @see #isInsidePolygone
      */
-    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
@@ -761,7 +751,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @return <code>true</code> if the particle is on edge of the domain
      * <code>false</code> otherwise.
      */
-    @Override
     public boolean isOnEdge(double[] pGrid) {
         /* barrier.n, 2017-08-02> adding the last two lines for zonal checking if xTore is activated*/
         return (!xTore && (pGrid[0] > (nx - 2.d)) || (!xTore && (pGrid[0] < 1.d))
@@ -777,7 +766,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return an int, the grid dimension in the XI-direction (Zonal)
      */
-    @Override
     public int get_nx() {
         return nx;
     }
@@ -787,7 +775,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return an int, the grid dimension in the ETA-direction (Meridional)
      */
-    @Override
     public int get_ny() {
         return ny;
     }
@@ -797,7 +784,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return an int, the grid dimension in the vertical direction
      */
-    @Override
     public int get_nz() {
         throw new UnsupportedOperationException("Method not supported in 2D");
     }
@@ -807,7 +793,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum latitude [north degree]
      */
-    @Override
     public double getLatMin() {
         return latMin;
     }
@@ -817,7 +802,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum latitude [north degree]
      */
-    @Override
     public double getLatMax() {
         return latMax;
     }
@@ -827,7 +811,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum longitude [east degree]
      */
-    @Override
     public double getLonMin() {
         return lonMin;
     }
@@ -837,7 +820,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum longitude [east degree]
      */
-    @Override
     public double getLonMax() {
         return lonMax;
     }
@@ -847,7 +829,6 @@ public class Mercator2dDataset extends AbstractDataset {
      *
      * @return a float, the domain maximum depth [meter]
      */
-    @Override
     public double getDepthMax() {
         return -1;
     }
@@ -859,7 +840,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
-    @Override
     public double getLat(int i, int j) {
         return latitude[j];
     }
@@ -871,7 +851,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-    @Override
     public double getLon(int i, int j) {
         return longitude[i];
     }
@@ -950,12 +929,10 @@ public class Mercator2dDataset extends AbstractDataset {
         throw new UnsupportedOperationException("Method not supported in 2D");
     }
     
-    @Override
     public double getDepthMax(double x, double y) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
-    @Override
     public double xTore(double x) {
         if (x < -0.5d) {
             return nx + x;
@@ -966,7 +943,6 @@ public class Mercator2dDataset extends AbstractDataset {
         return x;
     }
 
-    @Override
     public double yTore(double y) {
         return y;
     }

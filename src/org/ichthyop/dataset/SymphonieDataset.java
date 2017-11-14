@@ -700,7 +700,6 @@ public class SymphonieDataset extends AbstractDataset {
         info("Opened dataset {0}", filename);
     }
 
-    @Override
     public double[] latlon2xy(double lat, double lon) {
         //--------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
@@ -763,7 +762,6 @@ public class SymphonieDataset extends AbstractDataset {
         return (new double[]{xgrid, ygrid});
     }
 
-    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -789,7 +787,6 @@ public class SymphonieDataset extends AbstractDataset {
         return (new double[]{latitude, longitude});
     }
 
-    @Override
     public double depth2z(double x, double y, double depth) {
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -830,13 +827,10 @@ public class SymphonieDataset extends AbstractDataset {
         return (hh);
     }
     
-    @Override
     public double getDepthMax(double x, double y) {
         return getDepth(x, y, nk - 1);
     }
 
-
-    @Override
     public double z2depth(double x, double y, double z) {
 
         final double kz = Math.max(0.d, Math.min(z, (double) nk - 1.00001f));
@@ -979,12 +973,10 @@ public class SymphonieDataset extends AbstractDataset {
         return dw;
     }
 
-    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
-    @Override
     public boolean isInWater(int i, int j) {
         try {
             return (mask_t[j][i] > 0);
@@ -993,7 +985,6 @@ public class SymphonieDataset extends AbstractDataset {
         }
     }
 
-    @Override
     public boolean isCloseToCost(double[] pGrid) {
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
@@ -1003,7 +994,6 @@ public class SymphonieDataset extends AbstractDataset {
         return !(isInWater(i + ii, j) && isInWater(i + ii, j + jj) && isInWater(i, j + jj));
     }
 
-    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (ni - 2.0f))
                 || (pGrid[0] < 1.0f)
@@ -1019,27 +1009,22 @@ public class SymphonieDataset extends AbstractDataset {
         return Double.NaN;
     }
 
-    @Override
     public int get_nx() {
         return ni;
     }
 
-    @Override
     public int get_ny() {
         return nj;
     }
 
-    @Override
     public int get_nz() {
         return nk;
     }
 
-    @Override
     public double get_dx(int j, int i) {
         return dx_v[j][i];
     }
 
-    @Override
     public double get_dy(int j, int i) {
         return dy_u[j][i];
     }
@@ -1049,7 +1034,6 @@ public class SymphonieDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum latitude [north degree]
      */
-    @Override
     public double getLatMin() {
         return latMin;
     }
@@ -1059,7 +1043,6 @@ public class SymphonieDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum latitude [north degree]
      */
-    @Override
     public double getLatMax() {
         return latMax;
     }
@@ -1069,7 +1052,6 @@ public class SymphonieDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum longitude [east degree]
      */
-    @Override
     public double getLonMin() {
         return lonMin;
     }
@@ -1079,7 +1061,6 @@ public class SymphonieDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum longitude [east degree]
      */
-    @Override
     public double getLonMax() {
         return lonMax;
     }
@@ -1089,22 +1070,18 @@ public class SymphonieDataset extends AbstractDataset {
      *
      * @return a float, the domain maximum depth [meter]
      */
-    @Override
     public double getDepthMax() {
         return depthMax;
     }
 
-    @Override
     public double getLon(int igrid, int jgrid) {
         return longitude_t[jgrid][igrid];
     }
 
-    @Override
     public double getLat(int igrid, int jgrid) {
         return latitude_t[jgrid][igrid];
     }
 
-    @Override
     public boolean is3D() {
         return true;
     }
@@ -1234,13 +1211,10 @@ public class SymphonieDataset extends AbstractDataset {
         return (isInPolygone);
     }
     
-    @Override
     public double xTore(double x) {
         return x;
     }
 
-    
-    @Override
     public double yTore(double y) {
         return y;
     }

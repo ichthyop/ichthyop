@@ -63,7 +63,7 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-/**
+/*
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
@@ -110,7 +110,7 @@ public class RequiredVariable {
                 throw new NumberFormatException("Variable " + name + " is not a numeric variable");
             }
             isUnlimited = variable.isUnlimited();
-            boolean is3D = getSimulationManager().getDataset().is3D();
+            boolean is3D = getSimulationManager().getDataset().getGrid().is3D();
 
             switch (variable.getShape().length) {
                 case 4:
@@ -141,7 +141,7 @@ public class RequiredVariable {
 
         int[] origin;
         int[] shape;
-        int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
+        int n = dataset.getGrid().isCloseToCost(pGrid) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double dx = pGrid[0] - (double) i;
@@ -151,7 +151,7 @@ public class RequiredVariable {
         if (isUnlimited) {
             switch (array_tp0.getShape().length) {
                 case 3:
-                    kz = Math.max(0.d, Math.min(pGrid[2], (double) dataset.get_nz() - 1.00001f));
+                    kz = Math.max(0.d, Math.min(pGrid[2], (double) dataset.getGrid().get_nz() - 1.00001f));
                     k = (int) kz;
                     dz = kz - (double) k;
                     shape = new int[]{2, 2, 2};
@@ -179,7 +179,7 @@ public class RequiredVariable {
         } else {
             switch (array_tp0.getShape().length) {
                 case 3:
-                    kz = Math.max(0.d, Math.min(pGrid[2], (double) dataset.get_nz() - 1.00001f));
+                    kz = Math.max(0.d, Math.min(pGrid[2], (double) dataset.getGrid().get_nz() - 1.00001f));
                     k = (int) kz;
                     dz = kz - (double) k;
                     shape = new int[]{2, 2, 2};

@@ -108,7 +108,7 @@ public class GridPoint extends IchthyopLinker {
         x = y = z = -1;
         lon = lat = depth = Double.NaN;
         try {
-            nz = getSimulationManager().getDataset().get_nz();
+            nz = getSimulationManager().getDataset().getGrid().get_nz();
         } catch (Exception ex) {
             nz = -1;
         }
@@ -128,13 +128,13 @@ public class GridPoint extends IchthyopLinker {
     public void geo2Grid() {
 
         if (latlonHaveChanged) {
-            double[] pGrid = getSimulationManager().getDataset().latlon2xy(lat, lon);
+            double[] pGrid = getSimulationManager().getDataset().getGrid().latlon2xy(lat, lon);
             x = pGrid[0];
             y = pGrid[1];
             latlonHaveChanged = false;
         }
         if (is3D && depthHasChanged) {
-            z = getSimulationManager().getDataset().depth2z(x, y, depth);
+            z = getSimulationManager().getDataset().getGrid().depth2z(x, y, depth);
             depthHasChanged = false;
         }
     }
@@ -148,13 +148,13 @@ public class GridPoint extends IchthyopLinker {
     public void grid2Geo() {
 
         if (xyHaveChanged) {
-            double[] pGeog = getSimulationManager().getDataset().xy2latlon(x, y);
+            double[] pGeog = getSimulationManager().getDataset().getGrid().xy2latlon(x, y);
             lat = pGeog[0];
             lon = pGeog[1];
             xyHaveChanged = false;
         }
         if (is3D && zHasChanged) {
-            depth = getSimulationManager().getDataset().z2depth(x, y, z);
+            depth = getSimulationManager().getDataset().getGrid().z2depth(x, y, z);
             zHasChanged = false;
         }
     }
@@ -302,14 +302,14 @@ public class GridPoint extends IchthyopLinker {
 
     public void setX(double x) {
         if (this.x != x) {
-            this.x = getSimulationManager().getDataset().xTore(x);
+            this.x = getSimulationManager().getDataset().getGrid().xTore(x);
             xyHaveChanged = true;
         }
     }
 
     public void setY(double y) {
         if (this.y != y) {
-            this.y = getSimulationManager().getDataset().yTore(y);
+            this.y = getSimulationManager().getDataset().getGrid().yTore(y);
             xyHaveChanged = true;
         }
     }
@@ -375,10 +375,10 @@ public class GridPoint extends IchthyopLinker {
     }
 
     public boolean isInWater() {
-        return getSimulationManager().getDataset().isInWater(getGridCoordinates());
+        return getSimulationManager().getDataset().getGrid().isInWater(getGridCoordinates());
     }
 
     public boolean isOnEdge() {
-        return getSimulationManager().getDataset().isOnEdge(getGridCoordinates());
+        return getSimulationManager().getDataset().getGrid().isOnEdge(getGridCoordinates());
     }
 }

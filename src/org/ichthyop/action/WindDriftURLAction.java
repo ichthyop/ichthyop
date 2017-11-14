@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import java.io.IOException;
@@ -65,30 +64,30 @@ public class WindDriftURLAction extends WindDriftFileAction {
     public String getKey() {
         return "action.wind_drift_url";
     }
-        
+
     @Override
     public void loadParameters() throws Exception {
         strTime = getConfiguration().getString("action.wind_drift_url.field_time");
-        time_current=getSimulationManager().getTimeManager().getTime();
+        time_current = getSimulationManager().getTimeManager().getTime();
         openURL(getConfiguration().getString("action.wind_drift_url.wind_url"));
-        wind_factor=getConfiguration().getDouble("action.wind_drift_url.wind_factor");
-        angle = Math.PI/2.0-getConfiguration().getDouble("action.wind_drift_url.angle")*Math.PI/180.0;
-        strUW=getConfiguration().getString("action.wind_drift_url.wind_u");
-        strVW=getConfiguration().getString("action.wind_drift_url.wind_v");
-        strLon=getConfiguration().getString("action.wind_drift_url.longitude");
-        strLat=getConfiguration().getString("action.wind_drift_url.latitude");
-        convention = "wind to".equals(getConfiguration().getString("action.wind_drift_url.wind_convention"))? 1 : -1;
-        
+        wind_factor = getConfiguration().getDouble("action.wind_drift_url.wind_factor");
+        angle = Math.PI / 2.0 - getConfiguration().getDouble("action.wind_drift_url.angle") * Math.PI / 180.0;
+        strUW = getConfiguration().getString("action.wind_drift_url.wind_u");
+        strVW = getConfiguration().getString("action.wind_drift_url.wind_v");
+        strLon = getConfiguration().getString("action.wind_drift_url.longitude");
+        strLat = getConfiguration().getString("action.wind_drift_url.latitude");
+        convention = "wind to".equals(getConfiguration().getString("action.wind_drift_url.wind_convention")) ? 1 : -1;
+
         getDimNC();
         setOnFirstTime();
         setAllFieldsTp1AtTime(rank);
         readLonLat();
 
-        U_variable=new RequiredExternalVariable(latRho,lonRho,uw_tp0,uw_tp1,getSimulationManager().getDataset());
-        V_variable=new RequiredExternalVariable(latRho,lonRho,vw_tp0,vw_tp1,getSimulationManager().getDataset());
+        U_variable = new RequiredExternalVariable(latRho, lonRho, uw_tp0, uw_tp1, getSimulationManager().getDataset().getGrid());
+        V_variable = new RequiredExternalVariable(latRho, lonRho, vw_tp0, vw_tp1, getSimulationManager().getDataset().getGrid());
 
     }
-  
+
     void openURL(String opendapURL) throws IOException {
         try {
             ncIn = NetcdfDataset.openDataset(opendapURL);
@@ -99,7 +98,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
             throw ioex;
         }
     }
-    
+
     void setOnFirstTime() throws Exception {
         double t0 = getSimulationManager().getTimeManager().get_tO();
         readTimeLength();
@@ -108,7 +107,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
         time_tp1 = t0;
     }
 
-    public void checkInitTime(NetcdfFile nc, String strTime) throws IOException, IndexOutOfBoundsException, Exception{
+    public void checkInitTime(NetcdfFile nc, String strTime) throws IOException, IndexOutOfBoundsException, Exception {
 
         double time = getSimulationManager().getTimeManager().get_tO();
         Array timeArr = null;
@@ -133,7 +132,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
             throw new IndexOutOfBoundsException(msg.toString());
         }
     }
-    
+
     public void nextStepTriggered() throws Exception {
         double time = getSimulationManager().getTimeManager().getTime();
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -150,9 +149,9 @@ public class WindDriftURLAction extends WindDriftFileAction {
             throw new IndexOutOfBoundsException("Time out of wind dataset range");
         }
         setAllFieldsTp1AtTime(rank);
-    }    
-    
-     void setAllFieldsTp1AtTime(int i_time) throws Exception {
+    }
+
+    void setAllFieldsTp1AtTime(int i_time) throws Exception {
 
         double time_tp0 = time_tp1;
         uw_tp1 = readVariable(strUW);
@@ -167,8 +166,8 @@ public class WindDriftURLAction extends WindDriftFileAction {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         dt_wind = Math.abs(time_tp1 - time_tp0);
     }
- 
+
 }

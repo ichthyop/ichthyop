@@ -254,11 +254,11 @@ public class Zone extends IchthyopLinker {
         // compute area in km2
         area = 0.d;
         IDataset dataset = getSimulationManager().getDataset();
-        for (int i = 0; i < dataset.get_nx(); i++) {
-            for (int j = 0; j < dataset.get_ny(); j++) {
-                if (dataset.isInWater(i, j)) {
+        for (int i = 0; i < dataset.getGrid().get_nx(); i++) {
+            for (int j = 0; j < dataset.getGrid().get_ny(); j++) {
+                if (dataset.getGrid().isInWater(i, j)) {
                     if (getSimulationManager().getZoneManager().isInside(i, j, key)) {
-                        area += dataset.get_dy(j, i) * dataset.get_dx(j, i) * 1e-6;
+                        area += dataset.getGrid().get_dy(j, i) * dataset.getGrid().get_dx(j, i) * 1e-6;
                     }
                 }
             }

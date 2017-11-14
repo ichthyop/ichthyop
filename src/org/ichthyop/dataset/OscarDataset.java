@@ -205,7 +205,6 @@ public class OscarDataset extends AbstractDataset {
         nlat = ncIn.findDimension(strLatDim).getLength();
     }
 
-    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         // latitude to y
@@ -295,7 +294,6 @@ public class OscarDataset extends AbstractDataset {
         }
     }
 
-    @Override
     public double[] xy2latlon(double x, double y) {
 
         // y to latitude
@@ -316,16 +314,6 @@ public class OscarDataset extends AbstractDataset {
         double lon = (1 - dx) * longitude[ci] + dx * longitude[ci + 1];
 
         return new double[]{lat, lon};
-    }
-
-    @Override
-    public double depth2z(double x, double y, double depth) {
-        throw new UnsupportedOperationException("Method not supported in 2D");
-    }
-
-    @Override
-    public double z2depth(double x, double y, double z) {
-        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     @Override
@@ -403,12 +391,10 @@ public class OscarDataset extends AbstractDataset {
         throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
-    @Override
     public boolean isInWater(double[] pGrid) {
         return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
-    @Override
     public boolean isInWater(int i, int j) {
         int ci = i;
         if (ci < 0) {
@@ -420,7 +406,6 @@ public class OscarDataset extends AbstractDataset {
         return !Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]);
     }
 
-    @Override
     public boolean isCloseToCost(double[] pGrid) {
         int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
@@ -439,7 +424,6 @@ public class OscarDataset extends AbstractDataset {
      * @return <code>true</code> if the particle is on edge of the domain
      * <code>false</code> otherwise.
      */
-    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[1] > (nlat - 2.0f))
                 || (pGrid[1] < 1.0f));
@@ -450,27 +434,22 @@ public class OscarDataset extends AbstractDataset {
         return isInWater(i, j) ? 0.d : Double.NaN;
     }
 
-    @Override
     public int get_nx() {
         return nlon;
     }
 
-    @Override
     public int get_ny() {
         return nlat;
     }
 
-    @Override
     public int get_nz() {
         throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
-    @Override
     public double get_dx(int j, int i) {
         return dlon[i];
     }
 
-    @Override
     public double get_dy(int j, int i) {
         return dlat[j];
     }
@@ -539,7 +518,6 @@ public class OscarDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum latitude [north degree]
      */
-    @Override
     public double getLatMin() {
         return latitude[0];
     }
@@ -549,7 +527,6 @@ public class OscarDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum latitude [north degree]
      */
-    @Override
     public double getLatMax() {
         return latitude[nlat - 1];
     }
@@ -559,7 +536,6 @@ public class OscarDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum longitude [east degree]
      */
-    @Override
     public double getLonMin() {
         return longitude[0];
     }
@@ -569,34 +545,24 @@ public class OscarDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum longitude [east degree]
      */
-    @Override
     public double getLonMax() {
         return longitude[nlon - 1];
     }
 
-    @Override
     public double getLon(int igrid, int jgrid) {
         return longitude[igrid];
     }
 
-    @Override
     public double getLat(int igrid, int jgrid) {
         return latitude[jgrid];
     }
 
-    @Override
     public double getDepthMax() {
         return -1.d;
     }
 
-    @Override
     public boolean is3D() {
         return false;
-    }
-    
-    @Override
-    public double getDepthMax(double x, double y) {
-        throw new UnsupportedOperationException(MarsCommon.ErrorMessage.NOT_IN_2D.message());
     }
 
     @Override
@@ -633,7 +599,6 @@ public class OscarDataset extends AbstractDataset {
         }
     }
 
-    @Override
     public double xTore(double x) {
         if (x < 0) {
             return x + 1080.d;
@@ -644,7 +609,6 @@ public class OscarDataset extends AbstractDataset {
         return x;
     }
 
-    @Override
     public double yTore(double y) {
         return y;
     }

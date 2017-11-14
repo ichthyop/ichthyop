@@ -204,7 +204,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         return VertCoordType.OLD;
     }
 
-    @Override
     public boolean is3D() {
         return true;
     }
@@ -355,7 +354,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         zeta_tp1 = zeta_tp0;
     }
 
-    @Override
     public double depth2z(double x, double y, double depth) {
 
         //-----------------------------------------------
@@ -376,7 +374,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         return (z);
     }
 
-    @Override
     public double z2depth(double x, double y, double z) {
 
         final double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
@@ -541,12 +538,10 @@ abstract public class Roms3dCommon extends RomsCommon {
         return (hh);
     }
 
-    @Override
     public double getDepthMax(double x, double y) {
         return getDepth(x, y, 0);
     }
 
-    @Override
     public int get_nz() {
         return nz;
     }

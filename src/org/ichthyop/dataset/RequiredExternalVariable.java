@@ -56,6 +56,7 @@ package org.ichthyop.dataset;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.ichthyop.grid.IGrid;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 
@@ -65,7 +66,7 @@ import ucar.ma2.InvalidRangeException;
  */
 public class RequiredExternalVariable {
 
-    private final IDataset dataset;
+    private final IGrid hydroGrid;
     private Array array_tp0, array_tp1;
     private double time_tp1, dt_dataset;
     private final int nx_file;
@@ -73,25 +74,25 @@ public class RequiredExternalVariable {
     private final double[][] latRho;
     private final double[][] lonRho;
 
-    public RequiredExternalVariable(double[][] lat, double[][] lon, Array variable0, Array variable1, IDataset dataset_hydro) throws IOException {
-        this.dataset = dataset_hydro;
+    public RequiredExternalVariable(double[][] lat, double[][] lon, Array variable0, Array variable1, IGrid hydroGrid) throws IOException {
+        this.hydroGrid = hydroGrid;
         latRho = lat;
         lonRho = lon;
         array_tp0 = variable0;
         array_tp1 = variable1;
         nx_file = lonRho[0].length;
         ny_file = lonRho.length;
-        if (!isInto(dataset)) {
+        if (!isInto(hydroGrid)) {
             throw new IOException("!! WARNING : please use option Dataset/Shrink Domain "
                     + "to ensure that your ichthyop domain is contained within the new grid. \n"
                     + "Min and max longitude : " + lonRho[0][0] + " " + lonRho[0][nx_file - 1]
                     + " Min an max latitude : " + latRho[0][0] + " " + latRho[ny_file - 1][0]
-                    + ". \nActual domain (longitude latitude) : " + dataset.getLonMin() + " "
-                    + dataset.getLonMax() + "     " + dataset.getLatMin() + " " + dataset.getLatMax());
+                    + ". \nActual domain (longitude latitude) : " + hydroGrid.getLonMin() + " "
+                    + hydroGrid.getLonMax() + "     " + hydroGrid.getLatMin() + " " + hydroGrid.getLatMax());
         }
     }
 
-    private boolean isInto(IDataset dataset) {
+    private boolean isInto(IGrid grid) {
         boolean isInto = true;
 
         double lat_min_meteo = latRho[0][0];
@@ -99,10 +100,10 @@ public class RequiredExternalVariable {
         double lon_min_meteo = lonRho[0][0];
         double lon_max_meteo = lonRho[0][nx_file - 1];
 
-        double lon_max = dataset.getLonMax();
-        double lat_max = dataset.getLatMax();
-        double lon_min = dataset.getLonMin();
-        double lat_min = dataset.getLatMin();
+        double lon_max = grid.getLonMax();
+        double lat_max = grid.getLatMax();
+        double lon_min = grid.getLonMin();
+        double lat_min = grid.getLatMin();
 
         if (lon_max > lon_max_meteo) {
             isInto = false;
@@ -128,10 +129,10 @@ public class RequiredExternalVariable {
      */
     private double computeVariable(double[] pGrid_hydro) {
 
-        double[] latlon = dataset.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
+        double[] latlon = hydroGrid.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
         double[] pGrid = latlon2xy(latlon[0], latlon[1]);
 
-        int n = dataset.isCloseToCost(pGrid_hydro) ? 1 : 2;
+        int n = hydroGrid.isCloseToCost(pGrid_hydro) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double dx = pGrid[0] - (double) i;
@@ -154,9 +155,9 @@ public class RequiredExternalVariable {
      */
     public double getVariable(double[] pGrid_hydro, double time) {
 
-        double[] latlon = dataset.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
+        double[] latlon = hydroGrid.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
         double[] pGrid = latlon2xy(latlon[0], latlon[1]);
-        int n = dataset.isCloseToCost(pGrid_hydro) ? 1 : 2;
+        int n = hydroGrid.isCloseToCost(pGrid_hydro) ? 1 : 2;
         int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         double dx = pGrid[0] - (double) i;

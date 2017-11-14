@@ -198,7 +198,6 @@ public class NemoDataset extends AbstractDataset {
         return "dataset.nemo";
     }
     
-    @Override
     public boolean is3D() {
         return true;
     }
@@ -838,7 +837,6 @@ public class NemoDataset extends AbstractDataset {
      * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans
      * la définition de e1t et e2t
      */
-    @Override
     public double get_dx(int j, int i) {
         return e1t[j][i];
     }
@@ -846,7 +844,6 @@ public class NemoDataset extends AbstractDataset {
     /*
      * Gets cell dimension [meter] in the ETA-direction.
      */
-    @Override
     public double get_dy(int j, int i) {
         return e2t[j][i];
     }
@@ -1162,7 +1159,6 @@ public class NemoDataset extends AbstractDataset {
         }
     }
 
-    @Override
     public boolean isInWater(int i, int j) {
         return isInWater(i, j, nz - 1);
     }
@@ -1175,7 +1171,6 @@ public class NemoDataset extends AbstractDataset {
      * <code>false</code> otherwise.
      * @see #isInWater(int i, int j)
      */
-    @Override
     public boolean isInWater(double[] pGrid) {
         if (pGrid.length > 2) {
             return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
@@ -1194,7 +1189,6 @@ public class NemoDataset extends AbstractDataset {
      * @return <code>true</code> if the grid point is close to cost,
      * <code>false</code> otherwise.
      */
-    @Override
     public boolean isCloseToCost(double[] pGrid) {
 
         int i, j, k, ii, jj;
@@ -1216,7 +1210,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * pverley pour chourdin: méthode à tester.
      */
-    @Override
     public double depth2z(double x, double y, double depth) {
 
         if (depth > 0) {
@@ -1266,7 +1259,6 @@ public class NemoDataset extends AbstractDataset {
      * @param z double
      * @return double
      */
-    @Override
     public double z2depth(double x, double y, double z) {
 
         double depth;
@@ -1302,7 +1294,6 @@ public class NemoDataset extends AbstractDataset {
      * @param yRho double
      * @return double[]
      */
-    @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
         //--------------------------------------------------------------------
@@ -1349,7 +1340,6 @@ public class NemoDataset extends AbstractDataset {
      * @return a double[], the corresponding grid coordinates (x, y)
      * @see #isInsidePolygone
      */
-    @Override
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------
@@ -1680,7 +1670,6 @@ public class NemoDataset extends AbstractDataset {
      * @return <code>true</code> if the particle is on edge of the domain
      * <code>false</code> otherwise.
      */
-    @Override
     public boolean isOnEdge(double[] pGrid) {
         return ((pGrid[0] > (nx - 3.0f))
                 || (pGrid[0] < 2.0f)
@@ -1696,7 +1685,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return an int, the grid dimension in the XI-direction (Zonal)
      */
-    @Override
     public int get_nx() {
         return nx;
     }
@@ -1706,7 +1694,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return an int, the grid dimension in the ETA-direction (Meridional)
      */
-    @Override
     public int get_ny() {
         return ny;
     }
@@ -1716,7 +1703,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return an int, the grid dimension in the vertical direction
      */
-    @Override
     public int get_nz() {
         return nz;
     }
@@ -1726,7 +1712,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum latitude [north degree]
      */
-    @Override
     public double getLatMin() {
         return latMin;
     }
@@ -1736,7 +1721,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum latitude [north degree]
      */
-    @Override
     public double getLatMax() {
         return latMax;
     }
@@ -1746,7 +1730,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return a double, the domain minimum longitude [east degree]
      */
-    @Override
     public double getLonMin() {
         return lonMin;
     }
@@ -1756,7 +1739,6 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return a double, the domain maximum longitude [east degree]
      */
-    @Override
     public double getLonMax() {
         return lonMax;
     }
@@ -1766,12 +1748,10 @@ public class NemoDataset extends AbstractDataset {
      *
      * @return a float, the domain maximum depth [meter]
      */
-    @Override
     public double getDepthMax() {
         return depthMax;
     }
 
-    @Override
     public double getDepthMax(double x, double y) {
 
         if (isInWater((int) Math.round(x), (int) Math.round(y), nz - 1)) {
@@ -1793,7 +1773,6 @@ public class NemoDataset extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the latitude [north degree] at (i, j) grid point.
      */
-    @Override
     public double getLat(int i, int j) {
         return latRho[j][i];
     }
@@ -1805,7 +1784,6 @@ public class NemoDataset extends AbstractDataset {
      * @param j an int, the j-coordinate
      * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-    @Override
     public double getLon(int i, int j) {
         return lonRho[j][i];
     }
@@ -1890,12 +1868,10 @@ public class NemoDataset extends AbstractDataset {
         return array;
     }
 
-    @Override
     public double xTore(double x) {
         return x;
     }
 
-    @Override
     public double yTore(double y) {
         return y;
     }

@@ -132,7 +132,7 @@ public class ZoneManager extends AbstractManager {
         Zone zone = zones.get(key);
         boolean inside = true;
         if (zone.isEnabledBathyMask()) {
-            double[] xy = getSimulationManager().getDataset().latlon2xy(lat, lon);
+            double[] xy = getSimulationManager().getDataset().getGrid().latlon2xy(lat, lon);
             double bathy = Math.abs(getSimulationManager().getDataset().getBathy((int) Math.round(xy[0]), (int) Math.round(xy[1])));
             inside = (bathy > zone.getInshoreLine()) & (bathy < zone.getOffshoreLine());
         }
@@ -140,7 +140,7 @@ public class ZoneManager extends AbstractManager {
     }
 
     public boolean isInside(int i, int j, String key) {
-        double[] latlon = getSimulationManager().getDataset().xy2latlon(i, j);
+        double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(i, j);
         return isInside(latlon[0], latlon[1], key);
     }
 
