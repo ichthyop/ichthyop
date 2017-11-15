@@ -53,6 +53,7 @@
 package org.ichthyop.manager;
 
 import java.io.IOException;
+import org.ichthyop.dataset.BathymetryDataset;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.dataset.IDataset;
@@ -65,6 +66,7 @@ public class DatasetManager extends AbstractManager {
 
     final private static DatasetManager DATASET_MANAGER = new DatasetManager();
     private IDataset dataset;
+    private BathymetryDataset bathymetryDataset;
 
     public static DatasetManager getInstance() {
         return DATASET_MANAGER;
@@ -72,6 +74,7 @@ public class DatasetManager extends AbstractManager {
 
     private void instantiateDataset() throws Exception {
 
+        // current dataset
         int n = 0;
         String[] keys = getConfiguration().getParameterSubsets();
         for (String key : keys) {
@@ -99,16 +102,24 @@ public class DatasetManager extends AbstractManager {
         if (n > 1) {
             throw new IOException("Found several DATASET subsets enabled in the configuration file. Please only keep one enabled.");
         }
+        
+        // bathymetry dataset
+        bathymetryDataset = new BathymetryDataset();
     }
 
     public IDataset getDataset() {
         return dataset;
+    }
+    
+    public BathymetryDataset getBathymetryDataset() {
+        return bathymetryDataset;
     }
 
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
         instantiateDataset();
         dataset.setUp();
+        bathymetryDataset.init();
     }
 
     @Override

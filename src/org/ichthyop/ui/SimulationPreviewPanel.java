@@ -108,8 +108,12 @@ public class SimulationPreviewPanel extends JPanel {
     private double ratio = 1;
     final private Color bottom = new Color(0, 0, 150);
     final private Color surface = Color.CYAN;
-    private final Color land = Color.DARK_GRAY;
+    private final Color sealevel = Color.DARK_GRAY;
+    private final Color highland = new Color(200, 150, 100);
     public static final int DEFAULT_SIZE = 500;
+    private double[][] bathymetry;
+    private double deepest;
+    private double highest;
 
 ////////////////////////////
 // Definition of the methods
@@ -181,12 +185,7 @@ public class SimulationPreviewPanel extends JPanel {
         repaint();
     }
 
-    public void init(int height) {
-
-        this.height = height;
-
-        hi = -1;
-        wi = -1;
+    public void init() {
 
         latmin = getSimulationManager().getDataset().getGrid().getLatMin();
         latmax = getSimulationManager().getDataset().getGrid().getLatMax();
@@ -196,6 +195,28 @@ public class SimulationPreviewPanel extends JPanel {
         double dlon = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
         double dlat = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
         ratio = dlon / dlat;
+
+        // bathymetry
+        int nx = getSimulationManager().getDataset().getGrid().get_nx();
+        int ny = getSimulationManager().getDataset().getGrid().get_ny();
+        bathymetry = new double[nx][ny];
+        deepest = Double.MAX_VALUE;
+        highest = Double.MIN_VALUE;
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
+                double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
+                double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
+                bathymetry[i][j] = getSimulationManager().getDatasetManager().getBathymetryDataset().getBathymetry(lat, lon);
+                if (bathymetry[i][j] < deepest) {
+                    deepest = bathymetry[i][j];
+                }
+                if (bathymetry[i][j] > highest) {
+                    highest = bathymetry[i][j];
+                }
+            }
+        }
+        deepest = Math.min(deepest, -0.5);
+        highest = Math.max(highest, 0.5);
     }
 
     @Override
@@ -230,17 +251,20 @@ public class SimulationPreviewPanel extends JPanel {
                 }
             }
             // bathymetry
-            double bathymax = Math.abs(getSimulationManager().getDataset().getGrid().getDepthMax());
-            double bathy = Math.abs(getSimulationManager().getDataset().getBathy(i, j));
-            double xdepth = (bathymax - bathy) / bathymax;
+            double xdepth = (deepest - bathymetry[i][j]) / deepest;
             xdepth = Math.max(0, Math.min(xdepth, 1));
             return (new Color(
                     (int) (xdepth * surface.getRed() + (1 - xdepth) * bottom.getRed()),
                     (int) (xdepth * surface.getGreen() + (1 - xdepth) * bottom.getGreen()),
                     (int) (xdepth * surface.getBlue() + (1 - xdepth) * bottom.getBlue())));
         } else {
-            // land
-            return land;
+            // topography
+            double xtopo = (highest - bathymetry[i][j]) / highest;
+            xtopo = Math.max(0, Math.min(xtopo, 1));
+            return (new Color(
+                    (int) (xtopo * sealevel.getRed() + (1 - xtopo) * highland.getRed()),
+                    (int) (xtopo * sealevel.getGreen() + (1 - xtopo) * highland.getGreen()),
+                    (int) (xtopo * sealevel.getBlue() + (1 - xtopo) * highland.getBlue())));
         }
     }
 }

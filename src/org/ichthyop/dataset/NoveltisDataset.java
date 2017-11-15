@@ -356,7 +356,6 @@ public class NoveltisDataset extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
-    @Override
     public double getBathy(int i, int j) {
         if (isInWater(i, j)) {
             return hRho[j][i];

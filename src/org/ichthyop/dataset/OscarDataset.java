@@ -429,11 +429,6 @@ public class OscarDataset extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
-    @Override
-    public double getBathy(int i, int j) {
-        return isInWater(i, j) ? 0.d : Double.NaN;
-    }
-
     public int get_nx() {
         return nlon;
     }

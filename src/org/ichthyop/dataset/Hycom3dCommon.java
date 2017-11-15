@@ -177,11 +177,6 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     }
 
     @Override
-    public double getBathy(int i, int j) {
-        return getGrid().getDepthMax(i, j);
-    }
-
-    @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
 //        Variable variable = nc.findVariable(name);
 //        int[] origin = null, shape = null;

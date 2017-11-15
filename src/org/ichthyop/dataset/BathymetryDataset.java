@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,18 +50,71 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.output;
+package org.ichthyop.dataset;
 
-import org.ichthyop.particle.IParticle;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.ichthyop.IchthyopLinker;
+import org.ichthyop.grid.AbstractRegularGrid;
+import org.ichthyop.grid.RectilinearGrid;
+import ucar.nc2.NetcdfFile;
 
 /**
  *
- * @author gandres
+ * @author pverley
  */
-public class BathyTracker extends FloatTracker {
+public class BathymetryDataset extends IchthyopLinker {
 
-    @Override
-    public float getValue(IParticle particle) {
-        return (float) getSimulationManager().getDatasetManager().getBathymetryDataset().getBathymetry(particle.getLat(), particle.getLon());
+    private final String prefix;
+    private final AbstractRegularGrid grid;
+    private NetcdfTiledVariable bathymetry;
+
+    public BathymetryDataset(String prefix) {
+        this.prefix = prefix;
+        grid = new RectilinearGrid(prefix);
     }
+
+    public BathymetryDataset() {
+        this("bathymetry");
+    }
+
+    public void init() {
+
+        try {
+            grid.init();
+
+            // grid file
+            String file = getConfiguration().getFile(prefix + ".file");
+            NetcdfFile nc = DatasetUtil.openFile(file, true);
+            // longitude
+            List<String> names = new ArrayList(Arrays.asList(new String[]{"bathy", "bathymetry", "topo", "topography"}));
+            if (!getConfiguration().isNull(prefix + ".variable")) {
+                names.add(0, getConfiguration().getString(prefix + ".variable"));
+            }
+            for (String name : names) {
+                String fullname = DatasetUtil.findVariable(nc, name);
+                if (null != fullname) {
+                    bathymetry = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, grid.get_nx(), grid.get_ny(), grid.get_nz(), grid.get_i0(), grid.get_j0(), 0, 0, 100, 1);
+                    break;
+                }
+            }
+            if (null == bathymetry) {
+                throw new IOException("Bathymetry variable not found");
+            }
+        } catch (Exception ex) {
+            error("[bathymetry] Failed to load bathymetry dataset \"" + prefix + ".*\"", ex);
+        }
+    }
+
+    public double getBathymetry(double lat, double lon) {
+        if (null != bathymetry) {
+            double[] xy = grid.latlon2xy(lat, lon);
+            return bathymetry.getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]));
+        } else {
+            return 0;
+        }
+    }
+
 }

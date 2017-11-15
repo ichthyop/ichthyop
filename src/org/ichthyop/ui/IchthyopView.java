@@ -396,20 +396,19 @@ public class IchthyopView extends FrameView
     // SIMULATION PREVIEW
     /////////////////////
     @Action
-    public void previewSimulation() {
+    public Task previewSimulation() {
         taskPaneSimulation.setCollapsed(false);
-        if (!initDone) {
-            getApplication().getContext().getTaskService().execute(new SimulationPreviewTask(getApplication(), btnPreview.isSelected()));
-        } else {
-            showSimulationPreview();
-        }
+        if (!isRunning) {
+            return new SimulationPreviewTask(getApplication());
+        } 
+        return null;
     }
 
     private void showSimulationPreview() {
         lblSimulation.setVisible(false);
         previewScrollPane.setVisible(true);
         previewScrollPane.setPreferredSize(gradientPanel.getSize());
-        previewPanel.init(sliderPreviewZoom.getValue());
+        previewPanel.setHeight(sliderPreviewZoom.getValue());
         sliderPreviewZoom.setEnabled(true);
         btnSavePreview.getAction().setEnabled(true);
     }
@@ -422,13 +421,10 @@ public class IchthyopView extends FrameView
 
     private class SimulationPreviewTask extends SFTask {
 
-        private boolean setupSucceeded;
-        private boolean initSucceeded;
-
-        SimulationPreviewTask(Application instance, boolean isEnabled) {
+        SimulationPreviewTask(Application instance) {
             super(instance);
-            setupSucceeded = false;
-            initSucceeded = false;
+            isRunning = true;
+            btnSimulationRun.getAction().setEnabled(false);
         }
 
         @Override
@@ -436,9 +432,11 @@ public class IchthyopView extends FrameView
             if (!initDone) {
                 setMessage(resourceMap.getString("simulationRun.msg.init.start"));
                 getSimulationManager().setup();
-                setupSucceeded = true;
                 getSimulationManager().init();
-                initSucceeded = true;
+                setMessage(resourceMap.getString("simulationRun.msg.init.ok"));
+                setMessage("[preview] Loading bathymetric data...");
+                previewPanel.init();
+                setMessage("[preview] Initialisation OK", false, LogLevel.COMPLETE);
             }
             return null;
         }
@@ -446,23 +444,21 @@ public class IchthyopView extends FrameView
         @Override
         protected void onSuccess(Object obj) {
             initDone = true;
-            setMessage(resourceMap.getString("simulationRun.msg.init.ok"), false, LogLevel.COMPLETE);
             showSimulationPreview();
         }
 
         @Override
         void onFailure(Throwable throwable) {
+            initDone = false;
             StringBuilder msg = new StringBuilder();
             msg.append(resourceMap.getString("simulationRun.msg.init.failed"));
-            if (!setupSucceeded) {
-                msg.append(" (performing: SETUP)");
-            } else if (!initSucceeded) {
-                msg.append(" (performing: INIT)");
-            }
             setMessage(msg.toString(), false, Level.SEVERE);
-            setupSucceeded = initSucceeded = false;
-            btnPreview.setSelected(false);
-            initDone = false;
+        }
+        
+         @Override
+        protected void finished() {
+            isRunning = false;
+            btnSimulationRun.getAction().setEnabled(true);
         }
     }
 

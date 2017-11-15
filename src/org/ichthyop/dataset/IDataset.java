@@ -74,8 +74,6 @@ public interface IDataset extends NextStepListener {
 
     double get_dWz(double[] pGrid, double time);
 
-    public double getBathy(int i, int j);
-
     public void init() throws Exception;
 
     public Number get(String variableName, double[] pGrid, double time);

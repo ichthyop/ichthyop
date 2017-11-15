@@ -1001,7 +1001,6 @@ public class SymphonieDataset extends AbstractDataset {
                 || (pGrid[1] < 1.0f));
     }
 
-    @Override
     public double getBathy(int i, int j) {
         if (isInWater(i, j)) {
             return hm_w[j][i];

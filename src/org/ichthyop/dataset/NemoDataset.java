@@ -1029,7 +1029,7 @@ public class NemoDataset extends AbstractDataset {
                 if (latRho[j][i] <= latMin) {
                     latMin = latRho[j][i];
                 }
-                double depth = getBathy(i, j);
+                double depth = getDepthMax(i, j);
                 if (depth > depthMax) {
                     depthMax = depth;
                 }
@@ -1796,7 +1796,6 @@ public class NemoDataset extends AbstractDataset {
      * @return a double, the bathymetry [meter] at (i, j) grid point if is in
      * water, return NaN otherwise.
      */
-    @Override
     public double getBathy(int i, int j) {
 
         double bathy = 0.d;

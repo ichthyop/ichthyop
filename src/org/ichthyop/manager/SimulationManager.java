@@ -308,7 +308,7 @@ public class SimulationManager extends IchthyopLogger {
         }
     }
 
-    private DatasetManager getDatasetManager() {
+    public DatasetManager getDatasetManager() {
         return DatasetManager.getInstance();
     }
 

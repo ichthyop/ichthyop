@@ -98,7 +98,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     : getConfiguration().getString(prefix + ".latitude");
             String name = DatasetUtil.findVariable(nc, varlat);
             if (null == name) {
-                throw new IOException("Latitude variable not found in dataset");
+                throw new IOException("Latitude variable not found in dataset " + file);
             }
             Array array = nc.findVariable(name).read().reduce();
             ny = array.getShape()[0];
@@ -114,14 +114,13 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     : getConfiguration().getString(prefix + ".longitude");
             name = DatasetUtil.findVariable(nc, varlon);
             if (null == name) {
-                throw new IOException("Longitude variable not found in dataset");
+                throw new IOException("Longitude variable not found in dataset " + file);
             }
             array = nc.findVariable(name).read().reduce();
             nx = array.getShape()[0];
             longitude = new double[nx];
             for (int i = 0; i < nx; i++) {
-                double lon = array.getDouble(i);
-                longitude[i] = lon > 180 ? lon - 360.d : lon;
+                longitude[i] = validLon(array.getDouble(i));
             }
             i0 = 0;
 
@@ -136,14 +135,17 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     ? "depth"
                     : getConfiguration().getString(prefix + ".depth");
             name = DatasetUtil.findVariable(nc, vardepth);
-            if (null == name) {
-                throw new IOException("Depth variable not found in dataset");
-            }
-            array = nc.findVariable(name).read().reduce();
-            nz = array.getShape()[0];
-            depthLevel = new double[nz];
-            for (int k = 0; k < nz; k++) {
-                depthLevel[k] = array.getDouble(k);
+            if (null != name) {
+                array = nc.findVariable(name).read().reduce();
+                nz = array.getShape()[0];
+                depthLevel = new double[nz];
+                for (int k = 0; k < nz; k++) {
+                    depthLevel[k] = array.getDouble(k);
+                }
+            } else {
+                warning("[grid] Did not find depth variable in dataset " + file + ". Ichthyop assumes the grid is 2D.");
+                nz = 1;
+                depthLevel = new double[]{0};
             }
 
             // scale factors
@@ -153,10 +155,14 @@ public class RectilinearGrid extends AbstractRegularGrid {
                 dx[j] = dy * Math.cos(Math.PI * latitude[j] / 180.d);
             }
             ddepth = new double[nz];
-            ddepth[0] = 0.5 * Math.abs(depthLevel[0] - depthLevel[1]);
-            ddepth[nz - 1] = 0.5 * Math.abs(depthLevel[nz - 2] - depthLevel[nz - 1]);
-            for (int k = 1; k < nz - 1; k++) {
-                ddepth[k] = 0.5 * Math.abs(depthLevel[k - 1] - depthLevel[k + 1]);
+            if (nz > 1) {
+                ddepth[0] = 0.5 * Math.abs(depthLevel[0] - depthLevel[1]);
+                ddepth[nz - 1] = 0.5 * Math.abs(depthLevel[nz - 2] - depthLevel[nz - 1]);
+                for (int k = 1; k < nz - 1; k++) {
+                    ddepth[k] = 0.5 * Math.abs(depthLevel[k - 1] - depthLevel[k + 1]);
+                }
+            } else {
+                ddepth[0] = Double.NaN;
             }
 
             // mask
@@ -168,25 +174,26 @@ public class RectilinearGrid extends AbstractRegularGrid {
             if (null == name) {
                 for (Variable variable : nc.getVariables()) {
                     if ((variable.isUnlimited() && variable.getShape().length == 4)
-                            || (!variable.isUnlimited() && variable.getShape().length == 3)) {
+                            || (!variable.isUnlimited() && variable.getShape().length == 3)
+                            || (!variable.isUnlimited() && variable.getShape().length == 2) && nz == 1) {
                         name = variable.getFullName();
                         break;
                     }
                 }
             }
-            mask = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, nx, ny, nz, i0, j0, 0, 0, 10, 3);
+            mask = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, nx, ny, nz, i0, j0, 0, 0, 10, Math.min(3, nz));
 
         } catch (IOException ex) {
-            error("Failed to make grid " + prefix, ex);
+            error("[grid] Failed to make grid " + prefix, ex);
         }
 
     }
 
     private void crop() {
 
-        double lon1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+        double lon1 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
         double lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
-        double lon2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg));
+        double lon2 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
         double lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
 
         double[] pGrid1, pGrid2;
@@ -228,11 +235,6 @@ public class RectilinearGrid extends AbstractRegularGrid {
     @Override
     public double getDepth(double x, double y, int k) {
         return -depthLevel[k];
-    }
-
-    @Override
-    public double getDepthMax() {
-        return -depthLevel[nz - 1];
     }
 
     @Override

@@ -855,19 +855,6 @@ public class Mercator2dDataset extends AbstractDataset {
         return longitude[i];
     }
 
-    /**
-     * Gets the bathymetry at (i, j) grid point.
-     *
-     * @param i an int, the i-ccordinate
-     * @param j an int, the j-coordinate
-     * @return a double, the bathymetry [meter] at (i, j) grid point if is in
-     * water, return NaN otherwise.
-     */
-    @Override
-    public double getBathy(int i, int j) {
-        return -1.d;
-    }
-
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 

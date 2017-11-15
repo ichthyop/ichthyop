@@ -105,8 +105,6 @@ public interface IGrid {
     public double getLat(int i, int j);
     
     public double getDepth(double x, double y, int k);
-
-    public double getDepthMax();
     
     public double getDepthMax(double x, double y);
     

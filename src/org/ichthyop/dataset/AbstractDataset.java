@@ -67,13 +67,13 @@ import ucar.nc2.NetcdfFile;
 public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
 
     final HashMap<String, RequiredVariable> requiredVariables = new HashMap();
-    
+
     AbstractRegularGrid grid;
-    
+
     abstract String getKey();
 
     abstract void loadParameters();
-    
+
     @Override
     public IGrid getGrid() {
         return grid;
@@ -97,7 +97,7 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     }
 
     public void clearRequiredVariables() {
-            requiredVariables.clear();
+        requiredVariables.clear();
     }
 
     @Override

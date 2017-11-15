@@ -63,7 +63,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
 
     final String prefix;
     private double latmin, latmax, lonmin, lonmax;
-    private boolean xperiodicity, yperiodicity;
+    private boolean xperiodicity = false, yperiodicity = false;
     
     abstract void makeGrid();
 
@@ -249,6 +249,10 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
 
     private double bound(double x) {
         return Math.max(Math.min(1.d, x), 0.d);
+    }
+    
+    double validLon(double lon) {
+        return lon > 180 ? lon - 360.d : lon;
     }
 
     /*
