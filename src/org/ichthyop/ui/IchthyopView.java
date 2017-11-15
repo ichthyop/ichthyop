@@ -767,7 +767,7 @@ public class IchthyopView extends FrameView
         String vname = (String) cbBoxVariable.getSelectedItem();
         float vmin = Float.valueOf(txtFieldMin.getText());
         float vmax = Float.valueOf(txtFieldMax.getText());
-        Color[] colorbar = Colorbars.ALL.get((int) colorbarChooser.getSelectedItem());
+        Color[] colorbar = Colorbars.MATLAB_COLORBARS.get((int) colorbarChooser.getSelectedItem());
         mapper.setColorbar(vname.toLowerCase().contains("none") ? null : vname, vmin, vmax, colorbar);
     }
 

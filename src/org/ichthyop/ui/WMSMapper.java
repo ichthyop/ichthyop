@@ -304,40 +304,12 @@ public class WMSMapper extends JXMapKit {
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
         if (particle.isAlive()) {
             Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), particlePixel, particlePixel);
-            g.setColor(getColor(particle.getColorValue()));
+            g.setColor(Colorbars.getColor(colorbar, particle.getColorValue(), valmin, valmax));
             g.fill(ellipse);
         } else {
             g.setColor(Color.BLACK);
             Rectangle2D rectangle = new Rectangle2D.Double(pt.getX() + 0.5d * particlePixel, pt.getY() - 0.5d * particlePixel, particlePixel, particlePixel);
             g.fill(rectangle);
-        }
-    }
-
-    /*
-     * Determines the color of the particle as a function of its depth or the
-     * sea water temperature (depending on the display option).
-     *
-     * @param value a float, the depth or the water temperature of the particle
-     * @return the Color of the particle.
-     */
-    private Color getColor(float value) {
-
-        if (Float.isNaN(value)) {
-            return defaultColor;
-        }
-
-        float x = bound((value - valmin) / (valmax - valmin)) * (colorbar.length - 1);
-        int cinf = (int) x;
-        float xval = cinf + 1 - x;
-        if (cinf >= (colorbar.length - 1)) {
-            return colorbar[cinf];
-        } else {
-            return (new Color(((int) (xval * colorbar[cinf].getRed()
-                    + (1 - xval) * colorbar[cinf + 1].getRed())),
-                    ((int) (xval * colorbar[cinf].getGreen()
-                    + (1 - xval) * colorbar[cinf + 1].getGreen())),
-                    ((int) (xval * colorbar[cinf].getBlue()
-                    + (1 - xval) * colorbar[cinf + 1].getBlue()))));
         }
     }
 
@@ -448,17 +420,6 @@ public class WMSMapper extends JXMapKit {
             g2.setColor(Color.BLACK);
             layout.draw(g2, x, y);
         }
-    }
-
-    /**
-     * Ensures that float {@code x} belongs to [0, 1]
-     *
-     * @param x any float
-     * @return <code>x</code> if between 0 and 1, the closest boundary
-     * otherwise.
-     */
-    private float bound(float x) {
-        return Math.max(Math.min(1.f, x), 0.f);
     }
 
     private Date getTime(int itime) {

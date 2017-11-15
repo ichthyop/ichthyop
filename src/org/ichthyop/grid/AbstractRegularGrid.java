@@ -64,13 +64,13 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     final String prefix;
     private double latmin, latmax, lonmin, lonmax;
     private boolean xperiodicity = false, yperiodicity = false;
-    
+
     abstract void makeGrid();
 
     public AbstractRegularGrid(String prefix) {
         this.prefix = prefix;
     }
-    
+
     public void init() {
         makeGrid();
         extent();
@@ -79,9 +79,9 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     public void extent() {
 
         lonmin = Double.MAX_VALUE;
-        lonmax = Double.MIN_VALUE;
+        lonmax = -Double.MAX_VALUE;
         latmin = Double.MAX_VALUE;
-        latmax = Double.MIN_VALUE;
+        latmax = -Double.MAX_VALUE;
 
         for (int i = 0; i < get_nx(); i++) {
             for (int j = 0; j < get_ny(); j++) {
@@ -250,7 +250,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     private double bound(double x) {
         return Math.max(Math.min(1.d, x), 0.d);
     }
-    
+
     double validLon(double lon) {
         return lon > 180 ? lon - 360.d : lon;
     }
@@ -316,8 +316,8 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         }
         return 0;
     }
-    
-     @Override
+
+    @Override
     public boolean isInWater(double[] pGrid) {
         if (pGrid.length > 2) {
             return isInWater((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));

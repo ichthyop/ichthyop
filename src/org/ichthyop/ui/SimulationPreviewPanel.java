@@ -79,41 +79,36 @@ public class SimulationPreviewPanel extends JPanel {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    /**
-     * Dimension of the component.
-     */
+    // Dimension of the component.
     private int hi, wi;
-    /**
-     * Minimum latitude of the domain to display
-     */
+    // minimum latitude of the domain to display
     private double latmin;
-    /**
-     * Maximum latitude of the domain to display
-     */
+    // maximum latitude of the domain to display
     private double latmax;
-    /**
-     * Minimum longitude of the domain to display
-     */
+    // minimum longitude of the domain to display
     private double lonmin;
-    /**
-     * Maximum longitude of the domain to display
-     */
+    // maximum longitude of the domain to display
     private double lonmax;
-    /**
-     * BufferedImage in which the background (cost + bathymetry) has been drawn.
-     */
-    private BufferedImage background;
-    private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    // latitude closest to equator
+    private double latClosestEq;
+    // BufferedImage of the grid
+    private BufferedImage biGrid;
+    // panel height
     private int height;
+    // ratio such as width = ratio * height
     private double ratio = 1;
-    final private Color bottom = new Color(0, 0, 150);
-    final private Color surface = Color.CYAN;
-    private final Color sealevel = Color.DARK_GRAY;
-    private final Color highland = new Color(200, 150, 100);
-    public static final int DEFAULT_SIZE = 500;
-    private double[][] bathymetry;
+    // both topography and bathymetry data
+    private double[][] elevation;
+    // deepest point in ocean
     private double deepest;
+    // highest point on land
     private double highest;
+
+///////////////////////////////
+// Declaration of the constants
+///////////////////////////////
+    // panel default size
+    public static final int DEFAULT_SIZE = 500;
 
 ////////////////////////////
 // Definition of the methods
@@ -122,13 +117,6 @@ public class SimulationPreviewPanel extends JPanel {
         return SimulationManager.getInstance();
     }
 
-    /**
-     * Paints the current step of the simulation. Redraws the background if the
-     * size of the component has changed and draws the location of the particles
-     * on screen.
-     *
-     * @param g the <code>Graphics</code> object to protect
-     */
     @Override
     public void paintComponent(Graphics g) {
 
@@ -141,26 +129,26 @@ public class SimulationPreviewPanel extends JPanel {
 
         // redraw the background when size changed
         if (hi != h || wi != w) {
-            background = drawBackground(g2, w, h);
+            biGrid = gridToBI(g2, w, h);
             hi = h;
             wi = w;
         }
-        // draw the background into the graphics
-        g2.drawImage(background, 0, 0, this);
+        // draw the grid into the graphics
+        g2.drawImage(biGrid, 0, 0, this);
     }
 
-    /**
-     * Draws the background of the simulation.
+    /*
+     * Draw the grid
      *
      * @param g2 the Graphics2D to draw the background
      * @param w the width of the component
      * @param h the height of the component
      */
-    private BufferedImage drawBackground(Graphics2D g2, int w, int h) {
+    private BufferedImage gridToBI(Graphics2D g2, int w, int h) {
 
-        BufferedImage bimg = g2.getDeviceConfiguration().createCompatibleImage(w, h);
-        Graphics2D graphic = bimg.createGraphics();
-        graphic.setColor(new Color(223, 212, 200));
+        BufferedImage bi = g2.getDeviceConfiguration().createCompatibleImage(w, h);
+        Graphics2D graphic = bi.createGraphics();
+        graphic.setColor(Color.WHITE);
         graphic.fillRect(0, 0, w, h);
 
         double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getDataset().getGrid().get_ny()));
@@ -170,14 +158,15 @@ public class SimulationPreviewPanel extends JPanel {
             for (int j = getSimulationManager().getDataset().getGrid().get_ny(); j-- > 0;) {
                 double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
                 double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
-                double x = w * (lon - lonmin) / (lonmax - lonmin);
+                double wlat = w * Math.cos(Math.PI * lat / 180.d) / Math.cos(Math.PI * latClosestEq / 180.d);
+                double x = 0.5 * (w - wlat) + wlat * (lon - lonmin) / (lonmax - lonmin);
                 double y = h * (latmax - lat) / (latmax - latmin);
                 Rectangle2D rectangle = new Rectangle2D.Double(x + 0.5 * csize, y - 0.5 * csize, csize, csize);
                 graphic.setColor(getColor(i, j));
                 graphic.fill(rectangle);
             }
         }
-        return bimg;
+        return bi;
     }
 
     public void setHeight(int height) {
@@ -185,33 +174,39 @@ public class SimulationPreviewPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Assess domain extent, computes height width ratio and retrieves
+     * bathymetry data.
+     */
     public void init() {
 
         latmin = getSimulationManager().getDataset().getGrid().getLatMin();
         latmax = getSimulationManager().getDataset().getGrid().getLatMax();
         lonmin = getSimulationManager().getDataset().getGrid().getLonMin();
         lonmax = getSimulationManager().getDataset().getGrid().getLonMax();
-        double avgLat = 0.5d * (latmin + latmax);
-        double dlon = Math.abs(lonmax - lonmin) * ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * avgLat / 180.d);
-        double dlat = Math.abs(latmax - latmin) * ONE_DEG_LATITUDE_IN_METER;
+        latClosestEq = (latmin * latmax >= 0)
+                ? Math.min(Math.abs(latmin), Math.abs(latmax))
+                : 0.d;
+        double dlon = Math.abs(lonmax - lonmin) * Math.cos(Math.PI * latClosestEq / 180.d);
+        double dlat = Math.abs(latmax - latmin);
         ratio = dlon / dlat;
 
         // bathymetry
         int nx = getSimulationManager().getDataset().getGrid().get_nx();
         int ny = getSimulationManager().getDataset().getGrid().get_ny();
-        bathymetry = new double[nx][ny];
+        elevation = new double[nx][ny];
         deepest = Double.MAX_VALUE;
         highest = Double.MIN_VALUE;
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
                 double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
-                bathymetry[i][j] = getSimulationManager().getDatasetManager().getBathymetryDataset().getBathymetry(lat, lon);
-                if (bathymetry[i][j] < deepest) {
-                    deepest = bathymetry[i][j];
+                elevation[i][j] = getSimulationManager().getDatasetManager().getBathymetryDataset().getBathymetry(lat, lon);
+                if (elevation[i][j] < deepest) {
+                    deepest = elevation[i][j];
                 }
-                if (bathymetry[i][j] > highest) {
-                    highest = bathymetry[i][j];
+                if (elevation[i][j] > highest) {
+                    highest = elevation[i][j];
                 }
             }
         }
@@ -221,7 +216,7 @@ public class SimulationPreviewPanel extends JPanel {
 
     @Override
     public int getWidth() {
-        return (int) (height * ratio);
+        return (int) Math.ceil(height * ratio);
     }
 
     @Override
@@ -231,11 +226,11 @@ public class SimulationPreviewPanel extends JPanel {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension((int) (height * ratio), height);
+        return new Dimension((int) Math.ceil(height * ratio), height);
     }
 
-    /**
-     * Determines the color of cell(i, j), depending on the display option.
+    /*
+     * Determines the color of cell(i, j)
      *
      * @param i an int, the i-coordinate of the cell
      * @param j an int, the j-coordinate of the cell
@@ -251,20 +246,10 @@ public class SimulationPreviewPanel extends JPanel {
                 }
             }
             // bathymetry
-            double xdepth = (deepest - bathymetry[i][j]) / deepest;
-            xdepth = Math.max(0, Math.min(xdepth, 1));
-            return (new Color(
-                    (int) (xdepth * surface.getRed() + (1 - xdepth) * bottom.getRed()),
-                    (int) (xdepth * surface.getGreen() + (1 - xdepth) * bottom.getGreen()),
-                    (int) (xdepth * surface.getBlue() + (1 - xdepth) * bottom.getBlue())));
+            return Colorbars.getColor(Colorbars.OCEAN, elevation[i][j], deepest, 0);
         } else {
             // topography
-            double xtopo = (highest - bathymetry[i][j]) / highest;
-            xtopo = Math.max(0, Math.min(xtopo, 1));
-            return (new Color(
-                    (int) (xtopo * sealevel.getRed() + (1 - xtopo) * highland.getRed()),
-                    (int) (xtopo * sealevel.getGreen() + (1 - xtopo) * highland.getGreen()),
-                    (int) (xtopo * sealevel.getBlue() + (1 - xtopo) * highland.getBlue())));
+            return Colorbars.getColor(Colorbars.LAND, elevation[i][j], 0, highest);
         }
     }
 }

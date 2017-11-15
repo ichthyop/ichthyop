@@ -145,9 +145,40 @@ public class Colorbars {
         new Color(255, 255, 255)
     };
 
-    public final static List<Color[]> ALL = Arrays.asList(PARULA, JET, HSV, HOT, COOL, SPRING, SUMMER, AUTUMN, WINTER, BONE, COPPER, PINK);
+    public final static Color[] OCEAN = new Color[]{
+        new Color(0, 0, 150),
+        Color.CYAN
+    };
+    
+    public final static Color[] LAND = new Color[]{
+        Color.DARK_GRAY,
+        new Color(200, 150, 100)
+    };
 
-    public final static List<String> NAMES = Arrays.asList("parula", "jet", "hsv", "hot", "cool", "spring", "summer", "autumn", "winter", "bone", "copper", "pink");
+    public final static List<Color[]> MATLAB_COLORBARS = Arrays.asList(PARULA, JET, HSV, HOT, COOL, SPRING, SUMMER, AUTUMN, WINTER, BONE, COPPER, PINK);
+
+    public final static List<String> COLORBAR_NAMES = Arrays.asList("parula", "jet", "hsv", "hot", "cool", "spring", "summer", "autumn", "winter", "bone", "copper", "pink");
+
+    public static Color getColor(Color[] colorbar, double value, double min, double max) {
+
+        double x = bound((value - min) / (max - min)) * (colorbar.length - 1);
+        int cinf = (int) x;
+        double xval = cinf + 1 - x;
+        if (cinf >= (colorbar.length - 1)) {
+            return colorbar[cinf];
+        } else {
+            return (new Color(((int) (xval * colorbar[cinf].getRed()
+                    + (1 - xval) * colorbar[cinf + 1].getRed())),
+                    ((int) (xval * colorbar[cinf].getGreen()
+                    + (1 - xval) * colorbar[cinf + 1].getGreen())),
+                    ((int) (xval * colorbar[cinf].getBlue()
+                    + (1 - xval) * colorbar[cinf + 1].getBlue()))));
+        }
+    }
+
+    private static double bound(double x) {
+        return Math.max(Math.min(1.d, x), 0.d);
+    }
 
     public static void draw(Graphics2D g, Color[] colorbar, float wbar, float hbar) {
         float x = 1.f / (colorbar.length - 1);

@@ -68,8 +68,8 @@ public class ColorbarChooser extends JComboBox {
 
     public ColorbarChooser() {
 
-        Integer[] intArray = new Integer[Colorbars.ALL.size()];
-        for (int i = 0; i < Colorbars.ALL.size(); i++) {
+        Integer[] intArray = new Integer[Colorbars.MATLAB_COLORBARS.size()];
+        for (int i = 0; i < Colorbars.MATLAB_COLORBARS.size(); i++) {
             intArray[i] = i;
         }
         setModel(new DefaultComboBoxModel(intArray));
@@ -95,8 +95,8 @@ public class ColorbarChooser extends JComboBox {
 
             int selectedIndex = ((Integer) value);
 
-            setIcon(Colorbars.asIcon(Colorbars.ALL.get(selectedIndex), 200, 30));
-            setText(Colorbars.NAMES.get(selectedIndex));
+            setIcon(Colorbars.asIcon(Colorbars.MATLAB_COLORBARS.get(selectedIndex), 200, 30));
+            setText(Colorbars.COLORBAR_NAMES.get(selectedIndex));
             setBackground(Color.WHITE);
             return this;
         }
