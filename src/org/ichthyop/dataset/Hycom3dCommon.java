@@ -68,13 +68,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     NetcdfTiledVariable[] u;
     NetcdfTiledVariable[] v;
     WTiledVariable[] w;
-    double dt_HyMo, time_tp1;
-    int rank;
-    //NetcdfFile nc;
-    int nbTimeRecords;
     boolean xTore = true;
     final int tilingh = 100, tilingv = 3, tilinghw = 10;
-    final private int p = 2;
+    private final int p = 2;
 
     abstract void open() throws Exception;
 
@@ -126,7 +122,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         int i = coast ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = coast ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = coast ? (int) Math.round(pGrid[2]) : (int) pGrid[2];
-        double dt = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double dt = Math.abs((time - tv[0].getTimeStamp()) / (tv[1].getTimeStamp() - tv[0].getTimeStamp()));
         double CO = 0.d;
 
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
