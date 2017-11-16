@@ -114,6 +114,14 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         }
     }
 
+    public void setXPeriodicity(boolean enabled) {
+        this.xperiodicity = enabled;
+    }
+
+    public void setYPeriodicity(boolean enabled) {
+        this.yperiodicity = enabled;
+    }
+
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
@@ -144,10 +152,11 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         boolean found1 = false;
         boolean found2 = false;
 
-        int ci = get_nx() / 2;
-        int cj = get_ny() / 2;
-        int di = ci / 2;
-        int dj = cj / 2;
+        int ci = (int) Math.round(0.5 * get_nx());
+        int cj = (int) Math.round(0.5 * get_ny());
+        
+        int di = (int) Math.ceil(0.5 * ci);
+        int dj = (int) Math.ceil(0.5 * cj);
 
         // Find the closet grid point to {lat, lon}
         while (!(found1 && found2)) {
@@ -179,11 +188,15 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
                 if (dj == 1 && di == 1) {
                     found2 = true;
                 } else {
-                    di = (int) Math.max(1, di / 2);
-                    dj = (int) Math.max(1, dj / 2);
+                    di = (int) Math.max(1, Math.ceil(0.5 * di));
+                    dj = (int) Math.max(1, Math.ceil(0.5 * dj));
                     found1 = false;
                 }
             }
+        }
+
+        if (getLat(ci, cj) == lat && getLon(ci, cj) == lon) {
+            return new double[]{ci, cj};
         }
 
         // Refine within cell (ci, cj) by linear interpolation
@@ -191,7 +204,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         int cim1 = xperiodicity ? xTore(ci - 1) : (ci - 1 < 0 ? 0 : ci - 1);
         int cjp1 = yperiodicity ? yTore(cj + 1) : (cj + 1 > get_ny() - 1 ? get_ny() - 1 : cj + 1);
         int cjm1 = yperiodicity ? yTore(cj + 1) : (cj - 1 < 0 ? 0 : cj - 1);
-        int imin = 0, jmin = 0;
+        int imin = 0, jmin = 0;      
         if (isInside(lat, lon,
                 new double[]{
                     getLat(cim1, cjm1), getLat(cim1, cj), getLat(ci, cj), getLat(ci, cjm1), getLat(cim1, cjm1)},
@@ -221,7 +234,12 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
             imin = ci;
             jmin = cjm1;
         } else {
-            error("Failed to convert lat lon into x y coordinates", null);
+//            System.out.println("lat " + (float) lat + " lon " + (float) lon);
+//            System.out.println("nx " + get_nx() + " cim1 " + cim1 + " ci " + ci + " cip1 " + cip1);
+//            System.out.println("lon cim1 " + getLon(cim1, cj) + " ci " + getLon(ci, cj) + " cip1 " + getLon(cip1, cj));
+//            System.out.println("ny " + get_ny() + " cjm1 " + cjm1 + " cj " + cj + " cjp1 " + cjp1);
+//            System.out.println("lat cjm1 " + getLat(ci, cjm1) + " lat cj " + getLat(ci, cj) + " lat cjp1 " + getLat(ci, cjp1));
+            error("Failed to convert lat " + (float) lat + " lon " + (float) lon + " into x y coordinates", null);
         }
 
         // trilinear interpolation
@@ -256,20 +274,35 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     }
 
     /*
-     * Return true if the given point is contained inside the boundary. See:
-     * http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+    https://stackoverflow.com/questions/12083093/how-to-define-if-a-determinate-point-is-inside-a-region-lat-long
      */
     private boolean isInside(double lat0, double lon0, double[] lat, double[] lon) {
-        int i;
-        int j;
-        boolean result = false;
-        for (i = 0, j = lat.length - 1; i < lat.length; j = i++) {
-            if ((lat[i] > lat0) != (lat[j] > lat0)
-                    && (lon0 < (lon[j] - lon[i]) * (lat0 - lat[i]) / (lat[j] - lat[i]) + lon[i])) {
-                result = !result;
+        int i, j;
+        boolean inside = false;
+        int sides = lat.length;
+        for (i = 0, j = sides - 1; i < sides; j = i++) {
+            //verifying if your coordinate is inside your region
+            double dxi0 = substract(lon0, lon[i]);
+            double dxj0 = substract(lon0, lon[j]);
+            double dxji = substract(lon[j], lon[i]);
+            if ((((dxi0 >= 0) && (dxj0 < 0)) || ((dxj0 >= 0) && (dxi0 < 0)))
+                    && (lat0 < ((lat[j] - lat[i]) * dxi0 / dxji + lat[i]))) {
+                inside = !inside;
             }
         }
-        return result;
+        return inside;
+    }
+
+    private double substract(double lon1, double lon2) {
+        double dx;
+        if ((lon1 - lon2) > 180.d) {
+            dx = lon1 - lon2 - 360.d;
+        } else if ((lon1 - lon2) < -180.d) {
+            dx = 360.d + lon1 - lon2;
+        } else {
+            dx = lon1 - lon2;
+        }
+        return dx;
     }
 
     @Override

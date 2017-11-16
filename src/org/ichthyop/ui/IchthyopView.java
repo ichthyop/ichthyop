@@ -144,6 +144,7 @@ public class IchthyopView extends FrameView
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
     private Task simulActionTask;
+    private Task previewTask;
     private Task createMapTask;
     private Task kmzTask;
     private boolean initDone;
@@ -399,9 +400,11 @@ public class IchthyopView extends FrameView
     public Task previewSimulation() {
         taskPaneSimulation.setCollapsed(false);
         if (!isRunning) {
-            return new SimulationPreviewTask(getApplication());
-        } 
-        return null;
+            return previewTask = new SimulationPreviewTask(getApplication());
+        } else {
+            previewTask.cancel(true);
+            return null;
+        }
     }
 
     private void showSimulationPreview() {
@@ -425,6 +428,8 @@ public class IchthyopView extends FrameView
             super(instance);
             isRunning = true;
             btnSimulationRun.getAction().setEnabled(false);
+            btnPreview.setIcon(resourceMap.getIcon("previewSimulation.Action.cancel.icon"));
+            btnPreview.setText(resourceMap.getString("previewSimulation.Action.cancel.text"));
         }
 
         @Override
@@ -434,31 +439,37 @@ public class IchthyopView extends FrameView
                 getSimulationManager().setup();
                 getSimulationManager().init();
                 setMessage(resourceMap.getString("simulationRun.msg.init.ok"));
-                setMessage("[preview] Loading bathymetric data...");
+                setMessage("[preview] Loading bathymetric data...", true, LogLevel.COMPLETE);
                 previewPanel.init();
                 setMessage("[preview] Initialisation OK", false, LogLevel.COMPLETE);
+                initDone = true;
             }
             return null;
         }
 
         @Override
         protected void onSuccess(Object obj) {
-            initDone = true;
             showSimulationPreview();
         }
 
         @Override
         void onFailure(Throwable throwable) {
-            initDone = false;
             StringBuilder msg = new StringBuilder();
-            msg.append(resourceMap.getString("simulationRun.msg.init.failed"));
+            msg.append(resourceMap.getString("previewSimulation.msg.failed"));
             setMessage(msg.toString(), false, Level.SEVERE);
         }
         
-         @Override
+        @Override
+        protected void cancelled() {
+            setMessage(resourceMap.getString("previewSimulation.msg.interrupted"));
+        }
+
+        @Override
         protected void finished() {
             isRunning = false;
             btnSimulationRun.getAction().setEnabled(true);
+            btnPreview.setIcon(resourceMap.getIcon("previewSimulation.Action.icon"));
+            btnPreview.setText(resourceMap.getString("previewSimulation.Action.text"));
         }
     }
 

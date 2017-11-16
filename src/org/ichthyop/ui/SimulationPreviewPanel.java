@@ -158,8 +158,9 @@ public class SimulationPreviewPanel extends JPanel {
             for (int j = getSimulationManager().getDataset().getGrid().get_ny(); j-- > 0;) {
                 double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
                 double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
-                double wlat = w * Math.cos(Math.PI * lat / 180.d) / Math.cos(Math.PI * latClosestEq / 180.d);
-                double x = 0.5 * (w - wlat) + wlat * (lon - lonmin) / (lonmax - lonmin);
+//                double wlat = w * Math.cos(Math.PI * lat / 180.d) / Math.cos(Math.PI * latClosestEq / 180.d);
+//                double x = 0.5 * (w - wlat) + wlat * (lon - lonmin) / (lonmax - lonmin);
+                double x = w * (lon - lonmin) / (lonmax - lonmin);
                 double y = h * (latmax - lat) / (latmax - latmin);
                 Rectangle2D rectangle = new Rectangle2D.Double(x + 0.5 * csize, y - 0.5 * csize, csize, csize);
                 graphic.setColor(getColor(i, j));

@@ -75,6 +75,10 @@ import ucar.nc2.dataset.NetcdfDataset;
  */
 public class DatasetUtil extends IchthyopLinker {
 
+    private static final double TO_RAD = Math.PI / 180.d;
+    private static final double DEARTH = 2 * 6367000.d;
+    public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+
     /**
      * List directory content with file pattern accepting * and ?
      * metacharacters. Not recursive.
@@ -418,14 +422,15 @@ public class DatasetUtil extends IchthyopLinker {
      */
     public static double geodesicDistance(double lat1, double lon1, double lat2, double lon2) {
 
-        double lat1_rad = Math.PI * lat1 / 180.d;
-        double lat2_rad = Math.PI * lat2 / 180.d;
-        double lon1_rad = Math.PI * lon1 / 180.d;
-        double lon2_rad = Math.PI * lon2 / 180.d;
+        double lat1_rad = TO_RAD * lat1;
+        double lat2_rad = TO_RAD * lat2;
+        double lon1_rad = TO_RAD * lon1;
+        double lon2_rad = TO_RAD * lon2;
 
-        double d = 2 * 6367000.d
-                * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
-                        + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
+        double sindlat = Math.sin(0.5d * (lat2_rad - lat1_rad));
+        double sindlon = Math.sin(0.5d * (lon2_rad - lon1_rad));
+        double d = DEARTH * Math.asin(
+                Math.sqrt(sindlat * sindlat + Math.cos(lat1_rad) * Math.cos(lat2_rad) * sindlon * sindlon));
 
         return d;
     }
