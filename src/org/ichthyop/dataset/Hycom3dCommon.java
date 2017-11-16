@@ -53,6 +53,7 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
+import org.ichthyop.grid.IGrid;
 import org.ichthyop.grid.RectilinearGrid;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
@@ -96,8 +97,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         v = new NetcdfTiledVariable[nt];
         w = new WTiledVariable[nt];
         // Initializes u[0] & v[0] for the mask
-        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid().get_nx(), getGrid().get_ny(), getGrid().get_nz(), getGrid().get_i0(), getGrid().get_j0(), 0, 0, tilingh, tilingv);
-        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid().get_nx(), getGrid().get_ny(), getGrid().get_nz(), getGrid().get_i0(), getGrid().get_j0(), 0, 0, tilingh, tilingv);
+        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), 0, 0, tilingh, tilingv);
+        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), 0, 0, tilingh, tilingv);
     }
 
     private double weight(double[] xyz, int[] ijk, int p) {
@@ -112,7 +113,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return i < 0 || j < 0 || k < 0 || i > getGrid().get_nx() - 1 || j > getGrid().get_ny() - 1 || k > getGrid().get_nz() - 1;
     }
 
-    private double interpolateIDW(AbstractTiledVariable[] tv, double[] pGrid, double time) {
+    // interpolate Inverse Distance Weight
+    private double interpolateIDW(NetcdfTiledVariable[] tv, double[] pGrid, double time) {
 
         double value = 0.d;
         boolean coast = getGrid().isCloseToCost(pGrid);
@@ -201,15 +203,15 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         return null;
     }
 
-    public class WTiledVariable extends AbstractTiledVariable {
+    public class WTiledVariable extends NetcdfTiledVariable {
 
         private final NetcdfTiledVariable uw;
         private final NetcdfTiledVariable vw;
 
-        WTiledVariable(NetcdfFile nc, int nx, int ny, int nz, int i0, int j0, int nh, int rank, double timestamp) throws IOException {
-            super(nx, ny, nz, 1, nz, timestamp);
-            uw = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, timestamp, nh, nz);
-            vw = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, timestamp, nh, nz);
+        WTiledVariable(NetcdfFile nc, IGrid grid, int rank, double timestamp, int nh) throws IOException {
+            super(nc, null, grid, 1, timestamp, 1, grid.get_nz());
+            uw = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", grid, rank, timestamp, nh, nz);
+            vw = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", grid, rank, timestamp, nh, nz);
         }
 
         @Override

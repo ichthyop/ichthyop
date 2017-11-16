@@ -181,7 +181,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     }
                 }
             }
-            mask = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, nx, ny, nz, i0, j0, 0, 0, 10, Math.min(3, nz));
+            mask = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, this, 0, 0, 10, Math.min(3, nz));
 
         } catch (IOException ex) {
             error("[grid] Failed to make grid " + prefix, ex);

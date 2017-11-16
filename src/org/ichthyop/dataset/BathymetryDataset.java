@@ -96,7 +96,7 @@ public class BathymetryDataset extends IchthyopLinker {
             for (String name : names) {
                 String fullname = DatasetUtil.findVariable(nc, name);
                 if (null != fullname) {
-                    bathymetry = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, grid.get_nx(), grid.get_ny(), grid.get_nz(), grid.get_i0(), grid.get_j0(), 0, 0, 100, 1);
+                    bathymetry = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, grid, 0, 0, 100, 1);
                     break;
                 }
             }

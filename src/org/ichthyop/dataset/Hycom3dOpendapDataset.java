@@ -91,16 +91,17 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         int i0 = getGrid().get_i0();
         int j0 = getGrid().get_j0();
 
-        u[1] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time, tilingh, tilingv);
-        v[1] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time, tilingh, tilingv);
-        w[1] = new WTiledVariable(nc, nx, ny, nz, i0, j0, tilinghw, rank, time);
+        u[1] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv);
+        v[1] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv);
+        w[1] = new WTiledVariable(nc, getGrid(), rank, time, tilinghw);
+
 
         // t+2
         rank += time_arrow;
         time = DatasetUtil.timeAtRank(nc, "time", rank);
-        u[2] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time, tilingh, tilingv);
-        v[2] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time, tilingh, tilingv);
-        w[2] = new WTiledVariable(nc, nx, ny, nz, i0, j0, tilinghw, rank, time);
+        u[2] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv);
+        v[2] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv);
+        w[2] = new WTiledVariable(nc, getGrid(), rank, time, tilinghw);
 
         //checkRequiredVariable(nc);
     }
@@ -143,9 +144,9 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
         int i0 = getGrid().get_i0();
         int j0 = getGrid().get_j0();
         time = DatasetUtil.timeAtRank(nc, "time", rank);
-        u[2] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time, tilingh, tilingv);
-        v[2] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", nx, ny, nz, i0, j0, rank, time, tilingh, tilingv);
-        w[2] = new WTiledVariable(nc, nx, ny, nz, i0, j0, tilinghw, rank, time);
+        u[2] = new NetcdfTiledVariable(nc, "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv);
+        v[2] = new NetcdfTiledVariable(nc, "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv);
+        w[2] = new WTiledVariable(nc, getGrid(), rank, time, tilinghw);
         // pre-load tiles
         u[2].loadTiles(u[0].getTilesIndex());
         v[2].loadTiles(v[0].getTilesIndex());
