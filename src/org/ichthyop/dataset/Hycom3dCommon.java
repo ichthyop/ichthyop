@@ -65,13 +65,11 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class Hycom3dCommon extends AbstractDataset {
 
-    final int nt = 3;
-    NetcdfTiledVariable[] u;
-    NetcdfTiledVariable[] v;
-    WTiledVariable[] w;
+    DatasetVariable u;
+    DatasetVariable v;
+    DatasetVariable w;
     boolean xTore = true;
     final int tilingh = 100, tilingv = 3, tilinghw = 10;
-    private final int p = 2;
 
     abstract void open() throws Exception;
 
@@ -93,85 +91,24 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         grid = new RectilinearGrid(getKey() + ".grid");
         grid.init();
 
-        u = new NetcdfTiledVariable[nt];
-        v = new NetcdfTiledVariable[nt];
-        w = new WTiledVariable[nt];
-        // Initializes u[0] & v[0] for the mask
-        u[0] = new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), 0, 0, tilingh, tilingv);
-        v[0] = new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), 0, 0, tilingh, tilingv);
-    }
-
-    private double weight(double[] xyz, int[] ijk, int p) {
-        double distance = 0.d;
-        for (int n = 0; n < xyz.length; n++) {
-            distance += Math.abs(Math.pow(xyz[n] - ijk[n], p));
-        }
-        return 1.d / distance;
-    }
-
-    private boolean isOut(int i, int j, int k) {
-        return i < 0 || j < 0 || k < 0 || i > getGrid().get_nx() - 1 || j > getGrid().get_ny() - 1 || k > getGrid().get_nz() - 1;
-    }
-
-    // interpolate Inverse Distance Weight
-    private double interpolateIDW(NetcdfTiledVariable[] tv, double[] pGrid, double time) {
-
-        double value = 0.d;
-        boolean coast = getGrid().isCloseToCost(pGrid);
-        int n[] = coast ? new int[]{0, 1} : new int[]{0, 2}; // 8 points
-        //int n[] = coast ? new int[]{0, 1} : new int[] {-1, 3}; // 16 points
-        //int n[] = coast ? new int[]{0, 1} : new int[] {-2, 4}; // 64 points
-        int i = coast ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
-        int j = coast ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
-        int k = coast ? (int) Math.round(pGrid[2]) : (int) pGrid[2];
-        double dt = Math.abs((time - tv[0].getTimeStamp()) / (tv[1].getTimeStamp() - tv[0].getTimeStamp()));
-        double CO = 0.d;
-
-        if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
-            // pGrid falls on a grid point
-            CO = 1.d;
-            i = getGrid().xTore(i);
-            if (!(Double.isNaN(tv[0].getDouble(i, j, k)) || Double.isNaN(tv[1].getDouble(i, j, k)))) {
-                value = (1.d - dt) * tv[0].getDouble(i, j, k) + dt * tv[1].getDouble(i, j, k);
-            }
-        } else {
-            for (int ii = n[0]; ii < n[1]; ii++) {
-                for (int jj = n[0]; jj < n[1]; jj++) {
-                    for (int kk = n[0]; kk < n[1]; kk++) {
-                        int ci = getGrid().xTore(i + ii);
-                        if (isOut(ci, j + jj, k + kk)) {
-                            continue;
-                        }
-                        double co = weight(pGrid, new int[]{i + ii, j + jj, k + kk}, p);
-                        CO += co;
-                        if (!(Double.isNaN(tv[0].getDouble(ci, j + jj, k + kk)) || Double.isNaN(tv[1].getDouble(ci, j + jj, k + kk)))) {
-                            double x = (1.d - dt) * tv[0].getDouble(ci, j + jj, k + kk) + dt * tv[1].getDouble(ci, j + jj, k + kk);
-                            value += x * co;
-                        }
-                    }
-                }
-            }
-        }
-        if (CO != 0) {
-            value /= CO;
-        }
-
-        return value;
+        u = new DatasetVariable(grid);
+        v = new DatasetVariable(grid);
+        w = new DatasetVariable(grid);
     }
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        return interpolateIDW(u, pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return u.getDouble(pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        return interpolateIDW(v, pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return v.getDouble(pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        return interpolateIDW(w, pGrid, time) / getGrid().get_dz((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
+        return w.getDouble(pGrid, time) / getGrid().get_dz((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
     }
 
     @Override
