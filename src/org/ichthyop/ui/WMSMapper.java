@@ -304,7 +304,7 @@ public class WMSMapper extends JXMapKit {
         Point2D pt = map.getTileFactory().geoToPixel(particle, map.getZoom());
         if (particle.isAlive()) {
             Ellipse2D ellipse = new Ellipse2D.Double(pt.getX(), pt.getY(), particlePixel, particlePixel);
-            g.setColor(Colorbars.getColor(colorbar, particle.getColorValue(), valmin, valmax));
+            g.setColor(colorbar != null ? Colorbars.getColor(colorbar, particle.getColorValue(), valmin, valmax) : defaultColor);
             g.fill(ellipse);
         } else {
             g.setColor(Color.BLACK);
