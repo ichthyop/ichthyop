@@ -70,7 +70,7 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
     }
 
     @Override
-    void open() throws Exception {
+    void loadParameters() {
         url = getConfiguration().getString("dataset.hycom_3d_opendap.opendap_url");
     }
 

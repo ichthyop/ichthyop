@@ -71,22 +71,12 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     boolean xTore = true;
     final int tilingh = 100, tilingv = 3, tilinghw = 10;
 
-    abstract void open() throws Exception;
-
     abstract NetcdfFile getNC();
-
-    @Override
-    void loadParameters() {
-        // does nothing for now
-    }
 
     @Override
     public void setUp() throws Exception {
 
-        // Clear required variables
-//        clearRequiredVariables();
-        // Open NetCDF (abstract)
-        open();
+        loadParameters();
 
         grid = new RectilinearGrid(getKey() + ".grid");
         grid.init();

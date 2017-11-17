@@ -72,10 +72,15 @@ public class Hycom3dDataset extends Hycom3dCommon {
     }
 
     @Override
-    void open() throws Exception {
-        // List uv files
-        uvFiles = DatasetUtil.list(getConfiguration().getString("dataset.hycom_3d.input_path"),
-                getConfiguration().getString("dataset.hycom_3d.uv_file_pattern"));
+    void loadParameters() {
+        try {
+            // List uv files
+            uvFiles = DatasetUtil.list(
+                    getConfiguration().getString("dataset.hycom_3d.input_path"),
+                    getConfiguration().getString("dataset.hycom_3d.uv_file_pattern"));
+        } catch (IOException ex) {
+            error("[dataset] Failed to list HYCOM NetCDF files in folder " + getConfiguration().getString("dataset.hycom_3d.input_path"), ex);
+        }
         index = 0;
     }
 
