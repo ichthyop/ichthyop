@@ -58,6 +58,9 @@ import org.ichthyop.event.LastStepEvent;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.event.SetupEvent;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import org.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,9 +155,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             ncOut.close();
             String strFilePart = ncOut.getNetcdfFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
-            File filePart = new File(strFilePart);
-            File fileBase = new File(strFileBase);
-            filePart.renameTo(fileBase);
+            Path filePart = new File(strFilePart).toPath();
+            Path fileBase = new File(strFileBase).toPath();
+            Files.move(filePart, fileBase, REPLACE_EXISTING);
             info("[output] Closed NetCDF output file.");
         } catch (IOException ex) {
             warning("[output] Error closing NetCDF output file.", ex);
