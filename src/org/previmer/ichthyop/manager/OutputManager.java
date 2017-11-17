@@ -14,6 +14,9 @@ import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.logging.Level;
 import ucar.nc2.NetcdfFileWriteable;
 import org.previmer.ichthyop.event.LastStepListener;
@@ -116,9 +119,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             ncOut.close();
             String strFilePart = ncOut.getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
-            File filePart = new File(strFilePart);
-            File fileBase = new File(strFileBase);
-            filePart.renameTo(fileBase);
+            Path filePart = new File(strFilePart).toPath();
+            Path fileBase = new File(strFileBase).toPath();
+            Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
