@@ -62,12 +62,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -100,20 +95,67 @@ import org.ichthyop.manager.SimulationManager;
  *
  * @author pverley
  */
-public class JConfigurationPanel extends JPanel implements TreeSelectionListener, TableModelListener, ListSelectionListener, ActionListener {
+public class JConfigurationPanel extends JPanel {
+    
+    private final String PARAMETER_CHANGED = "parameterChanged";
 
     /**
      * Creates new form JConfigurationPanel
      */
     public JConfigurationPanel() {
         initComponents();
-        addActionListeners();
+        addListeners();
     }
 
-    private void addActionListeners() {
-        ckBoxNode.addActionListener(this);
-        btnRedo.addActionListener(this);
-        btnUndo.addActionListener(this);
+    private void addListeners() {
+
+        // stop editing
+        ActionListener al = (ActionEvent e) -> {
+            SwingUtilities.invokeLater(() -> {
+                getTable().stopEditing();
+            });
+        };
+        ckBoxNode.addActionListener(al);
+        btnRedo.addActionListener(al);
+        btnUndo.addActionListener(al);
+
+        // select subset in tree
+        table.getSelectionModel().addListSelectionListener((evt) -> {
+            if (!evt.getValueIsAdjusting()) {
+                try {
+                    int viewRow = table.getSelectedRow();
+                    if (viewRow < 0) {
+                        //Selection got filtered away.
+                        return;
+                    }
+                    UIParameterSubset pset = parameterTree.getParameterSet();
+                    UIParameter parameter = getTable().getParameter(table.convertRowIndexToModel(viewRow));
+                    StringBuilder info = new StringBuilder("<html>");
+                    info.append("<p>Set of parameters: ");
+                    info.append(pset.getTreePath());
+                    info.append("</p>");
+                    if (null != pset.getDescription()) {
+                        info.append("<br><p><i>");
+                        info.append(pset.getDescription());
+                        info.append("</i></p>");
+                    }
+                    info.append("<br>");
+                    info.append("<p>Parameter: ");
+                    info.append(parameter.getLongName());
+                    info.append("</p><br><p><i>");
+                    if (null != parameter.getDescription()) {
+                        info.append(parameter.getDescription());
+                    } else {
+                        info.append(getResourceMap().getString("noDescription.text"));
+                    }
+                    info.append("</i></p><br></html>");
+                    lblInfo.setText(info.toString());
+                } catch (Exception ex) {
+                    lblInfo.setText(getResourceMap().getString("noDescription.text"));
+                    SimulationManager.getInstance().debug(ex);
+                }
+            }
+        });
     }
 
     @Action
@@ -154,7 +196,14 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
         /* Disabled buttons */
         btnUndo.getAction().setEnabled(false);
         btnRedo.getAction().setEnabled(false);
-        getTable().setModel(pset, this);
+        getTable().setModel(pset, (TableModelEvent e) -> {
+            if (e != null) {
+                btnRedo.getAction().setEnabled(false);
+                btnUndo.getAction().setEnabled(true);
+                UIParameter parameter = getTable().getParameter(table.convertRowIndexToModel(e.getFirstRow()));
+                firePropertyChange(PARAMETER_CHANGED, null, parameter.getKey());
+            }
+        });
         setParameterEditorEnabled(pset.getType().equals(UIParameterSubset.Type.OPTION) ? true : pset.isEnabled());
     }
 
@@ -164,7 +213,8 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
         setParameterEditorEnabled(ckBoxNode.isSelected());
         ensureSingleNodeSelection(UIParameterSubset.Type.DATASET);
         ensureSingleNodeSelection(UIParameterSubset.Type.RELEASE);
-        firePropertyChange("configurationFile", null, null);
+        String key = parameterTree.getParameterSet().getKey() + ".enabled";
+        firePropertyChange(PARAMETER_CHANGED, null, key);
     }
 
     private void ensureSingleNodeSelection(UIParameterSubset.Type type) {
@@ -196,18 +246,6 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
         table.setEnabled(enabled);
         btnUndo.getAction().setEnabled(enabled && getTable().getUndoManager().canUndo());
         btnRedo.getAction().setEnabled(enabled && getTable().getUndoManager().canRedo());
-    }
-
-    @Override
-    public void valueChanged(TreeSelectionEvent e) {
-        Application.getInstance().getContext().getTaskService().execute(new ShowConfigEditorsTask());
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        SwingUtilities.invokeLater(() -> {
-            getTable().stopEditing();
-        });
     }
 
     private class ShowConfigEditorsTask extends Task {
@@ -250,54 +288,6 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
         @Override
         protected void cancelled() {
             splitPaneCfg.setRightComponent(pnlNoNodeSelected);
-        }
-    }
-
-    @Override
-    public void tableChanged(TableModelEvent e) {
-        if (e != null) {
-            btnRedo.getAction().setEnabled(false);
-            btnUndo.getAction().setEnabled(true);
-            UIParameter parameter = getTable().getParameter(table.convertRowIndexToModel(e.getFirstRow()));
-            firePropertyChange("parameterChanged", null, parameter.getKey());
-        }
-    }
-
-    @Override
-    public void valueChanged(ListSelectionEvent e) {
-        if (!e.getValueIsAdjusting()) {
-            try {
-                int viewRow = table.getSelectedRow();
-                if (viewRow < 0) {
-                    //Selection got filtered away.
-                    return;
-                }
-                UIParameterSubset pset = parameterTree.getParameterSet();
-                UIParameter parameter = getTable().getParameter(table.convertRowIndexToModel(viewRow));
-                StringBuilder info = new StringBuilder("<html>");
-                info.append("<p>Set of parameters: ");
-                info.append(pset.getTreePath());
-                info.append("</p>");
-                if (null != pset.getDescription()) {
-                    info.append("<br><p><i>");
-                    info.append(pset.getDescription());
-                    info.append("</i></p>");
-                }
-                info.append("<br>");
-                info.append("<p>Parameter: ");
-                info.append(parameter.getLongName());
-                info.append("</p><br><p><i>");
-                if (null != parameter.getDescription()) {
-                    info.append(parameter.getDescription());
-                } else {
-                    info.append(getResourceMap().getString("noDescription.text"));
-                }
-                info.append("</i></p><br></html>");
-                lblInfo.setText(info.toString());
-            } catch (Exception ex) {
-                lblInfo.setText(getResourceMap().getString("noDescription.text"));
-                SimulationManager.getInstance().debug(ex);
-            }
         }
     }
 
@@ -355,7 +345,9 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
         void onSuccess(Object result) {
             setVisible(true);
             parameterTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-            parameterTree.addTreeSelectionListener(JConfigurationPanel.this);
+            parameterTree.addTreeSelectionListener((evt) -> {
+                Application.getInstance().getContext().getTaskService().execute(new ShowConfigEditorsTask());
+            });
         }
 
         @Override
@@ -419,7 +411,7 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
         btnUndo = new JButton();
         btnRedo = new JButton();
         scrollPaneTable = new JScrollPane();
-        table = new org.ichthyop.ui.ParameterTable();
+        table = new ParameterTable();
 
         parameterEditor.setName("parameterEditor");
 
@@ -596,7 +588,7 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
 
         pnlParameterSet.setName("pnlParameterSet");
 
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(JConfigurationPanel.class);
+        ResourceMap resourceMap = Application.getInstance().getContext().getResourceMap(JConfigurationPanel.class);
         pnlInfo.setBorder(BorderFactory.createTitledBorder(resourceMap.getString("pnlInfo.border.title")));
         pnlInfo.setName("pnlInfo");
 
@@ -637,8 +629,8 @@ public class JConfigurationPanel extends JPanel implements TreeSelectionListener
 
         table.setModel(new DefaultTableModel());
         table.setName("table");
-        table.getModel().addTableModelListener(this);
-        table.getSelectionModel().addListSelectionListener(this);
+        //table.getModel().addTableModelListener(this);
+
         scrollPaneTable.setViewportView(table);
 
         GroupLayout pnlParametersLayout = new GroupLayout(pnlParameters);

@@ -751,12 +751,9 @@ public class ParameterManager extends AbstractManager {
         if (!keys.isEmpty()) {
             String s = keys.get(0);
             String subset = s.substring(0, s.lastIndexOf("."));
-            List<String> remove = new ArrayList();
-            for (String key : keys) {
-                if (key.startsWith(subset)) {
-                    remove.add(key);
-                }
-            }
+            // remove subsets specific parameters
+            keys.removeAll(Arrays.asList(new String[]{subset + ".enabled", subset + ".type", subset + ".type"}));
+            List<String> remove = keys.stream().filter((key) -> (key.startsWith(subset))).collect(Collectors.toList());
             subsets.put(subset, remove);
             keys.removeAll(remove);
             extractMiscellaneousSubsets(keys);
