@@ -76,8 +76,7 @@ public class DatasetManager extends AbstractManager {
 
         // current dataset
         int n = 0;
-        String[] keys = getConfiguration().getParameterSubsets();
-        for (String key : keys) {
+        for (String key : getConfiguration().getParameterSubsets()) {
             if (getConfiguration().canFind(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
                 if (getConfiguration().getBoolean(key + ".enabled")) {

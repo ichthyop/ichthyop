@@ -61,68 +61,72 @@ import org.ichthyop.IchthyopLinker;
  * @author pverley
  */
 public class UIParameterSubset extends IchthyopLinker {
-    
-    final private String key;
-    
-    public UIParameterSubset(String key) {
-        this.key = key;
-    }
-    
-    public String getKey() {
-        return key;
-    }
-    
-    public Type getType() {
-        return getConfiguration().isNull(key + ".type")
-                ? Type.OPTION
-                : Type.getType(getConfiguration().getString(key + ".type"));
-    }
-    
-    public String getTreePath() {
-        return getConfiguration().getString(key + ".treepath");
-    }
-    
-    public boolean isEnabled() {
-        return getConfiguration().getBoolean(key + ".enabled", false);
-    }
-    
-    public void setEnabled(boolean enabled) {
-        getConfiguration().setString(key + ".enabled", Boolean.toString(enabled));
-    }
-    
-    public String getDescription() {
-        return getConfiguration().isNull(key + ".description")
-                ? null
-                : getConfiguration().getString(key + ".description");
-    }
-    
-    public List<UIParameter> getParameters() {
-        String[] pkeys = getConfiguration().getArrayString(key + ".parameters");
-        List<UIParameter> parameters = new ArrayList(pkeys.length);
-        for (String pkey : pkeys) {
-            if (getConfiguration().canFind(key + "." + pkey)) {
-                parameters.add(new UIParameter(key + "." + pkey));
-            }
+
+    private final String prefix;
+    private final List<UIParameter> parameters;
+
+    public UIParameterSubset(String prefix, List<String> keys) {
+        this.prefix = (null == prefix) ? "" : prefix;
+        parameters = new ArrayList();
+        for (String key : keys) {
+            parameters.add(new UIParameter(key));
         }
+    }
+
+    public String getKey() {
+        return prefix;
+    }
+
+    public Type getType() {
+        return getConfiguration().isNull(prefix + ".type")
+                ? Type.OPTION
+                : Type.getType(getConfiguration().getString(prefix + ".type"));
+    }
+
+    public String getTreePath() {
+        return getConfiguration().isNull(prefix + ".treepath")
+                ? "Miscellaneous/" + prefix
+                : getConfiguration().getString(prefix + ".treepath");
+    }
+
+    public boolean isEnabled() {
+        return getConfiguration().isNull(prefix + ".enabled")
+                ? true
+                : getConfiguration().getBoolean(prefix + ".enabled", false);
+
+    }
+
+    public void setEnabled(boolean enabled) {
+        getConfiguration().setString(prefix + ".enabled", Boolean.toString(enabled));
+    }
+
+    public String getDescription() {
+        return getConfiguration().isNull(prefix + ".description")
+                ? null
+                : getConfiguration().getString(prefix + ".description");
+    }
+
+    public List<UIParameter> getParameters() {
         return parameters;
     }
-    
+
     public enum Type {
-        
+
         OPTION,
         ACTION,
         RELEASE,
-        DATASET;
-        
+        DATASET,
+        ZONE;
+
         public static Type getType(String value) {
             for (Type type : values()) {
-                if (type.toString().equals(value)) {
+                if (type.toString().equalsIgnoreCase(value)) {
                     return type;
                 }
             }
             return null;
         }
-        
+
         @Override
         public String toString() {
             return name().toLowerCase();

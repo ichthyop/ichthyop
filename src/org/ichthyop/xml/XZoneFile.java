@@ -259,10 +259,6 @@ public class XZoneFile extends IchthyopLinker {
                 }));
                 parameters.put(zkey + ".treepath", "Zones/" + prefix + "/zone" + index);
                 parameters.put(zkey + ".description", "Zone definition linked to submodel " + prefix);
-                String[] subsets = getConfiguration().getParameterSubsets();
-                String[] newsubsets = Arrays.copyOf(subsets, subsets.length + 1);
-                newsubsets[subsets.length] = zkey;
-                parameters.put("configuration.subsets", StringUtil.handleArray(newsubsets));
             }
             index++;
         }

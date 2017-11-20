@@ -64,9 +64,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.ichthyop.Version;
 import org.ichthyop.xml.XConfigurationFile;
 import org.ichthyop.util.Separator;
@@ -81,6 +85,7 @@ public class ParameterManager extends AbstractManager {
 
     private static final ParameterManager PARAMETER_MANAGER = new ParameterManager();
     private HashMap<String, Parameter> parameters = new HashMap();
+    private HashMap<String, List<String>> subsets = new HashMap();
     private String inputPathname;
     private String mainFilename;
 
@@ -99,6 +104,7 @@ public class ParameterManager extends AbstractManager {
         mainFilename = mainFile.getAbsolutePath();
         // load parameters
         loadParameters(mainFilename, 0);
+        identifySubsets();
         // check for old XML zone file
         zoneXMLToCFG();
     }
@@ -263,8 +269,10 @@ public class ParameterManager extends AbstractManager {
                 StringBuilder str = new StringBuilder();
                 if (JSON) {
                     str.append("    ");
+                    str.append("\"").append(parameter.key).append("\"");
+                } else {
+                    str.append(parameter.key);
                 }
-                str.append("\"").append(parameter.key).append("\"");
                 str.append(JSON ? ": " : parameter.keySeparator);
                 if (StringUtil.isNotString(parameter.value) | StringUtil.isQuoted(parameter.value)) {
                     str.append(parameter.value);
@@ -645,7 +653,7 @@ public class ParameterManager extends AbstractManager {
         try {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
-                if (!(line.length() <= 1)) {
+                if (!isCommented(line) & !(line.length() <= 1)) {
                     Parameter entry = JSON
                             ? new Parameter(iline, filename, ":", ",")
                             : new Parameter(iline, filename);
@@ -669,8 +677,94 @@ public class ParameterManager extends AbstractManager {
         }
     }
 
-    public String[] getParameterSubsets() {
-        return getArrayString("configuration.subsets");
+    private boolean isCommented(String value) {
+        return value.startsWith("#") || value.startsWith("//");
+    }
+
+    /**
+     * Checks whether a String start with a punctuation character. It uses
+     * {@link java.util.regex.Pattern} {@code \p{Punct}} Punctuation: One of
+     * {@code !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~}
+     *
+     * @param value, the {@code String} to be checked
+     * @return true if {@code value} starts with one of
+     * {@code !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~}
+     */
+    private boolean startsWithSymbol(String value) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        Pattern p = Pattern.compile("(^\\p{Punct})");
+        Matcher m = p.matcher(value);
+        return m.find();
+    }
+
+    public List<String> getParameterSubsets() {
+        return new ArrayList(subsets.keySet());
+    }
+
+    public List<String> getParameters(String subset) {
+        return subsets.get(subset);
+    }
+
+    /*
+     * Automatically identify parameter subsets in the configuration file
+     */
+    private void identifySubsets() {
+
+        List<String> identifiedSubsets = new ArrayList();
+        findKeys("*.treepath").forEach((treepath) -> {
+            identifiedSubsets.add(treepath.substring(0, treepath.lastIndexOf(".")));
+        });
+        Collections.sort(identifiedSubsets);
+        Collections.reverse(identifiedSubsets);
+
+        List<String> keys = new ArrayList(parameters.keySet());
+        // remove configuration file metadata
+        keys.removeAll(Arrays.asList(new String[]{"configuration.title", "configuration.description", "configuration.version"}));
+        // remove ichthyop.configuration.*
+        keys.removeAll(keys.stream().filter((key) -> (key.startsWith("ichthyop.configuration"))).collect(Collectors.toList()));
+        // remove all .description .longname .format .accepted UI parameters
+        keys.removeAll(keys.stream().filter((key) -> (key.endsWith(".description")
+                || key.endsWith(".longname") || key.endsWith(".format")
+                || key.endsWith(".accepted"))).collect(Collectors.toList()));
+        // remove subsets specific parameters
+        identifiedSubsets.forEach((subset) -> {
+            keys.removeAll(Arrays.asList(new String[]{subset + ".enabled", subset + ".type", subset + ".treepath", subset + ".type"}));
+        });
+
+        // list parameter keys for every subset
+        identifiedSubsets.forEach((subset) -> {
+            List<String> remove = keys.stream().filter((key) -> (key.startsWith(subset))).collect(Collectors.toList());
+            subsets.put(subset, remove);
+            // remove parameters of identified subsets
+            keys.removeAll(remove);
+        });
+
+        // left are the miscellaneous parameters
+        Collections.sort(keys, (String o1, String o2) -> Integer.compare(o1.length(), o2.length()));
+
+        // extract miscellaneous subets
+        extractMiscellaneousSubsets(keys);
+    }
+
+    /*
+     * Check whether parameter keys are isolated parameters of subsets of parameters
+     */
+    private void extractMiscellaneousSubsets(List<String> keys) {
+        if (!keys.isEmpty()) {
+            String s = keys.get(0);
+            String subset = s.substring(0, s.lastIndexOf("."));
+            List<String> remove = new ArrayList();
+            for (String key : keys) {
+                if (key.startsWith(subset)) {
+                    remove.add(key);
+                }
+            }
+            subsets.put(subset, remove);
+            keys.removeAll(remove);
+            extractMiscellaneousSubsets(keys);
+        }
     }
 
     /**

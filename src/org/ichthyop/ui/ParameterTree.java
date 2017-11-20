@@ -54,7 +54,7 @@ package org.ichthyop.ui;
 
 import java.awt.Component;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -165,13 +165,19 @@ public class ParameterTree extends JTree {
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(getSimulationManager().getConfigurationFile().getName());
         setModel(new DefaultTreeModel(root));
-        List<String> keys = Arrays.asList(getSimulationManager().getParameterManager().getParameterSubsets());
-        Collections.reverse(keys);
-        map = new HashMap(keys.size());
-        for (String key : keys) {
-            if (!getSimulationManager().getParameterManager().findKeys(key + ".*").isEmpty()) {
-                insertIntoTree(new UIParameterSubset(key));
-            }
+        List<String> subsets = getSimulationManager().getParameterManager().getParameterSubsets();
+        Collections.reverse(subsets);
+        map = new HashMap();
+        for (String subset : subsets) {
+            List<String> keys = getSimulationManager().getParameterManager().getParameters(subset);
+            UIParameterSubset uisubset = new UIParameterSubset(subset, keys);
+            map.put(uisubset.getTreePath(), uisubset);
+        }
+        List<String> treepaths = new ArrayList(map.keySet());
+        Collections.sort(treepaths);
+        Collections.reverse(treepaths);
+        for (String treepath : treepaths) {
+            insertIntoTree(map.get(treepath));
         }
         setCellRenderer(new TreeRenderer());
     }
@@ -239,14 +245,13 @@ public class ParameterTree extends JTree {
         }
     }
 
-    public void insertIntoTree(UIParameterSubset block) {
-        insertIntoTree(block, 0, false);
+    public void insertIntoTree(UIParameterSubset uisubset) {
+        insertIntoTree(uisubset, 0, false);
     }
 
-    public void insertIntoTree(UIParameterSubset block, int leafIndex, boolean isVisible) {
+    public void insertIntoTree(UIParameterSubset uisubset, int leafIndex, boolean isVisible) {
 
-        map.put(block.getTreePath(), block);
-        String[] treePath = block.getTreePath().split("/");
+        String[] treePath = uisubset.getTreePath().split("/");
         DefaultMutableTreeNode node = insertNodeInParent(getRoot(), treePath[0]);
         if (treePath.length > 1) {
             for (int i = 1; i < treePath.length - 1; i++) {

@@ -159,7 +159,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
             deactivate all the others nodes with same type */
             if (selectedSet.isEnabled()) {
                 for (String key : getSimulationManager().getParameterManager().getParameterSubsets()) {
-                    UIParameterSubset otherSet = new UIParameterSubset(key);
+                    UIParameterSubset otherSet = new UIParameterSubset(key, getSimulationManager().getParameterManager().getParameters(key));
                     if (otherSet.getType().equals(type) && !otherSet.getKey().equals(selectedSet.getKey())) {
                         parameterTree.get(otherSet.getTreePath()).setEnabled(false);
                     }

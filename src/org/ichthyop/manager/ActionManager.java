@@ -82,8 +82,7 @@ public class ActionManager extends AbstractManager {
 
     private void loadActions() throws InstantiationException {
         actionMap = new HashMap();
-        String[] keys = getConfiguration().getParameterSubsets();
-        for (String key : keys) {
+        for (String key : getConfiguration().getParameterSubsets()) {
             if (getConfiguration().canFind(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("action")) {
                 if (getConfiguration().getBoolean(key + ".enabled")) {
