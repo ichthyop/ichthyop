@@ -158,7 +158,7 @@ public class ListEditor extends AbstractCellEditor implements ActionListener, Ta
     }
 
     private ResourceMap getResource() {
-        return IchthyopApp.getApplication().getContext().getResourceMap();
+        return IchthyopApp.getApplication().getContext().getResourceMap(IchthyopView.class);
     }
 
     private JPanel createEditorUI() {

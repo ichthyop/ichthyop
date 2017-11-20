@@ -70,7 +70,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -137,8 +136,7 @@ import org.jdesktop.swingx.JXTitledPanel;
 /**
  * The application's main frame.
  */
-public class IchthyopView extends FrameView
-        implements TimingTarget, PropertyChangeListener {
+public class IchthyopView extends FrameView {
 
     // configuration variables
     private File cfgPath = new File(System.getProperty("user.dir"));
@@ -148,8 +146,7 @@ public class IchthyopView extends FrameView
     private Task createMapTask;
     private Task kmzTask;
     private boolean initDone;
-    private final float TEN_MINUTES = 10.f * 60.f;
-    private final Animator animator = new Animator((int) (TEN_MINUTES * 1000), this);
+    private Animator animator;
     private float nbfps = 1.f;
     private float time;
     private File outputFile, outputFolder;
@@ -163,6 +160,7 @@ public class IchthyopView extends FrameView
     public IchthyopView(SingleFrameApplication app) {
         super(app);
 
+        initAnimator();
         initComponents();
         setStatusBar(statusBar);
 
@@ -457,7 +455,7 @@ public class IchthyopView extends FrameView
             msg.append(resourceMap.getString("previewSimulation.msg.failed"));
             setMessage(msg.toString(), false, Level.SEVERE);
         }
-        
+
         @Override
         protected void cancelled() {
             setMessage(resourceMap.getString("previewSimulation.msg.interrupted"));
@@ -1157,36 +1155,42 @@ public class IchthyopView extends FrameView
             animator.start();
         }
     }
+    
+      private void initAnimator() {
 
-    @Override
-    public void timingEvent(float fraction) {
-        float ellpased_time = (fraction * TEN_MINUTES - time) * nbfps;
-        if (ellpased_time > 1) {
-            time = fraction * TEN_MINUTES;
-            if (animationDirection.equals(TimeDirection.FORWARD)) {
-                next();
-            } else {
-                previous();
+        float TEN_MINUTES = 10.f * 60.f;
+        animator = new Animator((int) (TEN_MINUTES * 1000), new TimingTarget() {
+            @Override
+            public void timingEvent(float fraction) {
+                float ellpased_time = (fraction * TEN_MINUTES - time) * nbfps;
+                if (ellpased_time > 1) {
+                    time = fraction * TEN_MINUTES;
+                    if (animationDirection.equals(TimeDirection.FORWARD)) {
+                        next();
+                    } else {
+                        previous();
+                    }
+                }
             }
-        }
-    }
 
-    @Override
-    public void begin() {
-        nbfps = (Float) animationSpeed.getValue();
-        time = 0;
-        getLogger().info(getResourceMap().getString("animation.msg.started"));
-        //startAccelerationProgress();
-    }
+            @Override
+            public void begin() {
+                nbfps = (Float) animationSpeed.getValue();
+                time = 0;
+                getLogger().info(getResourceMap().getString("animation.msg.started"));
+                //startAccelerationProgress();
+            }
 
-    @Override
-    public void end() {
-        btnOpenAnimation.getAction().setEnabled(true);
-        getLogger().info(getResourceMap().getString("animation.msg.stopped"));
-    }
+            @Override
+            public void end() {
+                btnOpenAnimation.getAction().setEnabled(true);
+                getLogger().info(getResourceMap().getString("animation.msg.stopped"));
+            }
 
-    @Override
-    public void repeat() {
+            @Override
+            public void repeat() {
+            }
+        });
     }
 
     //////////////
@@ -1222,7 +1226,7 @@ public class IchthyopView extends FrameView
 
     private String beanFilename(Component bean) {
         String name = bean.getName();
-        return (name == null) ? null : name + "." + getResourceMap().getString("preferences.filename");
+        return (name == null) ? null : name + ".preferences.xml";
     }
 
     public void restorePreferences() {
@@ -1287,12 +1291,6 @@ public class IchthyopView extends FrameView
         IchthyopApp.getApplication().show(aboutBox);
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        getSimulationManager().getParameterManager().notifyParameterChanged((String) evt.getNewValue());
-        btnSaveCfgFile.getAction().setEnabled(true);
-    }
-
     @Action
     public void exitApplication() {
         getContext().getActionMap().get("quit").actionPerformed(new ActionEvent(exitMenuItem, 0, null));
@@ -1312,7 +1310,10 @@ public class IchthyopView extends FrameView
 
     private void createMainPanel() {
 
-        pnlConfiguration.addPropertyChangeListener("parameterChanged", this);
+        pnlConfiguration.addPropertyChangeListener("parameterChanged", (evt) -> {
+            getSimulationManager().getParameterManager().notifyParameterChanged((String) evt.getNewValue());
+            btnSaveCfgFile.getAction().setEnabled(true);
+        });
 
         lblConfiguration = new JLabel(getResourceMap().getIcon("lblConfiguration.icon"));
         lblConfiguration.setHorizontalAlignment(JLabel.CENTER);
@@ -1576,7 +1577,7 @@ public class IchthyopView extends FrameView
         actionMap = Application.getInstance().getContext().getActionMap(IchthyopView.class, this);
 
         initMenu();
-
+        
         mainPanel = new JPanel();
         splitPane = new JSplitPane();
         leftSplitPane = new JSplitPane();
