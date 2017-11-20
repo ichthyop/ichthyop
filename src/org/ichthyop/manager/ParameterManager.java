@@ -64,8 +64,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -88,6 +88,7 @@ public class ParameterManager extends AbstractManager {
     private HashMap<String, List<String>> subsets = new HashMap();
     private String inputPathname;
     private String mainFilename;
+    private final LinkedHashSet<String> changedParameters = new LinkedHashSet();
 
     public static ParameterManager getInstance() {
         return PARAMETER_MANAGER;
@@ -109,6 +110,10 @@ public class ParameterManager extends AbstractManager {
         zoneXMLToCFG();
     }
 
+    public void notifyParameterChanged(String key) {
+        changedParameters.add(key);
+    }
+
     private File XMLToCFG(File file) throws Exception {
         XConfigurationFile cfg = new XConfigurationFile(file);
         cfg.load();
@@ -125,7 +130,7 @@ public class ParameterManager extends AbstractManager {
             i++;
         }
         warning("[Configuration] XML format deprecated. Configuration file {0} has been converted to CFG format {1}", new String[]{file.getName(), new File(filename).getName()});
-        saveParameters(cfgparam, filename);
+        exportParameters(cfgparam, filename);
         return new File(filename);
     }
 
@@ -220,22 +225,13 @@ public class ParameterManager extends AbstractManager {
         setString("configuration.title", longName);
     }
 
-    public void updateSource(String source) {
-
-        for (Parameter parameter : parameters.values()) {
-            if (parameter.source.equals(mainFilename)) {
-                parameter.source = source;
-            }
-        }
-    }
-
     /**
      * Save all the parameters in their corresponding file sources.
      *
      * @throws IOException
      * @throws FileNotFoundException
      */
-    public void saveParameters() throws IOException, FileNotFoundException {
+    private void exportParameters() throws IOException, FileNotFoundException {
 
         // find sources
         HashMap<String, List<Parameter>> parametersBySource = new HashMap();
@@ -248,11 +244,11 @@ public class ParameterManager extends AbstractManager {
 
         // save parameters for every source
         for (String source : parametersBySource.keySet()) {
-            saveParameters(parametersBySource.get(source), source);
+            exportParameters(parametersBySource.get(source), source);
         }
     }
 
-    private void saveParameters(List<Parameter> parameters, String filename) throws IOException, FileNotFoundException {
+    private void exportParameters(List<Parameter> parameters, String filename) throws IOException, FileNotFoundException {
 
         boolean JSON = filename.endsWith(".json");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -765,6 +761,93 @@ public class ParameterManager extends AbstractManager {
             keys.removeAll(remove);
             extractMiscellaneousSubsets(keys);
         }
+    }
+
+    public void saveParameters() throws IOException, FileNotFoundException {
+
+        // find sources
+        HashMap<String, List<String>> parametersBySource = new HashMap();
+        for (String key : changedParameters) {
+            Parameter parameter = getParameter(key);
+            if (!parametersBySource.containsKey(parameter.source)) {
+                parametersBySource.put(parameter.source, new ArrayList());
+            }
+            parametersBySource.get(parameter.source).add(key);
+        }
+
+        // save parameters for every source
+        for (String source : parametersBySource.keySet()) {
+            saveParameters(parametersBySource.get(source), source);
+        }
+    }
+
+    private void saveParameters(List<String> keys, String file) {
+
+        // Extract the list of parameters
+        ArrayList<String> lines = getLines(file);
+        for (String key : keys) {
+            // Find the line of parameter defined by the key
+            int iline = findLine(key, lines);
+            // Update the value of the parameter
+            String value = getConfiguration().getString(key);
+            Parameter parameter = new Parameter(iline, file);
+            parameter.parse(lines.get(iline));
+            String updatedParameter = lines.get(iline).replace(parameter.value, value);
+            lines.set(iline, updatedParameter);
+        }
+        // Write the updated configuration file
+        write(file, lines);
+    }
+
+    private void write(String file, ArrayList<String> lines) {
+        BufferedWriter bfr = null;
+        try {
+            bfr = new BufferedWriter(new FileWriter(file));
+            for (String line : lines) {
+                bfr.append(line);
+                bfr.newLine();
+            }
+            bfr.close();
+        } catch (IOException ex) {
+            error("Error writing configuration file " + file, ex);
+        } finally {
+            try {
+                bfr.flush();
+            } catch (IOException ex) {
+                // do nothing
+            }
+        }
+    }
+
+    private ArrayList<String> getLines(String file) {
+        ArrayList<String> lines = new ArrayList();
+        try {
+            BufferedReader bfr = new BufferedReader(new FileReader(file));
+            String line = null;
+            int iline = 1;
+            try {
+                while ((line = bfr.readLine()) != null) {
+                    lines.add(line.trim());
+                    iline++;
+                }
+            } catch (IOException ex) {
+                error("[configuration] Error reading parameters from file " + file + " at line " + iline + " " + line, ex);
+            }
+        } catch (FileNotFoundException ex) {
+            error("[configuration] Could not find configuration file: " + file, ex);
+        }
+        return lines;
+    }
+
+    private int findLine(String key, ArrayList<String> parameters) {
+        int iline = -1;
+        for (int i = 0; i < parameters.size(); i++) {
+            if (parameters.get(i).startsWith(key)) {
+                iline = i;
+                break;
+            }
+        }
+        return iline;
     }
 
     /**

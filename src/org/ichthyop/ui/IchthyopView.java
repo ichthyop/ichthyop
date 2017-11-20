@@ -251,7 +251,7 @@ public class IchthyopView extends FrameView
         File cfgFile = getSimulationManager().getConfigurationFile();
         getLogger().log(Level.INFO, "{0} {1}", new Object[]{getResourceMap().getString("openConfigurationFile.msg.opened"), cfgUntitled ? "Untitled configuration" : cfgFile.toString()});
         getFrame().setTitle(getResourceMap().getString("Application.title") + " - " + (cfgUntitled ? "Untitled configuration" : cfgFile.toString()));
-        lblCfgFile.setText((cfgUntitled ? "Filename not set yet" : cfgFile.getAbsolutePath()));
+        lblCfgFile.setText((cfgUntitled ? "Filename not set yet" : cfgFile.getName()));
         lblCfgFile.setFont(lblCfgFile.getFont().deriveFont(Font.PLAIN, 12));
         initDone = false;
         saveAsMenuItem.getAction().setEnabled(true);
@@ -324,8 +324,7 @@ public class IchthyopView extends FrameView
                 }
             }
             try {
-                getSimulationManager().getParameterManager().updateSource(file.getAbsolutePath());
-                getSimulationManager().getParameterManager().saveParameters();
+                IOTools.copyFile(getSimulationManager().getConfigurationFile(), file);
                 cfgUntitled = false;
                 StringBuilder sb = new StringBuilder();
                 sb.append(getResourceMap().getString("saveAsConfigurationFile.msg.prefix"));
@@ -1290,6 +1289,7 @@ public class IchthyopView extends FrameView
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        getSimulationManager().getParameterManager().notifyParameterChanged((String) evt.getNewValue());
         btnSaveCfgFile.getAction().setEnabled(true);
     }
 
@@ -1312,7 +1312,7 @@ public class IchthyopView extends FrameView
 
     private void createMainPanel() {
 
-        pnlConfiguration.addPropertyChangeListener("configurationFile", this);
+        pnlConfiguration.addPropertyChangeListener("parameterChanged", this);
 
         lblConfiguration = new JLabel(getResourceMap().getIcon("lblConfiguration.icon"));
         lblConfiguration.setHorizontalAlignment(JLabel.CENTER);
@@ -1374,13 +1374,13 @@ public class IchthyopView extends FrameView
         String title = getResourceMap().getString("Application.title") + " - ";
         if (!taskPaneConfiguration.isCollapsed()) {
             if (null != getSimulationManager().getConfigurationFile()) {
-                titledPanelMain.setTitle(title + taskPaneConfiguration.getTitle() + " - " + lblCfgFile.getText());
+                titledPanelMain.setTitle(title + taskPaneConfiguration.getTitle() + " - " + getSimulationManager().getConfigurationFile());
             } else {
                 titledPanelMain.setTitle(title + taskPaneConfiguration.getTitle());
             }
         } else if (!taskPaneSimulation.isCollapsed()) {
             if (null != getSimulationManager().getConfigurationFile()) {
-                titledPanelMain.setTitle(title + taskPaneSimulation.getTitle() + " - " + lblCfgFile.getText());
+                titledPanelMain.setTitle(title + taskPaneSimulation.getTitle() + " - " + getSimulationManager().getConfigurationFile());
             } else {
                 titledPanelMain.setTitle(title + taskPaneSimulation.getTitle());
             }
