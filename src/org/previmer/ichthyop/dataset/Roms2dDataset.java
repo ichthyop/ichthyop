@@ -11,6 +11,7 @@ import static org.previmer.ichthyop.dataset.RomsCommon.strTime;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import static org.previmer.ichthyop.io.IOTools.isDirectory;
+import static org.previmer.ichthyop.io.IOTools.isFile;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -248,9 +249,9 @@ public class Roms2dDataset extends RomsCommon {
 
         try {
             if (!getParameter("grid_file").isEmpty()) {
-                String path = IOTools.resolvePath(getParameter("grid_file"));
-                if (!isDirectory(path)) {
-                    throw new IOException("{Dataset} " + getParameter("grid_file") + " is not a valid directory.");
+                String path = IOTools.resolveFile(getParameter("grid_file"));
+                if (!isFile(path)) {
+                    throw new IOException("{Dataset} " + getParameter("grid_file") + " is not a valid file.");
                 }
             } else {
                 gridFile = ncIn.getLocation();
