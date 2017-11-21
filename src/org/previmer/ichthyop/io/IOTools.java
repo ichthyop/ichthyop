@@ -238,4 +238,20 @@ public class IOTools {
     public static boolean isDirectory(String location) {
         return new File(location).isDirectory();
     }
+    
+    /** 
+     * Check whether the input argument is a file
+     * 
+     * @param location
+     * @author Nicolas Barrier
+     * @return A boolean
+     */
+    public static boolean isFile(String location) {
+        File f = new File(location);
+        boolean output;
+
+        output = (f.exists() && !f.isDirectory());
+
+        return output;
+    }
 }
