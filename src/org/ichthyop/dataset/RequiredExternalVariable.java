@@ -145,7 +145,7 @@ public class RequiredExternalVariable {
             //double value_t1 = interp2D(array_tp1.section(origin, shape), dx, dy, n);
             return value_t0; //interpTime(value_t0, value_t1, time);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(RequiredVariable.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RequiredExternalVariable.class.getName()).log(Level.SEVERE, null, ex);
             return Float.NaN;
         }
     }
@@ -170,7 +170,7 @@ public class RequiredExternalVariable {
             double value_t1 = interp2D(array_tp1.section(origin, shape), dx, dy, n);
             return interpTime(value_t0, value_t1, time);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(RequiredVariable.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RequiredExternalVariable.class.getName()).log(Level.SEVERE, null, ex);
             return Float.NaN;
         }
     }

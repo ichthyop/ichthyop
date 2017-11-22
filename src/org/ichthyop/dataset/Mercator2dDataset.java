@@ -878,40 +878,6 @@ public class Mercator2dDataset extends AbstractDataset {
     }
 
     @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        Variable variable = nc.findVariable(name);
-        int[] origin = null, shape = null;
-        boolean hasVerticalDim = false;
-        switch (variable.getShape().length) {
-            case 4:
-                origin = new int[]{rank, 0, 0, 0};
-                shape = new int[]{1, 1, ny, nx};
-                hasVerticalDim = true;
-                break;
-            case 2:
-                origin = new int[]{0, 0};
-                shape = new int[]{ny, nx};
-                break;
-            case 3:
-                if (!variable.isUnlimited()) {
-                    origin = new int[]{0, 0, 0};
-                    shape = new int[]{1, ny, nx};
-                    hasVerticalDim = true;
-                } else {
-                    origin = new int[]{rank, 0, 0};
-                    shape = new int[]{1, ny, nx};
-                }
-                break;
-        }
-
-        Array array = variable.read(origin, shape).reduce();
-        if (hasVerticalDim) {
-            array = array.flip(0);
-        }
-        return array;
-    }
-
-    @Override
     public double get_dWz(double[] pGrid, double time) {
         throw new UnsupportedOperationException("Method not supported in 2D");
     }

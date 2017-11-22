@@ -1111,9 +1111,7 @@ public class NemoDataset extends AbstractDataset {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-        for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
-        }
+        
         if (readW) {
             try {
                 w_tp1 = (float[][][]) ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).
@@ -1831,40 +1829,6 @@ public class NemoDataset extends AbstractDataset {
 
         setAllFieldsTp1AtTime(rank);
 
-    }
-
-    @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        Variable variable = nc.findVariable(name);
-        int[] origin = null, shape = null;
-        boolean hasVerticalDim = false;
-        switch (variable.getShape().length) {
-            case 4:
-                origin = new int[]{rank, 0, jpo, ipo};
-                shape = new int[]{1, nz, ny, nx};
-                hasVerticalDim = true;
-                break;
-            case 2:
-                origin = new int[]{jpo, ipo};
-                shape = new int[]{ny, nx};
-                break;
-            case 3:
-                if (!variable.isUnlimited()) {
-                    origin = new int[]{0, jpo, ipo};
-                    shape = new int[]{nz, ny, nx};
-                    hasVerticalDim = true;
-                } else {
-                    origin = new int[]{rank, jpo, ipo};
-                    shape = new int[]{1, ny, nx};
-                }
-                break;
-        }
-
-        Array array = variable.read(origin, shape).reduce();
-        if (hasVerticalDim) {
-            array = array.flip(0);
-        }
-        return array;
     }
 
     public double xTore(double x) {

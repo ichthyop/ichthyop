@@ -108,7 +108,7 @@ public class LinearGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        LengthParticle.incrementLength(particle, grow(getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue()));
+        LengthParticle.incrementLength(particle, grow(getSimulationManager().getDataset().getDouble(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime())));
         StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
     }
 

@@ -52,10 +52,14 @@
  */
 package org.ichthyop.dataset;
 
+import java.util.ArrayList;
 import org.ichthyop.grid.AbstractRegularGrid;
 import java.util.HashMap;
+import java.util.List;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
+import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.manager.TimeManager;
 import ucar.nc2.NetcdfFile;
@@ -66,7 +70,8 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
 
-    final HashMap<String, RequiredVariable> requiredVariables = new HashMap();
+    final HashMap<String, AbstractDatasetVariable> variables = new HashMap();
+    final HashMap<String, List<String>> names = new HashMap();
 
     AbstractRegularGrid grid;
 
@@ -74,68 +79,77 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
 
     abstract void loadParameters();
 
+    AbstractDatasetVariable createVariable(String name) {
+        return null;
+    }
+
+    @Override
+    public void init() throws Exception {
+
+        // instantiate dataset variables
+        for (String name : names.keySet()) {
+            variables.put(name, createVariable(name));
+        }
+
+        // initialise them
+        int time_arrow = timeArrow();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
+        for (AbstractDatasetVariable variable : variables.values()) {
+            variable.init(t0, time_arrow);
+        }
+    }
+
+    @Override
+    public void nextStepTriggered(NextStepEvent e) throws Exception {
+
+        double time = e.getSource().getTime();
+        int time_arrow = timeArrow();
+
+        for (AbstractDatasetVariable variable : variables.values()) {
+            variable.update(time, time_arrow);
+        }
+    }
+
     @Override
     public IGrid getGrid() {
         return grid;
     }
 
     @Override
-    public Number get(String variableName, double[] pGrid, double time) {
-        if (null != requiredVariables.get(variableName)) {
-            return requiredVariables.get(variableName).get(pGrid, time);
+    public double getDouble(String variableName, double[] pGrid, double time) {
+        if (variables.containsKey(variableName)) {
+            return variables.get(variableName).getDouble(pGrid, time);
         }
-        return Float.NaN;
+        return Double.NaN;
     }
 
     @Override
     public void requireVariable(String name, Class requiredBy) {
-        if (!requiredVariables.containsKey(name)) {
-            requiredVariables.put(name, new RequiredVariable(name, requiredBy));
-        } else {
-            requiredVariables.get(name).addRequiredBy(requiredBy);
+        if (!names.containsKey(name)) {
+            names.put(name, new ArrayList());
         }
+        names.get(name).add(requiredBy.getCanonicalName());
     }
 
     public void clearRequiredVariables() {
-        requiredVariables.clear();
+        names.clear();
+        variables.clear();
     }
 
     @Override
     public void removeRequiredVariable(String name, Class requiredBy) {
-        RequiredVariable var = requiredVariables.get(name);
-        if (null != var) {
-            if (var.getRequiredBy().size() > 1) {
-                /* just remove the reference but dont remove the
-                 variable because other classes might need it */
-                var.getRequiredBy().remove(requiredBy);
-            } else if (var.getRequiredBy().get(0).equals(requiredBy)) {
-                requiredVariables.remove(name);
-            }
+
+        if (names.containsKey(name)) {
+            names.get(name).remove(requiredBy.getCanonicalName());
+        }
+        if (names.get(name).isEmpty()) {
+            names.remove(name);
+            variables.remove(name);
         }
     }
 
     public void checkRequiredVariable(NetcdfFile nc) {
-        for (RequiredVariable variable : requiredVariables.values()) {
-            try {
-                variable.checked(nc);
-            } catch (NullPointerException | NumberFormatException ex) {
-                requiredVariables.remove(variable.getName());
-                StringBuilder msg = new StringBuilder();
-                msg.append("Failed to read dataset variable ");
-                msg.append(variable.getName());
-                msg.append(" ==> ");
-                msg.append(ex.toString());
-                msg.append("\n");
-                msg.append("Required by classes ");
-                for (Class aClass : variable.getRequiredBy()) {
-                    msg.append(aClass.getCanonicalName());
-                    msg.append(", ");
-                }
-                msg.append("\n");
-                msg.append("Watch out, these classes might not work correctly.");
-                warning(msg.toString(), ex);
-            }
-        }
+
     }
 
     boolean skipSorting() {

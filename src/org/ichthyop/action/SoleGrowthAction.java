@@ -126,7 +126,7 @@ public class SoleGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        double temp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double temp = getSimulationManager().getDataset().getDouble(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         LengthParticle.incrementLength(particle, grow(lengthStage.getStage(particle), temp));
         StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
     }

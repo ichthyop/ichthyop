@@ -197,9 +197,6 @@ public abstract class Mars2dCommon extends MarsCommon {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-        for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
-        }
     }
 
     public double depth2z(double x, double y, double depth) {
@@ -222,26 +219,5 @@ public abstract class Mars2dCommon extends MarsCommon {
     
     public double getDepthMax(double x, double y) {
         throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-
-    @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        Variable variable = nc.findVariable(name);
-        int[] origin = null, shape = null;
-        switch (variable.getShape().length) {
-            case 2:
-                origin = new int[]{jpo, ipo};
-                shape = new int[]{ny, nx};
-                break;
-            case 3:
-                origin = new int[]{rank, jpo, ipo};
-                shape = new int[]{1, ny, nx};
-                break;
-            default:
-                throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-
-        }
-
-        return variable.read(origin, shape).reduce();
     }
 }

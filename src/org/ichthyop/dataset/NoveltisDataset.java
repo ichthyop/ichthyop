@@ -1046,9 +1046,6 @@ public class NoveltisDataset extends AbstractDataset {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-        for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
-        }
         w_tp1 = computeW();
     }
 
@@ -1147,33 +1144,6 @@ public class NoveltisDataset extends AbstractDataset {
         // Return w
         return w;
 
-    }
-
-    @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        Variable variable = nc.findVariable(name);
-        int[] origin = null, shape = null;
-        switch (variable.getShape().length) {
-            case 4:
-                origin = new int[]{rank, 0, jpo, ipo};
-                shape = new int[]{1, nz, ny, nx};
-                break;
-            case 2:
-                origin = new int[]{jpo, ipo};
-                shape = new int[]{ny, nx};
-                break;
-            case 3:
-                if (!variable.isUnlimited()) {
-                    origin = new int[]{0, jpo, ipo};
-                    shape = new int[]{nz, ny, nx};
-                } else {
-                    origin = new int[]{rank, jpo, ipo};
-                    shape = new int[]{1, ny, nx};
-                }
-                break;
-        }
-
-        return variable.read(origin, shape).reduce();
     }
 
     void openDataset() throws Exception {

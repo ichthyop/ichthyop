@@ -54,6 +54,7 @@
 package org.ichthyop.dataset;
 
 import java.util.List;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
 
 /**

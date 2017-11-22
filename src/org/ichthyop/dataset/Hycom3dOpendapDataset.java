@@ -52,7 +52,7 @@
  */
 package org.ichthyop.dataset;
 
-import org.ichthyop.dataset.variable.WDatasetVariable;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.dataset.variable.OpendapDatasetVariable;
 
 /**
@@ -72,15 +72,9 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
     void loadParameters() {
         url = getConfiguration().getString("dataset.hycom_3d_opendap.opendap_url");
     }
-
+    
     @Override
-    public void initVariables() {
-
-        u = new OpendapDatasetVariable(url, "eastward_sea_water_velocity", NLAYER, getGrid(), TILING_H, TILING_V);
-        v = new OpendapDatasetVariable(url, "northward_sea_water_velocity", NLAYER, getGrid(), TILING_H, TILING_V);
-        w = new WDatasetVariable(
-                url, "eastward_sea_water_velocity",
-                url, "northward_sea_water_velocity",
-                NLAYER, getGrid(), WTILING_H);
+    AbstractDatasetVariable createVariable(String name) {
+        return new OpendapDatasetVariable(url, name, NLAYER, getGrid(), TILING_H, TILING_V);
     }
 }

@@ -76,11 +76,9 @@ public interface IDataset extends NextStepListener {
 
     public void init() throws Exception;
 
-    public Number get(String variableName, double[] pGrid, double time);
+    public double getDouble(String name, double[] pGrid, double time);
 
     public void requireVariable(String name, Class requiredBy);
 
     public void removeRequiredVariable(String name, Class requiredBy);
-    
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception;
 }

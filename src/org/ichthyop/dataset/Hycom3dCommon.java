@@ -52,8 +52,6 @@
  */
 package org.ichthyop.dataset;
 
-import org.ichthyop.dataset.variable.AbstractDatasetVariable;
-import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.grid.RectilinearGrid;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
@@ -64,13 +62,8 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class Hycom3dCommon extends AbstractDataset {
 
-    AbstractDatasetVariable u;
-    AbstractDatasetVariable v;
-    AbstractDatasetVariable w;
-    final int TILING_H = 100, TILING_V = 3, WTILING_H = 10;
+    final int TILING_H = 100, TILING_V = 3;
     final int NLAYER = 3;
-
-    abstract void initVariables();
 
     @Override
     public void setUp() throws Exception {
@@ -79,50 +72,23 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         grid = new RectilinearGrid(getKey() + ".grid");
         grid.init();
+        
+        requireVariable("eastward_sea_water_velocity", org.ichthyop.action.AdvectionAction.class);
+        requireVariable("northward_sea_water_velocity", org.ichthyop.action.AdvectionAction.class);
     }
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        return u.getDouble(pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return getDouble("eastward_sea_water_velocity", pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        return v.getDouble(pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+        return getDouble("northward_sea_water_velocity", pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
     }
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        return w.getDouble(pGrid, time) / getGrid().get_dz((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
-    }
-
-    @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        return null;
-    }
-    
-    @Override
-    public void init() throws Exception {
-        
-        // instantiate variables u, v & w
-        initVariables();
-
-        int time_arrow = timeArrow();
-        double t0 = getSimulationManager().getTimeManager().get_tO();
-
-        u.init(t0, time_arrow);
-        v.init(t0, time_arrow);
-        w.init(t0, time_arrow);
-    }
-    
-    @Override
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
-
-        double time = e.getSource().getTime();
-        int time_arrow = timeArrow();
-        
-        u.update(time, time_arrow);
-        v.update(time, time_arrow);
-        w.update(time, time_arrow);
+        return 0.d;
     }
 }

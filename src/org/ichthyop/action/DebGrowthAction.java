@@ -147,8 +147,8 @@ public class DebGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        double temp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        double food = getSimulationManager().getDataset().get(food_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double temp = getSimulationManager().getDataset().getDouble(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double food = getSimulationManager().getDataset().getDouble(food_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         double[] res_deb = grow(dt, getE(particle), getV(particle), getE_R(particle), Vj, temp, food);
         setE(particle, res_deb[0]);
         setV(particle, res_deb[1]);

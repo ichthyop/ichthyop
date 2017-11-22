@@ -52,10 +52,10 @@
  */
 package org.ichthyop.dataset;
 
-import org.ichthyop.dataset.variable.WDatasetVariable;
 import org.ichthyop.dataset.variable.NetcdfDatasetVariable;
 import java.io.IOException;
 import java.util.List;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 
 /**
  *
@@ -83,13 +83,7 @@ public class Hycom3dDataset extends Hycom3dCommon {
     }
 
     @Override
-    void initVariables() {
-
-        u = new NetcdfDatasetVariable(uvFiles, "eastward_sea_water_velocity", NLAYER, getGrid(), TILING_H, TILING_V);
-        v = new NetcdfDatasetVariable(uvFiles, "northward_sea_water_velocity", NLAYER, getGrid(), TILING_H, TILING_V);
-        w = new WDatasetVariable(
-                uvFiles, "eastward_sea_water_velocity",
-                uvFiles, "northward_sea_water_velocity",
-                NLAYER, getGrid(), WTILING_H);
+    AbstractDatasetVariable createVariable(String name) {
+        return new NetcdfDatasetVariable(uvFiles, name, NLAYER, getGrid(), TILING_H, TILING_V);
     }
 }

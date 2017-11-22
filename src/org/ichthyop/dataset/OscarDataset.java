@@ -490,10 +490,6 @@ public class OscarDataset extends AbstractDataset {
 
         // Time step of the Oscar dataset
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-
-        for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
-        }
     }
 
     void setOnFirstTime() throws Exception {
@@ -558,11 +554,6 @@ public class OscarDataset extends AbstractDataset {
 
     public boolean is3D() {
         return false;
-    }
-
-    @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
