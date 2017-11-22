@@ -118,4 +118,8 @@ public interface IGrid {
     
     public int yTore(int y);
     
+    public boolean xTore();
+    
+    public boolean yTore();
+    
 }

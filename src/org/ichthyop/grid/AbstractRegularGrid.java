@@ -460,5 +460,15 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         }
         return y;
     }
+    
+    @Override
+    public boolean xTore() {
+        return xperiodicity;
+    }
+    
+    @Override
+    public boolean yTore() {
+        return yperiodicity;
+    }
 
 }
