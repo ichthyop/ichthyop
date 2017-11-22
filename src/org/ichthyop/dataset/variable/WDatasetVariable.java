@@ -50,7 +50,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.dataset;
+package org.ichthyop.dataset.variable;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,10 +62,10 @@ import ucar.ma2.ArrayDouble;
  *
  * @author pverley
  */
-public class WDatasetVariable extends DatasetVariable {
+public class WDatasetVariable extends AbstractDatasetVariable {
 
-    private final DatasetVariable u;
-    private final DatasetVariable v;
+    private final AbstractDatasetVariable u;
+    private final AbstractDatasetVariable v;
 
     public WDatasetVariable(List<String> ufiles, String uname, List<String> vfiles, String vname, int nlayer, IGrid grid, int tilingh) {
         super(nlayer, grid);
@@ -80,7 +80,7 @@ public class WDatasetVariable extends DatasetVariable {
     }
 
     @Override
-    void init(double t0, int time_arrow) throws IOException {
+    public void init(double t0, int time_arrow) throws IOException {
         u.init(t0, time_arrow);
         v.init(t0, time_arrow);
         for (int ilayer = 0; ilayer < nlayer; ilayer++) {
@@ -91,7 +91,7 @@ public class WDatasetVariable extends DatasetVariable {
     }
 
     @Override
-    void update(double currenttime, int time_arrow) throws IOException {
+    public void update(double currenttime, int time_arrow) throws IOException {
         if (updateNeeded(currenttime, time_arrow)) {
             u.update(currenttime, time_arrow);
             v.update(currenttime, time_arrow);
@@ -99,12 +99,12 @@ public class WDatasetVariable extends DatasetVariable {
         }
     }
 
-    private class WTiledVariable extends NetcdfTiledVariable {
+    private class WTiledVariable extends TiledVariable {
 
-        private final NetcdfTiledVariable uw;
-        private final NetcdfTiledVariable vw;
+        private final TiledVariable uw;
+        private final TiledVariable vw;
 
-        WTiledVariable(NetcdfTiledVariable uw, NetcdfTiledVariable vw) {
+        WTiledVariable(TiledVariable uw, TiledVariable vw) {
             super(null, null, grid, -1, uw.getTimeStamp(), 1, grid.get_nz());
             this.uw = uw;
             this.vw = vw;

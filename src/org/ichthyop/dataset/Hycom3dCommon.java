@@ -52,6 +52,7 @@
  */
 package org.ichthyop.dataset;
 
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.grid.RectilinearGrid;
 import ucar.ma2.Array;
@@ -63,9 +64,9 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class Hycom3dCommon extends AbstractDataset {
 
-    DatasetVariable u;
-    DatasetVariable v;
-    DatasetVariable w;
+    AbstractDatasetVariable u;
+    AbstractDatasetVariable v;
+    AbstractDatasetVariable w;
     final int TILING_H = 100, TILING_V = 3, WTILING_H = 10;
     final int NLAYER = 3;
 

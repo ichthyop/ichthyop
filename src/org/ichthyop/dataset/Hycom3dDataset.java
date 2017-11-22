@@ -52,6 +52,8 @@
  */
 package org.ichthyop.dataset;
 
+import org.ichthyop.dataset.variable.WDatasetVariable;
+import org.ichthyop.dataset.variable.NetcdfDatasetVariable;
 import java.io.IOException;
 import java.util.List;
 

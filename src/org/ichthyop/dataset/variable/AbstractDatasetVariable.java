@@ -50,7 +50,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.dataset;
+package org.ichthyop.dataset.variable;
 
 import java.io.IOException;
 import org.ichthyop.grid.IGrid;
@@ -59,30 +59,30 @@ import org.ichthyop.grid.IGrid;
  *
  * @author pverley
  */
-public abstract class DatasetVariable {
+public abstract class AbstractDatasetVariable {
 
     protected final IGrid grid;
-    protected final NetcdfTiledVariable[] stack;
+    protected final TiledVariable[] stack;
     protected final int nlayer;
     // constants
     private final int IDW_POWER = 2;
     private final int IDW_RADIUS = 1;
     
-    abstract void init(double t0, int time_arrow) throws IOException;
+    public abstract void init(double t0, int time_arrow) throws IOException;
     
-    abstract void update(double currenttime, int time_arrow) throws IOException;
+    public abstract void update(double currenttime, int time_arrow) throws IOException;
 
-    public DatasetVariable(int nlayer, IGrid grid) {
+    public AbstractDatasetVariable(int nlayer, IGrid grid) {
        this.nlayer = nlayer;
         this.grid = grid;
-        stack = new NetcdfTiledVariable[nlayer];
+        stack = new TiledVariable[nlayer];
     }
     
     protected boolean updateNeeded(double time, int time_arrow) {
         return (time_arrow * time >= time_arrow * stack[1].getTimeStamp());
     }
 
-    protected void update(NetcdfTiledVariable variable) {
+    protected void update(TiledVariable variable) {
         // clear first variable of the stack
         if (null != stack[0]) {
             stack[0].clear();
@@ -98,7 +98,7 @@ public abstract class DatasetVariable {
         }
     }
 
-    double getDouble(double[] pGrid, double time) {
+    public double getDouble(double[] pGrid, double time) {
         return interpolateIDW(pGrid, time, IDW_RADIUS, IDW_POWER);
     }
 

@@ -50,7 +50,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.dataset;
+package org.ichthyop.dataset.variable;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -61,6 +61,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.grid.IGrid;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -71,7 +72,7 @@ import ucar.nc2.Variable;
  *
  * @author pverley
  */
-public class NetcdfTiledVariable extends IchthyopLinker {
+public class TiledVariable extends IchthyopLinker {
 
     private final ConcurrentMap<Integer, Array> tiles;
     final int nx, ny, nz;
@@ -87,7 +88,7 @@ public class NetcdfTiledVariable extends IchthyopLinker {
     /*
      * 3D Tile Variable
      */
-    public NetcdfTiledVariable(NetcdfFile nc, String name, IGrid grid, int rank, double timestamp, int nh, int nv) {
+    public TiledVariable(NetcdfFile nc, String name, IGrid grid, int rank, double timestamp, int nh, int nv) {
 
         this.tiles = new ConcurrentHashMap();
         this.nc = nc;

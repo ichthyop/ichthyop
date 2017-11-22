@@ -52,6 +52,9 @@
  */
 package org.ichthyop.dataset;
 
+import org.ichthyop.dataset.variable.WDatasetVariable;
+import org.ichthyop.dataset.variable.OpendapDatasetVariable;
+
 /**
  *
  * @author pverley

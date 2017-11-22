@@ -52,6 +52,7 @@
  */
 package org.ichthyop.dataset;
 
+import org.ichthyop.dataset.variable.TiledVariable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +70,7 @@ public class BathymetryDataset extends IchthyopLinker {
 
     private final String prefix;
     private final AbstractRegularGrid grid;
-    private NetcdfTiledVariable bathymetry;
+    private TiledVariable bathymetry;
 
     public BathymetryDataset(String prefix) {
         this.prefix = prefix;
@@ -96,7 +97,7 @@ public class BathymetryDataset extends IchthyopLinker {
             for (String name : names) {
                 String fullname = DatasetUtil.findVariable(nc, name);
                 if (null != fullname) {
-                    bathymetry = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, grid, 0, 0, 100, 1);
+                    bathymetry = new TiledVariable(DatasetUtil.openFile(file, true), name, grid, 0, 0, 100, 1);
                     break;
                 }
             }

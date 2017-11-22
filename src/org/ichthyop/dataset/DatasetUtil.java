@@ -271,7 +271,7 @@ public class DatasetUtil extends IchthyopLinker {
      * @throws an IOException if an error occurs while reading the input file
      *
      */
-    static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws ArrayIndexOutOfBoundsException, IOException {
+    public static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws ArrayIndexOutOfBoundsException, IOException {
 
         int lrank = 0;
         double nctime;
@@ -371,7 +371,7 @@ public class DatasetUtil extends IchthyopLinker {
      * URL.
      * @throws IOException
      */
-    static NetcdfFile openURL(String opendapURL, boolean enhanced) throws IOException {
+    public static NetcdfFile openURL(String opendapURL, boolean enhanced) throws IOException {
 
         NetcdfFile ncIn;
         getLogger().log(Level.INFO, "Opening remote URL {0} Please wait...", opendapURL);

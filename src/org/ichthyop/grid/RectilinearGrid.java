@@ -55,7 +55,7 @@ package org.ichthyop.grid;
 import java.io.IOException;
 import java.util.Arrays;
 import org.ichthyop.dataset.DatasetUtil;
-import org.ichthyop.dataset.NetcdfTiledVariable;
+import org.ichthyop.dataset.variable.TiledVariable;
 import org.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
@@ -80,7 +80,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
     private int i0, j0;
     private double[] dx;
     private double dy;
-    private NetcdfTiledVariable mask;
+    private TiledVariable mask;
 
     public RectilinearGrid(String prefix) {
         super(prefix);
@@ -181,7 +181,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     }
                 }
             }
-            mask = new NetcdfTiledVariable(DatasetUtil.openFile(file, true), name, this, 0, 0, 10, Math.min(3, nz));
+            mask = new TiledVariable(DatasetUtil.openFile(file, true), name, this, 0, 0, 10, Math.min(3, nz));
 
         } catch (IOException ex) {
             error("[grid] Failed to make grid " + prefix, ex);
