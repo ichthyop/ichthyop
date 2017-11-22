@@ -179,7 +179,7 @@ public class LethalTempAction extends AbstractAction {
     }
 
     private void checkTp(IParticle particle) {
-        double temperature = getSimulationManager().getDataset().getDouble(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double temperature = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         int iAge = ages.length - 1;
         if (FLAG_LETHAL_TEMP_FUNCTION) {
             float age = particle.getAge();
@@ -201,7 +201,7 @@ public class LethalTempAction extends AbstractAction {
 
     private void checkTpGrowingParticle(IParticle particle) {
 
-        double temperature = getSimulationManager().getDataset().getDouble(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double temperature = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         int stage = StageParticle.getStage(particle);
         // stage == 0 means egg, stage > 0 means larvae
         boolean frozen = ((stage == 0) && (temperature <= coldLethalTp[0])) || ((stage != 0) && (temperature <= coldLethalTp[1]));

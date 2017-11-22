@@ -75,6 +75,6 @@ public class CustomTracker extends FloatTracker {
 
     @Override
     public float getValue(IParticle particle) {
-        return (float) getSimulationManager().getDataset().getDouble(variableName, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        return (float) getSimulationManager().getDataset().getVariable(variableName).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
     }
 }

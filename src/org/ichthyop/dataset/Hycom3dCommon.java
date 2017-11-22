@@ -52,6 +52,7 @@
  */
 package org.ichthyop.dataset;
 
+import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.grid.RectilinearGrid;
 
 /**
@@ -64,11 +65,7 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     final int NLAYER = 3;
 
     @Override
-    public void setUp() throws Exception {
-
-        loadParameters();
-
-        grid = new RectilinearGrid(getKey() + ".grid");
-        grid.init();
+    AbstractRegularGrid createGrid() {
+        return new RectilinearGrid(getKey() + ".grid");
     }
 }

@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,72 +50,39 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package org.ichthyop.action;
+package org.ichthyop.dataset.variable;
 
-import org.ichthyop.output.LengthTracker;
-import org.ichthyop.output.StageTracker;
-import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.LengthParticle;
-import org.ichthyop.particle.StageParticle;
-import org.ichthyop.stage.LengthStage;
-import org.ichthyop.util.Constant;
+import java.io.IOException;
+import org.ichthyop.dataset.DatasetUtil;
+import org.ichthyop.grid.IGrid;
 
 /**
  *
  * @author pverley
  */
-public class LinearGrowthAction extends AbstractAction {
-
-    /**
-     * The growth function assumed the sea water temperature must not be be
-     * colder than this threshold. Temperature set in Celsius degree.
-     */
-    private double tp_threshold;// = 10.d; //°C
-    private double coeff1; //0.02d
-    private double coeff2; //0.03d
-    private String temperature_field;
-    private LengthStage lengthStage;
+public class ConstantDatasetVariable extends AbstractDatasetVariable {
     
-    @Override
-    public String getKey() {
-        return "action.growth";
+    private final String file;
+    private final String name;
+        private final int tilingh;
+    private final int tilingv;
+
+    public ConstantDatasetVariable(String file, String name, IGrid grid, int tilingh, int tilingv) {
+        super(1, grid);
+        this.file = file;
+        this.name = name;
+        this.tilingh = tilingh;
+        this.tilingv = tilingv;
     }
 
     @Override
-    public void loadParameters() throws Exception {
-        tp_threshold = getConfiguration().getFloat("action.growth.threshold_temp");
-        coeff1 = getConfiguration().getFloat("action.growth.coeff1");
-        coeff2 = getConfiguration().getFloat("action.growth.coeff2");
-        temperature_field = getConfiguration().getString("action.growth.temperature_field");
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        lengthStage = new LengthStage(getKey());
-        lengthStage.init();
-
-        if (getConfiguration().getBoolean("action.growth.length_tracker")) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
-        }
-        
-        if (getConfiguration().getBoolean("action.growth.stage_tracker")) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
-        }
+    public void init(double t0, int time_arrow) throws IOException {
+        stack[0] = new TiledVariable(DatasetUtil.openFile(file, true), name, grid, 0, 0, tilingh, tilingv);
     }
 
     @Override
-    public void init(IParticle particle) {
-        LengthParticle.setLength(particle, lengthStage.getThreshold(0));
-        StageParticle.init(particle);
+    public void update(double currenttime, int time_arrow) throws IOException {
+        // nothing to do
     }
-
-    @Override
-    public void execute(IParticle particle) {
-        LengthParticle.incrementLength(particle, grow(getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime())));
-        StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
-    }
-
-    private double grow(double temperature) {
-
-        double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
-        return (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
-
-    }
+    
 }

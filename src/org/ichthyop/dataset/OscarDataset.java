@@ -55,7 +55,9 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
+import org.ichthyop.grid.AbstractRegularGrid;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -146,6 +148,16 @@ public class OscarDataset extends AbstractDataset {
     @Override
     String getKey() {
         return "dataset.oscar";
+    }
+    
+    @Override
+     AbstractDatasetVariable createVariable(String name) {
+         return null;
+     }
+    
+    @Override
+    AbstractRegularGrid createGrid() {
+        return null;
     }
 
     @Override

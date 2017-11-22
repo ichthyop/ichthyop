@@ -59,6 +59,7 @@ import java.util.List;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.IchthyopLinker;
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
+import org.ichthyop.dataset.variable.IVariable;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.manager.TimeManager;
@@ -79,8 +80,17 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
 
     abstract void loadParameters();
 
-    AbstractDatasetVariable createVariable(String name) {
-        return null;
+    abstract AbstractDatasetVariable createVariable(String name);
+    
+    abstract AbstractRegularGrid createGrid();
+    
+    @Override
+    public void setUp() throws Exception {
+
+        loadParameters();
+
+        grid = createGrid();
+        grid.init();
     }
 
     @Override
@@ -116,11 +126,8 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     }
 
     @Override
-    public double getDouble(String variableName, double[] pGrid, double time) {
-        if (variables.containsKey(variableName)) {
-            return variables.get(variableName).getDouble(pGrid, time);
-        }
-        return Double.NaN;
+    public IVariable getVariable(String name) {
+        return variables.get(name);
     }
 
     @Override

@@ -214,8 +214,8 @@ public class BuoyancyAction extends AbstractAction {
             //System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: " + particleDensity);
             double time = getSimulationManager().getTimeManager().getTime();
             double dt = getSimulationManager().getTimeManager().get_dt();
-            double sal = getSimulationManager().getDataset().getDouble(salinity_field, particle.getGridCoordinates(), time);
-            double tp = getSimulationManager().getDataset().getDouble(temperature_field, particle.getGridCoordinates(), time);
+            double sal = getSimulationManager().getDataset().getVariable(salinity_field).getDouble(particle.getGridCoordinates(), time);
+            double tp = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), time);
             double dz = getSimulationManager().getDataset().getGrid().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
             particle.increment(new double[]{0.d, 0.d, dz});
         }

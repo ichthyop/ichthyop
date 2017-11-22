@@ -54,6 +54,8 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
+import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
@@ -145,6 +147,16 @@ public abstract class MarsCommon extends AbstractDataset {
     abstract void setOnFirstTime() throws Exception;
 
     abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
+    
+    @Override
+     AbstractDatasetVariable createVariable(String name) {
+         return null;
+     }
+    
+    @Override
+    AbstractRegularGrid createGrid() {
+        return null;
+    }
 
     @Override
     public void setUp() throws Exception {

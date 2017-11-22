@@ -56,12 +56,12 @@ package org.ichthyop.dataset;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
+import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.ui.LonLatConverter;
-import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 
 /**
@@ -201,6 +201,16 @@ public class SymphonieDataset extends AbstractDataset {
     @Override
     String getKey() {
         return "dataset.symphonie";
+    }
+    
+    @Override
+     AbstractDatasetVariable createVariable(String name) {
+         return null;
+     }
+    
+    @Override
+    AbstractRegularGrid createGrid() {
+        return null;
     }
 
     @Override

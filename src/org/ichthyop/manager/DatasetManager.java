@@ -84,7 +84,7 @@ public class DatasetManager extends AbstractManager {
                     try {
                         dataset = (IDataset) Class.forName(className).newInstance();
                         n++;
-                    } catch (Exception ex) {
+                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("Dataset instantiation failed ==> ");
                         sb.append(ex.toString());
@@ -118,12 +118,13 @@ public class DatasetManager extends AbstractManager {
     public void setupPerformed(SetupEvent e) throws Exception {
         instantiateDataset();
         dataset.setUp();
-        bathymetryDataset.init();
+        bathymetryDataset.setUp();
     }
 
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
         getSimulationManager().getTimeManager().addNextStepListener(dataset);
         dataset.init();
+        bathymetryDataset.init();
     }
 }

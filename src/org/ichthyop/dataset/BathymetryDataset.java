@@ -52,12 +52,12 @@
  */
 package org.ichthyop.dataset;
 
-import org.ichthyop.dataset.variable.TiledVariable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.ichthyop.IchthyopLinker;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
+import org.ichthyop.dataset.variable.ConstantDatasetVariable;
 import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.grid.RectilinearGrid;
 import ucar.nc2.NetcdfFile;
@@ -66,56 +66,54 @@ import ucar.nc2.NetcdfFile;
  *
  * @author pverley
  */
-public class BathymetryDataset extends IchthyopLinker {
+public class BathymetryDataset extends AbstractDataset {
 
-    private final String prefix;
-    private final AbstractRegularGrid grid;
-    private TiledVariable bathymetry;
+    private final String prefix = "bathymetry";
+    private String file;
+    private String fullname;
+    // constant
+    private final int TILING_H = 100;
 
-    public BathymetryDataset(String prefix) {
-        this.prefix = prefix;
-        grid = new RectilinearGrid(prefix);
+    @Override
+    String getKey() {
+        return prefix;
     }
 
-    public BathymetryDataset() {
-        this("bathymetry");
+    @Override
+    AbstractRegularGrid createGrid() {
+        return new RectilinearGrid(prefix);
     }
 
-    public void init() {
+    @Override
+    public void loadParameters() {
 
-        try {
-            grid.init();
-
-            // grid file
-            String file = getConfiguration().getFile(prefix + ".file");
-            NetcdfFile nc = DatasetUtil.openFile(file, true);
-            // longitude
+        file = getConfiguration().getFile(prefix + ".file");
+        try (NetcdfFile nc = DatasetUtil.openFile(file, true)) {
             List<String> names = new ArrayList(Arrays.asList(new String[]{"bathy", "bathymetry", "topo", "topography"}));
             if (!getConfiguration().isNull(prefix + ".variable")) {
                 names.add(0, getConfiguration().getString(prefix + ".variable"));
             }
+
             for (String name : names) {
-                String fullname = DatasetUtil.findVariable(nc, name);
+                fullname = DatasetUtil.findVariable(nc, name);
                 if (null != fullname) {
-                    bathymetry = new TiledVariable(DatasetUtil.openFile(file, true), name, grid, 0, 0, 100, 1);
-                    break;
+                    requireVariable(fullname, getClass());
+                    return;
                 }
             }
-            if (null == bathymetry) {
-                throw new IOException("Bathymetry variable not found");
-            }
-        } catch (Exception ex) {
+            throw new IOException("Bathymetry variable not found");
+        } catch (IOException ex) {
             error("[bathymetry] Failed to load bathymetry dataset \"" + prefix + ".*\"", ex);
         }
     }
 
-    public double getBathymetry(double lat, double lon) {
-        if (null != bathymetry) {
-            double[] xy = grid.latlon2xy(lat, lon);
-            return bathymetry.getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]));
-        } else {
-            return 0;
-        }
+    @Override
+    AbstractDatasetVariable createVariable(String name) {
+        return new ConstantDatasetVariable(file, name, grid, TILING_H, 1);
     }
 
+    public double getBathymetry(double lat, double lon) {
+        double[] xy = grid.latlon2xy(lat, lon);
+        return getVariable(fullname).getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]));
+    }
 }

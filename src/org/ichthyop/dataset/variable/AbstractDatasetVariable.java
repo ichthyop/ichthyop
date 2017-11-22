@@ -59,7 +59,7 @@ import org.ichthyop.grid.IGrid;
  *
  * @author pverley
  */
-public abstract class AbstractDatasetVariable {
+public abstract class AbstractDatasetVariable implements IVariable {
 
     protected final IGrid grid;
     protected final TiledVariable[] stack;
@@ -98,8 +98,14 @@ public abstract class AbstractDatasetVariable {
         }
     }
 
+    @Override
     public double getDouble(double[] pGrid, double time) {
         return interpolateIDW(pGrid, time, IDW_RADIUS, IDW_POWER);
+    }
+    
+    @Override
+    public double getDouble(int i, int j) {
+        return stack[0].getDouble(i, j);
     }
 
     // interpolate Inverse Distance Weight

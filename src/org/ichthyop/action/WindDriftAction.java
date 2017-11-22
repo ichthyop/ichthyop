@@ -125,8 +125,8 @@ public class WindDriftAction extends AbstractAction {
         double dx, dy;
         double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
-        dx = dt * getSimulationManager().getDataset().getDouble(strUW, pgrid, time) / one_deg_lon_meter;
-        dy = dt * getSimulationManager().getDataset().getDouble(strVW, pgrid, time) / ONE_DEG_LATITUDE_IN_METER;
+        dx = dt * getSimulationManager().getDataset().getVariable(strUW).getDouble(pgrid, time) / one_deg_lon_meter;
+        dy = dt * getSimulationManager().getDataset().getVariable(strVW).getDouble(pgrid, time) / ONE_DEG_LATITUDE_IN_METER;
         dWi[0] = convention * wind_factor * (dx * Math.cos(angle) - dy * Math.sin(angle));
         dWi[1] = convention * wind_factor * (dx * Math.sin(angle) + dy * Math.cos(angle));
         return dWi;

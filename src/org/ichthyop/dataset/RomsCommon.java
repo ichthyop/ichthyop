@@ -54,6 +54,8 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
+import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import ucar.ma2.Array;
@@ -147,6 +149,16 @@ abstract class RomsCommon extends AbstractDataset {
     abstract void openDataset() throws Exception;
 
     abstract void setOnFirstTime() throws Exception;
+    
+    @Override
+     AbstractDatasetVariable createVariable(String name) {
+         return null;
+     }
+    
+    @Override
+    AbstractRegularGrid createGrid() {
+        return null;
+    }
 
     @Override
     void loadParameters() {

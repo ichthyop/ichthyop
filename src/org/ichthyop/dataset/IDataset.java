@@ -53,6 +53,7 @@
 
 package org.ichthyop.dataset;
 
+import org.ichthyop.dataset.variable.IVariable;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.grid.IGrid;
 
@@ -68,7 +69,7 @@ public interface IDataset extends NextStepListener {
 
     public void init() throws Exception;
 
-    public double getDouble(String name, double[] pGrid, double time);
+    public IVariable getVariable(String name);
 
     public void requireVariable(String name, Class requiredBy);
 

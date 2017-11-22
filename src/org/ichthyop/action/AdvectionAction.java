@@ -161,11 +161,11 @@ public class AdvectionAction extends AbstractAction {
         int i = (int) Math.round(pGrid[0]);
         int j = (int) Math.round(pGrid[1]);
 
-        dU[0] = getSimulationManager().getDataset().getDouble(ucurrent, pGrid, time) / getSimulationManager().getDataset().getGrid().get_dx(i, j) * dt;
+        dU[0] = getSimulationManager().getDataset().getVariable(ucurrent).getDouble(pGrid, time) / getSimulationManager().getDataset().getGrid().get_dx(i, j) * dt;
         if (Math.abs(dU[0]) > THRESHOLD_CFL) {
             warning("CFL broken for U {0}", (float) dU[0]);
         }
-        dU[1] = getSimulationManager().getDataset().getDouble(vcurrent, pGrid, time) / getSimulationManager().getDataset().getGrid().get_dy(i, j) * dt;
+        dU[1] = getSimulationManager().getDataset().getVariable(vcurrent).getDouble(pGrid, time) / getSimulationManager().getDataset().getGrid().get_dy(i, j) * dt;
         if (Math.abs(dU[1]) > THRESHOLD_CFL) {
             warning("CFL broken for V {0}", (float) dU[1]);
         }

@@ -55,7 +55,9 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
+import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
@@ -188,6 +190,16 @@ public class NoveltisDataset extends AbstractDataset {
     @Override
     String getKey() {
         return "dataset.noveltis";
+    }
+    
+    @Override
+     AbstractDatasetVariable createVariable(String name) {
+         return null;
+     }
+    
+    @Override
+    AbstractRegularGrid createGrid() {
+        return null;
     }
 
     @Override

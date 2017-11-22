@@ -55,7 +55,9 @@ package org.ichthyop.dataset;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
+import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.ichthyop.util.MetaFilenameFilter;
@@ -198,8 +200,14 @@ public class NemoDataset extends AbstractDataset {
         return "dataset.nemo";
     }
     
-    public boolean is3D() {
-        return true;
+   @Override
+     AbstractDatasetVariable createVariable(String name) {
+         return null;
+     }
+    
+    @Override
+    AbstractRegularGrid createGrid() {
+        return null;
     }
 
     /**

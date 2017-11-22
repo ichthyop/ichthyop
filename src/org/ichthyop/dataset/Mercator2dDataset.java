@@ -55,7 +55,9 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
+import org.ichthyop.grid.AbstractRegularGrid;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 
@@ -152,8 +154,14 @@ public class Mercator2dDataset extends AbstractDataset {
         return "dataset.mercator2d";
     }
     
-    public boolean is3D() {
-        return false;
+    @Override
+     AbstractDatasetVariable createVariable(String name) {
+         return null;
+     }
+    
+    @Override
+    AbstractRegularGrid createGrid() {
+        return null;
     }
 
     /**
