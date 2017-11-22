@@ -53,6 +53,7 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.List;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.grid.RectilinearGrid;
 import ucar.ma2.Array;
@@ -69,7 +70,8 @@ public abstract class Hycom3dCommon extends AbstractDataset {
     DatasetVariable v;
     DatasetVariable w;
     boolean xTore = true;
-    final int tilingh = 100, tilingv = 3, tilinghw = 10;
+    final int TILING_H = 100, TILING_V = 3, WTILING_H = 10;
+    final int NLAYER = 3;
 
     abstract NetcdfFile getNC();
 
@@ -81,9 +83,9 @@ public abstract class Hycom3dCommon extends AbstractDataset {
         grid = new RectilinearGrid(getKey() + ".grid");
         grid.init();
 
-        u = new DatasetVariable(grid);
-        v = new DatasetVariable(grid);
-        w = new DatasetVariable(grid);
+        u = new DatasetVariable(NLAYER, grid);
+        v = new DatasetVariable(NLAYER, grid);
+        w = new DatasetVariable(NLAYER, grid);
     }
 
     @Override

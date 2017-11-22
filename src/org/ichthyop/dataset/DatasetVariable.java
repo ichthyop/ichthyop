@@ -63,13 +63,12 @@ public class DatasetVariable {
     private final IGrid grid;
     private final NetcdfTiledVariable[] stack;
     // constants
-    private final int NSTACK = 3;
     private final int IDW_POWER = 2;
     private final int IDW_RADIUS = 1;
 
-    public DatasetVariable(IGrid grid) {
+    public DatasetVariable(int nstack, IGrid grid) {
         this.grid = grid;
-        stack = new NetcdfTiledVariable[NSTACK];
+        stack = new NetcdfTiledVariable[nstack];
     }
     
     public boolean updateNeeded(double time, int time_arrow) {
@@ -82,13 +81,14 @@ public class DatasetVariable {
             stack[0].clear();
         }
         // cascade down the variables in the stack
-        for (int istack = 0; istack < NSTACK - 1; istack++) {
+        int nlayer = stack.length;
+        for (int istack = 0; istack < nlayer - 1; istack++) {
             stack[istack] = stack[istack + 1];
         }
         // update the last variable of the stack
-        stack[NSTACK - 1] = variable;
+        stack[nlayer - 1] = variable;
         if (null != stack[0]) {
-            stack[NSTACK - 1].loadTiles(stack[0].getTilesIndex());
+            stack[nlayer - 1].loadTiles(stack[0].getTilesIndex());
         }
     }
 

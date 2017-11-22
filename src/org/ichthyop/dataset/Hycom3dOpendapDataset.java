@@ -78,24 +78,20 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
     public void init() throws Exception {
 
         int time_arrow = timeArrow();
-        double t0 = getSimulationManager().getTimeManager().get_tO();
+        double time = getSimulationManager().getTimeManager().get_tO();
         try (NetcdfFile nc = getNC()) {
-            String name = DatasetUtil.findVariable(nc, "time");
-            if (null == name) {
-                throw new IOException("Time variable not found in HYCOM dataset");
+            int rank = DatasetUtil.rank(time, nc, "time", time_arrow) - time_arrow;
+            for (int istack = 0; istack < NLAYER - 1; istack++) {
+                rank += time_arrow;
+                int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+                if (rank > (ntime - 1) || rank < 0) {
+                    nc.close();
+                    return;
+                }
+                u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+                v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+                w.update(new WTiledVariable(getNC(), getGrid(), rank, time, WTILING_H));
             }
-            int rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
-            double time = t0;
-            // t+1
-            u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-            v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-            w.update(new WTiledVariable(getNC(), getGrid(), rank, time, tilinghw));
-            // t+2
-            rank += time_arrow;
-            time = DatasetUtil.timeAtRank(nc, "time", rank);
-            u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-            v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-            w.update(new WTiledVariable(getNC(), getGrid(), rank, time, tilinghw));
         }
     }
 
@@ -104,7 +100,6 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
 
         double time = e.getSource().getTime();
         int time_arrow = timeArrow();
-
         if (u.updateNeeded(time, time_arrow)) {
             try (NetcdfFile nc = getNC()) {
                 int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
@@ -122,9 +117,9 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
                 }
                 time = DatasetUtil.timeAtRank(nc, "time", rank);
                 // update variables
-                u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-                v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-                w.update(new WTiledVariable(getNC(), getGrid(), rank, time, tilinghw));
+                u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+                v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+                w.update(new WTiledVariable(getNC(), getGrid(), rank, time, WTILING_H));
             }
         }
     }

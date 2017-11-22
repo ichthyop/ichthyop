@@ -88,40 +88,28 @@ public class Hycom3dDataset extends Hycom3dCommon {
     public void init() throws Exception {
 
         int time_arrow = timeArrow();
-        DatasetUtil.sort(uvFiles, "time", time_arrow);
-        double t0 = getSimulationManager().getTimeManager().get_tO();
-        index = DatasetUtil.index(uvFiles, t0, time_arrow, "time");
-        NetcdfFile nc = DatasetUtil.openFile(uvFiles.get(index), true);
-        String name = DatasetUtil.findVariable(nc, "time");
-        if (null == name) {
-            throw new IOException("Time variable not found in HYCOM dataset");
+        double time = getSimulationManager().getTimeManager().get_tO();
+        index = DatasetUtil.index(uvFiles, time, time_arrow, "time");
+        NetcdfFile nc = getNC();
+        int rank = DatasetUtil.rank(time, nc, "time", time_arrow) - time_arrow;
+        for (int istack = 0; istack < NLAYER - 1; istack++) {
+            rank += time_arrow;
+            int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+            if (rank > (ntime - 1) || rank < 0) {
+                nc.close();
+                index = DatasetUtil.next(uvFiles, index, time_arrow);
+                nc = DatasetUtil.openFile(uvFiles.get(index), true);
+                ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+                rank = (1 - time_arrow) / 2 * (ntime - 1);
+                time = DatasetUtil.timeAtRank(nc, "time", rank);
+            } else {
+                time = DatasetUtil.timeAtRank(nc, "time", rank);
+            }
+            u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+            v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+            w.update(new WTiledVariable(getNC(), getGrid(), rank, time, WTILING_H));
         }
-        int ntime = nc.findVariable(name).getShape()[0];
-        int rank = DatasetUtil.rank(t0, nc, "time", time_arrow);
-        double time = t0;
-
-        // t+1
-        u.update(new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-        v.update(new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-        w.update(new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index), true), getGrid(), rank, time, tilinghw));
-
-        // t+2
-        rank += time_arrow;
-        int index2 = index;
-        if (rank > (ntime - 1) || rank < 0) {
-            nc.close();
-            index2 = DatasetUtil.next(uvFiles, index, time_arrow);
-            nc = DatasetUtil.openFile(uvFiles.get(index2), true);
-            ntime = nc.findVariable(name).getShape()[0];
-            rank = (1 - time_arrow) / 2 * (ntime - 1);
-        }
-        time = DatasetUtil.timeAtRank(nc, "time", rank);
         nc.close();
-        u.update(new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-        v.update(new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-        w.update(new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), getGrid(), rank, time, tilinghw));
-
-        //checkRequiredVariable(nc);
     }
 
     @Override
@@ -129,39 +117,31 @@ public class Hycom3dDataset extends Hycom3dCommon {
 
         double time = e.getSource().getTime();
         int time_arrow = timeArrow();
-
         if (u.updateNeeded(time, time_arrow)) {
-            // t+1
-            NetcdfFile nc = getNC();
-            int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-            int rank = DatasetUtil.rank(time, nc, "time", time_arrow) + time_arrow;
-            if (rank > (ntime - 1) || rank < 0) {
-                nc.close();
-                index = DatasetUtil.next(uvFiles, index, time_arrow);
-                nc = DatasetUtil.openFile(uvFiles.get(index), true);
-                ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-                rank = (1 - time_arrow) / 2 * (ntime - 1);
-            }
-            // t+2
-            rank += time_arrow;
-            int index2 = index;
-            if (rank > (ntime - 1) || rank < 0) {
-                nc.close();
-                try {
-                    index2 = DatasetUtil.next(uvFiles, index, time_arrow);
-                } catch (IOException ex) {
-                    return;
+            int rank;
+            try (NetcdfFile nc = getNC()) {
+                int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+                rank = DatasetUtil.rank(time, nc, "time", time_arrow);
+                rank += (NLAYER - 1) * time_arrow;
+                if (rank > (ntime - 1) || rank < 0) {
+                    try {
+                        index = DatasetUtil.next(uvFiles, index, time_arrow);
+                    } catch (IOException ex) {
+                        return;
+                    }
+                    try (NetcdfFile nc2 = DatasetUtil.openFile(uvFiles.get(index), true)) {
+                        ntime = nc2.findVariable(DatasetUtil.findVariable(nc2, "time")).getShape()[0];
+                        rank = (1 - time_arrow) / 2 * (ntime - 1);
+                        time = DatasetUtil.timeAtRank(nc2, "time", rank);
+                    }
+                } else {
+                    time = DatasetUtil.timeAtRank(nc, "time", rank);
                 }
-                nc = DatasetUtil.openFile(uvFiles.get(index2), true);
-                ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-                rank = (1 - time_arrow) / 2 * (ntime - 1);
             }
-            time = DatasetUtil.timeAtRank(nc, "time", rank);
-            nc.close();
             // update variables
-            u.update(new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "eastward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-            v.update(new NetcdfTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), "northward_sea_water_velocity", getGrid(), rank, time, tilingh, tilingv));
-            w.update(new WTiledVariable(DatasetUtil.openFile(uvFiles.get(index2), true), getGrid(), rank, time, tilinghw));
+            u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+            v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
+            w.update(new WTiledVariable(getNC(), getGrid(), rank, time, WTILING_H));
         }
     }
 
