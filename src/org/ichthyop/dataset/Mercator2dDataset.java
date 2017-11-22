@@ -55,12 +55,9 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
-import org.ichthyop.dataset.MarsCommon.ErrorMessage;
 import org.ichthyop.event.NextStepEvent;
-import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -232,7 +229,6 @@ public class Mercator2dDataset extends AbstractDataset {
      * </pre>
      *
      */
-    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
@@ -270,7 +266,6 @@ public class Mercator2dDataset extends AbstractDataset {
         return du;
     }
 
-    @Override
     public double get_dVy(double[] pGrid, double time) {
 
         double dv = 0.d;
@@ -875,15 +870,6 @@ public class Mercator2dDataset extends AbstractDataset {
 
         setAllFieldsTp1AtTime(rank);
 
-    }
-
-    @Override
-    public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException("Method not supported in 2D");
-    }
-    
-    public double getDepthMax(double x, double y) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 
     public double xTore(double x) {

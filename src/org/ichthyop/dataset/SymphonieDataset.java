@@ -858,7 +858,6 @@ public class SymphonieDataset extends AbstractDataset {
         return depth;
     }
 
-    @Override
     public double get_dUx(double[] pGrid, double time) {
         double du = 0.d;
         double ix, jy, kz;
@@ -896,7 +895,6 @@ public class SymphonieDataset extends AbstractDataset {
         return du;
     }
 
-    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy, kz;
@@ -935,7 +933,6 @@ public class SymphonieDataset extends AbstractDataset {
         return dv;
     }
 
-    @Override
     public double get_dWz(double[] pGrid, double time) {
         double dw = 0.d;
         double ix, jy, kz;
@@ -1078,10 +1075,6 @@ public class SymphonieDataset extends AbstractDataset {
         return latitude_t[jgrid][igrid];
     }
 
-    public boolean is3D() {
-        return true;
-    }
-
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         double time = e.getSource().getTime();
@@ -1177,13 +1170,5 @@ public class SymphonieDataset extends AbstractDataset {
             isInPolygone = false;
         }
         return (isInPolygone);
-    }
-    
-    public double xTore(double x) {
-        return x;
-    }
-
-    public double yTore(double y) {
-        return y;
     }
 }

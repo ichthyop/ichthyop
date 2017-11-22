@@ -61,7 +61,6 @@ import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -880,7 +879,6 @@ public class NoveltisDataset extends AbstractDataset {
         return depth;
     }
 
-    @Override
     public double get_dWz(double[] pGrid, double time) {
 
         double dw = 0.d;
@@ -954,7 +952,6 @@ public class NoveltisDataset extends AbstractDataset {
         return dv;
     }
 
-    @Override
     public double get_dUx(double[] pGrid, double time) {
         // U points are at the centre of the cells
 

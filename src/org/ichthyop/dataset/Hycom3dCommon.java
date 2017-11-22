@@ -53,8 +53,6 @@
 package org.ichthyop.dataset;
 
 import org.ichthyop.grid.RectilinearGrid;
-import ucar.ma2.Array;
-import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -72,23 +70,5 @@ public abstract class Hycom3dCommon extends AbstractDataset {
 
         grid = new RectilinearGrid(getKey() + ".grid");
         grid.init();
-        
-        requireVariable("eastward_sea_water_velocity", org.ichthyop.action.AdvectionAction.class);
-        requireVariable("northward_sea_water_velocity", org.ichthyop.action.AdvectionAction.class);
-    }
-
-    @Override
-    public double get_dUx(double[] pGrid, double time) {
-        return getDouble("eastward_sea_water_velocity", pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-    }
-
-    @Override
-    public double get_dVy(double[] pGrid, double time) {
-        return getDouble("northward_sea_water_velocity", pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-    }
-
-    @Override
-    public double get_dWz(double[] pGrid, double time) {
-        return 0.d;
     }
 }

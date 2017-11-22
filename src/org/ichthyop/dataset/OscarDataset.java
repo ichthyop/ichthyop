@@ -316,7 +316,6 @@ public class OscarDataset extends AbstractDataset {
         return new double[]{lat, lon};
     }
 
-    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
@@ -351,7 +350,6 @@ public class OscarDataset extends AbstractDataset {
         return du;
     }
 
-    @Override
     public double get_dVy(double[] pGrid, double time) {
 
         double dv = 0.d;
@@ -384,11 +382,6 @@ public class OscarDataset extends AbstractDataset {
             dv /= CO;
         }
         return dv;
-    }
-
-    @Override
-    public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     public boolean isInWater(double[] pGrid) {
@@ -435,10 +428,6 @@ public class OscarDataset extends AbstractDataset {
 
     public int get_ny() {
         return nlat;
-    }
-
-    public int get_nz() {
-        throw new UnsupportedOperationException("Method not supported in 2D");
     }
 
     public double get_dx(int j, int i) {
@@ -546,14 +535,6 @@ public class OscarDataset extends AbstractDataset {
 
     public double getLat(int igrid, int jgrid) {
         return latitude[jgrid];
-    }
-
-    public double getDepthMax() {
-        return -1.d;
-    }
-
-    public boolean is3D() {
-        return false;
     }
 
     @Override

@@ -55,8 +55,6 @@ package org.ichthyop.dataset;
 
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.grid.IGrid;
-import ucar.ma2.Array;
-import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -67,12 +65,6 @@ public interface IDataset extends NextStepListener {
     public void setUp() throws Exception ;
     
     public IGrid getGrid();
-
-    double get_dUx(double[] pGrid, double time);
-
-    double get_dVy(double[] pGrid, double time);
-
-    double get_dWz(double[] pGrid, double time);
 
     public void init() throws Exception;
 

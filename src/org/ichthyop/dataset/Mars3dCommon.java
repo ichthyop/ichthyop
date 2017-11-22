@@ -56,8 +56,6 @@ import java.io.IOException;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -394,7 +392,6 @@ abstract class Mars3dCommon extends MarsCommon {
         return depth;
     }
 
-    @Override
     public double get_dWz(double[] pGrid, double time) {
 
         double dw = 0.d;
@@ -430,7 +427,6 @@ abstract class Mars3dCommon extends MarsCommon {
         return dw;
     }
 
-    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy, kz;
@@ -468,7 +464,6 @@ abstract class Mars3dCommon extends MarsCommon {
         return dv;
     }
 
-    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;

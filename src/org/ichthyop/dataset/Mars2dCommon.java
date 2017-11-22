@@ -54,10 +54,7 @@
 package org.ichthyop.dataset;
 
 import java.io.IOException;
-import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -86,7 +83,6 @@ public abstract class Mars2dCommon extends MarsCommon {
         return false;
     }
 
-    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy;
@@ -120,7 +116,6 @@ public abstract class Mars2dCommon extends MarsCommon {
         return dv;
     }
 
-    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
@@ -197,27 +192,5 @@ public abstract class Mars2dCommon extends MarsCommon {
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-    }
-
-    public double depth2z(double x, double y, double depth) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-
-    public double z2depth(double x, double y, double z) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-
-    public int get_nz() {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-
-    @Override
-    public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-    
-    
-    public double getDepthMax(double x, double y) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
     }
 }

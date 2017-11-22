@@ -404,7 +404,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         return depth;
     }
 
-    @Override
     public double get_dWz(double[] pGrid, double time) {
 
         double dw = 0.d;
@@ -440,7 +439,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         return dw;
     }
 
-    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy, kz;
@@ -478,7 +476,6 @@ abstract public class Roms3dCommon extends RomsCommon {
         return dv;
     }
 
-    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;

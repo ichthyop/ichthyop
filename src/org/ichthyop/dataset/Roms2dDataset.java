@@ -55,7 +55,6 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
-import org.ichthyop.dataset.MarsCommon.ErrorMessage;
 import static org.ichthyop.dataset.RomsCommon.strTime;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.util.IOTools;
@@ -63,8 +62,6 @@ import static org.ichthyop.util.IOTools.isDirectory;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -96,12 +93,6 @@ public class Roms2dDataset extends RomsCommon {
         return "dataset.roms_2d";
     }
 
-    @Override
-    public double get_dWz(double[] pGrid, double time) {
-        throw new UnsupportedOperationException(ErrorMessage.NOT_IN_2D.message());
-    }
-
-    @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
         double ix, jy;
@@ -136,7 +127,6 @@ public class Roms2dDataset extends RomsCommon {
         return dv;
     }
 
-    @Override
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
