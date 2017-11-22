@@ -157,10 +157,12 @@ public class NetcdfTiledVariable extends IchthyopLinker {
     }
 
     void closeSource() {
-        try {
-            nc.close();
-        } catch (IOException ex) {
-            warning("Error closing NetCDF " + nc.getLocation(), ex);
+        if (null != nc) {
+            try {
+                nc.close();
+            } catch (IOException ex) {
+                warning("Error closing NetCDF " + nc.getLocation(), ex);
+            }
         }
     }
 

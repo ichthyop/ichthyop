@@ -234,6 +234,10 @@ public class DatasetUtil extends IchthyopLinker {
         }
         return index + 1;
     }
+    
+    public static boolean hasNext(List<String> list, int index) {
+        return (index + 1) < list.size();
+    }
 
     public static int index(List<String> list, double time, int timeArrow, String strTime) throws IOException {
 

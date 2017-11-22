@@ -2,7 +2,7 @@
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -52,76 +52,65 @@
  */
 package org.ichthyop.dataset;
 
-import org.ichthyop.event.NextStepEvent;
-import org.ichthyop.grid.RectilinearGrid;
-import ucar.ma2.Array;
+import java.io.IOException;
+import org.ichthyop.grid.IGrid;
 import ucar.nc2.NetcdfFile;
 
 /**
  *
  * @author pverley
  */
-public abstract class Hycom3dCommon extends AbstractDataset {
+public class OpendapDatasetVariable extends DatasetVariable {
 
-    DatasetVariable u;
-    DatasetVariable v;
-    DatasetVariable w;
-    final int TILING_H = 100, TILING_V = 3, WTILING_H = 10;
-    final int NLAYER = 3;
+    private final String url;
+    private final String name;
+    private final int tilingh;
+    private final int tilingv;
 
-    abstract void initVariables();
-
-    @Override
-    public void setUp() throws Exception {
-
-        loadParameters();
-
-        grid = new RectilinearGrid(getKey() + ".grid");
-        grid.init();
+    public OpendapDatasetVariable(String url, String name, int nlayer, IGrid grid, int tilingh, int tilingv) {
+        super(nlayer, grid);
+        this.url = url;
+        this.name = name;
+        this.tilingh = tilingh;
+        this.tilingv = tilingv;
     }
 
     @Override
-    public double get_dUx(double[] pGrid, double time) {
-        return u.getDouble(pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+    void init(double t0, int time_arrow) throws IOException {
+
+        double time = t0;
+        try (NetcdfFile nc = DatasetUtil.openURL(url, true)) {
+            int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+            int rank = DatasetUtil.rank(time, nc, "time", time_arrow) - time_arrow;
+            for (int ilayer = 0; ilayer < nlayer - 1; ilayer++) {
+                rank += time_arrow;
+                if (rank > (ntime - 1) || rank < 0) {
+                    stack[ilayer] = null;
+                } else {
+                    time = DatasetUtil.timeAtRank(nc, "time", rank);
+                    stack[ilayer] = new NetcdfTiledVariable(DatasetUtil.openURL(url, true), name, grid, rank, time, tilingh, tilingv);
+                }
+            }
+        }
     }
 
     @Override
-    public double get_dVy(double[] pGrid, double time) {
-        return v.getDouble(pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-    }
+    void update(double currenttime, int time_arrow) throws IOException {
 
-    @Override
-    public double get_dWz(double[] pGrid, double time) {
-        return w.getDouble(pGrid, time) / getGrid().get_dz((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
-    }
-
-    @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        return null;
-    }
-    
-    @Override
-    public void init() throws Exception {
-        
-        // instantiate variables u, v & w
-        initVariables();
-
-        int time_arrow = timeArrow();
-        double t0 = getSimulationManager().getTimeManager().get_tO();
-
-        u.init(t0, time_arrow);
-        v.init(t0, time_arrow);
-        w.init(t0, time_arrow);
-    }
-    
-    @Override
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
-
-        double time = e.getSource().getTime();
-        int time_arrow = timeArrow();
-        
-        u.update(time, time_arrow);
-        v.update(time, time_arrow);
-        w.update(time, time_arrow);
+        double time = currenttime;
+        if (updateNeeded(time, time_arrow)) {
+            int rank;
+            try (NetcdfFile nc = DatasetUtil.openURL(url, true)) {
+                int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+                rank = DatasetUtil.rank(time, nc, "time", time_arrow);
+                rank += (nlayer - 1) * time_arrow;
+                if (rank > (ntime - 1) || rank < 0) {
+                    update(null);
+                } else {
+                    time = DatasetUtil.timeAtRank(nc, "time", rank);
+                    update(new NetcdfTiledVariable(DatasetUtil.openURL(url, true), name, grid, rank, time, tilingh, tilingv));
+                }
+            }
+        }
     }
 }

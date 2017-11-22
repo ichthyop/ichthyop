@@ -52,42 +52,48 @@
  */
 package org.ichthyop.dataset;
 
+import java.io.IOException;
 import org.ichthyop.grid.IGrid;
 
 /**
  *
  * @author pverley
  */
-public class DatasetVariable {
+public abstract class DatasetVariable {
 
-    private final IGrid grid;
-    private final NetcdfTiledVariable[] stack;
+    protected final IGrid grid;
+    protected final NetcdfTiledVariable[] stack;
+    protected final int nlayer;
     // constants
     private final int IDW_POWER = 2;
     private final int IDW_RADIUS = 1;
+    
+    abstract void init(double t0, int time_arrow) throws IOException;
+    
+    abstract void update(double currenttime, int time_arrow) throws IOException;
 
-    public DatasetVariable(int nstack, IGrid grid) {
+    public DatasetVariable(int nlayer, IGrid grid) {
+       this.nlayer = nlayer;
         this.grid = grid;
-        stack = new NetcdfTiledVariable[nstack];
+        stack = new NetcdfTiledVariable[nlayer];
     }
     
-    public boolean updateNeeded(double time, int time_arrow) {
+    protected boolean updateNeeded(double time, int time_arrow) {
         return (time_arrow * time >= time_arrow * stack[1].getTimeStamp());
     }
 
-    public void update(NetcdfTiledVariable variable) {
+    protected void update(NetcdfTiledVariable variable) {
         // clear first variable of the stack
         if (null != stack[0]) {
             stack[0].clear();
         }
         // cascade down the variables in the stack
-        int nlayer = stack.length;
         for (int istack = 0; istack < nlayer - 1; istack++) {
             stack[istack] = stack[istack + 1];
         }
         // update the last variable of the stack
         stack[nlayer - 1] = variable;
-        if (null != stack[0]) {
+        if (null != stack[0] && null != variable) {
             stack[nlayer - 1].loadTiles(stack[0].getTilesIndex());
         }
     }

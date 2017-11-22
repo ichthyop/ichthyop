@@ -52,10 +52,6 @@
  */
 package org.ichthyop.dataset;
 
-import java.io.IOException;
-import org.ichthyop.event.NextStepEvent;
-import ucar.nc2.NetcdfFile;
-
 /**
  *
  * @author pverley
@@ -75,64 +71,13 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
     }
 
     @Override
-    public void init() throws Exception {
+    public void initVariables() {
 
-        int time_arrow = timeArrow();
-        double time = getSimulationManager().getTimeManager().get_tO();
-        try (NetcdfFile nc = getNC()) {
-            int rank = DatasetUtil.rank(time, nc, "time", time_arrow) - time_arrow;
-            for (int istack = 0; istack < NLAYER - 1; istack++) {
-                rank += time_arrow;
-                int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-                if (rank > (ntime - 1) || rank < 0) {
-                    nc.close();
-                    return;
-                }
-                u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
-                v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
-                w.update(new WTiledVariable(getNC(), getGrid(), rank, time, WTILING_H));
-            }
-        }
+        u = new OpendapDatasetVariable(url, "eastward_sea_water_velocity", NLAYER, getGrid(), TILING_H, TILING_V);
+        v = new OpendapDatasetVariable(url, "northward_sea_water_velocity", NLAYER, getGrid(), TILING_H, TILING_V);
+        w = new WDatasetVariable(
+                url, "eastward_sea_water_velocity",
+                url, "northward_sea_water_velocity",
+                NLAYER, getGrid(), WTILING_H);
     }
-
-    @Override
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
-
-        double time = e.getSource().getTime();
-        int time_arrow = timeArrow();
-        if (u.updateNeeded(time, time_arrow)) {
-            try (NetcdfFile nc = getNC()) {
-                int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-                // t+1
-                int rank = DatasetUtil.rank(time, nc, "time", time_arrow) + time_arrow;
-                if (rank > (ntime - 1) || rank < 0) {
-                    nc.close();
-                    throw new IndexOutOfBoundsException("Time out of dataset range");
-                }
-                // t+2
-                rank += time_arrow;
-                if (rank > (ntime - 1) || rank < 0) {
-                    nc.close();
-                    return;
-                }
-                time = DatasetUtil.timeAtRank(nc, "time", rank);
-                // update variables
-                u.update(new NetcdfTiledVariable(getNC(), "eastward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
-                v.update(new NetcdfTiledVariable(getNC(), "northward_sea_water_velocity", getGrid(), rank, time, TILING_H, TILING_V));
-                w.update(new WTiledVariable(getNC(), getGrid(), rank, time, WTILING_H));
-            }
-        }
-    }
-
-    @Override
-    NetcdfFile getNC() {
-        try {
-            return DatasetUtil.openURL(url, true);
-        } catch (IOException ex) {
-            error("Failed to open NetCDF URL " + url, ex);
-        }
-        return null;
-
-    }
-
 }
