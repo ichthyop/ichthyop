@@ -71,8 +71,6 @@ public class BathymetryDataset extends AbstractDataset {
     private final String prefix = "bathymetry";
     private String file;
     private String fullname;
-    // constant
-    private final int TILING_H = 100;
 
     @Override
     String getKey() {
@@ -86,15 +84,15 @@ public class BathymetryDataset extends AbstractDataset {
 
     @Override
     public void loadParameters() {
-
+        
         file = getConfiguration().getFile(prefix + ".file");
         try (NetcdfFile nc = DatasetUtil.openFile(file, true)) {
-            List<String> names = new ArrayList(Arrays.asList(new String[]{"bathy", "bathymetry", "topo", "topography"}));
+            List<String> varnames = new ArrayList(Arrays.asList(new String[]{"bathy", "bathymetry", "topo", "topography"}));
             if (!getConfiguration().isNull(prefix + ".variable")) {
-                names.add(0, getConfiguration().getString(prefix + ".variable"));
+                varnames.add(0, getConfiguration().getString(prefix + ".variable"));
             }
 
-            for (String name : names) {
+            for (String name : varnames) {
                 fullname = DatasetUtil.findVariable(nc, name);
                 if (null != fullname) {
                     requireVariable(fullname, getClass());

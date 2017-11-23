@@ -71,15 +71,17 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
 
+    // constants
     final int NLAYER = 3;
     final int TILING_H = 100;
     final int TILING_V = 3;
-
+    // variables
     final HashMap<String, AbstractDatasetVariable> variables = new HashMap();
+    // names of the variables
     final HashMap<String, List<String>> names = new HashMap();
-
+    // dataset grid
     AbstractRegularGrid grid;
-
+    // 
     abstract String getKey();
 
     abstract void loadParameters();

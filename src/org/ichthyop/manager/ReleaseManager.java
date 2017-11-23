@@ -54,6 +54,8 @@ package org.ichthyop.manager;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.event.SetupEvent;
@@ -70,7 +72,7 @@ import org.ichthyop.release.AbstractRelease;
 public class ReleaseManager extends AbstractManager implements ReleaseListener, NextStepListener {
 
     private static final ReleaseManager RELEASE_MANAGER = new ReleaseManager();
-    private AbstractRelease releaseProcess;
+    private final List<AbstractRelease> releaseProcess = new ArrayList();
     /**
      * Stores time of the release events
      */
@@ -95,42 +97,46 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     private void instantiateReleaseProcess() throws Exception {
 
         for (String key : getConfiguration().getParameterSubsets()) {
-            if (getConfiguration().canFind(key + ".type")
+            if (!getConfiguration().isNull(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("release")) {
                 if (getConfiguration().getBoolean(key + ".enabled")) {
                     String className = getConfiguration().getString(key + ".class_name");
                     try {
-                        releaseProcess = (AbstractRelease) Class.forName(className).newInstance();
-                        releaseProcess.loadParameters();
-                    } catch (Exception ex) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Release process instantiation failed ==> ");
-                        sb.append(ex.toString());
-                        InstantiationException ieex = new InstantiationException(sb.toString());
-                        ieex.setStackTrace(ex.getStackTrace());
-                        throw ieex;
+                        releaseProcess.add((AbstractRelease) Class.forName(className).newInstance());
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                        error("[release] Release process instantiation failed " + key, ex);
                     }
                 }
             }
+        }
+        
+        for (AbstractRelease release : releaseProcess) {
+            release.loadParameters();
         }
     }
 
     @Override
     public void releaseTriggered(ReleaseEvent event) throws Exception {
-        int nbReleased = releaseProcess.release(event);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Release event (");
-        sb.append(getClass().getSimpleName());
-        sb.append(") time = ");
-        sb.append((long) event.getSource().getTime());
-        sb.append(" seconds. Released ");
-        sb.append(nbReleased);
-        sb.append(" particles.");
-        info(sb.toString());
+        
+        for (AbstractRelease release : releaseProcess) {
+            int nbReleased = release.release(event);
+            StringBuilder sb = new StringBuilder();
+            sb.append("[release] ");
+            sb.append(release.getClass().getSimpleName());
+            sb.append(", ");
+            sb.append(nbReleased);
+            sb.append(" particles, ");
+            sb.append(getSimulationManager().getTimeManager().timeToString());
+            info(sb.toString());
+        }
     }
 
     public int getNbParticles() {
-        return getNbReleaseEvents() * releaseProcess.getNbParticles();
+        int nparticle = 0;
+        for (AbstractRelease release : releaseProcess) {
+            nparticle += getNbReleaseEvents() * release.getNbParticles();
+        }
+        return nparticle;
     }
 
     @Override
@@ -267,7 +273,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         cleanReleaseListener();
         indexEvent = 0;
         isAllReleased = false;
-        releaseProcess = null;
+        releaseProcess.clear();
         timeEvent = new double[getReleaseEvents().length];
         instantiateReleaseProcess();
         info("Release manager setup [OK]");
