@@ -784,13 +784,13 @@ public class ParameterManager extends AbstractManager {
         ArrayList<String> lines = getLines(file);
         for (String key : keys) {
             // Find the line of parameter defined by the key
-            int iline = findLine(key, lines);
+            int iline = parameters.get(key).iline;
             // Update the value of the parameter
             String value = getConfiguration().getString(key);
             Parameter parameter = new Parameter(iline, file);
             parameter.parse(lines.get(iline));
             String updatedParameter = lines.get(iline).replace(parameter.value, value);
-            lines.set(iline, updatedParameter);
+            lines.set(iline - 1, updatedParameter);
         }
         // Write the updated configuration file
         write(file, lines);
