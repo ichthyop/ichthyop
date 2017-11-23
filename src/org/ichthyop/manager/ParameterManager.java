@@ -788,8 +788,8 @@ public class ParameterManager extends AbstractManager {
             // Update the value of the parameter
             String value = getConfiguration().getString(key);
             Parameter parameter = new Parameter(iline, file);
-            parameter.parse(lines.get(iline));
-            String updatedParameter = lines.get(iline).replace(parameter.value, value);
+            parameter.parse(lines.get(iline - 1));
+            String updatedParameter = lines.get(iline - 1).replace(parameter.value, value);
             lines.set(iline - 1, updatedParameter);
         }
         // Write the updated configuration file
