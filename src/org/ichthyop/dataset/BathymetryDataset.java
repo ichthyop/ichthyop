@@ -108,8 +108,8 @@ public class BathymetryDataset extends AbstractDataset {
     }
 
     @Override
-    AbstractDatasetVariable createVariable(String name) {
-        return new ConstantDatasetVariable(file, name, grid, TILING_H, 1);
+    AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
+        return new ConstantDatasetVariable(file, name, grid, tilingh, 1);
     }
 
     public double getBathymetry(double lat, double lon) {

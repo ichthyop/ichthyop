@@ -2,7 +2,7 @@
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -52,38 +52,32 @@
  */
 package org.ichthyop.dataset;
 
-import org.ichthyop.dataset.variable.NetcdfDatasetVariable;
-import java.io.IOException;
-import java.util.List;
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 
 /**
  *
  * @author pverley
  */
-public class Hycom3dDataset extends Hycom3dCommon {
-
-    private List<String> uvFiles;
+public abstract class AbstractOceanDataset extends AbstractDataset {
 
     @Override
-    String getKey() {
-        return "dataset.hycom_3d";
+    public void init() throws Exception {
+        variables.put("ocean_dataset_u", createUVariable());
+        variables.put("ocean_dataset_v", createVVariable());
+        variables.put("ocean_dataset_w", createWVariable());
+        super.init();
     }
 
-    @Override
-    void loadParameters() {
-        try {
-            // List uv files
-            uvFiles = DatasetUtil.list(
-                    getConfiguration().getString("dataset.hycom_3d.input_path"),
-                    getConfiguration().getString("dataset.hycom_3d.uv_file_pattern"));
-        } catch (IOException ex) {
-            error("[dataset] Failed to list HYCOM NetCDF files in folder " + getConfiguration().getString("dataset.hycom_3d.input_path"), ex);
-        }
-    }
+    public abstract AbstractDatasetVariable createUVariable();
 
-    @Override
-    AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
-        return new NetcdfDatasetVariable(uvFiles, name, nlayer, grid, tilingh, tilingv);
-    }
+    public abstract AbstractDatasetVariable createVVariable();
+
+    public abstract AbstractDatasetVariable createWVariable();
+
+    public abstract double get_dUx(double[] pgrid, double time);
+
+    public abstract double get_dVy(double[] pgrid, double time);
+
+    public abstract double get_dWz(double[] pgrid, double time);
+
 }

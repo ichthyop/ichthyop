@@ -52,6 +52,8 @@
  */
 package org.ichthyop.dataset;
 
+import org.ichthyop.dataset.variable.AbstractDatasetVariable;
+import org.ichthyop.dataset.variable.WDatasetVariable;
 import org.ichthyop.grid.AbstractRegularGrid;
 import org.ichthyop.grid.RectilinearGrid;
 
@@ -59,13 +61,44 @@ import org.ichthyop.grid.RectilinearGrid;
  *
  * @author pverley
  */
-public abstract class Hycom3dCommon extends AbstractDataset {
-
-    final int TILING_H = 100, TILING_V = 3;
-    final int NLAYER = 3;
+public abstract class Hycom3dCommon extends AbstractOceanDataset {
 
     @Override
     AbstractRegularGrid createGrid() {
         return new RectilinearGrid(getKey() + ".grid");
+    }
+
+    @Override
+    public AbstractDatasetVariable createUVariable() {
+        return createVariable("eastward_sea_water_velocity", NLAYER, TILING_H, TILING_V);
+    }
+
+    @Override
+    public AbstractDatasetVariable createVVariable() {
+        return createVariable("northward_sea_water_velocity", NLAYER, TILING_H, TILING_V);
+    }
+
+    @Override
+    public AbstractDatasetVariable createWVariable() {
+        int tilingv = Math.max(TILING_H * TILING_V / grid.get_nz(), 1);
+        return new WDatasetVariable(
+                createVariable("eastward_sea_water_velocity", NLAYER, tilingv, grid.get_nz()),
+                createVariable("northward_sea_water_velocity", NLAYER, tilingv, grid.get_nz()),
+                grid);
+    }
+
+    @Override
+    public double get_dUx(double[] pGrid, double time) {
+        return getVariable("ocean_dataset_u").getDouble(pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+    }
+
+    @Override
+    public double get_dVy(double[] pGrid, double time) {
+        return getVariable("ocean_dataset_v").getDouble(pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
+    }
+
+    @Override
+    public double get_dWz(double[] pGrid, double time) {
+        return getVariable("ocean_dataset_w").getDouble(pGrid, time) / getGrid().get_dz((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
     }
 }

@@ -71,6 +71,10 @@ import ucar.nc2.NetcdfFile;
  */
 public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
 
+    final int NLAYER = 3;
+    final int TILING_H = 100;
+    final int TILING_V = 3;
+
     final HashMap<String, AbstractDatasetVariable> variables = new HashMap();
     final HashMap<String, List<String>> names = new HashMap();
 
@@ -80,10 +84,10 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
 
     abstract void loadParameters();
 
-    abstract AbstractDatasetVariable createVariable(String name);
-    
+    abstract AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv);
+
     abstract AbstractRegularGrid createGrid();
-    
+
     @Override
     public void setUp() throws Exception {
 
@@ -98,14 +102,16 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
 
         // instantiate dataset variables
         for (String name : names.keySet()) {
-            variables.put(name, createVariable(name));
+            variables.put(name, createVariable(name, NLAYER, TILING_H, TILING_V));
         }
 
         // initialise them
         int time_arrow = timeArrow();
         double t0 = getSimulationManager().getTimeManager().get_tO();
         for (AbstractDatasetVariable variable : variables.values()) {
-            variable.init(t0, time_arrow);
+            if (null != variable) {
+                variable.init(t0, time_arrow);
+            }
         }
     }
 
@@ -116,7 +122,9 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
         int time_arrow = timeArrow();
 
         for (AbstractDatasetVariable variable : variables.values()) {
-            variable.update(time, time_arrow);
+            if (null != variable) {
+                variable.update(time, time_arrow);
+            }
         }
     }
 

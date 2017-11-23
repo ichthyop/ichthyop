@@ -74,7 +74,7 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
     }
     
     @Override
-    AbstractDatasetVariable createVariable(String name) {
-        return new OpendapDatasetVariable(url, name, NLAYER, getGrid(), TILING_H, TILING_V);
+    AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
+        return new OpendapDatasetVariable(url, name, nlayer, grid, tilingh, tilingv);
     }
 }

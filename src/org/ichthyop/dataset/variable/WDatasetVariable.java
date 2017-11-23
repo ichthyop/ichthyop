@@ -53,7 +53,6 @@
 package org.ichthyop.dataset.variable;
 
 import java.io.IOException;
-import java.util.List;
 import org.ichthyop.grid.IGrid;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
@@ -66,17 +65,11 @@ public class WDatasetVariable extends AbstractDatasetVariable {
 
     private final AbstractDatasetVariable u;
     private final AbstractDatasetVariable v;
-
-    public WDatasetVariable(List<String> ufiles, String uname, List<String> vfiles, String vname, int nlayer, IGrid grid, int tilingh) {
-        super(nlayer, grid);
-        u = new NetcdfDatasetVariable(ufiles, uname, nlayer, grid, tilingh, grid.get_nz());
-        v = new NetcdfDatasetVariable(vfiles, vname, nlayer, grid, tilingh, grid.get_nz());
-    }
-
-    public WDatasetVariable(String u_url, String uname, String v_url, String vname, int nlayer, IGrid grid, int tilingh) {
-        super(nlayer, grid);
-        u = new OpendapDatasetVariable(u_url, uname, nlayer, grid, tilingh, grid.get_nz());
-        v = new OpendapDatasetVariable(v_url, vname, nlayer, grid, tilingh, grid.get_nz());
+    
+    public WDatasetVariable(AbstractDatasetVariable u, AbstractDatasetVariable v, IGrid grid) {
+        super(u.nlayer, grid);
+        this.u = u;
+        this.v = v;
     }
 
     @Override

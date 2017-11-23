@@ -204,7 +204,7 @@ public class SymphonieDataset extends AbstractDataset {
     }
     
     @Override
-     AbstractDatasetVariable createVariable(String name) {
+     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
          return null;
      }
     

@@ -149,7 +149,7 @@ public abstract class MarsCommon extends AbstractDataset {
     abstract void setAllFieldsTp1AtTime(int rank) throws Exception;
     
     @Override
-     AbstractDatasetVariable createVariable(String name) {
+     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
          return null;
      }
     

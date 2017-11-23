@@ -151,7 +151,7 @@ abstract class RomsCommon extends AbstractDataset {
     abstract void setOnFirstTime() throws Exception;
     
     @Override
-     AbstractDatasetVariable createVariable(String name) {
+     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
          return null;
      }
     

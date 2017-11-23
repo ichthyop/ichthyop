@@ -52,6 +52,7 @@
  */
 package org.ichthyop.action;
 
+import org.ichthyop.dataset.AbstractOceanDataset;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.ParticleMortality;
 
@@ -65,8 +66,6 @@ public class AdvectionAction extends AbstractAction {
     private boolean isForward;
     private boolean horizontal;
     private boolean vertical;
-    private String ucurrent;
-    private String vcurrent;
     // Threshold for CFL error message
     public static final float THRESHOLD_CFL = 1.0f;
 
@@ -106,15 +105,6 @@ public class AdvectionAction extends AbstractAction {
         } catch (Exception ex) {
             vertical = true;
         }
-
-        // require U velocity
-        ucurrent = getConfiguration().getString("action.advection.variable.u");
-        getSimulationManager().getDataset().requireVariable(ucurrent, getClass());
-        // require V velocity
-        vcurrent = getConfiguration().getString("action.advection.variable.v");
-        getSimulationManager().getDataset().requireVariable(vcurrent, getClass());
-        // require W velocity
-        // @TODO
     }
 
     @Override
@@ -152,25 +142,26 @@ public class AdvectionAction extends AbstractAction {
             particle.kill(ParticleMortality.OUT_OF_DOMAIN);
         }
     }
+    
+    private AbstractOceanDataset getDataset() {
+        return (AbstractOceanDataset) getSimulationManager().getDataset();
+    }
 
     private double[] computeMove(double pGrid[], double time, double dt) {
 
         int dim = pGrid.length;
         double[] dU = new double[dim];
 
-        int i = (int) Math.round(pGrid[0]);
-        int j = (int) Math.round(pGrid[1]);
-
-        dU[0] = getSimulationManager().getDataset().getVariable(ucurrent).getDouble(pGrid, time) / getSimulationManager().getDataset().getGrid().get_dx(i, j) * dt;
+        dU[0] = getDataset().get_dUx(pGrid, time) * dt;
         if (Math.abs(dU[0]) > THRESHOLD_CFL) {
             warning("CFL broken for U {0}", (float) dU[0]);
         }
-        dU[1] = getSimulationManager().getDataset().getVariable(vcurrent).getDouble(pGrid, time) / getSimulationManager().getDataset().getGrid().get_dy(i, j) * dt;
+        dU[1] = getDataset().get_dVy(pGrid, time) * dt;
         if (Math.abs(dU[1]) > THRESHOLD_CFL) {
             warning("CFL broken for V {0}", (float) dU[1]);
         }
         if (dim > 2) {
-            dU[2] = 0;
+            dU[2] = getDataset().get_dWz(pGrid, time) * dt;
             if (Math.abs(dU[2]) > THRESHOLD_CFL) {
                 warning("CFL broken for W {0}", (float) dU[2]);
             }

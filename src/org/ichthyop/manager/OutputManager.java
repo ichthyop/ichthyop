@@ -60,7 +60,6 @@ import org.ichthyop.event.SetupEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import org.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +67,6 @@ import java.util.HashMap;
 import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.ichthyop.Zone;
-import org.ichthyop.dataset.IDataset;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.output.AbstractTracker;
@@ -157,7 +155,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             Path filePart = new File(strFilePart).toPath();
             Path fileBase = new File(strFileBase).toPath();
-            Files.move(filePart, fileBase, REPLACE_EXISTING);
+            Files.move(filePart, fileBase, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             info("[output] Closed NetCDF output file.");
         } catch (IOException ex) {
             warning("[output] Error closing NetCDF output file.", ex);
