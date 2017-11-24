@@ -144,10 +144,9 @@ public class OscarDataset extends AbstractDataset {
      * Index of the current file read in the {@code listInputFiles}
      */
     private int indexFile;
-    
-    @Override
-    String getKey() {
-        return "dataset.oscar";
+
+    public OscarDataset(String prefix) {
+        super(prefix);
     }
     
     @Override

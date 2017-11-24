@@ -116,6 +116,7 @@ public class UIParameterSubset extends IchthyopLinker {
         ACTION,
         RELEASE,
         DATASET,
+        OCEAN_DATASET,
         ZONE;
 
         public static Type getType(String value) {

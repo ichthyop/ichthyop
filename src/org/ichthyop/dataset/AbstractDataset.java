@@ -81,14 +81,23 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     final HashMap<String, List<String>> names = new HashMap();
     // dataset grid
     AbstractRegularGrid grid;
-    // 
-    abstract String getKey();
+    // prefix in the configuration file
+    final String prefix;
+    
+    // constructor
+    public AbstractDataset(String prefix) {
+        this.prefix = prefix;
+    }
 
     abstract void loadParameters();
 
     abstract AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv);
 
     abstract AbstractRegularGrid createGrid();
+    
+    public String getKey() {
+        return prefix;
+    }
 
     @Override
     public void setUp() throws Exception {

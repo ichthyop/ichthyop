@@ -63,9 +63,8 @@ public class Hycom3dOpendapDataset extends Hycom3dCommon {
 
     private String url;
 
-    @Override
-    String getKey() {
-        return "dataset.hycom_3d_opendap";
+    public Hycom3dOpendapDataset(String prefix) {
+        super(prefix);
     }
 
     @Override

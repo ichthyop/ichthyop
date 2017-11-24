@@ -65,9 +65,8 @@ public class Hycom3dDataset extends Hycom3dCommon {
 
     private List<String> uvFiles;
 
-    @Override
-    String getKey() {
-        return "dataset.hycom_3d";
+    public Hycom3dDataset(String prefix) {
+        super(prefix);
     }
 
     @Override

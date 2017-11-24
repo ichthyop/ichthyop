@@ -68,13 +68,11 @@ import ucar.nc2.NetcdfFile;
  */
 public class BathymetryDataset extends AbstractDataset {
 
-    private final String prefix = "bathymetry";
     private String file;
     private String fullname;
 
-    @Override
-    String getKey() {
-        return prefix;
+    public BathymetryDataset(String prefix) {
+        super(prefix);
     }
 
     @Override

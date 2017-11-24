@@ -211,7 +211,7 @@ public class JConfigurationPanel extends JPanel {
     public void setNodeEnabled() {
         parameterTree.getParameterSet().setEnabled(ckBoxNode.isSelected());
         setParameterEditorEnabled(ckBoxNode.isSelected());
-        ensureSingleNodeSelection(UIParameterSubset.Type.DATASET);
+        ensureSingleNodeSelection(UIParameterSubset.Type.OCEAN_DATASET);
         warningNoSelectedNode(UIParameterSubset.Type.RELEASE);
         String key = parameterTree.getParameterSet().getKey() + ".enabled";
         firePropertyChange(PARAMETER_CHANGED, null, key);

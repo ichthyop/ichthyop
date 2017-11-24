@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,68 +50,50 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+package org.ichthyop.action;
 
-package org.ichthyop.dataset;
-
+import java.util.HashMap;
 import java.util.List;
-import org.ichthyop.dataset.variable.AbstractDatasetVariable;
-import org.ichthyop.event.NextStepEvent;
+import org.ichthyop.particle.IParticle;
 
 /**
  *
  * @author pverley
  */
-public class Mars2dDataset extends Mars2dCommon {
+public class OrientatedSwimming extends AbstractAction {
     
-    private List<String> files;
-    private int index;
-    
+    private String zonePrefix;
+    final private String KEY =  "swimming.oriented";
+    final private String CURRENT_SPEED_ACTIVITY = "current_speed_activity";
+    final private String CURRENT_ORIENTATION_ACTIVITY = "current_orientation_activity";
+    private int nzone;
+
     @Override
-    String getKey() {
-        return "dataset.mars_2d";
+    public String getKey() {
+        return KEY;
     }
 
     @Override
-    void openDataset() throws Exception {
+    public void loadParameters() throws Exception {
+        zonePrefix = getConfiguration().getString(KEY + ".zone_prefix");
+        getSimulationManager().getZoneManager().loadZones(zonePrefix);
+        nzone = getSimulationManager().getZoneManager().getZones(zonePrefix).size();
+    }
+
+    @Override
+    public void execute(IParticle particle) {
         
-        files = DatasetUtil.list(getConfiguration().getString("dataset.mars_2d.input_path"), getConfiguration().getString("dataset.mars_2d.file_filter"));
-        if (!skipSorting()) 
-            DatasetUtil.sort(files, strTime, timeArrow());
-        ncIn = DatasetUtil.openFile(files.get(0), true);
-        readTimeLength();
+        List<String> keys = getSimulationManager().getZoneManager().findZones(particle, zonePrefix);
+        if (!keys.isEmpty()) {
+            
+        }
+        
     }
 
     @Override
-    void setOnFirstTime() throws Exception {
-
-        double t0 = getSimulationManager().getTimeManager().get_tO();
-        index = DatasetUtil.index(files, t0, timeArrow, strTime);
-        ncIn = DatasetUtil.openFile(files.get(index), true);
-        readTimeLength();
-        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow);
-        time_tp1 = t0;
+    public void init(IParticle particle) {
+        particle.set(CURRENT_SPEED_ACTIVITY, new HashMap(nzone));
+        particle.set(CURRENT_ORIENTATION_ACTIVITY, new HashMap(nzone));
     }
-
-    @Override
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
-        double time = e.getSource().getTime();
-        //Logger.getAnonymousLogger().info("set fields at time " + time);
-
-        if (timeArrow * time < timeArrow * time_tp1) {
-            return;
-        }
-
-        u_tp0 = u_tp1;
-        v_tp0 = v_tp1;
-        rank += timeArrow;
-        if (rank > (nbTimeRecords - 1) || rank < 0) {
-            ncIn.close();
-            index = index = DatasetUtil.next(files, index, timeArrow);
-            ncIn = DatasetUtil.openFile(files.get(index), true);
-            nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-            rank = (1 - timeArrow) / 2 * (nbTimeRecords - 1);
-        }
-        setAllFieldsTp1AtTime(rank);
-
-    }
+    
 }

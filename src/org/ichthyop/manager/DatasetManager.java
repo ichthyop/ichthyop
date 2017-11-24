@@ -53,6 +53,10 @@
 package org.ichthyop.manager;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import org.ichthyop.dataset.BathymetryDataset;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
@@ -64,67 +68,95 @@ import org.ichthyop.dataset.IDataset;
  */
 public class DatasetManager extends AbstractManager {
 
+    // static instance of the dataset manager
     final private static DatasetManager DATASET_MANAGER = new DatasetManager();
-    private IDataset dataset;
-    private BathymetryDataset bathymetryDataset;
+    // key of the ocean dataset
+    private String oceandataset;
+    // map of all the datasets
+    private final HashMap<String, IDataset> datasets = new HashMap();
 
     public static DatasetManager getInstance() {
         return DATASET_MANAGER;
     }
 
-    private void instantiateDataset() throws Exception {
+    private String findOceanDataset() throws IOException {
 
-        // current dataset
+        String datasetKey = null;
         int n = 0;
         for (String key : getConfiguration().getParameterSubsets()) {
-            if (getConfiguration().canFind(key + ".type")
-                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
+            if (!getConfiguration().isNull(key + ".type")
+                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("ocean_dataset")) {
                 if (getConfiguration().getBoolean(key + ".enabled")) {
-                    String className = getConfiguration().getString(key + ".class_name");
-                    try {
-                        dataset = (IDataset) Class.forName(className).newInstance();
-                        n++;
-                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Dataset instantiation failed ==> ");
-                        sb.append(ex.toString());
-                        InstantiationException ieex = new InstantiationException(sb.toString());
-                        ieex.setStackTrace(ex.getStackTrace());
-                        throw ieex;
-                    }
+                    datasetKey = key;
+                    n++;
                 }
             }
         }
         if (n == 0) {
-            throw new NullPointerException("Could not find any DATASET subset in the configuration file.");
+            throw new NullPointerException("Could not find any enabled OCEAN_DATASET subset in the configuration file.");
         }
         if (n > 1) {
-            throw new IOException("Found several DATASET subsets enabled in the configuration file. Please only keep one enabled.");
+            throw new IOException("Found several enabled OCEAN_DATASET subsets in the configuration file. One only please.");
         }
-        
-        // bathymetry dataset
-        bathymetryDataset = new BathymetryDataset();
+        return datasetKey;
+    }
+
+    private List<String> findDatasets() {
+
+        List<String> keys = new ArrayList();
+        for (String key : getConfiguration().getParameterSubsets()) {
+            if (!getConfiguration().isNull(key + ".type")
+                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("dataset")) {
+                if (getConfiguration().getBoolean(key + ".enabled")) {
+                    keys.add(key);
+                }
+            }
+        }
+        return keys;
+    }
+
+    private IDataset instantiateDataset(String key) {
+
+        String className = getConfiguration().getString(key + ".class_name");
+        try {
+            return (IDataset) Class.forName(className).getConstructor(String.class).newInstance(key);
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+            error("[dataset] Dataset instantiation failed " + key, ex);
+        }
+        return null;
     }
 
     public IDataset getDataset() {
-        return dataset;
+        return datasets.get(oceandataset);
     }
-    
+
     public BathymetryDataset getBathymetryDataset() {
-        return bathymetryDataset;
+        return (BathymetryDataset) datasets.get("dataset.bathymetry");
     }
 
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
-        instantiateDataset();
-        dataset.setUp();
-        bathymetryDataset.setUp();
+
+        // find datasets and instantiate them
+        List<String> datasetkeys = new ArrayList();
+        datasetkeys.add(oceandataset = findOceanDataset());
+        datasetkeys.addAll(findDatasets());
+        for (String key : datasetkeys) {
+            datasets.put(key, instantiateDataset(key));
+        }
+
+        // setup dataset
+        for (IDataset dataset : datasets.values()) {
+            dataset.setUp();
+        }
     }
 
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
-        getSimulationManager().getTimeManager().addNextStepListener(dataset);
-        dataset.init();
-        bathymetryDataset.init();
+        // setup dataset
+        for (IDataset dataset : datasets.values()) {
+            getSimulationManager().getTimeManager().addNextStepListener(dataset);
+            dataset.init();
+        }
     }
 }

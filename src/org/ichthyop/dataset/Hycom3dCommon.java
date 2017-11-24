@@ -63,6 +63,10 @@ import org.ichthyop.grid.RectilinearGrid;
  */
 public abstract class Hycom3dCommon extends AbstractOceanDataset {
 
+    public Hycom3dCommon(String prefix) {
+        super(prefix);
+    }
+
     @Override
     AbstractRegularGrid createGrid() {
         return new RectilinearGrid(getKey() + ".grid");

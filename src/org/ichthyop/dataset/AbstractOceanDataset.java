@@ -60,6 +60,10 @@ import org.ichthyop.dataset.variable.AbstractDatasetVariable;
  */
 public abstract class AbstractOceanDataset extends AbstractDataset {
 
+    public AbstractOceanDataset(String prefix) {
+        super(prefix);
+    }
+
     @Override
     public void init() throws Exception {
         variables.put("ocean_dataset_u", createUVariable());

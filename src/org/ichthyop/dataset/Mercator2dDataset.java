@@ -145,14 +145,13 @@ public class Mercator2dDataset extends AbstractDataset {
     /** Whether horizontal periodicity should be applied */
     boolean xTore = true;
 
+    public Mercator2dDataset(String prefix) {
+        super(prefix);
+    }
+
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    
-    @Override
-    String getKey() {
-        return "dataset.mercator2d";
-    }
     
     @Override
      AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
