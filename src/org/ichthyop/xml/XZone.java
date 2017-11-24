@@ -342,7 +342,7 @@ public class XZone extends org.jdom2.Element {
         }
 
         public GridPoint createRhoPoint() {
-            GridPoint rhoPoint = new GridPoint(false);
+            GridPoint rhoPoint = new GridPoint();
             double lat = Double.valueOf(LonLatConverter.convert(getLat(), LonLatFormat.DecimalDeg));
             double lon = Double.valueOf(LonLatConverter.convert(getLon(), LonLatFormat.DecimalDeg));
             rhoPoint.setLat(lat);

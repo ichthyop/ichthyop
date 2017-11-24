@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop;
 
 /**
@@ -80,10 +79,6 @@ public class GridPoint extends IchthyopLinker {
      * Geographical coordinate
      */
     private double lat, lon, depth;
-    /**
-     * <code>true</code> if 3 dimensions point false otherwise
-     */
-    private static boolean is3D;
     private boolean latlonHaveChanged, depthHasChanged;
     private boolean xyHaveChanged, zHasChanged;
     private boolean exclusivityH, exclusivityV;
@@ -93,29 +88,20 @@ public class GridPoint extends IchthyopLinker {
 // Constructors
 ///////////////
     /**
-     * Constructs a new 2D or 3D point.
+     * Constructs a new point.
      *
-     * @param bln3D a boolean, <code>true</code> if 3 dimensions point, false
-     * otherwise
      */
-    public GridPoint(boolean bln3D) {
-        is3D = bln3D;
+    public GridPoint() {
         latlonHaveChanged = false;
         depthHasChanged = false;
         xyHaveChanged = false;
         zHasChanged = false;
         dx = dy = dz = 0.d;
-        x = y = z = -1;
-        lon = lat = depth = Double.NaN;
-        try {
-            nz = getSimulationManager().getGrid().get_nz();
-        } catch (Exception ex) {
-            nz = -1;
-        }
-    }
-
-    public GridPoint() {
-        this(true);
+        x = y = -1;
+        z = 0;
+        lon = lat = Double.NaN;
+        depth = 0.d;
+        nz = getSimulationManager().getGrid().get_nz();
     }
 
 ////////////////////////////
@@ -133,7 +119,7 @@ public class GridPoint extends IchthyopLinker {
             y = pGrid[1];
             latlonHaveChanged = false;
         }
-        if (is3D && depthHasChanged) {
+        if (depthHasChanged) {
             z = getSimulationManager().getGrid().depth2z(x, y, depth);
             depthHasChanged = false;
         }
@@ -153,7 +139,7 @@ public class GridPoint extends IchthyopLinker {
             lon = pGeog[1];
             xyHaveChanged = false;
         }
-        if (is3D && zHasChanged) {
+        if (zHasChanged) {
             depth = getSimulationManager().getGrid().z2depth(x, y, z);
             zHasChanged = false;
         }
@@ -165,23 +151,18 @@ public class GridPoint extends IchthyopLinker {
         dx = 0.d;
         setY(y + dy);
         dy = 0.d;
-        if (is3D) {
-            setZ(z + dz);
-            dz = 0.d;
-        }
+        setZ(z + dz);
+        dz = 0.d;
         exclusivityH = false;
         exclusivityV = false;
     }
 
     public double[] getMove() {
-        return is3D
-                ? new double[]{dx, dy, dz}
-                : new double[]{dx, dy};
+        return new double[]{dx, dy, dz};
     }
 
     /**
-     * Increments (x, y, z) with (dx, dy, dz) if 3 dimensions move. Increments
-     * (x, y) with (dx, dy) if 2 dimensions move.
+     * Increments (x, y, z) with (dx, dy, dz) if 3 dimensions move.
      *
      * @param move a double[] array {dx, dy, dz} or {dx, dy}
      */
@@ -209,31 +190,18 @@ public class GridPoint extends IchthyopLinker {
             throw new UnsupportedOperationException("Two actions are requesting exclusivity on vertical transport");
         }
         if (!this.exclusivityV) {
-            if (move.length > 2) {
-                if (exclusivityV) {
-                    dz = move[2];
-                    this.exclusivityV = true;
-                } else {
-                    dz += move[2];
-                }
+            if (exclusivityV) {
+                dz = move[2];
+                this.exclusivityV = true;
+            } else {
+                dz += move[2];
             }
         }
     }
 
 //////////
-// Setters
-//////////
-    public void make2D() {
-        is3D = false;
-    }
-//////////
 // Getters
 //////////
-
-    public boolean is3D() {
-        return is3D;
-    }
-
     /**
      * Gets x coordinate
      *
@@ -332,9 +300,7 @@ public class GridPoint extends IchthyopLinker {
     }
 
     public double[] getGridCoordinates() {
-        return is3D
-                ? new double[]{x, y, z}
-                : new double[]{x, y};
+        return new double[]{x, y, z};
     }
 
     public void setLon(double lon) {
@@ -354,24 +320,20 @@ public class GridPoint extends IchthyopLinker {
     @Override
     public Object clone() {
 
-        GridPoint point = new GridPoint(is3D);
+        GridPoint point = new GridPoint();
         point.setX(x);
         point.setY(y);
         point.setLon(lon);
         point.setLat(lat);
-        if (is3D) {
-            point.setZ(z);
-            point.setDepth(depth);
-        }
+        point.setZ(z);
+        point.setDepth(depth);
         return point;
     }
     //----------- End of class
 
     @Override
     public String toString() {
-        return is3D
-                ? "(" + lat + ", " + lon + ", " + depth + ")"
-                : "(" + lat + ", " + lon + ")";
+        return "(" + lat + ", " + lon + ", " + depth + ")";
     }
 
     public boolean isInWater() {

@@ -137,7 +137,7 @@ public class MigrationAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         // DVM only in 3D mode
-        if (!getSimulationManager().getGrid().is3D()) {
+        if (getSimulationManager().getGrid().get_nz() < 2) {
             throw new UnsupportedOperationException("{Migration} Vertical migration cannot operate in 2D simulation. Please deactivate the block or run a 3D simulation.");
         }
 

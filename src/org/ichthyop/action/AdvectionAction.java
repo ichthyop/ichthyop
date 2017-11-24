@@ -142,7 +142,7 @@ public class AdvectionAction extends AbstractAction {
             particle.kill(ParticleMortality.OUT_OF_DOMAIN);
         }
     }
-    
+
     private AbstractOceanDataset getDataset() {
         return (AbstractOceanDataset) getSimulationManager().getOceanDataset();
     }
@@ -160,13 +160,10 @@ public class AdvectionAction extends AbstractAction {
         if (Math.abs(dU[1]) > THRESHOLD_CFL) {
             warning("CFL broken for V {0}", (float) dU[1]);
         }
-        if (dim > 2) {
-            dU[2] = getDataset().get_dWz(pGrid, time) * dt;
-            if (Math.abs(dU[2]) > THRESHOLD_CFL) {
-                warning("CFL broken for W {0}", (float) dU[2]);
-            }
+        dU[2] = getDataset().get_dWz(pGrid, time) * dt;
+        if (Math.abs(dU[2]) > THRESHOLD_CFL) {
+            warning("CFL broken for W {0}", (float) dU[2]);
         }
-
         return dU;
     }
 

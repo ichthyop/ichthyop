@@ -360,12 +360,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         trackers.add(new TimeTracker());
         trackers.add(new LonTracker());
         trackers.add(new LatTracker());
+        trackers.add(new DepthTracker());
         trackers.add(new MortalityTracker());
         if (null != getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry")) {
             trackers.add(new BathyTracker((BathymetryDataset) getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry")));
-        }
-        if (getSimulationManager().getGrid().is3D()) {
-            trackers.add(new DepthTracker());
         }
         /* Add trackers requested by external actions */
         if (null != predefinedTrackers) {

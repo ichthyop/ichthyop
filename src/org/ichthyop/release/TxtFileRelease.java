@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.release;
 
 import java.io.BufferedReader;
@@ -72,14 +71,12 @@ import org.ichthyop.particle.ParticleFactory;
 public class TxtFileRelease extends AbstractRelease {
 
     private File textFile;
-    private boolean is3D;
     private int nbParticles;
 
     @Override
     public void loadParameters() throws IOException {
 
         textFile = getFile(getConfiguration().getFile("release.txtfile.txtfile"));
-        is3D = getSimulationManager().getGrid().is3D();
         nbParticles = readNbParticles();
     }
 
@@ -102,6 +99,7 @@ public class TxtFileRelease extends AbstractRelease {
         String[] strCoord;
         double[] coord;
         NumberFormat nbFormat = NumberFormat.getInstance(Locale.US);
+        boolean is3D = getSimulationManager().getGrid().get_nz() > 0;
 
         BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
         String line;
@@ -120,17 +118,13 @@ public class TxtFileRelease extends AbstractRelease {
                     }
                 }
                 IParticle particle;
-                if (is3D) {
-                    double depth = coord.length > 2
-                            ? coord[2]
-                            : 0.d;
-                    if (depth > 0) {
-                        depth *= -1;
-                    }
-                    particle = ParticleFactory.getInstance().createGeoParticle(index, coord[0], coord[1], depth);
-                } else {
-                    particle = ParticleFactory.getInstance().createGeoParticle(index, coord[0], coord[1]);
+                double depth = is3D
+                        ? coord.length > 2 ? coord[2] : 0.d
+                        : 0.d;
+                if (depth > 0) {
+                    depth *= -1;
                 }
+                particle = ParticleFactory.getInstance().createGeoParticle(index, coord[0], coord[1], depth);
                 if (null != particle) {
                     //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
                     getSimulationManager().getSimulation().getPopulation().add(particle);
@@ -146,7 +140,7 @@ public class TxtFileRelease extends AbstractRelease {
     }
 
     private int readNbParticles() throws IOException {
-        
+
         int index = 0;
         BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
         String line;

@@ -83,7 +83,7 @@ public class Particle extends GridPoint implements IParticle {
     public Object get(String key) {
         return attributes.get(key);
     }
-    
+
     @Override
     public void set(String key, Object value) {
         attributes.put(key, value);
@@ -175,19 +175,15 @@ public class Particle extends GridPoint implements IParticle {
         str.append((float) getLat());
         str.append(" lon: ");
         str.append((float) getLon());
-        if (is3D()) {
-            str.append(" depth: ");
-            str.append((float) getDepth());
-        }
+        str.append(" depth: ");
+        str.append((float) getDepth());
         str.append('\n');
         str.append("  x: ");
         str.append((float) getX());
         str.append(" y: ");
         str.append((float) getY());
-        if (is3D()) {
-            str.append(" z: ");
-            str.append((float) getZ());
-        }
+        str.append(" z: ");
+        str.append((float) getZ());
         str.append('\n');
         str.append("  status: ");
         str.append(getDeathCause().toString());

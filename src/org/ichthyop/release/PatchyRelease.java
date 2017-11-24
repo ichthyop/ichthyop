@@ -69,7 +69,6 @@ public class PatchyRelease extends AbstractRelease {
     private int nagregated;
     private double radius_patch, thickness_patch;
     private int nbReleaseZones;
-    private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private String zonePrefix;
 
@@ -82,9 +81,6 @@ public class PatchyRelease extends AbstractRelease {
         radius_patch = getConfiguration().getFloat("release.patches.radius_patch");
         thickness_patch = getConfiguration().getFloat("release.patches.thickness_patch");
 
-        /* Check whether 2D or 3D simulation */
-        is3D = getSimulationManager().getGrid().is3D();
-
         /* Load release zones*/
         zonePrefix = getConfiguration().getString("release.zone.zone_prefix");
         getSimulationManager().getZoneManager().loadZones(zonePrefix);
@@ -93,7 +89,7 @@ public class PatchyRelease extends AbstractRelease {
                 : 0;
         getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
     }
-    
+
     /**
      * Computes and returns the number of particles per release zone,
      * proportionally to zone extents.
@@ -141,6 +137,7 @@ public class PatchyRelease extends AbstractRelease {
         int[] nParticlePerZone = dispatchParticles();
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         int i_zone = 0;
+        boolean is3D = getSimulationManager().getGrid().get_nz() > 1;
         for (Zone zone : getSimulationManager().getZoneManager().getZones(zonePrefix)) {
             // release particles randomly within the zone
             for (int p = 0; p < nParticlePerZone[i_zone]; p++) {
@@ -157,10 +154,9 @@ public class PatchyRelease extends AbstractRelease {
                         double lat = particle.getLat() + radius_patch * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
                         double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * particle.getLat() / 180.d);
                         double lon = particle.getLon() + radius_patch * (Math.random() - 0.5d) / one_deg_longitude_meter;
-                        double depth = Double.NaN;
-                        if (is3D) {
-                            depth = particle.getDepth() + thickness_patch * (Math.random() - 0.5d);
-                        }
+                        double depth = is3D
+                                ? particle.getDepth() + thickness_patch * (Math.random() - 0.5d)
+                                : 0.d;
                         particlePatch = ParticleFactory.getInstance().createGeoParticle(index, lon, lat, depth);
                     }
                     getSimulationManager().getSimulation().getPopulation().add(particlePatch);

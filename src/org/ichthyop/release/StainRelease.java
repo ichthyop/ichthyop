@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.release;
 
 import java.io.IOException;
@@ -62,9 +61,9 @@ import org.ichthyop.particle.ParticleFactory;
 import org.ichthyop.ui.LonLatConverter;
 import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 
-/**
+/*
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author Philippe Verley (philippe dot verley at ird dot fr)
  */
 public class StainRelease extends AbstractRelease {
 
@@ -72,24 +71,19 @@ public class StainRelease extends AbstractRelease {
     private double lon_stain, lat_stain, depth_stain;
     private double radius_stain;
     private double thickness_stain;
-    private boolean is3D;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     @Override
     public void loadParameters() throws Exception {
-
-        /* Check whether 2D or 3D simulation */
-        is3D = getSimulationManager().getGrid().is3D();
 
         /* retrieve stain parameters */
         nb_particles = getConfiguration().getInt("release.stain.number_particles");
         radius_stain = getConfiguration().getFloat("release.stain.radius_stain");
         lon_stain = Double.valueOf(LonLatConverter.convert(getConfiguration().getString("release.stain.lon_stain"), LonLatFormat.DecimalDeg));
         lat_stain = Double.valueOf(LonLatConverter.convert(getConfiguration().getString("release.stain.lat_stain"), LonLatFormat.DecimalDeg));
-        if (is3D) {
-            thickness_stain = getConfiguration().getFloat("release.stain.thickness_stain");
-            depth_stain = getConfiguration().getFloat("release.stain.depth_stain");
-        }
+        boolean is3D = getSimulationManager().getGrid().get_nz() > 1;
+        thickness_stain = is3D ? getConfiguration().getFloat("release.stain.thickness_stain") : 0.d;
+        depth_stain = is3D ? getConfiguration().getFloat("release.stain.depth_stain") : 0.d;
     }
 
     @Override
@@ -111,10 +105,7 @@ public class StainRelease extends AbstractRelease {
                     throw new NullPointerException("[release stain] Unable to release particle. Check out the stain definition.");
                 }
                 GeoPosition point = getGeoPosition();
-                double depth = Double.NaN;
-                if (is3D) {
-                    depth = depth_stain + thickness_stain * (Math.random() - 0.5d);
-                }
+                double depth = depth_stain + thickness_stain * (Math.random() - 0.5d);
                 if (depth > 0) {
                     depth *= -1.d;
                 }

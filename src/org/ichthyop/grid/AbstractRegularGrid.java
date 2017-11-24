@@ -405,11 +405,6 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     }
 
     @Override
-    public boolean is3D() {
-        return get_nz() > 1;
-    }
-
-    @Override
     public int xTore(int i) {
         if (xperiodicity) {
             if (i < 0) {

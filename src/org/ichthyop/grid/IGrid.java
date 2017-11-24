@@ -108,8 +108,6 @@ public interface IGrid {
     
     public double getDepthMax(double x, double y);
     
-    public boolean is3D();
-    
     public double xTore(double x);
     
     public double yTore(double y);

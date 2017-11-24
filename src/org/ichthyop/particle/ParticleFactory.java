@@ -88,9 +88,6 @@ public class ParticleFactory extends IchthyopLinker {
         }
         particle.setLat(lat);
         particle.setDepth(depth);
-        if (Double.isNaN(depth)) {
-            particle.make2D();
-        }
         particle.geo2Grid();
         if (living) {
             if (!particle.isInWater() || particle.isOnEdge()) {
@@ -111,16 +108,9 @@ public class ParticleFactory extends IchthyopLinker {
         return createGeoParticle(index, lon, lat, depth, ParticleMortality.ALIVE);
     }
 
-    public IParticle createGeoParticle(int index, double lon, double lat) throws IOException {
-        return createGeoParticle(index, lon, lat, Double.NaN, ParticleMortality.ALIVE);
-    }
-
     public IParticle createSurfaceParticle(int index) {
         Particle particle = new Particle();
         particle.setIndex(index);
-        if (!getSimulationManager().getGrid().is3D()) {
-            particle.make2D();
-        }
         int nx = getSimulationManager().getGrid().get_nx();
         int ny = getSimulationManager().getGrid().get_ny();
         int attempt = 0;
@@ -130,9 +120,7 @@ public class ParticleFactory extends IchthyopLinker {
                     && !getSimulationManager().getGrid().isOnEdge(xy)) {
                 particle.setX(xy[0]);
                 particle.setY(xy[1]);
-                if (getSimulationManager().getGrid().is3D()) {
-                    particle.setZ(getSimulationManager().getGrid().depth2z(xy[0], xy[1], 0.));
-                }
+                particle.setZ(getSimulationManager().getGrid().depth2z(xy[0], xy[1], 0.));
                 particle.grid2Geo();
                 return particle;
             }
@@ -146,9 +134,6 @@ public class ParticleFactory extends IchthyopLinker {
 
         Particle particle = new Particle();
         particle.setIndex(index);
-        if (!getSimulationManager().getGrid().is3D()) {
-            particle.make2D();
-        }
         int attempt = 0;
         double lat, lon;
         while (attempt++ < ATTEMPT_MAX) {

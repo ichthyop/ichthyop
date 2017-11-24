@@ -115,7 +115,7 @@ public class SysActionMove extends AbstractSysAction {
                  */
                 move = particle.getMove();
                 double[] bounce = bounceCostline(particle.getX(), particle.getY(), move[0], move[1]);
-                particle.increment(new double[]{bounce[0] - move[0], bounce[1] - move[1]});
+                particle.increment(new double[]{bounce[0] - move[0], bounce[1] - move[1], 0.d});
                 break;
             case STANDSTILL:
                 /*
@@ -123,7 +123,7 @@ public class SysActionMove extends AbstractSysAction {
                  */
                 move = particle.getMove();
                 if (!getSimulationManager().getGrid().isInWater(new double[]{particle.getX() + move[0], particle.getY() + move[1]})) {
-                    particle.increment(new double[]{-1.d * move[0], -1.d * move[1]});
+                    particle.increment(new double[]{-1.d * move[0], -1.d * move[1], 0.d});
                 }
                 break;
         }
