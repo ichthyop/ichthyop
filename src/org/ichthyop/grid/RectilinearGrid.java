@@ -88,7 +88,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
 
     @Override
     void makeGrid() {
-
+        
         // grid file
         file = getConfiguration().getFile(prefix + ".file");
         try (NetcdfFile nc = DatasetUtil.openFile(file, true)) {
@@ -137,7 +137,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
             name = DatasetUtil.findVariable(nc, vardepth);
             if (null != name) {
                 array = nc.findVariable(name).read().reduce();
-                nz = array.getShape()[0];
+                nz = array.getShape().length > 0 ? array.getShape()[0] : 1;
                 depthLevel = new double[nz];
                 for (int k = 0; k < nz; k++) {
                     depthLevel[k] = array.getDouble(k);
@@ -181,6 +181,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     }
                 }
             }
+            if (null == name) throw new IOException("Did not find suitable mask variable in grid file. Please specify parameter " + prefix + ".mask");
             mask = new TiledVariable(DatasetUtil.openFile(file, true), name, this, 0, 0, 10, Math.min(3, nz));
 
         } catch (IOException ex) {
@@ -275,6 +276,34 @@ public class RectilinearGrid extends AbstractRegularGrid {
     @Override
     public double get_dz(int i, int j, int k) {
         return ddepth[k];
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Grid ");
+        sb.append(prefix);
+        sb.append("\n  file: ");
+        sb.append(file);
+        sb.append("\n  latmin: ");
+        sb.append((float) getLatMin());
+        sb.append(", latmax: ");
+        sb.append((float) getLatMax());
+        sb.append(", lonmin: ");
+        sb.append((float) getLonMin());
+        sb.append(", lonmax: ");
+        sb.append((float) getLonMax());
+        sb.append("\n  i0: ");
+        sb.append(get_i0());
+        sb.append(", nx: ");
+        sb.append(get_nx());
+        sb.append(", j0: ");
+        sb.append(get_j0());
+        sb.append(", ny: ");
+        sb.append(get_ny());
+        sb.append("\n  nz: ");
+        sb.append(get_nz());
+        return sb.toString();
     }
 
 }
