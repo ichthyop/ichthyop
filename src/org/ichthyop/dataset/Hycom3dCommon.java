@@ -90,19 +90,4 @@ public abstract class Hycom3dCommon extends AbstractOceanDataset {
                 createVariable("northward_sea_water_velocity", NLAYER, tilingv, grid.get_nz()),
                 grid);
     }
-
-    @Override
-    public double get_dUx(double[] pGrid, double time) {
-        return getVariable("ocean_dataset_u").getDouble(pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-    }
-
-    @Override
-    public double get_dVy(double[] pGrid, double time) {
-        return getVariable("ocean_dataset_v").getDouble(pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-    }
-
-    @Override
-    public double get_dWz(double[] pGrid, double time) {
-        return getVariable("ocean_dataset_w").getDouble(pGrid, time) / getGrid().get_dz((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]), (int) Math.round(pGrid[2]));
-    }
 }

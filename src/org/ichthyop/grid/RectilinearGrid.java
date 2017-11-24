@@ -162,7 +162,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     ddepth[k] = 0.5 * Math.abs(depthLevel[k - 1] - depthLevel[k + 1]);
                 }
             } else {
-                ddepth[0] = Double.NaN;
+                ddepth[0] = 1;
             }
 
             // mask

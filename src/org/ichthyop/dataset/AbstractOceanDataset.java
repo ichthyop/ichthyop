@@ -59,7 +59,14 @@ import org.ichthyop.dataset.variable.AbstractDatasetVariable;
  * @author pverley
  */
 public abstract class AbstractOceanDataset extends AbstractDataset {
+    
+    public abstract AbstractDatasetVariable createUVariable();
 
+    public abstract AbstractDatasetVariable createVVariable();
+
+    public abstract AbstractDatasetVariable createWVariable();
+
+    // constructor
     public AbstractOceanDataset(String prefix) {
         super(prefix);
     }
@@ -72,70 +79,15 @@ public abstract class AbstractOceanDataset extends AbstractDataset {
         super.init();
     }
 
-    public abstract AbstractDatasetVariable createUVariable();
+    public double getU(double[] pGrid, double time) {
+        return getVariable("ocean_dataset_u").getDouble(pGrid, time);
+    }
 
-    public abstract AbstractDatasetVariable createVVariable();
+    public double getV(double[] pGrid, double time) {
+        return getVariable("ocean_dataset_v").getDouble(pGrid, time);
+    }
 
-    public abstract AbstractDatasetVariable createWVariable();
-
-    /*
-     * Advects the particle with the model velocity vector, using a Forward
-     * Euler scheme. Let's see how it works with the example of the Zonal
-     * component.
-     * <pre>
-     * ROMS and MARS uses an Arakawa C grid.
-     * Here is the scheme (2D) of cells (i, j) and (i + 1, j):
-     *
-     *     +-----V(i, j)-----+---V(i + 1, j)---+
-     *     |                 |                 |
-     *     |            *X   |                 |
-     * U(i - 1, j)  +      U(i, j)    +     U(i + 1, j)
-     *     |                 |                 |
-     *     |                 |                 |
-     *     +---V(i, j - 1)---+-V(i + 1, j - 1)-+
-     *
-     * Particle current location: X(x, y, z)
-     * Let's take i = round(x), j = truncate(y) and k = truncate(z)
-     * dx = x - i, dy = y - j, dz = z - k
-     * Let's call t, the current time of the simulation, and t0 and t1 the
-     * values of the time NetCDF variable bounding t: t0 <= t < t1
-     * We first interpolate the model velocity field at t0:
-     * U(t0) = U(t0, i, j, k) * |(0.5 - dx) * (1 - dy) * (1 - dz)|
-     *       + U(t0, i, j, k + 1) * |(0.5 - dx) * (1 - dy) * dz|
-     *       + U(t0, i, j + 1, k) * |(0.5 - dx) * dy * (1 - dz)|
-     *       + U(t0, i, j + 1, k + 1) * |(0.5 - dx) * dy * dz|
-     *       + U(t0, i + 1, j, k) * |(0.5 + dx) * (1 - dy) * (1 - dz)|
-     *       + U(t0, i + 1, j, k + 1) * |(0.5 + dx) * (1 - dy) * dz|
-     *       + U(t0, i + 1, j + 1, k) * |(0.5 + dx) * dy * (1 - dz)|
-     *       + U(t0, i + 1, j + 1, k + 1) * |(0.5 + dx) * dy * dz|
-     *
-     * This large expression can be written:
-     *
-     * U(t0) = U(t0, i + ii, j + jj, k + kk)
-     *         * |(0.5 - ii - dx) * (1 - jj - dy) * (1 - kk - dz)|
-     *
-     * with ii, jj and kk integers varying from zero to one.
-     * U is expressed in meter per second and we would like to express the move
-     * in grid unit. Therefore it has to be adimensionalized.
-     * Let's call Ua the velocity in grid unit per second
-     * Let's take dXI(i, j) the length of the cell in the zonal direction.
-     *
-     * Ua(t0) = U(t0, i + ii, j + jj, k + kk)
-     *          / [dXI(i + ii , j + jj) + dXI(i + ii + 1, j + jj)]
-     *          * |(0.5 - ii - dx) * (1 - jj - dy) * (1 - kk - dz)|
-     *
-     * Same with U(t1).
-     * Let's take frac = (t - t0) / (t1 - t0)
-     * Then Ua(t) = (1 - frac) * Ua(t0) + frac * Ua(t1)
-     *
-     * x(t + dt) = x(t) + Ua(t) * dt
-     * </pre>
-     *
-     */
-    public abstract double get_dUx(double[] pgrid, double time);
-
-    public abstract double get_dVy(double[] pgrid, double time);
-
-    public abstract double get_dWz(double[] pgrid, double time);
-
+    public double getW(double[] pGrid, double time) {
+        return getVariable("ocean_dataset_w").getDouble(pGrid, time);
+    }
 }

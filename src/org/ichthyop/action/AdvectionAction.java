@@ -152,17 +152,21 @@ public class AdvectionAction extends AbstractAction {
         int dim = pGrid.length;
         double[] dU = new double[dim];
 
-        dU[0] = getDataset().get_dUx(pGrid, time) * dt;
+        int i = (int) Math.round(pGrid[0]);
+        int j = (int) Math.round(pGrid[1]);
+        int k = (int) Math.round(pGrid[2]);
+        
+        dU[0] = getDataset().getU(pGrid, time) * dt / getDataset().getGrid().get_dx(i, j);
         if (Math.abs(dU[0]) > THRESHOLD_CFL) {
-            warning("CFL broken for U {0}", (float) dU[0]);
+            warning("[advection] CFL broken for U dx={0}", (float) dU[0]);
         }
-        dU[1] = getDataset().get_dVy(pGrid, time) * dt;
+        dU[1] = getDataset().getV(pGrid, time) * dt / getDataset().getGrid().get_dy(i, j);
         if (Math.abs(dU[1]) > THRESHOLD_CFL) {
-            warning("CFL broken for V {0}", (float) dU[1]);
+            warning("[advection] CFL broken for V dy={0}", (float) dU[1]);
         }
-        dU[2] = getDataset().get_dWz(pGrid, time) * dt;
+        dU[2] = getDataset().getW(pGrid, time) * dt / getDataset().getGrid().get_dz(i, j, k);
         if (Math.abs(dU[2]) > THRESHOLD_CFL) {
-            warning("CFL broken for W {0}", (float) dU[2]);
+            warning("[advection] CFL broken for W dz={0}", (float) dU[2]);
         }
         return dU;
     }

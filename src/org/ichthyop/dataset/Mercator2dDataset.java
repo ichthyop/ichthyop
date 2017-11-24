@@ -132,18 +132,8 @@ public class Mercator2dDataset extends AbstractOceanDataset {
         return new RectilinearGrid(getKey() + ".grid");
     }
 
-   @Override
-    public double get_dUx(double[] pGrid, double time) {
-        return getVariable("ocean_dataset_u").getDouble(pGrid, time) / getGrid().get_dx((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-    }
-
-    @Override
-    public double get_dVy(double[] pGrid, double time) {
-        return getVariable("ocean_dataset_v").getDouble(pGrid, time) / getGrid().get_dy((int) Math.round(pGrid[0]), (int) Math.round(pGrid[1]));
-    }
-    
      @Override
-    public double get_dWz(double[] pgrid, double time) {
+    public double getW(double[] pgrid, double time) {
         return 0;
     }
 }
