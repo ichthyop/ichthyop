@@ -137,7 +137,7 @@ public class MigrationAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         // DVM only in 3D mode
-        if (!getSimulationManager().getDataset().getGrid().is3D()) {
+        if (!getSimulationManager().getGrid().is3D()) {
             throw new UnsupportedOperationException("{Migration} Vertical migration cannot operate in 2D simulation. Please deactivate the block or run a 3D simulation.");
         }
 
@@ -251,7 +251,7 @@ public class MigrationAction extends AbstractAction {
                 // diel vertical migration
                 depth = getDepth(particle, getSimulationManager().getTimeManager().getTime());
             }
-            double dz = getSimulationManager().getDataset().getGrid().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
+            double dz = getSimulationManager().getGrid().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
             particle.increment(new double[]{0.d, 0.d, dz}, false, true);
         }
     }
@@ -276,7 +276,7 @@ public class MigrationAction extends AbstractAction {
         calendar.setTime(sunset);
         long timeSunset = getSecondsOfDay(calendar);
 
-        double bottom = getSimulationManager().getDataset().getGrid().z2depth(particle.getX(), particle.getY(), 0);
+        double bottom = getSimulationManager().getGrid().z2depth(particle.getX(), particle.getY(), 0);
         if (timeDay >= timeSunrise && timeDay < timeSunset) {
             // day time
             if (null != depthsDay) {

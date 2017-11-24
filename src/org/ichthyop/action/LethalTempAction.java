@@ -126,7 +126,7 @@ public class LethalTempAction extends AbstractAction {
                 getConfiguration().getFloat("action.lethal_temp.hot_lethal_temperature_egg"),
                 getConfiguration().getFloat("action.lethal_temp.hot_lethal_temperature_larva")};
         }
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(temperature_field, getClass());
         boolean addTracker = true;
         try {
             addTracker = getConfiguration().getBoolean("action.lethal_temp.temp_tracker");
@@ -179,7 +179,7 @@ public class LethalTempAction extends AbstractAction {
     }
 
     private void checkTp(IParticle particle) {
-        double temperature = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double temperature = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         int iAge = ages.length - 1;
         if (FLAG_LETHAL_TEMP_FUNCTION) {
             float age = particle.getAge();
@@ -201,7 +201,7 @@ public class LethalTempAction extends AbstractAction {
 
     private void checkTpGrowingParticle(IParticle particle) {
 
-        double temperature = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double temperature = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         int stage = StageParticle.getStage(particle);
         // stage == 0 means egg, stage > 0 means larvae
         boolean frozen = ((stage == 0) && (temperature <= coldLethalTp[0])) || ((stage != 0) && (temperature <= coldLethalTp[1]));

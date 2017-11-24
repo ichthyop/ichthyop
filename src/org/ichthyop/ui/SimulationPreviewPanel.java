@@ -57,6 +57,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import org.ichthyop.Zone;
+import org.ichthyop.dataset.BathymetryDataset;
 import org.ichthyop.manager.SimulationManager;
 
 /**
@@ -151,13 +152,13 @@ public class SimulationPreviewPanel extends JPanel {
         graphic.setColor(Color.WHITE);
         graphic.fillRect(0, 0, w, h);
 
-        double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getDataset().getGrid().get_ny()));
-        double csizew = Math.max(1.d, Math.ceil(w / getSimulationManager().getDataset().getGrid().get_nx()));
+        double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getGrid().get_ny()));
+        double csizew = Math.max(1.d, Math.ceil(w / getSimulationManager().getGrid().get_nx()));
         double csize = 2 * Math.max(csizeh, csizew);
-        for (int i = getSimulationManager().getDataset().getGrid().get_nx(); i-- > 0;) {
-            for (int j = getSimulationManager().getDataset().getGrid().get_ny(); j-- > 0;) {
-                double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
-                double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
+        for (int i = getSimulationManager().getGrid().get_nx(); i-- > 0;) {
+            for (int j = getSimulationManager().getGrid().get_ny(); j-- > 0;) {
+                double lat = getSimulationManager().getGrid().getLat(i, j);
+                double lon = getSimulationManager().getGrid().getLon(i, j);
 //                double wlat = w * Math.cos(Math.PI * lat / 180.d) / Math.cos(Math.PI * latClosestEq / 180.d);
 //                double x = 0.5 * (w - wlat) + wlat * (lon - lonmin) / (lonmax - lonmin);
                 double x = w * (lon - lonmin) / (lonmax - lonmin);
@@ -181,10 +182,10 @@ public class SimulationPreviewPanel extends JPanel {
      */
     public void init() {
 
-        latmin = getSimulationManager().getDataset().getGrid().getLatMin();
-        latmax = getSimulationManager().getDataset().getGrid().getLatMax();
-        lonmin = getSimulationManager().getDataset().getGrid().getLonMin();
-        lonmax = getSimulationManager().getDataset().getGrid().getLonMax();
+        latmin = getSimulationManager().getGrid().getLatMin();
+        latmax = getSimulationManager().getGrid().getLatMax();
+        lonmin = getSimulationManager().getGrid().getLonMin();
+        lonmax = getSimulationManager().getGrid().getLonMax();
         latClosestEq = (latmin * latmax >= 0)
                 ? Math.min(Math.abs(latmin), Math.abs(latmax))
                 : 0.d;
@@ -193,16 +194,17 @@ public class SimulationPreviewPanel extends JPanel {
         ratio = dlon / dlat;
 
         // bathymetry
-        int nx = getSimulationManager().getDataset().getGrid().get_nx();
-        int ny = getSimulationManager().getDataset().getGrid().get_ny();
+        int nx = getSimulationManager().getGrid().get_nx();
+        int ny = getSimulationManager().getGrid().get_ny();
         elevation = new double[nx][ny];
         deepest = Double.MAX_VALUE;
         highest = Double.MIN_VALUE;
+        BathymetryDataset bathymetry = (BathymetryDataset) getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry");
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
-                double lat = getSimulationManager().getDataset().getGrid().getLat(i, j);
-                double lon = getSimulationManager().getDataset().getGrid().getLon(i, j);
-                elevation[i][j] = getSimulationManager().getDatasetManager().getBathymetryDataset().getBathymetry(lat, lon);
+                double lat = getSimulationManager().getGrid().getLat(i, j);
+                double lon = getSimulationManager().getGrid().getLon(i, j);
+                elevation[i][j] = bathymetry.getBathymetry(lat, lon);
                 if (elevation[i][j] < deepest) {
                     deepest = elevation[i][j];
                 }
@@ -239,7 +241,7 @@ public class SimulationPreviewPanel extends JPanel {
      */
     private Color getColor(int i, int j) {
 
-        if (getSimulationManager().getDataset().getGrid().isInWater(i, j)) {
+        if (getSimulationManager().getGrid().isInWater(i, j)) {
             // zone
             for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
                 if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {

@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Objects;
 import org.ichthyop.dataset.IDataset;
+import org.ichthyop.grid.IGrid;
 import org.ichthyop.ui.LonLatConverter;
 
 /**
@@ -253,12 +254,12 @@ public class Zone extends IchthyopLinker {
 
         // compute area in km2
         area = 0.d;
-        IDataset dataset = getSimulationManager().getDataset();
-        for (int i = 0; i < dataset.getGrid().get_nx(); i++) {
-            for (int j = 0; j < dataset.getGrid().get_ny(); j++) {
-                if (dataset.getGrid().isInWater(i, j)) {
+        IGrid grid = getSimulationManager().getGrid();
+        for (int i = 0; i < grid.get_nx(); i++) {
+            for (int j = 0; j < grid.get_ny(); j++) {
+                if (grid.isInWater(i, j)) {
                     if (getSimulationManager().getZoneManager().isInside(i, j, key)) {
-                        area += dataset.getGrid().get_dy(j, i) * dataset.getGrid().get_dx(i, j) * 1e-6;
+                        area += grid.get_dy(j, i) * grid.get_dx(i, j) * 1e-6;
                     }
                 }
             }

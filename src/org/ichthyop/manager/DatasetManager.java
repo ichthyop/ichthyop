@@ -125,13 +125,13 @@ public class DatasetManager extends AbstractManager {
         }
         return null;
     }
-
-    public IDataset getDataset() {
-        return datasets.get(oceandataset);
+    
+    public IDataset getDataset(String key) {
+        return datasets.get(key);
     }
 
-    public BathymetryDataset getBathymetryDataset() {
-        return (BathymetryDataset) datasets.get("dataset.bathymetry");
+    public IDataset getOceanDataset() {
+        return datasets.get(oceandataset);
     }
 
     @Override

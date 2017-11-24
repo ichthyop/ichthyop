@@ -127,7 +127,7 @@ public class NcFileRelease extends AbstractRelease {
         ArrayFloat.D2 lonArr = (ArrayFloat.D2) nc.findVariable("lon").read();
         ArrayFloat.D2 latArr = (ArrayFloat.D2) nc.findVariable("lat").read();
         ArrayInt.D2 mortalityArr = (ArrayInt.D2) nc.findVariable("mortality").read();
-        boolean bln3D = getSimulationManager().getDataset().getGrid().is3D();
+        boolean bln3D = getSimulationManager().getGrid().is3D();
         ArrayFloat.D2 depthArr = null;
         if (bln3D) {
             depthArr = (ArrayFloat.D2) nc.findVariable("depth").read();

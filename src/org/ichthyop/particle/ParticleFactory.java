@@ -75,8 +75,8 @@ public class ParticleFactory extends IchthyopLinker {
         particle.setIndex(index);
         boolean living = mortality.equals(ParticleMortality.ALIVE);
 
-        double lonmin = getSimulationManager().getDataset().getGrid().getLonMin();
-        double lonmax = getSimulationManager().getDataset().getGrid().getLonMax();
+        double lonmin = getSimulationManager().getGrid().getLonMin();
+        double lonmax = getSimulationManager().getGrid().getLonMax();
         if (inside(lon, lonmin, lonmax)) {
             particle.setLon(lon);
         } else if (inside(lon + 360, lonmin, lonmax)) {
@@ -97,7 +97,7 @@ public class ParticleFactory extends IchthyopLinker {
                 return null;
             }
             if (!Double.isNaN(depth)) {
-                if (getSimulationManager().getDataset().getGrid().getDepthMax(particle.getX(), particle.getY()) > depth || depth > 0) {
+                if (getSimulationManager().getGrid().getDepthMax(particle.getX(), particle.getY()) > depth || depth > 0) {
                     return null;
                 }
             }
@@ -118,20 +118,20 @@ public class ParticleFactory extends IchthyopLinker {
     public IParticle createSurfaceParticle(int index) {
         Particle particle = new Particle();
         particle.setIndex(index);
-        if (!getSimulationManager().getDataset().getGrid().is3D()) {
+        if (!getSimulationManager().getGrid().is3D()) {
             particle.make2D();
         }
-        int nx = getSimulationManager().getDataset().getGrid().get_nx();
-        int ny = getSimulationManager().getDataset().getGrid().get_ny();
+        int nx = getSimulationManager().getGrid().get_nx();
+        int ny = getSimulationManager().getGrid().get_ny();
         int attempt = 0;
         while (attempt++ < ATTEMPT_MAX) {
             double[] xy = new double[]{Math.random() * (nx - 1), Math.random() * (ny - 1)};
-            if (getSimulationManager().getDataset().getGrid().isInWater(xy)
-                    && !getSimulationManager().getDataset().getGrid().isOnEdge(xy)) {
+            if (getSimulationManager().getGrid().isInWater(xy)
+                    && !getSimulationManager().getGrid().isOnEdge(xy)) {
                 particle.setX(xy[0]);
                 particle.setY(xy[1]);
-                if (getSimulationManager().getDataset().getGrid().is3D()) {
-                    particle.setZ(getSimulationManager().getDataset().getGrid().depth2z(xy[0], xy[1], 0.));
+                if (getSimulationManager().getGrid().is3D()) {
+                    particle.setZ(getSimulationManager().getGrid().depth2z(xy[0], xy[1], 0.));
                 }
                 particle.grid2Geo();
                 return particle;
@@ -146,7 +146,7 @@ public class ParticleFactory extends IchthyopLinker {
 
         Particle particle = new Particle();
         particle.setIndex(index);
-        if (!getSimulationManager().getDataset().getGrid().is3D()) {
+        if (!getSimulationManager().getGrid().is3D()) {
             particle.make2D();
         }
         int attempt = 0;
@@ -154,15 +154,15 @@ public class ParticleFactory extends IchthyopLinker {
         while (attempt++ < ATTEMPT_MAX) {
             lat = zone.getLatMin() + Math.random() * (zone.getLatMax() - zone.getLatMin());
             lon = zone.getLonMin() + Math.random() * (zone.getLonMax() - zone.getLonMin());
-            double[] xy = getSimulationManager().getDataset().getGrid().latlon2xy(lat, lon);
-            boolean valid = getSimulationManager().getDataset().getGrid().isInWater(xy)
-                    && !getSimulationManager().getDataset().getGrid().isOnEdge(xy)
+            double[] xy = getSimulationManager().getGrid().latlon2xy(lat, lon);
+            boolean valid = getSimulationManager().getGrid().isInWater(xy)
+                    && !getSimulationManager().getGrid().isOnEdge(xy)
                     && getSimulationManager().getZoneManager().isInside(lat, lon, zone.getKey());
             if (valid) {
                 particle.setLat(lat);
                 particle.setLon(lon);
                 double upperdepth, lowerdepth;
-                double depthmax = Math.abs(getSimulationManager().getDataset().getGrid().getDepthMax(xy[0], xy[1]));
+                double depthmax = Math.abs(getSimulationManager().getGrid().getDepthMax(xy[0], xy[1]));
                 if (zone.isEnabledDepthMask()) {
                     upperdepth = Math.min(depthmax, zone.getUpperDepth());
                     lowerdepth = Math.min(depthmax, zone.getLowerDepth());

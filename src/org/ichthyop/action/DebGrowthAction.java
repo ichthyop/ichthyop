@@ -122,9 +122,9 @@ public class DebGrowthAction extends AbstractAction {
 
         dt = getSimulationManager().getTimeManager().get_dt();
         temperature_field = getConfiguration().getString("action.growthDeb.temperature_field");
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(temperature_field, getClass());
         food_field = getConfiguration().getString("action.growthDeb.food_field");
-        getSimulationManager().getDataset().requireVariable(food_field, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(food_field, getClass());
 
         if (getConfiguration().isNull("action.growthDeb.length_tracker")
                 || getConfiguration().getBoolean("action.growthDeb.length_tracker")) {
@@ -147,8 +147,8 @@ public class DebGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        double temp = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
-        double food = getSimulationManager().getDataset().getVariable(food_field).getDouble( particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double temp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double food = getSimulationManager().getOceanDataset().getVariable(food_field).getDouble( particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         double[] res_deb = grow(dt, getE(particle), getV(particle), getE_R(particle), Vj, temp, food);
         setE(particle, res_deb[0]);
         setV(particle, res_deb[1]);

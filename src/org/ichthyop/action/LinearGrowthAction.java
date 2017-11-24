@@ -87,7 +87,7 @@ public class LinearGrowthAction extends AbstractAction {
         coeff1 = getConfiguration().getFloat("action.growth.coeff1");
         coeff2 = getConfiguration().getFloat("action.growth.coeff2");
         temperature_field = getConfiguration().getString("action.growth.temperature_field");
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(temperature_field, getClass());
         lengthStage = new LengthStage(getKey());
         lengthStage.init();
 
@@ -108,7 +108,7 @@ public class LinearGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        LengthParticle.incrementLength(particle, grow(getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime())));
+        LengthParticle.incrementLength(particle, grow(getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime())));
         StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
     }
 

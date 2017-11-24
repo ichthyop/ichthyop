@@ -66,6 +66,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
 import org.ichthyop.calendar.InterannualCalendar;
+import org.ichthyop.dataset.AbstractOceanDataset;
+import org.ichthyop.grid.IGrid;
 import org.ichthyop.logging.IchthyopLogger;
 import org.ichthyop.logging.StdoutHandler;
 
@@ -311,9 +313,13 @@ public class SimulationManager extends IchthyopLogger {
     public DatasetManager getDatasetManager() {
         return DatasetManager.getInstance();
     }
+    
+    public IGrid getGrid() {
+        return getDatasetManager().getOceanDataset().getGrid();
+    }
 
-    public IDataset getDataset() {
-        return getDatasetManager().getDataset();
+    public IDataset getOceanDataset() {
+        return getDatasetManager().getOceanDataset();
     }
 
     public ActionManager getActionManager() {

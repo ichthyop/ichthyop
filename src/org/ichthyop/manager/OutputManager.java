@@ -67,9 +67,11 @@ import java.util.HashMap;
 import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.ichthyop.Zone;
+import org.ichthyop.dataset.BathymetryDataset;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.output.AbstractTracker;
+import org.ichthyop.output.BathyTracker;
 import org.ichthyop.output.DepthTracker;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.output.LatTracker;
@@ -258,10 +260,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private List<GeoPosition> zoneToPointCloud(Zone zone) {
         List<GeoPosition> list = new ArrayList();
 
-        for (int i = 0; i < getSimulationManager().getDataset().getGrid().get_nx(); i += 2) {
-            for (int j = 0; j < getSimulationManager().getDataset().getGrid().get_ny(); j += 2) {
+        for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += 2) {
+            for (int j = 0; j < getSimulationManager().getGrid().get_ny(); j += 2) {
                 if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
-                    double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(i, j);
+                    double[] latlon = getSimulationManager().getGrid().xy2latlon(i, j);
                     list.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
                 }
             }
@@ -273,7 +275,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private List<GeoPosition> edgeToPointCloud() {
 
         List<GeoPosition> lregion = new ArrayList();
-        IGrid grid = getSimulationManager().getDataset().getGrid();
+        IGrid grid = getSimulationManager().getGrid();
         for (int i = 1; i < grid.get_nx(); i += 2) {
             if (!Double.isNaN(grid.getLat(i, 0)) && !Double.isNaN(grid.getLon(i, 0))) {
                 double lon = grid.getLon(i, 0);
@@ -316,10 +318,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public List<GeoPosition> maskToPointCloud() {
 
         List<GeoPosition> lmask = new ArrayList();
-        for (int i = 0; i < getSimulationManager().getDataset().getGrid().get_nx(); i += 2) {
-            for (int j = 0; j < getSimulationManager().getDataset().getGrid().get_ny(); j += 2) {
-                if (!getSimulationManager().getDataset().getGrid().isInWater(i, j)) {
-                    double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(i, j);
+        for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += 2) {
+            for (int j = 0; j < getSimulationManager().getGrid().get_ny(); j += 2) {
+                if (!getSimulationManager().getGrid().isInWater(i, j)) {
+                    double[] latlon = getSimulationManager().getGrid().xy2latlon(i, j);
                     lmask.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
                 }
             }
@@ -359,7 +361,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         trackers.add(new LonTracker());
         trackers.add(new LatTracker());
         trackers.add(new MortalityTracker());
-        if (getSimulationManager().getDataset().getGrid().is3D()) {
+        if (null != getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry")) {
+            trackers.add(new BathyTracker((BathymetryDataset) getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry")));
+        }
+        if (getSimulationManager().getGrid().is3D()) {
             trackers.add(new DepthTracker());
         }
         /* Add trackers requested by external actions */
@@ -432,7 +437,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     tracker.track();
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
-                    getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
+                    getSimulationManager().getOceanDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
                     warning("Error tracking variable \"" + tracker.getName() + "\". The variable will no longer be recorded in the NetCDF output file.", ex);
                     continue;
                 }
@@ -441,7 +446,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     ncOut.write(ncOut.findVariable(tracker.getName()), tracker.origin(i_record), tracker.getArray());
                 } catch (IOException | InvalidRangeException ex) {
                     errTrackers.add(tracker);
-                    getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
+                    getSimulationManager().getOceanDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
                     warning("Error writing variable \"" + tracker.getName() + "\". The variable will no longer be recorded in the NetCDF output file.", ex);
                 }
             }

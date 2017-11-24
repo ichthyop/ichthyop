@@ -65,7 +65,7 @@ public class CustomTracker extends FloatTracker {
 
     public CustomTracker(String variableName) {
         this.variableName = variableName;
-        getSimulationManager().getDataset().requireVariable(variableName, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(variableName, getClass());
     }
 
     @Override
@@ -75,6 +75,6 @@ public class CustomTracker extends FloatTracker {
 
     @Override
     public float getValue(IParticle particle) {
-        return (float) getSimulationManager().getDataset().getVariable(variableName).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        return (float) getSimulationManager().getOceanDataset().getVariable(variableName).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
     }
 }

@@ -286,7 +286,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
         } while (proba <= 0 || proba < (Math.random() * maxProbability[iTime]));
 
         // Set the depth of the particle, around the selected depth level
-        double dz = getSimulationManager().getDataset().getGrid().depth2z(particle.getX(), particle.getY(), -depth[iDepth]) - particle.getZ();
+        double dz = getSimulationManager().getGrid().depth2z(particle.getX(), particle.getY(), -depth[iDepth]) - particle.getZ();
         // The second boolean argument, set to true, means that the other processes
         // won't be able to change the depth of the particle (e.g. advection).
         // For combining effects of vertical advection and migration, set it to

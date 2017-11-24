@@ -137,8 +137,8 @@ public class BuoyancyAction extends AbstractAction {
                 warning("{Buoyancy} Could not find parameter buyancy maximum age in configuration file ==> application assumes maximum age = transport duration.");
             }
         }
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
-        getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(temperature_field, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(salinity_field, getClass());
         buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
         /*
          * Check whether there is a density CSV file
@@ -214,9 +214,9 @@ public class BuoyancyAction extends AbstractAction {
             //System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: " + particleDensity);
             double time = getSimulationManager().getTimeManager().getTime();
             double dt = getSimulationManager().getTimeManager().get_dt();
-            double sal = getSimulationManager().getDataset().getVariable(salinity_field).getDouble(particle.getGridCoordinates(), time);
-            double tp = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), time);
-            double dz = getSimulationManager().getDataset().getGrid().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
+            double sal = getSimulationManager().getOceanDataset().getVariable(salinity_field).getDouble(particle.getGridCoordinates(), time);
+            double tp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), time);
+            double dz = getSimulationManager().getGrid().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
             particle.increment(new double[]{0.d, 0.d, dz});
         }
     }

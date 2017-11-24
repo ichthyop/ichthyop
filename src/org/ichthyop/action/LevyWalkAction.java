@@ -98,14 +98,14 @@ public class LevyWalkAction extends AbstractAction {
             double dt = getSimulationManager().getTimeManager().get_dt();
             int i = (int) Math.round(particle.getX());
             int j = (int) Math.round(particle.getY());
-            double dx = vxy * Math.cos(theta) / getSimulationManager().getDataset().getGrid().get_dx(i, j) * dt;
-            double dy = vxy * Math.sin(theta) / getSimulationManager().getDataset().getGrid().get_dy(i, j) * dt;
+            double dx = vxy * Math.cos(theta) / getSimulationManager().getGrid().get_dx(i, j) * dt;
+            double dy = vxy * Math.sin(theta) / getSimulationManager().getGrid().get_dy(i, j) * dt;
             particle.increment(new double[]{dx, dy});
         }
 
         if (vEnabled) {
             double depth = depthmax * levywalk(rd3, alphaV);
-            double dz = getSimulationManager().getDataset().getGrid().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
+            double dz = getSimulationManager().getGrid().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
             particle.increment(new double[]{0.d, 0.d, dz}, false, true);
         }
     }

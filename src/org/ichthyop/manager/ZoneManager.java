@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import static org.ichthyop.IchthyopLinker.getSimulationManager;
+import org.ichthyop.dataset.BathymetryDataset;
 import org.ichthyop.particle.IParticle;
 
 /**
@@ -73,6 +74,7 @@ public class ZoneManager extends AbstractManager {
 
     private static final ZoneManager ZONE_MANAGER = new ZoneManager();
     private final HashMap<String, Zone> zones;
+    private BathymetryDataset bathymetry;
 
     public static ZoneManager getInstance() {
         return ZONE_MANAGER;
@@ -131,15 +133,15 @@ public class ZoneManager extends AbstractManager {
     public boolean isInside(double lat, double lon, String key) {
         Zone zone = zones.get(key);
         boolean inside = true;
-        if (zone.isEnabledBathyMask()) {
-            double bathy = Math.abs(getSimulationManager().getDatasetManager().getBathymetryDataset().getBathymetry(lat, lon));
+        if (zone.isEnabledBathyMask() && null != bathymetry) {
+            double bathy = bathymetry.getBathymetry(lat, lon);
             inside = (bathy > zone.getInshoreLine()) & (bathy < zone.getOffshoreLine());
         }
         return inside && isInside(lat, lon, zone.getLat(), zone.getLon());
     }
 
     public boolean isInside(int i, int j, String key) {
-        double[] latlon = getSimulationManager().getDataset().getGrid().xy2latlon(i, j);
+        double[] latlon = getSimulationManager().getGrid().xy2latlon(i, j);
         return isInside(latlon[0], latlon[1], key);
     }
 
@@ -173,7 +175,7 @@ public class ZoneManager extends AbstractManager {
         }
         return pzones;
     }
-    
+
     public Zone getZone(String key) {
         return zones.get(key);
     }
@@ -214,6 +216,8 @@ public class ZoneManager extends AbstractManager {
             zone.init();
         }
 
-        info("Zone manager initialization [OK]");
+        bathymetry = (BathymetryDataset) getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry");
+
+        info("[zones] Initialisation [OK]");
     }
 }

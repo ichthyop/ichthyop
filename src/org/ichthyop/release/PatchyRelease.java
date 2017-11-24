@@ -83,7 +83,7 @@ public class PatchyRelease extends AbstractRelease {
         thickness_patch = getConfiguration().getFloat("release.patches.thickness_patch");
 
         /* Check whether 2D or 3D simulation */
-        is3D = getSimulationManager().getDataset().getGrid().is3D();
+        is3D = getSimulationManager().getGrid().is3D();
 
         /* Load release zones*/
         zonePrefix = getConfiguration().getString("release.zone.zone_prefix");

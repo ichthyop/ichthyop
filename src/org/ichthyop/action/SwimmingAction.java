@@ -139,8 +139,8 @@ public class SwimmingAction extends AbstractAction {
         // Convert dx and dy from m.s-1 to grid displacement
         int i = (int) Math.round(particle.getX());
         int j = (int) Math.round(particle.getY());
-        double dx = u / getSimulationManager().getDataset().getGrid().get_dx(i, j) * dt;
-        double dy = v / getSimulationManager().getDataset().getGrid().get_dy(i, j) * dt;
+        double dx = u / getSimulationManager().getGrid().get_dx(i, j) * dt;
+        double dy = v / getSimulationManager().getGrid().get_dy(i, j) * dt;
 
         // Move the particle
         particle.increment(new double[]{dx, dy});

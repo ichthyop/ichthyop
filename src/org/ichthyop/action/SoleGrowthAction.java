@@ -83,7 +83,7 @@ public class SoleGrowthAction extends AbstractAction {
 
         // Request the temperature variable from the hydrodynamic dataset
         temperature_field = getConfiguration().getString("action.growth.sole.temperature_field");
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        getSimulationManager().getOceanDataset().requireVariable(temperature_field, getClass());
 
         // Add the length tracker
         getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
@@ -126,7 +126,7 @@ public class SoleGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        double temp = getSimulationManager().getDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double temp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
         LengthParticle.incrementLength(particle, grow(lengthStage.getStage(particle), temp));
         StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
     }

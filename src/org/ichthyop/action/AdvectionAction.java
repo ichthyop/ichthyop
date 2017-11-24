@@ -144,7 +144,7 @@ public class AdvectionAction extends AbstractAction {
     }
     
     private AbstractOceanDataset getDataset() {
-        return (AbstractOceanDataset) getSimulationManager().getDataset();
+        return (AbstractOceanDataset) getSimulationManager().getOceanDataset();
     }
 
     private double[] computeMove(double pGrid[], double time, double dt) {

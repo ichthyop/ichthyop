@@ -52,6 +52,7 @@
  */
 package org.ichthyop.output;
 
+import org.ichthyop.dataset.BathymetryDataset;
 import org.ichthyop.particle.IParticle;
 
 /**
@@ -59,9 +60,15 @@ import org.ichthyop.particle.IParticle;
  * @author gandres
  */
 public class BathyTracker extends FloatTracker {
+    
+    private final BathymetryDataset bathymetry;
+    
+    public BathyTracker(BathymetryDataset bathymetry) {
+        this.bathymetry = bathymetry;
+    }
 
     @Override
     public float getValue(IParticle particle) {
-        return (float) getSimulationManager().getDatasetManager().getBathymetryDataset().getBathymetry(particle.getLat(), particle.getLon());
+        return (float) bathymetry.getBathymetry(particle.getLat(), particle.getLon());
     }
 }
