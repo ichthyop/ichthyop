@@ -52,22 +52,114 @@
  */
 package org.ichthyop.particle;
 
-import org.ichthyop.GridPoint;
 import java.util.HashMap;
 import java.util.Map;
+import org.ichthyop.IchthyopLinker;
 
 /**
  *
  * @author pverley
  */
-public class Particle extends GridPoint implements IParticle {
+public class Particle extends IchthyopLinker implements IParticle {
 
     private int index;
+    private double lat, lon, depth;
+    private double dlat, dlon, ddepth;
+    private boolean exclusivity;
     private long age = 0;
     private ParticleMortality deathCause;
     private boolean living = true;
     private boolean locked = false;
     private final Map<String, Object> attributes = new HashMap();
+
+    /**
+     * Gets longitude
+     *
+     * @return double lon, the longitude of the point [degree East]
+     */
+    @Override
+    public double getLon() {
+        return lon;
+    }
+
+    /**
+     * Gets latitude
+     *
+     * @return double lat, the latitude of the point [degree North]
+     */
+    @Override
+    public double getLat() {
+        return lat;
+    }
+
+    /**
+     * Gets depth
+     *
+     * @return double depth, the depth of the point [meter]
+     */
+    @Override
+    public double getDepth() {
+        return depth;
+    }
+
+    /**
+     * Sets the depth
+     *
+     * @param depth a double, depth of the geographical point [meter]
+     */
+    public void setDepth(double depth) {
+        this.depth = depth;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    @Override
+    public void incrLon(double dlon) {
+        this.dlon += dlon;
+    }
+
+    @Override
+    public void incrLat(double dlat) {
+        this.dlat += dlat;
+    }
+
+    @Override
+    public void incrDepth(double ddepth, boolean exclusivity) {
+        if (this.exclusivity & exclusivity) {
+            throw new UnsupportedOperationException("Two actions are requesting exclusivity on vertical transport");
+        }
+        if (!this.exclusivity) {
+            if (exclusivity) {
+                this.ddepth = ddepth;
+                this.exclusivity = true;
+            } else {
+                this.ddepth += ddepth;
+            }
+        }
+    }
+
+    @Override
+    public void incrDepth(double ddepth) {
+        incrDepth(ddepth, false);
+    }
+
+    public void applyMove() {
+        lon += dlon;
+        lat += dlat;
+        depth += ddepth;
+        dlon = dlat = ddepth = 0.d;
+        exclusivity = false;
+    }
+
+    public double[] getMove() {
+        return new double[]{dlat, dlon, ddepth};
+    }
 
     @Override
     public double getDouble(String key) {
@@ -177,13 +269,6 @@ public class Particle extends GridPoint implements IParticle {
         str.append((float) getLon());
         str.append(" depth: ");
         str.append((float) getDepth());
-        str.append('\n');
-        str.append("  x: ");
-        str.append((float) getX());
-        str.append(" y: ");
-        str.append((float) getY());
-        str.append(" z: ");
-        str.append((float) getZ());
         str.append('\n');
         str.append("  status: ");
         str.append(getDeathCause().toString());

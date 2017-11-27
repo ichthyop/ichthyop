@@ -66,6 +66,7 @@ public class LevyWalkAction extends AbstractAction {
     private double vmax, depthmax;
     private boolean hEnabled, vEnabled;
     private MTRandom rd1, rd2, rd3;
+    private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     
     @Override
     public String getKey() {
@@ -94,19 +95,18 @@ public class LevyWalkAction extends AbstractAction {
             double theta = rd1.nextDouble() * 2 * Math.PI;
             // Levywalk velocity
             double vxy = vmax * levywalk(rd2, alphaH);
-            // converts direction and velocity into dx, dy move
+            // converts direction and velocity into lat lon move
             double dt = getSimulationManager().getTimeManager().get_dt();
-            int i = (int) Math.round(particle.getX());
-            int j = (int) Math.round(particle.getY());
-            double dx = vxy * Math.cos(theta) / getSimulationManager().getGrid().get_dx(i, j) * dt;
-            double dy = vxy * Math.sin(theta) / getSimulationManager().getGrid().get_dy(i, j) * dt;
-            particle.increment(new double[]{dx, dy});
+            double distance = vxy * dt / ONE_DEG_LATITUDE_IN_METER;
+            double dlat = distance * Math.sin(theta);
+            double dlon = distance * Math.cos(theta) / Math.cos(Math.PI * particle.getLat() / 180.d);
+            particle.incrLat(dlat);
+            particle.incrLon(dlon);
         }
 
         if (vEnabled) {
             double depth = depthmax * levywalk(rd3, alphaV);
-            double dz = getSimulationManager().getGrid().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
-            particle.increment(new double[]{0.d, 0.d, dz}, false, true);
+            particle.incrDepth(depth - particle.getDepth(), true);
         }
     }
 

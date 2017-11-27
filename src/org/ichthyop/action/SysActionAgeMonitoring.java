@@ -50,9 +50,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
+import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.Particle;
 import org.ichthyop.particle.ParticleMortality;
 
@@ -60,22 +60,32 @@ import org.ichthyop.particle.ParticleMortality;
  *
  * @author pverley
  */
-public class SysActionAgeMonitoring extends AbstractSysAction {
+public class SysActionAgeMonitoring extends AbstractAction {
 
     boolean keepDrifting;
 
     @Override
-    public void execute(Particle particle) {
+    public void execute(IParticle particle) {
         if (!keepDrifting && particle.getAge() > getSimulationManager().getTimeManager().getTransportDuration()) {
             particle.kill(ParticleMortality.OLD);
             return;
         }
-        particle.incrementAge();
+        ((Particle) particle).incrementAge();
     }
 
     @Override
     public void loadParameters() throws Exception {
         keepDrifting = getConfiguration().getBoolean("app.time.keep_drifting");
+    }
+
+    @Override
+    public String getKey() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public void init(IParticle particle) {
+        // nothing to do
     }
 
 }

@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import com.opencsv.CSVReader;
@@ -83,7 +82,8 @@ public class SwimmingAction extends AbstractAction {
     private float[] ages;
     private double dt;
     private boolean cruising;
-    
+    private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+
     @Override
     public String getKey() {
         return "action.swimming";
@@ -131,24 +131,30 @@ public class SwimmingAction extends AbstractAction {
 
         // Find the swimming velocity for this particle
         double speed = getSpeed(particle) * (cruising ? 1.d : Math.random());
-        // Random x component of the swimming velocity
-        double u = randomDir() * Math.random() * speed;
-        // y component such as sqrt(x2 + y2) = speed
-        double v = randomDir() * Math.sqrt(speed * speed - u * u);
-
-        // Convert dx and dy from m.s-1 to grid displacement
-        int i = (int) Math.round(particle.getX());
-        int j = (int) Math.round(particle.getY());
-        double dx = u / getSimulationManager().getGrid().get_dx(i, j) * dt;
-        double dy = v / getSimulationManager().getGrid().get_dy(i, j) * dt;
+        double[] move = randomMove(speed * dt, particle.getLat());
 
         // Move the particle
-        particle.increment(new double[]{dx, dy});
+        particle.incrLat(move[0]);
+        particle.incrLat(move[1]);
     }
 
     @Override
     public void init(IParticle particle) {
         // nothing to do
+    }
+
+    private double[] randomMove(double radius, double lat) {
+
+        // Convert radius from meters to degrees
+        double radiusInDegrees = radius / ONE_DEG_LATITUDE_IN_METER;
+        double u = Math.random();
+        double v = Math.random();
+        double w = radiusInDegrees * Math.sqrt(u);
+        double t = 2 * Math.PI * v;
+        double dlon = w * Math.cos(t) / Math.cos(Math.PI * lat / 180.d);
+        double dlat = w * Math.sin(t);
+
+        return new double[]{dlat, dlon};
     }
 
     /**
@@ -165,15 +171,6 @@ public class SwimmingAction extends AbstractAction {
             }
         }
         return speeds[ages.length - 1];
-    }
-
-    /**
-     * Random draw in {-1, 1}
-     *
-     * @return -1 or 1 randomly
-     */
-    private double randomDir() {
-        return Math.random() < 0.5 ? -1.d : 1.d;
     }
 
 }

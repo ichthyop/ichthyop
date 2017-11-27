@@ -58,40 +58,40 @@ package org.ichthyop.grid;
  */
 public interface IGrid {
     
-     public double[] latlon2xy(double lat, double lon);
+    public double[] latlon2xy(double lat, double lon);
 
     public double[] xy2latlon(double x, double y);
 
     public double depth2z(double x, double y, double depth);
 
     public double z2depth(double x, double y, double z);
-    
-     public boolean isInWater(double[] pGrid);
+
+    public boolean isInWater(double[] pGrid);
 
     public boolean isInWater(int i, int j);
-    
+
     public boolean isInWater(int i, int j, int k);
 
     boolean isCloseToCost(double[] pGrid);
 
     public boolean isOnEdge(double[] pGrid);
-    
+
     public int get_nx();
 
     public int get_ny();
 
     public int get_nz();
-    
+
     public int get_i0();
-    
+
     public int get_j0();
 
     public double get_dx(int i, int j);
 
     public double get_dy(int i, int j);
-    
+
     public double get_dz(int i, int j, int k);
-    
+
     public double getLatMin();
 
     public double getLatMax();
@@ -103,21 +103,21 @@ public interface IGrid {
     public double getLon(int i, int j);
 
     public double getLat(int i, int j);
-    
+
     public double getDepth(double x, double y, int k);
-    
+
     public double getDepthMax(double x, double y);
-    
+
     public double xTore(double x);
-    
+
     public double yTore(double y);
-    
+
     public int xTore(int x);
-    
+
     public int yTore(int y);
-    
+
     public boolean xTore();
-    
+
     public boolean yTore();
-    
+
 }

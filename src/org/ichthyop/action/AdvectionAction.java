@@ -54,6 +54,7 @@ package org.ichthyop.action;
 
 import org.ichthyop.dataset.AbstractOceanDataset;
 import org.ichthyop.particle.IParticle;
+import org.ichthyop.particle.OceanGridParticle;
 import org.ichthyop.particle.ParticleMortality;
 
 /**
@@ -116,28 +117,30 @@ public class AdvectionAction extends AbstractAction {
     public void execute(IParticle particle) {
 
         double time = getSimulationManager().getTimeManager().getTime();
-        double[] pgrid = particle.getGridCoordinates();
+        double[] xyz = OceanGridParticle.xyz(particle);
         double dt = getSimulationManager().getTimeManager().get_dt();
         double[] mvt;
         try {
             if (isForward) {
                 // move forward in time
                 mvt = isRK4
-                        ? computeMoveRK4(pgrid, time, dt)
-                        : computeMove(particle.getGridCoordinates(), time, dt);
+                        ? computeMoveRK4(xyz, time, dt)
+                        : computeMove(xyz, time, dt);
             } else {
                 // move backward in time
-                mvt = substract(backwardGuess(pgrid, time, dt), pgrid);
+                mvt = substract(backwardGuess(xyz, time, dt), xyz);
             }
-//            getLogger().log(Level.INFO, "dx {0} dy {1} dz {2}", new Object[]{mvt[0], mvt[1], mvt[2]});
-            if (!horizontal) {
-                mvt[0] = 0;
-                mvt[1] = 0;
+
+            xyz = sum(xyz, mvt);
+            if (horizontal) {
+                double[] latlon = getSimulationManager().getGrid().xy2latlon(xyz[0], xyz[1]);
+                particle.incrLat(latlon[0] - particle.getLat());
+                particle.incrLon(latlon[1] - particle.getLon());
             }
-            if (!vertical && mvt.length > 2) {
-                mvt[2] = 0;
+            if (vertical) {
+                double depth = getSimulationManager().getGrid().z2depth(xyz[0], xyz[1], xyz[2]);
+                particle.incrDepth(depth - particle.getDepth());
             }
-            particle.increment(mvt);
         } catch (ArrayIndexOutOfBoundsException ex) {
             particle.kill(ParticleMortality.OUT_OF_DOMAIN);
         }
@@ -147,28 +150,30 @@ public class AdvectionAction extends AbstractAction {
         return (AbstractOceanDataset) getSimulationManager().getOceanDataset();
     }
 
-    private double[] computeMove(double pGrid[], double time, double dt) {
+    private double[] computeMove(double xyz[], double time, double dt) {
 
-        int dim = pGrid.length;
-        double[] dU = new double[dim];
+        double dx = 0.d, dy = 0.d, dz = 0.d;
+        int i = (int) Math.round(xyz[0]);
+        int j = (int) Math.round(xyz[1]);
 
-        int i = (int) Math.round(pGrid[0]);
-        int j = (int) Math.round(pGrid[1]);
-        int k = (int) Math.round(pGrid[2]);
-        
-        dU[0] = getDataset().getU(pGrid, time) * dt / getDataset().getGrid().get_dx(i, j);
-        if (Math.abs(dU[0]) > THRESHOLD_CFL) {
-            warning("[advection] CFL broken for U dx={0}", (float) dU[0]);
+        if (horizontal) {
+            dx = getDataset().getU(xyz, time) * dt / getDataset().getGrid().get_dx(i, j);
+            if (Math.abs(dx) > THRESHOLD_CFL) {
+                warning("[advection] CFL broken for U dx={0}", (float) dx);
+            }
+            dy = getDataset().getV(xyz, time) * dt / getDataset().getGrid().get_dy(i, j);
+            if (Math.abs(dy) > THRESHOLD_CFL) {
+                warning("[advection] CFL broken for V dy={0}", (float) dy);
+            }
         }
-        dU[1] = getDataset().getV(pGrid, time) * dt / getDataset().getGrid().get_dy(i, j);
-        if (Math.abs(dU[1]) > THRESHOLD_CFL) {
-            warning("[advection] CFL broken for V dy={0}", (float) dU[1]);
+        if (vertical) {
+            int k = (int) Math.round(xyz[2]);
+            dz = getDataset().getW(xyz, time) * dt / getDataset().getGrid().get_dz(i, j, k);
+            if (Math.abs(dz) > THRESHOLD_CFL) {
+                warning("[advection] CFL broken for W dz={0}", (float) dz);
+            }
         }
-        dU[2] = getDataset().getW(pGrid, time) * dt / getDataset().getGrid().get_dz(i, j, k);
-        if (Math.abs(dU[2]) > THRESHOLD_CFL) {
-            warning("[advection] CFL broken for W dz={0}", (float) dU[2]);
-        }
-        return dU;
+        return new double[]{dx, dy, dz};
     }
 
     /**
@@ -250,6 +255,14 @@ public class AdvectionAction extends AbstractAction {
             p0[i] += mvt[i];
         }
         return p0;
+    }
+
+    private double[] sum(double[] p1, double[] p2) {
+        double[] p3 = new double[p1.length];
+        for (int i = 0; i < p1.length; i++) {
+            p3[i] = p1[i] + p2[i];
+        }
+        return p3;
     }
 
     private double[] substract(double[] p1, double[] p2) {

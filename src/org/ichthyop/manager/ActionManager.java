@@ -55,10 +55,8 @@ package org.ichthyop.manager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import org.ichthyop.action.AbstractAction;
-import org.ichthyop.action.AbstractSysAction;
 import org.ichthyop.action.ActionPriority;
 import org.ichthyop.action.SysActionAgeMonitoring;
 import org.ichthyop.action.SysActionMove;
@@ -73,100 +71,71 @@ import org.ichthyop.particle.Particle;
 public class ActionManager extends AbstractManager {
 
     final private static ActionManager ACTION_MANAGER = new ActionManager();
-    private HashMap<String, AbstractAction> actionMap;
-    private List<AbstractSysAction> sysActionList;
+    private List<AbstractAction> actions;
 
     public static ActionManager getInstance() {
         return ACTION_MANAGER;
     }
 
     private void loadActions() throws InstantiationException {
-        actionMap = new HashMap();
-        for (String key : getConfiguration().getParameterSubsets()) {
-            if (getConfiguration().canFind(key + ".type")
-                    && getConfiguration().getString(key + ".type").equalsIgnoreCase("action")) {
-                if (getConfiguration().getBoolean(key + ".enabled")) {
+
+        actions = new ArrayList();
+
+        // instantiate user defined action
+        getConfiguration().getParameterSubsets().stream().filter((key)
+                -> (!getConfiguration().isNull(key + ".type")
+                && getConfiguration().getString(key + ".type").equalsIgnoreCase("action")
+                && getConfiguration().getBoolean(key + ".enabled")))
+                .forEach((key) -> {
+                    String classname = getConfiguration().getString(key + ".class_name");
                     try {
-                        Class actionClass = Class.forName(getConfiguration().getString(key + ".class_name"));
-                        AbstractAction action = createAction(actionClass);
-                        action.loadParameters();
-                        actionMap.put(key, action);
-                        info("Instantiated action \"{0}\"", actionClass.getName());
-                    } catch (Exception ex) {
+                        Class actionClass = Class.forName(classname);
+                        AbstractAction action = (AbstractAction) actionClass.newInstance();
+                        actions.add(action);
+                        info("[processes] Instantiated \"{0}\" ({1})", new Object[]{key, classname});
+                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
                         StringBuilder msg = new StringBuilder();
-                        msg.append("Failed to setup action ");
+                        msg.append("[processes] Failed to instantiate \"");
                         msg.append(key);
-                        msg.append("\n");
-                        msg.append(ex.toString());
-                        InstantiationException iex = new InstantiationException(msg.toString());
-                        iex.setStackTrace(ex.getStackTrace());
-                        throw iex;
+                        msg.append("\" (");
+                        msg.append(classname);
+                        msg.append(")");
+                        error(msg.toString(), ex);
                     }
-                }
-            }
-        }
-    }
+                });
 
-    private void implementSysActions() throws InstantiationException {
-
-        sysActionList = new ArrayList();
-
-        sysActionList.add(new SysActionAgeMonitoring());
-        sysActionList.add(new SysActionMove());
-
-        for (AbstractSysAction sysaction : sysActionList) {
-            try {
-                sysaction.loadParameters();
-                info("Instantiated system action \"{0}\"", sysaction.getClass().getCanonicalName());
-            } catch (Exception ex) {
-                StringBuilder msg = new StringBuilder();
-                msg.append("Failed to setup system action ");
-                msg.append(sysaction.getClass().getCanonicalName());
-                msg.append("\n");
-                msg.append(ex.toString());
-                InstantiationException iex = new InstantiationException(msg.toString());
-                iex.setStackTrace(ex.getStackTrace());
-                throw iex;
-            }
-        }
-    }
-
-    private List<AbstractAction> getSortedActions() {
-        List<AbstractAction> actions = new ArrayList(actionMap.values());
+        // sort actions by priority
         Collections.sort(actions, new ActionComparator());
-        return actions;
-    }
 
-    public AbstractAction createAction(Class actionClass) throws InstantiationException, IllegalAccessException {
-        return (AbstractAction) actionClass.newInstance();
+        // add internal actions
+        actions.add(new SysActionAgeMonitoring());
+        actions.add(new SysActionMove());
     }
 
     public void executeActions(Particle particle) {
-        // Pre-defined actions
-        for (AbstractAction action : getSortedActions()) {
-            if (!particle.isLocked()) {
-                action.execute(particle);
-            }
-        }
 
-        // System actions
-        for (AbstractSysAction sysaction : sysActionList) {
-            sysaction.execute(particle);
+        if (!particle.isLocked()) {
+            actions.forEach((action) -> {
+                action.execute(particle);
+            });
         }
     }
 
     public void initActions(Particle particle) {
-        // Pre-defined actions
-        for (AbstractAction action : getSortedActions()) {
+
+        actions.forEach((action) -> {
             action.init(particle);
-        }
+        });
     }
 
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
+
         loadActions();
-        implementSysActions();
-        info("Action manager setup [OK]");
+        for (AbstractAction action : actions) {
+            action.loadParameters();
+        }
+        info("[processes] Setup [OK]");
     }
 
     @Override
@@ -175,6 +144,7 @@ public class ActionManager extends AbstractManager {
     }
 
     private ActionPriority getPriority(String actionKey) {
+
         String priority = getConfiguration().getString(actionKey + ".priority");
         for (ActionPriority actionPriority : ActionPriority.values()) {
             if (priority.equals(actionPriority.toString())) {

@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,20 +50,34 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
-package org.ichthyop.action;
+package org.ichthyop.particle;
 
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.particle.Particle;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractSysAction extends IchthyopLinker {
+public class OceanGridParticle extends IchthyopLinker {
     
-    abstract public void loadParameters() throws Exception;
-
-    abstract public void execute(Particle particle);
-
+    private final static String OCEAN_XYZ = "ocean_dataset.xyz";
+    
+    public static double[] xyz(IParticle particle) {
+        return (double[]) particle.get(OCEAN_XYZ);
+    }
+    
+    public static void update(IParticle particle) {
+        
+        double[] xy = getSimulationManager().getGrid().latlon2xy(particle.getLat(), particle.getLon());
+        double z = getSimulationManager().getGrid().depth2z(xy[0], xy[1], particle.getDepth());
+        particle.set(OCEAN_XYZ, new double[] {xy[0], xy[1], z});
+    }
+    
+    public static boolean isOnEdge(IParticle particle) {
+        return getSimulationManager().getGrid().isOnEdge(xyz(particle));
+    } 
+    
+    public static boolean isInWater(IParticle particle) {
+        return getSimulationManager().getGrid().isInWater(xyz(particle));
+    } 
 }

@@ -56,6 +56,7 @@ import org.ichthyop.output.FloatTracker;
 import org.ichthyop.output.LengthTracker;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.LengthParticle;
+import org.ichthyop.particle.OceanGridParticle;
 import org.ichthyop.particle.ParticleMortality;
 
 /**
@@ -147,8 +148,10 @@ public class DebGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        double temp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
-        double food = getSimulationManager().getOceanDataset().getVariable(food_field).getDouble( particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        
+        double[] xyz = OceanGridParticle.xyz(particle);
+        double temp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
+        double food = getSimulationManager().getOceanDataset().getVariable(food_field).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
         double[] res_deb = grow(dt, getE(particle), getV(particle), getE_R(particle), Vj, temp, food);
         setE(particle, res_deb[0]);
         setV(particle, res_deb[1]);

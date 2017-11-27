@@ -123,7 +123,7 @@ public class ZoneManager extends AbstractManager {
     private boolean isInside(IParticle particle, String key) {
         Zone zone = zones.get(key);
         boolean inside = true;
-        if (particle.getGridCoordinates().length > 2 && zone.isEnabledDepthMask()) {
+        if (zone.isEnabledDepthMask()) {
             double depth = Math.abs(particle.getDepth());
             inside = depth <= zone.getLowerDepth() & depth >= zone.getUpperDepth();
         }

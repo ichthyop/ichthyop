@@ -64,6 +64,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import org.ichthyop.particle.OceanGridParticle;
 import org.ichthyop.particle.StageParticle;
 
 /**
@@ -251,8 +252,7 @@ public class MigrationAction extends AbstractAction {
                 // diel vertical migration
                 depth = getDepth(particle, getSimulationManager().getTimeManager().getTime());
             }
-            double dz = getSimulationManager().getGrid().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
-            particle.increment(new double[]{0.d, 0.d, dz}, false, true);
+            particle.incrDepth(depth - particle.getDepth(), true);
         }
     }
 
@@ -276,7 +276,8 @@ public class MigrationAction extends AbstractAction {
         calendar.setTime(sunset);
         long timeSunset = getSecondsOfDay(calendar);
 
-        double bottom = getSimulationManager().getGrid().z2depth(particle.getX(), particle.getY(), 0);
+        double[] xyz = OceanGridParticle.xyz(particle);
+        double bottom = getSimulationManager().getGrid().z2depth(xyz[0], xyz[1], 0);
         if (timeDay >= timeSunrise && timeDay < timeSunset) {
             // day time
             if (null != depthsDay) {

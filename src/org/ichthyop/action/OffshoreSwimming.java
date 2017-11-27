@@ -55,7 +55,9 @@ package org.ichthyop.action;
 import java.util.ArrayList;
 import java.util.List;
 import org.ichthyop.dataset.DatasetUtil;
+import org.ichthyop.grid.IGrid;
 import org.ichthyop.particle.IParticle;
+import org.ichthyop.particle.OceanGridParticle;
 
 /**
  *
@@ -69,7 +71,7 @@ public class OffshoreSwimming extends AbstractAction {
     private double velocity;
     // swimming period (second)
     private double period;
-    
+
     @Override
     public String getKey() {
         return "action.offshore_swimming";
@@ -90,34 +92,37 @@ public class OffshoreSwimming extends AbstractAction {
         if (particle.getAge() > period) {
             return;
         }
-        
+
         // Find coastal cells
-        List<int[]> coord = findCoastalCells(particle);
-        if (coord.isEmpty()) {
+        List<double[]> gp = findCoastalCells(particle);
+        if (gp.isEmpty()) {
             return;
         }
 
         // Compute barycenter of the coastal cells        
-        double[] barycenter = barycenter(coord);
+        double[] latlon = barycenter(gp);
         // Distance from barycenter to particle
-        double[] latlon = getSimulationManager().getGrid().xy2latlon(barycenter[0], barycenter[1]);
         double distance = DatasetUtil.geodesicDistance(latlon[0], latlon[1], particle.getLat(), particle.getLon());
         // Distance swum offsore
         double dswim = velocity * getSimulationManager().getTimeManager().get_dt() / distance;
-        double dx = (particle.getX() - barycenter[0]) * dswim;
-        double dy = (particle.getY() - barycenter[1]) * dswim;
-        particle.increment(new double[]{dx, dy});
+        double dlat = (particle.getLat() - latlon[0]) * dswim;
+        double dlon = (particle.getLon() - latlon[1]) * dswim;
+        particle.incrLat(dlat);
+        particle.incrLon(dlon);
     }
 
-    private List<int[]> findCoastalCells(IParticle particle) {
+    private List<double[]> findCoastalCells(IParticle particle) {
+
+        IGrid grid = getSimulationManager().getGrid();
 
         double lat0 = particle.getLat();
         double lon0 = particle.getLon();
-        int i0 = (int) Math.round(particle.getX());
-        int j0 = (int) Math.round(particle.getY());
+        double[] xyz = OceanGridParticle.xyz(particle);
+        int i0 = (int) Math.round(xyz[0]);
+        int j0 = (int) Math.round(xyz[1]);
         int n = 1;
         // Find coastal cells withing the defined radius
-        List<int[]> coord = new ArrayList();
+        List<double[]> gp = new ArrayList();
         int nx = getSimulationManager().getGrid().get_nx();
         int ny = getSimulationManager().getGrid().get_ny();
         while (true) {
@@ -127,7 +132,7 @@ public class OffshoreSwimming extends AbstractAction {
                     if ((distance = distance(i0 + i, j0 + n, lat0, lon0)) < radius) {
                         dmin = Math.min(dmin, distance);
                         if (coastal(i0 + i, j0 + n)) {
-                            coord.add(new int[]{i0 + i, j0 + n});
+                            gp.add(new double[]{grid.getLat(i0 + i, j0 + n), grid.getLon(i0 + i, j0 + n)});
                         }
                     }
                 }
@@ -135,7 +140,7 @@ public class OffshoreSwimming extends AbstractAction {
                     if ((distance = distance(i0 + i, j0 - n, lat0, lon0)) < radius) {
                         dmin = Math.min(dmin, distance);
                         if (coastal(i0 + i, j0 - n)) {
-                            coord.add(new int[]{i0 + i, j0 - n});
+                            gp.add(new double[]{grid.getLat(i0 + i, j0 - n), grid.getLon(i0 + i, j0 - n)});
                         }
                     }
                 }
@@ -145,7 +150,7 @@ public class OffshoreSwimming extends AbstractAction {
                     if ((distance = distance(i0 + n, j0 + j, lat0, lon0)) < radius) {
                         dmin = Math.min(dmin, distance);
                         if (coastal(i0 + n, j0 + j)) {
-                            coord.add(new int[]{i0 + n, j0 + j});
+                            gp.add(new double[]{grid.getLat(i0 + n, j0 + j), grid.getLon(i0 + n, j0 + j)});
                         }
                     }
                 }
@@ -153,7 +158,7 @@ public class OffshoreSwimming extends AbstractAction {
                     if ((distance = distance(i0 - n, j0 + j, lat0, lon0)) < radius) {
                         dmin = Math.min(dmin, distance);
                         if (coastal(i0 - n, j0 + j)) {
-                            coord.add(new int[]{i0 - n, j0 + j});
+                            gp.add(new double[]{grid.getLat(i0 - n, j0 + j), grid.getLon(i0 - n, j0 + j)});
                         }
                     }
                 }
@@ -164,19 +169,19 @@ public class OffshoreSwimming extends AbstractAction {
             n++;
         }
 
-        return coord;
+        return gp;
     }
 
-    private double[] barycenter(List<int[]> coord) {
+    private double[] barycenter(List<double[]> gp) {
 
         double[] xy = new double[]{0.d, 0.d};
-        coord.forEach((ij) -> {
+        gp.forEach((ij) -> {
             xy[0] += ij[0];
             xy[1] += ij[1];
         });
 
-        xy[0] /= coord.size();
-        xy[1] /= coord.size();
+        xy[0] /= gp.size();
+        xy[1] /= gp.size();
 
         return xy;
 

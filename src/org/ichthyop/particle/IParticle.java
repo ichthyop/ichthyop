@@ -72,27 +72,6 @@ public interface IParticle {
 // Declaration of the methods
 /////////////////////////////
     /**
-     * Gets the x grid coordinate
-     *
-     * @return a double, the x grid coordinate of the particle
-     */
-    public double getX();
-
-    /**
-     * Gets the y grid coordinate
-     *
-     * @return a double, the y grid coordinate of the particle
-     */
-    public double getY();
-
-    /**
-     * Gets the z grid coordinate
-     *
-     * @return a double, the z grid coordinate of the particle
-     */
-    public double getZ();
-
-    /**
      * Gets the longitude
      *
      * @return a double, the longitude of the particle location [East degree]
@@ -152,11 +131,13 @@ public interface IParticle {
 
     public void unlock();
 
-    public double[] getGridCoordinates();
-
-    public void increment(double[] move);
-
-    public void increment(double[] move, boolean exclusivityH, boolean exclusivityV);
+    public void incrLon(double dlon);
+    
+    public void incrLat(double dlat);
+    
+    public void incrDepth(double ddepth);
+    
+    public void incrDepth(double ddepth, boolean exclusivity);
 
     public void init();
 

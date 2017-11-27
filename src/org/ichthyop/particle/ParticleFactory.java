@@ -88,15 +88,13 @@ public class ParticleFactory extends IchthyopLinker {
         }
         particle.setLat(lat);
         particle.setDepth(depth);
-        particle.geo2Grid();
         if (living) {
-            if (!particle.isInWater() || particle.isOnEdge()) {
+            double[] xy = getSimulationManager().getGrid().latlon2xy(lat, particle.getLon());
+            if (!getSimulationManager().getGrid().isInWater(xy) || getSimulationManager().getGrid().isOnEdge(xy)) {
                 return null;
             }
-            if (!Double.isNaN(depth)) {
-                if (getSimulationManager().getGrid().getDepthMax(particle.getX(), particle.getY()) > depth || depth > 0) {
-                    return null;
-                }
+            if (getSimulationManager().getGrid().getDepthMax(xy[0], xy[1]) > depth || depth > 0) {
+                return null;
             }
         } else {
             particle.kill(mortality);
@@ -109,6 +107,7 @@ public class ParticleFactory extends IchthyopLinker {
     }
 
     public IParticle createSurfaceParticle(int index) {
+
         Particle particle = new Particle();
         particle.setIndex(index);
         int nx = getSimulationManager().getGrid().get_nx();
@@ -116,16 +115,14 @@ public class ParticleFactory extends IchthyopLinker {
         int attempt = 0;
         while (attempt++ < ATTEMPT_MAX) {
             double[] xy = new double[]{Math.random() * (nx - 1), Math.random() * (ny - 1)};
-            if (getSimulationManager().getGrid().isInWater(xy)
-                    && !getSimulationManager().getGrid().isOnEdge(xy)) {
-                particle.setX(xy[0]);
-                particle.setY(xy[1]);
-                particle.setZ(getSimulationManager().getGrid().depth2z(xy[0], xy[1], 0.));
-                particle.grid2Geo();
+            if (getSimulationManager().getGrid().isInWater(xy) && !getSimulationManager().getGrid().isOnEdge(xy)) {
+                double[] latlon = getSimulationManager().getGrid().xy2latlon(xy[0], xy[1]);
+                particle.setLat(latlon[0]);
+                particle.setLon(latlon[1]);
+                particle.setDepth(0.d);
                 return particle;
             }
         }
-
         error("Unable to release particle at surface", new IOException("Too many failed attempts"));
         return null;
     }
@@ -156,7 +153,6 @@ public class ParticleFactory extends IchthyopLinker {
                     lowerdepth = depthmax;
                 }
                 particle.setDepth(-1.d * (upperdepth + Math.random() * (lowerdepth - upperdepth)));
-                particle.geo2Grid();
                 return particle;
             }
         }

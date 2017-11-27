@@ -58,6 +58,7 @@ import org.ichthyop.output.LengthTracker;
 import org.ichthyop.output.StageTracker;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.LengthParticle;
+import org.ichthyop.particle.OceanGridParticle;
 import org.ichthyop.particle.StageParticle;
 import org.ichthyop.stage.LengthStage;
 import org.ichthyop.util.Constant;
@@ -126,7 +127,9 @@ public class SoleGrowthAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-        double temp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        
+        double[] xyz = OceanGridParticle.xyz(particle);
+        double temp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
         LengthParticle.incrementLength(particle, grow(lengthStage.getStage(particle), temp));
         StageParticle.setStage(particle, lengthStage.getStage(LengthParticle.getLength(particle)));
     }

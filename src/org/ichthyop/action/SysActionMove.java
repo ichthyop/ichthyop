@@ -50,9 +50,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
+import org.ichthyop.particle.IParticle;
+import org.ichthyop.particle.OceanGridParticle;
 import org.ichthyop.particle.Particle;
 import org.ichthyop.particle.ParticleMortality;
 
@@ -60,7 +61,7 @@ import org.ichthyop.particle.ParticleMortality;
  *
  * @author pverley
  */
-public class SysActionMove extends AbstractSysAction {
+public class SysActionMove extends AbstractAction {
 
     private CoastlineBehavior coastlineBehavior = CoastlineBehavior.BEACHING;
 
@@ -74,14 +75,14 @@ public class SysActionMove extends AbstractSysAction {
     }
 
     @Override
-    public void execute(Particle particle) {
+    public void execute(IParticle particle) {
+
         if (!particle.isLocked()) {
             checkCoastlineAndMove(particle);
-            if (particle.isOnEdge()) {
+            if (OceanGridParticle.isOnEdge(particle)) {
                 particle.kill(ParticleMortality.OUT_OF_DOMAIN);
                 return;
             }
-            particle.grid2Geo();
         }
         particle.unlock();
     }
@@ -90,44 +91,64 @@ public class SysActionMove extends AbstractSysAction {
      * Implements specific behaviours in case the current move take the particle
      * inland.
      */
-    private void checkCoastlineAndMove(Particle particle) {
+    private void checkCoastlineAndMove(IParticle particle) {
 
         double[] move;
+        Particle p = (Particle) particle;
         switch (coastlineBehavior) {
             case NONE:
                 /* Does nothing, the move might take the
                  * particle inland.
                  */
+                p.applyMove();
+                OceanGridParticle.update(particle);
                 break;
             case BEACHING:
                 /*
                  * The move might take the particle inland
                  * and lead to a beaching.
                  */
-                particle.applyMove();
-                if (!particle.isInWater()) {
+                p.applyMove();
+                OceanGridParticle.update(particle);
+                if (!OceanGridParticle.isInWater(particle)) {
                     particle.kill(ParticleMortality.BEACHED);
                 }
-                return;
+                break;
             case BOUNCING:
                 /*
                  * The particle will act exactly as a billard ball.
                  */
-                move = particle.getMove();
-                double[] bounce = bounceCostline(particle.getX(), particle.getY(), move[0], move[1]);
-                particle.increment(new double[]{bounce[0] - move[0], bounce[1] - move[1], 0.d});
+                move = p.getMove();
+                double[] xyz = OceanGridParticle.xyz(particle);
+                double[] nxyz = xyz(particle.getLat() + move[0], particle.getLon() + move[1], particle.getDepth() + move[2]);
+                double[] bounce = bounceCostline(xyz[0], xyz[1], nxyz[0] - xyz[0], nxyz[1] - xyz[1]);
+                double[] nlatlon = getSimulationManager().getGrid().xy2latlon(xyz[0] + bounce[0], xyz[1] + bounce[1]);
+                particle.incrLat(nlatlon[0] - particle.getLat() - move[0]);
+                particle.incrLon(nlatlon[1] - particle.getLon() - move[1]);
                 break;
             case STANDSTILL:
                 /*
                  * The particle will stand still instead of going in land.
                  */
-                move = particle.getMove();
-                if (!getSimulationManager().getGrid().isInWater(new double[]{particle.getX() + move[0], particle.getY() + move[1]})) {
-                    particle.increment(new double[]{-1.d * move[0], -1.d * move[1], 0.d});
+                move = p.getMove();
+                xyz = xyz(particle.getLat() + move[0],
+                        particle.getLon() + move[1],
+                        particle.getDepth() + move[2]);
+                if (!getSimulationManager().getGrid().isInWater(xyz)) {
+                    particle.incrLat(-move[0]);
+                    particle.incrLon(-move[1]);
+                    particle.incrDepth(-move[2]);
                 }
+                p.applyMove();
+                OceanGridParticle.update(particle);
                 break;
         }
-        particle.applyMove();
+    }
+
+    private double[] xyz(double lat, double lon, double depth) {
+        double[] xy = getSimulationManager().getGrid().latlon2xy(lat, lon);
+        double z = getSimulationManager().getGrid().depth2z(xy[0], xy[1], depth);
+        return new double[]{xy[0], xy[1], z};
     }
 
     private double[] bounceCostline(double x, double y, double dx, double dy) {
@@ -187,6 +208,16 @@ public class SysActionMove extends AbstractSysAction {
             }
         }
         return new double[]{newdx, newdy};
+    }
+
+    @Override
+    public String getKey() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public void init(IParticle particle) {
+        OceanGridParticle.update(particle);
     }
 
     public enum CoastlineBehavior {

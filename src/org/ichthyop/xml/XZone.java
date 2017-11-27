@@ -52,13 +52,10 @@
  */
 package org.ichthyop.xml;
 
-import org.ichthyop.GridPoint;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Element;
-import org.ichthyop.ui.LonLatConverter;
-import org.ichthyop.ui.LonLatConverter.LonLatFormat;
 
 /**
  *
@@ -339,15 +336,6 @@ public class XZone extends org.jdom2.Element {
                 addContent(new Element(INDEX));
             }
             getChild(INDEX).setText(String.valueOf(index));
-        }
-
-        public GridPoint createRhoPoint() {
-            GridPoint rhoPoint = new GridPoint();
-            double lat = Double.valueOf(LonLatConverter.convert(getLat(), LonLatFormat.DecimalDeg));
-            double lon = Double.valueOf(LonLatConverter.convert(getLon(), LonLatFormat.DecimalDeg));
-            rhoPoint.setLat(lat);
-            rhoPoint.setLon(lon);
-            return rhoPoint;
         }
     }
 }

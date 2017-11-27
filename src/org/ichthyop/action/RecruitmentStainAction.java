@@ -67,13 +67,9 @@ import org.ichthyop.ui.LonLatConverter.LonLatFormat;
  */
 public class RecruitmentStainAction extends AbstractAction {
 
-    /**
-     * Minimum duration [second] a particle has to spend within the same zone
-     * before being recruited.
-     */
-    private static int durationMinInRecruitArea;
-    /**
-     * Duration [second] presently spent by the particule within the current
+
+    /*
+     * Duration [second] presently spent by the particle within the current
      * zone.
      */
     private float ageMinAtRecruitment;
@@ -84,7 +80,6 @@ public class RecruitmentStainAction extends AbstractAction {
     private double radius_stain;
     private double thickness_stain;
     private boolean is3D;
-    private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
 
     @Override
     public String getKey() {

@@ -64,6 +64,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.particle.IParticle;
+import org.ichthyop.particle.OceanGridParticle;
 import org.ichthyop.particle.ParticleMortality;
 import org.ichthyop.particle.StageParticle;
 
@@ -179,7 +180,9 @@ public class LethalTempAction extends AbstractAction {
     }
 
     private void checkTp(IParticle particle) {
-        double temperature = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        
+        double[] xyz = OceanGridParticle.xyz(particle);
+        double temperature = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
         int iAge = ages.length - 1;
         if (FLAG_LETHAL_TEMP_FUNCTION) {
             float age = particle.getAge();
@@ -201,7 +204,8 @@ public class LethalTempAction extends AbstractAction {
 
     private void checkTpGrowingParticle(IParticle particle) {
 
-        double temperature = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime());
+        double[] xyz = OceanGridParticle.xyz(particle);
+        double temperature = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
         int stage = StageParticle.getStage(particle);
         // stage == 0 means egg, stage > 0 means larvae
         boolean frozen = ((stage == 0) && (temperature <= coldLethalTp[0])) || ((stage != 0) && (temperature <= coldLethalTp[1]));

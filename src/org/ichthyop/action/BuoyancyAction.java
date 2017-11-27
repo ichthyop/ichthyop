@@ -63,6 +63,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ichthyop.particle.IParticle;
+import org.ichthyop.particle.OceanGridParticle;
 import org.ichthyop.particle.StageParticle;
 
 /**
@@ -214,10 +215,10 @@ public class BuoyancyAction extends AbstractAction {
             //System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: " + particleDensity);
             double time = getSimulationManager().getTimeManager().getTime();
             double dt = getSimulationManager().getTimeManager().get_dt();
-            double sal = getSimulationManager().getOceanDataset().getVariable(salinity_field).getDouble(particle.getGridCoordinates(), time);
-            double tp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(particle.getGridCoordinates(), time);
-            double dz = getSimulationManager().getGrid().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(sal, tp, dt)) - particle.getZ();
-            particle.increment(new double[]{0.d, 0.d, dz});
+            double[] xyz = OceanGridParticle.xyz(particle);
+            double sal = getSimulationManager().getOceanDataset().getVariable(salinity_field).getDouble(xyz, time);
+            double tp = getSimulationManager().getOceanDataset().getVariable(temperature_field).getDouble(xyz, time);
+            particle.incrDepth(move(sal, tp, dt));
         }
     }
 

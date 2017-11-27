@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.action;
 
 import java.io.File;
@@ -61,7 +60,6 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Properties;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.util.IOTools;
 
 /**
  *
@@ -72,7 +70,7 @@ public class WindAction extends AbstractAction {
     private Properties windprop;
     private HashMap<Integer, WindScenario> scenarios;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    
+
     @Override
     public String getKey() {
         return "action.wind";
@@ -110,28 +108,20 @@ public class WindAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        /* for 3D simulation, ckeck whether the particle is close surface */
-        if (particle.getZ() >= 0) {
-            double dz = Math.abs(particle.getZ() - (getSimulationManager().getGrid().get_nz() - 1));
-            if (dz > 0.01) {
-                return;
+        // check whether the particle is close surface, 1m is arbitrary, should be user defined
+        if (Math.abs(particle.getDepth()) < 1) {
+            // wind effect
+            double time = getSimulationManager().getTimeManager().getTime();
+            int rank = findCurrentRank(time);
+            if (rank >= 0) {
+                WindScenario scenario = scenarios.get(rank);
+                double intensity = scenario.getIntensity();
+                double direction = scenario.getDirection();
+                double windage = scenario.getWindage();
+                double dt = getSimulationManager().getTimeManager().get_dt();
+                particle.incrLon(getdlon(intensity, direction, windage, particle.getLat(), dt));
+                particle.incrLat(getdlat(intensity, direction, windage, dt));
             }
-        }
-
-        /* wind effect */
-        double time = getSimulationManager().getTimeManager().getTime();
-        int rank = findCurrentRank(time);
-        if (rank >= 0) {
-            WindScenario scenario = scenarios.get(rank);
-            double intensity = scenario.getIntensity();
-            double direction = scenario.getDirection();
-            double windage = scenario.getWindage();
-            double dt = getSimulationManager().getTimeManager().get_dt();
-            double newLon = particle.getLon() + getdlon(intensity, direction, windage, particle.getLat(), dt);
-            double newLat = particle.getLat() + getdlat(intensity, direction, windage, dt);
-            double[] newPos = getSimulationManager().getGrid().latlon2xy(newLat, newLon);
-            double[] windincr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
-            particle.increment(windincr);
         }
     }
 
