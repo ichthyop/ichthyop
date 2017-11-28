@@ -107,6 +107,10 @@ public class BathymetryDataset extends AbstractDataset {
     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
         return new ConstantDatasetVariable(file, name, grid, tilingh, 1);
     }
+    
+    public String getVariableName() {
+        return fullname;
+    }
 
     public double getBathymetry(double[] xy) {
         return getVariable(fullname).getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]), 0);

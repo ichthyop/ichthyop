@@ -60,25 +60,22 @@ import org.ichthyop.particle.GriddedParticle;
  *
  * @author pverley
  */
-public class CustomTracker extends FloatTracker {
+public class DatasetVariableTracker extends FloatTracker {
 
     private final String datasetKey;
     private final String variableName;
+    private final String fullname;
 
-    public CustomTracker(String tracker) {
-        datasetKey = tracker.substring(0, tracker.indexOf('#'));
-        variableName = tracker.substring(tracker.indexOf('#') + 1);
+    public DatasetVariableTracker(String fullname) {
+        this.fullname = fullname;
+        datasetKey = fullname.substring(0, fullname.indexOf('@'));
+        variableName = fullname.substring(fullname.indexOf('@') + 1);
         getSimulationManager().getDatasetManager().getDataset(datasetKey).requireVariable(variableName, OutputManager.class);
     }
 
     @Override
     public String getVariableName() {
-        return variableName;
-    }
-
-    @Override
-    public String getDatasetKey() {
-        return datasetKey;
+        return fullname;
     }
 
     @Override

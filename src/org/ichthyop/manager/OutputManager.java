@@ -71,14 +71,13 @@ import org.ichthyop.dataset.BathymetryDataset;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.output.AbstractTracker;
-import org.ichthyop.output.BathyTracker;
 import org.ichthyop.output.DepthTracker;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.output.LatTracker;
 import org.ichthyop.output.LonTracker;
 import org.ichthyop.output.MortalityTracker;
 import org.ichthyop.output.TimeTracker;
-import org.ichthyop.output.CustomTracker;
+import org.ichthyop.output.DatasetVariableTracker;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -258,6 +257,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private List<GeoPosition> zoneToPointCloud(Zone zone) {
+
         List<GeoPosition> list = new ArrayList();
 
         for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += 2) {
@@ -330,6 +330,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     public void addPredefinedTracker(Class trackerClass) {
+
         if (null == predefinedTrackers) {
             predefinedTrackers = new ArrayList();
         }
@@ -343,6 +344,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     public void addCustomTracker(String datasetKey, String variableName) {
+
         if (null == customTrackers) {
             customTrackers = new ArrayList();
         }
@@ -350,13 +352,14 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             customTrackers.clear();
             clearCustomTrackerList = false;
         }
-        String tracker = datasetKey + "#" + variableName;
+        String tracker = datasetKey + "@" + variableName;
         if (!customTrackers.contains(tracker)) {
             customTrackers.add(tracker);
         }
     }
 
     private void setupPredefinedTrackers() throws Exception {
+
         trackers = new ArrayList();
         trackers.add(new TimeTracker());
         trackers.add(new LonTracker());
@@ -364,7 +367,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         trackers.add(new DepthTracker());
         trackers.add(new MortalityTracker());
         if (null != getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry")) {
-            trackers.add(new BathyTracker((BathymetryDataset) getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry")));
+            BathymetryDataset bathymetry = (BathymetryDataset) getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry");
+            trackers.add(new DatasetVariableTracker(bathymetry.getKey() + "@" + bathymetry.getVariableName()));
         }
         /* Add trackers requested by external actions */
         if (null != predefinedTrackers) {
@@ -380,14 +384,14 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private List<String> getUserTrackers() throws Exception {
-        
+
         List<String> variables = new ArrayList();
         for (String key : getSimulationManager().getDatasetManager().getDatasetKeys()) {
-            if (!getConfiguration().isNull(key+".tracked_variables")) {
+            if (!getConfiguration().isNull(key + ".tracked_variables")) {
                 String[] tokens = getConfiguration().getArrayString(key + ".tracked_variables");
                 for (String token : tokens) {
                     if (!token.trim().isEmpty()) {
-                        variables.add(key + "#" + token.trim());
+                        variables.add(key + "@" + token.trim());
                     }
                 }
             }
@@ -395,12 +399,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         return variables;
     }
 
-    private void setupCustomTrackers(List<String> variables) {
+    private void setupCustomTrackers(List<String> fullnames) {
 
-        if (null != variables) {
-            for (String variable : variables) {
-                System.out.println("Adding tracker " + variable);
-                trackers.add(new CustomTracker(variable));
+        if (null != fullnames) {
+            for (String fullname : fullnames) {
+                trackers.add(new DatasetVariableTracker(fullname));
             }
         }
     }
@@ -425,6 +428,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private void writeToNetCDF(int i_record) {
+
         info("[output] Saving variables...");
         List<AbstractTracker> errTrackers = new ArrayList();
         for (AbstractTracker tracker : trackers) {
@@ -432,19 +436,16 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 /* Retrieve the values of the variable */
                 try {
                     tracker.track();
+                    ncOut.write(ncOut.findVariable(clean(tracker.getVariableName())), tracker.origin(i_record), tracker.getArray());
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
-                    getSimulationManager().getDatasetManager().getDataset(tracker.getDatasetKey()).removeRequiredVariable(tracker.getVariableName(), tracker.getClass());
+                    if (tracker instanceof DatasetVariableTracker) {
+                        String fullname = tracker.getVariableName();
+                        String datasetKey = fullname.substring(0, fullname.indexOf('@'));
+                        String variableName = fullname.substring(fullname.indexOf('@') + 1);
+                        getSimulationManager().getDatasetManager().getDataset(datasetKey).removeRequiredVariable(variableName, tracker.getClass());
+                    }
                     warning("Error tracking variable \"" + tracker.getVariableName() + "\". The variable will no longer be recorded in the NetCDF output file.", ex);
-                    continue;
-                }
-                /* Write the current time step in the NetCDF file */
-                try {
-                    ncOut.write(ncOut.findVariable(tracker.getVariableName()), tracker.origin(i_record), tracker.getArray());
-                } catch (IOException | InvalidRangeException ex) {
-                    errTrackers.add(tracker);
-                    getSimulationManager().getDatasetManager().getDataset(tracker.getDatasetKey()).removeRequiredVariable(tracker.getVariableName(), tracker.getClass());
-                    warning("Error writing variable \"" + tracker.getVariableName() + "\". The variable will no longer be recorded in the NetCDF output file.", ex);
                 }
             }
         }
@@ -455,6 +456,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     @Override
     public void lastStepOccurred(LastStepEvent e) {
+
         if (!e.isInterrupted()) {
             writeToNetCDF(i_record);
         }
@@ -467,6 +469,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             customTrackers.clear();
         }
     }
+    
+    private String clean(String variable) {
+        return variable.replaceAll("\\.", "_");
+    }
 
     private void createNetCDF() throws IOException {
 
@@ -478,7 +484,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         for (AbstractTracker tracker : trackers) {
             try {
                 tracker.init();
-                ncOut.addVariable(null, tracker.getVariableName(), tracker.getDataType(), tracker.getDimensions());
+                ncOut.addVariable(null, clean(tracker.getVariableName()), tracker.getDataType(), tracker.getDimensions());
             } catch (Exception ex) {
                 errTrackers.add(tracker);
                 warning("[output] Error adding variable \"" + tracker.getVariableName() + "\" in NetCDF output file. The variable will not be recorded.", ex);
