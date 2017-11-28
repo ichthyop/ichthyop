@@ -67,17 +67,17 @@ public abstract class AbstractDatasetVariable implements IVariable {
     // constants
     private final int IDW_POWER = 2;
     private final int IDW_RADIUS = 1;
-    
+
     public abstract void init(double t0, int time_arrow) throws IOException;
-    
+
     public abstract void update(double currenttime, int time_arrow) throws IOException;
 
     public AbstractDatasetVariable(int nlayer, IGrid grid) {
-       this.nlayer = nlayer;
+        this.nlayer = nlayer;
         this.grid = grid;
         stack = new TiledVariable[nlayer];
     }
-    
+
     protected boolean updateNeeded(double time, int time_arrow) {
         return (time_arrow * time >= time_arrow * stack[1].getTimeStamp());
     }
@@ -102,10 +102,23 @@ public abstract class AbstractDatasetVariable implements IVariable {
     public double getDouble(double[] pGrid, double time) {
         return interpolateIDW(pGrid, time, IDW_RADIUS, IDW_POWER);
     }
-    
+
     @Override
     public double getDouble(int i, int j, int k) {
         return stack[0].getDouble(i, j, k);
+    }
+
+    private double interpolateTime(int i, int j, int k, double dt) {
+
+        double value = 0;
+        if (dt > 0 && stack.length > 1) {
+            if (!(Double.isNaN(stack[0].getDouble(i, j, k)) || Double.isNaN(stack[1].getDouble(i, j, k)))) {
+                value = (1.d - dt) * stack[0].getDouble(i, j, k) + dt * stack[1].getDouble(i, j, k);
+            }
+        } else if (!(Double.isNaN(stack[0].getDouble(i, j, k)))) {
+            value = stack[0].getDouble(i, j, k);
+        }
+        return value;
     }
 
     // interpolate Inverse Distance Weight
@@ -118,16 +131,16 @@ public abstract class AbstractDatasetVariable implements IVariable {
         int i = coast ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = coast ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = coast ? (int) Math.round(pGrid[2]) : (int) pGrid[2];
-        double dt = Math.abs((time - stack[0].getTimeStamp()) / (stack[1].getTimeStamp() - stack[0].getTimeStamp()));
+        double dt = stack.length > 1
+                ? Math.abs((time - stack[0].getTimeStamp()) / (stack[1].getTimeStamp() - stack[0].getTimeStamp()))
+                : 0.d;
         double CO = 0.d;
 
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
             // pGrid falls on a grid point
             CO = 1.d;
             i = grid.xTore(i);
-            if (!(Double.isNaN(stack[0].getDouble(i, j, k)) || Double.isNaN(stack[1].getDouble(i, j, k)))) {
-                value = (1.d - dt) * stack[0].getDouble(i, j, k) + dt * stack[1].getDouble(i, j, k);
-            }
+            value = interpolateTime(i, j, k, dt);
         } else {
             for (int ii = n[0]; ii < n[1]; ii++) {
                 for (int jj = n[0]; jj < n[1]; jj++) {
@@ -139,10 +152,7 @@ public abstract class AbstractDatasetVariable implements IVariable {
                         }
                         double co = weight(pGrid, new int[]{i + ii, cj, k + kk}, p);
                         CO += co;
-                        if (!(Double.isNaN(stack[0].getDouble(ci, cj, k + kk)) || Double.isNaN(stack[1].getDouble(ci, cj, k + kk)))) {
-                            double x = (1.d - dt) * stack[0].getDouble(ci, cj, k + kk) + dt * stack[1].getDouble(ci, cj, k + kk);
-                            value += x * co;
-                        }
+                        value += interpolateTime(ci, cj, k + kk, dt) * co;
                     }
                 }
             }
