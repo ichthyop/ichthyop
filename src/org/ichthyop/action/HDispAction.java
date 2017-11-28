@@ -55,6 +55,7 @@ package org.ichthyop.action;
 import java.util.Random;
 import org.ichthyop.util.MTRandom;
 import org.ichthyop.particle.IParticle;
+import org.ichthyop.particle.OceanGridParticle;
 
 /**
  * Simulates horizontal dispersion.
@@ -84,6 +85,10 @@ public class HDispAction extends AbstractAction {
 
     private double cff;
     private Random random1, random2;
+    private final double TWO_THIRD = 2.d / 3.d;
+    private final double TWO_PI = 2.d * Math.PI;
+    private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    private final double TO_RADIAN = Math.PI / 180.d;
 
     @Override
     public String getKey() {
@@ -97,10 +102,9 @@ public class HDispAction extends AbstractAction {
         random2 = new MTRandom();
         double epsilon = getConfiguration().getDouble("action.hdisp.epsilon");
         double epsilon16 = Math.pow(epsilon, 1.d / 6.d);
-        double dL = getConfiguration().getDouble("action.hdisp.subgrid_scale");
         double dt = getSimulationManager().getTimeManager().get_dt();
         // pre-computation
-        cff = Math.sqrt(2.d * Math.abs(dt)) * epsilon16 * Math.pow(dL, 2.d / 3.d);
+        cff = Math.sqrt(2.d * Math.abs(dt)) * epsilon16 / ONE_DEG_LATITUDE_IN_METER;
     }
 
     @Override
@@ -111,7 +115,16 @@ public class HDispAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        particle.incrLat((2.d * random1.nextDouble() - 1.d) * cff);
-        particle.incrLon((2.d * random2.nextDouble() - 1.d) * cff);
+        double[] xyz = OceanGridParticle.xyz(particle);
+        int i = (int) Math.round(xyz[0]);
+        int j = (int) Math.round(xyz[1]);
+        double dL = 0.5 * (getSimulationManager().getGrid().get_dx(i, j)
+                + getSimulationManager().getGrid().get_dy(i, j));
+        double distance = (2.d * random1.nextDouble() - 1.d) * cff * Math.pow(dL, TWO_THIRD);
+        double theta = TWO_PI * random2.nextDouble();
+        double dlat = distance * Math.sin(theta);
+        double dlon = distance * Math.cos(theta) / Math.cos(particle.getLat() * TO_RADIAN);
+        particle.incrLat(dlat);
+        particle.incrLon(dlon);
     }
 }
