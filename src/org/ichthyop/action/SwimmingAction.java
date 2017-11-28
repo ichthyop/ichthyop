@@ -59,8 +59,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import org.ichthyop.util.IOTools;
 import org.ichthyop.particle.IParticle;
+import org.ichthyop.util.MTRandom;
 
 /**
  * This class simulates active swimming, given the swimming velocity as an age
@@ -77,12 +79,15 @@ import org.ichthyop.particle.IParticle;
 public class SwimmingAction extends AbstractAction {
 
     // speed in m/s
-    private float[] speeds;
+    private double[] speeds;
     // ages in seconds
-    private float[] ages;
+    private double[] ages;
     private double dt;
-    private boolean cruising;
+    private boolean constant;
+    private final double TWO_PI = 2.d * Math.PI;
     private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    private final double TO_RADIAN = Math.PI / 180.d;
+    private Random random1, random2;
 
     @Override
     public String getKey() {
@@ -107,54 +112,49 @@ public class SwimmingAction extends AbstractAction {
         CSVReader reader = new CSVReader(new FileReader(pathname), ';');
         List<String[]> lines = reader.readAll();
         // init arrays
-        ages = new float[lines.size() - 1];
-        speeds = new float[ages.length];
+        ages = new double[lines.size() - 1];
+        speeds = new double[ages.length];
         // read ages (days converted to seconds) and velocities
         for (int i = 0; i < ages.length; i++) {
             String[] line = lines.get(i + 1);
             if (line.length < 2 || line[0].isEmpty()) {
                 continue;
             }
-            ages[i] = Float.valueOf(line[0]) * 3600.f * 24.f;
-            speeds[i] = Float.valueOf(line[1]);
+            ages[i] = Double.valueOf(line[0]) * 3600.d * 24.d;
+            speeds[i] = Double.valueOf(line[1]);
         }
 
         // Simulation time step
         dt = getSimulationManager().getTimeManager().get_dt();
 
-        // Whether the velocity should be considered as maximal velocity or cruising velocity
-        cruising = getConfiguration().getString("action.swimming.velocity_type").equalsIgnoreCase("cruising");
+        // Whether the velocity should be constant or random
+        constant = getConfiguration().getBoolean("action.swimming.constant_velocity");
+        
+        // Random number generator
+        random1 = new MTRandom();
+        random2 = new MTRandom();
     }
 
     @Override
     public void execute(IParticle particle) {
 
-        // Find the swimming velocity for this particle
-        double speed = getSpeed(particle) * (cruising ? 1.d : Math.random());
-        double[] move = randomMove(speed * dt, particle.getLat());
+        // find the swimming velocity for this particle
+        double speed = getSpeed(particle) * (constant ? 1.d : 2 * random1.nextDouble());
+        // convert it to a move in a random direction
+        System.out.println((particle.getAge() / (3600.d * 24.d)) + " " + speed);
+        double distance = speed * dt / ONE_DEG_LATITUDE_IN_METER;
+        double theta = TWO_PI * random2.nextDouble();
+        double dlon = distance * Math.cos(theta) / Math.cos(particle.getLat() * TO_RADIAN);
+        double dlat = distance * Math.sin(theta);
 
-        // Move the particle
-        particle.incrLat(move[0]);
-        particle.incrLat(move[1]);
+        // move the particle
+        particle.incrLat(dlat);
+        particle.incrLon(dlon);
     }
 
     @Override
     public void init(IParticle particle) {
         // nothing to do
-    }
-
-    private double[] randomMove(double radius, double lat) {
-
-        // Convert radius from meters to degrees
-        double radiusInDegrees = radius / ONE_DEG_LATITUDE_IN_METER;
-        double u = Math.random();
-        double v = Math.random();
-        double w = radiusInDegrees * Math.sqrt(u);
-        double t = 2 * Math.PI * v;
-        double dlon = w * Math.cos(t) / Math.cos(Math.PI * lat / 180.d);
-        double dlat = w * Math.sin(t);
-
-        return new double[]{dlat, dlon};
     }
 
     /**
@@ -163,7 +163,7 @@ public class SwimmingAction extends AbstractAction {
      * @param particle
      * @return the swimming velocity of the particle in m.s-1
      */
-    private float getSpeed(IParticle particle) {
+    private double getSpeed(IParticle particle) {
         float age = particle.getAge();
         for (int i = 0; i < ages.length - 1; i++) {
             if (ages[i] <= age && age < ages[i + 1]) {
