@@ -172,10 +172,6 @@ public class TiledVariable extends IchthyopLinker {
         closeSource();
     }
 
-    public double getDouble(int i, int j) {
-        return getDouble(i, j, 0);
-    }
-
     public double getDouble(int i, int j, int k) {
 
         int tag = ijk2tag(i, j, k);

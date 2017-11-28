@@ -53,7 +53,7 @@
 package org.ichthyop.action;
 
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.OceanGridParticle;
+import org.ichthyop.particle.GriddedParticle;
 import org.ichthyop.particle.Particle;
 import org.ichthyop.particle.ParticleMortality;
 
@@ -79,7 +79,7 @@ public class SysActionMove extends AbstractAction {
 
         if (!particle.isLocked()) {
             checkCoastlineAndMove(particle);
-            if (OceanGridParticle.isOnEdge(particle)) {
+            if (GriddedParticle.isOnEdge(particle)) {
                 particle.kill(ParticleMortality.OUT_OF_DOMAIN);
                 return;
             }
@@ -101,7 +101,7 @@ public class SysActionMove extends AbstractAction {
                  * particle inland.
                  */
                 p.applyMove();
-                OceanGridParticle.update(particle);
+                GriddedParticle.update(particle);
                 break;
             case BEACHING:
                 /*
@@ -109,8 +109,8 @@ public class SysActionMove extends AbstractAction {
                  * and lead to a beaching.
                  */
                 p.applyMove();
-                OceanGridParticle.update(particle);
-                if (!OceanGridParticle.isInWater(particle)) {
+                GriddedParticle.update(particle);
+                if (!GriddedParticle.isInWater(particle)) {
                     particle.kill(ParticleMortality.BEACHED);
                 }
                 break;
@@ -119,7 +119,7 @@ public class SysActionMove extends AbstractAction {
                  * The particle will act exactly as a billard ball.
                  */
                 move = p.getMove();
-                double[] xyz = OceanGridParticle.xyz(particle);
+                double[] xyz = GriddedParticle.xyz(particle);
                 double[] nxyz = xyz(particle.getLat() + move[0], particle.getLon() + move[1], particle.getDepth() + move[2]);
                 double[] bounce = bounceCostline(xyz[0], xyz[1], nxyz[0] - xyz[0], nxyz[1] - xyz[1]);
                 double[] nlatlon = getSimulationManager().getGrid().xy2latlon(xyz[0] + bounce[0], xyz[1] + bounce[1]);
@@ -140,7 +140,7 @@ public class SysActionMove extends AbstractAction {
                     particle.incrDepth(-move[2]);
                 }
                 p.applyMove();
-                OceanGridParticle.update(particle);
+                GriddedParticle.update(particle);
                 break;
         }
     }
@@ -217,7 +217,7 @@ public class SysActionMove extends AbstractAction {
 
     @Override
     public void init(IParticle particle) {
-        OceanGridParticle.update(particle);
+        GriddedParticle.update(particle);
     }
 
     public enum CoastlineBehavior {

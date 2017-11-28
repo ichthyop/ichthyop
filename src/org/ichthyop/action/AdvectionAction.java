@@ -54,7 +54,7 @@ package org.ichthyop.action;
 
 import org.ichthyop.dataset.AbstractOceanDataset;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.OceanGridParticle;
+import org.ichthyop.particle.GriddedParticle;
 import org.ichthyop.particle.ParticleMortality;
 
 /**
@@ -117,7 +117,7 @@ public class AdvectionAction extends AbstractAction {
     public void execute(IParticle particle) {
 
         double time = getSimulationManager().getTimeManager().getTime();
-        double[] xyz = OceanGridParticle.xyz(particle);
+        double[] xyz = GriddedParticle.xyz(particle);
         double dt = getSimulationManager().getTimeManager().get_dt();
         double[] mvt;
         try {

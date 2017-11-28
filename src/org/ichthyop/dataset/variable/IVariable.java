@@ -58,8 +58,8 @@ package org.ichthyop.dataset.variable;
  */
 public interface IVariable {
     
-    public double getDouble(double[] pGrid, double time);
+    public double getDouble(double[] xyz, double time);
     
-    public double getDouble(int i, int j);
+    public double getDouble(int i, int j, int k);
     
 }

@@ -108,8 +108,7 @@ public class BathymetryDataset extends AbstractDataset {
         return new ConstantDatasetVariable(file, name, grid, tilingh, 1);
     }
 
-    public double getBathymetry(double lat, double lon) {
-        double[] xy = grid.latlon2xy(lat, lon);
-        return getVariable(fullname).getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]));
+    public double getBathymetry(double[] xy) {
+        return getVariable(fullname).getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]), 0);
     }
 }

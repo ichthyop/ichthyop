@@ -57,7 +57,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.ichthyop.dataset.BathymetryDataset;
+import java.util.Set;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import org.ichthyop.dataset.IDataset;
@@ -124,6 +124,10 @@ public class DatasetManager extends AbstractManager {
             error("[dataset] Dataset instantiation failed " + key, ex);
         }
         return null;
+    }
+    
+    public Set<String> getDatasetKeys() {
+        return datasets.keySet();
     }
     
     public IDataset getDataset(String key) {

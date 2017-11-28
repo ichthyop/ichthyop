@@ -55,7 +55,7 @@ package org.ichthyop.action;
 import java.util.Random;
 import org.ichthyop.util.MTRandom;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.OceanGridParticle;
+import org.ichthyop.particle.GriddedParticle;
 
 /**
  * Simulates horizontal dispersion.
@@ -115,7 +115,7 @@ public class HDispAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
 
-        double[] xyz = OceanGridParticle.xyz(particle);
+        double[] xyz = GriddedParticle.xyz(particle);
         int i = (int) Math.round(xyz[0]);
         int j = (int) Math.round(xyz[1]);
         double dL = 0.5 * (getSimulationManager().getGrid().get_dx(i, j)

@@ -57,7 +57,7 @@ import java.util.List;
 import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.OceanGridParticle;
+import org.ichthyop.particle.GriddedParticle;
 
 /**
  *
@@ -117,7 +117,7 @@ public class OffshoreSwimming extends AbstractAction {
 
         double lat0 = particle.getLat();
         double lon0 = particle.getLon();
-        double[] xyz = OceanGridParticle.xyz(particle);
+        double[] xyz = GriddedParticle.xyz(particle);
         int i0 = (int) Math.round(xyz[0]);
         int j0 = (int) Math.round(xyz[1]);
         int n = 1;

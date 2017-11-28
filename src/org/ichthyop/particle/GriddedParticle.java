@@ -58,26 +58,32 @@ import org.ichthyop.IchthyopLinker;
  *
  * @author pverley
  */
-public class OceanGridParticle extends IchthyopLinker {
-    
-    private final static String OCEAN_XYZ = "ocean_dataset.xyz";
+public class GriddedParticle extends IchthyopLinker {
+
+    private final static String XYZ = ".xyz";
+
+    public static double[] xyz(IParticle particle, String datasetKey) {
+        return (double[]) particle.get(datasetKey + XYZ);
+    }
     
     public static double[] xyz(IParticle particle) {
-        return (double[]) particle.get(OCEAN_XYZ);
+        return (double[]) particle.get(getSimulationManager().getDatasetManager().getOceanDataset().getKey() + XYZ);
     }
-    
+
     public static void update(IParticle particle) {
-        
-        double[] xy = getSimulationManager().getGrid().latlon2xy(particle.getLat(), particle.getLon());
-        double z = getSimulationManager().getGrid().depth2z(xy[0], xy[1], particle.getDepth());
-        particle.set(OCEAN_XYZ, new double[] {xy[0], xy[1], z});
+
+        for (String key : getSimulationManager().getDatasetManager().getDatasetKeys()) {
+            double[] xy = getSimulationManager().getDatasetManager().getDataset(key).getGrid().latlon2xy(particle.getLat(), particle.getLon());
+            double z = getSimulationManager().getDatasetManager().getDataset(key).getGrid().depth2z(xy[0], xy[1], particle.getDepth());
+            particle.set(key + XYZ, new double[]{xy[0], xy[1], z});
+        }
     }
-    
+
     public static boolean isOnEdge(IParticle particle) {
         return getSimulationManager().getGrid().isOnEdge(xyz(particle));
-    } 
-    
+    }
+
     public static boolean isInWater(IParticle particle) {
         return getSimulationManager().getGrid().isInWater(xyz(particle));
-    } 
+    }
 }

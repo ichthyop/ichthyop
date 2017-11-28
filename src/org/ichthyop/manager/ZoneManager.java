@@ -64,6 +64,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import static org.ichthyop.IchthyopLinker.getSimulationManager;
 import org.ichthyop.dataset.BathymetryDataset;
+import org.ichthyop.particle.GriddedParticle;
 import org.ichthyop.particle.IParticle;
 
 /**
@@ -121,28 +122,31 @@ public class ZoneManager extends AbstractManager {
     }
 
     private boolean isInside(IParticle particle, String key) {
+        
         Zone zone = zones.get(key);
         boolean inside = true;
         if (zone.isEnabledDepthMask()) {
             double depth = Math.abs(particle.getDepth());
             inside = depth <= zone.getLowerDepth() & depth >= zone.getUpperDepth();
         }
-        return inside && isInside(particle.getLat(), particle.getLon(), key);
+        if (inside && zone.isEnabledBathyMask() && null != bathymetry) {
+            double[] xyz = GriddedParticle.xyz(particle, bathymetry.getKey());
+            double bathy = bathymetry.getBathymetry(xyz);
+            inside = (bathy > zone.getInshoreLine()) & (bathy < zone.getOffshoreLine());
+        }
+        return inside && isInside(particle.getLat(), particle.getLon(), zone.getLat(), zone.getLon());
     }
 
     public boolean isInside(double lat, double lon, String key) {
+        
         Zone zone = zones.get(key);
         boolean inside = true;
         if (zone.isEnabledBathyMask() && null != bathymetry) {
-            double bathy = bathymetry.getBathymetry(lat, lon);
+            double[] xy = bathymetry.getGrid().latlon2xy(lat, lon);
+            double bathy = bathymetry.getBathymetry(xy);
             inside = (bathy > zone.getInshoreLine()) & (bathy < zone.getOffshoreLine());
         }
         return inside && isInside(lat, lon, zone.getLat(), zone.getLon());
-    }
-
-    public boolean isInside(int i, int j, String key) {
-        double[] latlon = getSimulationManager().getGrid().xy2latlon(i, j);
-        return isInside(latlon[0], latlon[1], key);
     }
 
     /*

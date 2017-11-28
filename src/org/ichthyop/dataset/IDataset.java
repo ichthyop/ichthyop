@@ -62,6 +62,8 @@ import org.ichthyop.grid.IGrid;
  * @author pverley
  */
 public interface IDataset extends NextStepListener {
+    
+    public String getKey();
 
     public void setUp() throws Exception ;
     

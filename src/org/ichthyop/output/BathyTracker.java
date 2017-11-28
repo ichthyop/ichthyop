@@ -53,6 +53,7 @@
 package org.ichthyop.output;
 
 import org.ichthyop.dataset.BathymetryDataset;
+import org.ichthyop.particle.GriddedParticle;
 import org.ichthyop.particle.IParticle;
 
 /**
@@ -69,6 +70,6 @@ public class BathyTracker extends FloatTracker {
 
     @Override
     public float getValue(IParticle particle) {
-        return (float) bathymetry.getBathymetry(particle.getLat(), particle.getLon());
+        return (float) bathymetry.getBathymetry(GriddedParticle.xyz(particle, "dataset.bathymetry"));
     }
 }

@@ -104,8 +104,8 @@ public abstract class AbstractDatasetVariable implements IVariable {
     }
     
     @Override
-    public double getDouble(int i, int j) {
-        return stack[0].getDouble(i, j);
+    public double getDouble(int i, int j, int k) {
+        return stack[0].getDouble(i, j, k);
     }
 
     // interpolate Inverse Distance Weight

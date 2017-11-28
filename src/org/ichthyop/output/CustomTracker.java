@@ -55,7 +55,7 @@ package org.ichthyop.output;
 
 import org.ichthyop.action.SysActionMove;
 import org.ichthyop.particle.IParticle;
-import org.ichthyop.particle.OceanGridParticle;
+import org.ichthyop.particle.GriddedParticle;
 
 /**
  *
@@ -77,7 +77,7 @@ public class CustomTracker extends FloatTracker {
 
     @Override
     public float getValue(IParticle particle) {
-        double[] xyz = OceanGridParticle.xyz(particle);
+        double[] xyz = GriddedParticle.xyz(particle);
         return (float) getSimulationManager().getOceanDataset().getVariable(variableName).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
     }
 }
