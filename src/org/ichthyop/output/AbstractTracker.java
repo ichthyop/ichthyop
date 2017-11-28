@@ -159,8 +159,12 @@ public abstract class AbstractTracker extends IchthyopLinker {
         return origin;
     }
 
-    public String getName() {
+    public String getVariableName() {
         return propertyManager.getProperty("tracker.shortname");
+    }
+    
+    public String getDatasetKey() {
+        return getSimulationManager().getOceanDataset().getKey();
     }
 
     void addAttribute(Attribute attribute) {

@@ -135,7 +135,7 @@ public class LethalTempAction extends AbstractAction {
             // do nothing and just add the tracker
         }
         if (addTracker) {
-            getSimulationManager().getOutputManager().addCustomTracker(temperature_field);
+            getSimulationManager().getOutputManager().addCustomTracker(getSimulationManager().getOceanDataset().getKey(), temperature_field);
         }
     }
     

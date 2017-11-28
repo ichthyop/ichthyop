@@ -50,10 +50,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.output;
 
-import org.ichthyop.action.SysActionMove;
+import org.ichthyop.manager.OutputManager;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.GriddedParticle;
 
@@ -63,21 +62,28 @@ import org.ichthyop.particle.GriddedParticle;
  */
 public class CustomTracker extends FloatTracker {
 
+    private final String datasetKey;
     private final String variableName;
 
-    public CustomTracker(String variableName) {
-        this.variableName = variableName;
-        getSimulationManager().getOceanDataset().requireVariable(variableName, getClass());
+    public CustomTracker(String tracker) {
+        datasetKey = tracker.substring(0, tracker.indexOf('#'));
+        variableName = tracker.substring(tracker.indexOf('#') + 1);
+        getSimulationManager().getDatasetManager().getDataset(datasetKey).requireVariable(variableName, OutputManager.class);
     }
 
     @Override
-    public String getName() {
+    public String getVariableName() {
         return variableName;
     }
 
     @Override
+    public String getDatasetKey() {
+        return datasetKey;
+    }
+
+    @Override
     public float getValue(IParticle particle) {
-        double[] xyz = GriddedParticle.xyz(particle);
-        return (float) getSimulationManager().getOceanDataset().getVariable(variableName).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
+        double[] xyz = GriddedParticle.xyz(particle, datasetKey);
+        return (float) getSimulationManager().getDatasetManager().getDataset(datasetKey).getVariable(variableName).getDouble(xyz, getSimulationManager().getTimeManager().getTime());
     }
 }
