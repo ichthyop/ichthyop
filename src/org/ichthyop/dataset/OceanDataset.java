@@ -2,7 +2,7 @@
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -53,27 +53,60 @@
 package org.ichthyop.dataset;
 
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
-import org.ichthyop.dataset.variable.OpendapDatasetVariable;
+import org.ichthyop.dataset.variable.WDatasetVariable;
 
 /**
  *
  * @author pverley
  */
-public class Hycom3dOpendapDataset extends Hycom3dCommon {
+public class OceanDataset extends AbstractDataset {
 
-    private String url;
+    private String variable_u;
+    private String variable_v;
+    private String variable_w;
 
-    public Hycom3dOpendapDataset(String prefix) {
+    // constructor
+    public OceanDataset(String prefix) {
         super(prefix);
     }
 
     @Override
     void loadParameters() {
-        url = getConfiguration().getString("dataset.hycom_3d_opendap.opendap_url");
+
+        variable_u = getConfiguration().getString(prefix + ".variable.u");
+        variable_v = getConfiguration().getString(prefix + ".variable.v");
+        requireVariable(variable_u, getClass());
+        requireVariable(variable_v, getClass());
+        if (grid.get_nz() > 1) {
+            if (!getConfiguration().isNull(prefix + ".variable.w")) {
+                variable_w = getConfiguration().getString(prefix + ".variable.w");
+                requireVariable(variable_v, getClass());
+            } else {
+                variable_w = "ocean_dataset_w";
+                variables.put("ocean_dataset_w", createWVariable());
+            }
+        }
     }
     
-    @Override
-    AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
-        return new OpendapDatasetVariable(url, name, nlayer, grid, tilingh, tilingv);
+    AbstractDatasetVariable createWVariable() {
+        int tilingv = Math.max(TILING_H * TILING_V / grid.get_nz(), 1);
+        return new WDatasetVariable(
+                createVariable(variable_u, NLAYER, tilingv, grid.get_nz()),
+                createVariable(variable_v, NLAYER, tilingv, grid.get_nz()),
+                grid);
+    }
+
+    public double getU(double[] pGrid, double time) {
+        return getVariable(variable_u).getDouble(pGrid, time);
+    }
+
+    public double getV(double[] pGrid, double time) {
+        return getVariable(variable_v).getDouble(pGrid, time);
+    }
+
+    public double getW(double[] pGrid, double time) {
+        return variable_w != null 
+                ? getVariable(variable_w).getDouble(pGrid, time)
+                : 0.d;
     }
 }

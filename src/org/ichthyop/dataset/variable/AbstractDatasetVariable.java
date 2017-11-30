@@ -53,7 +53,11 @@
 package org.ichthyop.dataset.variable;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import org.ichthyop.grid.IGrid;
+import static org.ichthyop.logging.IchthyopLogger.getLogger;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  *
@@ -175,6 +179,13 @@ public abstract class AbstractDatasetVariable implements IVariable {
             distance += Math.abs(Math.pow(xyz[n] - ijk[n], power));
         }
         return 1.d / distance;
+    }
+    
+    NetcdfFile open(String location, boolean enhanced) throws IOException {
+        NetcdfFile nc;
+        getLogger().log(Level.FINE, "[dataset] Opening {0}", location);
+        nc = NetcdfDataset.openDataset(location, enhanced, null);
+        return nc;
     }
 
 }

@@ -66,7 +66,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
 import org.ichthyop.calendar.InterannualCalendar;
-import org.ichthyop.dataset.AbstractOceanDataset;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.logging.IchthyopLogger;
 import org.ichthyop.logging.StdoutHandler;
@@ -77,7 +76,7 @@ import org.ichthyop.logging.StdoutHandler;
  */
 public class SimulationManager extends IchthyopLogger {
 
-    final private static SimulationManager simulationManager = new SimulationManager();
+    final private static SimulationManager SIMULATION_MANAGER = new SimulationManager();
     /**
      * Listeners list for SetupEvent and InitializeEvent.
      */
@@ -102,7 +101,7 @@ public class SimulationManager extends IchthyopLogger {
     /**
      * The date format used for generating the id of the simulation
      */
-    private static final SimpleDateFormat dtformatterId = new SimpleDateFormat("yyyyMMddHHmm");
+    private static final SimpleDateFormat SDFORMAT = new SimpleDateFormat("yyyyMMddHHmm");
     /*
      * Whether the simulation has been setup or not 
      */
@@ -113,7 +112,7 @@ public class SimulationManager extends IchthyopLogger {
      * @return
      */
     public static SimulationManager getInstance() {
-        return simulationManager;
+        return SIMULATION_MANAGER;
     }
 
     public void setupLogger() {
@@ -154,8 +153,8 @@ public class SimulationManager extends IchthyopLogger {
         StringBuilder strBfRunId = new StringBuilder("ichthyop-run");
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        dtformatterId.setCalendar(calendar);
-        strBfRunId.append(dtformatterId.format(calendar.getTime()));
+        SDFORMAT.setCalendar(calendar);
+        strBfRunId.append(SDFORMAT.format(calendar.getTime()));
         return strBfRunId.toString();
     }
 

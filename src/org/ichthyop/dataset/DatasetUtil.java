@@ -60,7 +60,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.util.IOTools;
 import org.ichthyop.util.MetaFilenameFilter;
 import org.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
@@ -83,27 +82,42 @@ public class DatasetUtil extends IchthyopLinker {
      * List directory content with file pattern accepting * and ?
      * metacharacters. Not recursive.
      *
-     * @param path, a String the directory
+     * @param filepath, a String the directory
      * @param pattern, the file pattern with either * or ? metacharacters.
      * @return the list of files matching the pattern, alphabetically sorted.
-     * @throws IOException if no file match the pattern
      */
-    public static List<String> list(String path, String pattern) throws IOException {
+    public static List<String> list(String filepath, String pattern, boolean recursive) {
         List<String> list = new ArrayList();
 
-        File inputPath = new File(IOTools.resolvePath(path));
-        if (!inputPath.isDirectory()) {
-            throw new IOException("{Dataset} " + inputPath + " is not a valid directory.");
-        }
-        File[] listFile = inputPath.listFiles(new MetaFilenameFilter(pattern));
-        if (listFile.length > 0) {
-            list = new ArrayList(listFile.length);
-            for (File file : listFile) {
-                list.add(file.toString());
+        File path = new File(filepath);
+
+        if (path.isDirectory()) {
+            File[] listFile = path.listFiles(new MetaFilenameFilter(pattern));
+            if (listFile.length > 0) {
+                list = new ArrayList(listFile.length);
+                for (File file : listFile) {
+                    list.add(file.toString());
+                }
             }
-            Collections.sort(list);
+            if (recursive) {
+                File[] subdirectories = path.listFiles((file) -> {
+                    return file.isDirectory();
+                });
+                for (File subdirectory : subdirectories) {
+                    list.addAll(list(subdirectory.getAbsolutePath(), pattern, recursive));
+                }
+            }
         }
+        Collections.sort(list);
         return list;
+    }
+
+    public static boolean isValidDataset(String location) {
+        try (NetcdfFile nc = NetcdfDataset.openDataset(location, true, null)) {
+        } catch (IOException ex) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -234,7 +248,7 @@ public class DatasetUtil extends IchthyopLinker {
         }
         return index + 1;
     }
-    
+
     public static boolean hasNext(List<String> list, int index) {
         return (index + 1) < list.size();
     }

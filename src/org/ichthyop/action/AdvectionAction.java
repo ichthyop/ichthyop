@@ -52,7 +52,7 @@
  */
 package org.ichthyop.action;
 
-import org.ichthyop.dataset.AbstractOceanDataset;
+import org.ichthyop.dataset.OceanDataset;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.particle.GriddedParticle;
 import org.ichthyop.particle.ParticleMortality;
@@ -146,8 +146,8 @@ public class AdvectionAction extends AbstractAction {
         }
     }
 
-    private AbstractOceanDataset getDataset() {
-        return (AbstractOceanDataset) getSimulationManager().getOceanDataset();
+    private OceanDataset getDataset() {
+        return (OceanDataset) getSimulationManager().getOceanDataset();
     }
 
     private double[] computeMove(double xyz[], double time, double dt) {

@@ -64,15 +64,15 @@ import ucar.nc2.NetcdfFile;
  */
 public class NetcdfDatasetVariable extends AbstractDatasetVariable {
 
-    private final List<String> files;
+    private final List<String> locations;
     private final String name;
     private final int tilingh;
     private final int tilingv;
     private int index;
 
-    public NetcdfDatasetVariable(List<String> files, String name, int nlayer, IGrid grid, int tilingh, int tilingv) {
+    public NetcdfDatasetVariable(List<String> locations, String name, int nlayer, IGrid grid, int tilingh, int tilingv) {
         super(nlayer, grid);
-        this.files = files;
+        this.locations = locations;
         this.name = name;
         this.tilingh = tilingh;
         this.tilingv = tilingv;
@@ -82,7 +82,9 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
     public void init(double t0, int time_arrow) throws IOException {
 
         double time = t0;
-        index = DatasetUtil.index(files, time, time_arrow, "time");
+        index = locations.size() > 1 
+                ? DatasetUtil.index(locations, time, time_arrow, "time")
+                : 0;
         NetcdfFile nc = getNC();
         int rank = DatasetUtil.rank(time, nc, "time", time_arrow) - time_arrow;
         for (int ilayer = 0; ilayer < nlayer - 1; ilayer++) {
@@ -90,9 +92,9 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
             int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
             if (rank > (ntime - 1) || rank < 0) {
                 nc.close();
-                if (DatasetUtil.hasNext(files, index)) {
-                    index = DatasetUtil.next(files, index, time_arrow);
-                    nc = DatasetUtil.openFile(files.get(index), true);
+                if (DatasetUtil.hasNext(locations, index)) {
+                    index = DatasetUtil.next(locations, index, time_arrow);
+                    nc = DatasetUtil.openFile(locations.get(index), true);
                     ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
                     rank = (1 - time_arrow) / 2 * (ntime - 1);
                     time = DatasetUtil.timeAtRank(nc, "time", rank);
@@ -119,10 +121,10 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
             rank = DatasetUtil.rank(time, nc, "time", time_arrow);
             rank += (nlayer - 1) * time_arrow;
             if (rank > (ntime - 1) || rank < 0) {
-                if (DatasetUtil.hasNext(files, index)) {
+                if (DatasetUtil.hasNext(locations, index)) {
                     nc.close();
-                    index = DatasetUtil.next(files, index, time_arrow);
-                    nc = DatasetUtil.openFile(files.get(index), true);
+                    index = DatasetUtil.next(locations, index, time_arrow);
+                    nc = DatasetUtil.openFile(locations.get(index), true);
                     ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
                     rank = (1 - time_arrow) / 2 * (ntime - 1);
                     time = DatasetUtil.timeAtRank(nc, "time", rank);
@@ -139,6 +141,6 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
     }
 
     private NetcdfFile getNC() throws IOException {
-        return DatasetUtil.openFile(files.get(index), true);
+        return open(locations.get(index), true);
     }
 }

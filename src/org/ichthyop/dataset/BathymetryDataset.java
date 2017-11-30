@@ -58,9 +58,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.dataset.variable.ConstantDatasetVariable;
-import org.ichthyop.grid.AbstractRegularGrid;
-import org.ichthyop.grid.RectilinearGrid;
-import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -68,7 +65,6 @@ import ucar.nc2.NetcdfFile;
  */
 public class BathymetryDataset extends AbstractDataset {
 
-    private String file;
     private String fullname;
 
     public BathymetryDataset(String prefix) {
@@ -76,36 +72,26 @@ public class BathymetryDataset extends AbstractDataset {
     }
 
     @Override
-    AbstractRegularGrid createGrid() {
-        return new RectilinearGrid(prefix);
-    }
-
-    @Override
     public void loadParameters() {
-        
-        file = getConfiguration().getFile(prefix + ".file");
-        try (NetcdfFile nc = DatasetUtil.openFile(file, true)) {
-            List<String> varnames = new ArrayList(Arrays.asList(new String[]{"bathy", "bathymetry", "topo", "topography"}));
-            if (!getConfiguration().isNull(prefix + ".variable")) {
-                varnames.add(0, getConfiguration().getString(prefix + ".variable"));
-            }
 
-            for (String name : varnames) {
-                fullname = DatasetUtil.findVariable(nc, name);
-                if (null != fullname) {
-                    requireVariable(fullname, getClass());
-                    return;
-                }
-            }
-            throw new IOException("Bathymetry variable not found");
-        } catch (IOException ex) {
-            error("[bathymetry] Failed to load bathymetry dataset \"" + prefix + ".*\"", ex);
+        List<String> varnames = new ArrayList(Arrays.asList(new String[]{"bathy", "bathymetry", "topo", "topography"}));
+        if (!getConfiguration().isNull(prefix + ".variable")) {
+            varnames.add(0, getConfiguration().getString(prefix + ".variable"));
         }
+
+        for (String name : varnames) {
+            if (variableMap.containsKey(name)) {
+                fullname = name;
+                requireVariable(fullname, getClass());
+                return;
+            }
+        }
+        error("[dataset] Failed to load bathymetry dataset \"" + prefix + ".*\"", new IOException("Bathymetry variable not found"));
     }
 
     @Override
     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
-        return new ConstantDatasetVariable(file, name, grid, tilingh, 1);
+        return new ConstantDatasetVariable(variableMap.get(name).get(0), name, grid, tilingh, 1);
     }
     
     public String getVariableName() {

@@ -52,7 +52,11 @@
  */
 package org.ichthyop.dataset;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import org.ichthyop.grid.AbstractRegularGrid;
 import java.util.HashMap;
 import java.util.List;
@@ -60,10 +64,14 @@ import org.ichthyop.event.NextStepListener;
 import org.ichthyop.IchthyopLinker;
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.dataset.variable.IVariable;
+import org.ichthyop.dataset.variable.NetcdfDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.manager.TimeManager;
+import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  *
@@ -78,23 +86,34 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     // variables
     final HashMap<String, AbstractDatasetVariable> variables = new HashMap();
     // names of the variables
-    final HashMap<String, List<String>> names = new HashMap();
+    final HashMap<String, List<String>> requiredBy = new HashMap();
     // dataset grid
     AbstractRegularGrid grid;
     // prefix in the configuration file
     final String prefix;
-    
+    private String location;
+    // 
+    final HashMap<String, List<String>> variableMap = new HashMap();
+
     // constructor
     public AbstractDataset(String prefix) {
         this.prefix = prefix;
+
     }
 
     abstract void loadParameters();
 
-    abstract AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv);
+    AbstractRegularGrid createGrid() {
+        String classname = getConfiguration().getString(prefix + ".grid.class_name");
 
-    abstract AbstractRegularGrid createGrid();
-    
+        try {
+            return (AbstractRegularGrid) Class.forName(classname).getConstructor(String.class).newInstance(prefix + ".grid");
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            error("[dataset] Failed to instantiate dataset grid " + prefix + ".grid", ex);
+        }
+        return null;
+    }
+
     @Override
     public String getKey() {
         return prefix;
@@ -103,17 +122,68 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     @Override
     public void setUp() throws Exception {
 
-        loadParameters();
-
+        this.location = getConfiguration().getString(prefix + ".location");
+        mapDatasetVariables(location);
+        if (variableMap.isEmpty()) {
+            error("Failed to list any variable in dataset " + prefix, new IOException("Invalid dataset location " + location));
+        }
+        // sort locations
+        for (String name : variableMap.keySet()) {
+            Collections.sort(variableMap.get(name));
+        }
+        
         grid = createGrid();
         grid.init();
+
+        loadParameters();
+    }
+
+    AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
+        return new NetcdfDatasetVariable(variableMap.get(name), name, nlayer, grid, tilingh, Math.min(tilingv, grid.get_nz()));
+    }
+
+    private void mapDatasetVariables(String source) {
+
+        if (DatasetUtil.isValidDataset(source)) {
+            try (NetcdfFile nc = NetcdfDataset.openDataset(source, true, null)) {
+                for (Variable variable : nc.getVariables()) {
+                    if (!variable.isCoordinateVariable()) {
+                        List<String> names = new ArrayList();
+                        names.add(variable.getFullName());
+                        Attribute sname = variable.findAttributeIgnoreCase("standard_name");
+                        if (null != sname) {
+                            names.add(sname.getStringValue());
+                        }
+                        Attribute lname = variable.findAttributeIgnoreCase("long_name");
+                        if (null != lname) {
+                            names.add(lname.getStringValue());
+                        }
+                        for (String name : names) {
+                            if (variableMap.containsKey(name)) {
+                                variableMap.get(name).add(nc.getLocation());
+                            } else {
+                                List<String> list = new ArrayList();
+                                list.add(nc.getLocation());
+                                variableMap.put(name, list);
+                            }
+                        }
+                    }
+                }
+            } catch (IOException ex) {
+                warning("Error listing non-coordinate variables from dataset " + source, ex);
+            }
+        } else if (new File(source).isDirectory()) {
+            for (File file : new File(source).listFiles()) {
+                mapDatasetVariables(file.getAbsolutePath());
+            }
+        }
     }
 
     @Override
     public void init() throws Exception {
 
         // instantiate dataset variables
-        for (String name : names.keySet()) {
+        for (String name : requiredBy.keySet()) {
             variables.put(name, createVariable(name, NLAYER, TILING_H, TILING_V));
         }
 
@@ -152,31 +222,29 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
 
     @Override
     public void requireVariable(String name, Class requiredBy) {
-        if (!names.containsKey(name)) {
-            names.put(name, new ArrayList());
+        if (!this.requiredBy.containsKey(name)) {
+            this.requiredBy.put(name, new ArrayList());
         }
-        names.get(name).add(requiredBy.getCanonicalName());
+        this.requiredBy.get(name).add(requiredBy.getCanonicalName());
     }
 
     public void clearRequiredVariables() {
-        names.clear();
+        requiredBy.clear();
         variables.clear();
+        variableMap.clear();
     }
 
     @Override
     public void removeRequiredVariable(String name, Class requiredBy) {
 
-        if (names.containsKey(name)) {
-            names.get(name).remove(requiredBy.getCanonicalName());
+        if (this.requiredBy.containsKey(name)) {
+            this.requiredBy.get(name).remove(requiredBy.getCanonicalName());
         }
-        if (names.get(name).isEmpty()) {
-            names.remove(name);
+        if (this.requiredBy.get(name).isEmpty()) {
+            this.requiredBy.remove(name);
             variables.remove(name);
+            variableMap.remove(name);
         }
-    }
-
-    public void checkRequiredVariable(NetcdfFile nc) {
-
     }
 
     boolean skipSorting() {

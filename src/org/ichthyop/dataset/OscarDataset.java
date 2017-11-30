@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.dataset;
 
 import java.io.IOException;
@@ -148,12 +147,12 @@ public class OscarDataset extends AbstractDataset {
     public OscarDataset(String prefix) {
         super(prefix);
     }
-    
+
     @Override
-     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
-         return null;
-     }
-    
+    AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
+        return null;
+    }
+
     @Override
     AbstractRegularGrid createGrid() {
         return null;
@@ -182,7 +181,10 @@ public class OscarDataset extends AbstractDataset {
             ncIn = DatasetUtil.openURL(getConfiguration().getString("dataset.oscar.opendap_url"), true);
         } else {
             opendap = false;
-            listInputFiles = DatasetUtil.list(getConfiguration().getString("dataset.oscar.input_path"), getConfiguration().getString("dataset.oscar.file_filter"));
+            listInputFiles = DatasetUtil.list(
+                    getConfiguration().getString("dataset.oscar.input_path"),
+                    getConfiguration().getString("dataset.oscar.file_filter"),
+                    false);
             ncIn = DatasetUtil.openFile(listInputFiles.get(0), true);
         }
         getDimNC();
@@ -452,7 +454,6 @@ public class OscarDataset extends AbstractDataset {
     @Override
     public void init() throws Exception {
         setOnFirstTime();
-        checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank);
     }
 
