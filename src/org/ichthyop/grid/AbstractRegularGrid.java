@@ -67,8 +67,8 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
 
     abstract void makeGrid();
 
-    public AbstractRegularGrid(String prefix) {
-        this.prefix = prefix;
+    public AbstractRegularGrid(String datasetKey) {
+        this.prefix = datasetKey + ".grid";
     }
 
     public void init() {

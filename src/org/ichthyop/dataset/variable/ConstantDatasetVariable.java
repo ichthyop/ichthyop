@@ -61,28 +61,30 @@ import org.ichthyop.grid.IGrid;
  * @author pverley
  */
 public class ConstantDatasetVariable extends AbstractDatasetVariable {
-    
-    private final String file;
-    private final String name;
-        private final int tilingh;
-    private final int tilingv;
 
-    public ConstantDatasetVariable(String file, String name, IGrid grid, int tilingh, int tilingv) {
+    private final String location;
+    private final String name;
+    private final int tilingh;
+    private final int tilingv;
+    private final boolean enhanced;
+
+    public ConstantDatasetVariable(String file, String name, IGrid grid, int tilingh, int tilingv, boolean enhanced) {
         super(1, grid);
-        this.file = file;
+        this.location = file;
         this.name = name;
         this.tilingh = tilingh;
         this.tilingv = tilingv;
+        this.enhanced = enhanced;
     }
 
     @Override
     public void init(double t0, int time_arrow) throws IOException {
-        stack[0] = new TiledVariable(DatasetUtil.openFile(file, true), name, grid, 0, 0, tilingh, tilingv);
+        stack[0] = new TiledVariable(DatasetUtil.open(location, enhanced), name, grid, 0, 0, tilingh, tilingv);
     }
 
     @Override
     public void update(double currenttime, int time_arrow) throws IOException {
         // nothing to do
     }
-    
+
 }

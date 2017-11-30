@@ -67,7 +67,7 @@ import ucar.nc2.Variable;
  */
 public class RectilinearGrid extends AbstractRegularGrid {
 
-    private String file;
+    private String location;
     private String varlon;
     private String varlat;
     private String vardepth;
@@ -90,15 +90,15 @@ public class RectilinearGrid extends AbstractRegularGrid {
     void makeGrid() {
         
         // grid file
-        file = getConfiguration().getFile(prefix + ".file");
-        try (NetcdfFile nc = DatasetUtil.openFile(file, true)) {
+        location = getConfiguration().getFile(prefix + ".location");
+        try (NetcdfFile nc = DatasetUtil.open(location, true)) {
             // latitude
-            varlat = getConfiguration().isNull(prefix + ".latitude")
+            varlat = getConfiguration().isNull(prefix + ".variable.latitude")
                     ? "latitude"
-                    : getConfiguration().getString(prefix + ".latitude");
+                    : getConfiguration().getString(prefix + ".variable.latitude");
             String name = DatasetUtil.findVariable(nc, varlat);
             if (null == name) {
-                throw new IOException("Latitude variable not found in dataset " + file);
+                throw new IOException("Latitude variable not found in dataset " + location);
             }
             Array array = nc.findVariable(name).read().reduce();
             ny = array.getShape()[0];
@@ -109,12 +109,12 @@ public class RectilinearGrid extends AbstractRegularGrid {
             j0 = 0;
 
             // longitude
-            varlon = getConfiguration().isNull(prefix + ".longitude")
+            varlon = getConfiguration().isNull(prefix + ".variable.longitude")
                     ? "longitude"
-                    : getConfiguration().getString(prefix + ".longitude");
+                    : getConfiguration().getString(prefix + ".variable.longitude");
             name = DatasetUtil.findVariable(nc, varlon);
             if (null == name) {
-                throw new IOException("Longitude variable not found in dataset " + file);
+                throw new IOException("Longitude variable not found in dataset " + location);
             }
             array = nc.findVariable(name).read().reduce();
             nx = array.getShape()[0];
@@ -131,9 +131,9 @@ public class RectilinearGrid extends AbstractRegularGrid {
             }
 
             // depth
-            vardepth = getConfiguration().isNull(prefix + ".depth")
+            vardepth = getConfiguration().isNull(prefix + ".variable.depth")
                     ? "depth"
-                    : getConfiguration().getString(prefix + ".depth");
+                    : getConfiguration().getString(prefix + ".variable.depth");
             name = DatasetUtil.findVariable(nc, vardepth);
             if (null != name) {
                 array = nc.findVariable(name).read().reduce();
@@ -143,7 +143,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     depthLevel[k] = array.getDouble(k);
                 }
             } else {
-                warning("[grid] Did not find depth variable in dataset " + file + ". Ichthyop assumes the grid is 2D.");
+                warning("[grid] Did not find depth variable in dataset " + location + ". Ichthyop assumes the grid is 2D.");
                 nz = 1;
                 depthLevel = new double[]{0};
             }
@@ -166,9 +166,9 @@ public class RectilinearGrid extends AbstractRegularGrid {
             }
 
             // mask
-            varmask = getConfiguration().isNull(prefix + ".mask")
+            varmask = getConfiguration().isNull(prefix + ".variable.mask")
                     ? "mask"
-                    : getConfiguration().getString(prefix + ".mask");
+                    : getConfiguration().getString(prefix + ".variable.mask");
             name = DatasetUtil.findVariable(nc, varmask);
             // assume that the mask can be extracted from any 3D variable
             if (null == name) {
@@ -182,7 +182,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                 }
             }
             if (null == name) throw new IOException("Did not find suitable mask variable in grid file. Please specify parameter " + prefix + ".mask");
-            mask = new TiledVariable(DatasetUtil.openFile(file, true), name, this, 0, 0, 10, Math.min(3, nz));
+            mask = new TiledVariable(DatasetUtil.open(location, true), name, this, 0, 0, 10, Math.min(3, nz));
 
         } catch (IOException ex) {
             error("[grid] Failed to make grid " + prefix, ex);
@@ -284,7 +284,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
         sb.append("Grid ");
         sb.append(prefix);
         sb.append("\n  file: ");
-        sb.append(file);
+        sb.append(location);
         sb.append("\n  latmin: ");
         sb.append((float) getLatMin());
         sb.append(", latmax: ");

@@ -148,8 +148,8 @@ public class DatasetUtil extends IchthyopLinker {
             throw new FileNotFoundException(file);
         }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
-        Array timeArr = nc.findVariable(findVariable(nc, strTime)).read();
-        double convert = guessTimeConversion(nc.findVariable(findVariable(nc, strTime)));
+        Array timeArr = nc.findVariable(strTime).read();
+        double convert = guessTimeConversion(nc.findVariable(strTime));
         nc.close();
         return convert == 1.d
                 ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(0)))
@@ -169,8 +169,8 @@ public class DatasetUtil extends IchthyopLinker {
             throw new FileNotFoundException(file);
         }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
-        Array timeArr = nc.findVariable(findVariable(nc, strTime)).read();
-        double convert = guessTimeConversion(nc.findVariable(findVariable(nc, strTime)));
+        Array timeArr = nc.findVariable(strTime).read();
+        double convert = guessTimeConversion(nc.findVariable(strTime));
         nc.close();
         return convert == 1.d
                 ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1)))
@@ -178,8 +178,8 @@ public class DatasetUtil extends IchthyopLinker {
     }
 
     public static double timeAtRank(NetcdfFile nc, String strTime, int rank) throws IOException {
-        Array timeArr = nc.findVariable(findVariable(nc, strTime)).read();
-        double convert = guessTimeConversion(nc.findVariable(findVariable(nc, strTime)));
+        Array timeArr = nc.findVariable(strTime).read();
+        double convert = guessTimeConversion(nc.findVariable(strTime));
         return (convert == 1.d)
                 ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(rank)))
                 : convert * timeArr.getDouble(timeArr.getIndex().set(rank));
@@ -277,7 +277,7 @@ public class DatasetUtil extends IchthyopLinker {
         throw new IndexOutOfBoundsException(msg.toString());
     }
 
-    /**
+    /*
      * Finds the index of the dataset time variable such as      <code>time(rank) <= time < time(rank + 1)
      *
      * @param time a double, the current time [second] of the simulation
@@ -291,7 +291,7 @@ public class DatasetUtil extends IchthyopLinker {
         double nctime;
         Array timeArr = null;
         try {
-            Variable vtime = nc.findVariable(findVariable(nc, strTime));
+            Variable vtime = nc.findVariable(strTime);
             double convert = guessTimeConversion(vtime);
             timeArr = vtime.read();
             nctime = (convert == 1)
@@ -312,6 +312,22 @@ public class DatasetUtil extends IchthyopLinker {
         lrank = lrank - (timeArrow + 1) / 2;
 
         return lrank;
+    }
+
+    public static String findTimeVariable(NetcdfFile nc) {
+
+        String time_dim = nc.getUnlimitedDimension().getFullName();
+        String variable_time = DatasetUtil.findVariable(nc, time_dim);
+        if (null == variable_time) {
+            String[] names = new String[]{"time", "ocean_time", "time_counter", "scrum_time"};
+            for (String name : names) {
+                variable_time = DatasetUtil.findVariable(nc, time_dim);
+                if (null != variable_time) {
+                    break;
+                }
+            }
+        }
+        return variable_time;
     }
 
     public static String findVariable(NetcdfFile nc, String name) {
@@ -371,14 +387,14 @@ public class DatasetUtil extends IchthyopLinker {
         return 1.d;
     }
 
-    public static NetcdfFile openFile(String filename, boolean enhanced) throws IOException {
+    public static NetcdfFile open(String filename, boolean enhanced) throws IOException {
         NetcdfFile nc;
         nc = NetcdfDataset.openDataset(filename, enhanced, null);
-        getLogger().log(Level.FINE, "'{'Dataset'}' Open {0}", filename);
+        getLogger().log(Level.FINE, "[dataset] Opened {0}", filename);
         return nc;
     }
 
-    /**
+    /*
      * Loads the NetCDF dataset from the specified filename.
      *
      * @param opendapURL a String that can be a local pathname or an OPeNDAP

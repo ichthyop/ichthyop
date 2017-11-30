@@ -68,6 +68,7 @@ import org.ichthyop.dataset.variable.NetcdfDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.manager.TimeManager;
+import org.ichthyop.util.NCComparator;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -94,6 +95,11 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     private String location;
     // 
     final HashMap<String, List<String>> variableMap = new HashMap();
+    // 
+    int time_arrow;
+    //
+    boolean enhanced;
+    private boolean alphabetically_sorted;
 
     // constructor
     public AbstractDataset(String prefix) {
@@ -103,11 +109,12 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
 
     abstract void loadParameters();
 
-    AbstractRegularGrid createGrid() {
+    private AbstractRegularGrid createGrid() {
+
         String classname = getConfiguration().getString(prefix + ".grid.class_name");
 
         try {
-            return (AbstractRegularGrid) Class.forName(classname).getConstructor(String.class).newInstance(prefix + ".grid");
+            return (AbstractRegularGrid) Class.forName(classname).getConstructor(String.class).newInstance(prefix);
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             error("[dataset] Failed to instantiate dataset grid " + prefix + ".grid", ex);
         }
@@ -122,6 +129,16 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     @Override
     public void setUp() throws Exception {
 
+        time_arrow = getConfiguration().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
+
+        enhanced = !getConfiguration().isNull(prefix + ".enhanced_mode")
+                ? getConfiguration().getBoolean(prefix + ".enhanced_mode")
+                : true;
+
+        alphabetically_sorted = getConfiguration().isNull(prefix + ".alphabetically_sorted")
+                ? true
+                : getConfiguration().getBoolean(prefix + ".alphabetically_sorted", false);
+
         this.location = getConfiguration().getString(prefix + ".location");
         mapDatasetVariables(location);
         if (variableMap.isEmpty()) {
@@ -129,9 +146,17 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
         }
         // sort locations
         for (String name : variableMap.keySet()) {
-            Collections.sort(variableMap.get(name));
+            if (alphabetically_sorted) {
+                Collections.sort(variableMap.get(name));
+            } else {
+                String variable_time;
+                try (NetcdfFile nc = DatasetUtil.open(variableMap.get(name).get(0), enhanced)) {
+                    variable_time = DatasetUtil.findTimeVariable(nc);
+                }
+                Collections.sort(variableMap.get(name), new NCComparator(variable_time, time_arrow));
+            }
         }
-        
+
         grid = createGrid();
         grid.init();
 
@@ -139,7 +164,10 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     }
 
     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
-        return new NetcdfDatasetVariable(variableMap.get(name), name, nlayer, grid, tilingh, Math.min(tilingv, grid.get_nz()));
+
+        return new NetcdfDatasetVariable(variableMap.get(name), name,
+                nlayer, grid, tilingh, Math.min(tilingv, grid.get_nz()),
+                enhanced);
     }
 
     private void mapDatasetVariables(String source) {
@@ -188,7 +216,6 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
         }
 
         // initialise them
-        int time_arrow = timeArrow();
         double t0 = getSimulationManager().getTimeManager().get_tO();
         for (AbstractDatasetVariable variable : variables.values()) {
             if (null != variable) {
@@ -201,7 +228,6 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
         double time = e.getSource().getTime();
-        int time_arrow = timeArrow();
 
         for (AbstractDatasetVariable variable : variables.values()) {
             if (null != variable) {
@@ -245,19 +271,5 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
             variables.remove(name);
             variableMap.remove(name);
         }
-    }
-
-    boolean skipSorting() {
-        return getConfiguration().getBoolean(getKey() + ".skip_sorting", false);
-    }
-
-    int timeArrow() {
-        return getConfiguration().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
-    }
-
-    boolean enhanced() {
-        return getConfiguration().canFind(getKey() + ".enhanced_mode")
-                ? getConfiguration().getBoolean(getKey() + ".enhanced_mode")
-                : true;
     }
 }

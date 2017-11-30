@@ -91,7 +91,7 @@ public class BathymetryDataset extends AbstractDataset {
 
     @Override
     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
-        return new ConstantDatasetVariable(variableMap.get(name).get(0), name, grid, tilingh, 1);
+        return new ConstantDatasetVariable(variableMap.get(name).get(0), name, grid, tilingh, 1, enhanced);
     }
     
     public String getVariableName() {

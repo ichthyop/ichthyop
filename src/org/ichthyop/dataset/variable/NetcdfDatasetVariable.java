@@ -68,43 +68,54 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
     private final String name;
     private final int tilingh;
     private final int tilingv;
+    private String variable_time;
+    private final boolean enhanced;
     private int index;
 
-    public NetcdfDatasetVariable(List<String> locations, String name, int nlayer, IGrid grid, int tilingh, int tilingv) {
+    public NetcdfDatasetVariable(List<String> locations, String name,
+            int nlayer, IGrid grid, int tilingh, int tilingv,
+            boolean enhanced) {
         super(nlayer, grid);
         this.locations = locations;
         this.name = name;
         this.tilingh = tilingh;
         this.tilingv = tilingv;
+        this.enhanced = enhanced;
+        this.index = 0;
     }
 
     @Override
     public void init(double t0, int time_arrow) throws IOException {
 
+        // find time variable
+        NetcdfFile nc = open();
+        variable_time = DatasetUtil.findTimeVariable(nc);
+        nc.close();
+
         double time = t0;
-        index = locations.size() > 1 
-                ? DatasetUtil.index(locations, time, time_arrow, "time")
+        index = locations.size() > 1
+                ? DatasetUtil.index(locations, time, time_arrow, variable_time)
                 : 0;
-        NetcdfFile nc = getNC();
-        int rank = DatasetUtil.rank(time, nc, "time", time_arrow) - time_arrow;
+        nc = open();
+        int rank = DatasetUtil.rank(time, nc, variable_time, time_arrow) - time_arrow;
         for (int ilayer = 0; ilayer < nlayer - 1; ilayer++) {
             rank += time_arrow;
-            int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+            int ntime = nc.findVariable(variable_time).getShape()[0];
             if (rank > (ntime - 1) || rank < 0) {
                 nc.close();
                 if (DatasetUtil.hasNext(locations, index)) {
                     index = DatasetUtil.next(locations, index, time_arrow);
-                    nc = DatasetUtil.openFile(locations.get(index), true);
-                    ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+                    nc = open();
+                    ntime = nc.findVariable(variable_time).getShape()[0];
                     rank = (1 - time_arrow) / 2 * (ntime - 1);
-                    time = DatasetUtil.timeAtRank(nc, "time", rank);
-                    update(new TiledVariable(getNC(), name, grid, rank, time, tilingh, tilingv));
+                    time = DatasetUtil.timeAtRank(nc, variable_time, rank);
+                    update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
                 } else {
                     update(null);
                 }
             } else {
-                time = DatasetUtil.timeAtRank(nc, "time", rank);
-                update(new TiledVariable(getNC(), name, grid, rank, time, tilingh, tilingv));
+                time = DatasetUtil.timeAtRank(nc, variable_time, rank);
+                update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
             }
         }
         nc.close();
@@ -116,31 +127,31 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
         double time = currenttime;
         if (updateNeeded(time, time_arrow)) {
             int rank;
-            NetcdfFile nc = getNC();
-            int ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
-            rank = DatasetUtil.rank(time, nc, "time", time_arrow);
+            NetcdfFile nc = open();
+            int ntime = nc.findVariable(variable_time).getShape()[0];
+            rank = DatasetUtil.rank(time, nc, variable_time, time_arrow);
             rank += (nlayer - 1) * time_arrow;
             if (rank > (ntime - 1) || rank < 0) {
                 if (DatasetUtil.hasNext(locations, index)) {
                     nc.close();
                     index = DatasetUtil.next(locations, index, time_arrow);
-                    nc = DatasetUtil.openFile(locations.get(index), true);
-                    ntime = nc.findVariable(DatasetUtil.findVariable(nc, "time")).getShape()[0];
+                    nc = open();
+                    ntime = nc.findVariable(variable_time).getShape()[0];
                     rank = (1 - time_arrow) / 2 * (ntime - 1);
-                    time = DatasetUtil.timeAtRank(nc, "time", rank);
-                    update(new TiledVariable(getNC(), name, grid, rank, time, tilingh, tilingv));
+                    time = DatasetUtil.timeAtRank(nc, variable_time, rank);
+                    update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
                 } else {
                     update(null);
                 }
             } else {
-                time = DatasetUtil.timeAtRank(nc, "time", rank);
-                update(new TiledVariable(getNC(), name, grid, rank, time, tilingh, tilingv));
+                time = DatasetUtil.timeAtRank(nc, variable_time, rank);
+                update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
             }
             nc.close();
         }
     }
 
-    private NetcdfFile getNC() throws IOException {
-        return open(locations.get(index), true);
+    private NetcdfFile open() throws IOException {
+        return DatasetUtil.open(locations.get(index), enhanced);
     }
 }

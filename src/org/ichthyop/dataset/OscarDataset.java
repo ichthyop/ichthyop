@@ -54,9 +54,7 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.util.List;
-import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.event.NextStepEvent;
-import org.ichthyop.grid.AbstractRegularGrid;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -149,16 +147,6 @@ public class OscarDataset extends AbstractDataset {
     }
 
     @Override
-    AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
-        return null;
-    }
-
-    @Override
-    AbstractRegularGrid createGrid() {
-        return null;
-    }
-
-    @Override
     void loadParameters() {
 
         strLonDim = getConfiguration().getString("dataset.oscar.field_dim_lon");
@@ -185,7 +173,7 @@ public class OscarDataset extends AbstractDataset {
                     getConfiguration().getString("dataset.oscar.input_path"),
                     getConfiguration().getString("dataset.oscar.file_filter"),
                     false);
-            ncIn = DatasetUtil.openFile(listInputFiles.get(0), true);
+            ncIn = DatasetUtil.open(listInputFiles.get(0), true);
         }
         getDimNC();
         readLonLat();
@@ -497,11 +485,11 @@ public class OscarDataset extends AbstractDataset {
         // Time is expressed as number of days since origin in Oscar
         double t0 = getSimulationManager().getTimeManager().get_tO();
         if (!opendap) {
-            indexFile = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
-            ncIn = DatasetUtil.openFile(listInputFiles.get(indexFile), true);
+            indexFile = DatasetUtil.index(listInputFiles, t0, time_arrow, strTime);
+            ncIn = DatasetUtil.open(listInputFiles.get(indexFile), true);
         }
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
-        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
+        rank = DatasetUtil.rank(t0, ncIn, strTime, time_arrow);
         time_tp1 = getSimulationManager().getTimeManager().get_tO();
     }
 
@@ -553,7 +541,7 @@ public class OscarDataset extends AbstractDataset {
     public void nextStepTriggered(NextStepEvent e) {
 
         double time = e.getSource().getTime();
-        int timeArrow = timeArrow();
+        int timeArrow = time_arrow;
 
         if (timeArrow * time < timeArrow * time_tp1) {
             return;
@@ -568,7 +556,7 @@ public class OscarDataset extends AbstractDataset {
                     throw new IndexOutOfBoundsException("Time out of dataset range");
                 } else {
                     indexFile = DatasetUtil.next(listInputFiles, indexFile, timeArrow);
-                    ncIn = DatasetUtil.openFile(listInputFiles.get(indexFile), true);
+                    ncIn = DatasetUtil.open(listInputFiles.get(indexFile), true);
                     rank = (1 - timeArrow) / 2 * (nbTimeRecords - 1);
                 }
             }
