@@ -57,8 +57,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ichthyop.IchthyopLinker;
 import org.ichthyop.util.MetaFilenameFilter;
 import org.ichthyop.util.NCComparator;
@@ -351,6 +353,56 @@ public class DatasetUtil extends IchthyopLinker {
             }
         }
         return null;
+    }
+
+    public static HashMap<String, List<String>> mapVariables(String location, boolean coordinateV) {
+
+        HashMap<String, List<String>> map = new HashMap();
+
+        if (DatasetUtil.isValidDataset(location)) {
+            try (NetcdfFile nc = NetcdfDataset.openDataset(location, true, null)) {
+                for (Variable variable : nc.getVariables()) {
+                    if ((coordinateV & variable.isCoordinateVariable())
+                            || (!coordinateV & !variable.isCoordinateVariable())) {
+                        List<String> names = new ArrayList();
+                        names.add(variable.getFullName());
+                        Attribute sname = variable.findAttributeIgnoreCase("standard_name");
+                        if (null != sname) {
+                            names.add(sname.getStringValue());
+                        }
+                        Attribute lname = variable.findAttributeIgnoreCase("long_name");
+                        if (null != lname) {
+                            names.add(lname.getStringValue());
+                        }
+                        for (String name : names) {
+                            if (map.containsKey(name)) {
+                                map.get(name).add(nc.getLocation());
+                            } else {
+                                List<String> list = new ArrayList();
+                                list.add(nc.getLocation());
+                                map.put(name, list);
+                            }
+                        }
+                    }
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(DatasetUtil.class.getName()).log(Level.WARNING, "Error listing variables from dataset " + location, ex);
+            }
+        } else if (new File(location).isDirectory()) {
+            for (File file : new File(location).listFiles()) {
+                HashMap<String, List<String>> submap = mapVariables(file.getAbsolutePath(), coordinateV);
+                for (String name : submap.keySet()) {
+                    if (map.containsKey(name)) {
+                        map.get(name).addAll(submap.get(name));
+                    } else {
+                        map.put(name, submap.get(name));
+                    }
+                }
+                submap.clear();
+            }
+        }
+
+        return map;
     }
 
     /**

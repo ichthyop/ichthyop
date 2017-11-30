@@ -52,6 +52,8 @@
  */
 package org.ichthyop.grid;
 
+import java.util.HashMap;
+import java.util.List;
 import org.ichthyop.IchthyopLinker;
 import org.ichthyop.dataset.DatasetUtil;
 
@@ -61,18 +63,43 @@ import org.ichthyop.dataset.DatasetUtil;
  */
 public abstract class AbstractRegularGrid extends IchthyopLinker implements IGrid {
 
-    final String prefix;
+    final String grid_prefix;
+    private final String dataset_prefix;
     private double latmin, latmax, lonmin, lonmax;
-    private boolean xperiodicity = false, yperiodicity = false;
+    private boolean xperiodicity, yperiodicity;
+    final HashMap<String, List<String>> variables = new HashMap();
+    boolean enhanced;
 
     abstract void makeGrid();
 
-    public AbstractRegularGrid(String datasetKey) {
-        this.prefix = datasetKey + ".grid";
+    public AbstractRegularGrid(String dataset_prefix) {
+
+        this.dataset_prefix = dataset_prefix;
+        this.grid_prefix = dataset_prefix + ".grid";
     }
 
     public void init() {
+
+        // list variables
+        String location = getConfiguration().isNull(grid_prefix + ".location")
+                ? getConfiguration().getString(dataset_prefix + ".location")
+                : getConfiguration().getString(grid_prefix + ".location");
+        variables.putAll(DatasetUtil.mapVariables(location, false));
+        variables.putAll(DatasetUtil.mapVariables(location, true));
+
+        // x and y periodicity
+        xperiodicity = getConfiguration().getBoolean(grid_prefix + ".periodicity.x");
+        yperiodicity = getConfiguration().getBoolean(grid_prefix + ".periodicity.y");
+        
+        // enhanced dataset
+        enhanced = !getConfiguration().isNull(dataset_prefix + ".enhanced_mode")
+                ? getConfiguration().getBoolean(dataset_prefix + ".enhanced_mode")
+                : true;
+
+        // make grid
         makeGrid();
+
+        // compute grid extent
         extent();
     }
 
@@ -114,14 +141,6 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         }
     }
 
-    public void setXPeriodicity(boolean enabled) {
-        this.xperiodicity = enabled;
-    }
-
-    public void setYPeriodicity(boolean enabled) {
-        this.yperiodicity = enabled;
-    }
-
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
@@ -154,7 +173,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
 
         int ci = (int) Math.round(0.5 * get_nx());
         int cj = (int) Math.round(0.5 * get_ny());
-        
+
         int di = (int) Math.ceil(0.5 * ci);
         int dj = (int) Math.ceil(0.5 * cj);
 
@@ -204,7 +223,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         int cim1 = xperiodicity ? xTore(ci - 1) : (ci - 1 < 0 ? 0 : ci - 1);
         int cjp1 = yperiodicity ? yTore(cj + 1) : (cj + 1 > get_ny() - 1 ? get_ny() - 1 : cj + 1);
         int cjm1 = yperiodicity ? yTore(cj + 1) : (cj - 1 < 0 ? 0 : cj - 1);
-        int imin = 0, jmin = 0;      
+        int imin = 0, jmin = 0;
         if (isInside(lat, lon,
                 new double[]{
                     getLat(cim1, cjm1), getLat(cim1, cj), getLat(ci, cj), getLat(ci, cjm1), getLat(cim1, cjm1)},
@@ -455,12 +474,12 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         }
         return y;
     }
-    
+
     @Override
     public boolean xTore() {
         return xperiodicity;
     }
-    
+
     @Override
     public boolean yTore() {
         return yperiodicity;

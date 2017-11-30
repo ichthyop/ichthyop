@@ -67,7 +67,6 @@ import ucar.nc2.Variable;
  */
 public class RectilinearGrid extends AbstractRegularGrid {
 
-    private String location;
     private String varlon;
     private String varlat;
     private String vardepth;
@@ -88,19 +87,22 @@ public class RectilinearGrid extends AbstractRegularGrid {
 
     @Override
     void makeGrid() {
-        
+
         // grid file
-        location = getConfiguration().getFile(prefix + ".location");
-        try (NetcdfFile nc = DatasetUtil.open(location, true)) {
+        try {
             // latitude
-            varlat = getConfiguration().isNull(prefix + ".variable.latitude")
+            varlat = getConfiguration().isNull(grid_prefix + ".variable.latitude")
                     ? "latitude"
-                    : getConfiguration().getString(prefix + ".variable.latitude");
-            String name = DatasetUtil.findVariable(nc, varlat);
-            if (null == name) {
-                throw new IOException("Latitude variable not found in dataset " + location);
+                    : getConfiguration().getString(grid_prefix + ".variable.latitude");
+
+            if (!variables.containsKey(varlat)) {
+                throw new IOException("Latitude variable not found in dataset " + grid_prefix);
             }
-            Array array = nc.findVariable(name).read().reduce();
+            String location = variables.get(varlat).get(0);
+            NetcdfFile nc = DatasetUtil.open(location, enhanced);
+            varlat = DatasetUtil.findVariable(nc, varlat);
+            Array array = nc.findVariable(varlat).read().reduce();
+            nc.close();
             ny = array.getShape()[0];
             latitude = new double[ny];
             for (int j = 0; j < ny; j++) {
@@ -109,14 +111,17 @@ public class RectilinearGrid extends AbstractRegularGrid {
             j0 = 0;
 
             // longitude
-            varlon = getConfiguration().isNull(prefix + ".variable.longitude")
+            varlon = getConfiguration().isNull(grid_prefix + ".variable.longitude")
                     ? "longitude"
-                    : getConfiguration().getString(prefix + ".variable.longitude");
-            name = DatasetUtil.findVariable(nc, varlon);
-            if (null == name) {
-                throw new IOException("Longitude variable not found in dataset " + location);
+                    : getConfiguration().getString(grid_prefix + ".variable.longitude");
+            if (!variables.containsKey(varlon)) {
+                throw new IOException("Longitude variable not found in dataset " + grid_prefix);
             }
-            array = nc.findVariable(name).read().reduce();
+            location = variables.get(varlon).get(0);
+            nc = DatasetUtil.open(location, enhanced);
+            varlon = DatasetUtil.findVariable(nc, varlon);
+            array = nc.findVariable(varlon).read().reduce();
+            nc.close();
             nx = array.getShape()[0];
             longitude = new double[nx];
             for (int i = 0; i < nx; i++) {
@@ -124,26 +129,29 @@ public class RectilinearGrid extends AbstractRegularGrid {
             }
             i0 = 0;
 
-            if (getConfiguration().getBoolean(prefix + ".shrink")) {
+            if (getConfiguration().getBoolean(grid_prefix + ".shrink")) {
                 crop();
                 longitude = Arrays.copyOfRange(longitude, i0, i0 + nx);
                 latitude = Arrays.copyOfRange(latitude, j0, j0 + ny);
             }
 
             // depth
-            vardepth = getConfiguration().isNull(prefix + ".variable.depth")
+            vardepth = getConfiguration().isNull(grid_prefix + ".variable.depth")
                     ? "depth"
-                    : getConfiguration().getString(prefix + ".variable.depth");
-            name = DatasetUtil.findVariable(nc, vardepth);
-            if (null != name) {
-                array = nc.findVariable(name).read().reduce();
+                    : getConfiguration().getString(grid_prefix + ".variable.depth");
+            if (variables.containsKey(vardepth)) {
+                location = variables.get(vardepth).get(0);
+                nc = DatasetUtil.open(location, enhanced);
+                vardepth = DatasetUtil.findVariable(nc, vardepth);
+                array = nc.findVariable(vardepth).read().reduce();
+                nc.close();
                 nz = array.getShape().length > 0 ? array.getShape()[0] : 1;
                 depthLevel = new double[nz];
                 for (int k = 0; k < nz; k++) {
                     depthLevel[k] = array.getDouble(k);
                 }
             } else {
-                warning("[grid] Did not find depth variable in dataset " + location + ". Ichthyop assumes the grid is 2D.");
+                warning("[grid] Did not find depth variable in dataset " + grid_prefix + ". Ichthyop assumes the grid is 2D.");
                 nz = 1;
                 depthLevel = new double[]{0};
             }
@@ -166,36 +174,43 @@ public class RectilinearGrid extends AbstractRegularGrid {
             }
 
             // mask
-            varmask = getConfiguration().isNull(prefix + ".variable.mask")
+            varmask = getConfiguration().isNull(grid_prefix + ".variable.mask")
                     ? "mask"
-                    : getConfiguration().getString(prefix + ".variable.mask");
-            name = DatasetUtil.findVariable(nc, varmask);
+                    : getConfiguration().getString(grid_prefix + ".variable.mask");
             // assume that the mask can be extracted from any 3D variable
-            if (null == name) {
-                for (Variable variable : nc.getVariables()) {
+            if (!variables.containsKey(varmask)) {
+                for (String name : variables.keySet()) {
+                    location = variables.get(name).get(0);
+                    nc = DatasetUtil.open(location, enhanced);
+                    name = DatasetUtil.findVariable(nc, name);
+                    Variable variable = nc.findVariable(name);
+                    nc.close();
                     if ((variable.isUnlimited() && variable.getShape().length == 4)
                             || (!variable.isUnlimited() && variable.getShape().length == 3)
                             || (!variable.isUnlimited() && variable.getShape().length == 2) && nz == 1) {
-                        name = variable.getFullName();
+                        varmask = variable.getFullName();
                         break;
                     }
                 }
             }
-            if (null == name) throw new IOException("Did not find suitable mask variable in grid file. Please specify parameter " + prefix + ".mask");
-            mask = new TiledVariable(DatasetUtil.open(location, true), name, this, 0, 0, 10, Math.min(3, nz));
+            if (null == varmask) {
+                throw new IOException("Did not find suitable mask variable in grid file. Please specify parameter " + grid_prefix + ".variable.mask");
+            }
+            location = variables.get(varmask).get(0);
+            mask = new TiledVariable(DatasetUtil.open(location, true), varmask, this, 0, 0, 10, Math.min(3, nz));
 
         } catch (IOException ex) {
-            error("[grid] Failed to make grid " + prefix, ex);
+            error("[grid] Failed to make grid " + grid_prefix, ex);
         }
 
     }
 
     private void crop() {
 
-        double lon1 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
-        double lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
-        double lon2 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
-        double lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(prefix + ".south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+        double lon1 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
+        double lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+        double lon2 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
+        double lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
 
         double[] pGrid1, pGrid2;
         int ipn, jpn;
@@ -277,14 +292,12 @@ public class RectilinearGrid extends AbstractRegularGrid {
     public double get_dz(int i, int j, int k) {
         return ddepth[k];
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Grid ");
-        sb.append(prefix);
-        sb.append("\n  file: ");
-        sb.append(location);
+        sb.append(grid_prefix);
         sb.append("\n  latmin: ");
         sb.append((float) getLatMin());
         sb.append(", latmax: ");

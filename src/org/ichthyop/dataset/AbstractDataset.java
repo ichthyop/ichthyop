@@ -52,7 +52,6 @@
  */
 package org.ichthyop.dataset;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -69,10 +68,7 @@ import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.manager.TimeManager;
 import org.ichthyop.util.NCComparator;
-import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  *
@@ -140,7 +136,7 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
                 : getConfiguration().getBoolean(prefix + ".alphabetically_sorted", false);
 
         this.location = getConfiguration().getString(prefix + ".location");
-        mapDatasetVariables(location);
+        variableMap.putAll(DatasetUtil.mapVariables(location, false));
         if (variableMap.isEmpty()) {
             error("Failed to list any variable in dataset " + prefix, new IOException("Invalid dataset location " + location));
         }
@@ -168,43 +164,6 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
         return new NetcdfDatasetVariable(variableMap.get(name), name,
                 nlayer, grid, tilingh, Math.min(tilingv, grid.get_nz()),
                 enhanced);
-    }
-
-    private void mapDatasetVariables(String source) {
-
-        if (DatasetUtil.isValidDataset(source)) {
-            try (NetcdfFile nc = NetcdfDataset.openDataset(source, true, null)) {
-                for (Variable variable : nc.getVariables()) {
-                    if (!variable.isCoordinateVariable()) {
-                        List<String> names = new ArrayList();
-                        names.add(variable.getFullName());
-                        Attribute sname = variable.findAttributeIgnoreCase("standard_name");
-                        if (null != sname) {
-                            names.add(sname.getStringValue());
-                        }
-                        Attribute lname = variable.findAttributeIgnoreCase("long_name");
-                        if (null != lname) {
-                            names.add(lname.getStringValue());
-                        }
-                        for (String name : names) {
-                            if (variableMap.containsKey(name)) {
-                                variableMap.get(name).add(nc.getLocation());
-                            } else {
-                                List<String> list = new ArrayList();
-                                list.add(nc.getLocation());
-                                variableMap.put(name, list);
-                            }
-                        }
-                    }
-                }
-            } catch (IOException ex) {
-                warning("Error listing non-coordinate variables from dataset " + source, ex);
-            }
-        } else if (new File(source).isDirectory()) {
-            for (File file : new File(source).listFiles()) {
-                mapDatasetVariables(file.getAbsolutePath());
-            }
-        }
     }
 
     @Override
