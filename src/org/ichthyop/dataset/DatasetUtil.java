@@ -323,7 +323,7 @@ public class DatasetUtil extends IchthyopLinker {
         if (null == variable_time) {
             String[] names = new String[]{"time", "ocean_time", "time_counter", "scrum_time"};
             for (String name : names) {
-                variable_time = DatasetUtil.findVariable(nc, time_dim);
+                variable_time = DatasetUtil.findVariable(nc, name);
                 if (null != variable_time) {
                     break;
                 }
@@ -365,14 +365,14 @@ public class DatasetUtil extends IchthyopLinker {
                     if ((coordinateV & variable.isCoordinateVariable())
                             || (!coordinateV & !variable.isCoordinateVariable())) {
                         List<String> names = new ArrayList();
-                        names.add(variable.getFullName());
+                        names.add(variable.getFullName().toLowerCase());
                         Attribute sname = variable.findAttributeIgnoreCase("standard_name");
                         if (null != sname) {
-                            names.add(sname.getStringValue());
+                            names.add(sname.getStringValue().toLowerCase());
                         }
                         Attribute lname = variable.findAttributeIgnoreCase("long_name");
                         if (null != lname) {
-                            names.add(lname.getStringValue());
+                            names.add(lname.getStringValue().toLowerCase());
                         }
                         for (String name : names) {
                             if (map.containsKey(name)) {
@@ -431,6 +431,10 @@ public class DatasetUtil extends IchthyopLinker {
             if (units.contains("day")) {
                 // Days confirmed
                 return 3600.d * 24.d;
+            }
+            if (units.contains("year")) {
+                // Years confirmed
+                return 3600.d * 24.d * 365.d;
             }
         }
 

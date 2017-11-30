@@ -59,7 +59,7 @@ import org.ichthyop.dataset.variable.WDatasetVariable;
  *
  * @author pverley
  */
-public class OceanDataset extends AbstractDataset {
+public class OceanDataset extends NetcdfDataset {
 
     private String variable_u;
     private String variable_v;

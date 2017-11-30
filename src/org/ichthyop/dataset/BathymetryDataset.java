@@ -63,7 +63,7 @@ import org.ichthyop.dataset.variable.ConstantDatasetVariable;
  *
  * @author pverley
  */
-public class BathymetryDataset extends AbstractDataset {
+public class BathymetryDataset extends NetcdfDataset {
 
     private String fullname;
 

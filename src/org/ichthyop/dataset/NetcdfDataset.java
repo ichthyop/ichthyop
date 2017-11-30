@@ -74,7 +74,7 @@ import ucar.nc2.NetcdfFile;
  *
  * @author pverley
  */
-public abstract class AbstractDataset extends IchthyopLinker implements IDataset, NextStepListener {
+public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepListener {
 
     // constants
     final int NLAYER = 3;
@@ -98,12 +98,15 @@ public abstract class AbstractDataset extends IchthyopLinker implements IDataset
     private boolean alphabetically_sorted;
 
     // constructor
-    public AbstractDataset(String prefix) {
+    public NetcdfDataset(String prefix) {
         this.prefix = prefix;
 
     }
 
-    abstract void loadParameters();
+    void loadParameters() {
+        // does nothing
+        // to be overidden by inheriting class
+    }
 
     private AbstractRegularGrid createGrid() {
 

@@ -64,7 +64,7 @@ import ucar.nc2.NetcdfFile;
  *
  * @author pverley
  */
-public class OscarDataset extends AbstractDataset {
+public class OscarDataset extends NetcdfDataset {
 
     ///////////////////////////////
 // Declaration of the variables

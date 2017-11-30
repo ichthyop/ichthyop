@@ -58,6 +58,7 @@ import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.dataset.variable.TiledVariable;
 import org.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -103,10 +104,17 @@ public class RectilinearGrid extends AbstractRegularGrid {
             varlat = DatasetUtil.findVariable(nc, varlat);
             Array array = nc.findVariable(varlat).read().reduce();
             nc.close();
-            ny = array.getShape()[0];
+            int[] shape = array.getShape();
+            ny = shape[0];
             latitude = new double[ny];
+            Index index = array.getIndex();
             for (int j = 0; j < ny; j++) {
-                latitude[j] = array.getDouble(j);
+                if (shape.length > 1) {
+                    index.set(j, 0);
+                } else {
+                    index.set(j);
+                }
+                latitude[j] = array.getDouble(index);
             }
             j0 = 0;
 
@@ -122,7 +130,8 @@ public class RectilinearGrid extends AbstractRegularGrid {
             varlon = DatasetUtil.findVariable(nc, varlon);
             array = nc.findVariable(varlon).read().reduce();
             nc.close();
-            nx = array.getShape()[0];
+            shape = array.getShape();
+            nx = shape.length > 1 ? shape[1] : shape[0];
             longitude = new double[nx];
             for (int i = 0; i < nx; i++) {
                 longitude[i] = validLon(array.getDouble(i));
@@ -188,7 +197,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     if ((variable.isUnlimited() && variable.getShape().length == 4)
                             || (!variable.isUnlimited() && variable.getShape().length == 3)
                             || (!variable.isUnlimited() && variable.getShape().length == 2) && nz == 1) {
-                        varmask = variable.getFullName();
+                        varmask = variable.getFullName().toLowerCase();
                         break;
                     }
                 }
