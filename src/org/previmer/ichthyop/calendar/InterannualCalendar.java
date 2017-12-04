@@ -1,19 +1,22 @@
 package org.previmer.ichthyop.calendar;
 
-/** Import the abstract class Calendar */
+/**
+ * Import the abstract class Calendar
+ */
 import java.util.Calendar;
 
 /**
- * <p>The class extends the abstact class {@link java.util.Calendar}. It provides
- * methods for converting between a specific instant in time and a set of
- * fields such as <code>YEAR</code>, <code>MONTH</code>,
- * <code>DAY_OF_MONTH</code>, <code>HOUR</code>, and so on, according with the
- * Gregorian calendar. An instant in time is represented by a millisecond
- * value that is, by default, an offset from January 1, 1900 00:00:00.000 GMT.
- * The origin can be set by the user in one of the constructors.</p>
+ * <p>
+ * The class extends the abstact class {@link java.util.Calendar}. It provides
+ * methods for converting between a specific instant in time and a set of fields
+ * such as <code>YEAR</code>, <code>MONTH</code>, <code>DAY_OF_MONTH</code>,
+ * <code>HOUR</code>, and so on, according with the Gregorian calendar. An
+ * instant in time is represented by a millisecond value that is, by default, an
+ * offset from January 1, 1900 00:00:00.000 GMT. The origin can be set by the
+ * user in one of the constructors.</p>
  * The class is a very simplified version of the Gregorian Calendar, except that
- * the epoch is not automatically set to January 1, 1970 (Gregorian),
- * midnight UTC.
+ * the epoch is not automatically set to January 1, 1970 (Gregorian), midnight
+ * UTC.
  *
  * @author P.Verley 2007
  * @see java.util.Calendar
@@ -43,8 +46,8 @@ public class InterannualCalendar extends Calendar {
 // Constructors
 ///////////////
     /**
-     * Constructs a Gregorian Calendar with origin of time
-     * January 1, 1900 00:00:00.000 GMT.
+     * Constructs a Gregorian Calendar with origin of time January 1, 1900
+     * 00:00:00.000 GMT.
      */
     public InterannualCalendar() {
         this(1582, OCTOBER, 15, 0, 0);
@@ -53,6 +56,7 @@ public class InterannualCalendar extends Calendar {
     /**
      * Constructs a Gregorian Calendar with origin of time set by parameters.
      * Hours, minutes, seconds are automatically set to 00:00:00.000
+     *
      * @param year an int, the year origin
      * @param month an int, the month origin
      * @param day an int, the day origin
@@ -113,7 +117,8 @@ public class InterannualCalendar extends Calendar {
     protected void computeFields() {
         int rawYear, year, month, dayOfMonth, dayOfYear;
         boolean isLeap;
-        long timeInDay = millisToDay(time);
+        long epoch_hour = epoch_fields[HOUR_OF_DAY] * ONE_HOUR + epoch_fields[MINUTE] * ONE_MINUTE;
+        long timeInDay = millisToDay(time + epoch_hour);
 
         long timeInDay_o = timeInDay + (isLeap(epoch_fields[YEAR])
                 ? LEAP_NUM_DAYS[epoch_fields[MONTH]] + epoch_fields[DAY_OF_MONTH] - 1
@@ -155,11 +160,11 @@ public class InterannualCalendar extends Calendar {
         set(DAY_OF_MONTH, dayOfMonth);
         set(DAY_OF_YEAR, ++dayOfYear);
 
-        int millisInDay = (int) (time - timeInDay * ONE_DAY);
+        int millisInDay = (int) (time + epoch_hour - timeInDay * ONE_DAY);
         if (millisInDay < 0) {
             millisInDay += ONE_DAY;
         }
-
+        
         set(MILLISECOND, millisInDay % 1000);
         millisInDay /= 1000;
         set(SECOND, millisInDay % 60);
@@ -173,8 +178,8 @@ public class InterannualCalendar extends Calendar {
     }
 
     /**
-     * Determines if the given year is a leap year. Returns true if the
-     * given year is a leap year.
+     * Determines if the given year is a leap year. Returns true if the given
+     * year is a leap year.
      *
      * @param year the given year.
      * @return true if the given year is a leap year; false otherwise.
@@ -212,11 +217,12 @@ public class InterannualCalendar extends Calendar {
                 : NUM_DAYS[epoch_fields[MONTH]];
 
         long millis = dayToMillis(time2Day);
-        int millisInDay = fields[MILLISECOND]
-                + 1000
-                * (fields[SECOND]
-                + 60 * (fields[MINUTE] + 60 * fields[HOUR_OF_DAY]));
-        time = millis + millisInDay;
+        long millisInDay = fields[MILLISECOND]
+                + fields[SECOND] * ONE_SECOND
+                + fields[MINUTE] * ONE_MINUTE
+                + fields[HOUR_OF_DAY] * ONE_HOUR;
+        long epoch_hour = epoch_fields[HOUR_OF_DAY] * ONE_HOUR + epoch_fields[MINUTE] * ONE_MINUTE;
+        time = millis + millisInDay - epoch_hour;
     }
 
 //////////////////////////////////

@@ -4,6 +4,7 @@
 package org.previmer.ichthyop.timeconverter.ui;
 
 import java.io.IOException;
+import java.text.ParseException;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.previmer.ichthyop.util.TimeConverter;
@@ -19,15 +20,6 @@ public class TimeConverterApp extends SingleFrameApplication {
     @Override
     protected void startup() {
         show(new TimeConverterView(this));
-    }
-
-    /**
-     * This method is to initialize the specified window by injecting resources.
-     * Windows shown in our application come fully initialized from the GUI
-     * builder, so this additional configuration is not needed.
-     */
-    @Override
-    protected void configureWindow(java.awt.Window root) {
     }
 
     /**
@@ -64,15 +56,17 @@ public class TimeConverterApp extends SingleFrameApplication {
 
             }
 
-        } catch (Exception e) {
+        } catch (IOException | NumberFormatException | ParseException e) {
             TimeConverter.error(e);
         }
     }
 
     /**
      * Main method launching the application.
+     * @param args
      */
     public static void main(String[] args) {
+        
         if (args.length > 0) {
             convertNoUI(args);
         } else {
