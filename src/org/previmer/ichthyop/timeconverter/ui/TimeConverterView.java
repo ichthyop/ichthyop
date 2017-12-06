@@ -14,8 +14,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import javax.swing.ActionMap;
@@ -33,8 +31,13 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.table.DefaultTableModel;
 import org.jdesktop.application.Application;
+import org.previmer.ichthyop.calendar.AllLeapCalendar;
 import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
+import org.previmer.ichthyop.calendar.JulianCalendar;
+import org.previmer.ichthyop.calendar.NoLeapCalendar;
+import org.previmer.ichthyop.calendar.ProlepticGregorianCalendar;
+import org.previmer.ichthyop.calendar.StandardCalendar;
 
 /**
  * The application's main frame.
@@ -74,17 +77,27 @@ public class TimeConverterView extends FrameView {
             int min_o = calendar.get(Calendar.MINUTE);
             String calendarClass = (String) calendarComboBox.getSelectedItem();
             switch (calendarClass) {
-                case "java.util.GregorianCalendar":
-                    Date gorigin = calendar.getTime();
-                    calendar = new GregorianCalendar();
-                    ((GregorianCalendar) calendar).setGregorianChange(gorigin);
+                case "org.previmer.ichthyop.calendar.AllLeapCalendar":
+                    calendar = new AllLeapCalendar(year_o, month_o, day_o, hour_o, min_o);
                     break;
-                case "org.previmer.ichthyop.calendar.InterannualCalendar":
-                    calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o);
-                    break;
-                case "org.previmer.ichthyop.calendar.Day360Calendar":
-                    calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, min_o);
-                    break;
+            case "org.previmer.ichthyop.calendar.Day360Calendar":
+                calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, min_o);
+                break;
+            case "org.previmer.ichthyop.calendar.InterannualCalendar":
+                calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o);
+                break;
+            case "org.previmer.ichthyop.calendar.JulianCalendar":
+                calendar = new JulianCalendar(year_o, month_o, day_o, hour_o, min_o);
+                break;
+            case "org.previmer.ichthyop.calendar.NoLeapCalendar":
+                calendar = new NoLeapCalendar(year_o, month_o, day_o, hour_o, min_o);
+                break;
+            case "org.previmer.ichthyop.calendar.ProlepticGregorianCalendar":
+                calendar = new ProlepticGregorianCalendar(year_o, month_o, day_o, hour_o, min_o);
+                break;
+            case "org.previmer.ichthyop.calendar.StandardCalendar":
+                calendar = new StandardCalendar(year_o, month_o, day_o, hour_o, min_o);
+                break;
             }
             btnConvert.getAction().setEnabled(true);
         } catch (ParseException ex) {
@@ -153,67 +166,57 @@ public class TimeConverterView extends FrameView {
         pnlCalendar.setName("pnlCalendar");
 
         lblOrigin.setName("lblOrigin");
+        lblOrigin.setText(resourceMap.getString("lblOrigin.text"));
 
         lblCalendar.setText(resourceMap.getString("lblCalendar.text"));
         lblCalendar.setName("lblCalendar");
 
         textFieldOrigin.setName("textFieldOrigin");
+        textFieldOrigin.setText(resourceMap.getString("textFieldOrigin.text"));
 
         String[] calendars = new String[]{
-            "java.util.GregorianCalendar",
+            "org.previmer.ichthyop.calendar.AllLeapCalendar",
+            "org.previmer.ichthyop.calendar.Day360Calendar",
             "org.previmer.ichthyop.calendar.InterannualCalendar",
-            "org.previmer.ichthyop.calendar.Day360Calendar"
-
+            "org.previmer.ichthyop.calendar.JulianCalendar",
+            "org.previmer.ichthyop.calendar.NoLeapCalendar",
+            "org.previmer.ichthyop.calendar.ProlepticGregorianCalendar",
+            "org.previmer.ichthyop.calendar.StandardCalendar"
         };
         calendarComboBox.setModel(new DefaultComboBoxModel(calendars));
         calendarComboBox.setName("calendarComboBox");
         calendarComboBox.setEditable(false);
-        calendarComboBox.addActionListener((evt) -> {
-            String calendarClass = (String) calendarComboBox.getSelectedItem();
-            switch (calendarClass) {
-                case "java.util.GregorianCalendar":
-                    lblOrigin.setText(resourceMap.getString("lblOrigin.text2"));
-                    textFieldOrigin.setText(resourceMap.getString("textFieldOrigin.text2"));
-                    break;
-                case "org.previmer.ichthyop.calendar.InterannualCalendar":
-                case "org.previmer.ichthyop.calendar.Day360Calendar":
-                    lblOrigin.setText(resourceMap.getString("lblOrigin.text1"));
-                    textFieldOrigin.setText(resourceMap.getString("textFieldOrigin.text1"));
-                    break;
-            }
-
-        });
         calendarComboBox.setSelectedIndex(0);
 
         GroupLayout layoutCalendar = new GroupLayout(pnlCalendar);
         pnlCalendar.setLayout(layoutCalendar);
         layoutCalendar.setHorizontalGroup(
                 layoutCalendar.createParallelGroup()
-                        .addGroup(layoutCalendar.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(lblCalendar)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(calendarComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
-                        .addGroup(layoutCalendar.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(lblOrigin)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(textFieldOrigin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
+                .addGroup(layoutCalendar.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblCalendar)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(calendarComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                .addGroup(layoutCalendar.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblOrigin)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textFieldOrigin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
         );
         layoutCalendar.setVerticalGroup(
                 layoutCalendar.createParallelGroup()
-                        .addGroup(layoutCalendar.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layoutCalendar.createParallelGroup()
-                                        .addComponent(lblCalendar)
-                                        .addComponent(calendarComboBox))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layoutCalendar.createParallelGroup()
-                                        .addComponent(lblOrigin)
-                                        .addComponent(textFieldOrigin, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap())
+                .addGroup(layoutCalendar.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layoutCalendar.createParallelGroup()
+                                .addComponent(lblCalendar)
+                                .addComponent(calendarComboBox))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layoutCalendar.createParallelGroup()
+                                .addComponent(lblOrigin)
+                                .addComponent(textFieldOrigin, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap())
         );
 
         pnlConversion.setBorder(BorderFactory.createTitledBorder(resourceMap.getString("pnlConversion.border.title")));
@@ -278,52 +281,52 @@ public class TimeConverterView extends FrameView {
         pnlConversion.setLayout(layoutConversion);
         layoutConversion.setHorizontalGroup(
                 layoutConversion.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layoutConversion.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layoutConversion.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(scrollPaneConversion, GroupLayout.DEFAULT_SIZE, 592, Short.MAX_VALUE)
-                                        .addGroup(layoutConversion.createSequentialGroup()
-                                                .addComponent(textFieldValue, GroupLayout.PREFERRED_SIZE, 201, GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(btnConvert)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(btnClear))
-                                        .addComponent(lblHelp))
-                                .addContainerGap())
+                .addGroup(layoutConversion.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layoutConversion.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addComponent(scrollPaneConversion, GroupLayout.DEFAULT_SIZE, 592, Short.MAX_VALUE)
+                                .addGroup(layoutConversion.createSequentialGroup()
+                                        .addComponent(textFieldValue, GroupLayout.PREFERRED_SIZE, 201, GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnConvert)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnClear))
+                                .addComponent(lblHelp))
+                        .addContainerGap())
         );
         layoutConversion.setVerticalGroup(
                 layoutConversion.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layoutConversion.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(lblHelp)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layoutConversion.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                                        .addComponent(textFieldValue)
-                                        .addComponent(btnConvert, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(btnClear, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(scrollPaneConversion, GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
-                                .addContainerGap())
+                .addGroup(layoutConversion.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblHelp)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layoutConversion.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(textFieldValue)
+                                .addComponent(btnConvert, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnClear, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(scrollPaneConversion, GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
+                        .addContainerGap())
         );
 
         GroupLayout mainPanelLayout = new GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
                 mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(mainPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                        .addComponent(pnlConversion, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(pnlCalendar, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addContainerGap())
+                .addGroup(GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(mainPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                .addComponent(pnlConversion, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(pnlCalendar, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
                 mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(pnlCalendar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(pnlConversion, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(pnlCalendar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pnlConversion, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         setComponent(mainPanel);

@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import org.previmer.ichthyop.calendar.Day360Calendar;
-import org.previmer.ichthyop.calendar.FlawedCalendar;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
 
 /**
@@ -38,14 +37,6 @@ public class TimeConverter {
         dateFormat.setCalendar(calendar);
         calendar.setTime(dateFormat.parse(date));
         System.out.println(date + " (" + typeDate + ") <==> " + (calendar.getTimeInMillis() / 1000L) + " [second]");
-
-        if (isGregorian) {
-            Calendar cld = new FlawedCalendar(1900, Calendar.JANUARY, 1, 0, 0);
-            //Calendar cld = new FlawedCalendar(1858, Calendar.NOVEMBER, 17, 0, 0);
-            dateFormat.setCalendar(cld);
-            cld.setTime(dateFormat.parse(date));
-           System.out.println(date + " (flawed " + typeDate + ") <==> " + (cld.getTimeInMillis() / 1000L) + " [second]");
-        }
     }
 
     /**
@@ -71,14 +62,6 @@ public class TimeConverter {
         dateFormat.setCalendar(calendar);
         calendar.setTimeInMillis(time * 1000L);
         System.out.println(time + " [second] <==> " + dateFormat.format(calendar.getTime()) + " (" + typeDate + ")");
-
-        if (isGregorian) {
-            Calendar cld = new FlawedCalendar(1900, Calendar.JANUARY, 1, 0, 0);
-            //Calendar cld = new FlawedCalendar(1858, Calendar.NOVEMBER, 17, 0, 0);
-            dateFormat.setCalendar(cld);
-            cld.setTimeInMillis(time * 1000L);
-            System.out.println(time + " [second] <==> " + dateFormat.format(cld.getTime()) + " (flawed " + typeDate + ")");
-        }
     }
 
     /**
@@ -88,7 +71,7 @@ public class TimeConverter {
     public static void error(Throwable t) {
 
         StackTraceElement[] stackTrace = t.getStackTrace();
-        StringBuffer message = new StringBuffer(t.getClass().getSimpleName());
+        StringBuilder message = new StringBuilder(t.getClass().getSimpleName());
         message.append(": ");
         message.append(stackTrace[0].toString());
         message.append('\n');

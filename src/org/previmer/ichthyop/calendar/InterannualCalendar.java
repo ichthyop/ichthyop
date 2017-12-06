@@ -7,7 +7,7 @@ import java.util.Calendar;
 
 /**
  * <p>
- * The class extends the abstact class {@link java.util.Calendar}. It provides
+ * The class extends the abstract class {@link java.util.Calendar}. It provides
  * methods for converting between a specific instant in time and a set of fields
  * such as <code>YEAR</code>, <code>MONTH</code>, <code>DAY_OF_MONTH</code>,
  * <code>HOUR</code>, and so on, according with the Gregorian calendar. An
@@ -27,10 +27,13 @@ public class InterannualCalendar extends Calendar {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    /**
-     * Origin of time
-     */
+    
+     // Origin of time
     final private int[] epoch_fields;
+    
+    // Type of calendar
+    final private Type type;
+
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
@@ -42,6 +45,13 @@ public class InterannualCalendar extends Calendar {
     private static final int NUM_DAYS[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334}; // 0-based, for day-in-year
     private static final int LEAP_NUM_DAYS[] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}; // 0-based, for day-in-year
 
+    public enum Type {
+        PROLEPTIC_GREGORIAN,
+        JULIAN,
+        ALL_LEAP,
+        NO_LEAP
+    }
+
 ///////////////
 // Constructors
 ///////////////
@@ -50,7 +60,11 @@ public class InterannualCalendar extends Calendar {
      * 00:00:00.000 GMT.
      */
     public InterannualCalendar() {
-        this(1582, OCTOBER, 15, 0, 0);
+        this(1900, JANUARY, 1, 0, 0, Type.PROLEPTIC_GREGORIAN);
+    }
+
+    public InterannualCalendar(int year, int month, int day, int hour, int minute) {
+        this(year, month, day, hour, minute, Type.PROLEPTIC_GREGORIAN);
     }
 
     /**
@@ -62,9 +76,11 @@ public class InterannualCalendar extends Calendar {
      * @param day an int, the day origin
      * @param hour an int, the hour origin
      * @param minute an int, the minute origin
+     * @param type
      */
-    public InterannualCalendar(int year, int month, int day, int hour, int minute) {
+    public InterannualCalendar(int year, int month, int day, int hour, int minute, Type type) {
 
+        this.type = type;
         epoch_fields = new int[FIELD_COUNT];
         fields = new int[FIELD_COUNT];
         setEpoch(YEAR, year);
@@ -73,7 +89,6 @@ public class InterannualCalendar extends Calendar {
         setEpoch(HOUR_OF_DAY, hour);
         setEpoch(MINUTE, minute);
         setEpoch(SECOND, 0);
-        setTimeInMillis(0);
     }
 
 ////////////////////////////
@@ -115,6 +130,7 @@ public class InterannualCalendar extends Calendar {
      */
     @Override
     protected void computeFields() {
+
         int rawYear, year, month, dayOfMonth, dayOfYear;
         boolean isLeap;
         long epoch_hour = epoch_fields[HOUR_OF_DAY] * ONE_HOUR + epoch_fields[MINUTE] * ONE_MINUTE;
@@ -164,7 +180,7 @@ public class InterannualCalendar extends Calendar {
         if (millisInDay < 0) {
             millisInDay += ONE_DAY;
         }
-        
+
         set(MILLISECOND, millisInDay % 1000);
         millisInDay /= 1000;
         set(SECOND, millisInDay % 60);
@@ -185,7 +201,17 @@ public class InterannualCalendar extends Calendar {
      * @return true if the given year is a leap year; false otherwise.
      */
     private boolean isLeap(int year) {
-        return ((year % 4 == 0) && ((!(year % 100 == 0)) | (year % 400 == 0)));
+
+        switch (type) {
+            case PROLEPTIC_GREGORIAN:
+                return ((year % 4 == 0) && ((!(year % 100 == 0)) | (year % 400 == 0)));
+            case JULIAN:
+                return (year % 4 == 0);
+            case ALL_LEAP:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
@@ -196,14 +222,8 @@ public class InterannualCalendar extends Calendar {
 
         int yearOn = fields[YEAR];
         int monthOn = fields[MONTH];
-        boolean isLeap = isLeap(yearOn);
         long time2Day = (long) (fields[DAY_OF_MONTH] - 1);
-        try {
-            time2Day += isLeap
-                    ? (long) (LEAP_NUM_DAYS[monthOn])
-                    : (long) (NUM_DAYS[monthOn]);
-        } catch (Exception ex) {
-        }
+        time2Day += isLeap(yearOn) ? LEAP_NUM_DAYS[monthOn] : NUM_DAYS[monthOn];
 
         for (int incYear = epoch_fields[YEAR]; incYear < yearOn; incYear++) {
             time2Day += isLeap(incYear)
