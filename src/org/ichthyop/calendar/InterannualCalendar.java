@@ -27,10 +27,9 @@ public class InterannualCalendar extends Calendar {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    
-     // Origin of time
+    // Origin of time
     final private int[] epoch_fields;
-    
+
     // Type of calendar
     final private Type type;
 
@@ -142,23 +141,23 @@ public class InterannualCalendar extends Calendar {
 
         long nbDays = 0;
         int currentYear = epoch_fields[YEAR];
-        while (nbDays < timeInDay_o) {
-            nbDays += isLeap(currentYear)
-                    ? 366
-                    : 365;
-            currentYear++;
+        int signum = (int) Math.signum(timeInDay_o);
+        while (Math.abs(nbDays) < Math.abs(timeInDay_o)) {
+            nbDays = nbDays + signum * (isLeap(currentYear) ? 366 : 365);
+            currentYear += signum;
         }
-        --currentYear;
-        nbDays -= isLeap(currentYear)
-                ? 366
-                : 365;
+        currentYear -= signum;
+        nbDays = nbDays - signum * (isLeap(currentYear) ? 366 : 365);
         rawYear = (int) currentYear;
         dayOfYear = (int) (timeInDay_o - nbDays);
         isLeap = isLeap(rawYear);
-
+        if (dayOfYear < 0) {
+            rawYear--;
+            dayOfYear += (isLeap ? 366 : 365);
+        }
         if (dayOfYear > (isLeap ? 365 : 364)) {
-            dayOfYear -= (isLeap ? 366 : 365);
-            rawYear++;
+            dayOfYear = dayOfYear - signum * (isLeap ? 366 : 365);
+            rawYear += signum;
         }
 
         int correction = 0;
@@ -225,16 +224,15 @@ public class InterannualCalendar extends Calendar {
         long time2Day = (long) (fields[DAY_OF_MONTH] - 1);
         time2Day += isLeap(yearOn) ? LEAP_NUM_DAYS[monthOn] : NUM_DAYS[monthOn];
 
-        for (int incYear = epoch_fields[YEAR]; incYear < yearOn; incYear++) {
-            time2Day += isLeap(incYear)
-                    ? 366
-                    : 365;
+        int signum = (int) Math.signum(yearOn - epoch_fields[YEAR]);
+        for (int year = epoch_fields[YEAR]; year != yearOn; year = year + signum) {
+            time2Day = time2Day + signum * (isLeap(year) ? 366 : 365);
         }
 
-        time2Day -= (epoch_fields[DAY_OF_MONTH] - 1);
-        time2Day -= isLeap(epoch_fields[YEAR])
+        time2Day = time2Day - signum * (epoch_fields[DAY_OF_MONTH] - 1);
+        time2Day = time2Day - signum * (isLeap(epoch_fields[YEAR])
                 ? LEAP_NUM_DAYS[epoch_fields[MONTH]]
-                : NUM_DAYS[epoch_fields[MONTH]];
+                : NUM_DAYS[epoch_fields[MONTH]]);
 
         long millis = dayToMillis(time2Day);
         long millisInDay = fields[MILLISECOND]
@@ -242,7 +240,7 @@ public class InterannualCalendar extends Calendar {
                 + fields[MINUTE] * ONE_MINUTE
                 + fields[HOUR_OF_DAY] * ONE_HOUR;
         long epoch_hour = epoch_fields[HOUR_OF_DAY] * ONE_HOUR + epoch_fields[MINUTE] * ONE_MINUTE;
-        time = millis + millisInDay - epoch_hour;
+        time = millis + millisInDay - signum * epoch_hour;
     }
 
 //////////////////////////////////
