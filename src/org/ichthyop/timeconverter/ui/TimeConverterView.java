@@ -33,11 +33,10 @@ import javax.swing.table.DefaultTableModel;
 import org.jdesktop.application.Application;
 import org.ichthyop.calendar.AllLeapCalendar;
 import org.ichthyop.calendar.Day360Calendar;
-import org.ichthyop.calendar.InterannualCalendar;
 import org.ichthyop.calendar.JulianCalendar;
 import org.ichthyop.calendar.NoLeapCalendar;
 import org.ichthyop.calendar.ProlepticGregorianCalendar;
-import org.ichthyop.calendar.StandardCalendar;
+import org.ichthyop.calendar.GregorianCalendar;
 
 /**
  * The application's main frame.
@@ -80,24 +79,21 @@ public class TimeConverterView extends FrameView {
                 case "org.previmer.ichthyop.calendar.AllLeapCalendar":
                     calendar = new AllLeapCalendar(year_o, month_o, day_o, hour_o, min_o);
                     break;
-            case "org.previmer.ichthyop.calendar.Day360Calendar":
-                calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, min_o);
-                break;
-            case "org.previmer.ichthyop.calendar.InterannualCalendar":
-                calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o);
-                break;
-            case "org.previmer.ichthyop.calendar.JulianCalendar":
-                calendar = new JulianCalendar(year_o, month_o, day_o, hour_o, min_o);
-                break;
-            case "org.previmer.ichthyop.calendar.NoLeapCalendar":
-                calendar = new NoLeapCalendar(year_o, month_o, day_o, hour_o, min_o);
-                break;
-            case "org.previmer.ichthyop.calendar.ProlepticGregorianCalendar":
-                calendar = new ProlepticGregorianCalendar(year_o, month_o, day_o, hour_o, min_o);
-                break;
-            case "org.previmer.ichthyop.calendar.StandardCalendar":
-                calendar = new StandardCalendar(year_o, month_o, day_o, hour_o, min_o);
-                break;
+                case "org.previmer.ichthyop.calendar.Day360Calendar":
+                    calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, min_o);
+                    break;
+                case "org.previmer.ichthyop.calendar.GregorianCalendar":
+                    calendar = new GregorianCalendar(year_o, month_o, day_o, hour_o, min_o);
+                    break;
+                case "org.previmer.ichthyop.calendar.JulianCalendar":
+                    calendar = new JulianCalendar(year_o, month_o, day_o, hour_o, min_o);
+                    break;
+                case "org.previmer.ichthyop.calendar.NoLeapCalendar":
+                    calendar = new NoLeapCalendar(year_o, month_o, day_o, hour_o, min_o);
+                    break;
+                case "org.previmer.ichthyop.calendar.ProlepticGregorianCalendar":
+                    calendar = new ProlepticGregorianCalendar(year_o, month_o, day_o, hour_o, min_o);
+                    break;
             }
             btnConvert.getAction().setEnabled(true);
         } catch (ParseException ex) {
@@ -174,14 +170,13 @@ public class TimeConverterView extends FrameView {
         textFieldOrigin.setName("textFieldOrigin");
         textFieldOrigin.setText(resourceMap.getString("textFieldOrigin.text"));
 
-        String[] calendars = new String[]{
+        String[] calendars = new String[] {
             "org.previmer.ichthyop.calendar.AllLeapCalendar",
             "org.previmer.ichthyop.calendar.Day360Calendar",
-            "org.previmer.ichthyop.calendar.InterannualCalendar",
+            "org.previmer.ichthyop.calendar.GregorianCalendar",
             "org.previmer.ichthyop.calendar.JulianCalendar",
             "org.previmer.ichthyop.calendar.NoLeapCalendar",
-            "org.previmer.ichthyop.calendar.ProlepticGregorianCalendar",
-            "org.previmer.ichthyop.calendar.StandardCalendar"
+            "org.previmer.ichthyop.calendar.ProlepticGregorianCalendar"
         };
         calendarComboBox.setModel(new DefaultComboBoxModel(calendars));
         calendarComboBox.setName("calendarComboBox");

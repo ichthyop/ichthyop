@@ -4,6 +4,7 @@ package org.ichthyop.calendar;
  * Import the abstract class Calendar
  */
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * <p>
@@ -22,16 +23,18 @@ import java.util.Calendar;
  * @see java.util.Calendar
  * @see java.util.GregorianCalendar
  */
-public class InterannualCalendar extends Calendar {
+abstract class InterannualCalendar extends Calendar {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     // Origin of time
-    final private int[] epoch_fields;
+    private final int[] epoch_fields;
 
     // Type of calendar
-    final private Type type;
+    private final Type type;
+
+    private final Calendar cld = new GregorianCalendar();
 
 ///////////////////////////////
 // Declaration of the constants
@@ -55,19 +58,7 @@ public class InterannualCalendar extends Calendar {
 // Constructors
 ///////////////
     /**
-     * Constructs a Gregorian Calendar with origin of time January 1, 1900
-     * 00:00:00.000 GMT.
-     */
-    public InterannualCalendar() {
-        this(1900, JANUARY, 1, 0, 0, Type.PROLEPTIC_GREGORIAN);
-    }
-
-    public InterannualCalendar(int year, int month, int day, int hour, int minute) {
-        this(year, month, day, hour, minute, Type.PROLEPTIC_GREGORIAN);
-    }
-
-    /**
-     * Constructs a Gregorian Calendar with origin of time set by parameters.
+     * Constructs an interannual Calendar with origin of time set by parameters.
      * Hours, minutes, seconds are automatically set to 00:00:00.000
      *
      * @param year an int, the year origin
@@ -82,29 +73,19 @@ public class InterannualCalendar extends Calendar {
         this.type = type;
         epoch_fields = new int[FIELD_COUNT];
         fields = new int[FIELD_COUNT];
-        setEpoch(YEAR, year);
-        setEpoch(MONTH, month);
-        setEpoch(DAY_OF_MONTH, day);
-        setEpoch(HOUR_OF_DAY, hour);
-        setEpoch(MINUTE, minute);
-        setEpoch(SECOND, 0);
+        epoch_fields[YEAR] = year;
+        epoch_fields[MONTH] = month;
+        epoch_fields[DAY_OF_MONTH] = day;
+        epoch_fields[HOUR_OF_DAY] = hour;
+        epoch_fields[MINUTE] = minute;
+        epoch_fields[SECOND] = 0;
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    /**
-     * Sets the given epoch field (origin of time) to the given value.
-     *
-     * @param field an int, one of the field of the epoch.
-     * @param value an int, the value of the given field.
-     * @see java.util.Calendar for details about the available fields.
-     */
-    private void setEpoch(int field, int value) {
-        epoch_fields[field] = value;
-    }
 
-    /**
+    /*
      * Converts time as milliseconds to day
      *
      * @param millis a long, the time in millisecond
@@ -114,7 +95,7 @@ public class InterannualCalendar extends Calendar {
         return (millis / ONE_DAY);
     }
 
-    /**
+    /*
      * Converts time as day to milliseconds
      *
      * @param day a long, the time in day
@@ -124,9 +105,6 @@ public class InterannualCalendar extends Calendar {
         return day * ONE_DAY;
     }
 
-    /**
-     * Converts time as milliseconds to time field values.
-     */
     @Override
     protected void computeFields() {
 
@@ -213,9 +191,6 @@ public class InterannualCalendar extends Calendar {
         }
     }
 
-    /**
-     * Converts time field values to milliseconds.
-     */
     @Override
     protected void computeTime() {
 
@@ -243,35 +218,34 @@ public class InterannualCalendar extends Calendar {
         time = millis + millisInDay - signum * epoch_hour;
     }
 
-//////////////////////////////////
-// Inherited methods not redefined
-//////////////////////////////////
     @Override
-    public int getGreatestMinimum(int field) {
-        return 0;
-    }
-
-    @Override
-    public int getLeastMaximum(int field) {
-        return 0;
+    public int getMinimum(int field) {
+        return cld.getMinimum(field);
     }
 
     @Override
     public int getMaximum(int field) {
-        return 0;
+        return cld.getMaximum(field);
     }
 
     @Override
-    public int getMinimum(int field) {
-        return 0;
+    public int getGreatestMinimum(int field) {
+        return cld.getGreatestMinimum(field);
+    }
+
+    @Override
+    public int getLeastMaximum(int field) {
+        return cld.getLeastMaximum(field);
     }
 
     @Override
     public void add(int field, int amount) {
+        throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
     public void roll(int field, boolean up) {
+        throw new UnsupportedOperationException("Not supported.");
     }
     //---------- End of class
 }

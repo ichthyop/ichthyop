@@ -4,7 +4,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import org.ichthyop.calendar.Day360Calendar;
-import org.ichthyop.calendar.InterannualCalendar;
+import org.ichthyop.calendar.GregorianCalendar;
 
 /**
  *
@@ -26,7 +26,7 @@ public class TimeConverter {
                 : new SimpleDateFormat("yy/MM/dd HH:mm");
 
         Calendar calendar = isGregorian
-                ? new InterannualCalendar(1900, Calendar.JANUARY, 1, 0, 0)
+                ? new GregorianCalendar(1900, Calendar.JANUARY, 1, 0, 0)
                 //? new InterannualCalendar(1858, Calendar.NOVEMBER, 17, 0, 0)
                 : new Day360Calendar(1900, Calendar.JANUARY, 1, 0, 0);
 
@@ -51,7 +51,7 @@ public class TimeConverter {
                 : new SimpleDateFormat("yy/MM/dd HH:mm");
 
         Calendar calendar = isGregorian
-                ? new InterannualCalendar(1900, Calendar.JANUARY, 1, 0, 0)
+                ? new GregorianCalendar(1900, Calendar.JANUARY, 1, 0, 0)
                 //? new InterannualCalendar(1858, Calendar.NOVEMBER, 17, 0, 0)
                 : new Day360Calendar(1900, Calendar.JANUARY, 1, 0, 0);
 

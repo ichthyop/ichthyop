@@ -7,7 +7,6 @@ package org.ichthyop.calendar;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
@@ -15,18 +14,18 @@ import java.util.TimeZone;
  *
  * @author pverley
  */
-public class StandardCalendar extends Calendar {
+public class GregorianCalendar extends Calendar {
 
     final private long EPOCH_OFFSET;
-    final private GregorianCalendar cld;
+    final private java.util.GregorianCalendar cld;
 
-    public StandardCalendar(int year, int month, int day, int hour, int minute) {
+    public GregorianCalendar(int year, int month, int day, int hour, int minute) {
         this(year, month, day, hour, minute, null);
     }
 
-    public StandardCalendar(int year, int month, int day, int hour, int minute, Date gregorianCutover) {
+    public GregorianCalendar(int year, int month, int day, int hour, int minute, Date gregorianCutover) {
 
-        cld = new GregorianCalendar();
+        cld = new java.util.GregorianCalendar();
         if (null != gregorianCutover) {
             cld.setGregorianChange(gregorianCutover);
         }
@@ -55,15 +54,16 @@ public class StandardCalendar extends Calendar {
 
     @Override
     public void add(int field, int amount) {
-//        complete();
-//        cld.add(field, amount);
-//        setTimeInMillis(cld.getTimeInMillis() - EPOCH_OFFSET);
-        throw new UnsupportedOperationException("Not supported yet.");
+        complete();
+        cld.add(field, amount);
+        setTimeInMillis(cld.getTimeInMillis() - EPOCH_OFFSET);
     }
 
     @Override
     public void roll(int field, boolean up) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        complete();
+        cld.roll(field, up);
+        setTimeInMillis(cld.getTimeInMillis() - EPOCH_OFFSET);
     }
 
     @Override

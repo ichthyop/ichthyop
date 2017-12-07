@@ -11,7 +11,7 @@ import java.util.Date;
  *
  * @author pverley
  */
-public class JulianCalendar extends StandardCalendar {
+public class JulianCalendar extends GregorianCalendar {
     
     public JulianCalendar(int year, int month, int day, int hour, int minute) {
         super(year, month, day, hour, minute, new Date(Long.MAX_VALUE));

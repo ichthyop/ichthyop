@@ -11,7 +11,7 @@ import java.util.Date;
  *
  * @author pverley
  */
-public class ProlepticGregorianCalendar extends StandardCalendar {
+public class ProlepticGregorianCalendar extends GregorianCalendar {
     
     public ProlepticGregorianCalendar(int year, int month, int day, int hour, int minute) {
         super(year, month, day, hour, minute, new Date(Long.MIN_VALUE));
