@@ -3,25 +3,25 @@ TimeConverter readme file
 ================================
 
 
-TimeConverter is a handy tool to convert elapsed seconds since a time orgin into a human readable date and reciprocally.
-It is part of the Ichthyop project.
+TimeConverter is a handy tool to convert elapsed seconds since a time origin into a human readable date and reciprocally.
+It is part of the Ichthyop project and has been included into Ichthyop tool since version 2.0
 http://www.ichthyop.org
 
-Copyright (c) Philippe VERLEY 2011
+Copyright (c) Philippe VERLEY 2017
 
-Release: 1.0 (2011/03/11)
+Release: 2.0 (2017/12/07)
 
 Feedback & Bug reports: contact@ichthyop.org
 
 ===========
 Requirement
 
-Get latest Java installed, at least JRE 1.6.
+Get latest Java installed, at least JRE 1.8
 
 For most users, Java is already installed and up-to-date. Skip this
 step and go to the start-up instructions.
 
-Latest version of JRE (at least 1.6) can be download at http://www.java.com/en/download/manual.jsp
+Latest version of JRE (at least 1.8) can be download at http://www.java.com/en/download/manual.jsp
 
 =======
 Startup
