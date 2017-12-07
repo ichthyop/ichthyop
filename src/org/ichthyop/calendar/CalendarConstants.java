@@ -1,8 +1,8 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
- * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2016
+ * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2017
  * http://www.ird.fr
  *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr)
@@ -50,81 +50,18 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
-package org.ichthyop.ui.param;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import javax.swing.JFormattedTextField;
-import javax.swing.text.DateFormatter;
-import javax.swing.text.DefaultFormatterFactory;
-import org.ichthyop.calendar.GregorianCalendar;
+package org.ichthyop.calendar;
 
 /**
  *
  * @author pverley
  */
-public class JDateTextField extends JFormattedTextField {
-
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
-
-    /**
-     * The simple date format parses and formats dates in human readable format.
-     * The pattern for date-time formatting depends on the calendar
-     * (Calendar1900 or ClimatoCalendar)
-     */
-    private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-    /**
-     * The calendar to convert specific instant in time to date.
-     */
-    private Calendar calendar;
-
-///////////////
-// Constructors
-///////////////
-
-    public JDateTextField() {
-        this(new GregorianCalendar());
-    }
-
-    public JDateTextField(Calendar calendar) {
-        setCalendar(calendar);
-        setFormatterFactory(new DefaultFormatterFactory(new DateFormatter(dtFormat)));
-        setFocusLostBehavior(JFormattedTextField.COMMIT_OR_REVERT);
-        setValue(0L);
-    }
-
-    private Calendar getCalendar() {
-        return calendar;
-    }
-
-    public void setCalendar(Calendar calendar) {
-        long time = (null != this.calendar)
-                ? getTimeInSeconds()
-                : 0L;
-        this.calendar = calendar;
-        dtFormat.setCalendar(calendar);
-        setValue(time);
-    }
-
-    /**
-     * Gets the current value of the parameter
-     * @return a long, the current value of the parameter
-     */
-    public long getTimeInSeconds() {
-        return calendar.getTimeInMillis() / 1000L;
-    }
-
-    /**
-     * Sets the time as milliseconds
-     *
-     * @param value a long, the time seconds
-     */
-    public void setValue(long value) {
-        calendar.setTimeInMillis(value * 1000L);
-        setValue(calendar.getTime());
-    }
+public class CalendarConstants {
+    
+    public static final int ONE_SECOND = 1000;
+    public static final int ONE_MINUTE = 60 * ONE_SECOND;
+    public static final int ONE_HOUR = 60 * ONE_MINUTE;
+    public static final long ONE_DAY = 24 * ONE_HOUR;
+    public static final long ONE_WEEK = 7 * ONE_DAY;
     
 }

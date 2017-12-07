@@ -52,10 +52,8 @@
  */
 package org.ichthyop.output;
 
-import de.micromata.opengis.kml.v_2_2_0.IconStyle;
 import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
-import de.micromata.opengis.kml.v_2_2_0.Style;
 import de.micromata.opengis.kml.v_2_2_0.Document;
 import de.micromata.opengis.kml.v_2_2_0.Folder;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
@@ -70,7 +68,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import org.ichthyop.calendar.Day360Calendar;
-import org.ichthyop.calendar.InterannualCalendar;
+import org.ichthyop.calendar.GregorianCalendar;
 import org.ichthyop.manager.TimeManager;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -140,7 +138,7 @@ public class ExportToKML {
         if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
             calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
         } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
+            calendar = new GregorianCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
 
         // random color for particles

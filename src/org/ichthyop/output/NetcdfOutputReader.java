@@ -59,11 +59,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ichthyop.IchthyopLinker;
 import org.ichthyop.calendar.Day360Calendar;
-import org.ichthyop.calendar.InterannualCalendar;
+import org.ichthyop.calendar.GregorianCalendar;
 import org.ichthyop.manager.TimeManager;
 import org.ichthyop.ui.DrawableParticle;
 import org.ichthyop.ui.DrawableZone;
@@ -151,7 +149,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
         if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
             calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
         } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
+            calendar = new GregorianCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
 
         // lon, lat min and max
@@ -265,7 +263,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
             // read custom colorbar variable
             if (null != colorVariableName && null != nc.findVariable(colorVariableName)) {
                 Variable variable = nc.findVariable(colorVariableName);
-                Array arrColorVariable = null;
+                Array arrColorVariable;
                 if (colorVariableName.equals("time")) {
                     arrColorVariable = variable.read(new int[]{itime}, new int[]{1}).reduce();
                 } else {

@@ -58,7 +58,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import org.ichthyop.event.NextStepEvent;
 import org.ichthyop.event.NextStepListener;
-import org.ichthyop.calendar.InterannualCalendar;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.LastStepEvent;
 import org.ichthyop.event.LastStepListener;
@@ -67,6 +66,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.event.EventListenerList;
 import org.ichthyop.calendar.Day360Calendar;
+import org.ichthyop.calendar.GregorianCalendar;
 import org.ichthyop.util.Constant;
 
 /**
@@ -174,7 +174,7 @@ public class TimeManager extends AbstractManager {
         if (getParameter("calendar_type").equals(TypeCalendar.CLIMATO.toString())) {
             calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
         } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
+            calendar = new GregorianCalendar(year_o, month_o, day_o, hour_o, minute_o);
         }
 
         /* initial time */
@@ -189,7 +189,7 @@ public class TimeManager extends AbstractManager {
         
         /* output date format */
         outputDateFormat = new SimpleDateFormat(
-                (calendar.getClass() == InterannualCalendar.class)
+                (calendar.getClass() == GregorianCalendar.class)
                         ? "yyyy/MM/dd HH:mm:ss"
                         : "yy/MM/dd HH:mm:ss");
         outputDateFormat.setCalendar(calendar);

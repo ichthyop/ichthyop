@@ -61,11 +61,10 @@ import org.ichthyop.event.SetupListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
-import org.ichthyop.calendar.InterannualCalendar;
+import org.ichthyop.calendar.CalendarConstants;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.logging.IchthyopLogger;
 import org.ichthyop.logging.StdoutHandler;
@@ -151,7 +150,7 @@ public class SimulationManager extends IchthyopLogger {
 
     private static String newId() {
         StringBuilder strBfRunId = new StringBuilder("ichthyop-run");
-        Calendar calendar = new GregorianCalendar();
+        Calendar calendar = new java.util.GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
         SDFORMAT.setCalendar(calendar);
         strBfRunId.append(SDFORMAT.format(calendar.getTime()));
@@ -191,9 +190,9 @@ public class SimulationManager extends IchthyopLogger {
         if (progress != 0) {
             nbMilliSecLeft = (long) ((System.currentTimeMillis() - cpu_start) * (1 - progress) / progress);
         }
-        int nbHourLeft = (int) (nbMilliSecLeft / InterannualCalendar.ONE_HOUR);
-        int nbMinLeft = (int) ((nbMilliSecLeft - InterannualCalendar.ONE_HOUR * nbHourLeft) / InterannualCalendar.ONE_MINUTE);
-        int nbSecLeft = (int) ((nbMilliSecLeft - InterannualCalendar.ONE_HOUR * nbHourLeft - InterannualCalendar.ONE_MINUTE * nbMinLeft) / InterannualCalendar.ONE_SECOND);
+        int nbHourLeft = (int) (nbMilliSecLeft / CalendarConstants.ONE_HOUR);
+        int nbMinLeft = (int) ((nbMilliSecLeft - CalendarConstants.ONE_HOUR * nbHourLeft) / CalendarConstants.ONE_MINUTE);
+        int nbSecLeft = (int) ((nbMilliSecLeft - CalendarConstants.ONE_HOUR * nbHourLeft - CalendarConstants.ONE_MINUTE * nbMinLeft) / CalendarConstants.ONE_SECOND);
 
         strBf = new StringBuffer("Time left ");
         if (nbHourLeft == 0) {
