@@ -110,13 +110,13 @@ public abstract class AbstractDatasetVariable implements IVariable {
     @Override
     public double getDouble(double[] pGrid, double seconds) {
 
-        if (!times.containsKey(seconds)) {
+        if (null != calendar && !times.containsKey(seconds)) {
             long millis = (long) (t0 + seconds) * 1000L;
             calendar.setTimeInMillis(millis);
             times.putIfAbsent(seconds, calendar.getTimeInMillis() / 1000.d);
             //System.out.println(seconds + " " + times.get(seconds));
         }
-        return interpolateIDW(pGrid, times.get(seconds), IDW_RADIUS, IDW_POWER);
+        return interpolateIDW(pGrid, times.containsKey(seconds) ? times.get(seconds) : Double.NaN, IDW_RADIUS, IDW_POWER);
     }
 
     @Override
