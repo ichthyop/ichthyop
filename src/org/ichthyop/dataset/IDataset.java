@@ -53,6 +53,7 @@
 
 package org.ichthyop.dataset;
 
+import java.util.Calendar;
 import org.ichthyop.dataset.variable.IVariable;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.grid.IGrid;
@@ -76,4 +77,6 @@ public interface IDataset extends NextStepListener {
     public void requireVariable(String name, Class requiredBy);
 
     public void removeRequiredVariable(String name, Class requiredBy);
+    
+    public Calendar getCalendar();
 }

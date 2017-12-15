@@ -54,7 +54,10 @@ package org.ichthyop.dataset;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import org.ichthyop.grid.AbstractRegularGrid;
 import java.util.HashMap;
@@ -91,6 +94,9 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
     private String location;
     // 
     final HashMap<String, List<String>> variableMap = new HashMap();
+    //
+    private Calendar calendar;
+    protected double t0;
     // 
     int time_arrow;
     //
@@ -118,6 +124,43 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
             error("[dataset] Failed to instantiate dataset grid " + prefix + ".grid", ex);
         }
         return null;
+    }
+
+    private Calendar createCalendar() {
+
+        try {
+            if (!getConfiguration().isNull(prefix + ".calendar.class_name")) {
+                String classname = getConfiguration().getString(prefix + ".calendar.class_name");
+                int year = 1900;
+                int month = Calendar.JANUARY;
+                int day = 1;
+                int hour = 0;
+                int minute = 0;
+                if (!getConfiguration().isNull(prefix + ".calendar.time_origin")) {
+                    String origin = getConfiguration().getString(prefix + ".calendar.time_origin");
+                    Calendar calendar_o = Calendar.getInstance();
+                    SimpleDateFormat idf = getSimulationManager().getTimeManager().getInputDateFormat();
+                    idf.setCalendar(calendar_o);
+                    calendar_o.setTime(idf.parse(origin));
+                    year = calendar_o.get(Calendar.YEAR);
+                    month = calendar_o.get(Calendar.MONTH);
+                    day = calendar_o.get(Calendar.DAY_OF_MONTH);
+                    hour = calendar_o.get(Calendar.HOUR_OF_DAY);
+                    minute = calendar_o.get(Calendar.MINUTE);
+                } else {
+                    warning("[dataset] Did not find parameter" + prefix + ".calendar.time_origin. Ichthyop assumes 1900/01/01 00:00");
+                }
+                return (Calendar) Class.forName(classname).getConstructor(int.class, int.class, int.class, int.class, int.class).newInstance(year, month, day, hour, minute);
+            }
+        } catch (ParseException | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            warning("Failed to create calendar for dataset " + prefix, ex);
+        }
+        return null;
+    }
+
+    @Override
+    public Calendar getCalendar() {
+        return calendar;
     }
 
     @Override
@@ -152,9 +195,13 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
                 try (NetcdfFile nc = DatasetUtil.open(variableMap.get(name).get(0), enhanced)) {
                     variable_time = DatasetUtil.findTimeVariable(nc);
                 }
-                Collections.sort(variableMap.get(name), new NCComparator(variable_time, time_arrow));
+                if (null != variable_time) {
+                    Collections.sort(variableMap.get(name), new NCComparator(variable_time, time_arrow));
+                }
             }
         }
+
+        calendar = createCalendar();
 
         grid = createGrid();
         grid.init();
@@ -166,19 +213,26 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
         return new NetcdfDatasetVariable(variableMap.get(name), name,
                 nlayer, grid, tilingh, Math.min(tilingv, grid.get_nz()),
+                calendar, t0,
                 enhanced);
     }
 
     @Override
     public void init() throws Exception {
 
+        if (null != calendar) {
+            calendar.setTimeInMillis(0);
+            t0 = getSimulationManager().getTimeManager().get_tO(calendar);
+        } else {
+            t0 = 0;
+        }
+
         // instantiate dataset variables
         for (String name : requiredBy.keySet()) {
             variables.put(name, createVariable(name, NLAYER, TILING_H, TILING_V));
         }
 
-        // initialise them
-        double t0 = getSimulationManager().getTimeManager().get_tO();
+        // initialise dataset variables
         for (AbstractDatasetVariable variable : variables.values()) {
             if (null != variable) {
                 variable.init(t0, time_arrow);
@@ -189,8 +243,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
-        double time = e.getSource().getTime();
-
+        double time = t0 + e.getSource().getTime();
         for (AbstractDatasetVariable variable : variables.values()) {
             if (null != variable) {
                 variable.update(time, time_arrow);

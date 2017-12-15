@@ -482,15 +482,15 @@ public class OscarDataset extends NetcdfDataset {
     }
 
     void setOnFirstTime() throws Exception {
+        
         // Time is expressed as number of days since origin in Oscar
-        double t0 = getSimulationManager().getTimeManager().get_tO();
         if (!opendap) {
             indexFile = DatasetUtil.index(listInputFiles, t0, time_arrow, strTime);
             ncIn = DatasetUtil.open(listInputFiles.get(indexFile), true);
         }
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
         rank = DatasetUtil.rank(t0, ncIn, strTime, time_arrow);
-        time_tp1 = getSimulationManager().getTimeManager().get_tO();
+        time_tp1 = t0;
     }
 
     /**
@@ -540,7 +540,7 @@ public class OscarDataset extends NetcdfDataset {
     @Override
     public void nextStepTriggered(NextStepEvent e) {
 
-        double time = e.getSource().getTime();
+        double time = t0 + e.getSource().getTime();
         int timeArrow = time_arrow;
 
         if (timeArrow * time < timeArrow * time_tp1) {

@@ -57,6 +57,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Properties;
 import org.ichthyop.particle.IParticle;
@@ -186,11 +187,14 @@ public class WindAction extends AbstractAction {
         private double time;
 
         WindScenario(int rank) {
+
             intensity = Float.valueOf(getProperty("wind.intensity", rank));
             direction = Float.valueOf(getProperty("wind.direction", rank));
             windage = Float.valueOf(getProperty("windage", rank)) / 100.f;
+            Calendar calendar = getSimulationManager().getOceanDataset().getCalendar();
+            double t0 = getSimulationManager().getTimeManager().get_tO(calendar);
             try {
-                time = getSimulationManager().getTimeManager().date2seconds(getProperty("from.time", rank));
+                time = getSimulationManager().getTimeManager().date2seconds(getProperty("from.time", rank), calendar) - t0;
             } catch (ParseException ex) {
                 error("Failed to parse time in wind scenario", ex);
             }

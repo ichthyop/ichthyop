@@ -69,7 +69,7 @@ public class ConstantDatasetVariable extends AbstractDatasetVariable {
     private final boolean enhanced;
 
     public ConstantDatasetVariable(String file, String name, IGrid grid, int tilingh, int tilingv, boolean enhanced) {
-        super(1, grid);
+        super(1, grid, null, 0);
         this.location = file;
         this.name = name;
         this.tilingh = tilingh;

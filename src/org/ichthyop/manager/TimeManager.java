@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.manager;
 
 import java.io.IOException;
@@ -65,8 +64,6 @@ import org.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.event.EventListenerList;
-import org.ichthyop.calendar.Day360Calendar;
-import org.ichthyop.calendar.GregorianCalendar;
 import org.ichthyop.util.Constant;
 
 /**
@@ -84,15 +81,11 @@ public class TimeManager extends AbstractManager {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    private final static TimeManager timeManager = new TimeManager();
-    /**
-     * Current time of the simulation [second]
-     */
-    private double time;
+    private final static TimeManager TIME_MANAGER = new TimeManager();
     /**
      * Beginning of the simulation [second]
      */
-    private double t0;
+//    private Date t0;
     /**
      * Transport duration [second]
      */
@@ -109,30 +102,25 @@ public class TimeManager extends AbstractManager {
      * Index of the current step
      */
     private int i_step;
+
+    private double elapsed;
     /**
      * Number of simulated steps
      */
-    private int nb_steps;
-    /**
-     * A Calendar for time management
-     */
-    private Calendar calendar;
+    private int nsteps;
     /**
      * Determine whether particle should keep drifting when age exceeds
      * transport duration
      */
     private boolean keepDrifting;
-    /**
-     * The simple date format parses and formats dates in human readable format.
-     */
-    private SimpleDateFormat outputDateFormat;
+    
     private final EventListenerList listeners = new EventListenerList();
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
     public static TimeManager getInstance() {
-        return timeManager;
+        return TIME_MANAGER;
     }
 
     public void firstStepTriggered() throws Exception {
@@ -141,58 +129,29 @@ public class TimeManager extends AbstractManager {
 
     private void loadParameters() throws Exception {
 
-        /* time step */
-        dt = Integer.valueOf(getParameter("time_step"));
+        // time step
+        dt = getConfiguration().getInt("app.time.time_step");
 
-        /* time direction */
-        boolean isForward = getParameter("time_arrow").equals(TimeDirection.FORWARD.toString());
+        // time direction */
+        boolean isForward = getConfiguration().getString("app.time.time_arrow").equals(TimeDirection.FORWARD.toString());
         if (!isForward) {
             dt *= -1;
         }
 
-        /* transport duration */
+        // transport duration */
         try {
-            transportDuration = duration2seconds(getParameter("transport_duration"));
+            transportDuration = duration2seconds(getConfiguration().getString("app.time.transport_duration"));
         } catch (ParseException ex) {
             IOException pex = new IOException("Error converting transport duration into seconds ==> " + ex.toString());
             pex.setStackTrace(ex.getStackTrace());
             throw pex;
         }
 
-        /* keep drifting ?*/
-        keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
+        // keep drifting ?
+        keepDrifting = getConfiguration().getBoolean("app.time.keep_drifting");
 
-        // Calendar en origin of time
-        Calendar calendar_o = Calendar.getInstance();
-        INPUT_DATE_FORMAT.setCalendar(calendar_o);
-        calendar_o.setTime(INPUT_DATE_FORMAT.parse(getParameter("time_origin")));
-        int year_o = calendar_o.get(Calendar.YEAR);
-        int month_o = calendar_o.get(Calendar.MONTH);
-        int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
-        int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
-        int minute_o = calendar_o.get(Calendar.MINUTE);
-        if (getParameter("calendar_type").equals(TypeCalendar.CLIMATO.toString())) {
-            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
-        } else {
-            calendar = new GregorianCalendar(year_o, month_o, day_o, hour_o, minute_o);
-        }
-
-        /* initial time */
-        try {
-            t0 = date2seconds(getParameter("initial_time"));
-        } catch (ParseException ex) {
-            IOException pex = new IOException("Error converting initial time into seconds ==> " + ex.toString());
-            pex.setStackTrace(ex.getStackTrace());
-            throw pex;
-        }
-        calendar.setTimeInMillis((long) (t0 * 1000));
-        
-        /* output date format */
-        outputDateFormat = new SimpleDateFormat(
-                (calendar.getClass() == GregorianCalendar.class)
-                        ? "yyyy/MM/dd HH:mm:ss"
-                        : "yy/MM/dd HH:mm:ss");
-        outputDateFormat.setCalendar(calendar);
+        // ellapsed time
+        elapsed = 0.d;
     }
 
     public boolean keepDrifting() {
@@ -206,6 +165,7 @@ public class TimeManager extends AbstractManager {
      * @throws java.text.ParseException
      */
     public double duration2seconds(String duration) throws ParseException {
+        
         double seconds;
         NumberFormat nbFormat = NumberFormat.getInstance();
         nbFormat.setParseIntegerOnly(true);
@@ -214,7 +174,7 @@ public class TimeManager extends AbstractManager {
         seconds = nbFormat.parse(duration.substring(duration.indexOf("hour") + 8, duration.indexOf("minute"))).longValue()
                 * Constant.ONE_MINUTE
                 + nbFormat.parse(duration.substring(duration.indexOf("day") + 7,
-                                duration.indexOf("hour")).trim()).longValue()
+                        duration.indexOf("hour")).trim()).longValue()
                 * Constant.ONE_HOUR
                 + nbFormat.parse(duration.substring(0, duration.indexOf("day")).trim()).longValue()
                 * Constant.ONE_DAY;
@@ -222,14 +182,11 @@ public class TimeManager extends AbstractManager {
         return seconds;
     }
 
-    public double date2seconds(String date) throws ParseException {
+    public double date2seconds(String date, Calendar calendar) throws ParseException {
+        
         INPUT_DATE_FORMAT.setCalendar(calendar);
         calendar.setTime(INPUT_DATE_FORMAT.parse(date));
         return calendar.getTimeInMillis() / 1000L;
-    }
-
-    private String getParameter(String key) {
-        return getSimulationManager().getParameterManager().getString("app.time." + key);
     }
 
     /**
@@ -242,15 +199,15 @@ public class TimeManager extends AbstractManager {
      */
     public boolean hasNextStep() throws Exception {
 
-        time += dt;
-        calendar.setTimeInMillis((long) (time * 1000));
-        if (Math.abs(time - t0) < simuDuration) {
+        if (elapsed < simuDuration) {
             fireNextStepTriggered();
             i_step++;
+            elapsed += dt;
             return true;
+        } else {
+            lastStepTriggered();
+            return false;
         }
-        lastStepTriggered();
-        return false;
     }
 
     /**
@@ -259,7 +216,29 @@ public class TimeManager extends AbstractManager {
      * @return the current time of the simulation, formatted in a String
      */
     public String timeToString() {
-        return outputDateFormat.format(calendar.getTime());
+
+        int nd = (int) (elapsed / (3600 * 24));
+        int nh = (int) (elapsed - nd * 3600 * 24) / 3600;
+        int nm = (int) (elapsed - nd * 3600 * 24 - nh * 3600) / 60;
+        int ns = (int) (elapsed - nd * 3600 * 24 - nh * 3600 - nm * 60);
+        StringBuilder sb = new StringBuilder();
+        if (nd > 0) {
+            sb.append(nd).append(" day");
+            sb.append(nd > 1 ? "s " : " ");
+        }
+        if (nh > 0) {
+            sb.append(nh).append(" hour");
+            sb.append(nh > 1 ? "s " : " ");
+        }
+        if (nm > 0) {
+            sb.append(nm).append(" minute");
+            sb.append(nm > 1 ? "s " : " ");
+        }
+        if (ns > 0) {
+            sb.append(ns).append(" second");
+            sb.append(ns > 1 ? "s " : " ");
+        }
+        return sb.toString();
     }
 
     /**
@@ -273,7 +252,7 @@ public class TimeManager extends AbstractManager {
 
     public String stepToString() {
         StringBuilder strBf = new StringBuilder("Step ");
-        strBf.append(index() + 1);
+        strBf.append(i_step + 1);
         strBf.append(" / ");
         strBf.append(getNumberOfSteps());
         return strBf.toString();
@@ -285,7 +264,7 @@ public class TimeManager extends AbstractManager {
      * @return the number of steps of the current simulation.
      */
     public int getNumberOfSteps() {
-        return nb_steps;
+        return nsteps;
     }
 
     /**
@@ -294,20 +273,16 @@ public class TimeManager extends AbstractManager {
      * @return a long, the current time [second] of the simulation
      */
     public double getTime() {
-        return time;
+        return elapsed;
     }
 
-    public double get_tO() {
-        return t0;
-    }
-
-    /**
-     * Gets the calendar used for time management
-     *
-     * @return the Calendar of the simulation
-     */
-    public Calendar getCalendar() {
-        return calendar;
+    public double get_tO(Calendar calendar) {
+        try {
+            return date2seconds(getConfiguration().getString("app.time.initial_time"), calendar);
+        } catch (ParseException ex) {
+            error("Failed to convert parameter app.time.initial_time into seconds" , ex);
+            return Double.NaN;
+        }
     }
 
     /**
@@ -412,8 +387,8 @@ public class TimeManager extends AbstractManager {
     public void initializePerformed(InitializeEvent e) throws Exception {
         simuDuration = transportDuration + getSimulationManager().getReleaseManager().getReleaseDuration();
         i_step = 0;
-        time = t0;
-        nb_steps = (int) Math.abs(simuDuration / dt);
+        elapsed = 0;
+        nsteps = (int) Math.abs(simuDuration / dt);
         info("Time manager initialization [OK]");
     }
 
@@ -434,22 +409,6 @@ public class TimeManager extends AbstractManager {
         @Override
         public String toString() {
             return name().toLowerCase();
-        }
-    }
-
-    public enum TypeCalendar {
-
-        CLIMATO("Climatology calendar"),
-        GREGORIAN("Gregorian calendar");
-        private final String name;
-
-        TypeCalendar(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
         }
     }
 }

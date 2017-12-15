@@ -53,6 +53,8 @@
 package org.ichthyop.dataset.variable;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.HashMap;
 import org.ichthyop.grid.IGrid;
 
 /**
@@ -64,6 +66,9 @@ public abstract class AbstractDatasetVariable implements IVariable {
     protected final IGrid grid;
     protected final TiledVariable[] stack;
     protected final int nlayer;
+    protected final Calendar calendar;
+    protected final double t0;
+    private final HashMap<Double, Double> times = new HashMap();
     // constants
     private final int IDW_POWER = 2;
     private final int IDW_RADIUS = 1;
@@ -72,9 +77,11 @@ public abstract class AbstractDatasetVariable implements IVariable {
 
     public abstract void update(double currenttime, int time_arrow) throws IOException;
 
-    public AbstractDatasetVariable(int nlayer, IGrid grid) {
+    public AbstractDatasetVariable(int nlayer, IGrid grid, Calendar calendar, double t0) {
         this.nlayer = nlayer;
         this.grid = grid;
+        this.calendar = calendar;
+        this.t0 = t0;
         stack = new TiledVariable[nlayer];
     }
 
@@ -83,6 +90,8 @@ public abstract class AbstractDatasetVariable implements IVariable {
     }
 
     protected void update(TiledVariable variable) {
+
+        times.clear();
         // clear first variable of the stack
         if (null != stack[0]) {
             stack[0].clear();
@@ -99,8 +108,15 @@ public abstract class AbstractDatasetVariable implements IVariable {
     }
 
     @Override
-    public double getDouble(double[] pGrid, double time) {
-        return interpolateIDW(pGrid, time, IDW_RADIUS, IDW_POWER);
+    public double getDouble(double[] pGrid, double seconds) {
+
+        if (!times.containsKey(seconds)) {
+            long millis = (long) (t0 + seconds) * 1000L;
+            calendar.setTimeInMillis(millis);
+            times.putIfAbsent(seconds, calendar.getTimeInMillis() / 1000.d);
+            //System.out.println(seconds + " " + times.get(seconds));
+        }
+        return interpolateIDW(pGrid, times.get(seconds), IDW_RADIUS, IDW_POWER);
     }
 
     @Override

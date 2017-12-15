@@ -144,7 +144,7 @@ public class MigrationAction extends AbstractAction {
 
         // Check whether the growth module is enabled
         isGrowth = getConfiguration().getBoolean("action.growth.enabled");
-        calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
+        calendar = (Calendar) getSimulationManager().getOceanDataset().getCalendar().clone();
         // Otherwise read migration minimal age
         if (!isGrowth) {
             minimumAge = (long) (getConfiguration().getFloat("action.migration.age_min") * 24.f * 3600.f);

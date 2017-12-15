@@ -87,7 +87,7 @@ public class OceanDataset extends NetcdfDataset {
             }
         }
     }
-    
+
     AbstractDatasetVariable createWVariable() {
         int tilingv = Math.max(TILING_H * TILING_V / grid.get_nz(), 1);
         return new WDatasetVariable(
@@ -105,7 +105,7 @@ public class OceanDataset extends NetcdfDataset {
     }
 
     public double getW(double[] pGrid, double time) {
-        return variable_w != null 
+        return variable_w != null
                 ? getVariable(variable_w).getDouble(pGrid, time)
                 : 0.d;
     }

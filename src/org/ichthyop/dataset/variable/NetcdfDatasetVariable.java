@@ -53,6 +53,7 @@
 package org.ichthyop.dataset.variable;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import org.ichthyop.dataset.DatasetUtil;
 import org.ichthyop.grid.IGrid;
@@ -74,8 +75,9 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
 
     public NetcdfDatasetVariable(List<String> locations, String name,
             int nlayer, IGrid grid, int tilingh, int tilingv,
+            Calendar calendar, double t0,
             boolean enhanced) {
-        super(nlayer, grid);
+        super(nlayer, grid, calendar, t0);
         this.locations = locations;
         this.name = name;
         this.tilingh = tilingh;

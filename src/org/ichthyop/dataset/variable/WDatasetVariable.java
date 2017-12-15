@@ -67,7 +67,7 @@ public class WDatasetVariable extends AbstractDatasetVariable {
     private final AbstractDatasetVariable v;
     
     public WDatasetVariable(AbstractDatasetVariable u, AbstractDatasetVariable v, IGrid grid) {
-        super(u.nlayer, grid);
+        super(u.nlayer, grid, u.calendar, u.t0);
         this.u = u;
         this.v = v;
     }

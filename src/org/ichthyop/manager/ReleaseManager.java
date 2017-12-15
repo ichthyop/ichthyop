@@ -55,6 +55,7 @@ package org.ichthyop.manager;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.NextStepEvent;
@@ -165,31 +166,18 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         return canRelease;
     }
 
-    private double get_t0() throws Exception {
-        String iniTime = getSimulationManager().getParameterManager().getString("app.time.initial_time");
-        try {
-            return getSimulationManager().getTimeManager().date2seconds(iniTime);
-        } catch (ParseException ex) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Release schedule - error converting initial time into seconds ==> ");
-            sb.append(ex.toString());
-            IOException ioex = new IOException(sb.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-    }
-
     private void schedule() throws Exception {
 
         String[] events = getReleaseEvents();
         timeEvent = new double[events.length];
-        double t0 = get_t0();
+        Calendar calendar = getSimulationManager().getOceanDataset().getCalendar();
+        double t0 = getSimulationManager().getTimeManager().get_tO(calendar);
         int arrow = (getSimulationManager().getTimeManager().get_dt()) > 0 ? 1 : -1;
         String st0 = getSimulationManager().getParameterManager().getString("app.time.initial_time");
         for (int i = 0; i < timeEvent.length; i++) {
             try {
-                timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i]);
-                if (arrow * timeEvent[i] < arrow * t0) {
+                timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i], calendar) - t0;
+                if (arrow * timeEvent[i] < 0) {
                     throw new IndexOutOfBoundsException("Release event " + events[i] + " cannot occur prior to simulation initial time " + st0);
                 }
             } catch (ParseException ex) {
@@ -265,7 +253,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
      * @return a long, the release duration in seconds.
      */
     public double getReleaseDuration() {
-        return timeEvent[getNbReleaseEvents() - 1] - getSimulationManager().getTimeManager().get_tO();
+        return timeEvent[getNbReleaseEvents() - 1];
     }
 
     @Override

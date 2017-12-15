@@ -152,7 +152,7 @@ public class OntogeneticMigrationAction extends AbstractAction {
                 }
                 // Line 4: time steps in second since the beginning of transport
                 time = new double[nTime];
-                double cumulatedTime = getSimulationManager().getTimeManager().get_tO();
+                double cumulatedTime = 0;
                 String[] sTime = bfIn.readLine().trim().split(" ");
                 for (int iTime = 0; iTime < nTime; iTime++) {
                     cumulatedTime += Long.parseLong(sTime[iTime]);
@@ -263,9 +263,8 @@ public class OntogeneticMigrationAction extends AbstractAction {
             }
         }
         iPreviousTime = Math.min(iPreviousTime, time.length - 1);
-        double t0 = getSimulationManager().getTimeManager().get_tO();
         // The particle is in the same CMS time step, nothing to do
-        if ((previousTime >= t0) && (iPreviousTime == iTime)) {
+        if ((previousTime >= 0) && (iPreviousTime == iTime)) {
             return;
         }
 

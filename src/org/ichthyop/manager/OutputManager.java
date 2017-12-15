@@ -108,6 +108,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private List<Class> predefinedTrackers;
     private List<String> customTrackers;
     private String basename;
+    private double ellapsed;
 
     public static OutputManager getInstance() {
         return OUTPUT_MANAGER;
@@ -414,17 +415,18 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (e.isInterrupted()) {
             return;
         }
-        TimeManager timeManager = e.getSource();
 
         // Create NetCDF on first time step
-        if (timeManager.getTime() - timeManager.get_tO() == 0) {
+        if (ellapsed == 0) {
             createNetCDF();
         }
 
         // write current step
-        if (((long) (timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
+        if (ellapsed % dt_record == 0) {
             writeToNetCDF(i_record++);
         }
+
+        ellapsed += e.getSource().get_dt();
     }
 
     private void writeToNetCDF(int i_record) {
@@ -469,7 +471,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             customTrackers.clear();
         }
     }
-    
+
     private String clean(String variable) {
         return variable.replaceAll("\\.", "_");
     }
@@ -566,6 +568,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         // Get record frequency
         record_frequency = Integer.valueOf(getParameter("record_frequency"));
         dt_record = record_frequency * Math.abs(getSimulationManager().getTimeManager().get_dt());
+        ellapsed = 0.d;
 
         // Reset NetCDF dimensions
         getDimensionFactory().resetDimensions();
