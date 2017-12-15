@@ -188,6 +188,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     : getConfiguration().getString(grid_prefix + ".variable.mask");
             // assume that the mask can be extracted from any 3D variable
             if (!variables.containsKey(varmask)) {
+                varmask = null;
                 for (String name : variables.keySet()) {
                     location = variables.get(name).get(0);
                     nc = DatasetUtil.open(location, enhanced);
@@ -203,10 +204,11 @@ public class RectilinearGrid extends AbstractRegularGrid {
                 }
             }
             if (null == varmask) {
-                throw new IOException("Did not find suitable mask variable in grid file. Please specify parameter " + grid_prefix + ".variable.mask");
+                warning("[grid] Did not find suitable mask variable in grid file. Please specify parameter " + grid_prefix + ".variable.mask");
+            } else {
+                location = variables.get(varmask).get(0);
+                mask = new TiledVariable(DatasetUtil.open(location, true), varmask, this, 0, 0, 10, Math.min(3, nz));
             }
-            location = variables.get(varmask).get(0);
-            mask = new TiledVariable(DatasetUtil.open(location, true), varmask, this, 0, 0, 10, Math.min(3, nz));
 
         } catch (IOException ex) {
             error("[grid] Failed to make grid " + grid_prefix, ex);
@@ -243,8 +245,13 @@ public class RectilinearGrid extends AbstractRegularGrid {
 
     @Override
     public boolean isInWater(int i, int j, int k) {
-        int ci = xTore(i);
-        return !Double.isNaN(mask.getDouble(ci, j, k));
+        
+        if (null != mask) {
+            int ci = xTore(i);
+            return !Double.isNaN(mask.getDouble(ci, j, k));
+        } else {
+            return true;
+        }
     }
 
     @Override

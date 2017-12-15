@@ -318,8 +318,11 @@ public class DatasetUtil extends IchthyopLinker {
 
     public static String findTimeVariable(NetcdfFile nc) {
 
-        String time_dim = nc.getUnlimitedDimension().getFullName();
-        String variable_time = DatasetUtil.findVariable(nc, time_dim);
+        String variable_time = null;
+        if (null != nc.getUnlimitedDimension()) {
+            String time_dim = nc.getUnlimitedDimension().getFullName();
+            variable_time = DatasetUtil.findVariable(nc, time_dim);
+        }
         if (null == variable_time) {
             String[] names = new String[]{"time", "ocean_time", "time_counter", "scrum_time"};
             for (String name : names) {
