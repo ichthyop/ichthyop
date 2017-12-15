@@ -50,10 +50,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.ui;
 
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -65,14 +65,15 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import org.jdesktop.application.Action;
 
-public class IchthyopAboutBox extends JDialog {
+public class AboutDialog extends JDialog {
 
-    public IchthyopAboutBox(java.awt.Frame parent) {
+    public AboutDialog(java.awt.Frame parent) {
         super(parent);
         initComponents();
     }
 
-    @Action public void closeAboutBox() {
+    @Action
+    public void closeAboutBox() {
         dispose();
     }
 
@@ -87,18 +88,17 @@ public class IchthyopAboutBox extends JDialog {
         JLabel homepageLabel = new JLabel();
         JLabel appHomepageLabel = new JLabel();
         JLabel imageLabel = new JLabel();
-        JLabel desritpionLabel = new JLabel();
-        JScrollPane scrollPaneDescription = new JScrollPane();
-        JTextArea textAreaDescription = new JTextArea();
+        JLabel aboutLabel = new JLabel();
+        JLabel descriptionText = new JLabel();
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(IchthyopAboutBox.class);
+        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance().getContext().getResourceMap(AboutDialog.class);
         setTitle(resourceMap.getString("title"));
         setModal(true);
         setName("aboutBox");
         setResizable(false);
 
-        ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(IchthyopAboutBox.class, this);
+        ActionMap actionMap = org.jdesktop.application.Application.getInstance().getContext().getActionMap(AboutDialog.class, this);
         closeButton.setAction(actionMap.get("closeAboutBox"));
         closeButton.setName("closeButton");
 
@@ -121,65 +121,58 @@ public class IchthyopAboutBox extends JDialog {
         imageLabel.setVerticalAlignment(SwingConstants.TOP);
         imageLabel.setName("imageLabel");
 
-        desritpionLabel.setFont(desritpionLabel.getFont().deriveFont(desritpionLabel.getFont().getStyle() | java.awt.Font.BOLD));
-        desritpionLabel.setText(resourceMap.getString("descriptionLabel.text"));
-        desritpionLabel.setName("descriptionLabel");
+        aboutLabel.setFont(aboutLabel.getFont().deriveFont(aboutLabel.getFont().getStyle() | java.awt.Font.BOLD));
+        aboutLabel.setText(resourceMap.getString("aboutLabel.text"));
+        aboutLabel.setName("aboutLabel");
 
-        scrollPaneDescription.setName("scrollPaneDescription");
-
-        textAreaDescription.setColumns(20);
-        textAreaDescription.setEditable(false);
-        textAreaDescription.setLineWrap(true);
-        textAreaDescription.setRows(5);
-        textAreaDescription.setText(resourceMap.getString("Application.description"));
-        textAreaDescription.setWrapStyleWord(true);
-        textAreaDescription.setName("textAreaDescription");
-        scrollPaneDescription.setViewportView(textAreaDescription);
+        descriptionText.setText(resourceMap.getString("Application.description"));
+        descriptionText.setName("descriptionText");
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(scrollPaneDescription, GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
-                    .addComponent(imageLabel, GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(homepageLabel)
-                            .addComponent(versionLabel)
-                            .addComponent(desritpionLabel))
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(appVersionLabel)
-                            .addComponent(appHomepageLabel)))
-                    .addComponent(closeButton, GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE))
-                .addContainerGap())
+            layout.createParallelGroup()
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(imageLabel, GroupLayout.Alignment.CENTER)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addComponent(homepageLabel)
+                                                        .addComponent(versionLabel)
+                                                        .addComponent(aboutLabel))
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addComponent(appVersionLabel)
+                                                        .addComponent(appHomepageLabel)
+                                                        .addComponent(descriptionText)
+                                                ))
+                                        .addComponent(closeButton, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(imageLabel)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(versionLabel)
-                    .addComponent(appVersionLabel))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(homepageLabel)
-                    .addComponent(appHomepageLabel))
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(desritpionLabel)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrollPaneDescription, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(closeButton)
-                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(imageLabel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(versionLabel)
+                                        .addComponent(appVersionLabel))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(homepageLabel)
+                                        .addComponent(appHomepageLabel))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(aboutLabel)
+                                        .addComponent(descriptionText))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(closeButton)
+                                .addContainerGap())
         );
 
         pack();
         getRootPane().setDefaultButton(closeButton);
-    }    
+    }
 }

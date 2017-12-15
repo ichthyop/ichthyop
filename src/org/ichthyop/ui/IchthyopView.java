@@ -1294,7 +1294,7 @@ public class IchthyopView extends FrameView {
     public void showAboutBox() {
         if (aboutBox == null) {
             JFrame mainFrame = IchthyopApp.getApplication().getMainFrame();
-            aboutBox = new IchthyopAboutBox(mainFrame);
+            aboutBox = new AboutDialog(mainFrame);
             aboutBox.setLocationRelativeTo(mainFrame);
         }
         IchthyopApp.getApplication().show(aboutBox);
