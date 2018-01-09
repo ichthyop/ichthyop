@@ -253,6 +253,7 @@ public class Roms2dDataset extends RomsCommon {
                 if (!isFile(path)) {
                     throw new IOException("{Dataset} " + getParameter("grid_file") + " is not a valid file.");
                 }
+                gridFile = path;
             } else {
                 gridFile = ncIn.getLocation();
             }
