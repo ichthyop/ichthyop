@@ -108,6 +108,10 @@ public class OscarDataset extends AbstractDataset {
      * Index of the current file read in the {@code listInputFiles}
      */
     private int indexFile;
+    /**
+     * Whether horizontal periodicity should be applied
+     */
+    boolean xTore = true;
 
     @Override
     void loadParameters() {
@@ -120,6 +124,13 @@ public class OscarDataset extends AbstractDataset {
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strTime = getParameter("field_var_time");
+
+        // phv 2018/01/26 Longitudinal toricity, true by default
+        try {
+            xTore = Boolean.valueOf(getParameter("longitude_tore"));
+        } catch (NullPointerException ex) {
+            xTore = true;
+        }
     }
 
     @Override
@@ -403,8 +414,8 @@ public class OscarDataset extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[1] > (nlat - 2.0f))
-                || (pGrid[1] < 1.0f));
+        return (!xTore && (pGrid[0] > (nlon - 2.d)) || (!xTore && (pGrid[0] < 1.d)))
+                || ((pGrid[1] > (nlat - 2.0f)) || (pGrid[1] < 1.0f));
     }
 
     @Override
@@ -593,11 +604,13 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public double xTore(double x) {
-        if (x < 0) {
-            return x + 1080.d;
-        }
-        if (x > nlon - 1) {
-            return x - 1080.d;
+        if (xTore) {
+            if (x < 0) {
+                return x + 1080.d;
+            }
+            if (x > nlon - 1) {
+                return x - 1080.d;
+            }
         }
         return x;
     }

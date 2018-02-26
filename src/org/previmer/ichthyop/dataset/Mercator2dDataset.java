@@ -94,8 +94,10 @@ public class Mercator2dDataset extends AbstractDataset {
     private List<String> listUFiles, listVFiles;
     private NetcdfFile ncU, ncV;
 
-     /** Whether horizontal periodicity should be applied */
-    boolean xTore=true;
+    /**
+     * Whether horizontal periodicity should be applied
+     */
+    boolean xTore = true;
 
 ////////////////////////////
 // Definition of the methods
@@ -332,7 +334,12 @@ public class Mercator2dDataset extends AbstractDataset {
         time_arrow = timeArrow();
 
         // Longitudinal toricity (barrier.n)
-        xTore = Boolean.valueOf(getParameter("longitude_tore"));
+        // phv 2018/01/26 true by default
+          try {
+             xTore = Boolean.valueOf(getParameter("longitude_tore"));
+        } catch (NullPointerException ex ) {
+            xTore = true;
+        }
 
     }
 
@@ -892,11 +899,13 @@ public class Mercator2dDataset extends AbstractDataset {
 
     @Override
     public double xTore(double x) {
-        if (x < -0.5d) {
-            return nx + x;
-        }
-        if (x > nx - 0.5d) {
-            return x - nx;
+        if (xTore) {
+            if (x < -0.5d) {
+                return nx + x;
+            }
+            if (x > nx - 0.5d) {
+                return x - nx;
+            }
         }
         return x;
     }
