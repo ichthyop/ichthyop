@@ -9,7 +9,7 @@ ${licensePrefix}http://www.ird.fr
 ${licensePrefix?replace(" +$", "", "r")}
 ${licensePrefix}Main developper: Philippe VERLEY (philippe.verley@ird.fr)
 ${licensePrefix}Contributors (alphabetically sorted):
-${licensePrefix}Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
+${licensePrefix}Gwendoline ANDRES, Nicolas BARRIER, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
 ${licensePrefix}Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
 ${licensePrefix}Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
 ${licensePrefix}Stephane POUS, Nathan PUTMAN.
