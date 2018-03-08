@@ -80,7 +80,7 @@ public class OceanDataset extends NetcdfDataset {
         if (grid.get_nz() > 1) {
             if (!getConfiguration().isNull(prefix + ".variable.w")) {
                 variable_w = getConfiguration().getString(prefix + ".variable.w");
-                requireVariable(variable_v, getClass());
+                requireVariable(variable_w, getClass());      // barrier.n: replace variable_v by variable_w
             } else {
                 variable_w = "ocean_dataset_w";
                 variables.put("ocean_dataset_w", createWVariable());
