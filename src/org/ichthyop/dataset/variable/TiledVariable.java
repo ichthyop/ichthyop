@@ -255,7 +255,7 @@ public class TiledVariable extends IchthyopLinker {
         return tiles.keySet();
     }
 
-    double getTimeStamp() {
+    public double getTimeStamp() {
         return timestamp;
     }
 

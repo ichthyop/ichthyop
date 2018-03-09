@@ -85,6 +85,18 @@ public abstract class AbstractDatasetVariable implements IVariable {
         stack = new TiledVariable[nlayer];
     }
 
+    /** Returns the stack array.
+     * @return  TiledVariable[] stack*/
+    public TiledVariable[] getStack() {
+        return this.stack;
+    }
+    
+    /** Returns the grid object.
+     * @return  Grid object*/
+    public IGrid getGrid() {
+        return this.grid;
+    }
+    
     protected boolean updateNeeded(double time, int time_arrow) {
         return (time_arrow * time >= time_arrow * stack[1].getTimeStamp());
     }
@@ -180,7 +192,7 @@ public abstract class AbstractDatasetVariable implements IVariable {
         return value;
     }
 
-    private boolean isOut(int i, int j, int k) {
+    public boolean isOut(int i, int j, int k) {
         return i < 0 || j < 0 || k < 0
                 || i > (grid.get_nx() - 1) || j > (grid.get_ny() - 1) || k > (grid.get_nz() - 1);
     }
