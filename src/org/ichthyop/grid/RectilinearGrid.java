@@ -55,7 +55,7 @@ package org.ichthyop.grid;
 import java.io.IOException;
 import java.util.Arrays;
 import org.ichthyop.dataset.DatasetUtil;
-import org.ichthyop.dataset.variable.TiledVariable;
+import org.ichthyop.dataset.variable.ConstantDatasetVariable;
 import org.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
@@ -80,7 +80,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
     private int i0, j0;
     private double[] dx;
     private double dy;
-    private TiledVariable mask;
+    private ConstantDatasetVariable mask;
 
     public RectilinearGrid(String prefix) {
         super(prefix);
@@ -207,7 +207,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                 warning("[grid] Did not find suitable mask variable in grid file. Please specify parameter " + grid_prefix + ".variable.mask");
             } else {
                 location = variables.get(varmask).get(0);
-                mask = new TiledVariable(DatasetUtil.open(location, true), varmask, this, 0, 0, 10, Math.min(3, nz));
+                mask = new ConstantDatasetVariable(location, varmask, this, 10, Math.min(3, nz), true);
             }
 
         } catch (IOException ex) {

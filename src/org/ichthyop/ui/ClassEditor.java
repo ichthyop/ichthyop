@@ -77,17 +77,22 @@ public class ClassEditor extends DefaultCellEditor {
 
     JComboBox cbBox;
 
-    public ClassEditor() throws Exception {
+    public ClassEditor() {
+        
         super(new JComboBox());
-        cbBox = (JComboBox) getComponent();
-        String packageName = Simulation.class.getPackage().getName();
-        DefaultComboBoxModel model = new DefaultComboBoxModel();
-        for (Class aClass : getClasses(packageName)) {
-            if (null != aClass && null != aClass.getCanonicalName()) {
-                model.addElement(aClass.getCanonicalName());
+        try {
+            cbBox = (JComboBox) getComponent();
+            String packageName = Simulation.class.getPackage().getName();
+            DefaultComboBoxModel model = new DefaultComboBoxModel();
+            for (Class aClass : getClasses(packageName)) {
+                if (null != aClass && null != aClass.getCanonicalName()) {
+                    model.addElement(aClass.getCanonicalName());
+                }
             }
+            cbBox.setModel(model);
+        } catch (Exception ex) {
+            Logger.getLogger(ClassEditor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        cbBox.setModel(model);
     }
 
     /*
