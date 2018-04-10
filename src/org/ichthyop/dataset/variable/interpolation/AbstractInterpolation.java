@@ -52,7 +52,7 @@
  */
 package org.ichthyop.dataset.variable.interpolation;
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
-import org.ichthyop.dataset.variable.TiledVariable;
+import org.ichthyop.dataset.variable.NetcdfTiledArray;
 
 /**
  *
@@ -71,7 +71,7 @@ public abstract class AbstractInterpolation implements IInterpolation {
     
     public double interpolateTime(int i, int j, int k, double dt) {
 
-        TiledVariable[] stack;
+        NetcdfTiledArray[] stack;
         stack = this.variable.getStack();
         
         double value = 0;

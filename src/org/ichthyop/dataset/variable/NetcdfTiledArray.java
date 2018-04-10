@@ -72,7 +72,7 @@ import ucar.nc2.Variable;
  *
  * @author pverley
  */
-public class TiledVariable extends IchthyopLinker {
+public class NetcdfTiledArray extends IchthyopLinker {
 
     private final ConcurrentMap<Integer, Array> tiles;
     final int nx, ny, nz;
@@ -88,7 +88,7 @@ public class TiledVariable extends IchthyopLinker {
     /*
      * 3D Tile Variable
      */
-    public TiledVariable(NetcdfFile nc, String name, IGrid grid, int rank, double timestamp, int nh, int nv) {
+    public NetcdfTiledArray(NetcdfFile nc, String name, IGrid grid, int rank, double timestamp, int nh, int nv) {
 
         this.tiles = new ConcurrentHashMap();
         this.nc = nc;

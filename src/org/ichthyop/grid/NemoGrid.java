@@ -55,7 +55,7 @@ package org.ichthyop.grid;
 import java.io.IOException;
 import java.util.Arrays;
 import org.ichthyop.dataset.DatasetUtil;
-import org.ichthyop.dataset.variable.TiledVariable;
+import org.ichthyop.dataset.variable.NetcdfTiledArray;
 import org.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
@@ -82,9 +82,9 @@ public class NemoGrid extends AbstractRegularGrid {
     private int i0, j0;
     private double[][] dx;
     private double[][] dy;
-    private TiledVariable mask;
+    private NetcdfTiledArray mask;
 
-    private TiledVariable e3t;  // e3t variable is 3D in NEMO
+    private NetcdfTiledArray e3t;  // e3t variable is 3D in NEMO
     private double[] e3t_0;  // e3t_0 (1d scale factor)
     private double[][] e3t_ps; // 2D scale factor of the last point
     private int[][] mbathy; // Number of unmasked points on the vertical
@@ -241,7 +241,7 @@ public class NemoGrid extends AbstractRegularGrid {
 
             // gets the mask variable on tile
             location = variables.get(varmask).get(0);
-            mask = new TiledVariable(DatasetUtil.open(location, true), varmask, this, 0, 0, 10, Math.min(3, nz));
+            mask = new NetcdfTiledArray(DatasetUtil.open(location, true), varmask, this, 0, 0, 10, Math.min(3, nz));
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ e3t
             this.read_e3t();
@@ -418,7 +418,7 @@ public class NemoGrid extends AbstractRegularGrid {
             }
             // gets the mask variable on tile
             location = variables.get(vare3t).get(0);
-            e3t = new TiledVariable(DatasetUtil.open(location, true), vare3t, this, 0, 0, 10, Math.min(3, nz));
+            e3t = new NetcdfTiledArray(DatasetUtil.open(location, true), vare3t, this, 0, 0, 10, Math.min(3, nz));
         }
 
         // Reads the e3t_ps variable: this is the vertical scale factor of the last ocean point

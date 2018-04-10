@@ -53,7 +53,7 @@
 package org.ichthyop.dataset.variable.interpolation;
 
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
-import org.ichthyop.dataset.variable.TiledVariable;
+import org.ichthyop.dataset.variable.NetcdfTiledArray;
 
 /**
  * Class that is dedicated to the 3D inverse distance interpolation,
@@ -79,7 +79,7 @@ public class InterpolationIDW extends AbstractInterpolation {
 
         int r = IDW_RADIUS;
         int p = IDW_POWER;
-        TiledVariable stack[] = this.getVar().getStack();
+        NetcdfTiledArray stack[] = this.getVar().getStack();
         
         double value = 0.d;
         boolean coast = this.getVar().getGrid().isCloseToCost(pGrid);

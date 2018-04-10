@@ -53,7 +53,7 @@
 package org.ichthyop.dataset.variable.interpolation;
 
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
-import org.ichthyop.dataset.variable.TiledVariable;
+import org.ichthyop.dataset.variable.NetcdfTiledArray;
 
 /**
  * Class that is dedicated to the 3D inverse distance interpolation,

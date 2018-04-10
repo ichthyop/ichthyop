@@ -53,7 +53,7 @@
 package org.ichthyop.dataset.variable.interpolation;
 
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
-import org.ichthyop.dataset.variable.TiledVariable;
+import org.ichthyop.dataset.variable.NetcdfTiledArray;
 
 /**
  * Class that is dedicated to the interpolation by using closest distance.
@@ -78,7 +78,7 @@ public class InterpolationClosest extends AbstractInterpolation {
     public double interpolate(double[] pGrid, double time) {
 
         double value;
-        TiledVariable stack[] = this.getVar().getStack();
+        NetcdfTiledArray stack[] = this.getVar().getStack();
 
         boolean coast = this.getVar().getGrid().isCloseToCost(pGrid);
         

@@ -92,12 +92,12 @@ public class WDatasetVariable extends AbstractDatasetVariable {
         }
     }
 
-    private class WTiledVariable extends TiledVariable {
+    private class WTiledVariable extends NetcdfTiledArray {
 
-        private final TiledVariable uw;
-        private final TiledVariable vw;
+        private final NetcdfTiledArray uw;
+        private final NetcdfTiledArray vw;
 
-        WTiledVariable(TiledVariable uw, TiledVariable vw) {
+        WTiledVariable(NetcdfTiledArray uw, NetcdfTiledArray vw) {
             super(null, null, grid, -1, uw.getTimeStamp(), 1, grid.get_nz());
             this.uw = uw;
             this.vw = vw;

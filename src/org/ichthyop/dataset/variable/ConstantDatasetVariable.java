@@ -79,7 +79,7 @@ public class ConstantDatasetVariable extends AbstractDatasetVariable {
 
     @Override
     public void init(double t0, int time_arrow) throws IOException {
-        stack[0] = new TiledVariable(DatasetUtil.open(location, enhanced), name, grid, 0, 0, tilingh, tilingv);
+        stack[0] = new NetcdfTiledArray(DatasetUtil.open(location, enhanced), name, grid, 0, 0, tilingh, tilingv);
     }
 
     @Override

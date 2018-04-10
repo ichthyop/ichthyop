@@ -64,7 +64,7 @@ import org.ichthyop.grid.IGrid;
 public abstract class AbstractDatasetVariable implements IVariable {
 
     protected final IGrid grid;
-    protected final TiledVariable[] stack;
+    protected final NetcdfTiledArray[] stack;
     protected final int nlayer;
     protected final Calendar calendar;
     protected final double t0;
@@ -82,12 +82,12 @@ public abstract class AbstractDatasetVariable implements IVariable {
         this.grid = grid;
         this.calendar = calendar;
         this.t0 = t0;
-        stack = new TiledVariable[nlayer];
+        stack = new NetcdfTiledArray[nlayer];
     }
 
     /** Returns the stack array.
      * @return  TiledVariable[] stack*/
-    public TiledVariable[] getStack() {
+    public NetcdfTiledArray[] getStack() {
         return this.stack;
     }
     
@@ -101,7 +101,7 @@ public abstract class AbstractDatasetVariable implements IVariable {
         return (time_arrow * time >= time_arrow * stack[1].getTimeStamp());
     }
 
-    protected void update(TiledVariable variable) {
+    protected void update(NetcdfTiledArray variable) {
 
         times.clear();
         // clear first variable of the stack

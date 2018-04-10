@@ -111,13 +111,13 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
                     ntime = nc.findVariable(variable_time).getShape()[0];
                     rank = (1 - time_arrow) / 2 * (ntime - 1);
                     time = DatasetUtil.timeAtRank(nc, variable_time, rank);
-                    update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
+                    update(new NetcdfTiledArray(open(), name, grid, rank, time, tilingh, tilingv));
                 } else {
                     update(null);
                 }
             } else {
                 time = DatasetUtil.timeAtRank(nc, variable_time, rank);
-                update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
+                update(new NetcdfTiledArray(open(), name, grid, rank, time, tilingh, tilingv));
             }
         }
         nc.close();
@@ -141,13 +141,13 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
                     ntime = nc.findVariable(variable_time).getShape()[0];
                     rank = (1 - time_arrow) / 2 * (ntime - 1);
                     time = DatasetUtil.timeAtRank(nc, variable_time, rank);
-                    update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
+                    update(new NetcdfTiledArray(open(), name, grid, rank, time, tilingh, tilingv));
                 } else {
                     update(null);
                 }
             } else {
                 time = DatasetUtil.timeAtRank(nc, variable_time, rank);
-                update(new TiledVariable(open(), name, grid, rank, time, tilingh, tilingv));
+                update(new NetcdfTiledArray(open(), name, grid, rank, time, tilingh, tilingv));
             }
             nc.close();
         }
