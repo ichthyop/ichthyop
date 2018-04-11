@@ -52,6 +52,7 @@
  */
 package org.ichthyop.action;
 
+import java.io.IOException;
 import java.util.Random;
 import org.ichthyop.particle.IParticle;
 import org.ichthyop.util.MTRandom;
@@ -62,12 +63,13 @@ import org.ichthyop.util.MTRandom;
  */
 public class LevyWalkAction extends AbstractAction {
 
-    private double alphaH, alphaV;
-    private double vmax, depthmax;
+    private double muH, muV;
+    private double vcruising, depthmax;
     private boolean hEnabled, vEnabled;
     private MTRandom rd1, rd2, rd3;
     private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    
+    private double meanwalk;
+
     @Override
     public String getKey() {
         return "action.levywalk";
@@ -75,44 +77,76 @@ public class LevyWalkAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        alphaH = getConfiguration().getDouble("action.levywalk.alpha_h");
-        vmax = getConfiguration().getDouble("action.levywalk.vmax");
-        alphaV = getConfiguration().getDouble("action.levywalk.alpha_v");
+
+        muH = getConfiguration().getDouble("action.levywalk.mu_h");
+        if (muH <= 1 | muH >= 3) {
+            throw new IOException("Horizontal Levy walk exponenet mu action.levywalk.mu_h must range in ]1, 3[");
+        }
+        vcruising = getConfiguration().getDouble("action.levywalk.vcruising");
+        muV = getConfiguration().getDouble("action.levywalk.mu_v");
         depthmax = getConfiguration().getDouble("action.levywalk.depthmax");
-        if (depthmax > 0) depthmax *= -1.d;
+        if (muV <= 1 | muV >= 3) {
+            throw new IOException("Vertical Levy walk exponenet mu action.levywalk.mu_v must range in ]1, 3[");
+        }
+        if (depthmax > 0) {
+            depthmax *= -1.d;
+        }
         hEnabled = getConfiguration().getBoolean("action.levywalk.enabled_h");
         vEnabled = getConfiguration().getBoolean("action.levywalk.enabled_v");
         rd1 = new MTRandom();
         rd2 = new MTRandom(2L * System.currentTimeMillis());
         rd3 = new MTRandom(System.currentTimeMillis() / 2L);
+        // average move within one time step
+        meanwalk = vcruising * getSimulationManager().getTimeManager().get_dt();
     }
 
     @Override
     public void execute(IParticle particle) {
 
         if (hEnabled) {
-            // random direction
-            double theta = rd1.nextDouble() * 2 * Math.PI;
-            // Levywalk velocity
-            double vxy = vmax * levywalk(rd2, alphaH);
-            // converts direction and velocity into lat lon move
-            double dt = getSimulationManager().getTimeManager().get_dt();
-            double distance = vxy * dt / ONE_DEG_LATITUDE_IN_METER;
+            if (getLevywalk(particle) == 0) {
+                // new random direction and levy walk
+                setTheta(particle, rd1.nextDouble() * 2 * Math.PI);
+                setLevywalk(particle, levywalk(rd2, muH));
+            }
+            double lw = getLevywalk(particle);
+            double theta = getTheta(particle);
+            double distance = meanwalk * Math.min(1.d, lw) / ONE_DEG_LATITUDE_IN_METER;
+            // converts direction and distance into lat lon move
             double dlat = distance * Math.sin(theta);
             double dlon = distance * Math.cos(theta) / Math.cos(Math.PI * particle.getLat() / 180.d);
             particle.incrLat(dlat);
             particle.incrLon(dlon);
+            setLevywalk(particle, Math.max(0.d, lw - 1.d));
         }
 
         if (vEnabled) {
-            double depth = depthmax * levywalk(rd3, alphaV);
+            // make sure turtles do not dive any deeper than depthmax
+            double depth = depthmax * Math.min(1.d, levywalk(rd3, muV));
             particle.incrDepth(depth - particle.getDepth(), true);
         }
     }
 
+    private double getTheta(IParticle particle) {
+        return (double) particle.get(getKey() + ".theta");
+    }
+
+    private void setTheta(IParticle particle, double theta) {
+        particle.set(getKey() + ".theta", theta);
+    }
+
+    private double getLevywalk(IParticle particle) {
+        return (double) particle.get(getKey() + ".levywalk");
+    }
+
+    private void setLevywalk(IParticle particle, double lw) {
+        particle.set(getKey() + ".levywalk", lw);
+    }
+
     @Override
     public void init(IParticle particle) {
-        // nothing to do
+        setTheta(particle, 0.d);
+        setLevywalk(particle, 0.d);
     }
 
     /**
@@ -120,13 +154,11 @@ public class LevyWalkAction extends AbstractAction {
      *
      * @return
      */
-    private double levywalk(Random rd, double alpha) {
-        return (Math.pow(bounded_uniform(rd, Math.pow(2, -alpha), Math.pow(1, -alpha)), -1. / alpha) - 1.);
-    }
-
+//    private double levywalk(Random rd, double alpha) {
+//        return (Math.pow(bounded_uniform(rd, Math.pow(2, -alpha), Math.pow(1, -alpha)), -1. / alpha) - 1.);
+//    }
     /**
      * http://markread.info/2016/08/code-to-generate-a-levy-distribution/
-     *
      *
      * Harris, T. H., Banigan, E. J., Christian, D. a., Konradt, C., Tait Wojno,
      * E. D., Norose, K., … Hunter, C. a. (2012). Generalized Lévy walks and the
@@ -150,19 +182,20 @@ public class LevyWalkAction extends AbstractAction {
      * performing a Lévy walk. There are other papers too. Find the references
      * in my recent PLOS Computational Biology paper!
      *
-     *
+     * @param mu, a double, the the Levy exponent and takes on a value in ]1, 3[
      */
-//    private double levywalk(Random rd, double alpha) {
-//
-//        double X = bounded_uniform(rd, -Math.PI / 2.0, Math.PI / 2.0);
-//        // uses Mersenne Twister random number generator to retrieve a value between (0,1) (does not include 0 or 1
-//        // themselves)
-//        double Y = -Math.log(nextDouble(rd, false, false));
-//
-//        double Z = (Math.sin(alpha * X) / Math.pow(Math.cos(X), 1.0 / alpha))
-//                * Math.pow(Math.cos((1.0 - alpha) * X) / Y, (1.0 - alpha) / alpha);
-//        return Math.abs(Z);
-//    }
+    private double levywalk(Random rd, double mu) {
+
+        double X = bounded_uniform(rd, -Math.PI / 2.0, Math.PI / 2.0);
+        // uses Mersenne Twister random number generator to retrieve a value between (0,1) (does not include 0 or 1
+        // themselves)
+        double Y = -Math.log(nextDouble(rd, false, false));
+
+        double alpha = mu -1.d;
+        double Z = (Math.sin(alpha * X) / Math.pow(Math.cos(X), 1.0 / alpha))
+                * Math.pow(Math.cos((1.0 - alpha) * X) / Y, (1.0 - alpha) / alpha);
+        return Math.abs(Z);
+    }
 
     private double nextDouble(Random rd, boolean includeZero, boolean includeOne) {
         double d = 0.0;
