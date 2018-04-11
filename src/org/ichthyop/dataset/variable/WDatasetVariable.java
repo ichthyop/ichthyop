@@ -65,7 +65,7 @@ public class WDatasetVariable extends AbstractDatasetVariable {
 
     private final AbstractDatasetVariable u;
     private final AbstractDatasetVariable v;
-    
+
     public WDatasetVariable(AbstractDatasetVariable u, AbstractDatasetVariable v, IGrid grid) {
         super(u.nlayer, grid, u.calendar, u.t0);
         this.u = u;
@@ -92,6 +92,12 @@ public class WDatasetVariable extends AbstractDatasetVariable {
         }
     }
 
+    /*
+    WARNING PhV 2018.04.12 this class only works so far for HYCOM like grid
+    And it is not fully rigorous since I compute U and V flux at cell center though
+    they should be computed on U and V point (arakawa C grid configuration)
+    To be improved
+    */
     private class WTiledVariable extends NetcdfTiledArray {
 
         private final NetcdfTiledArray uw;
@@ -124,7 +130,7 @@ public class WDatasetVariable extends AbstractDatasetVariable {
             }
 
             for (int k = 0; k < grid.get_nz(); k++) {
-                double dz = grid.get_dz(0, 0, k);
+                double dz = grid.get_dz(ci, cj, k);
                 Huon[k][1] = Double.isNaN(uw.getDouble(ci, cj, k))
                         ? 0.d
                         : uw.getDouble(ci, cj, k) * grid.get_dy(ci, cj) * dz;
