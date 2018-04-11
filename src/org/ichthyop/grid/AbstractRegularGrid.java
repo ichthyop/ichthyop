@@ -69,6 +69,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     private boolean xperiodicity, yperiodicity;
     final HashMap<String, List<String>> variables = new HashMap();
     boolean enhanced;
+    private boolean z0AtSurface;
 
     abstract void makeGrid();
 
@@ -90,7 +91,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         // x and y periodicity
         xperiodicity = getConfiguration().getBoolean(grid_prefix + ".periodicity.x");
         yperiodicity = getConfiguration().getBoolean(grid_prefix + ".periodicity.y");
-        
+
         // enhanced dataset
         enhanced = !getConfiguration().isNull(dataset_prefix + ".enhanced_mode")
                 ? getConfiguration().getBoolean(dataset_prefix + ".enhanced_mode")
@@ -99,6 +100,21 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         // make grid
         makeGrid();
 
+        // check whether z=0 is at surface or ocean floor
+        z0AtSurface = false;
+        if (get_nz() < 2) {
+            z0AtSurface = true;
+        } else {
+            int i = 0, j = 0;
+            while (!isInWater(i, j, get_nz() / 2)) {
+                i = (int) (Math.random() * get_nx());
+                j = (int) (Math.random() * get_ny());
+            }
+            if (getDepth(i, j, 0) > getDepth(i, j, 1)) {
+                z0AtSurface = true;
+            }
+        }
+        
         // compute grid extent
         extent();
     }
@@ -327,18 +343,41 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     @Override
     public double depth2z(double x, double y, double depth) {
 
-        double z;
-        int lk = 0;
-        while ((lk < get_nz() - 1) && (getDepth(x, y, lk) > depth)) {
-            lk++;
+        //System.out.println((float) x+ " " + (float) y + " " + (float) depth);
+        // no vertical dimension
+        if (get_nz() < 2) {
+            return 0.d;
         }
-        if (lk == 0) {
-            z = 0;
+
+        // handle particular cases for depth outside water column
+        if (z0AtSurface) {
+            if (depth >= getDepth(x, y, 0)) {
+                return 0.d;
+            }
+            if (depth <= getDepth(x, y, get_nz() - 1)) {
+                return (double) (get_nz() - 1);
+            }
         } else {
-            double pr = getDepth(x, y, lk);
-            z = Math.max(0.d, (double) lk + (depth - pr) / (getDepth(x, y, lk + 1) - pr));
+            if (depth >= getDepth(x, y, get_nz() - 1)) {
+                return (double) (get_nz() - 1);
+            }
+            if (depth <= getDepth(x, y, 0)) {
+                return 0.d;
+            }
         }
-        return (z);
+
+        // general case
+        int lk;
+        for (lk = 0; lk < get_nz() - 1; lk++) {
+            double depthk = getDepth(x, y, lk);
+            double depthkp1 = getDepth(x, y, lk + 1);
+            if (Math.abs(depthk - depth) + Math.abs(depthkp1 - depth) <= Math.abs(depthk - depthkp1)) {
+                break;
+            }
+        }
+        double depthlk = getDepth(x, y, lk);
+        //System.out.println(depthlk + " " + lk + " " + get_nz() + " " + grid_prefix);
+        return Math.max(0.d, (double) lk + (depth - depthlk) / (getDepth(x, y, lk + 1) - depthlk));
     }
 
     @Override
