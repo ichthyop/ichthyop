@@ -122,7 +122,7 @@ public class LevyWalkAction extends AbstractAction {
 
         if (vEnabled) {
             // make sure turtles do not dive any deeper than depthmax
-            double depth = depthmax * Math.min(1.d, levywalk(rd3, muV));
+            double depth = depthmax * bounded_levywalk(rd3, muV);
             particle.incrDepth(depth - particle.getDepth(), true);
         }
     }
@@ -154,9 +154,11 @@ public class LevyWalkAction extends AbstractAction {
      *
      * @return
      */
-//    private double levywalk(Random rd, double alpha) {
-//        return (Math.pow(bounded_uniform(rd, Math.pow(2, -alpha), Math.pow(1, -alpha)), -1. / alpha) - 1.);
-//    }
+    private double bounded_levywalk(Random rd, double mu) {
+        double alpha = mu -1.d;
+        return (Math.pow(bounded_uniform(rd, Math.pow(2, -alpha), Math.pow(1, -alpha)), -1. / alpha) - 1.);
+    }
+    
     /**
      * http://markread.info/2016/08/code-to-generate-a-levy-distribution/
      *
@@ -190,8 +192,7 @@ public class LevyWalkAction extends AbstractAction {
         // uses Mersenne Twister random number generator to retrieve a value between (0,1) (does not include 0 or 1
         // themselves)
         double Y = -Math.log(nextDouble(rd, false, false));
-
-        double alpha = mu -1.d;
+        double alpha = mu - 1.d;
         double Z = (Math.sin(alpha * X) / Math.pow(Math.cos(X), 1.0 / alpha))
                 * Math.pow(Math.cos((1.0 - alpha) * X) / Y, (1.0 - alpha) / alpha);
         return Math.abs(Z);
