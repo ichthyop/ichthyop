@@ -172,7 +172,7 @@ public class NemoGrid extends AbstractRegularGrid {
                     depthLevel[k] = array.getDouble(k);
                 }
             } else {
-                warning("[grid] Did not find depth variable in dataset " + grid_prefix + ". Ichthyop assumes the grid is 2D.");
+                warning("[grid] Could not find depth variable in dataset " + grid_prefix + ". Ichthyop assumes the grid is 2D.");
                 nz = 1;
                 depthLevel = new double[]{0};
             }

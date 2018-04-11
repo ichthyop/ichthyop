@@ -129,31 +129,35 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
     private Calendar createCalendar() {
 
         try {
+            int year = 1900;
+            int month = Calendar.JANUARY;
+            int day = 1;
+            int hour = 0;
+            int minute = 0;
+            String classname;
             if (!getConfiguration().isNull(prefix + ".calendar.class_name")) {
-                String classname = getConfiguration().getString(prefix + ".calendar.class_name");
-                int year = 1900;
-                int month = Calendar.JANUARY;
-                int day = 1;
-                int hour = 0;
-                int minute = 0;
-                if (!getConfiguration().isNull(prefix + ".calendar.time_origin")) {
-                    String origin = getConfiguration().getString(prefix + ".calendar.time_origin");
-                    Calendar calendar_o = Calendar.getInstance();
-                    SimpleDateFormat idf = getSimulationManager().getTimeManager().getInputDateFormat();
-                    idf.setCalendar(calendar_o);
-                    calendar_o.setTime(idf.parse(origin));
-                    year = calendar_o.get(Calendar.YEAR);
-                    month = calendar_o.get(Calendar.MONTH);
-                    day = calendar_o.get(Calendar.DAY_OF_MONTH);
-                    hour = calendar_o.get(Calendar.HOUR_OF_DAY);
-                    minute = calendar_o.get(Calendar.MINUTE);
-                } else {
-                    warning("[dataset] Did not find parameter" + prefix + ".calendar.time_origin. Ichthyop assumes 1900/01/01 00:00");
-                }
-                return (Calendar) Class.forName(classname).getConstructor(int.class, int.class, int.class, int.class, int.class).newInstance(year, month, day, hour, minute);
+                classname = getConfiguration().getString(prefix + ".calendar.class_name");
+            } else {
+                classname = "org.ichthyop.calendar.GregorianCalendar";
+                warning("[dataset] Could not find parameter " + prefix + ".calendar.class_name. Ichthyop assumes org.ichthyop.calendar.GregorianCalendar");
             }
+            if (!getConfiguration().isNull(prefix + ".calendar.time_origin")) {
+                String origin = getConfiguration().getString(prefix + ".calendar.time_origin");
+                Calendar calendar_o = Calendar.getInstance();
+                SimpleDateFormat idf = getSimulationManager().getTimeManager().getInputDateFormat();
+                idf.setCalendar(calendar_o);
+                calendar_o.setTime(idf.parse(origin));
+                year = calendar_o.get(Calendar.YEAR);
+                month = calendar_o.get(Calendar.MONTH);
+                day = calendar_o.get(Calendar.DAY_OF_MONTH);
+                hour = calendar_o.get(Calendar.HOUR_OF_DAY);
+                minute = calendar_o.get(Calendar.MINUTE);
+            } else {
+                warning("[dataset] Could not find parameter " + prefix + ".calendar.time_origin. Ichthyop assumes 1900/01/01 00:00");
+            }
+            return (Calendar) Class.forName(classname).getConstructor(int.class, int.class, int.class, int.class, int.class).newInstance(year, month, day, hour, minute);
         } catch (ParseException | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            warning("Failed to create calendar for dataset " + prefix, ex);
+            error("Failed to create calendar for dataset " + prefix, ex);
         }
         return null;
     }
@@ -170,7 +174,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
     @Override
     public void setUp() throws Exception {
-
+        
         time_arrow = getConfiguration().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
 
         enhanced = !getConfiguration().isNull(prefix + ".enhanced_mode")
@@ -229,6 +233,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
         // instantiate dataset variables
         for (String name : requiredBy.keySet()) {
+            debug("[dataset] " + prefix + " request NetCDF variable " + name);
             variables.put(name, createVariable(name, NLAYER, TILING_H, TILING_V));
         }
 

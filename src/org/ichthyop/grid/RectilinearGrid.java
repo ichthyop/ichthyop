@@ -160,7 +160,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                     depthLevel[k] = array.getDouble(k);
                 }
             } else {
-                warning("[grid] Did not find depth variable in dataset " + grid_prefix + ". Ichthyop assumes the grid is 2D.");
+                warning("[grid] Could not find depth variable in dataset " + grid_prefix + ". Ichthyop assumes the grid is 2D.");
                 nz = 1;
                 depthLevel = new double[]{0};
             }
@@ -199,15 +199,17 @@ public class RectilinearGrid extends AbstractRegularGrid {
                             || (!variable.isUnlimited() && variable.getShape().length == 3)
                             || (!variable.isUnlimited() && variable.getShape().length == 2) && nz == 1) {
                         varmask = variable.getFullName().toLowerCase();
+                        warning("[grid] Mask variable not (or uncorrectly) specified for grid " + grid_prefix + ". Ichthyop selected \'" + varmask + "\' variable as mask.");
                         break;
                     }
                 }
             }
             if (null == varmask) {
-                warning("[grid] Did not find suitable mask variable in grid file. Please specify parameter " + grid_prefix + ".variable.mask");
+                error("[grid] Could not find suitable mask variable in grid file", new NullPointerException("Please specify parameter " + grid_prefix + ".variable.mask"));
             } else {
                 location = variables.get(varmask).get(0);
                 mask = new ConstantDatasetVariable(location, varmask, this, 10, Math.min(3, nz), true);
+                mask.init(0, 0);
             }
 
         } catch (IOException ex) {

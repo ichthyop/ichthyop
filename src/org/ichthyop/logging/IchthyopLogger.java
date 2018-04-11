@@ -67,8 +67,8 @@ public class IchthyopLogger {
     private final static Logger ICHTHYOPLOGGER = Logger.getAnonymousLogger();
 
     final public void error(String msg, Exception ex) {
-        ICHTHYOPLOGGER.log(Level.SEVERE, msg, ex);
-        //System.exit(1);
+        //ICHTHYOPLOGGER.log(Level.SEVERE, msg, ex);
+        throw new RuntimeException(msg, ex);
     }
     
     final public void warning(String msg) {

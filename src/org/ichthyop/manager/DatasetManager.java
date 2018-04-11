@@ -125,11 +125,11 @@ public class DatasetManager extends AbstractManager {
         }
         return null;
     }
-    
+
     public Set<String> getDatasetKeys() {
         return datasets.keySet();
     }
-    
+
     public IDataset getDataset(String key) {
         return datasets.get(key);
     }
@@ -151,7 +151,9 @@ public class DatasetManager extends AbstractManager {
 
         // setup dataset
         for (IDataset dataset : datasets.values()) {
+            info("[dataset] Setting up " + dataset.getKey());
             dataset.setUp();
+            info("[dataset] Setup " + dataset.getKey() + " [OK]");
         }
     }
 
@@ -159,8 +161,10 @@ public class DatasetManager extends AbstractManager {
     public void initializePerformed(InitializeEvent e) throws Exception {
         // setup dataset
         for (IDataset dataset : datasets.values()) {
+            info("[dataset] Initializating " + dataset.getKey());
             getSimulationManager().getTimeManager().addNextStepListener(dataset);
             dataset.init();
+            info("[dataset] Initialization " + dataset.getKey() + " [OK]");
         }
     }
 }

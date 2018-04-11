@@ -246,7 +246,7 @@ public class DatasetUtil extends IchthyopLinker {
      */
     public static int next(List<String> list, int index, int timeArrow) throws IOException {
         if ((list.size() == 1) || ((index + 1) >= list.size())) {
-            throw new IOException("{Dataset} Unable to find any file following " + list.get(index));
+            throw new IOException("[dataset] Unable to find any file following " + list.get(index));
         }
         return index + 1;
     }
@@ -273,7 +273,7 @@ public class DatasetUtil extends IchthyopLinker {
 
         // Time value not found among NetCDF files        
         StringBuilder msg = new StringBuilder();
-        msg.append("{Dataset} Time value ");
+        msg.append("[dataset] Time value ");
         msg.append(time);
         msg.append(" (in seconds) not contained among NetCDF files.");
         throw new IndexOutOfBoundsException(msg.toString());
@@ -389,7 +389,7 @@ public class DatasetUtil extends IchthyopLinker {
                     }
                 }
             } catch (IOException ex) {
-                Logger.getLogger(DatasetUtil.class.getName()).log(Level.WARNING, "Error listing variables from dataset " + location, ex);
+                Logger.getLogger(DatasetUtil.class.getName()).log(Level.WARNING, "[dataset] Error listing variables from dataset " + location, ex);
             }
         } else if (new File(location).isDirectory()) {
             for (File file : new File(location).listFiles()) {
@@ -463,9 +463,9 @@ public class DatasetUtil extends IchthyopLinker {
     public static NetcdfFile openURL(String opendapURL, boolean enhanced) throws IOException {
 
         NetcdfFile ncIn;
-        getLogger().log(Level.INFO, "Opening remote URL {0} Please wait...", opendapURL);
+        getLogger().log(Level.INFO, "[dataset] Opening remote URL {0} Please wait...", opendapURL);
         ncIn = NetcdfDataset.openDataset(opendapURL, enhanced, null);
-        getLogger().log(Level.INFO, "'{'Dataset'}' Open remote {0}", opendapURL);
+        getLogger().log(Level.INFO, "[dataset] Remote URL opened {0}", opendapURL);
         return ncIn;
     }
 
