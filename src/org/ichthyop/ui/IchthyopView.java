@@ -176,6 +176,7 @@ public class IchthyopView extends FrameView {
         /* Disabled some actions */
         closeMenuItem.getAction().setEnabled(false);
         saveAsMenuItem.getAction().setEnabled(false);
+        reloadMenuItem.getAction().setEnabled(false);
         btnSimulationRun.getAction().setEnabled(false);
         btnPreview.getAction().setEnabled(false);
         sliderPreviewZoom.setEnabled(false);
@@ -254,6 +255,7 @@ public class IchthyopView extends FrameView {
         initDone = false;
         saveAsMenuItem.getAction().setEnabled(true);
         saveMenuItem.getAction().setEnabled(cfgUntitled);
+        reloadMenuItem.getAction().setEnabled(true);
         closeMenuItem.getAction().setEnabled(true);
         btnSimulationRun.getAction().setEnabled(true);
         btnPreview.getAction().setEnabled(true);
@@ -341,6 +343,19 @@ public class IchthyopView extends FrameView {
         }
         return null;
     }
+    
+    @Action
+    public Task reloadConfigurationFile() {
+        
+        // current configuration file
+        File file = getSimulationManager().getConfigurationFile();
+        
+        // close it
+        closeConfigurationFile();
+        
+        // open it again
+        return loadConfigurationFile(file);
+    }
 
     @Action
     public void closeConfigurationFile() {
@@ -364,6 +379,7 @@ public class IchthyopView extends FrameView {
         btnSimulationRun.getAction().setEnabled(false);
         btnSaveAsCfgFile.getAction().setEnabled(false);
         btnSaveCfgFile.getAction().setEnabled(false);
+        btnReloadCfgFile.getAction().setEnabled(false);
         closeMenuItem.getAction().setEnabled(false);
         pnlConfiguration.setVisible(false);
         lblConfiguration.setVisible(true);
@@ -1447,11 +1463,15 @@ public class IchthyopView extends FrameView {
         newMenuItem.setAction(actionMap.get("newConfigurationFile"));
         newMenuItem.setName("newMenuItem");
 
-        closeMenuItem = new JMenuItem();
         openMenuItem = new JMenuItem();
         openMenuItem.setAction(actionMap.get("openConfigurationFile"));
         openMenuItem.setName("openMenuItem");
+        
+        reloadMenuItem = new JMenuItem();
+        reloadMenuItem.setAction(actionMap.get("reloadConfigurationFile"));
+        reloadMenuItem.setName("reloadMenuItem");
 
+        closeMenuItem = new JMenuItem();
         closeMenuItem.setAction(actionMap.get("closeConfigurationFile"));
         closeMenuItem.setName("closeMenuItem");
 
@@ -1605,6 +1625,7 @@ public class IchthyopView extends FrameView {
         btnOpenCfgFile = new JButton();
         btnSaveCfgFile = new JButton();
         btnSaveAsCfgFile = new JButton();
+        btnReloadCfgFile = new JButton();
         btnCloseCfgFile = new JButton();
         taskPaneSimulation = new JXTaskPane();
         pnlSimulation = new JPanel();
@@ -1725,6 +1746,12 @@ public class IchthyopView extends FrameView {
         btnSaveAsCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
         btnSaveAsCfgFile.setName("btnSaveAsCfgFile");
         btnSaveAsCfgFile.setVerticalTextPosition(SwingConstants.BOTTOM);
+        
+        btnReloadCfgFile.setAction(actionMap.get("reloadConfigurationFile"));
+        btnReloadCfgFile.setFocusable(false);
+        btnReloadCfgFile.setHorizontalTextPosition(SwingConstants.RIGHT);
+        btnReloadCfgFile.setName("btnReloadCfgFile");
+        btnReloadCfgFile.setVerticalTextPosition(SwingConstants.BOTTOM);
 
         btnCloseCfgFile.setAction(actionMap.get("closeConfigurationFile"));
         btnCloseCfgFile.setFocusable(false);
@@ -1745,11 +1772,13 @@ public class IchthyopView extends FrameView {
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addComponent(btnOpenCfgFile)
                                         .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnCloseCfgFile))
+                                        .addComponent(btnReloadCfgFile))
                                 .addGroup(pnlFileLayout.createSequentialGroup()
                                         .addComponent(btnSaveCfgFile)
                                         .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(btnSaveAsCfgFile)))
+                                        .addComponent(btnSaveAsCfgFile)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(btnCloseCfgFile)))
                         .addContainerGap())
         );
         pnlFileLayout.setVerticalGroup(
@@ -1759,11 +1788,12 @@ public class IchthyopView extends FrameView {
                         .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                 .addComponent(btnOpenCfgFile)
                                 .addComponent(btnNewCfgFile)
-                                .addComponent(btnCloseCfgFile))
+                                .addComponent(btnReloadCfgFile))
                         .addPreferredGap(ComponentPlacement.RELATED)
                         .addGroup(pnlFileLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(btnSaveCfgFile)
-                                .addComponent(btnSaveAsCfgFile))
+                                .addComponent(btnSaveAsCfgFile)
+                                .addComponent(btnCloseCfgFile))
                         .addPreferredGap(ComponentPlacement.RELATED)
                         .addComponent(lblCfgFile)
                         .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -2587,6 +2617,7 @@ public class IchthyopView extends FrameView {
     private JMenu configurationMenu;
     private JMenuItem newMenuItem;
     private JMenuItem openMenuItem;
+    private JMenuItem reloadMenuItem;
     private JMenuItem closeMenuItem;
     private JMenuItem saveAsMenuItem;
     private JMenuItem saveMenuItem;
@@ -2622,6 +2653,7 @@ public class IchthyopView extends FrameView {
     private JButton btnCloseCfgFile;
     private JButton btnNewCfgFile;
     private JButton btnSaveAsCfgFile;
+    private JButton btnReloadCfgFile;
     private JButton btnSaveCfgFile;
     private JLabel lblConfiguration;
     private JLabel lblCfgFile;
