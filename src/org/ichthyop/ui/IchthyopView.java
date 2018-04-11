@@ -1221,6 +1221,7 @@ public class IchthyopView extends FrameView {
             savePreference(openMenuItem, System.getProperty("user.dir"));
         }
 
+        savePreference(leftSplitPane, leftSplitPane.getDividerLocation());
         savePreference(animationSpeed, animationSpeed.getValue());
         savePreference(spinnerParticleSize, spinnerParticleSize.getValue());
         savePreference(btnParticleColor, btnParticleColor.getForeground());
@@ -1283,6 +1284,10 @@ public class IchthyopView extends FrameView {
         property = restorePreference(txtFieldMax);
         if (property != null) {
             txtFieldMax.setValue(property);
+        }
+        property = restorePreference(leftSplitPane);
+        if (property != null) {
+            leftSplitPane.setDividerLocation((int) property);
         }
 
         getFrame().setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -1698,7 +1703,7 @@ public class IchthyopView extends FrameView {
         splitPane.setOneTouchExpandable(true);
 
         leftSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        leftSplitPane.setResizeWeight(1.0);
+        leftSplitPane.setResizeWeight(0.6);
         leftSplitPane.setName("leftSplitPane");
         leftSplitPane.setOneTouchExpandable(true);
 
