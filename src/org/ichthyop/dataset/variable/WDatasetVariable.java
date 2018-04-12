@@ -78,7 +78,7 @@ public class WDatasetVariable extends AbstractDatasetVariable {
         v.init(t0, time_arrow);
         for (int ilayer = 0; ilayer < nlayer; ilayer++) {
             if (null != u.stack[ilayer] && null != v.stack[ilayer]) {
-                stack[ilayer] = new WTiledVariable(u.stack[ilayer], v.stack[ilayer]);
+                stack[ilayer] = new WTiledArray(u.stack[ilayer], v.stack[ilayer]);
             }
         }
     }
@@ -88,7 +88,7 @@ public class WDatasetVariable extends AbstractDatasetVariable {
         if (updateNeeded(currenttime, time_arrow)) {
             u.update(currenttime, time_arrow);
             v.update(currenttime, time_arrow);
-            update(new WTiledVariable(u.stack[nlayer - 1], v.stack[nlayer - 1]));
+            update(new WTiledArray(u.stack[nlayer - 1], v.stack[nlayer - 1]));
         }
     }
 
@@ -98,12 +98,12 @@ public class WDatasetVariable extends AbstractDatasetVariable {
     they should be computed on U and V point (arakawa C grid configuration)
     To be improved
     */
-    private class WTiledVariable extends NetcdfTiledArray {
+    private class WTiledArray extends NetcdfTiledArray {
 
         private final NetcdfTiledArray uw;
         private final NetcdfTiledArray vw;
 
-        WTiledVariable(NetcdfTiledArray uw, NetcdfTiledArray vw) {
+        WTiledArray(NetcdfTiledArray uw, NetcdfTiledArray vw) {
             super(null, null, grid, -1, uw.getTimeStamp(), 1, grid.get_nz());
             this.uw = uw;
             this.vw = vw;

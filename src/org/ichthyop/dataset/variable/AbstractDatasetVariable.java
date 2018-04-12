@@ -136,12 +136,12 @@ public abstract class AbstractDatasetVariable implements IVariable {
         return stack[0].getDouble(i, j, k);
     }
 
-    private double interpolateTime(int i, int j, int k, double dt) {
+    private double interpolateTime(int i, int j, int k, double xt) {
 
         double value = 0;
-        if (dt > 0 && stack.length > 1) {
+        if (xt > 0 && stack.length > 1) {
             if (!(Double.isNaN(stack[0].getDouble(i, j, k)) || Double.isNaN(stack[1].getDouble(i, j, k)))) {
-                value = (1.d - dt) * stack[0].getDouble(i, j, k) + dt * stack[1].getDouble(i, j, k);
+                value = (1.d - xt) * stack[0].getDouble(i, j, k) + xt * stack[1].getDouble(i, j, k);
             }
         } else if (!(Double.isNaN(stack[0].getDouble(i, j, k)))) {
             value = stack[0].getDouble(i, j, k);
@@ -163,7 +163,7 @@ public abstract class AbstractDatasetVariable implements IVariable {
                 ? Math.abs((time - stack[0].getTimeStamp()) / (stack[1].getTimeStamp() - stack[0].getTimeStamp()))
                 : 0.d;
         double CO = 0.d;
-
+        
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
             // pGrid falls on a grid point
             CO = 1.d;

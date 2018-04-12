@@ -174,7 +174,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
     @Override
     public void setUp() throws Exception {
-        
+
         time_arrow = getConfiguration().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
 
         enhanced = !getConfiguration().isNull(prefix + ".enhanced_mode")
@@ -205,8 +205,12 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
             }
         }
 
+        // initialize calendar
         calendar = createCalendar();
+        calendar.setTimeInMillis(0);
+        t0 = getSimulationManager().getTimeManager().get_tO(calendar);
 
+        // create grid
         grid = createGrid();
         grid.init();
 
@@ -223,13 +227,6 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
     @Override
     public void init() throws Exception {
-
-        if (null != calendar) {
-            calendar.setTimeInMillis(0);
-            t0 = getSimulationManager().getTimeManager().get_tO(calendar);
-        } else {
-            t0 = 0;
-        }
 
         // instantiate dataset variables
         for (String name : requiredBy.keySet()) {

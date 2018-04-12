@@ -83,7 +83,7 @@ public class OceanDataset extends NetcdfDataset {
                 requireVariable(variable_w, getClass());      // barrier.n: replace variable_v by variable_w
             } else {
                 variable_w = "ocean_dataset_w";
-                variables.put("ocean_dataset_w", createWVariable());
+                variables.put(variable_w, createWVariable());
             }
         }
     }
