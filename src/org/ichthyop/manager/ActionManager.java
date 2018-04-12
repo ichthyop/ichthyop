@@ -145,10 +145,12 @@ public class ActionManager extends AbstractManager {
 
     private ActionPriority getPriority(String actionKey) {
 
-        String priority = getConfiguration().getString(actionKey + ".priority");
-        for (ActionPriority actionPriority : ActionPriority.values()) {
-            if (priority.equals(actionPriority.toString())) {
-                return actionPriority;
+        if (!getConfiguration().isNull(actionKey + ".priority")) {
+            String priority = getConfiguration().getString(actionKey + ".priority");
+            for (ActionPriority actionPriority : ActionPriority.values()) {
+                if (priority.equals(actionPriority.toString())) {
+                    return actionPriority;
+                }
             }
         }
         return ActionPriority.NORMAL;
