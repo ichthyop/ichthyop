@@ -466,7 +466,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (!e.isInterrupted()) {
             writeToNetCDF(i_record);
         }
-        writeUIVariables();
+        if (!getConfiguration().getBoolean("app.output.no_ui_var")) {
+            writeUIVariables();
+        }
         close();
         if (null != predefinedTrackers) {
             predefinedTrackers.clear();
@@ -515,14 +517,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         // add UI variables 
-        latlonDim = ncOut.addDimension(null, "latlon", 2);
-        // add edge of the simulated area
-        addEdge();
-        // add masked cells
-        addMask();
-        // add zone areas
-        addZones();
-
+        if (!getConfiguration().getBoolean("app.output.no_ui_var")) {
+            addUIVariables();
+        }
         // add gloabal attributes
         addGlobalAttributes();
 
@@ -534,6 +531,17 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         info("[output] Created NetCDF output file " + basename);
+    }
+
+    private void addUIVariables() {
+
+        latlonDim = ncOut.addDimension(null, "latlon", 2);
+        // add edge of the simulated area
+        addEdge();
+        // add masked cells
+        addMask();
+        // add zone areas
+        addZones();
     }
 
     private void writeUIVariables() {

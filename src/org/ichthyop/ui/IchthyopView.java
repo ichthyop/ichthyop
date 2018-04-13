@@ -758,8 +758,8 @@ public class IchthyopView extends FrameView {
     @Action
     public void openNcMapping() throws IOException {
         File file = (null == outputFile)
-                ? new File(System.getProperty("user.dir"))
-                : outputFile.getParentFile();
+                ? (null == cfgPath) ? new File(System.getProperty("user.dir")) : cfgPath
+                : outputFile;
         JFileChooser chooser = new JFileChooser(file);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.outputFile"), getResourceMap().getString("Application.outputFile.extension")));

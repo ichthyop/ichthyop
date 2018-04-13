@@ -161,23 +161,25 @@ public class NetcdfOutputReader extends IchthyopLinker {
         }
 
         // lon, lat min and max
-        lonmin = Double.MAX_VALUE;
+        lonmin = 180;
         lonmax = -lonmin;
-        latmin = Double.MAX_VALUE;
+        latmin = 90;
         latmax = -latmin;
 
-        for (GeoPosition gp : readEdge()) {
-            if (gp.getLongitude() >= lonmax) {
-                lonmax = gp.getLongitude();
-            }
-            if (gp.getLongitude() <= lonmin) {
-                lonmin = gp.getLongitude();
-            }
-            if (gp.getLatitude() >= latmax) {
-                latmax = gp.getLatitude();
-            }
-            if (gp.getLatitude() <= latmin) {
-                latmin = gp.getLatitude();
+        if (null != nc.findVariable("edge")) {
+            for (GeoPosition gp : readEdge()) {
+                if (gp.getLongitude() >= lonmax) {
+                    lonmax = gp.getLongitude();
+                }
+                if (gp.getLongitude() <= lonmin) {
+                    lonmin = gp.getLongitude();
+                }
+                if (gp.getLatitude() >= latmax) {
+                    latmax = gp.getLatitude();
+                }
+                if (gp.getLatitude() <= latmin) {
+                    latmin = gp.getLatitude();
+                }
             }
         }
         double double_tmp;
@@ -208,15 +210,16 @@ public class NetcdfOutputReader extends IchthyopLinker {
     public List<GeoPosition> readEdge() {
 
         List<GeoPosition> edge = new ArrayList();
-        try {
-            ArrayFloat.D2 regionEdge = (ArrayFloat.D2) nc.findVariable("edge").read();
-            for (int i = 0; i < regionEdge.getShape()[0]; i++) {
-                edge.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
+        if (null != nc.findVariable("edge")) {
+            try {
+                ArrayFloat.D2 regionEdge = (ArrayFloat.D2) nc.findVariable("edge").read();
+                for (int i = 0; i < regionEdge.getShape()[0]; i++) {
+                    edge.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
+                }
+            } catch (Exception ex) {
+                warning("[output] Failed to read NetCDF variable \"edge\"", ex);
             }
-        } catch (IOException ex) {
-            warning("[output] Failed to read NetCDF variable \"edge\"", ex);
         }
-
         return edge;
     }
 
@@ -246,13 +249,15 @@ public class NetcdfOutputReader extends IchthyopLinker {
     public List<GeoPosition> readMask() {
 
         List<GeoPosition> mask = new ArrayList();
-        try {
-            ArrayFloat.D2 maskVar = (ArrayFloat.D2) nc.findVariable("mask").read();
-            for (int i = 0; i < maskVar.getShape()[0]; i++) {
-                mask.add(new GeoPosition(maskVar.get(i, 0), maskVar.get(i, 1)));
+        if (null != nc.findVariable("mask")) {
+            try {
+                ArrayFloat.D2 maskVar = (ArrayFloat.D2) nc.findVariable("mask").read();
+                for (int i = 0; i < maskVar.getShape()[0]; i++) {
+                    mask.add(new GeoPosition(maskVar.get(i, 0), maskVar.get(i, 1)));
+                }
+            } catch (IOException ex) {
+                warning("[output] Failed to read NetCDF variable \"mask\"", ex);
             }
-        } catch (IOException ex) {
-            warning("[output] Failed to read NetCDF variable \"mask\"", ex);
         }
         return mask;
     }
