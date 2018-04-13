@@ -88,7 +88,11 @@ public class WDatasetVariable extends AbstractDatasetVariable {
         if (updateNeeded(currenttime, time_arrow)) {
             u.update(currenttime, time_arrow);
             v.update(currenttime, time_arrow);
-            update(new WTiledArray(u.stack[nlayer - 1], v.stack[nlayer - 1]));
+            if ((null != u.stack[nlayer - 1]) && (null != v.stack[nlayer - 1])) {
+                update(new WTiledArray(u.stack[nlayer - 1], v.stack[nlayer - 1]));
+            } else {
+                update(null);
+            }
         }
     }
 
@@ -97,7 +101,7 @@ public class WDatasetVariable extends AbstractDatasetVariable {
     And it is not fully rigorous since I compute U and V flux at cell center though
     they should be computed on U and V point (arakawa C grid configuration)
     To be improved
-    */
+     */
     private class WTiledArray extends NetcdfTiledArray {
 
         private final NetcdfTiledArray uw;
