@@ -980,7 +980,6 @@ public class IchthyopView extends FrameView {
 
     public void closeFolderAnimation() {
         replayPanel.setVisible(false);
-        System.out.println(replayPanel.isVisible());
         lblAnimation.setVisible(true);
         lblFolder.setText(getResourceMap().getString("lblFolder.text"));
         outputFolder = null;
@@ -2803,7 +2802,6 @@ public class IchthyopView extends FrameView {
         public void mousePressed(MouseEvent e) {
             origin = new Point(e.getPoint());
             JViewport viewPort = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, previewPanel);
-            System.out.println(previewPanel.getSize() + " " + viewPort.getSize());
             if (previewPanel.getSize().getWidth() > viewPort.getSize().getWidth()
                     || previewPanel.getSize().getHeight() > viewPort.getSize().getHeight()) {
                 previewPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));

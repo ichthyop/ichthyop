@@ -90,7 +90,6 @@ public class TimeTracker extends AbstractTracker {
         t0 = getSimulationManager().getTimeManager().get_tO(cld);
         listAttributes.add(new Attribute("calendar_class", cld.getClass().getCanonicalName()));
         String name = getSimulationManager().getPropertyManager(cld.getClass()).getProperty("calendar.cf_name");
-        System.out.println("CALENDAR "+ name);
         listAttributes.add(new Attribute("calendar", name));
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         df.setCalendar(cld);

@@ -141,7 +141,7 @@ public class SwimmingAction extends AbstractAction {
         // find the swimming velocity for this particle
         double speed = getSpeed(particle) * (constant ? 1.d : 2 * random1.nextDouble());
         // convert it to a move in a random direction
-        System.out.println((particle.getAge() / (3600.d * 24.d)) + " " + speed);
+        //System.out.println((particle.getAge() / (3600.d * 24.d)) + " " + speed);
         double distance = speed * dt / ONE_DEG_LATITUDE_IN_METER;
         double theta = TWO_PI * random2.nextDouble();
         double dlon = distance * Math.cos(theta) / Math.cos(particle.getLat() * TO_RADIAN);
