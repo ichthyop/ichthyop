@@ -100,7 +100,7 @@ public class LethalTempAction extends AbstractAction {
                 lethal_temp_file = null;
             }
             if (null != lethal_temp_file && !lethal_temp_file.isEmpty()) {
-                String pathname = IOTools.resolveFile(lethal_temp_file);
+                String pathname = getConfiguration().resolve(lethal_temp_file);
                 File f = new File(pathname);
                 if (!f.isFile()) {
                     throw new FileNotFoundException("Lethal temperature file " + pathname + " not found.");

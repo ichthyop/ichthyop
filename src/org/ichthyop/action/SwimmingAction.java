@@ -99,7 +99,7 @@ public class SwimmingAction extends AbstractAction {
 
         // Read swimming velocity file
         String velocity_file = getConfiguration().getString("action.swimming.velocity_file");
-        String pathname = IOTools.resolveFile(velocity_file);
+        String pathname = getConfiguration().resolve(velocity_file);
         File f = new File(pathname);
         if (!f.isFile()) {
             throw new FileNotFoundException("Swimming velocity file " + pathname + " not found.");

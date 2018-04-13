@@ -587,7 +587,7 @@ public class ParameterManager extends AbstractManager {
     }
 
     /**
-     * Resolves a file path against the the input path. If filename is a
+     * Resolves a file path against an other path. If filename is a
      * directory the function ensures the path ends with a separator.
      *
      * @param filename, the file path to resolve
@@ -606,6 +606,10 @@ public class ParameterManager extends AbstractManager {
             pathname += File.separator;
         }
         return pathname;
+    }
+    
+    public String resolve(String filename) {
+        return resolve(filename, inputPathname);
     }
 
     /**

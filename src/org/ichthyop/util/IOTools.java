@@ -78,24 +78,6 @@ import java.util.logging.Logger;
  */
 public class IOTools {
 
-    public static String resolvePath(String path) {
-        String pathname = resolveFile(path);
-        if (!pathname.endsWith(File.separator)) {
-            pathname += File.separator;
-        }
-        return pathname;
-    }
-
-    public static String resolveFile(String filename) {
-        try {
-            File file = new File(System.getProperty("user.dir"));
-            String pathname = new File(file.toURI().resolve(new File(filename).toURI())).getAbsolutePath();
-            return pathname;
-        } catch (Exception e) {
-            return filename;
-        }
-    }
-
     public static boolean makeDirectories(String file) throws SecurityException {
         String path = file.substring(0, file.lastIndexOf(File.separator));
         return new File(path).mkdirs();

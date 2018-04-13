@@ -131,7 +131,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     private String makeFileLocation() {
 
-        String filename = IOTools.resolvePath(getParameter("output_path"));
+        String filename = getSimulationManager().getParameterManager().resolve(getParameter("output_path"));
+        new File(filename).mkdirs();
+        if (!filename.endsWith(File.separator)) {
+            filename += File.separator;
+        }
 
         if (!getConfiguration().isNull(OUTPUT_KEY + ".file_prefix")) {
             filename += getParameter("file_prefix") + "_";

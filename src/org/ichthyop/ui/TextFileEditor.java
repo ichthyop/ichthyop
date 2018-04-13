@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.ui;
 
 import java.awt.Component;
@@ -65,7 +64,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -81,12 +79,11 @@ import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
 import org.jdesktop.application.ResourceMap;
 import org.ichthyop.Template;
-import org.ichthyop.util.IOTools;
 import org.ichthyop.manager.SimulationManager;
 
 /**
  *
- * @author Philippe Verley <philippe dot verley at ird dot fr>
+ * @author Philippe Verley (philippe dot verley at ird dot fr)
  */
 public class TextFileEditor extends AbstractCellEditor implements ActionListener, TableCellEditor {
 
@@ -129,43 +126,37 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
 
             }
         });
-        optionPane.addPropertyChangeListener(
-                new PropertyChangeListener() {
+        optionPane.addPropertyChangeListener((PropertyChangeEvent e) -> {
+            String prop = e.getPropertyName();
+            if (dialog.isVisible()
+                    && (e.getSource() == optionPane)
+                    && (JOptionPane.VALUE_PROPERTY.equals(prop)
+                    || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
+                Object value = optionPane.getValue();
+                if (value == JOptionPane.UNINITIALIZED_VALUE) {
+                    //ignore reset
+                    return;
+                }
+                //Reset the JOptionPane's value.
+                //If you don't do this, then if the user
+                //presses the same button next time, no
+                //property change event will be fired.
+                optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
 
-                    @Override
-                    public void propertyChange(PropertyChangeEvent e) {
-                        String prop = e.getPropertyName();
-                        if (dialog.isVisible()
-                                && (e.getSource() == optionPane)
-                                && (JOptionPane.VALUE_PROPERTY.equals(prop)
-                                || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {
-                            Object value = optionPane.getValue();
-                            if (value == JOptionPane.UNINITIALIZED_VALUE) {
-                                //ignore reset
-                                return;
-                            }
-                            //Reset the JOptionPane's value.
-                            //If you don't do this, then if the user
-                            //presses the same button next time, no
-                            //property change event will be fired.
-                            optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
+                int answer = ((Integer) value);
+                if (answer == JOptionPane.OK_OPTION) {
+                    textField.setText(fileEditor.getFilename());
+                    fireEditingStopped();
+                }
 
-                            int answer = ((Integer) value).intValue();
-                            if (answer == JOptionPane.OK_OPTION) {
-                                textField.setText(fileEditor.getFilename());
-                                fireEditingStopped();
-                            }
-
-                            //If you were going to check something
-                            //before closing the window, you'd do
-                            //it here.
-                            dialog.setVisible(false);
-                        }
-                    }
-                });
+                //If you were going to check something
+                //before closing the window, you'd do
+                //it here.
+                dialog.setVisible(false);
+            }
+        });
         dialog.pack();
         panel = createEditorUI();
-
     }
 
     private ResourceMap getResource() {
@@ -195,7 +186,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
         return pnl;
     }
 
-    /**
+    /*
      * Handles events from the editor button and from
      * the dialog's OK button.
      */
@@ -203,10 +194,8 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
     public void actionPerformed(ActionEvent e) {
 
         try {
-            String path = IOTools.resolveFile(textField.getText());
-
             if (e.getActionCommand().equals(EDIT)) {
-                fileChooser.setSelectedFile(new File(path));
+                fileChooser.setSelectedFile(new File(textField.getText()));
                 int answer = fileChooser.showOpenDialog(panel);
                 if (answer == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
@@ -230,7 +219,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
                     dialog.setVisible(true);
                 }
             } else if (e.getActionCommand().equals(NEW)) {
-                File f = new File(path);
+                File f = new File(textField.getText());
                 if (f.isFile()) {
                     f = f.getParentFile();
                     String filename = f.getAbsolutePath();
@@ -265,7 +254,7 @@ public class TextFileEditor extends AbstractCellEditor implements ActionListener
                     fireEditingCanceled();
                 }
             }
-        } catch (Exception ex) {
+        } catch (HeadlessException | IOException ex) {
             SimulationManager.getLogger().log(Level.SEVERE, "Problem for editing or creating text file ==> " + ex.getMessage(), ex);
         }
     }

@@ -83,7 +83,7 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
     public void run() {
 
         try {
-            File file = new File(IOTools.resolveFile(filename));
+            File file = new File(filename);
             getSimulationManager().setConfigurationFile(file);
             info("Opened configuration file {0}", file.getPath());
             info("===== Simulation started =====");

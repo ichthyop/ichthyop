@@ -64,20 +64,17 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.net.URI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import org.ichthyop.util.IOTools;
 
-public class FileEditor extends AbstractCellEditor
-        implements TableCellEditor, ActionListener {
+public class FileEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
 
-    private JFileChooser fileChooser;
+    private final JFileChooser fileChooser;
     private JTextField textField = new JTextField();
     protected static final String EDIT = "edit";
-    private JPanel panel;
+    private final JPanel panel;
 
     public FileEditor(int dialogType) {
         //Set up the editor (from the table's point of view),
@@ -105,15 +102,15 @@ public class FileEditor extends AbstractCellEditor
         return pnl;
     }
 
-    /**
+    /*
      * Handles events from the editor button and from
      * the dialog's OK button.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         //The user has clicked the cell, so
         //bring up the dialog.
-        String path = IOTools.resolveFile(textField.getText());
-        fileChooser.setSelectedFile(new File(path));
+        fileChooser.setSelectedFile(new File(textField.getText()));
         int answer = fileChooser.showOpenDialog(panel);
         if (answer == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
@@ -127,11 +124,13 @@ public class FileEditor extends AbstractCellEditor
     }
 
     //Implement the one CellEditor method that AbstractCellEditor doesn't.
+    @Override
     public Object getCellEditorValue() {
         return textField.getText();
     }
 
     //Implement the one method defined by TableCellEditor.
+    @Override
     public Component getTableCellEditorComponent(JTable table,
             Object value,
             boolean isSelected,
