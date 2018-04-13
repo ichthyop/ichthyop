@@ -202,7 +202,9 @@ public class ParameterManager extends AbstractManager {
     }
 
     public String getConfigurationDescription() {
-        return getString("configuration.description");
+        return isNull("configuration.description")
+                ? "No description provided"
+                : getString("configuration.description");
     }
 
     public void setConfigurationDescription(String description) {
@@ -218,7 +220,9 @@ public class ParameterManager extends AbstractManager {
     }
 
     public String getConfigurationTitle() {
-        return getString("configuration.title");
+        return isNull("configuration.title")
+                ? new File(getMainFile()).getName()
+                : getString("configuration.title");
     }
 
     public void setConfigurationTitle(String longName) {
