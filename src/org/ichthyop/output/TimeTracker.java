@@ -53,18 +53,24 @@
 
 package org.ichthyop.output;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import org.ichthyop.manager.PropertyManager;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 
 /**
- *
+ * Ichthyop records time in the NetCDF output file with same calendar and time
+ * origin than the Ocean Dataset.
  * @author pverley
  */
 public class TimeTracker extends AbstractTracker {
+    
+    private double t0;
 
     public TimeTracker() {
         super(DataType.DOUBLE);
@@ -77,15 +83,20 @@ public class TimeTracker extends AbstractTracker {
 
     @Override
     public Attribute[] getAttributes() {
+        
         List<Attribute> listAttributes = new ArrayList();
-        String calendarName = getSimulationManager().getOceanDataset().getCalendar().getClass().getSimpleName();
-        if (calendarName.toLowerCase().contains("gregorian")) {
-            listAttributes.add(new Attribute("calendar", "gregorian"));
-        } else {
-            listAttributes.add(new Attribute("calendar", "climato"));
-        }
-        listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getString("app.time.time_origin")));
-        return listAttributes.toArray(new Attribute[listAttributes.size()]);
+        Calendar cld = getSimulationManager().getOceanDataset().getCalendar();
+        // retrieve t0 value
+        t0 = getSimulationManager().getTimeManager().get_tO(cld);
+        listAttributes.add(new Attribute("calendar_class", cld.getClass().getCanonicalName()));
+        String name = getSimulationManager().getPropertyManager(cld.getClass()).getProperty("calendar.cf_name");
+        System.out.println("CALENDAR "+ name);
+        listAttributes.add(new Attribute("calendar", name));
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setCalendar(cld);
+        cld.setTimeInMillis(0);
+        listAttributes.add(new Attribute("units", "seconds since " + df.format(cld.getTime())));
+        return listAttributes.toArray(new Attribute[listAttributes.size()]); 
     }
 
     @Override
@@ -95,7 +106,7 @@ public class TimeTracker extends AbstractTracker {
 
     @Override
     public void track() {
-        getArray().setDouble(0, getSimulationManager().getTimeManager().getTime());
+        getArray().setDouble(0, getSimulationManager().getTimeManager().getTime() +  t0);
     }
     
     @Override

@@ -54,15 +54,14 @@ package org.ichthyop.output;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import org.ichthyop.IchthyopLinker;
-import org.ichthyop.calendar.Day360Calendar;
 import org.ichthyop.calendar.GregorianCalendar;
-import org.ichthyop.manager.TimeManager;
 import org.ichthyop.ui.DrawableParticle;
 import org.ichthyop.ui.DrawableZone;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
@@ -131,11 +130,11 @@ public class NetcdfOutputReader extends IchthyopLinker {
         int day_o = 1;
         int hour_o = 0;
         int minute_o = 0;
-        if (null != vtime.findAttribute("origin")) {
+        if (null != vtime.findAttribute("units")) {
             try {
-                SimpleDateFormat dFormat = TimeManager.INPUT_DATE_FORMAT;
+                SimpleDateFormat dFormat = new SimpleDateFormat("'seconds since' yyyy-MM-dd HH:mm:ss");
                 dFormat.setCalendar(calendar_o);
-                calendar_o.setTime(dFormat.parse(vtime.findAttribute("origin").getStringValue()));
+                calendar_o.setTime(dFormat.parse(vtime.findAttribute("units").getStringValue()));
                 year_o = calendar_o.get(Calendar.YEAR);
                 month_o = calendar_o.get(Calendar.MONTH);
                 day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
@@ -146,10 +145,19 @@ public class NetcdfOutputReader extends IchthyopLinker {
                 // set to 0001/01/01 00:00
             }
         }
-        if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
-            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
-        } else {
+        if (null != vtime.findAttribute("calendar_class")) {
+            String classname = vtime.findAttribute("calendar_class").getStringValue();
+            try {
+                calendar = (Calendar) Class.forName(classname).getConstructor(int.class, int.class, int.class, int.class, int.class).newInstance(year_o, month_o, day_o, hour_o, minute_o);
+            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                // we do not really mond if something goes wrong here
+                // will use fallback calendar
+            }
+        }
+        // fallback calendar
+        if (null == calendar) {
             calendar = new GregorianCalendar(year_o, month_o, day_o, hour_o, minute_o);
+            warning("Could not find calendar attribute in the NetCDF output file. It will only affect the display of time on the maps.");
         }
 
         // lon, lat min and max
