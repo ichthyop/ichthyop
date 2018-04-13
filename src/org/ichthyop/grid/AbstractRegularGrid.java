@@ -269,19 +269,20 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
             imin = ci;
             jmin = cjm1;
         } else {
-//            System.out.println("lat " + (float) lat + " lon " + (float) lon);
-//            System.out.println("nx " + get_nx() + " cim1 " + cim1 + " ci " + ci + " cip1 " + cip1);
-//            System.out.println("lon cim1 " + getLon(cim1, cj) + " ci " + getLon(ci, cj) + " cip1 " + getLon(cip1, cj));
-//            System.out.println("ny " + get_ny() + " cjm1 " + cjm1 + " cj " + cj + " cjp1 " + cjp1);
-//            System.out.println("lat cjm1 " + getLat(ci, cjm1) + " lat cj " + getLat(ci, cj) + " lat cjp1 " + getLat(ci, cjp1));
-            error("Failed to convert lat " + (float) lat + " lon " + (float) lon + " into x y coordinates", null);
+            warning("[grid] " + grid_prefix + " Failed to convert lat " + (float) lat + " lon " + (float) lon + " into x y coordinates");
+//            System.out.println("  lat " + (float) lat + " lon " + (float) lon);
+//            System.out.println("  nx " + get_nx() + " cim1 " + cim1 + " ci " + ci + " cip1 " + cip1);
+//            System.out.println("  lon cim1 " + getLon(cim1, cj) + " ci " + getLon(ci, cj) + " cip1 " + getLon(cip1, cj));
+//            System.out.println("  ny " + get_ny() + " cjm1 " + cjm1 + " cj " + cj + " cjp1 " + cjp1);
+//            System.out.println("  lat cjm1 " + getLat(ci, cjm1) + " lat cj " + getLat(ci, cj) + " lat cjp1 " + getLat(ci, cjp1));
+            return null;
         }
 
         // trilinear interpolation
-        double dy1 = getLat(imin, jmin + 1) - getLat(imin, jmin);
-        double dx1 = getLon(imin, jmin + 1) - getLon(imin, jmin);
-        double dy2 = getLat(imin + 1, jmin) - getLat(imin, jmin);
-        double dx2 = getLon(imin + 1, jmin) - getLon(imin, jmin);
+        double dy1 = getLat(imin, yTore(jmin + 1)) - getLat(imin, jmin);
+        double dx1 = getLon(imin, yTore(jmin + 1)) - getLon(imin, jmin);
+        double dy2 = getLat(xTore(imin + 1), jmin) - getLat(imin, jmin);
+        double dx2 = getLon(xTore(imin + 1), jmin) - getLon(imin, jmin);
 
         // xgrid
         double c1 = lon * dy1 - lat * dx1;

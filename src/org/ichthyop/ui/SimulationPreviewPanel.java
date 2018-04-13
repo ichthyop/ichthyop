@@ -205,7 +205,7 @@ public class SimulationPreviewPanel extends JPanel {
                 double lat = getSimulationManager().getGrid().getLat(i, j);
                 double lon = getSimulationManager().getGrid().getLon(i, j);
                 double[] xy = bathymetry.getGrid().latlon2xy(lat, lon);
-                elevation[i][j] = bathymetry.getBathymetry(xy);
+                elevation[i][j] = (xy == null) ? Double.NaN : bathymetry.getBathymetry(xy);
                 if (elevation[i][j] < deepest) {
                     deepest = elevation[i][j];
                 }

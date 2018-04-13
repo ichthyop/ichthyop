@@ -138,11 +138,9 @@ public class RectilinearGrid extends AbstractRegularGrid {
             }
             i0 = 0;
 
-            if (getConfiguration().getBoolean(grid_prefix + ".shrink")) {
-                crop();
-                longitude = Arrays.copyOfRange(longitude, i0, i0 + nx);
-                latitude = Arrays.copyOfRange(latitude, j0, j0 + ny);
-            }
+            crop();
+            longitude = Arrays.copyOfRange(longitude, i0, i0 + nx);
+            latitude = Arrays.copyOfRange(latitude, j0, j0 + ny);
 
             // depth
             vardepth = getConfiguration().isNull(grid_prefix + ".variable.depth")
@@ -218,36 +216,58 @@ public class RectilinearGrid extends AbstractRegularGrid {
 
     }
 
+    /**
+     * User may provide a North/South/East/West boundaries of the simulated area
+     */
     private void crop() {
 
-        double lon1 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".north-west-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
-        double lat1 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".north-west-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
-        double lon2 = validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".south-east-corner.lon"), LonLatConverter.LonLatFormat.DecimalDeg)));
-        double lat2 = Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".south-east-corner.lat"), LonLatConverter.LonLatFormat.DecimalDeg));
+        double west = getConfiguration().isNull(grid_prefix + ".crop.west")
+                ? Double.NaN
+                : validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".crop.west"), LonLatConverter.LonLatFormat.DecimalDeg)));
+        double north = getConfiguration().isNull(grid_prefix + ".crop.north")
+                ? Double.NaN
+                : Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".crop.north"), LonLatConverter.LonLatFormat.DecimalDeg));
+        double east = getConfiguration().isNull(grid_prefix + ".crop.east")
+                ? Double.NaN
+                : validLon(Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".crop.east"), LonLatConverter.LonLatFormat.DecimalDeg)));
+        double south = getConfiguration().isNull(grid_prefix + ".crop.south")
+                ? Double.NaN
+                : Float.valueOf(LonLatConverter.convert(getConfiguration().getString(grid_prefix + ".crop.south"), LonLatConverter.LonLatFormat.DecimalDeg));
 
-        double[] pGrid1, pGrid2;
-        int ipn, jpn;
+        // north south cropping
+        int jpn = ny;
+        if (!Double.isNaN(north)) {
+            double[] nxy = latlon2xy(north, 0);
+            jpn = (int) Math.ceil(nxy[1]);
+        }
+        if (!Double.isNaN(south)) {
+            double[] sxy = latlon2xy(south, 0);
+            j0 = (int) Math.floor(sxy[1]);
+        }
+        ny = Math.min(ny, jpn - j0);
 
-        pGrid1 = latlon2xy(lat1, lon1);
-        pGrid2 = latlon2xy(lat2, lon2);
-        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            error("[dataset] Crop grid error.", new IOException("Impossible to proportion the simulation area : points out of domain"));
+        // east/west cropping 
+        if ((!Double.isNaN(west) || !Double.isNaN(east)) && (longitude[nx - 1] < longitude[0])) {
+            warning("[grid] " + grid_prefix + " Discontinuity at the +/-180 meridian is in the middle of the longitude array. Ichthyop cannot handle the West/East cropping in that case.");
+        } else {
+            int ipn = nx;
+            if (!Double.isNaN(west)) {
+                double[] wxy = latlon2xy(0, west);
+                i0 = (int) Math.floor(wxy[0]);
+            }
+            if (!Double.isNaN(east)) {
+                double[] exy = latlon2xy(0, east);
+                ipn = (int) Math.floor(exy[0]);
+            }
+            nx = Math.min(nx, ipn - i0);
         }
 
-        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
-        i0 = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
-        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
-        j0 = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
-        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
-
-        nx = Math.min(nx, ipn - i0 + 1);
-        ny = Math.min(ny, jpn - j0 + 1);
-        debug("[dataset] Crop i0 " + i0 + " nx " + nx + " j0 " + j0 + " ny " + ny);
+        debug("[grid] " + grid_prefix + " Cropped i0 " + i0 + " nx " + nx + " j0 " + j0 + " ny " + ny);
     }
 
     @Override
     public boolean isInWater(int i, int j, int k) {
-        
+
         if (null != mask) {
             int ci = xTore(i);
             return !Double.isNaN(mask.getDouble(ci, j, k));
