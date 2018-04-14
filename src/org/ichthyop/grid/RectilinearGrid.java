@@ -244,13 +244,12 @@ public class RectilinearGrid extends AbstractRegularGrid {
             double[] sxy = latlon2xy(south, 0);
             j0 = (int) Math.floor(sxy[1]);
         }
-        ny = Math.min(ny, jpn - j0);
 
         // east/west cropping 
+        int ipn = nx;
         if ((!Double.isNaN(west) || !Double.isNaN(east)) && (longitude[nx - 1] < longitude[0])) {
             warning("[grid] " + grid_prefix + " Discontinuity at the +/-180 meridian is in the middle of the longitude array. Ichthyop cannot handle the West/East cropping in that case.");
         } else {
-            int ipn = nx;
             if (!Double.isNaN(west)) {
                 double[] wxy = latlon2xy(0, west);
                 i0 = (int) Math.floor(wxy[0]);
@@ -259,8 +258,9 @@ public class RectilinearGrid extends AbstractRegularGrid {
                 double[] exy = latlon2xy(0, east);
                 ipn = (int) Math.floor(exy[0]);
             }
-            nx = Math.min(nx, ipn - i0);
         }
+        nx = Math.min(nx, ipn - i0);
+        ny = Math.min(ny, jpn - j0);
 
         debug("[grid] " + grid_prefix + " Cropped i0 " + i0 + " nx " + nx + " j0 " + j0 + " ny " + ny);
     }
