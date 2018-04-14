@@ -76,7 +76,7 @@ public class TxtFileRelease extends AbstractRelease {
     @Override
     public void loadParameters() throws IOException {
 
-        textFile = getFile(getConfiguration().getFile("release.txtfile.txtfile"));
+        textFile = getFile(getConfiguration().getFile("release.txtfile.file"));
         nbParticles = readNbParticles();
     }
 
