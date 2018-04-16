@@ -64,6 +64,8 @@ import java.util.HashMap;
 import java.util.List;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.IchthyopLinker;
+import org.ichthyop.calendar.CalendarUtil;
+import org.ichthyop.calendar.GregorianCalendar;
 import org.ichthyop.dataset.variable.AbstractDatasetVariable;
 import org.ichthyop.dataset.variable.IVariable;
 import org.ichthyop.dataset.variable.NetcdfDatasetVariable;
@@ -72,6 +74,7 @@ import org.ichthyop.grid.IGrid;
 import org.ichthyop.manager.TimeManager;
 import org.ichthyop.util.NCComparator;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -128,36 +131,68 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
     private Calendar createCalendar() {
 
+        String units = null;
+        String classname = null;
+
+        if (!getConfiguration().isNull(prefix + ".calendar")) {
+            String scal = getConfiguration().getString(prefix + ".calendar");
+            classname = CalendarUtil.CFToJavaClass(scal);
+            if (null == classname) {
+                error("[dataset] Parameter " + prefix + ".calendar " + scal + " not recognized.", new IOException("Invalid calendar type"));
+            }
+        } else {
+            // user did not specify the type of calendar to use, Ichthyop takes a guess
+            for (String name : variableMap.keySet()) {
+                try (NetcdfFile nc = DatasetUtil.open(variableMap.get(name).get(0), enhanced)) {
+                    String stime = DatasetUtil.findTimeVariable(nc);
+                    if (stime != null) {
+                        // found time variable, check its attribute
+                        Variable vtime = nc.findVariable(stime);
+                        if (null != vtime.findAttribute("calendar")) {
+                            classname = CalendarUtil.CFToJavaClass(vtime.findAttribute("calendar").getStringValue());
+                        }
+                        if (null != vtime.findAttribute("units")) {
+                            units = vtime.findAttribute("units").getStringValue();
+                        }
+                        break;
+                    }
+                } catch (IOException ex) {
+                    // no need to report error here
+                }
+            }
+        }
+        // class name not set or not automatically detected
+        if (null == classname) {
+            classname = GregorianCalendar.class.getCanonicalName();
+        }
+        info("[dataset] " + prefix + " calendar class " + classname);
+
+        if (!getConfiguration().isNull(prefix + ".calendar.units")) {
+            if (null != units) {
+                warning("[dataset] " + prefix + " you are overwriting NetCDF calendar units " + units);
+            }
+            units = getConfiguration().getString(prefix + ".calendar.units");
+        }
+
+        // calendar units not set or not automatically detected
+        if (null == units) {
+            units = "seconds since 1900-01-01 0:0:0";
+        }
+        info("[dataset] " + prefix + " calendar units " + units);
+
         try {
-            int year = 1900;
-            int month = Calendar.JANUARY;
-            int day = 1;
-            int hour = 0;
-            int minute = 0;
-            String classname;
-            if (!getConfiguration().isNull(prefix + ".calendar.class_name")) {
-                classname = getConfiguration().getString(prefix + ".calendar.class_name");
-            } else {
-                classname = "org.ichthyop.calendar.GregorianCalendar";
-                warning("[dataset] Could not find parameter " + prefix + ".calendar.class_name. Ichthyop assumes org.ichthyop.calendar.GregorianCalendar");
-            }
-            if (!getConfiguration().isNull(prefix + ".calendar.time_origin")) {
-                String origin = getConfiguration().getString(prefix + ".calendar.time_origin");
-                Calendar calendar_o = Calendar.getInstance();
-                SimpleDateFormat idf = getSimulationManager().getTimeManager().getInputDateFormat();
-                idf.setCalendar(calendar_o);
-                calendar_o.setTime(idf.parse(origin));
-                year = calendar_o.get(Calendar.YEAR);
-                month = calendar_o.get(Calendar.MONTH);
-                day = calendar_o.get(Calendar.DAY_OF_MONTH);
-                hour = calendar_o.get(Calendar.HOUR_OF_DAY);
-                minute = calendar_o.get(Calendar.MINUTE);
-            } else {
-                warning("[dataset] Could not find parameter " + prefix + ".calendar.time_origin. Ichthyop assumes 1900/01/01 00:00");
-            }
+            Calendar calendar_o = Calendar.getInstance();
+            SimpleDateFormat idf = CalendarUtil.unitsAsSDF(units);
+            idf.setCalendar(calendar_o);
+            calendar_o.setTime(idf.parse(units));
+            int year = calendar_o.get(Calendar.YEAR);
+            int month = calendar_o.get(Calendar.MONTH);
+            int day = calendar_o.get(Calendar.DAY_OF_MONTH);
+            int hour = calendar_o.get(Calendar.HOUR_OF_DAY);
+            int minute = calendar_o.get(Calendar.MINUTE);
             return (Calendar) Class.forName(classname).getConstructor(int.class, int.class, int.class, int.class, int.class).newInstance(year, month, day, hour, minute);
         } catch (ParseException | ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            error("Failed to create calendar for dataset " + prefix, ex);
+            error("[dataset] " + prefix + " Failed to create calendar.", ex);
         }
         return null;
     }
