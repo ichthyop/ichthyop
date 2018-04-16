@@ -77,6 +77,8 @@ public class TimeManager extends AbstractManager {
 ///////////////////////////////
     public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    
+    final private static String TIME_KEY = "time";
 
 ///////////////////////////////
 // Declaration of the variables
@@ -130,17 +132,17 @@ public class TimeManager extends AbstractManager {
     private void loadParameters() throws Exception {
 
         // time step
-        dt = getConfiguration().getInt("app.time.time_step");
+        dt = getConfiguration().getInt(TIME_KEY + ".time_step");
 
         // time direction */
-        boolean isForward = getConfiguration().getString("app.time.time_arrow").equals(TimeDirection.FORWARD.toString());
+        boolean isForward = getConfiguration().getString(TIME_KEY + ".time_arrow").equals(TimeDirection.FORWARD.toString());
         if (!isForward) {
             dt *= -1;
         }
 
         // transport duration */
         try {
-            transportDuration = duration2seconds(getConfiguration().getString("app.time.transport_duration"));
+            transportDuration = duration2seconds(getConfiguration().getString(TIME_KEY + ".transport_duration"));
         } catch (ParseException ex) {
             IOException pex = new IOException("Error converting transport duration into seconds ==> " + ex.toString());
             pex.setStackTrace(ex.getStackTrace());
@@ -148,7 +150,7 @@ public class TimeManager extends AbstractManager {
         }
 
         // keep drifting ?
-        keepDrifting = getConfiguration().getBoolean("app.time.keep_drifting");
+        keepDrifting = getConfiguration().getBoolean(TIME_KEY + ".keep_drifting");
 
         // ellapsed time
         elapsed = 0.d;
@@ -278,9 +280,9 @@ public class TimeManager extends AbstractManager {
 
     public double get_tO(Calendar calendar) {
         try {
-            return date2seconds(getConfiguration().getString("app.time.initial_time"), calendar);
+            return date2seconds(getConfiguration().getString(TIME_KEY + ".initial_time"), calendar);
         } catch (ParseException ex) {
-            error("Failed to convert parameter app.time.initial_time into seconds" , ex);
+            error("Failed to convert parameter " + TIME_KEY + ".initial_time into seconds" , ex);
             return Double.NaN;
         }
     }

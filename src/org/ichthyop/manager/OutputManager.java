@@ -92,7 +92,7 @@ import ucar.nc2.NetcdfFileWriter;
 public class OutputManager extends AbstractManager implements LastStepListener, NextStepListener {
 
     final private static OutputManager OUTPUT_MANAGER = new OutputManager();
-    final private static String OUTPUT_KEY = "app.output";
+    final private static String OUTPUT_KEY = "output";
     private int dt_record;
     private NCDimFactory dimensionFactory;
     private int i_record;
@@ -109,6 +109,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private List<String> customTrackers;
     private String basename;
     private double ellapsed;
+    private int sampling;
 
     public static OutputManager getInstance() {
         return OUTPUT_MANAGER;
@@ -265,8 +266,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         List<GeoPosition> list = new ArrayList();
 
-        for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += 2) {
-            for (int j = 0; j < getSimulationManager().getGrid().get_ny(); j += 2) {
+        for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += sampling) {
+            for (int j = 0; j < getSimulationManager().getGrid().get_ny(); j += sampling) {
                 if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
                     double[] latlon = getSimulationManager().getGrid().xy2latlon(i, j);
                     list.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
@@ -281,7 +282,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         List<GeoPosition> lregion = new ArrayList();
         IGrid grid = getSimulationManager().getGrid();
-        for (int i = 1; i < grid.get_nx(); i += 2) {
+        for (int i = 1; i < grid.get_nx(); i += sampling) {
             if (!Double.isNaN(grid.getLat(i, 0)) && !Double.isNaN(grid.getLon(i, 0))) {
                 double lon = grid.getLon(i, 0);
                 if (lon > 180) {
@@ -290,7 +291,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 lregion.add(new GeoPosition(grid.getLat(i, 0), lon));
             }
         }
-        for (int j = 1; j < grid.get_ny(); j += 2) {
+        for (int j = 1; j < grid.get_ny(); j += sampling) {
             if (!Double.isNaN(grid.getLat(grid.get_nx() - 1, j)) && !Double.isNaN(grid.getLon(grid.get_nx() - 1, j))) {
                 double lon = grid.getLon(grid.get_nx() - 1, j);
                 if (lon > 180) {
@@ -299,7 +300,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 lregion.add(new GeoPosition(grid.getLat(grid.get_nx() - 1, j), lon));
             }
         }
-        for (int i = grid.get_nx() - 1; i > 0; i -= 2) {
+        for (int i = grid.get_nx() - 1; i > 0; i -= sampling) {
             if (!Double.isNaN(grid.getLat(i, grid.get_ny() - 1)) && !Double.isNaN(grid.getLon(i, grid.get_ny() - 1))) {
                 double lon = grid.getLon(i, grid.get_ny() - 1);
                 if (lon > 180) {
@@ -308,7 +309,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 lregion.add(new GeoPosition(grid.getLat(i, grid.get_ny() - 1), lon));
             }
         }
-        for (int j = grid.get_ny() - 1; j > 0; j -= 2) {
+        for (int j = grid.get_ny() - 1; j > 0; j -= sampling) {
             if (!Double.isNaN(grid.getLat(0, j)) && !Double.isNaN(grid.getLon(0, j))) {
                 double lon = grid.getLon(0, j);
                 if (lon > 180) {
@@ -323,8 +324,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public List<GeoPosition> maskToPointCloud() {
 
         List<GeoPosition> lmask = new ArrayList();
-        for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += 2) {
-            for (int j = 0; j < getSimulationManager().getGrid().get_ny(); j += 2) {
+        for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += sampling) {
+            for (int j = 0; j < getSimulationManager().getGrid().get_ny(); j += sampling) {
                 if (!getSimulationManager().getGrid().isInWater(i, j)) {
                     double[] latlon = getSimulationManager().getGrid().xy2latlon(i, j);
                     lmask.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
@@ -466,7 +467,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (!e.isInterrupted()) {
             writeToNetCDF(i_record);
         }
-        if (!getConfiguration().getBoolean("app.output.no_ui_var")) {
+        if (sampling > 0) {
             writeUIVariables();
         }
         close();
@@ -517,9 +518,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         // add UI variables 
-        if (!getConfiguration().getBoolean("app.output.no_ui_var")) {
+        if (!getConfiguration().isNull(OUTPUT_KEY + ".ui.sampling")) {
+            sampling = getConfiguration().getInt(OUTPUT_KEY + ".ui.sampling");
+        }
+        if (sampling > 0) {
             addUIVariables();
         }
+
         // add gloabal attributes
         addGlobalAttributes();
 

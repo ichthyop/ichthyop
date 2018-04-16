@@ -174,7 +174,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         Calendar calendar = getSimulationManager().getOceanDataset().getCalendar();
         double t0 = getSimulationManager().getTimeManager().get_tO(calendar);
         int arrow = (getSimulationManager().getTimeManager().get_dt()) > 0 ? 1 : -1;
-        String st0 = getSimulationManager().getParameterManager().getString("app.time.initial_time");
+        String st0 = getSimulationManager().getParameterManager().getString("time.initial_time");
         for (int i = 0; i < timeEvent.length; i++) {
             try {
                 timeEvent[i] = getSimulationManager().getTimeManager().date2seconds(events[i], calendar) - t0;
@@ -193,7 +193,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         if (getConfiguration().getBoolean("release.schedule.is_enabled")) {
             return getConfiguration().getArrayString("release.schedule.events");
         } else {
-            return new String[]{getConfiguration().getString("app.time.initial_time")};
+            return new String[]{getConfiguration().getString("time.initial_time")};
         }
     }
 

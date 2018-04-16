@@ -104,6 +104,8 @@ public class SimulationPreviewPanel extends JPanel {
     private double deepest;
     // highest point on land
     private double highest;
+    //
+    private int sampling = 1;
 
 ///////////////////////////////
 // Declaration of the constants
@@ -155,10 +157,12 @@ public class SimulationPreviewPanel extends JPanel {
         double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getGrid().get_ny()));
         double csizew = Math.max(1.d, Math.ceil(w / getSimulationManager().getGrid().get_nx()));
         double csize = 2 * Math.max(csizeh, csizew);
-        for (int i = getSimulationManager().getGrid().get_nx(); i-- > 0;) {
-            for (int j = getSimulationManager().getGrid().get_ny(); j-- > 0;) {
-                double lat = getSimulationManager().getGrid().getLat(i, j);
-                double lon = getSimulationManager().getGrid().getLon(i, j);
+        int nx = getSimulationManager().getGrid().get_nx() / sampling;
+        int ny = getSimulationManager().getGrid().get_ny() / sampling;
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                double lat = getSimulationManager().getGrid().getLat(i * sampling, j * sampling);
+                double lon = getSimulationManager().getGrid().getLon(i * sampling, j * sampling);
 //                double wlat = w * Math.cos(Math.PI * lat / 180.d) / Math.cos(Math.PI * latClosestEq / 180.d);
 //                double x = 0.5 * (w - wlat) + wlat * (lon - lonmin) / (lonmax - lonmin);
                 double x = w * (lon - lonmin) / (lonmax - lonmin);
@@ -194,16 +198,16 @@ public class SimulationPreviewPanel extends JPanel {
         ratio = dlon / dlat;
 
         // bathymetry
-        int nx = getSimulationManager().getGrid().get_nx();
-        int ny = getSimulationManager().getGrid().get_ny();
+        int nx = getSimulationManager().getGrid().get_nx() / sampling;
+        int ny = getSimulationManager().getGrid().get_ny() / sampling;
         elevation = new double[nx][ny];
         deepest = Double.MAX_VALUE;
         highest = Double.MIN_VALUE;
         BathymetryDataset bathymetry = (BathymetryDataset) getSimulationManager().getDatasetManager().getDataset("dataset.bathymetry");
-        for (int i = nx; i-- > 0;) {
-            for (int j = ny; j-- > 0;) {
-                double lat = getSimulationManager().getGrid().getLat(i, j);
-                double lon = getSimulationManager().getGrid().getLon(i, j);
+        for (int i = 0; i < nx ; i++) {
+            for (int j = 0; j < ny; j++) {
+                double lat = getSimulationManager().getGrid().getLat(i * sampling, j * sampling);
+                double lon = getSimulationManager().getGrid().getLon(i * sampling, j * sampling);
                 double[] xy = bathymetry.getGrid().latlon2xy(lat, lon);
                 elevation[i][j] = (xy == null) ? Double.NaN : bathymetry.getBathymetry(xy);
                 if (elevation[i][j] < deepest) {
@@ -214,6 +218,7 @@ public class SimulationPreviewPanel extends JPanel {
                 }
             }
         }
+
         deepest = Math.min(deepest, -0.5);
         highest = Math.max(highest, 0.5);
     }
@@ -242,10 +247,10 @@ public class SimulationPreviewPanel extends JPanel {
      */
     private Color getColor(int i, int j) {
 
-        if (getSimulationManager().getGrid().isInWater(i, j)) {
+        if (getSimulationManager().getGrid().isInWater(i * sampling, j * sampling)) {
             // zone
             for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
-                if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
+                if (getSimulationManager().getZoneManager().isInside(i * sampling, j * sampling, zone.getKey())) {
                     return zone.getColor();
                 }
             }

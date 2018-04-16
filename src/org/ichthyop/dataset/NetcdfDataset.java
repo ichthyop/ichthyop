@@ -175,7 +175,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
     @Override
     public void setUp() throws Exception {
 
-        time_arrow = getConfiguration().getString("app.time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
+        time_arrow = getConfiguration().getString("time.time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 : -1;
 
         enhanced = !getConfiguration().isNull(prefix + ".enhanced_mode")
                 ? getConfiguration().getBoolean(prefix + ".enhanced_mode")

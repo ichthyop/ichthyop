@@ -715,6 +715,9 @@ public class ParameterManager extends AbstractManager {
      * Automatically identify parameter subsets in the configuration file
      */
     private void identifySubsets() {
+        
+        // remove any previous subsets
+        subsets.clear();
 
         List<String> identifiedSubsets = new ArrayList();
         findKeys("*.treepath").forEach((treepath) -> {
