@@ -206,7 +206,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
                 error("[grid] Could not find suitable mask variable in grid file", new NullPointerException("Please specify parameter " + grid_prefix + ".variable.mask"));
             } else {
                 location = variables.get(varmask).get(0);
-                mask = new ConstantDatasetVariable(location, varmask, this, 10, Math.min(3, nz), true);
+                mask = new ConstantDatasetVariable(grid_prefix, location, varmask, this, 10, Math.min(3, nz), true);
                 mask.init(0, 0);
             }
 

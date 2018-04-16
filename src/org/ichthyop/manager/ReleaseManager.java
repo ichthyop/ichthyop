@@ -65,6 +65,7 @@ import org.ichthyop.event.ReleaseListener;
 import javax.swing.event.EventListenerList;
 import org.ichthyop.event.NextStepListener;
 import org.ichthyop.release.AbstractRelease;
+import org.ichthyop.release.ReleaseFactory;
 
 /**
  *
@@ -272,6 +273,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         addReleaseListener(this);
         getSimulationManager().getTimeManager().addNextStepListener(this);
         schedule();
+        //ReleaseFactory.createUniformReleaseTxtFile();
         info("Release manager initialization [OK]");
     }
 }

@@ -255,7 +255,7 @@ public class DatasetUtil extends IchthyopLinker {
         return (index + 1) < list.size();
     }
 
-    public static int index(List<String> list, double time, int timeArrow, String strTime) throws IOException {
+    public static int index(String dataset_prefix, List<String> list, double time, int timeArrow, String strTime) throws IOException {
 
         // Check whether the time is within a file
         for (int index = 0; index < list.size(); index++) {
@@ -273,7 +273,7 @@ public class DatasetUtil extends IchthyopLinker {
 
         // Time value not found among NetCDF files        
         StringBuilder msg = new StringBuilder();
-        msg.append("[dataset] Time value ");
+        msg.append("[dataset] ").append(dataset_prefix).append(" Time value ");
         msg.append(time);
         msg.append(" (in seconds) not contained among NetCDF files.");
         throw new IndexOutOfBoundsException(msg.toString());
@@ -358,7 +358,7 @@ public class DatasetUtil extends IchthyopLinker {
         return null;
     }
 
-    public static HashMap<String, List<String>> mapVariables(String location, boolean coordinateV) {
+    public static HashMap<String, List<String>> mapVariables(String dataset_prefix, String location, boolean coordinateV) {
 
         HashMap<String, List<String>> map = new HashMap();
 
@@ -389,11 +389,11 @@ public class DatasetUtil extends IchthyopLinker {
                     }
                 }
             } catch (IOException ex) {
-                Logger.getLogger(DatasetUtil.class.getName()).log(Level.WARNING, "[dataset] Error listing variables from dataset " + location, ex);
+                Logger.getLogger(DatasetUtil.class.getName()).log(Level.WARNING, "[dataset] " + dataset_prefix + " Error listing variables from dataset " + location, ex);
             }
         } else if (new File(location).isDirectory()) {
             for (File file : new File(location).listFiles()) {
-                HashMap<String, List<String>> submap = mapVariables(file.getAbsolutePath(), coordinateV);
+                HashMap<String, List<String>> submap = mapVariables(dataset_prefix, file.getAbsolutePath(), coordinateV);
                 for (String name : submap.keySet()) {
                     if (map.containsKey(name)) {
                         map.get(name).addAll(submap.get(name));

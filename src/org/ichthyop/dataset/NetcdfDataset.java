@@ -186,7 +186,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
                 : getConfiguration().getBoolean(prefix + ".alphabetically_sorted", false);
 
         this.location = getConfiguration().getString(prefix + ".location");
-        variableMap.putAll(DatasetUtil.mapVariables(location, false));
+        variableMap.putAll(DatasetUtil.mapVariables(prefix, location, false));
         if (variableMap.isEmpty()) {
             error("Failed to list any variable in dataset " + prefix, new IOException("Invalid dataset location " + location));
         }
@@ -219,7 +219,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
     AbstractDatasetVariable createVariable(String name, int nlayer, int tilingh, int tilingv) {
 
-        return new NetcdfDatasetVariable(variableMap.get(name), name,
+        return new NetcdfDatasetVariable(prefix, variableMap.get(name), name,
                 nlayer, grid, tilingh, Math.min(tilingv, grid.get_nz()),
                 calendar, t0,
                 enhanced);
@@ -269,6 +269,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
             this.requiredBy.put(name, new ArrayList());
         }
         this.requiredBy.get(name).add(requiredBy.getCanonicalName());
+        debug("[dataset] " + prefix + " variable " + name + " required by " + requiredBy.getCanonicalName());
     }
 
     public void clearRequiredVariables() {

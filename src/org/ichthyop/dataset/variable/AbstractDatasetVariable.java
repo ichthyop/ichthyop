@@ -63,6 +63,7 @@ import org.ichthyop.grid.IGrid;
  */
 public abstract class AbstractDatasetVariable implements IVariable {
 
+    protected final String dataset_prefix;
     protected final IGrid grid;
     protected final NetcdfTiledArray[] stack;
     protected final int nlayer;
@@ -77,7 +78,8 @@ public abstract class AbstractDatasetVariable implements IVariable {
 
     public abstract void update(double currenttime, int time_arrow) throws IOException;
 
-    public AbstractDatasetVariable(int nlayer, IGrid grid, Calendar calendar, double t0) {
+    public AbstractDatasetVariable(String dataset_prefix, int nlayer, IGrid grid, Calendar calendar, double t0) {
+        this.dataset_prefix = dataset_prefix;
         this.nlayer = nlayer;
         this.grid = grid;
         this.calendar = calendar;

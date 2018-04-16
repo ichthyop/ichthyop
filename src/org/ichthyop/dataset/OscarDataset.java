@@ -485,7 +485,7 @@ public class OscarDataset extends NetcdfDataset {
         
         // Time is expressed as number of days since origin in Oscar
         if (!opendap) {
-            indexFile = DatasetUtil.index(listInputFiles, t0, time_arrow, strTime);
+            indexFile = DatasetUtil.index(prefix, listInputFiles, t0, time_arrow, strTime);
             ncIn = DatasetUtil.open(listInputFiles.get(indexFile), true);
         }
         nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();

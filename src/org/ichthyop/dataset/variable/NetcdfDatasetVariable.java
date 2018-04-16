@@ -73,11 +73,11 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
     private final boolean enhanced;
     private int index;
 
-    public NetcdfDatasetVariable(List<String> locations, String name,
+    public NetcdfDatasetVariable(String dataset_prefix, List<String> locations, String name,
             int nlayer, IGrid grid, int tilingh, int tilingv,
             Calendar calendar, double t0,
             boolean enhanced) {
-        super(nlayer, grid, calendar, t0);
+        super(dataset_prefix, nlayer, grid, calendar, t0);
         this.locations = locations;
         this.name = name;
         this.tilingh = tilingh;
@@ -95,11 +95,12 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
         nc.close();
 
         double time = t0;
-        index = locations.size() > 1
-                ? DatasetUtil.index(locations, time, time_arrow, variable_time)
-                : 0;
+        index =  DatasetUtil.index(dataset_prefix, locations, time, time_arrow, variable_time);
         nc = open();
-        int rank = DatasetUtil.rank(time, nc, variable_time, time_arrow) - time_arrow;
+        
+        int rank = DatasetUtil.rank(time, nc, variable_time, time_arrow);
+        // substract time_arrow since the first thing done in the loop is time_arrow increment
+        rank -= time_arrow;
         for (int ilayer = 0; ilayer < nlayer - 1; ilayer++) {
             rank += time_arrow;
             int ntime = nc.findVariable(variable_time).getShape()[0];
