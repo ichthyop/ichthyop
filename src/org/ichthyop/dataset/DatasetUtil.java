@@ -435,10 +435,10 @@ public class DatasetUtil extends IchthyopLinker {
                 // Days confirmed
                 return 3600.d * 24.d;
             }
-            if (units.contains("year")) {
-                // Years confirmed
-                return 3600.d * 24.d * 365.d;
-            }
+//            if (units.contains("year")) {
+//                // Years confirmed
+//                return 3600.d * 24.d * 365.d;
+//            }
         }
 
         // By default time is assumed to be expressed in seconds.
