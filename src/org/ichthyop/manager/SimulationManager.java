@@ -64,7 +64,6 @@ import java.util.Calendar;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
-import org.ichthyop.calendar.CalendarConstants;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.logging.IchthyopLogger;
 import org.ichthyop.logging.StdoutHandler;
@@ -80,10 +79,6 @@ public class SimulationManager extends IchthyopLogger {
      * Listeners list for SetupEvent and InitializeEvent.
      */
     private final EventListenerList listeners = new EventListenerList();
-    /**
-     * Computer time when the current simulation starts [millisecond]
-     */
-    private long cpu_start;
     /**
      * A flag indicating whether the simulation has been interrupted or
      * completed.
@@ -163,54 +158,6 @@ public class SimulationManager extends IchthyopLogger {
     }
 
     /**
-     * Calculates the progress of the current simulation
-     *
-     * @return the progress of the current simulation as a percent
-     */
-    public float progress() {
-        float progress = (getTimeManager().index() + 1) / (float) getTimeManager().getNumberOfSteps();
-        return Math.min(Math.max(progress, 0.f), 1.f);
-    }
-
-    /**
-     * Estimates the time left to end up the current simulation.
-     *
-     * @return the time left, formatted in a String
-     */
-    public String timeLeft() {
-
-        return timeLeft(progress(), cpu_start);
-    }
-
-    private String timeLeft(float progress, long cpu_start) {
-
-        StringBuffer strBf;
-
-        long nbMilliSecLeft = 0L;
-        if (progress != 0) {
-            nbMilliSecLeft = (long) ((System.currentTimeMillis() - cpu_start) * (1 - progress) / progress);
-        }
-        int nbHourLeft = (int) (nbMilliSecLeft / CalendarConstants.ONE_HOUR);
-        int nbMinLeft = (int) ((nbMilliSecLeft - CalendarConstants.ONE_HOUR * nbHourLeft) / CalendarConstants.ONE_MINUTE);
-        int nbSecLeft = (int) ((nbMilliSecLeft - CalendarConstants.ONE_HOUR * nbHourLeft - CalendarConstants.ONE_MINUTE * nbMinLeft) / CalendarConstants.ONE_SECOND);
-
-        strBf = new StringBuffer("Time left ");
-        if (nbHourLeft == 0) {
-            strBf.append(nbMinLeft);
-            strBf.append("min ");
-            strBf.append(nbSecLeft);
-            strBf.append("s");
-        } else {
-            strBf.append(nbHourLeft);
-            strBf.append("h ");
-            strBf.append(nbMinLeft);
-            strBf.append("min");
-        }
-
-        return strBf.toString();
-    }
-
-    /**
      * Order is of primary importance since the setup events and the
      * initialization events will be called in the same order they are called
      * here.
@@ -268,10 +215,6 @@ public class SimulationManager extends IchthyopLogger {
         return flagStop;
     }
 
-    public void resetTimer() {
-        cpu_start = System.currentTimeMillis();
-    }
-
     public Simulation getSimulation() {
         return Simulation.getInstance();
     }
@@ -311,7 +254,7 @@ public class SimulationManager extends IchthyopLogger {
     public DatasetManager getDatasetManager() {
         return DatasetManager.getInstance();
     }
-    
+
     public IGrid getGrid() {
         return getDatasetManager().getOceanDataset().getGrid();
     }

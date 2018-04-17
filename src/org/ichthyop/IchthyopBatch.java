@@ -97,8 +97,7 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
             info("Initializing...");
             getSimulationManager().init();
             /* first time step */
-            getSimulationManager().getTimeManager().firstStepTriggered();
-            getSimulationManager().resetTimer();
+            getSimulationManager().getTimeManager().resetTimer();
             do {
                 /* check whether the simulation has been interrupted by user */
                 if (getSimulationManager().isStopped()) {
@@ -106,7 +105,7 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
                 }
                 /* step simulation */
                 getSimulationManager().getSimulation().step();
-                progress(getSimulationManager().getTimeManager().index());
+                info(getSimulationManager().getTimeManager().printProgress());
             } while (getSimulationManager().getTimeManager().hasNextStep());
             long endTime = System.currentTimeMillis();
             info("Simulation ran in {0} seconds.", ((endTime - startTime) / 1000L));
@@ -114,26 +113,5 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
         } catch (Exception ex) {
             error("An error occured while running the simulation", ex);
         }
-    }
-
-    /**
-     * Logs the progress of the simulation.
-     */
-    private void progress(int iStep) {
-
-        int detail = 20;
-        StringBuilder msg = new StringBuilder();
-        msg.append(getSimulationManager().getTimeManager().stepToString());
-        if (iStep % detail == 0) {
-            msg.append(" (");
-            msg.append(getSimulationManager().getTimeManager().timeToString());
-            msg.append(")");
-        }
-        if ((iStep + (detail / 2)) % detail == 0) {
-            msg.append(" (");
-            msg.append(getSimulationManager().timeLeft());
-            msg.append(")");
-        }
-        info(msg.toString());
     }
 }

@@ -77,7 +77,7 @@ public class TimeManager extends AbstractManager {
 ///////////////////////////////
     public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
-    
+
     final private static String TIME_KEY = "time";
 
 ///////////////////////////////
@@ -115,7 +115,11 @@ public class TimeManager extends AbstractManager {
      * transport duration
      */
     private boolean keepDrifting;
-    
+    /**
+     * Computer time when the current simulation starts [millisecond]
+     */
+    private long cpu_start;
+
     private final EventListenerList listeners = new EventListenerList();
 
 ////////////////////////////
@@ -123,10 +127,6 @@ public class TimeManager extends AbstractManager {
 ////////////////////////////
     public static TimeManager getInstance() {
         return TIME_MANAGER;
-    }
-
-    public void firstStepTriggered() throws Exception {
-        fireNextStepTriggered();
     }
 
     private void loadParameters() throws Exception {
@@ -167,7 +167,7 @@ public class TimeManager extends AbstractManager {
      * @throws java.text.ParseException
      */
     public double duration2seconds(String duration) throws ParseException {
-        
+
         double seconds;
         NumberFormat nbFormat = NumberFormat.getInstance();
         nbFormat.setParseIntegerOnly(true);
@@ -185,7 +185,7 @@ public class TimeManager extends AbstractManager {
     }
 
     public double date2seconds(String date, Calendar calendar) throws ParseException {
-        
+
         INPUT_DATE_FORMAT.setCalendar(calendar);
         calendar.setTime(INPUT_DATE_FORMAT.parse(date));
         return calendar.getTimeInMillis() / 1000L;
@@ -201,7 +201,7 @@ public class TimeManager extends AbstractManager {
      */
     public boolean hasNextStep() throws Exception {
 
-        if (elapsed < simuDuration) {
+        if ((elapsed + dt) < simuDuration) {
             fireNextStepTriggered();
             i_step++;
             elapsed += dt;
@@ -215,14 +215,20 @@ public class TimeManager extends AbstractManager {
     /**
      * Gets the current time of the simulation as a String
      *
+     * @param seconds
      * @return the current time of the simulation, formatted in a String
      */
-    public String timeToString() {
+    private String timeToString(double seconds) {
 
-        int nd = (int) (elapsed / (3600 * 24));
-        int nh = (int) (elapsed - nd * 3600 * 24) / 3600;
-        int nm = (int) (elapsed - nd * 3600 * 24 - nh * 3600) / 60;
-        int ns = (int) (elapsed - nd * 3600 * 24 - nh * 3600 - nm * 60);
+        if (0 == seconds) {
+            return "0 second";
+        }
+        
+        double one_day = 3600 * 24;
+        int nd = (int) (seconds / one_day);
+        int nh = (int) (seconds - nd * one_day) / 3600;
+        int nm = (int) (seconds - nd * one_day - nh * 3600) / 60;
+        int ns = (int) (seconds - nd * one_day - nh * 3600 - nm * 60);
         StringBuilder sb = new StringBuilder();
         if (nd > 0) {
             sb.append(nd).append(" day");
@@ -238,35 +244,53 @@ public class TimeManager extends AbstractManager {
         }
         if (ns > 0) {
             sb.append(ns).append(" second");
-            sb.append(ns > 1 ? "s " : " ");
+            if (ns > 1) {
+                sb.append("s");
+            }
         }
         return sb.toString();
     }
 
-    /**
-     * Gets the index of the current step
-     *
-     * @return the index of the current step
-     */
-    public int index() {
-        return i_step;
+    public String timeToString() {
+        return timeToString(elapsed);
     }
 
-    public String stepToString() {
-        StringBuilder strBf = new StringBuilder("Step ");
-        strBf.append(i_step + 1);
-        strBf.append(" / ");
-        strBf.append(getNumberOfSteps());
-        return strBf.toString();
+    public String printProgress() {
+
+        StringBuilder msg = new StringBuilder();
+        msg.append(i_step + 1);
+        msg.append(" / ");
+        msg.append(nsteps);
+        float progress = progress();
+        if (i_step > 0 && ((i_step + 1) % 10 == 0)) {
+            msg.append(" (Simulated time ");
+            msg.append(timeToString());
+            msg.append(", simulation progress ");
+            msg.append((int) (progress * 100));
+            msg.append("%");
+            if (progress > 0.01) {
+                msg.append(", time left ");
+                double seconds = 1e-3d * (System.currentTimeMillis() - cpu_start) * (100.d - progress) / progress;
+                msg.append(timeToString(seconds));
+            }
+            msg.append(")");
+        }
+        return msg.toString();
+
     }
 
     /**
-     * The number of steps of the current simulation.
+     * Calculates the progress of the current simulation
      *
-     * @return the number of steps of the current simulation.
+     * @return the progress of the current simulation as a percent
      */
-    public int getNumberOfSteps() {
-        return nsteps;
+    public int progress() {
+        int progress = (int) (100.f * i_step / (float) (nsteps - 1));
+        return Math.min(Math.max(progress, 0), 100);
+    }
+
+    public void resetTimer() {
+        cpu_start = System.currentTimeMillis();
     }
 
     /**
@@ -282,18 +306,9 @@ public class TimeManager extends AbstractManager {
         try {
             return date2seconds(getConfiguration().getString(TIME_KEY + ".initial_time"), calendar);
         } catch (ParseException ex) {
-            error("Failed to convert parameter " + TIME_KEY + ".initial_time into seconds" , ex);
+            error("Failed to convert parameter " + TIME_KEY + ".initial_time into seconds", ex);
             return Double.NaN;
         }
-    }
-
-    /**
-     * Gets the simulation duration
-     *
-     * @return a long, the simulation duration [second]
-     */
-    public double getSimulationDuration() {
-        return simuDuration;
     }
 
     /**
@@ -390,7 +405,7 @@ public class TimeManager extends AbstractManager {
         simuDuration = transportDuration + getSimulationManager().getReleaseManager().getReleaseDuration();
         i_step = 0;
         elapsed = 0;
-        nsteps = (int) Math.abs(simuDuration / dt);
+        nsteps = (int) Math.ceil(Math.abs(simuDuration / (double) dt));
         info("Time manager initialization [OK]");
     }
 

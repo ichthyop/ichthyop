@@ -98,12 +98,8 @@ public class JRunProgressPanel extends javax.swing.JPanel {
     public void printProgress() {
 
         if (progressBar.isVisible()) {
-            progressBar.setValue((int) (getSimulationManager().progress() * 100));
-            StringBuffer strBf = new StringBuffer();
-            strBf.append(getSimulationManager().getTimeManager().stepToString());
-            strBf.append(" - ");
-            strBf.append(getSimulationManager().timeLeft());
-            lblTimeLeft.setText(strBf.toString());
+            progressBar.setValue(getSimulationManager().getTimeManager().progress());
+            lblTimeLeft.setText(getSimulationManager().getTimeManager().printProgress());
         }
     }
 

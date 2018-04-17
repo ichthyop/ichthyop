@@ -91,10 +91,10 @@ public class TimeTracker extends AbstractTracker {
         listAttributes.add(new Attribute("calendar_class", cld.getClass().getCanonicalName()));
         String name = getSimulationManager().getPropertyManager(cld.getClass()).getProperty("calendar.cf_name");
         listAttributes.add(new Attribute("calendar", name));
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd H:m");
         df.setCalendar(cld);
         cld.setTimeInMillis(0);
-        listAttributes.add(new Attribute("units", "seconds since " + df.format(cld.getTime())));
+        listAttributes.add(new Attribute("units", "seconds since " + df.format(cld.getTime()) + ":0"));
         return listAttributes.toArray(new Attribute[listAttributes.size()]); 
     }
 
