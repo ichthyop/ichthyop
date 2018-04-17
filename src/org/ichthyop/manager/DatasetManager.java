@@ -141,6 +141,9 @@ public class DatasetManager extends AbstractManager {
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
 
+        // clear previous dataset list
+        datasets.clear();
+        
         // find datasets and instantiate them
         List<String> datasetkeys = new ArrayList();
         datasetkeys.add(oceandataset = findOceanDataset());
