@@ -148,10 +148,8 @@ public abstract class AbstractDatasetVariable implements IVariable {
 
         double value = 0;
         if (xt > 0 && stack.length > 1) {
-            if (!(Double.isNaN(stack[0].getDouble(i, j, k)) || Double.isNaN(stack[1].getDouble(i, j, k)))) {
-                value = (1.d - xt) * stack[0].getDouble(i, j, k) + xt * stack[1].getDouble(i, j, k);
-            }
-        } else if (!(Double.isNaN(stack[0].getDouble(i, j, k)))) {
+            value = (1.d - xt) * stack[0].getDouble(i, j, k) + xt * stack[1].getDouble(i, j, k);
+        } else {
             value = stack[0].getDouble(i, j, k);
         }
         return value;
@@ -176,7 +174,7 @@ public abstract class AbstractDatasetVariable implements IVariable {
             // pGrid falls on a grid point
             CO = 1.d;
             i = grid.continuity(i);
-            value = interpolateTime(i, j, k, dt);
+            return interpolateTime(i, j, k, dt);
         } else {
             for (int ii = n[0]; ii < n[1]; ii++) {
                 for (int jj = n[0]; jj < n[1]; jj++) {
@@ -186,17 +184,21 @@ public abstract class AbstractDatasetVariable implements IVariable {
                             continue;
                         }
                         double co = weight(pGrid, new int[]{ci, j + jj, k + kk}, p);
-                        CO += co;
-                        value += interpolateTime(ci, j + jj, k + kk, dt) * co;
+                        double v = interpolateTime(ci, j + jj, k + kk, dt);
+                        if (!Double.isNaN(v)) {
+                            CO += co;
+                            value += v * co;
+                        }
                     }
                 }
             }
+            if (CO != 0) {
+                return value / CO;
+            } else {
+                // NaN values only in the interpolation
+                return Double.NaN;
+            }
         }
-        if (CO != 0) {
-            value /= CO;
-        }
-
-        return value;
     }
 
     public boolean isOut(int i, int j, int k) {

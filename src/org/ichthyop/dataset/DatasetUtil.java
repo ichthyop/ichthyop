@@ -146,9 +146,6 @@ public class DatasetUtil extends IchthyopLinker {
      * @throws java.io.IOException if the file does not exist
      */
     public static double timeFirst(String file, String strTime) throws IOException {
-        if (!new File(file).isFile()) {
-            throw new FileNotFoundException(file);
-        }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
         Array timeArr = nc.findVariable(strTime).read();
         double convert = guessTimeConversion(nc.findVariable(strTime));
@@ -167,9 +164,6 @@ public class DatasetUtil extends IchthyopLinker {
      * @throws java.io.IOException if the file does not exist
      */
     public static double timeLast(String file, String strTime) throws IOException {
-        if (!new File(file).isFile()) {
-            throw new FileNotFoundException(file);
-        }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
         Array timeArr = nc.findVariable(strTime).read();
         double convert = guessTimeConversion(nc.findVariable(strTime));
@@ -395,10 +389,10 @@ public class DatasetUtil extends IchthyopLinker {
                         }
                         for (String name : names) {
                             if (map.containsKey(name)) {
-                                map.get(name).add(nc.getLocation());
+                                map.get(name).add(location);
                             } else {
                                 List<String> list = new ArrayList();
-                                list.add(nc.getLocation());
+                                list.add(location);
                                 map.put(name, list);
                             }
                         }
@@ -477,36 +471,6 @@ public class DatasetUtil extends IchthyopLinker {
         return ncIn;
     }
 
-    /**
-     * Computes the Hyperbolic Sinus of x
-     *
-     * @param x
-     * @return
-     */
-    public static double sinh(double x) {
-        return ((Math.exp(x) - Math.exp(-x)) / 2.d);
-    }
-
-    /**
-     * Computes the Hyperbolic Cosinus of x
-     *
-     * @param x
-     * @return
-     */
-    public static double cosh(double x) {
-        return ((Math.exp(x) + Math.exp(-x)) / 2.d);
-    }
-
-    /**
-     * Computes the Hyperbolic Tangent of x
-     *
-     * @param x
-     * @return
-     */
-    public static double tanh(double x) {
-        return (sinh(x) / cosh(x));
-    }
-
     private static double skipSeconds(double time) {
         return 100.d * Math.floor(time / 100.d);
     }
@@ -534,36 +498,5 @@ public class DatasetUtil extends IchthyopLinker {
                 Math.sqrt(sindlat * sindlat + Math.cos(lat1_rad) * Math.cos(lat2_rad) * sindlon * sindlon));
 
         return d;
-    }
-
-    /**
-     * <p>
-     * The functions computes the 2nd order approximate derivative at index
-     * i</p>
-     * <code>diff2(X, i) == diff(diff(X), i) == diff(diff(X))[i]</code>
-     *
-     * @param X double[]
-     * @param k
-     * @return double
-     */
-    public static double diff2(double[] X, int k) {
-
-        int length = X.length;
-        /**
-         * Returns NaN if size <= 2
-         */
-        if (length < 3) {
-            return Double.NaN;
-        }
-
-        /**
-         * This return statement traduces the natural spline hypothesis M(0) =
-         * M(nz - 1) = 0
-         */
-        if ((k <= 0) || (k >= (length - 1))) {
-            return 0.d;
-        }
-
-        return (X[k + 1] - 2.d * X[k] + X[k - 1]);
     }
 }

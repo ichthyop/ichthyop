@@ -52,6 +52,7 @@
  */
 package org.ichthyop.grid;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import org.ichthyop.IchthyopLinker;
@@ -79,7 +80,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         this.grid_prefix = dataset_prefix + ".grid";
     }
 
-    public void init() {
+    public void init() throws IOException {
 
         // list variables
         String location = getConfiguration().isNull(grid_prefix + ".location")
@@ -239,7 +240,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         int cim1 = continuity ? continuity(ci - 1) : (ci - 1 < 0 ? 0 : ci - 1);
         int cjp1 = cj + 1 > get_ny() - 1 ? get_ny() - 1 : cj + 1;
         int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
-        int imin = 0, jmin = 0;
+        int imin, jmin;
         if (isInside(lat, lon,
                 new double[]{
                     getLat(cim1, cjm1), getLat(cim1, cj), getLat(ci, cj), getLat(ci, cjm1), getLat(cim1, cjm1)},
