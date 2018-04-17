@@ -393,7 +393,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         List<String> variables = new ArrayList();
         for (String key : getSimulationManager().getDatasetManager().getDatasetKeys()) {
-            if (!getConfiguration().isNull(key + ".tracked_variables")) {
+            if (getConfiguration().getBoolean(key + ".enabled") && !getConfiguration().isNull(key + ".tracked_variables")) {
                 String[] tokens = getConfiguration().getArrayString(key + ".tracked_variables");
                 for (String token : tokens) {
                     if (!token.trim().isEmpty()) {
