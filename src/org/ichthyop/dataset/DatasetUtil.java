@@ -358,11 +358,27 @@ public class DatasetUtil extends IchthyopLinker {
         return null;
     }
 
-    public static HashMap<String, List<String>> mapVariables(String dataset_prefix, String location, boolean coordinateV) {
+    public static HashMap<String, List<String>> mapVariables(String dataset_prefix, String location, boolean coordinateV) throws IOException {
+
+        if (!new File(location).exists()) {
+            throw new IOException("[dataset] " + dataset_prefix + " location does not exist " + location);
+        }
 
         HashMap<String, List<String>> map = new HashMap();
 
-        if (DatasetUtil.isValidDataset(location)) {
+        if (new File(location).isDirectory()) {
+            for (File file : new File(location).listFiles()) {
+                HashMap<String, List<String>> submap = mapVariables(dataset_prefix, file.getAbsolutePath(), coordinateV);
+                for (String name : submap.keySet()) {
+                    if (map.containsKey(name)) {
+                        map.get(name).addAll(submap.get(name));
+                    } else {
+                        map.put(name, submap.get(name));
+                    }
+                }
+                submap.clear();
+            }
+        } else if (DatasetUtil.isValidDataset(location)) {
             try (NetcdfFile nc = NetcdfDataset.openDataset(location, true, null)) {
                 for (Variable variable : nc.getVariables()) {
                     if ((coordinateV & variable.isCoordinateVariable())
@@ -391,18 +407,10 @@ public class DatasetUtil extends IchthyopLinker {
             } catch (IOException ex) {
                 Logger.getLogger(DatasetUtil.class.getName()).log(Level.WARNING, "[dataset] " + dataset_prefix + " Error listing variables from dataset " + location, ex);
             }
-        } else if (new File(location).isDirectory()) {
-            for (File file : new File(location).listFiles()) {
-                HashMap<String, List<String>> submap = mapVariables(dataset_prefix, file.getAbsolutePath(), coordinateV);
-                for (String name : submap.keySet()) {
-                    if (map.containsKey(name)) {
-                        map.get(name).addAll(submap.get(name));
-                    } else {
-                        map.put(name, submap.get(name));
-                    }
-                }
-                submap.clear();
-            }
+        }
+
+        if (map.isEmpty()) {
+            throw new IOException("[dataset] " + dataset_prefix + " Could not list any" + (coordinateV ? " coordinate " : " ") + "variable. Check dataset location " + location);
         }
 
         return map;

@@ -92,6 +92,9 @@ public class NetcdfDatasetVariable extends AbstractDatasetVariable {
         // find time variable
         NetcdfFile nc = open();
         variable_time = DatasetUtil.findTimeVariable(nc);
+        if (null == variable_time) {
+            throw new IOException("[dataset] " + dataset_prefix + " variable " + name + " could not find associated time variable in the dataset");
+        }
         nc.close();
 
         double time = t0;
