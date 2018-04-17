@@ -108,16 +108,9 @@ public interface IGrid {
 
     public double getDepthMax(double x, double y);
 
-    public double xTore(double x);
+    public double continuity(double x);
 
-    public double yTore(double y);
+    public int continuity(int x);
 
-    public int xTore(int x);
-
-    public int yTore(int y);
-
-    public boolean xTore();
-
-    public boolean yTore();
-
+    public boolean continuity();
 }

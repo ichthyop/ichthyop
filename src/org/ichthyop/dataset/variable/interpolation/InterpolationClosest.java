@@ -106,10 +106,10 @@ public class InterpolationClosest extends AbstractInterpolation {
 
         // Loop over a square around the grid cell
         for (int ii=n[0]; ii<n[1]; ii++) {
-            int ci = this.getVar().getGrid().xTore(i + ii);
+            int ci = this.getVar().getGrid().continuity(i + ii);
             
             for (int jj = n[0]; jj < n[1]; jj++) {
-                int cj = this.getVar().getGrid().yTore(j + jj);
+                int cj = j + jj;
             
                 for (int kk = n[0]; kk < n[1]; kk++) {
                     

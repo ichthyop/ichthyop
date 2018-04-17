@@ -181,39 +181,45 @@ public class RectilinearGrid extends AbstractRegularGrid {
             }
 
             // mask
-            varmask = getConfiguration().isNull(grid_prefix + ".variable.mask")
-                    ? "mask"
-                    : getConfiguration().getString(grid_prefix + ".variable.mask");
-            // assume that the mask can be extracted from any 3D variable
-            if (!variables.containsKey(varmask)) {
-                varmask = null;
-                for (String name : variables.keySet()) {
-                    location = variables.get(name).get(0);
-                    nc = DatasetUtil.open(location, enhanced);
-                    name = DatasetUtil.findVariable(nc, name);
-                    Variable variable = nc.findVariable(name);
-                    nc.close();
-                    if ((variable.isUnlimited() && variable.getShape().length == 4)
-                            || (!variable.isUnlimited() && variable.getShape().length == 3)
-                            || (!variable.isUnlimited() && variable.getShape().length == 2) && nz == 1) {
-                        varmask = variable.getFullName().toLowerCase();
-                        warning("[grid] Mask variable not (or uncorrectly) specified for grid " + grid_prefix + ". Ichthyop selected \'" + varmask + "\' variable as mask.");
-                        break;
-                    }
-                }
-            }
-            if (null == varmask) {
-                error("[grid] Could not find suitable mask variable in grid file", new NullPointerException("Please specify parameter " + grid_prefix + ".variable.mask"));
-            } else {
-                location = variables.get(varmask).get(0);
-                mask = new ConstantDatasetVariable(grid_prefix, location, varmask, this, 10, Math.min(3, nz), true);
-                mask.init(0, 0);
-            }
-
+            loadMask();
+            
         } catch (IOException ex) {
             error("[grid] Failed to make grid " + grid_prefix, ex);
         }
+    }
 
+    void loadMask() throws IOException {
+
+        String location;
+        varmask = getConfiguration().isNull(grid_prefix + ".variable.mask")
+                ? "mask"
+                : getConfiguration().getString(grid_prefix + ".variable.mask");
+        // assume that the mask can be extracted from any 3D variable
+        if (!variables.containsKey(varmask)) {
+            varmask = null;
+            for (String name : variables.keySet()) {
+                location = variables.get(name).get(0);
+                Variable variable;
+                try (NetcdfFile nc = DatasetUtil.open(location, enhanced)) {
+                    name = DatasetUtil.findVariable(nc, name);
+                    variable = nc.findVariable(name);
+                }
+                if ((variable.isUnlimited() && variable.getShape().length == 4)
+                        || (!variable.isUnlimited() && variable.getShape().length == 3)
+                        || (!variable.isUnlimited() && variable.getShape().length == 2) && nz == 1) {
+                    varmask = variable.getFullName().toLowerCase();
+                    warning("[grid] Mask variable not (or uncorrectly) specified for grid " + grid_prefix + ". Ichthyop selected \'" + varmask + "\' variable as mask.");
+                    break;
+                }
+            }
+        }
+        if (null == varmask) {
+            error("[grid] Could not find suitable mask variable in grid file", new NullPointerException("Please specify parameter " + grid_prefix + ".variable.mask"));
+        } else {
+            location = variables.get(varmask).get(0);
+            mask = new ConstantDatasetVariable(grid_prefix, location, varmask, this, 10, Math.min(3, nz), true);
+            mask.init(0, 0);
+        }
     }
 
     /**
@@ -269,7 +275,7 @@ public class RectilinearGrid extends AbstractRegularGrid {
     public boolean isInWater(int i, int j, int k) {
 
         if (null != mask) {
-            int ci = xTore(i);
+            int ci = continuity(i);
             return !Double.isNaN(mask.getDouble(ci, j, k));
         } else {
             return true;

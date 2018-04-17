@@ -124,13 +124,13 @@ public class WDatasetVariable extends AbstractDatasetVariable {
 
             int ci = i, cim1 = i - 1;
             if (i == 0) {
-                ci = grid.xTore() ? i : i + 1;
-                cim1 = grid.xTore() ? grid.get_nx() - 1 : i;
+                ci = grid.continuity() ? i : i + 1;
+                cim1 = grid.continuity() ? grid.get_nx() - 1 : i;
             }
             int cj = j, cjm1 = j - 1;
             if (j == 0) {
-                cj = grid.yTore() ? j : j + 1;
-                cjm1 = grid.yTore() ? grid.get_ny() - 1 : j;
+                cj = j + 1;
+                cjm1 = j;
             }
 
             for (int k = 0; k < grid.get_nz(); k++) {

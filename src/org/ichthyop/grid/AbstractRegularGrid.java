@@ -66,7 +66,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     final String grid_prefix;
     private final String dataset_prefix;
     private double latmin, latmax, lonmin, lonmax;
-    private boolean xperiodicity, yperiodicity;
+    private boolean continuity;
     final HashMap<String, List<String>> variables = new HashMap();
     boolean enhanced;
     private boolean z0AtSurface;
@@ -89,8 +89,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         variables.putAll(DatasetUtil.mapVariables(grid_prefix, location, true));
 
         // x and y periodicity
-        xperiodicity = getConfiguration().getBoolean(grid_prefix + ".periodicity.x");
-        yperiodicity = getConfiguration().getBoolean(grid_prefix + ".periodicity.y");
+        continuity = getConfiguration().getBoolean(grid_prefix + ".continuity");
 
         // enhanced dataset
         enhanced = !getConfiguration().isNull(dataset_prefix + ".enhanced_mode")
@@ -162,10 +161,10 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
 
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-        double jy = yperiodicity ? yRho : Math.max(0.00001d, Math.min(yRho, (double) get_ny() - 1.00001d));
-        double ix = xperiodicity ? xRho : Math.max(0.00001d, Math.min(xRho, (double) get_nx() - 1.00001d));
+        double jy = Math.max(0.00001d, Math.min(yRho, (double) get_ny() - 1.00001d));
+        double ix = continuity ? xRho : Math.max(0.00001d, Math.min(xRho, (double) get_nx() - 1.00001d));
 
-        final int i = (int) Math.floor(ix);
+        final int i = (int) continuity(Math.floor(ix));
         final int j = (int) Math.floor(jy);
         double latitude = 0.d;
         double longitude = 0.d;
@@ -175,8 +174,9 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                latitude += co * getLat(i + ii, j + jj);
-                longitude += co * getLon(i + ii, j + jj);
+                int cii = continuity(i + ii);
+                latitude += co * getLat(cii, j + jj);
+                longitude += co * getLon(cii, j + jj);
             }
         }
         return (new double[]{latitude, longitude});
@@ -235,10 +235,10 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         }
 
         // Refine within cell (ci, cj) by linear interpolation
-        int cip1 = xperiodicity ? xTore(ci + 1) : (ci + 1 > get_nx() - 1 ? get_nx() - 1 : ci + 1);
-        int cim1 = xperiodicity ? xTore(ci - 1) : (ci - 1 < 0 ? 0 : ci - 1);
-        int cjp1 = yperiodicity ? yTore(cj + 1) : (cj + 1 > get_ny() - 1 ? get_ny() - 1 : cj + 1);
-        int cjm1 = yperiodicity ? yTore(cj + 1) : (cj - 1 < 0 ? 0 : cj - 1);
+        int cip1 = continuity ? continuity(ci + 1) : (ci + 1 > get_nx() - 1 ? get_nx() - 1 : ci + 1);
+        int cim1 = continuity ? continuity(ci - 1) : (ci - 1 < 0 ? 0 : ci - 1);
+        int cjp1 = cj + 1 > get_ny() - 1 ? get_ny() - 1 : cj + 1;
+        int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
         int imin = 0, jmin = 0;
         if (isInside(lat, lon,
                 new double[]{
@@ -279,10 +279,10 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         }
 
         // trilinear interpolation
-        double dy1 = getLat(imin, yTore(jmin + 1)) - getLat(imin, jmin);
-        double dx1 = getLon(imin, yTore(jmin + 1)) - getLon(imin, jmin);
-        double dy2 = getLat(xTore(imin + 1), jmin) - getLat(imin, jmin);
-        double dx2 = getLon(xTore(imin + 1), jmin) - getLon(imin, jmin);
+        double dy1 = getLat(imin, jmin + 1) - getLat(imin, jmin);
+        double dx1 = getLon(imin, jmin + 1) - getLon(imin, jmin);
+        double dy2 = getLat(continuity(imin + 1), jmin) - getLat(imin, jmin);
+        double dx2 = getLon(continuity(imin + 1), jmin) - getLon(imin, jmin);
 
         // xgrid
         double c1 = lon * dy1 - lat * dx1;
@@ -430,17 +430,17 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
         j = (int) (Math.round(pGrid[1]));
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
-        int ci = xTore(i + ii);
+        int ci = continuity(i + ii);
         return !(isInWater(ci, j) && isInWater(ci, j + jj) && isInWater(i, j + jj));
     }
 
     @Override
     public boolean isOnEdge(double[] pGrid) {
 
-        return (!xperiodicity && (pGrid[0] > (get_nx() - 2.d)))
-                || (!xperiodicity && (pGrid[0] < 1.d))
-                || (!yperiodicity && (pGrid[1] > (get_ny() - 2.d)))
-                || (!yperiodicity && (pGrid[1] < 1.d));
+        return (!continuity && (pGrid[0] > (get_nx() - 2.d)))
+                || (!continuity && (pGrid[0] < 1.d))
+                || (pGrid[1] > (get_ny() - 2.d))
+                || (pGrid[1] < 1.d);
     }
 
     @Override
@@ -464,8 +464,8 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     }
 
     @Override
-    public int xTore(int i) {
-        if (xperiodicity) {
+    public int continuity(int i) {
+        if (continuity) {
             if (i < 0) {
                 return get_nx() + i;
             }
@@ -477,8 +477,8 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     }
 
     @Override
-    public double xTore(double x) {
-        if (xperiodicity) {
+    public double continuity(double x) {
+        if (continuity) {
             if (x < -0.5d) {
                 return get_nx() + x;
             }
@@ -490,39 +490,7 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     }
 
     @Override
-    public int yTore(int j) {
-        if (yperiodicity) {
-            if (j < 0) {
-                return get_ny() + j;
-            }
-            if (j > get_ny() - 1) {
-                return j - get_ny();
-            }
-        }
-        return j;
+    public boolean continuity() {
+        return continuity;
     }
-
-    @Override
-    public double yTore(double y) {
-        if (yperiodicity) {
-            if (y < -0.5d) {
-                return get_ny() + y;
-            }
-            if (y > get_ny() - 0.5d) {
-                return y - get_ny();
-            }
-        }
-        return y;
-    }
-
-    @Override
-    public boolean xTore() {
-        return xperiodicity;
-    }
-
-    @Override
-    public boolean yTore() {
-        return yperiodicity;
-    }
-
 }

@@ -255,7 +255,7 @@ public class NemoGrid extends AbstractRegularGrid {
     public boolean isInWater(int i, int j, int k) {
 
         if (null != mask) {
-            int ci = xTore(i);
+            int ci = continuity(i);
             return !Double.isNaN(mask.getDouble(ci, j, k));
         } else {
             return true;
@@ -326,7 +326,7 @@ public class NemoGrid extends AbstractRegularGrid {
     public double get_dz(int i, int j, int k) {
 
         double output;
-        int ci = xTore(i);
+        int ci = continuity(i);
 
         // If e3t is not null, the 3D e3t variable is used
         if (null != e3t) {

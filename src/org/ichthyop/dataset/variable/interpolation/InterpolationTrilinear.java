@@ -58,7 +58,7 @@ import org.ichthyop.dataset.variable.NetcdfTiledArray;
 /**
  * Class that is dedicated to the 3D inverse distance interpolation,
  *
- * 
+ *
  * @author pverley
  * @author nbarrier
  */
@@ -67,18 +67,19 @@ public class InterpolationTrilinear extends AbstractInterpolation {
     // constants
     private final int IDW_POWER = 2;
     private final int IDW_RADIUS = 1;
-    
-    public InterpolationTrilinear(AbstractDatasetVariable var)
-    {
+
+    public InterpolationTrilinear(AbstractDatasetVariable var) {
         super(var);
     }
 
-    /** Tri-linear interpolation. Calculation is done
-     * following the Wikipedia method (https://en.wikipedia.org/wiki/Trilinear_interpolation).
+    /**
+     * Tri-linear interpolation. Calculation is done following the Wikipedia
+     * method (https://en.wikipedia.org/wiki/Trilinear_interpolation).
+     *
      * @param pGrid
      * @param time
-     * @return 
-     */ 
+     * @return
+     */
     @Override
     public double interpolate(double[] pGrid, double time) {
 
@@ -87,46 +88,44 @@ public class InterpolationTrilinear extends AbstractInterpolation {
         int i = coast ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = coast ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = coast ? (int) Math.round(pGrid[2]) : (int) pGrid[2];
-        
+
         double dx1 = Math.abs(pGrid[0] - i);
         double dx2 = Math.abs(i + 1 - pGrid[0]);
         double dy1 = Math.abs(pGrid[1] - j);
         double dy2 = Math.abs(j + 1 - pGrid[1]);
         double dz1 = Math.abs(pGrid[2] - k);
         double dz2 = Math.abs(k + 1 - pGrid[2]);
-        
+
         // Recovers the index with periodicity
-        int ci = this.getVar().getGrid().xTore(i);
-        int cip1 = this.getVar().getGrid().xTore(i+1);
-        int cj = this.getVar().getGrid().yTore(j);
-        int cjp1 = this.getVar().getGrid().yTore(j + 1);
-        
+        int ci = this.getVar().getGrid().continuity(i);
+        int cip1 = this.getVar().getGrid().continuity(i + 1);
+
         // Interpolates along the x dimension
-        double temp1 = dx1 * getValue(ci, cj, k, time) + dx2 * getValue(cip1, cj, k, time);   // C00
-        double temp2 = dx1 * getValue(ci, cjp1, k, time) + dx2 * getValue(cip1, cjp1, k, time);  // C10   
-        double temp3 = dx1 * getValue(ci, cj, k+1, time) + dx2 * getValue(cip1, cj, k+1, time);  // C01
-        double temp4 = dx1 * getValue(ci, cjp1, k+1, time) + dx2 * getValue(cip1, cjp1, k+1, time);  // C11 
-        
+        double temp1 = dx1 * getValue(ci, j, k, time) + dx2 * getValue(cip1, j, k, time);   // C00
+        double temp2 = dx1 * getValue(ci, j + 1, k, time) + dx2 * getValue(cip1, j + 1, k, time);  // C10   
+        double temp3 = dx1 * getValue(ci, j, k + 1, time) + dx2 * getValue(cip1, j, k + 1, time);  // C01
+        double temp4 = dx1 * getValue(ci, j + 1, k + 1, time) + dx2 * getValue(cip1, j + 1, k + 1, time);  // C11 
+
         // Interpolates along the y dimension 
         double temp5 = dy1 * temp1 + dy2 * temp2;  // C0
         double temp6 = dy1 * temp3 + dy2 * temp4;  // C1
-        
+
         // Interpolates along the z-dimension
-        double value = dz1 * temp5  + dz2 * temp6;
-        
+        double value = dz1 * temp5 + dz2 * temp6;
+
         return value;
 
     }
 
-    /** Returns the value used in the spatial interpolation.
-     * If out of domain, 0 is returned. Else, return the time
-     * interpolated data.
-     * 
+    /**
+     * Returns the value used in the spatial interpolation. If out of domain, 0
+     * is returned. Else, return the time interpolated data.
+     *
      * @param ci
      * @param cj
      * @param k
      * @param time
-     * @return 
+     * @return
      */
     private double getValue(int ci, int cj, int k, double time) {
 
@@ -136,7 +135,5 @@ public class InterpolationTrilinear extends AbstractInterpolation {
             return interpolateTime(ci, cj, k, time);
         }
     }
-    
-    
-    
+
 }

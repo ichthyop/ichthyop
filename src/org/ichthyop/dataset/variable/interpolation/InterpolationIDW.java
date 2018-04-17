@@ -58,7 +58,7 @@ import org.ichthyop.dataset.variable.NetcdfTiledArray;
 /**
  * Class that is dedicated to the 3D inverse distance interpolation,
  *
- * 
+ *
  * @author pverley
  * @author nbarrier
  */
@@ -67,9 +67,8 @@ public class InterpolationIDW extends AbstractInterpolation {
     // constants
     private final int IDW_POWER = 2;
     private final int IDW_RADIUS = 1;
-    
-    public InterpolationIDW(AbstractDatasetVariable var)
-    {
+
+    public InterpolationIDW(AbstractDatasetVariable var) {
         super(var);
     }
 
@@ -80,7 +79,7 @@ public class InterpolationIDW extends AbstractInterpolation {
         int r = IDW_RADIUS;
         int p = IDW_POWER;
         NetcdfTiledArray stack[] = this.getVar().getStack();
-        
+
         double value = 0.d;
         boolean coast = this.getVar().getGrid().isCloseToCost(pGrid);
 
@@ -96,13 +95,13 @@ public class InterpolationIDW extends AbstractInterpolation {
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
             // pGrid falls on a grid point
             CO = 1.d;
-            i = this.getVar().getGrid().xTore(i);
+            i = this.getVar().getGrid().continuity(i);
             value = interpolateTime(i, j, k, dt);
         } else {
             for (int ii = n[0]; ii < n[1]; ii++) {
-                int ci = this.getVar().getGrid().xTore(i + ii);
+                int ci = this.getVar().getGrid().continuity(i + ii);
                 for (int jj = n[0]; jj < n[1]; jj++) {
-                    int cj = this.getVar().getGrid().yTore(j + jj);
+                    int cj = j + jj;
                     for (int kk = n[0]; kk < n[1]; kk++) {
                         if (this.getVar().isOut(ci, cj, k + kk)) {
                             continue;
@@ -121,8 +120,7 @@ public class InterpolationIDW extends AbstractInterpolation {
         return value;
 
     }
-    
-    
+
     private double weight(double[] xyz, int[] ijk, int power) {
         double distance = 0.d;
         for (int n = 0; n < xyz.length; n++) {

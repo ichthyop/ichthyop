@@ -87,18 +87,24 @@ public abstract class AbstractDatasetVariable implements IVariable {
         stack = new NetcdfTiledArray[nlayer];
     }
 
-    /** Returns the stack array.
-     * @return  TiledVariable[] stack*/
+    /**
+     * Returns the stack array.
+     *
+     * @return TiledVariable[] stack
+     */
     public NetcdfTiledArray[] getStack() {
         return this.stack;
     }
-    
-    /** Returns the grid object.
-     * @return  Grid object*/
+
+    /**
+     * Returns the grid object.
+     *
+     * @return Grid object
+     */
     public IGrid getGrid() {
         return this.grid;
     }
-    
+
     protected boolean updateNeeded(double time, int time_arrow) {
         return (time_arrow * time >= time_arrow * stack[1].getTimeStamp());
     }
@@ -165,24 +171,23 @@ public abstract class AbstractDatasetVariable implements IVariable {
                 ? Math.abs((time - stack[0].getTimeStamp()) / (stack[1].getTimeStamp() - stack[0].getTimeStamp()))
                 : 0.d;
         double CO = 0.d;
-        
+
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
             // pGrid falls on a grid point
             CO = 1.d;
-            i = grid.xTore(i);
+            i = grid.continuity(i);
             value = interpolateTime(i, j, k, dt);
         } else {
             for (int ii = n[0]; ii < n[1]; ii++) {
                 for (int jj = n[0]; jj < n[1]; jj++) {
                     for (int kk = n[0]; kk < n[1]; kk++) {
-                        int ci = grid.xTore(i + ii);
-                        int cj = grid.yTore(j + jj);
-                        if (isOut(ci, cj, k + kk)) {
+                        int ci = grid.continuity(i + ii);
+                        if (isOut(ci, j + jj, k + kk)) {
                             continue;
                         }
-                        double co = weight(pGrid, new int[]{i + ii, cj, k + kk}, p);
+                        double co = weight(pGrid, new int[]{ci, j + jj, k + kk}, p);
                         CO += co;
-                        value += interpolateTime(ci, cj, k + kk, dt) * co;
+                        value += interpolateTime(ci, j + jj, k + kk, dt) * co;
                     }
                 }
             }
