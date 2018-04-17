@@ -98,38 +98,45 @@ public class SwimmingAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         // Read swimming velocity file
-        String velocity_file = getConfiguration().getString("action.swimming.velocity_file");
-        String pathname = getConfiguration().resolve(velocity_file);
-        File f = new File(pathname);
-        if (!f.isFile()) {
-            throw new FileNotFoundException("Swimming velocity file " + pathname + " not found.");
-        }
-        if (!f.canRead()) {
-            throw new IOException("Swimming velocity file " + pathname + " cannot be read.");
-        }
-        Locale.setDefault(Locale.US);
-        // open velocities csv file
-        CSVReader reader = new CSVReader(new FileReader(pathname), ';');
-        List<String[]> lines = reader.readAll();
-        // init arrays
-        ages = new double[lines.size() - 1];
-        speeds = new double[ages.length];
-        // read ages (days converted to seconds) and velocities
-        for (int i = 0; i < ages.length; i++) {
-            String[] line = lines.get(i + 1);
-            if (line.length < 2 || line[0].isEmpty()) {
-                continue;
+        if (!getConfiguration().isNull("action.swimming.speed.file")) {
+            String velocity_file = getConfiguration().getString("action.swimming.speed.file");
+            String pathname = getConfiguration().resolve(velocity_file);
+            File f = new File(pathname);
+            if (!f.isFile()) {
+                throw new FileNotFoundException("Could not find swimming speed file " + pathname);
             }
-            ages[i] = Double.valueOf(line[0]) * 3600.d * 24.d;
-            speeds[i] = Double.valueOf(line[1]);
+            if (!f.canRead()) {
+                throw new IOException("Could not read swimming speed file " + pathname);
+            }
+            Locale.setDefault(Locale.US);
+            // open velocities csv file
+            CSVReader reader = new CSVReader(new FileReader(pathname), ';');
+            List<String[]> lines = reader.readAll();
+            // init arrays
+            ages = new double[lines.size() - 1];
+            speeds = new double[ages.length];
+            // read ages (days converted to seconds) and velocities
+            for (int i = 0; i < ages.length; i++) {
+                String[] line = lines.get(i + 1);
+                if (line.length < 2 || line[0].isEmpty()) {
+                    continue;
+                }
+                ages[i] = Double.valueOf(line[0]) * 3600.d * 24.d;
+                speeds[i] = Double.valueOf(line[1]);
+            }
+        } else if (!getConfiguration().isNull("action.swimming.speed")) {
+            ages = new double[]{-1.d, Double.MAX_VALUE};
+            speeds = new double[]{getConfiguration().getDouble("action.swimming.speed")};
+        } else {
+            throw new IOException("[action] Random swimming, could not find parameter action.swimming.speed or action.swimming.speed.file");
         }
 
         // Simulation time step
         dt = getSimulationManager().getTimeManager().get_dt();
 
         // Whether the velocity should be constant or random
-        constant = getConfiguration().getBoolean("action.swimming.constant_velocity");
-        
+        constant = getConfiguration().getBoolean("action.swimming.speed.constant");
+
         // Random number generator
         random1 = new MTRandom();
         random2 = new MTRandom();

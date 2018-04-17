@@ -64,7 +64,7 @@ import org.ichthyop.util.MTRandom;
 public class LevyWalkAction extends AbstractAction {
 
     private double muH, muV;
-    private double vcruising, depthmax;
+    private double speed, depthmax;
     private boolean hEnabled, vEnabled;
     private MTRandom rd1, rd2, rd3;
     private final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
@@ -78,26 +78,26 @@ public class LevyWalkAction extends AbstractAction {
     @Override
     public void loadParameters() throws Exception {
 
-        muH = getConfiguration().getDouble("action.levywalk.mu_h");
+        muH = getConfiguration().getDouble("action.levywalk.horizontal.mu");
         if (muH <= 1 | muH >= 3) {
-            throw new IOException("Horizontal Levy walk exponenet mu action.levywalk.mu_h must range in ]1, 3[");
+            throw new IOException("Horizontal Levy walk exponenet mu action.levywalk.horizontal.mu must range in ]1, 3[");
         }
-        vcruising = getConfiguration().getDouble("action.levywalk.vcruising");
-        muV = getConfiguration().getDouble("action.levywalk.mu_v");
-        depthmax = getConfiguration().getDouble("action.levywalk.depthmax");
+        speed = getConfiguration().getDouble("action.levywalk.horizontal.speed");
+        muV = getConfiguration().getDouble("action.levywalk.vertical.mu");
+        depthmax = getConfiguration().getDouble("action.levywalk.vertical.depthmax");
         if (muV <= 1 | muV >= 3) {
-            throw new IOException("Vertical Levy walk exponenet mu action.levywalk.mu_v must range in ]1, 3[");
+            throw new IOException("Vertical Levy walk exponenet mu action.levywalk.vertical.mu must range in ]1, 3[");
         }
         if (depthmax > 0) {
             depthmax *= -1.d;
         }
-        hEnabled = getConfiguration().getBoolean("action.levywalk.enabled_h");
-        vEnabled = getConfiguration().getBoolean("action.levywalk.enabled_v");
+        hEnabled = getConfiguration().getBoolean("action.levywalk.horizontal.enabled");
+        vEnabled = getConfiguration().getBoolean("action.levywalk.vertical.enabled");
         rd1 = new MTRandom();
         rd2 = new MTRandom(2L * System.currentTimeMillis());
         rd3 = new MTRandom(System.currentTimeMillis() / 2L);
         // average move within one time step
-        meanwalk = vcruising * getSimulationManager().getTimeManager().get_dt();
+        meanwalk = speed * getSimulationManager().getTimeManager().get_dt();
     }
 
     @Override
