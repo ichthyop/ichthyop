@@ -56,7 +56,6 @@ import java.awt.Color;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Objects;
-import org.ichthyop.dataset.IDataset;
 import org.ichthyop.grid.IGrid;
 import org.ichthyop.ui.LonLatConverter;
 
@@ -92,7 +91,7 @@ public class Zone extends IchthyopLinker {
      */
     private final String key;
 
-    private final float index;
+    private final int index;
     /**
      * List of geographical coordinates that defines an area
      */
@@ -142,7 +141,7 @@ public class Zone extends IchthyopLinker {
      * @param key, a unique key of the zone
      * @param index, a unique index of the zone
      */
-    public Zone(String key, float index) {
+    public Zone(String key, int index) {
         this.key = key;
         this.index = index;
         // initializes variables
@@ -173,7 +172,7 @@ public class Zone extends IchthyopLinker {
      *
      * @return the index of the zone
      */
-    public float getIndex() {
+    public int getIndex() {
         return index;
     }
 

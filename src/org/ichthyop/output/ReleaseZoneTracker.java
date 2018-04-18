@@ -57,6 +57,7 @@ import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 
@@ -69,7 +70,7 @@ public class ReleaseZoneTracker extends AbstractTracker {
     private int nPopTm1;
 
     public ReleaseZoneTracker() {
-        super(DataType.FLOAT);
+        super(DataType.INT);
         nPopTm1 = 0;
     }
 
@@ -80,10 +81,10 @@ public class ReleaseZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        Array array = new ArrayFloat.D1(getNParticle());
+        Array array = new ArrayInt.D1(getNParticle());
         // Particle not released yet set to NaN
         for (int i = 0; i < getNParticle(); i++) {
-            array.setFloat(i, Float.NaN);
+            array.setInt(i, -1);
         }
         return array;
     }
@@ -92,13 +93,21 @@ public class ReleaseZoneTracker extends AbstractTracker {
     public void addRuntimeAttributes() {
 
         List<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("release.zone.zone_prefix"));
-        if (null != zones) {
-            for (Zone zone : zones) {
-                addAttribute(new Attribute(zone.getName(), zone.getIndex()));
-            }
+        int imin = zones.size();
+        int imax = 0;
+        for (Zone zone : zones) {
+            int index = zone.getIndex();
+            imin = Math.min(imin, index);
+            imax = Math.max(imax, index);
+            addAttribute(new Attribute(zone.getKey(), index));
+            addAttribute(new Attribute(zone.getName(), index));
         }
         // Particle not released yet set to NaN
-        addAttribute(new Attribute("not_released_yet", Float.NaN));
+        addAttribute(new Attribute("_FillValue", -1));
+        addAttribute(new Attribute("missing_value", -1));
+        addAttribute(new Attribute("valid_min", imin));
+        addAttribute(new Attribute("valid_max", imax));
+        addAttribute(new Attribute("units", "release zone index"));
     }
 
     @Override
@@ -111,8 +120,8 @@ public class ReleaseZoneTracker extends AbstractTracker {
             IParticle particle = (IParticle) getSimulationManager().getSimulation().getPopulation().get(i);
             List<String> keys = getSimulationManager().getZoneManager().findZones(particle, zoneprefix);
             if (!keys.isEmpty()) {
-                float index = getSimulationManager().getZoneManager().getZone(keys.get(0)).getIndex();
-                getArray().setFloat(getIndex().set(particle.getIndex()), index);
+                int index = getSimulationManager().getZoneManager().getZone(keys.get(0)).getIndex();
+                getArray().setInt(getIndex().set(particle.getIndex()), index);
             }
         }
         nPopTm1 = nNow;

@@ -90,36 +90,48 @@ public class RecruitmentZoneAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         timeInZone = 0;
-        durationMinInRecruitArea = (int) (getConfiguration().getFloat("action.recruitment.zone.duration_min") * 24.f * 3600.f);
-        isAgeCriterion = getConfiguration().getString("action.recruitment.zone.criterion").equals("Age criterion");
-        boolean isGrowth = getConfiguration().getBoolean("action.growth.enabled");
-        if (!isGrowth && !isAgeCriterion) {
-            throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
+        // minimal duration in recruitment zone
+        durationMinInRecruitArea = getConfiguration().isNull("action.recruitment.zone.duration_min")
+                ? 0
+                : (int) (getConfiguration().getFloat("action.recruitment.zone.duration_min") * 24.f * 3600.f);
+
+        // recruitment metrics
+        isAgeCriterion = getConfiguration().isNull("action.recruitment.zone.duration_min")
+                ? true
+                : getConfiguration().getString("action.recruitment.zone.criterion").equals("Age criterion");
+        if (!isAgeCriterion && !getConfiguration().getBoolean("action.growth.enabled", false)) {
+            throw new IllegalArgumentException("[Recruitment] Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
         }
+
+        // recruitment criterion
         if (isAgeCriterion) {
-            ageMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_age");
+            ageMinAtRecruitment = getConfiguration().isNull("action.recruitment.zone.limit_age")
+                    ? 0
+                    : getConfiguration().getFloat("action.recruitment.zone.limit_age");
         } else {
-            lengthMinAtRecruitment = getConfiguration().getFloat("action.recruitment.zone.limit_length");
+            lengthMinAtRecruitment = getConfiguration().isNull("action.recruitment.zone.limit_length")
+                    ? 0
+                    : getConfiguration().getFloat("action.recruitment.zone.limit_length");
         }
-        stopMovingOnceRecruited = getConfiguration().getBoolean("action.recruitment.zone.stop_moving");
+
+        // stop moving once recruited
+        stopMovingOnceRecruited = getConfiguration().isNull("action.recruitment.zone.stop_moving")
+                ? false
+                : getConfiguration().getBoolean("action.recruitment.zone.stop_moving");
+
+        // recruitment zone prefix
         zonePrefix = getConfiguration().getString("action.recruitment.zone.zone_prefix");
         getSimulationManager().getZoneManager().loadZones(zonePrefix);
-        boolean addTracker = true;
-        try {
-            addTracker = getConfiguration().getBoolean("action.recruitment.zone.recruited_tracker");
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addTracker) {
+
+        // recruitment zone tracker
+        if (getConfiguration().isNull("action.recruitment.zone.recruited_tracker")
+                || getConfiguration().getBoolean("action.recruitment.zone.recruited_tracker")) {
             getSimulationManager().getOutputManager().addPredefinedTracker(RecruitmentZoneTracker.class);
         }
-        addTracker = true;
-        try {
-            addTracker = getConfiguration().getBoolean("action.recruitment.zone.zone_tracker");
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addTracker) {
+
+        // zone tracker
+        if (getConfiguration().isNull("action.recruitment.zone.zone_tracker")
+                || getConfiguration().getBoolean("action.recruitment.zone.zone_tracker")) {
             getSimulationManager().getOutputManager().addPredefinedTracker(ZoneTracker.class);
         }
     }
@@ -138,10 +150,10 @@ public class RecruitmentZoneAction extends AbstractAction {
         }
 
         for (String key : getSimulationManager().getZoneManager().findZones(particle, zonePrefix)) {
-            float index = getSimulationManager().getZoneManager().getZone(key).getIndex();
+            int index = getSimulationManager().getZoneManager().getZone(key).getIndex();
             if (!RecruitableParticle.isRecruited(particle, index)) {
                 if (satisfyRecruitmentCriterion(particle)) {
-                    timeInZone = (RecruitableParticle.getCurrentRecruimentZone(particle) == index)
+                    timeInZone = (index == RecruitableParticle.getCurrentRecruimentZone(particle))
                             ? timeInZone + getSimulationManager().getTimeManager().get_dt()
                             : 0;
                     RecruitableParticle.setCurrentRecruimentZone(particle, index);

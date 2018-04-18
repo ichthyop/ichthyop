@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.ichthyop.output;
 
 import java.util.List;
@@ -63,22 +62,33 @@ import ucar.nc2.Attribute;
  *
  * @author Philippe Verley (philippe dot verley at ird dot fr)
  */
-public class RecruitmentZoneTracker extends FloatTracker {
+public class RecruitmentZoneTracker extends IntegerTracker {
 
     @Override
-    public float getValue(IParticle particle) {
-        float index = RecruitableParticle.getCurrentRecruimentZone(particle);
-        if (!Float.isNaN(index) && RecruitableParticle.isRecruited(particle, index)) {
+    public int getValue(IParticle particle) {
+        int index = RecruitableParticle.getCurrentRecruimentZone(particle);
+        if (index >= 0 && RecruitableParticle.isRecruited(particle, index)) {
             return index;
         }
-        return Float.NaN;
+        return -1;
     }
 
     @Override
     public void addRuntimeAttributes() {
         List<Zone> zones = getSimulationManager().getZoneManager().getZones(getConfiguration().getString("action.recruitment.zone.zone_prefix"));
+        int imin = zones.size();
+        int imax = 0;
         for (Zone zone : zones) {
-            addAttribute(new Attribute(zone.getName(), zone.getIndex()));
+            int index = zone.getIndex();
+            imin = Math.min(imin, index);
+            imax = Math.max(imax, index);
+            addAttribute(new Attribute(zone.getKey(), index));
+            addAttribute(new Attribute(zone.getName(), index));
         }
+        addAttribute(new Attribute("_FillValue", -1));
+        addAttribute(new Attribute("missing_value", -1));
+        addAttribute(new Attribute("valid_min", 0));
+        addAttribute(new Attribute("valid_max", zones.size() - 1));
+        addAttribute(new Attribute("units", "recruitment zone index"));
     }
 }

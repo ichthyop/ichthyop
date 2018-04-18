@@ -53,14 +53,11 @@
 package org.ichthyop.manager;
 
 import org.ichthyop.Zone;
-import java.io.IOException;
-import java.text.DecimalFormat;
 import org.ichthyop.event.InitializeEvent;
 import org.ichthyop.event.SetupEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import static org.ichthyop.IchthyopLinker.getSimulationManager;
 import org.ichthyop.dataset.BathymetryDataset;
@@ -92,37 +89,20 @@ public class ZoneManager extends AbstractManager {
 
     public void loadZones(String prefix) throws Exception {
 
-        LinkedHashSet set = new LinkedHashSet();
-        for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
-            if (prefix.equals(zone.getPrefix())) {
-                warning("Zones with such prefix have already be loaded.", new IOException("Zone prefix " + prefix + " duplicated"));
-                return;
-            }
-            set.add(Math.floor(zone.getIndex()));
-        }
-        double index = set.size() + 1;
-
-        List<String> keys = getConfiguration().findKeys(prefix + ".zone*.name");
-        int ndecim = String.valueOf(keys.size()).length();
-        DecimalFormat df = new DecimalFormat();
-        df.setMinimumFractionDigits(ndecim);
-        df.setMaximumFractionDigits(ndecim);
-        double incr = Math.pow(10.d, -ndecim);
+        int index = getZones().size();
+        List<String> keys = getConfiguration().findKeys(prefix + ".zone*.latitude");
         for (String zname : keys) {
-            String zkey = zname.substring(0, zname.lastIndexOf(".name"));
-            if (getConfiguration().getBoolean(zkey + ".enabled")) {
-                index += incr;
-                Zone zone = new Zone(zkey, Float.valueOf(df.format(index)));
-                if (zones.containsKey(zone.getKey())) {
-                    error("Zones must have unique name", new IOException("Zone " + zone.getName() + " already exists"));
+            String key = zname.substring(0, zname.lastIndexOf(".latitude"));
+            if (getConfiguration().isNull(key + ".enabled") || getConfiguration().getBoolean(key + ".enabled")) {
+                if (null == zones.get(key)) {
+                    zones.put(key, new Zone(key, index++));
                 }
-                zones.put(zkey, zone);
             }
         }
     }
 
     private boolean isInside(IParticle particle, String key) {
-        
+
         Zone zone = zones.get(key);
         boolean inside = true;
         if (zone.isEnabledDepthMask()) {
@@ -138,7 +118,7 @@ public class ZoneManager extends AbstractManager {
     }
 
     public boolean isInside(double lat, double lon, String key) {
-        
+
         Zone zone = zones.get(key);
         boolean inside = true;
         if (zone.isEnabledBathyMask() && null != bathymetry) {

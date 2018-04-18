@@ -649,7 +649,6 @@ public class ParameterManager extends AbstractManager {
         msg.append("[configuration] loading parameters from ");
         msg.append(filename);
         debug(msg.toString());
-        space.append(". ");
 
         // Read it
         String line = null;

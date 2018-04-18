@@ -67,31 +67,30 @@ public class RecruitableParticle extends IchthyopLinker {
 
     public static void init(IParticle particle) {
         particle.set(RECRUITED, new ArrayList());
-        particle.set(CURRENT_RECRUITMENT_ZONE, Float.NaN);
+        particle.set(CURRENT_RECRUITMENT_ZONE, -1);
     }
 
     public static boolean isRecruited(IParticle particle) {
         return !((List) particle.get(RECRUITED)).isEmpty();
     }
 
-    public static boolean isRecruited(IParticle particle, float indexZone) {
-        List<Float> zones = (List<Float>) particle.get(RECRUITED);
-        return zones.contains(indexZone);
+    public static boolean isRecruited(IParticle particle, Integer indexZone) {
+        return ((List<Integer>) particle.get(RECRUITED)).contains(indexZone);
     }
     
-    public static float getCurrentRecruimentZone(IParticle particle) {
-        return (float) particle.get(CURRENT_RECRUITMENT_ZONE);
+    public static Integer getCurrentRecruimentZone(IParticle particle) {
+        return (Integer) particle.get(CURRENT_RECRUITMENT_ZONE);
     }
     
-    public static void setCurrentRecruimentZone(IParticle particle, float indexZone) {
+    public static void setCurrentRecruimentZone(IParticle particle, Integer indexZone) {
         particle.set(CURRENT_RECRUITMENT_ZONE, indexZone);
     }
 
-    public static List<Float> getRecruimentZones(IParticle particle) {
-        return (List<Float>) particle.get(RECRUITED);
+    public static List<Integer> getRecruimentZones(IParticle particle) {
+        return (List<Integer>) particle.get(RECRUITED);
     }
 
-    public static void recruit(IParticle particle, float indexZone) {
-        ((List<Float>) particle.get(RECRUITED)).add(indexZone);
+    public static void recruit(IParticle particle, Integer indexZone) {
+        ((List<Integer>) particle.get(RECRUITED)).add(indexZone);
     }
 }

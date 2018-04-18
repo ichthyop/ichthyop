@@ -53,11 +53,10 @@
 package org.ichthyop.output;
 
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import org.ichthyop.Zone;
 import org.ichthyop.particle.IParticle;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -70,27 +69,23 @@ import ucar.nc2.Dimension;
 public class ZoneTracker extends AbstractTracker {
 
     public ZoneTracker() {
-        super(DataType.FLOAT);
+        super(DataType.INT);
     }
 
     @Override
     void setDimensions() {
         addTimeDimension();
         addDrifterDimension();
-        addCustomDimension(new Dimension("zones", getNPrefix()));
+        addCustomDimension(new Dimension("zone", getNZones()));
+    }
+
+    private int getNZones() {
+        return getSimulationManager().getZoneManager().getZones().size();
     }
 
     @Override
     Array createArray() {
-        return new ArrayFloat.D3(1, getNParticle(), getNPrefix());
-    }
-    
-    private int getNPrefix() {
-        LinkedHashSet prefix = new LinkedHashSet();
-        for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
-            prefix.add(Math.floor(zone.getIndex()));
-        }
-        return prefix.size();
+        return new ArrayInt.D3(1, getNParticle(), getNZones());
     }
 
     @Override
@@ -100,10 +95,11 @@ public class ZoneTracker extends AbstractTracker {
         while (iter.hasNext()) {
             particle = iter.next();
             Index aindex = getArray().getIndex();
-            for (String key : getSimulationManager().getZoneManager().findZones(particle)) {
-                float zindex = getSimulationManager().getZoneManager().getZone(key).getIndex();
-                aindex.set(0, particle.getIndex(), (int) Math.floor(zindex) - 1);
-                getArray().setFloat(aindex, zindex);
+            for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
+                if (getSimulationManager().getZoneManager().isInside(particle.getLat(), particle.getLon(), zone.getKey())) {
+                    aindex.set(0, particle.getIndex(), zone.getIndex());
+                    getArray().setInt(aindex, 1);
+                }
             }
         }
     }
@@ -112,7 +108,11 @@ public class ZoneTracker extends AbstractTracker {
     public void addRuntimeAttributes() {
 
         for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
-            addAttribute(new Attribute(zone.getName(), zone.getIndex()));
+            addAttribute(new Attribute(zone.getKey(), zone.getIndex()));
+            addAttribute(new Attribute(zone.getName(),  zone.getIndex()));
         }
+        addAttribute(new Attribute("units",  "0 not inside, 1 inside"));
+        addAttribute(new Attribute("valid_min", 0));
+        addAttribute(new Attribute("valid_max", 1));
     }
 }
