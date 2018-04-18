@@ -176,7 +176,7 @@ public class Zone extends IchthyopLinker {
     public float getIndex() {
         return index;
     }
-    
+
     public String getPrefix() {
         return key.substring(0, key.lastIndexOf("."));
     }
@@ -236,6 +236,8 @@ public class Zone extends IchthyopLinker {
     }
 
     public void init() {
+        
+        getSimulationManager().info("[zone]" + key + " initializing...");
 
         // lon & lat same length
         if (lat.length != lon.length) {
@@ -258,7 +260,9 @@ public class Zone extends IchthyopLinker {
         for (int i = 0; i < grid.get_nx(); i++) {
             for (int j = 0; j < grid.get_ny(); j++) {
                 if (grid.isInWater(i, j)) {
-                    if (getSimulationManager().getZoneManager().isInside(i, j, key)) {
+                    double lat = getSimulationManager().getGrid().getLat(i, j);
+                    double lon = getSimulationManager().getGrid().getLon(i, j);
+                    if (getSimulationManager().getZoneManager().isInside(lat, lon, key)) {
                         area += grid.get_dy(j, i) * grid.get_dx(i, j) * 1e-6;
                     }
                 }

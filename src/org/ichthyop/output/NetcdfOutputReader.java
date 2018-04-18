@@ -225,23 +225,22 @@ public class NetcdfOutputReader extends IchthyopLinker {
 
     public List<DrawableZone> readZones() {
 
+        int izone = 0;
         List<DrawableZone> zones = new ArrayList();
-        if (null != nc.findGlobalAttribute("number_of_zones")) {
-            int nbZones = nc.findGlobalAttribute("number_of_zones").getNumericValue().intValue();
-            for (int iZone = 0; iZone < nbZones; iZone++) {
-                try {
-                    Variable varZone = nc.findVariable("zone" + iZone);
-                    ArrayFloat.D2 arrZone = (ArrayFloat.D2) varZone.read();
-                    int color = varZone.findAttribute("color").getNumericValue().intValue();
-                    DrawableZone zone = new DrawableZone(color);
-                    for (int i = 0; i < arrZone.getShape()[0]; i++) {
-                        zone.addPoint(new GeoPosition(arrZone.get(i, 0), arrZone.get(i, 1)));
-                    }
-                    zones.add(zone);
-                } catch (IOException ex) {
-                    warning("[output] Failed to read NetCDF variable \"zone" + iZone + "\"", ex);
+        while (null != nc.findVariable("zone" + izone)) {
+            try {
+                Variable varZone = nc.findVariable("zone" + izone);
+                ArrayFloat.D2 arrZone = (ArrayFloat.D2) varZone.read();
+                int color = varZone.findAttribute("color").getNumericValue().intValue();
+                DrawableZone zone = new DrawableZone(color);
+                for (int i = 0; i < arrZone.getShape()[0]; i++) {
+                    zone.addPoint(new GeoPosition(arrZone.get(i, 0), arrZone.get(i, 1)));
                 }
+                zones.add(zone);
+            } catch (IOException ex) {
+                warning("[output] Failed to read NetCDF variable \"zone" + izone + "\"", ex);
             }
+            izone++;
         }
         return zones;
     }

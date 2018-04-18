@@ -226,7 +226,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("color", zone.getColor().getRGB()));
             iZone++;
         }
-        ncOut.addGroupAttribute(null, new Attribute("number_of_zones", iZone));
     }
 
     private void writeZone(int index) throws IOException, InvalidRangeException {
@@ -245,21 +244,16 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void addGlobalAttributes() {
 
         // Write parameters from enabled subsets
-        for (String subsetKey : getConfiguration().getParameterSubsets()) {
-            if (!getConfiguration().canFind(subsetKey + ".enabled") || getConfiguration().getBoolean(subsetKey + ".enabled", false)) {
-                if (!getConfiguration().isNull(subsetKey + ".parameters")) {
-                    for (String paramKey : getConfiguration().getArrayString(subsetKey + ".parameters")) {
-                        String key = subsetKey + "." + paramKey;
-                        if (getConfiguration().canFind(key)) {
-                            ncOut.addGroupAttribute(null, new Attribute(key, getConfiguration().getString(key)));
-                        }
-                    }
+        for (String subset : getConfiguration().getParameterSubsets()) {
+            if (!getConfiguration().canFind(subset + ".enabled") || getConfiguration().getBoolean(subset + ".enabled", false)) {
+                for (String key : getConfiguration().getParameters(subset)) {
+                    ncOut.addGroupAttribute(null, new Attribute(key, getConfiguration().getString(key)));
                 }
             }
         }
 
         // Add the corresponding configuration file 
-        ncOut.addGroupAttribute(null, new Attribute("cfgfile", getConfiguration().getMainFile()));
+        ncOut.addGroupAttribute(null, new Attribute("ichthyop.configuration.file", getConfiguration().getMainFile()));
     }
 
     private List<GeoPosition> zoneToPointCloud(Zone zone) {
@@ -268,13 +262,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         for (int i = 0; i < getSimulationManager().getGrid().get_nx(); i += sampling) {
             for (int j = 0; j < getSimulationManager().getGrid().get_ny(); j += sampling) {
-                if (getSimulationManager().getZoneManager().isInside(i, j, zone.getKey())) {
-                    double[] latlon = getSimulationManager().getGrid().xy2latlon(i, j);
-                    list.add(new GeoPosition(latlon[0], latlon[1] > 180 ? latlon[1] - 360.d : latlon[1]));
+                double lat = getSimulationManager().getGrid().getLat(i, j);
+                double lon = getSimulationManager().getGrid().getLon(i, j);
+                if (getSimulationManager().getZoneManager().isInside(lat, lon, zone.getKey())) {
+                    list.add(new GeoPosition(lat, lon));
                 }
             }
         }
-
         return list;
     }
 
