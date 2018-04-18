@@ -220,7 +220,7 @@ public class TimeManager extends AbstractManager {
      */
     private String timeToString(double seconds) {
 
-        if (0 == seconds) {
+        if (0 >= seconds) {
             return "0 second";
         }
         
@@ -261,16 +261,16 @@ public class TimeManager extends AbstractManager {
         msg.append(i_step + 1);
         msg.append(" / ");
         msg.append(nsteps);
-        float progress = progress();
+        int progress = progress();
         if (i_step > 0 && ((i_step + 1) % 10 == 0)) {
             msg.append(" (Simulated time ");
             msg.append(timeToString());
             msg.append(", simulation progress ");
-            msg.append((int) (progress * 100));
+            msg.append(progress);
             msg.append("%");
-            if (progress > 0.01) {
+            if (progress > 0) {
                 msg.append(", time left ");
-                double seconds = 1e-3d * (System.currentTimeMillis() - cpu_start) * (100.d - progress) / progress;
+                double seconds = Math.ceil(1e-3d * (System.currentTimeMillis() - cpu_start) * (100.d - progress) / progress);
                 msg.append(timeToString(seconds));
             }
             msg.append(")");
