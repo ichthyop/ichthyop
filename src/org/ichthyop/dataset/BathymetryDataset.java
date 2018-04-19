@@ -99,6 +99,7 @@ public class BathymetryDataset extends NetcdfDataset {
     }
 
     public double getBathymetry(double[] xy) {
-        return getVariable(fullname).getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]), 0);
+        double bathy = getVariable(fullname).getDouble((int) Math.round(xy[0]), (int) Math.round(xy[1]), 0);
+        return bathy > 0 ? 0 : bathy;
     }
 }

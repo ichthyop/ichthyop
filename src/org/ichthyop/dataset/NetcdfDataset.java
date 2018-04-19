@@ -94,7 +94,7 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
     AbstractRegularGrid grid;
     // prefix in the configuration file
     final String prefix;
-    private String location;
+    private String path;
     // 
     final HashMap<String, List<String>> variableMap = new HashMap();
     //
@@ -220,12 +220,12 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
                 ? true
                 : getConfiguration().getBoolean(prefix + ".alphabetically_sorted", false);
 
-        this.location = getConfiguration().getString(prefix + ".location");
-        variableMap.putAll(DatasetUtil.mapVariables(prefix, location, false));
+        this.path = getConfiguration().getString(prefix + ".path");
+        variableMap.putAll(DatasetUtil.mapVariables(prefix, path, false));
         if (variableMap.isEmpty()) {
-            error("Failed to list any variable in dataset " + prefix, new IOException("Invalid dataset location " + location));
+            error("Failed to list any variable in dataset " + prefix, new IOException("Invalid dataset path " + path));
         }
-        // sort locations
+        // sort files in targeted path
         for (String name : variableMap.keySet()) {
             if (alphabetically_sorted) {
                 Collections.sort(variableMap.get(name));

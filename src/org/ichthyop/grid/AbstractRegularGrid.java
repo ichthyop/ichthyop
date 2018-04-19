@@ -83,11 +83,11 @@ public abstract class AbstractRegularGrid extends IchthyopLinker implements IGri
     public void init() throws IOException {
 
         // list variables
-        String location = getConfiguration().isNull(grid_prefix + ".location")
-                ? getConfiguration().getString(dataset_prefix + ".location")
-                : getConfiguration().getString(grid_prefix + ".location");
-        variables.putAll(DatasetUtil.mapVariables(grid_prefix, location, false));
-        variables.putAll(DatasetUtil.mapVariables(grid_prefix, location, true));
+        String path = getConfiguration().isNull(grid_prefix + ".path")
+                ? getConfiguration().getString(dataset_prefix + ".path")
+                : getConfiguration().getString(grid_prefix + ".path");
+        variables.putAll(DatasetUtil.mapVariables(grid_prefix, path, false));
+        variables.putAll(DatasetUtil.mapVariables(grid_prefix, path, true));
 
         // x and y periodicity
         continuity = getConfiguration().getBoolean(grid_prefix + ".continuity");
