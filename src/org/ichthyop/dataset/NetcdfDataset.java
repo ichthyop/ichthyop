@@ -119,10 +119,10 @@ public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepL
 
     private AbstractRegularGrid createGrid() {
 
-        String classname = getConfiguration().getString(prefix + ".grid.class_name");
+        String className = getConfiguration().getString(prefix + ".grid.class");
 
         try {
-            return (AbstractRegularGrid) Class.forName(classname).getConstructor(String.class).newInstance(prefix);
+            return (AbstractRegularGrid) Class.forName(className).getConstructor(String.class).newInstance(prefix);
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             error("[dataset] Failed to instantiate dataset grid " + prefix + ".grid", ex);
         }

@@ -87,18 +87,18 @@ public class ActionManager extends AbstractManager {
                 && getConfiguration().getString(key + ".type").equalsIgnoreCase("action")
                 && getConfiguration().getBoolean(key + ".enabled")))
                 .forEach((key) -> {
-                    String classname = getConfiguration().getString(key + ".class_name");
+                    String className = getConfiguration().getString(key + ".class");
                     try {
-                        Class actionClass = Class.forName(classname);
+                        Class actionClass = Class.forName(className);
                         AbstractAction action = (AbstractAction) actionClass.newInstance();
                         actions.add(action);
-                        info("[processes] Instantiated \"{0}\" ({1})", new Object[]{key, classname});
+                        info("[processes] Instantiated \"{0}\" ({1})", new Object[]{key, className});
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
                         StringBuilder msg = new StringBuilder();
                         msg.append("[processes] Failed to instantiate \"");
                         msg.append(key);
                         msg.append("\" (");
-                        msg.append(classname);
+                        msg.append(className);
                         msg.append(")");
                         error(msg.toString(), ex);
                     }

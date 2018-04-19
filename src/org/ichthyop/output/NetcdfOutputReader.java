@@ -210,14 +210,14 @@ public class NetcdfOutputReader extends IchthyopLinker {
     public List<GeoPosition> readEdge() {
 
         List<GeoPosition> edge = new ArrayList();
-        if (null != nc.findVariable("edge")) {
+        if (null != nc.findVariable("uiedge")) {
             try {
-                ArrayFloat.D2 regionEdge = (ArrayFloat.D2) nc.findVariable("edge").read();
+                ArrayFloat.D2 regionEdge = (ArrayFloat.D2) nc.findVariable("uiedge").read();
                 for (int i = 0; i < regionEdge.getShape()[0]; i++) {
                     edge.add(new GeoPosition(regionEdge.get(i, 0), regionEdge.get(i, 1)));
                 }
             } catch (Exception ex) {
-                warning("[output] Failed to read NetCDF variable \"edge\"", ex);
+                warning("[output] Failed to read NetCDF variable \"uiedge\"", ex);
             }
         }
         return edge;
@@ -227,9 +227,9 @@ public class NetcdfOutputReader extends IchthyopLinker {
 
         int izone = 0;
         List<DrawableZone> zones = new ArrayList();
-        while (null != nc.findVariable("zone" + izone)) {
+        while (null != nc.findVariable("uizone" + izone)) {
             try {
-                Variable varZone = nc.findVariable("zone" + izone);
+                Variable varZone = nc.findVariable("uizone" + izone);
                 ArrayFloat.D2 arrZone = (ArrayFloat.D2) varZone.read();
                 int color = varZone.findAttribute("color").getNumericValue().intValue();
                 DrawableZone zone = new DrawableZone(color);
@@ -238,7 +238,7 @@ public class NetcdfOutputReader extends IchthyopLinker {
                 }
                 zones.add(zone);
             } catch (IOException ex) {
-                warning("[output] Failed to read NetCDF variable \"zone" + izone + "\"", ex);
+                warning("[output] Failed to read NetCDF variable \"uizone" + izone + "\"", ex);
             }
             izone++;
         }
@@ -248,9 +248,9 @@ public class NetcdfOutputReader extends IchthyopLinker {
     public List<GeoPosition> readMask() {
 
         List<GeoPosition> mask = new ArrayList();
-        if (null != nc.findVariable("mask")) {
+        if (null != nc.findVariable("uimask")) {
             try {
-                ArrayFloat.D2 maskVar = (ArrayFloat.D2) nc.findVariable("mask").read();
+                ArrayFloat.D2 maskVar = (ArrayFloat.D2) nc.findVariable("uimask").read();
                 for (int i = 0; i < maskVar.getShape()[0]; i++) {
                     mask.add(new GeoPosition(maskVar.get(i, 0), maskVar.get(i, 1)));
                 }

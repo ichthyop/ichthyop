@@ -172,10 +172,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void addMask() {
 
         mask = maskToPointCloud();
-        Dimension maskDim = ncOut.addDimension(null, "mask", mask.size());
-        ncOut.addVariable(null, "mask", DataType.FLOAT, Arrays.asList(new Dimension[]{maskDim, latlonDim}));
-        ncOut.addVariableAttribute(ncOut.findVariable("mask"), new Attribute("long_name", "geoposition of masked cells"));
-        ncOut.addVariableAttribute(ncOut.findVariable("mask"), new Attribute("unit", "lat degree north lon degree east"));
+        Dimension maskDim = ncOut.addDimension(null, "uimask", mask.size());
+        ncOut.addVariable(null, "uimask", DataType.FLOAT, Arrays.asList(new Dimension[]{maskDim, latlonDim}));
+        ncOut.addVariableAttribute(ncOut.findVariable("uimask"), new Attribute("long_name", "geoposition of masked cells"));
+        ncOut.addVariableAttribute(ncOut.findVariable("uimask"), new Attribute("unit", "lat degree north lon degree east"));
     }
 
     private void writeMask() throws IOException, InvalidRangeException {
@@ -187,17 +187,17 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             arrMask.set(i, 1, (float) gp.getLongitude());
             i++;
         }
-        ncOut.write(ncOut.findVariable("mask"), arrMask);
+        ncOut.write(ncOut.findVariable("uimask"), arrMask);
     }
 
     private void addEdge() {
 
         /* Add the region edges */
         edge = edgeToPointCloud();
-        Dimension edgeDim = ncOut.addDimension(null, "edge", edge.size());
-        ncOut.addVariable(null, "edge", DataType.FLOAT, Arrays.asList(new Dimension[]{edgeDim, latlonDim}));
-        ncOut.addVariableAttribute(ncOut.findVariable("edge"), new Attribute("long_name", "geopositions of edge"));
-        ncOut.addVariableAttribute(ncOut.findVariable("edge"), new Attribute("unit", "lat degree north lon degree east"));
+        Dimension edgeDim = ncOut.addDimension(null, "uiedge", edge.size());
+        ncOut.addVariable(null, "uiedge", DataType.FLOAT, Arrays.asList(new Dimension[]{edgeDim, latlonDim}));
+        ncOut.addVariableAttribute(ncOut.findVariable("uiedge"), new Attribute("long_name", "geopositions of edge"));
+        ncOut.addVariableAttribute(ncOut.findVariable("uiedge"), new Attribute("unit", "lat degree north lon degree east"));
     }
 
     private void writeEdge() throws IOException, InvalidRangeException {
@@ -209,7 +209,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             arrEdge.set(i, 1, (float) gp.getLongitude());
             i++;
         }
-        ncOut.write(ncOut.findVariable("edge"), arrEdge);
+        ncOut.write(ncOut.findVariable("uiedge"), arrEdge);
     }
 
     private void addZones() {
@@ -218,12 +218,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         zoneAreas = new ArrayList();
         for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
             zoneAreas.add(iZone, zoneToPointCloud(zone));
-            Dimension zoneDim = ncOut.addDimension(null, "zone" + iZone, zoneAreas.get(iZone).size());
-            ncOut.addVariable(null, "zone" + iZone, DataType.FLOAT, Arrays.asList(new Dimension[]{zoneDim, latlonDim}));
-            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("long_name", zone.getName()));
-            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("unit", "latitude longitude coordinates of the center of the cells in the zone"));
-            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("key", zone.getKey()));
-            ncOut.addVariableAttribute(ncOut.findVariable("zone" + iZone), new Attribute("color", zone.getColor().getRGB()));
+            Dimension zoneDim = ncOut.addDimension(null, "uizone" + iZone, zoneAreas.get(iZone).size());
+            ncOut.addVariable(null, "uizone" + iZone, DataType.FLOAT, Arrays.asList(new Dimension[]{zoneDim, latlonDim}));
+            ncOut.addVariableAttribute(ncOut.findVariable("uizone" + iZone), new Attribute("long_name", zone.getName()));
+            ncOut.addVariableAttribute(ncOut.findVariable("uizone" + iZone), new Attribute("unit", "latitude longitude coordinates of the center of the cells in the zone"));
+            ncOut.addVariableAttribute(ncOut.findVariable("uizone" + iZone), new Attribute("key", zone.getKey()));
+            ncOut.addVariableAttribute(ncOut.findVariable("uizone" + iZone), new Attribute("color", zone.getColor().getRGB()));
             iZone++;
         }
     }
@@ -238,7 +238,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             arrZoneArea.set(i, 1, (float) gp.getLongitude());
             i++;
         }
-        ncOut.write(ncOut.findVariable("zone" + index), arrZoneArea);
+        ncOut.write(ncOut.findVariable("uizone" + index), arrZoneArea);
     }
 
     private void addGlobalAttributes() {
@@ -512,8 +512,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         // add UI variables 
-        if (!getConfiguration().isNull(OUTPUT_KEY + ".ui.sampling")) {
-            sampling = getConfiguration().getInt(OUTPUT_KEY + ".ui.sampling");
+        if (!getConfiguration().isNull(OUTPUT_KEY + ".uivar.sampling")) {
+            sampling = getConfiguration().getInt(OUTPUT_KEY + ".uivar.sampling");
         }
         if (sampling > 0) {
             addUIVariables();
@@ -534,7 +534,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     private void addUIVariables() {
 
-        latlonDim = ncOut.addDimension(null, "latlon", 2);
+        latlonDim = ncOut.addDimension(null, "uilatlon", 2);
         // add edge of the simulated area
         addEdge();
         // add masked cells

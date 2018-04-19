@@ -102,7 +102,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
             if (!getConfiguration().isNull(key + ".type")
                     && getConfiguration().getString(key + ".type").equalsIgnoreCase("release")) {
                 if (getConfiguration().getBoolean(key + ".enabled")) {
-                    String className = getConfiguration().getString(key + ".class_name");
+                    String className = getConfiguration().getString(key + ".class");
                     try {
                         releaseProcess.add((AbstractRelease) Class.forName(className).newInstance());
                     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
@@ -190,7 +190,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     }
 
     private String[] getReleaseEvents() throws Exception {
-        if (getConfiguration().getBoolean("release.schedule.is_enabled")) {
+        if (getConfiguration().getBoolean("release.schedule.enabled")) {
             return getConfiguration().getArrayString("release.schedule.events");
         } else {
             return new String[]{getConfiguration().getString("time.initial_time")};

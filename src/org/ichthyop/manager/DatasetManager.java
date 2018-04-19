@@ -117,7 +117,7 @@ public class DatasetManager extends AbstractManager {
 
     private IDataset instantiateDataset(String key) {
 
-        String className = getConfiguration().getString(key + ".class_name");
+        String className = getConfiguration().getString(key + ".class");
         try {
             return (IDataset) Class.forName(className).getConstructor(String.class).newInstance(key);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {

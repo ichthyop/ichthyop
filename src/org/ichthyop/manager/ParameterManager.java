@@ -719,7 +719,7 @@ public class ParameterManager extends AbstractManager {
         subsets.clear();
 
         List<String> identifiedSubsets = new ArrayList();
-        findKeys("*.treepath").forEach((treepath) -> {
+        findKeys("*.ui.treepath").forEach((treepath) -> {
             identifiedSubsets.add(treepath.substring(0, treepath.lastIndexOf(".")));
         });
         Collections.sort(identifiedSubsets);
@@ -731,12 +731,12 @@ public class ParameterManager extends AbstractManager {
         // remove ichthyop.configuration.*
         keys.removeAll(keys.stream().filter((key) -> (key.startsWith("ichthyop.configuration"))).collect(Collectors.toList()));
         // remove all .description .longname .format .accepted UI parameters
-        keys.removeAll(keys.stream().filter((key) -> (key.endsWith(".description")
-                || key.endsWith(".longname") || key.endsWith(".format")
-                || key.endsWith(".accepted"))).collect(Collectors.toList()));
+        keys.removeAll(keys.stream().filter((key) -> (key.endsWith(".ui.description")
+                || key.endsWith(".ui.longname") || key.endsWith(".ui.format")
+                || key.endsWith(".ui.accepted"))).collect(Collectors.toList()));
         // remove subsets specific parameters
         identifiedSubsets.forEach((subset) -> {
-            keys.removeAll(Arrays.asList(new String[]{subset + ".enabled", subset + ".type", subset + ".treepath", subset + ".type"}));
+            keys.removeAll(Arrays.asList(new String[]{subset + ".enabled", subset + ".type", subset + ".ui.treepath"}));
         });
 
         // list parameter keys for every subset
@@ -762,7 +762,7 @@ public class ParameterManager extends AbstractManager {
             String s = keys.get(0);
             String subset = s.substring(0, s.lastIndexOf("."));
             // remove subsets specific parameters
-            keys.removeAll(Arrays.asList(new String[]{subset + ".enabled", subset + ".type", subset + ".type"}));
+            keys.removeAll(Arrays.asList(new String[]{subset + ".enabled", subset + ".type"}));
             List<String> remove = keys.stream().filter((key) -> (key.startsWith(subset))).collect(Collectors.toList());
             subsets.put(subset, remove);
             keys.removeAll(remove);
