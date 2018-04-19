@@ -235,7 +235,7 @@ public class Zone extends IchthyopLinker {
     }
 
     public void init() {
-        
+
         getSimulationManager().info("[zone]" + key + " initializing...");
 
         // lon & lat same length
@@ -253,6 +253,13 @@ public class Zone extends IchthyopLinker {
             error("Offshore line must be deeper than inshore line", new IOException(key + " definition error"));
         }
 
+        for (int k = 0; k < lat.length; k++) {
+            double[] xy = getSimulationManager().getGrid().latlon2xy(lat[k], lon[k]);
+            if (null == xy) {
+                error("Zone " + key + " point lat " + (float) lat[k] + " lon " + (float) lon[k] + " falls outside ocean dataset grid", null);
+            }
+        }
+
         // compute area in km2
         area = 0.d;
         IGrid grid = getSimulationManager().getGrid();
@@ -267,6 +274,8 @@ public class Zone extends IchthyopLinker {
                 }
             }
         }
+
+        debug(toString());
     }
 
     public double getArea() {

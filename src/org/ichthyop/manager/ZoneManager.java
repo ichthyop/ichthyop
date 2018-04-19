@@ -111,7 +111,7 @@ public class ZoneManager extends AbstractManager {
         }
         if (inside && zone.isEnabledBathyMask() && null != bathymetry) {
             double[] xyz = GriddedParticle.xyz(particle, bathymetry.getKey());
-            double bathy = bathymetry.getBathymetry(xyz);
+            double bathy = Math.abs(bathymetry.getBathymetry(xyz));
             inside = (bathy > zone.getInshoreLine()) & (bathy < zone.getOffshoreLine());
         }
         return inside && isInside(particle.getLat(), particle.getLon(), zone.getLat(), zone.getLon());
@@ -123,7 +123,7 @@ public class ZoneManager extends AbstractManager {
         boolean inside = true;
         if (zone.isEnabledBathyMask() && null != bathymetry) {
             double[] xy = bathymetry.getGrid().latlon2xy(lat, lon);
-            double bathy = bathymetry.getBathymetry(xy);
+            double bathy = Math.abs(bathymetry.getBathymetry(xy));
             inside = (bathy > zone.getInshoreLine()) & (bathy < zone.getOffshoreLine());
         }
         return inside && isInside(lat, lon, zone.getLat(), zone.getLon());

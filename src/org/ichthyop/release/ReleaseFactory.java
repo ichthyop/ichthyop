@@ -81,8 +81,8 @@ public class ReleaseFactory extends IchthyopLinker {
                 int lat = (int) Math.round(grid.getLat(i, j));
                 int lon = (int) Math.round(grid.getLon(i, j));
                 List<float[]> coords = new ArrayList(incr * incr);
-                for (int ii = 0; ii < incr; ii++) {
-                    for (int jj = 0; jj < incr; jj++) {
+                for (int ii = 0; ii < incr; ii += 3) {
+                    for (int jj = 0; jj < incr; jj += 3) {
                         if ((i + ii) < nx && (j + jj) < ny) {
                             if (grid.isInWater(i + ii, j + jj)) {
                                 coords.add(new float[]{(float) grid.getLat(i + ii, j + jj), (float) grid.getLon(i + ii, j + jj)});

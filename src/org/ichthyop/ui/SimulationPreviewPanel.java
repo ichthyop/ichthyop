@@ -250,7 +250,9 @@ public class SimulationPreviewPanel extends JPanel {
         if (getSimulationManager().getGrid().isInWater(i * sampling, j * sampling)) {
             // zone
             for (Zone zone : getSimulationManager().getZoneManager().getZones()) {
-                if (getSimulationManager().getZoneManager().isInside(i * sampling, j * sampling, zone.getKey())) {
+                double lat = getSimulationManager().getGrid().getLat(i * sampling, j * sampling);
+                double lon = getSimulationManager().getGrid().getLon(i * sampling, j * sampling);
+                if (getSimulationManager().getZoneManager().isInside(lat, lon, zone.getKey())) {
                     return zone.getColor();
                 }
             }
