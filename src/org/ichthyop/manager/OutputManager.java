@@ -512,9 +512,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         // add UI variables 
-        if (!getConfiguration().isNull(OUTPUT_KEY + ".uivar.sampling")) {
-            sampling = getConfiguration().getInt(OUTPUT_KEY + ".uivar.sampling");
-        }
+        sampling = !getConfiguration().isNull(OUTPUT_KEY + ".uivar.sampling")
+                ? getConfiguration().getInt(OUTPUT_KEY + ".uivar.sampling")
+                : 1;
         if (sampling > 0) {
             addUIVariables();
         }

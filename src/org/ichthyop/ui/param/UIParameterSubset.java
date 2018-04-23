@@ -84,9 +84,9 @@ public class UIParameterSubset extends IchthyopLinker {
     }
 
     public String getTreePath() {
-        return getConfiguration().isNull(prefix + ".treepath")
+        return getConfiguration().isNull(prefix + ".ui.treepath")
                 ? "Miscellaneous/" + prefix
-                : getConfiguration().getString(prefix + ".treepath");
+                : getConfiguration().getString(prefix + ".ui.treepath");
     }
 
     public boolean isEnabled() {
@@ -101,9 +101,9 @@ public class UIParameterSubset extends IchthyopLinker {
     }
 
     public String getDescription() {
-        return getConfiguration().isNull(prefix + ".description")
+        return getConfiguration().isNull(prefix + ".ui.description")
                 ? null
-                : getConfiguration().getString(prefix + ".description");
+                : getConfiguration().getString(prefix + ".ui.description");
     }
 
     public List<UIParameter> getParameters() {

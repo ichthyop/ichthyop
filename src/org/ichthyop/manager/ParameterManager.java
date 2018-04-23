@@ -720,7 +720,7 @@ public class ParameterManager extends AbstractManager {
 
         List<String> identifiedSubsets = new ArrayList();
         findKeys("*.ui.treepath").forEach((treepath) -> {
-            identifiedSubsets.add(treepath.substring(0, treepath.lastIndexOf(".")));
+            identifiedSubsets.add(treepath.substring(0, treepath.indexOf(".ui.treepath")));
         });
         Collections.sort(identifiedSubsets);
         Collections.reverse(identifiedSubsets);
