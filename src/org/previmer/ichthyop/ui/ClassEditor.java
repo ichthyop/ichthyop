@@ -144,9 +144,22 @@ public class ClassEditor extends DefaultCellEditor {
             if (element.getName().startsWith(pkgpath)
                     && element.getName().endsWith(".class")) {
 
+                /*
                 String nomFichier = element.getName().substring(packageName.length() + 1);
-
                 classes.add(Class.forName(packageName + "." + nomFichier.split("\\.")[0]));
+                
+                barrier.n, 2017-08-04:
+                in the .jar file, the class appears as org/ichthyop/dataset/Roms3dDataset.class
+                therefore, the org.ichthyop.dataset.Roms3dDataset class should be loaded
+                however, with the above, nomFichier becomes dataset/Roms3dDataset.class
+                thus the class org.ichthyop.dataset/Roms3dDataset is being loaded, which is wrong.
+                    
+                Now we recover the element name org/ichthyop/dataset/Roms3dDataset.class
+                and we replace ".class" by "" and "/" by "." to have the proper class name
+                */
+                
+                String nomFichier = element.getName().replace(".class", "").replace("/", ".");
+                classes.add(Class.forName(nomFichier));
 
             }
 
