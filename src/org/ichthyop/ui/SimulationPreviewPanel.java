@@ -156,7 +156,7 @@ public class SimulationPreviewPanel extends JPanel {
 
         double csizeh = Math.max(1.d, Math.ceil(h / getSimulationManager().getGrid().get_ny()));
         double csizew = Math.max(1.d, Math.ceil(w / getSimulationManager().getGrid().get_nx()));
-        double csize = 2 * Math.max(csizeh, csizew);
+        double csize = 2 * Math.max(csizeh, csizew) * sampling;
         int nx = getSimulationManager().getGrid().get_nx() / sampling;
         int ny = getSimulationManager().getGrid().get_ny() / sampling;
         for (int i = 0; i < nx; i++) {

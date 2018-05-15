@@ -361,7 +361,7 @@ public class JConfigurationPanel extends JPanel {
         protected Object doInBackground() throws Exception {
             cfgTitle = getSimulationManager().getParameterManager().getConfigurationTitle();
             cfgDescription = getSimulationManager().getParameterManager().getConfigurationDescription();
-            cfgVersion = getSimulationManager().getParameterManager().getConfigurationVersion().toString();
+            cfgVersion = getSimulationManager().getParameterManager().getConfigurationVersion();
             parameterTree.createModel();
             return null;
         }
