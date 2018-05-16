@@ -75,8 +75,8 @@ public class BathymetryDataset extends NetcdfDataset {
     public void loadParameters() {
 
         List<String> varnames = new ArrayList(Arrays.asList(new String[]{"bathy", "bathymetry", "topo", "topography"}));
-        if (!getConfiguration().isNull(prefix + ".variable")) {
-            varnames.add(0, getConfiguration().getString(prefix + ".variable"));
+        if (!getConfiguration().isNull(prefix + ".variable.bathymetry")) {
+            varnames.add(0, getConfiguration().getString(prefix + ".variable.bathymetry"));
         }
 
         for (String name : varnames) {
