@@ -67,7 +67,7 @@ public class SysActionMove extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
-        if (!getConfiguration().isNull("")) {
+        if (!getConfiguration().isNull("transport.coastline_behavior")) {
             coastlineBehavior = CoastlineBehavior.getBehavior(getConfiguration().getString("transport.coastline_behavior"));
         } else {
             warning("[transport] Could not find parameter transport.coastline_behavior. Default coastline behavior set to {0}", coastlineBehavior.name());

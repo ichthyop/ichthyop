@@ -102,9 +102,9 @@ public class ReleaseFactory extends IchthyopLinker {
         StringBuilder file = new StringBuilder();
         file.append(getSimulationManager().getConfigurationFile().getParent());
         file.append(File.separator).append("release").append(File.separator);
-        file.append(Math.abs(lat));
+        file.append(String.format("%03d", Math.abs(lat)));
         file.append(lat >= 0 ? "N" : "S");
-        file.append(Math.abs(lon));
+        file.append(String.format("%03d", Math.abs(lon)));
         file.append(lon >= 0 ? "E" : "W");
         file.append("_release.txt");
         System.out.println(file);
