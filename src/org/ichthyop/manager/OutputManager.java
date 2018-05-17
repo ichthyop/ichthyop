@@ -60,9 +60,11 @@ import org.ichthyop.event.SetupEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import org.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
@@ -122,26 +124,27 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         return dimensionFactory;
     }
 
-    public String getParameter(String key) {
-        return getConfiguration().getString(OUTPUT_KEY + "." + key);
-    }
-
     public String getFileLocation() {
         return basename;
     }
 
     private String makeFileLocation() {
 
-        String filename = getSimulationManager().getParameterManager().resolve(getParameter("output_path"));
-        new File(filename).mkdirs();
+        String filename = getConfiguration().getFile(OUTPUT_KEY + ".output_path");
         if (!filename.endsWith(File.separator)) {
             filename += File.separator;
         }
 
         if (!getConfiguration().isNull(OUTPUT_KEY + ".file_prefix")) {
-            filename += getParameter("file_prefix") + "_";
+            String prefix = getConfiguration().getString(OUTPUT_KEY + ".file_prefix");
+            filename += prefix.isEmpty() ? "ichthyop" : prefix;
         }
-        filename += getSimulationManager().getId() + ".nc";
+        // by default append unique timestamp to output file name
+        // set output.timestamp=false to remove timestamp
+        if (getConfiguration().isNull(OUTPUT_KEY + ".timestamp") || getConfiguration().getBoolean(OUTPUT_KEY + ".timestamp")) {
+            filename += "_" + newId();
+        }
+        filename += ".nc";
         File file = new File(filename);
         try {
             IOTools.makeDirectories(file.getAbsolutePath());
@@ -150,6 +153,20 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
         basename = filename;
         return filename + ".part";
+    }
+
+    /*
+     * The id of the current simulation ichthyop-run_yyyyMMddHHmm
+     */
+    private String newId() {
+
+        StringBuilder strBfRunId = new StringBuilder("run");
+        Calendar calendar = new java.util.GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        SimpleDateFormat sdformat = new SimpleDateFormat("yyyyMMddHHmm");
+        sdformat.setCalendar(calendar);
+        strBfRunId.append(sdformat.format(calendar.getTime()));
+        return strBfRunId.toString();
     }
 
     /**
@@ -577,7 +594,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public void setupPerformed(SetupEvent e) throws Exception {
 
         // Get record frequency
-        record_frequency = Integer.valueOf(getParameter("record_frequency"));
+        record_frequency = getConfiguration().getInt(OUTPUT_KEY + ".record_frequency");
         dt_record = record_frequency * Math.abs(getSimulationManager().getTimeManager().get_dt());
         ellapsed = 0.d;
 

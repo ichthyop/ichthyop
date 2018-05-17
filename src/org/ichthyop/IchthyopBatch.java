@@ -53,8 +53,6 @@
 package org.ichthyop;
 
 import java.io.File;
-import java.util.logging.Level;
-import org.ichthyop.util.IOTools;
 
 /**
  *
@@ -87,7 +85,6 @@ public class IchthyopBatch extends IchthyopLinker implements Runnable {
             getSimulationManager().setConfigurationFile(file);
             info("Opened configuration file {0}", file.getPath());
             info("===== Simulation started =====");
-            getSimulationManager().resetId();
             /* */
             long startTime = System.currentTimeMillis();
             /* setup */

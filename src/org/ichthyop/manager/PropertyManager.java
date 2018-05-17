@@ -76,7 +76,7 @@ public class PropertyManager {
         try {
             bundle = ResourceBundle.getBundle(bundleName);
         } catch (MissingResourceException e) {
-            logger.log(Level.SEVERE, "Couldn't load bundle: " + bundleName);
+            logger.log(Level.FINE, "Could not load bundle {0}", bundleName);
         }
     }
 

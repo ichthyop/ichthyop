@@ -552,7 +552,6 @@ public class IchthyopView extends FrameView {
             btnSimulationRun.setIcon(resourceMap.getIcon("simulationRun.Action.icon.stop"));
             btnSimulationRun.setText(resourceMap.getString("simulationRun.Action.text.stop"));
             isRunning = true;
-            getSimulationManager().resetId();
             setupSucceeded = false;
             initSucceeded = false;
             title = getFrame().getTitle();

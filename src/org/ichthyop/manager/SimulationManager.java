@@ -60,7 +60,6 @@ import org.ichthyop.event.SetupEvent;
 import org.ichthyop.event.SetupListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
@@ -88,14 +87,6 @@ public class SimulationManager extends IchthyopLogger {
      * The configuration file
      */
     private File cfgFile;
-    /*
-     * The id of the current simulation ichthyop-run_yyyyMMddHHmm
-     */
-    private String id;
-    /**
-     * The date format used for generating the id of the simulation
-     */
-    private static final SimpleDateFormat SDFORMAT = new SimpleDateFormat("yyyyMMddHHmm");
     /*
      * Whether the simulation has been setup or not 
      */
@@ -131,35 +122,9 @@ public class SimulationManager extends IchthyopLogger {
         return cfgFile;
     }
 
-    public String getId() {
-
-        if (null == id) {
-            id = newId();
-        }
-        return id;
-    }
-
-    public void resetId() {
-        id = null;
-    }
-
-    private static String newId() {
-        StringBuilder strBfRunId = new StringBuilder("ichthyop-run");
-        Calendar calendar = new java.util.GregorianCalendar();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        SDFORMAT.setCalendar(calendar);
-        strBfRunId.append(SDFORMAT.format(calendar.getTime()));
-        return strBfRunId.toString();
-    }
-
-    public static String getIdFromFile(File file) {
-        String filename = file.getName();
-        return filename;
-    }
-
     /**
      * Order is of primary importance since the setup events and the
-     * initialization events will be called in the same order they are called
+     * initialisation events will be called in the same order they are called
      * here.
      */
     public void addListenersToManagers() {
