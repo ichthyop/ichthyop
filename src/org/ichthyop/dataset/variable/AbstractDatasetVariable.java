@@ -158,10 +158,14 @@ public abstract class AbstractDatasetVariable implements IVariable {
     // interpolate Inverse Distance Weight
     private double interpolateIDW(double[] pGrid, double time, int r, int p) {
 
+        if (!grid.isInWater(pGrid)) {
+            return Double.NaN;
+        }
+        
         double value = 0.d;
         boolean coast = grid.isCloseToCost(pGrid);
 
-        int n[] = coast ? new int[]{0, 1} : new int[]{1 - r, 1 + r}; // 8 points
+        int n[] = coast ? new int[]{0, 1} : new int[]{1 - r, 1 + r};
         int i = coast ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
         int j = coast ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = coast ? (int) Math.round(pGrid[2]) : (int) pGrid[2];
@@ -172,9 +176,7 @@ public abstract class AbstractDatasetVariable implements IVariable {
 
         if (Double.isInfinite(weight(pGrid, new int[]{i, j, k}, p))) {
             // pGrid falls on a grid point
-            CO = 1.d;
-            i = grid.continuity(i);
-            return interpolateTime(i, j, k, dt);
+            return interpolateTime(grid.continuity(i), j, k, dt);
         } else {
             for (int ii = n[0]; ii < n[1]; ii++) {
                 for (int jj = n[0]; jj < n[1]; jj++) {
