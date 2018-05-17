@@ -97,16 +97,20 @@ public class OceanDataset extends NetcdfDataset {
     }
 
     public double getU(double[] pGrid, double time) {
-        return getVariable(variable_u).getDouble(pGrid, time);
+        double u = getVariable(variable_u).getDouble(pGrid, time);
+        return Double.isNaN(u) ? 0.d : u;
     }
 
     public double getV(double[] pGrid, double time) {
-        return getVariable(variable_v).getDouble(pGrid, time);
+        double v = getVariable(variable_v).getDouble(pGrid, time);
+        return Double.isNaN(v) ? 0.d : v;
     }
 
     public double getW(double[] pGrid, double time) {
-        return variable_w != null
-                ? getVariable(variable_w).getDouble(pGrid, time)
-                : 0.d;
+        if (null != variable_w) {
+            double w = getVariable(variable_w).getDouble(pGrid, time);
+            return Double.isNaN(w) ? 0.d : w;
+        }
+        return 0.d;
     }
 }
