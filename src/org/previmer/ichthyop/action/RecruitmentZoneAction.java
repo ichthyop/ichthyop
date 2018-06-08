@@ -92,7 +92,7 @@ public class RecruitmentZoneAction extends AbstractAction {
 
             if (satisfyRecruitmentCriterion(particle)) {
                 timeInZone = (rParticle.getNumRecruitmentZone() == numCurrentZone)
-                        ? timeInZone + getSimulationManager().getTimeManager().get_dt()
+                        ? timeInZone + Math.abs(getSimulationManager().getTimeManager().get_dt())
                         : 0;
                 rParticle.setNumRecruitmentZone(numCurrentZone);
                 rParticle.setNewRecruited(timeInZone >= durationMinInRecruitArea);
