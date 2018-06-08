@@ -72,7 +72,7 @@ public class Particle extends GridPoint implements IParticle {
     }
 
     public void incrementAge() {
-        age += getSimulationManager().getTimeManager().get_dt();
+        age += Math.abs(getSimulationManager().getTimeManager().get_dt());
     }
 
     @Override
