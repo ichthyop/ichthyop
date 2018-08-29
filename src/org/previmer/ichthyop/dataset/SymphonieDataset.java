@@ -57,7 +57,7 @@ public class SymphonieDataset extends AbstractDataset {
     /**
      * Bathymetry
      */
-    private float[][] hm_w;
+    private double[][] hm_w;
     /**
      * Mask: water = 1, cost = 0
      */
@@ -209,7 +209,8 @@ public class SymphonieDataset extends AbstractDataset {
         indexFile = DatasetUtil.index(listInputFiles, t0, timeArrow(), strDim_time);
         open(listInputFiles.get(indexFile));
         checkRequiredVariable(ncIn);
-        setAllFieldsTp1AtTime(rank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strDim_time));
+        //setAllFieldsTp1AtTime(rank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strDim_time));
+        setAllFieldsTp1AtTime(rank = 0);  // barrier.n: correction of a bug in model initialisation
         time_tp1 = t0;
     }
     
@@ -534,7 +535,7 @@ public class SymphonieDataset extends AbstractDataset {
             throw ioex;
         }
         try {
-            hm_w = (float[][]) ncGrid.findVariable(strVar_hm_w).read(origin2d, size2d).copyToNDJavaArray();
+            hm_w = (double[][]) ncGrid.findVariable(strVar_hm_w).read(origin2d, size2d).copyToNDJavaArray();
         } catch (Exception e) {
             IOException ioex = new IOException("Problem reading dataset hm_w. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
