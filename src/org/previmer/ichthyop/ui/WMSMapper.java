@@ -1144,7 +1144,8 @@ public class WMSMapper extends JXMapKit {
                     int zz = 17 - zoom;
                     int z = 4;
                     z = (int) Math.pow(2, (double) zz - 1);
-                    return new WMSService("http://www.marine-geo.org/services/wms?", "GMRT,topo").toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
+                    WMSService wmsServ = new WMSService("https://www.gmrt.org/services/mapserver/wms_merc?request=GetCapabilities&service=WMS&CRS=EPSG:3395&", "topo");
+                    return wmsServ.toWMSURL(x - z, z - 1 - y, zz, getTileSize(zoom));
                 }
             });
         }
