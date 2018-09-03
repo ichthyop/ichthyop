@@ -361,19 +361,26 @@ public class NemoDataset extends AbstractDataset {
          */
         gdepW = new double[nz + 1];
         if (null != nc.findVariable(str_gdepW)) {
+            getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
             // Read gdepw
             array = nc.findVariable(str_gdepW).read().reduce().flip(0);
             index = array.getIndex();
             for (int k = 0; k < nz + 1; k++) {
-                index.set(k + 1);
+                index.set(k); // barrier.n
                 gdepW[k] = array.getDouble(index);
             }
         } else {
             // Compute gdepw (approximation)
-            for (int k = 1; k < nz; k++) {
-                gdepW[k] = 0.5 * (gdepT[k - 1] + gdepT[k]);
+            // Reads the T depth from NetCDF file
+            getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
+            array = nc.findVariable(str_gdepT).read().reduce().flip(0);
+            for (int k = 0; k < nz; k++) {
+                index.set(k);
+                gdepW[k] = array.getDouble(index);
+                index.set(k + 1);
+                gdepW[k] += array.getDouble(index);
+                gdepW[k] *= 0.5;
             }
-            gdepW[0] = gdepT[0];
             gdepW[nz] = 0.;
         }
     }
