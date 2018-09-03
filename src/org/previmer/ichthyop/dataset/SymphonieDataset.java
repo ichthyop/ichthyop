@@ -209,8 +209,8 @@ public class SymphonieDataset extends AbstractDataset {
         indexFile = DatasetUtil.index(listInputFiles, t0, timeArrow(), strDim_time);
         open(listInputFiles.get(indexFile));
         checkRequiredVariable(ncIn);
-        //setAllFieldsTp1AtTime(rank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strDim_time));
-        setAllFieldsTp1AtTime(rank = 0);  // barrier.n: correction of a bug in model initialisation
+        // barrier.n: correction of a bug: rank to be used instead of index.
+        setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncIn, strDim_time, timeArrow()));
         time_tp1 = t0;
     }
     
