@@ -70,4 +70,33 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <target name="-post-jar">
+
+    <!-- barrier.n: create zip files for sources-->
+       <zip update="true" compress="${jar.compress}" file="${dist.dir}/ichthyop-v3u3_src.zip">
+           <fileset dir="${basedir}">
+               <include name="src/**"/>
+               <include name="lib/**"/>
+               <include name="nbproject/**"/>
+               <include name="build.xml"/>
+               <include name="filePath.txt"/>
+               <exclude name="**/META-INF/**"/>
+           </fileset>
+       </zip>
+
+    <!-- barrier.n: create zip files for java jar-->
+       <zip update="true" compress="${jar.compress}" file="${dist.dir}/ichthyop-v3u3.zip">
+           <fileset dir="${basedir}">
+               <include name="lib/**"/>
+               <include name="filePath.txt"/>
+               <include name="${dist.jar}"/>
+           </fileset>
+       </zip>
+   </target> 
+
+
+
+
+
 </project>
