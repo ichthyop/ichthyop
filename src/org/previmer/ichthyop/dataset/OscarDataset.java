@@ -26,6 +26,7 @@ import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -453,6 +454,11 @@ public class OscarDataset extends AbstractDataset {
         setOnFirstTime();
         checkRequiredVariable(ncIn);
         setAllFieldsTp1AtTime(rank);
+        
+        for (RequiredVariable variable : requiredVariables.values()) {
+            variable.setUnlimited(true);
+        }
+        
     }
 
     private void setAllFieldsTp1AtTime(int rank) throws Exception {
@@ -569,9 +575,14 @@ public class OscarDataset extends AbstractDataset {
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        Variable variable = nc.findVariable(name);
+        int[] origin = new int[]{rank, 0, 0, 0};
+        int[] shape = new int[]{1, 1, nlat, nlon};
+        return variable.read(origin, shape).reduce().flip(0);
     }
 
+        
     @Override
     public void nextStepTriggered(NextStepEvent e) {
 
