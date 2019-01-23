@@ -54,6 +54,10 @@ public class RequiredVariable {
         return name;
     }
 
+    public void setUnlimited(boolean unlim) {
+        this.isUnlimited = unlim;
+    }
+    
     public void addRequiredBy(Class requiredBy) {
         requiredByList.add(requiredBy);
     }
@@ -74,12 +78,12 @@ public class RequiredVariable {
             }
             isUnlimited = variable.isUnlimited();
             boolean is3D = getSimulationManager().getDataset().is3D();
-
             switch (variable.getShape().length) {
                 case 4:
-                    if (!is3D) {
+                    if ((variable.getShape()[1]!= 1) & !is3D) {
                         throw new UnsupportedOperationException("2D simulation cannot deal with 3D variable " + name);
                     }
+                    break;
                 case 3:
                     if (!isUnlimited && !is3D) {
                         throw new UnsupportedOperationException("2D simulation cannot deal with 3D variable " + name);
@@ -188,7 +192,7 @@ public class RequiredVariable {
 
         if (CO != 0) {
             value /= CO;
-        }
+        }      
         return value;
     }
 
