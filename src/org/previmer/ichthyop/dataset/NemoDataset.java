@@ -637,7 +637,7 @@ public class NemoDataset extends AbstractDataset {
         Index index;
         for (int k = nz; k-- > 0;) {
             index = u_tp1.getIndex();
-            for (int i = 0; i < nx - 1; i++) {
+            for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
 //                    Huon[k][j][i] = u_tp1[k][j][i] * e2u[j][i] * Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
                     index.set(k, j, i);
@@ -648,9 +648,9 @@ public class NemoDataset extends AbstractDataset {
             }
             index = v_tp1.getIndex();
             for (int i = 0; i < nx; i++) {
-                for (int j = 0; j < ny - 1; j++) {
+                for (int j = 0; j < ny; j++) {
 //                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                    index.set(k, j, i);
+                    index.set(k, j, i); 
                     Hvom[k][j][i] = Double.isNaN(v_tp1.getDouble(index))
                             ? 0.f
                             : v_tp1.getDouble(index) * e1v[j][i] * e3v[k][j][i];
@@ -672,29 +672,27 @@ public class NemoDataset extends AbstractDataset {
                  * cell of the column in water.
                  */
                 int k0 = 0;
-                for (int k = 0; k < nz; k++) {
-                    if (isInWater(k, j, i)) {
-                        k0 = k;
-                        break;
-                    }
-                }
+                
                 /*
                  * pverley 15/02/2011
                  * Ensured that w(0:k0, :, :) = 0;
                  */
                 for (int k = 0; k < k0 + 1; k++) {
                     w_double[k][j][i] = 0.d;
-                    //System.out.println("k: " + k + " k0: " + k0 + " wr: " + wr_tp1[k][j][i] + " " + isInWater(k, j, i));
+                    //System.out.println("k: " + k + " k0: " + k0 + " wr: " + wr_   tp1[k][j][i] + " " + isInWater(k, j, i));
                 }
-                for (int k = k0 + 1; k < nz; k++) {
+                for (int k = k0 + 1; k < nz; k++) {     
                     w_double[k][j][i] = w_double[k - 1][j][i]
                             - (Huon[k - 1][j][i] - Huon[k - 1][j][i - 1] + Hvom[k - 1][j][i] - Hvom[k - 1][j - 1][i]);
                 }
-                w_double[nz][j][i] = 0.d;
+                
+                w_double[nz][j][i] = 0.d;  // Because particle at the surface can not "fly" (must remember my GFD classes).
             }
         }
         //---------------------------------------------------
         // Boundary Conditions
+        
+        /*
         for (int k = nz + 1; k-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 w_double[k][j][0] = w_double[k][j][1];
@@ -707,6 +705,7 @@ public class NemoDataset extends AbstractDataset {
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
         }
+        */
 
         //---------------------------------------------------
         // w * dxu * dyv
@@ -716,9 +715,7 @@ public class NemoDataset extends AbstractDataset {
         for (int i = nx; i-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 for (int k = nz + 1; k-- > 0;) {
-                    w.setDouble(index.set(k, j, i), isInWater(i, j, k)
-                            ? (float) (w_double[k][j][i] / (e1t[j][i] * e2t[j][i]))
-                            : 0.f);
+                    w.setDouble(index.set(k, j, i), (w_double[k][j][i] / (e1t[j][i] * e2t[j][i])));
                 }
             }
         }
@@ -1030,7 +1027,7 @@ public class NemoDataset extends AbstractDataset {
         double time_tp0 = time_tp1;
 
         try {
-            u_tp1 = ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx - 1}).flip(1).reduce();
+            u_tp1 = ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx}).flip(1).reduce();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -1038,7 +1035,7 @@ public class NemoDataset extends AbstractDataset {
         }
 
         try {
-            v_tp1 = ncV.findVariable(strV).read(origin, new int[]{1, nz, ny - 1, nx}).flip(1).reduce();
+            v_tp1 = ncV.findVariable(strV).read(origin, new int[]{1, nz, ny, nx}).flip(1).reduce();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
