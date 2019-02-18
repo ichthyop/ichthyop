@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
+import static org.previmer.ichthyop.dataset.Mars3dCommon.z_rho_cst;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
@@ -81,11 +82,11 @@ public class Mercator_3D extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    private double[] gdepT;
+    private double[][][] gdepT;
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    private double[] gdepW;
+    private double[][][] gdepW;
     /**
      * Geographical boundary of the domain
      */
@@ -194,9 +195,6 @@ public class Mercator_3D extends AbstractDataset {
             nc.close();
             nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
-        //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
-        //fichier *mesh*z*
-        get_gdep_fields(nc);
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
@@ -217,6 +215,11 @@ public class Mercator_3D extends AbstractDataset {
         e2u = e2t;
 
         nc.close();
+        
+        //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
+        //fichier *mesh*z*
+        get_gdep_fields(nc);
+        
     }
 
     private double[][][] compute_e3u(double[][][] e3t) {
@@ -281,9 +284,25 @@ public class Mercator_3D extends AbstractDataset {
 
         Index index;
         Array array;
+
+        gdepT = new double[nz][ny][nx];
+        gdepW = new double[nz + 1][ny][nx];
+
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                
+                gdepW[nz][j][i] = 0.d;   // init.
+
+                for (int k = nz; k-- > 0;) {
+
+                    gdepW[k][j][i] = gdepW[k + 1][j][i] + e3t[k][j][i];
+                    gdepT[k][j][i] = 0.5 * (gdepW[k][j][i] + gdepW[k + 1][j][i]);
+
+                }
+            }
+        }
+   
         /*
-         * Read gdept
-         */
         array = nc.findVariable(str_gdepT).read().reduce().flip(0);
         index = array.getIndex();
         gdepT = new double[nz];
@@ -291,9 +310,7 @@ public class Mercator_3D extends AbstractDataset {
             index.set(k + 1);
             gdepT[k] = array.getDouble(index);
         }
-        /*
-         * Read or compute gdepw
-         */
+     
         gdepW = new double[nz + 1];
         if (null != nc.findVariable(str_gdepW)) {
             getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
@@ -318,6 +335,7 @@ public class Mercator_3D extends AbstractDataset {
             }
             gdepW[nz] = 0.;
         }
+        */
     }
 
     private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
@@ -398,21 +416,21 @@ public class Mercator_3D extends AbstractDataset {
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
-        double ix, jy, kz;
+        double kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (int) Math.round(ix);
-        int j = (n == 1) ? (int) Math.round(jy) : (int) jy;
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
         int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+           
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
         double dz = kz - (double) k;
         double CO = 0.d;
         double co, x;
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
         Index index = u_tp0.getIndex();
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
@@ -421,11 +439,11 @@ public class Mercator_3D extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    index.set(k + kk, j + jj, i + ii - 1);
+                    index.set(k + kk, j + jj, i + ii);
                     if (!(Double.isNaN(u_tp0.getDouble(index)))) {
                         x = (1.d - x_euler) * u_tp0.getDouble(index)
                                 + x_euler * u_tp1.getDouble(index);
-                        du += x * co / e2u[j + jj][i + ii - 1];
+                        du += x * co / e2u[j + jj][i + ii];
                     }
                 }
             }
@@ -467,8 +485,8 @@ public class Mercator_3D extends AbstractDataset {
                     x = (1.d - x_euler) * w_tp0.getDouble(index)
                             + x_euler * w_tp1.getDouble(index);
                     dw += 2.d * x * co
-                            / (gdepW[Math.max(k + kk - 1, 0)]
-                            - gdepW[Math.min(k + kk + 1, nz)]);
+                            / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
+                            - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
                 }
             }
         }
@@ -484,22 +502,24 @@ public class Mercator_3D extends AbstractDataset {
 
     @Override
     public double get_dVy(double[] pGrid, double time) {
+        
         double dv = 0.d;
-        double ix, jy, kz;
         int n = isCloseToCost(pGrid) ? 1 : 2;
-        ix = pGrid[0];
-        jy = pGrid[1];
+        int i = (n == 1) ? (int) Math.round(pGrid[0]) : (int) pGrid[0];
+        int j = (n == 1) ? (int) Math.round(pGrid[1]) : (int) pGrid[1];
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double dx = pGrid[0] - (double) i;
+        double dy = pGrid[1] - (double) j;
+        double CO = 0.d;
+        double x;
+        double co;
+        
+        double kz;
         kz = Math.max(0.d, Math.min(pGrid[2], nz - 1.00001f));
 
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        int i = (n == 1) ? (int) Math.round(ix) : (int) ix;
-        int j = (int) Math.round(jy);
         int k = (int) kz;
-        double dx = ix - (double) i;
-        double dy = jy - (double) j;
+
         double dz = kz - (double) k;
-        double CO = 0.d;
-        double co, x;
         Index index = v_tp0.getIndex();
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
@@ -508,11 +528,11 @@ public class Mercator_3D extends AbstractDataset {
                             * (1.d - (double) jj - dy)
                             * (1.d - (double) kk - dz));
                     CO += co;
-                    index.set(k + kk, j + jj - 1, i + ii);
+                    index.set(k + kk, j + jj, i + ii);
                     if (!Double.isNaN(v_tp0.getDouble(index))) {
                         x = (1.d - x_euler) * v_tp0.getDouble(index)
                                 + x_euler * v_tp1.getDouble(index);
-                        dv += x * co / e1v[j + jj - 1][i + ii];
+                        dv += x * co / e1v[j + jj][i + ii];
                     }
                 }
             }
@@ -960,6 +980,8 @@ public class Mercator_3D extends AbstractDataset {
         lonMax = -lonMin;
         latMin = Double.MAX_VALUE;
         latMax = -latMin;
+        
+                depthMax = 0.d;
 
         int i = nx;
         while (i-- > 0) {
@@ -993,7 +1015,15 @@ public class Mercator_3D extends AbstractDataset {
             latMin = latMax;
             latMax = double_tmp;
         }
-
+        
+        for (j = 0; j < ny; j++) {
+            for (i = 0; i < nx; i++) {
+                double depth = getBathy(i, j);
+                if (depth > depthMax) {
+                    depthMax = depth;
+                }
+            }
+        }
     }
 
     /*
@@ -1069,20 +1099,6 @@ public class Mercator_3D extends AbstractDataset {
         } else {
             w_tp1 = computeW();
         }
-    }
-
-    /*
-     * Computes the depth of the specified sigma level at the x-y particle
-     * location.
-     *
-     * @param xRho a double, x-coordinate of the grid point
-     * @param yRho a double, y-coordinate of the grid point
-     * @param k an int, the index of the sigma level
-     * @return a double, the depth [meter] at (x, y, k)
-     */
-    public double getDepth(int k) {
-
-        return -1.d * gdepT[k];
     }
 
     /**
@@ -1164,30 +1180,35 @@ public class Mercator_3D extends AbstractDataset {
             depth = 0.d;
         }
         depth = Math.abs(depth);
+        
+        int i = (int) Math.round(x);
+        int j = (int) Math.round(y);
+            
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double zRho = 0.d;
-
+        
+        
         /* case particle is going straight up to surface, due to strong
          * buoyancy for instance.
          */
-        if (depth < gdepT[nz - 1]) {
+        if (depth < gdepT[nz - 1][j][i]) {
             //System.out.println("depth: " + depth + " ==> z: " + (nz - 1) + " gdepT[nz - 1]: " + gdepT[nz - 1]);
             return (nz - 1);
         }
         for (int k = nz - 1; k > 0; k--) {
             //System.out.println("t1 " + z_w[k] + " " + (float)depth + " " + z_rho[k]);
-            if (depth <= gdepW[k] && depth > gdepT[k]) {
-                zRho = k + 0.d - 0.5d * Math.abs((gdepT[k] - depth) / (gdepT[k] - gdepW[k]));
+            if (depth <= gdepW[k][j][i] && depth > gdepT[k][j][i]) {
+                zRho = k + 0.d - 0.5d * Math.abs((gdepT[k][j][i] - depth) / (gdepT[k][j][i] - gdepW[k][j][i]));
                 //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k]: " + gdepW[k] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
             }
             //System.out.println("t2 " + z_rho[k] + " " + (float)depth + " " + z_w[k + 1]);
-            if (depth <= gdepT[k] && depth > gdepW[k + 1]) {
+            if (depth <= gdepT[k][j][i] && depth > gdepW[k + 1][j][i]) {
                 zRho = k + 0.d
                         + 0.5d
-                        * Math.abs((gdepT[k] - depth)
-                                / (gdepW[k + 1] - gdepT[k]));
+                        * Math.abs((gdepT[k][j][i] - depth)
+                                / (gdepW[k + 1][j][i] - gdepT[k][j][i]));
                 //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k + 1]: " + gdepW[k + 1] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
             }
@@ -1216,14 +1237,17 @@ public class Mercator_3D extends AbstractDataset {
         double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         int k = (int) Math.round(kz);
         dz = z - k;
+        
+        int i = (int) Math.round(x);
+        int j = (int) Math.round(y);
 
         if (dz < 0) { // >= ?
-            depth = gdepT[k]
-                    + 2 * Math.abs(dz * (gdepT[k] - gdepW[k]));
+            depth = gdepT[k][j][i]
+                    + 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k][j][i]));
             //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k]: " + gdepW[k]) ;
         } else {
-            depth = gdepT[k]
-                    - 2 * Math.abs(dz * (gdepT[k] - gdepW[k + 1]));
+            depth = gdepT[k][j][i]
+                    - 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k + 1][j][i]));
             //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k + 1]: " + gdepW[k + 1]);
         }
         return -depth;
