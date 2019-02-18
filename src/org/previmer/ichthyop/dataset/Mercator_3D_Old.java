@@ -25,7 +25,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author pverley
  */
-public class Mercator_3D extends AbstractDataset {
+public class Mercator_3D_Old extends AbstractDataset {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -45,11 +45,16 @@ public class Mercator_3D extends AbstractDataset {
     /**
      * Longitude at rho point.
      */
-    private float[] longitude;
+    private float[][] lonRho;
     /**
      * Latitude at rho point.
      */
+    private float[][] latRho;
+
+    private float[] longitude;
     private float[] latitude;
+    private boolean xTore;
+
     /**
      * Mask: water = 1, cost = 0
      */
@@ -135,8 +140,9 @@ public class Mercator_3D extends AbstractDataset {
      */
     private double[][][] e3t, e3u, e3v;
     private double[][] e1t, e2t, e1v, e2u;
-    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
+    private String stre3t;
     private String str_gdepT, str_gdepW;
+    private String stre1t, stre2t, stre1v, stre2u, stre3u, stre3v;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
     private String file_hgr, file_zgr, file_mask;
@@ -156,23 +162,36 @@ public class Mercator_3D extends AbstractDataset {
      * Reads time non-dependant fields in NetCDF dataset
      */
     private void readConstantField() throws Exception {
+        
+        System.out.println("+++++++++++ old class");
 
         NetcdfFile nc;
         nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
+        lonRho = new float[ny][nx];
+        latRho = new float[ny][nx];
         longitude = new float[nx];
         latitude = new float[ny];
         Array arrLon = nc.findVariable(strLon).read().reduce();
         Array arrLat = nc.findVariable(strLat).read().reduce();
         Index indexLon = arrLon.getIndex();
         Index indexLat = arrLat.getIndex();
-
-        for (int i = 0; i < nx; i++) {
-            longitude[i] = arrLon.getFloat(indexLon.set(ipo + i));
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                lonRho[j][i] = arrLon.getFloat((arrLon.getShape().length == 2)
+                        ? indexLon.set(jpo + j, ipo + i)
+                        : indexLon.set(ipo + i));
+                latRho[j][i] = arrLat.getFloat((arrLat.getShape().length == 2)
+                        ? indexLat.set(jpo + j, ipo + i)
+                        : indexLat.set(jpo + j));
+            }
         }
 
         for (int j = 0; j < ny; j++) {
-            latitude[j] = arrLat.getFloat(indexLat.set(jpo + j));
+            latitude[j] = latRho[j][0];
+        }
+        for (int i = 0; i < nx; i++) {
+            longitude[i] = lonRho[0][i];
         }
 
         if (!isGridInfoInOneFile) {
@@ -200,23 +219,76 @@ public class Mercator_3D extends AbstractDataset {
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
-        e3t = read_e3_field(nc, stre3t);
+        if (findParameter("field_var_e3t0") && findParameter("field_var_e3tps") && findParameter("field_var_mbathy")) {
+            compute_e3t();
+        } else {
+            e3t = read_e3_field(nc, stre3t);
+        }
+
         e3u = compute_e3u(e3t);
         e3v = compute_e3v(e3t);
 
-        if (!isGridInfoInOneFile) {
-            nc.close();
-            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
-        }
-        //System.out.println("read e1t e2t " + nc.getLocation());
-        // fichier *mesh*h*
         e1t = read_e1_e2_field(nc, stre1t);
         e2t = read_e1_e2_field(nc, stre2t);
-
-        e1v = e1t;
         e2u = e2t;
+        e1v = e1t;
 
         nc.close();
+
+        // overwrites the values that have been computed here.
+        // compute_e2t_e1t_e1v_e2u();
+        
+    }
+
+    private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
+
+        Array array = nc.findVariable(varname).read().reduce();
+        double[][] field = new double[ny][nx];
+        Index index = array.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j + jpo, i + ipo);
+                field[j][i] = array.getDouble(index);
+            }
+        }
+        return field;
+    }
+
+    private void compute_e2t_e1t_e1v_e2u() throws IOException {
+        
+        e2t = new double[ny][nx];
+        e1t = new double[ny][nx];
+        e1v = new double[ny][nx];
+        e2u = new double[ny][nx];
+
+        double R = 6339.6 * 1e3;
+        double dlat = Math.abs(latitude[1] - latitude[0]);
+        double dlon = Math.abs(longitude[1] - longitude[0]);
+
+        // Initialisation of e2t from the grid. It is set as constant
+        // since seemingly on a regular grid.
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                e2t[j][i] = R * dlat * Math.PI / 180.d;
+            }
+        }
+
+        // Calculation of e1t with correction of cos(lat)
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                e1t[j][i] = R * dlon * Math.PI / 180.d * Math.cos(latitude[j] * Math.PI / 180.d);
+            }
+        }
+
+        // Correction of scale factor for e1v 
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                e1v[j][i] = R * dlon * Math.PI / 180.d * Math.cos((latitude[j] + 0.5d * dlat) * Math.PI / 180.d);
+            }
+        }
+
+        e2u = e2t;
+
     }
 
     private double[][][] compute_e3u(double[][][] e3t) {
@@ -260,7 +332,7 @@ public class Mercator_3D extends AbstractDataset {
     }
 
     private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-
+        
         Array array = nc.findVariable(varname).read().reduce().flip(0);
         Index index = array.getIndex();
         double[][][] field = new double[nz][ny][nx];
@@ -320,6 +392,7 @@ public class Mercator_3D extends AbstractDataset {
         }
     }
 
+    /*
     private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
 
         Array array = nc.findVariable(varname).read().reduce();
@@ -333,7 +406,7 @@ public class Mercator_3D extends AbstractDataset {
         }
         return field;
     }
-
+     */
     /**
      * Advects the particle with the model velocity vector, using a Forward
      * Euler scheme. Let's see how it works with the example of the Zonal
@@ -466,6 +539,7 @@ public class Mercator_3D extends AbstractDataset {
                     index.set(k + kk, j + jj, i + ii);
                     x = (1.d - x_euler) * w_tp0.getDouble(index)
                             + x_euler * w_tp1.getDouble(index);
+                    //System.out.println("xxxx = " + x + "co " + co   );
                     dw += 2.d * x * co
                             / (gdepW[Math.max(k + kk - 1, 0)]
                             - gdepW[Math.min(k + kk + 1, nz)]);
@@ -708,19 +782,31 @@ public class Mercator_3D extends AbstractDataset {
     private void readLonLat() throws IOException {
 
         try (NetcdfFile nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null)) {
+            lonRho = new float[ny][nx];
+            latRho = new float[ny][nx];
             longitude = new float[nx];
             latitude = new float[ny];
             Array arrLon = nc.findVariable(strLon).read().reduce();
             Array arrLat = nc.findVariable(strLat).read().reduce();
             Index indexLon = arrLon.getIndex();
             Index indexLat = arrLat.getIndex();
-
-            for (int i = 0; i < nx; i++) {
-                longitude[i] = arrLon.getFloat(indexLon.set(ipo + i));
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    lonRho[j][i] = arrLon.getFloat((arrLon.getShape().length == 2)
+                            ? indexLon.set(j, i)
+                            : indexLon.set(i));
+                    latRho[j][i] = arrLat.getFloat((arrLat.getShape().length == 2)
+                            ? indexLat.set(j, i)
+                            : indexLat.set(j));
+                }
             }
 
             for (int j = 0; j < ny; j++) {
-                latitude[j] = arrLat.getFloat(indexLat.set(jpo + j));
+                latitude[j] = latRho[j][0];
+            }
+
+            for (int i = 0; i < nx; i++) {
+                longitude[i] = lonRho[0][i];
             }
 
         }
@@ -824,6 +910,15 @@ public class Mercator_3D extends AbstractDataset {
             getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         }
         time_arrow = timeArrow();
+
+        // Longitudinal toricity (barrier.n)
+        // phv 2018/01/26 true by default
+        try {
+            xTore = Boolean.valueOf(getParameter("longitude_tore"));
+        } catch (NullPointerException ex) {
+            xTore = true;
+        }
+
     }
 
     /**
@@ -889,8 +984,8 @@ public class Mercator_3D extends AbstractDataset {
                     "Impossible to proportion the simulation area : points out of domain");
         }
 
-        longitude = null;
-        latitude = null;
+        lonRho = null;
+        latRho = null;
 
         //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
         ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
@@ -909,7 +1004,6 @@ public class Mercator_3D extends AbstractDataset {
      */
     private void getDimGeogArea() {
 
-        /* NEMO way. 
         //--------------------------------------
         // Calculate the Physical Space extrema
         lonMin = Double.MAX_VALUE;
@@ -953,47 +1047,111 @@ public class Mercator_3D extends AbstractDataset {
             latMin = latMax;
             latMax = double_tmp;
         }
-         */
-        //--------------------------------------
-        // Calculate the Physical Space extrema
-        lonMin = Double.MAX_VALUE;
-        lonMax = -lonMin;
-        latMin = Double.MAX_VALUE;
-        latMax = -latMin;
+    }
 
-        int i = nx;
-        while (i-- > 0) {
-            if (longitude[i] >= lonMax) {
-                lonMax = longitude[i];
+    /**
+     * Transforms the specified 2D geographical coordinates into a grid
+     * coordinates.
+     *
+     * The algorithme has been adapted from a function in ROMS/UCLA code,
+     * originally written by Alexander F. Shchepetkin and Hernan G. Arango.
+     * Please find below an extract of the ROMS/UCLA documention.
+     *
+     * <pre>
+     *  Checks the position to find if it falls inside the whole domain.
+     *  Once it is established that it is inside, find the exact cell to which
+     *  it belongs by successively dividing the domain by a half (binary
+     *  search).
+     * </pre>
+     *
+     * @param lon a double, the longitude of the geographical point
+     * @param lat a double, the latitude of the geographical point
+     * @return a double[], the corresponding grid coordinates (x, y)
+     * @see #isInsidePolygone
+     */
+    @Override
+    public double[] latlon2xy(double lat, double lon) {
+
+        //--------------------------------------------------------------------
+        // Physical space (lat, lon) => Computational space (x, y)
+        boolean found1 = false;
+        boolean found2 = false;
+
+        int ci = nx / 2;
+        int cj = ny / 2;
+        int di = ci / 2;
+        int dj = cj / 2;
+
+        // Find the closet grid point to {lat, lon}
+        while (!(found1 && found2)) {
+            int i = ci;
+            int j = cj;
+            double dmin = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i]);
+            for (int ii = -di; ii <= di; ii += di) {
+                if ((i + ii >= 0) && (i + ii < nx)) {
+                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i + ii]);
+                    if (d < dmin) {
+                        dmin = d;
+                        ci = i + ii;
+                        cj = j;
+                    }
+                }
             }
-            if (longitude[i] <= lonMin) {
-                lonMin = longitude[i];
+            for (int jj = -dj; jj <= dj; jj += dj) {
+                if ((j + jj >= 0) && (j + jj < ny)) {
+                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j + jj], longitude[i]);
+                    if (d < dmin) {
+                        dmin = d;
+                        ci = i;
+                        cj = j + jj;
+                    }
+                }
+            }
+            if (i == ci && j == cj) {
+                found1 = true;
+                if (dj == 1 && di == 1) {
+                    found2 = true;
+                } else {
+                    di = (int) Math.max(1, di / 2);
+                    dj = (int) Math.max(1, di / 2);
+                    found1 = false;
+                }
             }
         }
-        int j = ny;
-        while (j-- > 0) {
-            if (latitude[j] >= latMax) {
-                latMax = latitude[j];
-            }
-            if (latitude[j] <= latMin) {
-                latMin = latitude[j];
-            }
+
+        // Refine within cell (ci, cj) by linear interpolation
+        int cip1 = ci + 1 > nx - 1 ? 0 : ci + 1;
+        int cim1 = ci - 1 < 0 ? nx - 1 : ci - 1;
+        int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
+        int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
+        // xgrid
+        double xgrid;
+        if (lon >= longitude[ci]) {
+            double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
+                    ? 360.d + (longitude[cip1] - longitude[ci])
+                    : longitude[cip1] - longitude[ci];
+            double deltax = (lon - longitude[ci]) / dx;
+            xgrid = xTore(ci + deltax);
+        } else {
+            double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d)
+                    ? 360.d + (longitude[ci] - longitude[cim1])
+                    : longitude[ci] - longitude[cim1];
+            double deltax = (lon - longitude[cim1]) / dx;
+            xgrid = xTore(cim1 + deltax);
+        }
+        // ygrid
+        double ygrid;
+        if (lat >= latitude[cj]) {
+            double dy = latitude[cjp1] - latitude[cj];
+            double deltay = (lat - latitude[cj]) / dy;
+            ygrid = (double) cj + deltay;
+        } else {
+            double dy = latitude[cj] - latitude[cjm1];
+            double deltay = (lat - latitude[cjm1]) / dy;
+            ygrid = (double) cjm1 + deltay;
         }
 
-        //System.out.println("lonmin " + lonMin + " lonmax " + lonMax + " latmin " + latMin + " latmax " + latMax);
-        double double_tmp;
-        if (lonMin > lonMax) {
-            double_tmp = lonMin;
-            lonMin = lonMax;
-            lonMax = double_tmp;
-        }
-
-        if (latMin > latMax) {
-            double_tmp = latMin;
-            latMin = latMax;
-            latMax = double_tmp;
-        }
-
+        return (new double[]{xgrid, ygrid});
     }
 
     /*
@@ -1144,7 +1302,6 @@ public class Mercator_3D extends AbstractDataset {
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
         jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
         return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
-
     }
 
     /*
@@ -1229,7 +1386,7 @@ public class Mercator_3D extends AbstractDataset {
         return -depth;
     }
 
-    /*
+    /**
      * * Transforms the specified 2D grid coordinates into geographical
      * coordinates. It merely does a bilinear spatial interpolation of the
      * surrounding grid nods geographical coordinates.
@@ -1238,38 +1395,10 @@ public class Mercator_3D extends AbstractDataset {
      * @param yRho a double, the y-coordinate
      * @return a double[], the corresponding geographical coordinates (latitude,
      * longitude)
-     *
-     * @param xRho double
-     * @param yRho double
-     * @return double[]
      */
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
-        /* NEMO way 
-        //--------------------------------------------------------------------
-        // Computational space (x, y , z) => Physical space (lat, lon, depth)
-        final double ix = Math.max(0.00001f,
-                Math.min(xRho, (double) nx - 1.00001f));
-        final double jy = Math.max(0.00001f,
-                Math.min(yRho, (double) ny - 1.00001f));
-
-        final int i = (int) Math.floor(ix);
-        final int j = (int) Math.floor(jy);
-        double latitude = 0.d;
-        double longitude = 0.d;
-        final double dx = ix - (double) i;
-        final double dy = jy - (double) j;
-        double co;
-        for (int ii = 0; ii < 2; ii++) {
-            for (int jj = 0; jj < 2; jj++) {
-                co = Math.abs((1 - ii - dx) * (1 - jj - dy));
-                latitude += co * latRho[j + jj][i + ii];
-                longitude += co * lonRho[j + jj][i + ii];
-            }
-        }
-        return (new double[]{latitude, longitude}); 
-         */
         //--------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
         final double jy = Math.max(0.00001f,
@@ -1314,169 +1443,162 @@ public class Mercator_3D extends AbstractDataset {
     }
 
     /**
-     * Transforms the specified 2D geographical coordinates into a grid
-     * coordinates.
+     * Determines whether the specified geographical point (lon, lat) belongs to
+     * the is inside the polygon defined by (imin, jmin) & (imin, jmax) & (imax,
+     * jmax) & (imax, jmin).
      *
-     * The algorithme has been adapted from a function in ROMS/UCLA code,
+     * <p>
+     * The algorithm has been adapted from a function in ROMS/UCLA code,
      * originally written by Alexander F. Shchepetkin and Hernan G. Arango.
      * Please find below an extract of the ROMS/UCLA documention.
-     *
+     * </p>
      * <pre>
-     *  Checks the position to find if it falls inside the whole domain.
-     *  Once it is established that it is inside, find the exact cell to which
-     *  it belongs by successively dividing the domain by a half (binary
-     *  search).
+     * Given the vectors Xb and Yb of size Nb, defining the coordinates
+     * of a closed polygon,  this function find if the point (Xo,Yo) is
+     * inside the polygon.  If the point  (Xo,Yo)  falls exactly on the
+     * boundary of the polygon, it still considered inside.
+     * This algorithm does not rely on the setting of  Xb(Nb)=Xb(1) and
+     * Yb(Nb)=Yb(1).  Instead, it assumes that the last closing segment
+     * is (Xb(Nb),Yb(Nb)) --> (Xb(1),Yb(1)).
+     *
+     * Reference:
+     * Reid, C., 1969: A long way from Euclid. Oceanography EMR,
+     * page 174.
+     *
+     * Algorithm:
+     *
+     * The decision whether the point is  inside or outside the polygon
+     * is done by counting the number of crossings from the ray (Xo,Yo)
+     * to (Xo,-infinity), hereafter called meridian, by the boundary of
+     * the polygon.  In this counting procedure,  a crossing is counted
+     * as +2 if the crossing happens from "left to right" or -2 if from
+     * "right to left". If the counting adds up to zero, then the point
+     * is outside.  Otherwise,  it is either inside or on the boundary.
+     *
+     * This routine is a modified version of the Reid (1969) algorithm,
+     * where all crossings were counted as positive and the decision is
+     * made  based on  whether the  number of crossings is even or odd.
+     * This new algorithm may produce different results  in cases where
+     * Xo accidentally coinsides with one of the (Xb(k),k=1:Nb) points.
+     * In this case, the crossing is counted here as +1 or -1 depending
+     * of the sign of (Xb(k+1)-Xb(k)).  Crossings  are  not  counted if
+     * Xo=Xb(k)=Xb(k+1).  Therefore, if Xo=Xb(k0) and Yo>Yb(k0), and if
+     * Xb(k0-1) < Xb(k0) < Xb(k0+1),  the crossing is counted twice but
+     * with weight +1 (for segments with k=k0-1 and k=k0). Similarly if
+     * Xb(k0-1) > Xb(k0) > Xb(k0+1), the crossing is counted twice with
+     * weight -1 each time.  If,  on the other hand,  the meridian only
+     * touches the boundary, that is, for example, Xb(k0-1) < Xb(k0)=Xo
+     * and Xb(k0+1) < Xb(k0)=Xo, then the crossing is counted as +1 for
+     * segment k=k0-1 and -1 for segment k=k0, resulting in no crossing.
+     *
+     * Note 1: (Explanation of the logical condition)
+     *
+     * Suppose  that there exist two points  (x1,y1)=(Xb(k),Yb(k))  and
+     * (x2,y2)=(Xb(k+1),Yb(k+1)),  such that,  either (x1 < Xo < x2) or
+     * (x1 > Xo > x2).  Therefore, meridian x=Xo intersects the segment
+     * (x1,y1) -> (x2,x2) and the ordinate of the point of intersection
+     * is:
+     *                y1*(x2-Xo) + y2*(Xo-x1)
+     *            y = -----------------------
+     *                         x2-x1
+     * The mathematical statement that point  (Xo,Yo)  either coinsides
+     * with the point of intersection or lies to the north (Yo>=y) from
+     * it is, therefore, equivalent to the statement:
+     *
+     *      Yo*(x2-x1) >= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 > 0
+     * or
+     *      Yo*(x2-x1) <= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 < 0
+     *
+     * which, after noting that  Yo*(x2-x1) = Yo*(x2-Xo + Xo-x1) may be
+     * rewritten as:
+     *
+     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) >= 0,   if   x2-x1 > 0
+     * or
+     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) <= 0,   if   x2-x1 < 0
+     *
+     * and both versions can be merged into  essentially  the condition
+     * that (Yo-y1)*(x2-Xo)+(Yo-y2)*(Xo-x1) has the same sign as x2-x1.
+     * That is, the product of these two must be positive or zero.
      * </pre>
      *
+     * @param imin an int, i-coordinate of the area left corners
+     * @param imax an int, i-coordinate of the area right corners
+     * @param jmin an int, j-coordinate of the area left corners
+     * @param jmax an int, j-coordinate of the area right corners
      * @param lon a double, the longitude of the geographical point
      * @param lat a double, the latitude of the geographical point
-     * @return a double[], the corresponding grid coordinates (x, y)
-     * @see #isInsidePolygone
+     * @return <code>true</code> if (lon, lat) belongs to the polygon,
+     * <code>false</code>otherwise.
      */
-    @Override
-    public double[] latlon2xy(double lat, double lon) {
+    private boolean isInsidePolygone(int imin, int imax, int jmin,
+            int jmax, double lon, double lat) {
 
-        /* NEMO way
-        //--------------------------------------------------------------------
-        // Physical space (lat, lon) => Computational space (x, y)
-        boolean found;
-        int imin, imax, jmin, jmax, i0, j0;
-        double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
+        //--------------------------------------------------------------
+        // Return true if (lon, lat) is insidide the polygon defined by
+        // (imin, jmin) & (imin, jmax) & (imax, jmax) & (imax, jmin)
+        //-----------------------------------------
+        // Build the polygone
+        int nb, shft;
+        double[] xb, yb;
+        boolean isInPolygone = true;
 
-        xgrid = -1.;
-        ygrid = -1.;
-        found = isInsidePolygone(0, nx - 1, 0, ny - 1, lon, lat);
-
-        //-------------------------------------------
-        // Research surrounding grid-points
-        if (found) {
-            imin = 0;
-            imax = nx - 1;
-            jmin = 0;
-            jmax = ny - 1;
-            while (((imax - imin) > 1) | ((jmax - jmin) > 1)) {
-                if ((imax - imin) > 1) {
-                    i0 = (imin + imax) / 2;
-                    found = isInsidePolygone(imin, i0, jmin, jmax, lon, lat);
-                    if (found) {
-                        imax = i0;
-                    } else {
-                        imin = i0;
-                    }
-                }
-                if ((jmax - jmin) > 1) {
-                    j0 = (jmax + jmin) / 2;
-                    found = isInsidePolygone(imin, imax, jmin, j0, lon, lat);
-                    if (found) {
-                        jmax = j0;
-                    } else {
-                        jmin = j0;
-                    }
-                }
-            }
-
-            //--------------------------------------------
-            // Trilinear interpolation
-            dy1 = latRho[jmin + 1][imin] - latRho[jmin][imin];
-            dx1 = lonRho[jmin + 1][imin] - lonRho[jmin][imin];
-            dy2 = latRho[jmin][imin + 1] - latRho[jmin][imin];
-            dx2 = lonRho[jmin][imin + 1] - lonRho[jmin][imin];
-
-            c1 = lon * dy1 - lat * dx1;
-            c2 = lonRho[jmin][imin] * dy2 - latRho[jmin][imin] * dx2;
-            deltax = (c1 * dx2 - c2 * dx1) / (dx2 * dy1 - dy2 * dx1);
-            deltax = (deltax - lonRho[jmin][imin]) / dx2;
-            xgrid = (double) imin + Math.min(Math.max(0.d, deltax), 1.d);
-
-            c1 = lonRho[jmin][imin] * dy1 - latRho[jmin][imin] * dx1;
-            c2 = lon * dy2 - lat * dx2;
-            deltay = (c1 * dy2 - c2 * dy1) / (dx2 * dy1 - dy2 * dx1);
-            deltay = (deltay - latRho[jmin][imin]) / dy1;
-            ygrid = (double) jmin + Math.min(Math.max(0.d, deltay), 1.d);
+        nb = 2 * (jmax - jmin + imax - imin);
+        xb = new double[nb + 1];
+        yb = new double[nb + 1];
+        shft = 0 - imin;
+        for (int i = imin; i <= (imax - 1); i++) {
+            xb[i + shft] = lonRho[jmin][i];
+            yb[i + shft] = latRho[jmin][i];
         }
-        return (new double[]{xgrid, ygrid});
-         */
-        //--------------------------------------------------------------------
-        // Physical space (lat, lon) => Computational space (x, y)
-        boolean found1 = false;
-        boolean found2 = false;
+        shft = 0 - jmin + imax - imin;
+        for (int j = jmin; j <= (jmax - 1); j++) {
+            xb[j + shft] = lonRho[j][imax];
+            yb[j + shft] = latRho[j][imax];
+        }
+        shft = jmax - jmin + 2 * imax - imin;
+        for (int i = imax; i >= (imin + 1); i--) {
+            xb[shft - i] = lonRho[jmax][i];
+            yb[shft - i] = latRho[jmax][i];
+        }
+        shft = 2 * jmax - jmin + 2 * (imax - imin);
+        for (int j = jmax; j >= (jmin + 1); j--) {
+            xb[shft - j] = lonRho[j][imin];
+            yb[shft - j] = latRho[j][imin];
+        }
+        xb[nb] = xb[0];
+        yb[nb] = yb[0];
 
-        int ci = nx / 2;
-        int cj = ny / 2;
-        int di = ci / 2;
-        int dj = cj / 2;
+        //---------------------------------------------
+        //Check if {lon, lat} is inside polygone
+        int inc, crossings;
+        double dx1, dx2, dxy;
+        crossings = 0;
 
-        // Find the closet grid point to {lat, lon}
-        while (!(found1 && found2)) {
-            int i = ci;
-            int j = cj;
-            double dmin = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i]);
-            for (int ii = -di; ii <= di; ii += di) {
-                if ((i + ii >= 0) && (i + ii < nx)) {
-                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j], longitude[i + ii]);
-                    if (d < dmin) {
-                        dmin = d;
-                        ci = i + ii;
-                        cj = j;
-                    }
+        for (int k = 0; k < nb; k++) {
+            if (xb[k] != xb[k + 1]) {
+                dx1 = lon - xb[k];
+                dx2 = xb[k + 1] - lon;
+                dxy = dx2 * (lat - yb[k]) - dx1 * (yb[k + 1] - lat);
+                inc = 0;
+                if ((xb[k] == lon) & (yb[k] == lat)) {
+                    crossings = 1;
+                } else if (((dx1 == 0.) & (lat >= yb[k]))
+                        | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
+                    inc = 1;
+                } else if ((dx1 * dx2 > 0.) & ((xb[k + 1] - xb[k]) * dxy >= 0.)) {
+                    inc = 2;
                 }
-            }
-            for (int jj = -dj; jj <= dj; jj += dj) {
-                if ((j + jj >= 0) && (j + jj < ny)) {
-                    double d = DatasetUtil.geodesicDistance(lat, lon, latitude[j + jj], longitude[i]);
-                    if (d < dmin) {
-                        dmin = d;
-                        ci = i;
-                        cj = j + jj;
-                    }
-                }
-            }
-            if (i == ci && j == cj) {
-                found1 = true;
-                if (dj == 1 && di == 1) {
-                    found2 = true;
+                if (xb[k + 1] > xb[k]) {
+                    crossings += inc;
                 } else {
-                    di = (int) Math.max(1, di / 2);
-                    dj = (int) Math.max(1, di / 2);
-                    found1 = false;
+                    crossings -= inc;
                 }
             }
         }
-
-        // Refine within cell (ci, cj) by linear interpolation
-        int cip1 = ci + 1 > nx - 1 ? 0 : ci + 1;
-        int cim1 = ci - 1 < 0 ? nx - 1 : ci - 1;
-        int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
-        int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
-        // xgrid
-        double xgrid;
-        if (lon >= longitude[ci]) {
-            double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
-                    ? 360.d + (longitude[cip1] - longitude[ci])
-                    : longitude[cip1] - longitude[ci];
-            double deltax = (lon - longitude[ci]) / dx;
-            xgrid = xTore(ci + deltax);
-        } else {
-            double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d)
-                    ? 360.d + (longitude[ci] - longitude[cim1])
-                    : longitude[ci] - longitude[cim1];
-            double deltax = (lon - longitude[cim1]) / dx;
-            xgrid = xTore(cim1 + deltax);
+        if (crossings == 0) {
+            isInPolygone = false;
         }
-        // ygrid
-        double ygrid;
-        if (lat >= latitude[cj]) {
-            double dy = latitude[cjp1] - latitude[cj];
-            double deltay = (lat - latitude[cj]) / dy;
-            ygrid = (double) cj + deltay;
-        } else {
-            double dy = latitude[cj] - latitude[cjm1];
-            double deltay = (lat - latitude[cjm1]) / dy;
-            ygrid = (double) cjm1 + deltay;
-        }
-
-        return (new double[]{xgrid, ygrid});
-
+        return (isInPolygone);
     }
 
     /**
@@ -1590,17 +1712,9 @@ public class Mercator_3D extends AbstractDataset {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-
-        /* NEMO way 
-        return ((pGrid[0] > (nx - 3.0f))
-                || (pGrid[0] < 2.0f)
-                || (pGrid[1] > (ny - 3.0f))
-                || (pGrid[1] < 2.0f));
-         */
-        // barrier.n, 2017-08-02> adding the last two lines for zonal checking */
-        return ((pGrid[0] > (nx - 2.d)) || ((pGrid[0] < 1.d))
+        /* barrier.n, 2017-08-02> adding the last two lines for zonal checking */
+        return ((!xTore && (pGrid[0] > (nx - 2.d))) || ((!xTore && (pGrid[0] < 1.d)))
                 || (pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
-
     }
 
 //////////
@@ -1695,7 +1809,7 @@ public class Mercator_3D extends AbstractDataset {
      */
     @Override
     public double getLat(int i, int j) {
-        return latitude[j];
+        return latRho[j][i];
     }
 
     /**
@@ -1707,7 +1821,7 @@ public class Mercator_3D extends AbstractDataset {
      */
     @Override
     public double getLon(int i, int j) {
-        return longitude[i];
+        return lonRho[j][i];
     }
 
     /**
@@ -1794,11 +1908,63 @@ public class Mercator_3D extends AbstractDataset {
 
     @Override
     public double xTore(double x) {
+        if (xTore) {
+            if (x < -0.5d) {
+                return nx + x;
+            }
+            if (x > nx - 0.5d) {
+                return x - nx;
+            }
+        }
         return x;
     }
 
     @Override
     public double yTore(double y) {
         return y;
+    }
+
+    private void compute_e3t() throws IOException {
+
+        String str_e3t0 = getParameter("field_var_e3t0");
+        String str_e3tps = getParameter("field_var_e3tps");
+        String str_mbathy = getParameter("field_var_mbathy");
+
+        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
+
+        // Open NetCDF file
+        NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
+
+        // Read e3t_0 double[nz]
+        Array e3t0 = nc.findVariable(str_e3t0).read().reduce().flip(0);
+
+        // Read e3t_ps double[ny][nx]
+        Array e3tps = nc.findVariable(str_e3tps).read().reduce();
+
+        // Read mbathy int[ny][nx]
+        Array mbathy = nc.findVariable(str_mbathy).read().reduce();
+
+        // Reconstruct e3t_ps
+        e3t = new double[nz][ny][nx];
+        Index ind_e3t0 = e3t0.getIndex();
+        Index ind_e3tps = e3tps.getIndex();
+        Index ind_mbathy = mbathy.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                // First we initialize e3t with e3t_0
+                for (int k = 0; k < nz; k++) {
+                    e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k + 1));
+                }
+                // From NEMO to Ichthyop grid, we remove the deepest z level
+                // as it is always ocean bottom in NEMO and we flip z-axis
+                // So the index of mbathy must be converted into Ichthyop grid
+                int km = nz - mbathy.getInt(ind_mbathy.set(j + jpo, i + ipo)) - 1;
+                // Next we correct the depth of the layer adjacent to the ocean
+                // bottom with e3t_ps
+                if (km > 0) {
+                    e3t[km][j][i] = e3tps.getDouble(ind_e3tps.set(j + jpo, i + ipo));
+                }
+            }
+        }
     }
 }
