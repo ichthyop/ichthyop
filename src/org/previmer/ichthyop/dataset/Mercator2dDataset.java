@@ -340,7 +340,6 @@ public class Mercator2dDataset extends AbstractDataset {
         } catch (NullPointerException ex ) {
             xTore = true;
         }
-
     }
 
     /**
@@ -459,12 +458,21 @@ public class Mercator2dDataset extends AbstractDataset {
     @Override
     public boolean isInWater(int i, int j) {
         int ci = i;
-        if (ci < 0) {
-            ci = nx - 1;
+        if (xTore) {
+            if (ci < 0) {
+                ci = nx - 1;
+            }
+            if (ci > nx - 1) {
+                ci = 0;
+            }
         }
-        if (ci > nx - 1) {
-            ci = 0;
-        }
+        
+        ci = Math.max(ci, 0);
+        j = Math.max(j, 0);
+        
+        ci = Math.min(ci, nx - 1);
+        j = Math.min(j, ny - 1);
+        
         return !Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]);
     }
 
