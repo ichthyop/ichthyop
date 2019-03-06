@@ -81,11 +81,11 @@ public class NemoDataset extends AbstractDataset {
     /**
      * Depth at rho point
      */
-    private double[] gdepT;
+    private double[][][] gdepT;
     /**
      * Depth at w point. The free surface elevation is disregarded.
      */
-    private double[] gdepW;
+    private double[][][] gdepW;
     /**
      * Geographical boundary of the domain
      */
@@ -268,7 +268,7 @@ public class NemoDataset extends AbstractDataset {
             for (int i = 0; i < nx; i++) {
                 // First we initialize e3t with e3t_0
                 for (int k = 0; k < nz; k++) {
-                    e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k+1));
+                    e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k + 1));
                 }
                 // From NEMO to Ichthyop grid, we remove the deepest z level
                 // as it is always ocean bottom in NEMO and we flip z-axis
@@ -344,44 +344,137 @@ public class NemoDataset extends AbstractDataset {
 
     private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
 
-        Index index;
+        Index index, indexbis;
         Array array;
-        /*
-         * Read gdept
-         */
+        boolean depth3d;
+
         array = nc.findVariable(str_gdepT).read().reduce().flip(0);
-        index = array.getIndex();
-        gdepT = new double[nz];
-        for (int k = 0; k < nz; k++) {
-            index.set(k + 1);
-            gdepT[k] = array.getDouble(index);
-        }
-        /*
-         * Read or compute gdepw
-         */
-        gdepW = new double[nz + 1];
-        if (null != nc.findVariable(str_gdepW)) {
-            getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
-            // Read gdepw
-            array = nc.findVariable(str_gdepW).read().reduce().flip(0);
-            index = array.getIndex();
-            for (int k = 0; k < nz + 1; k++) {
-                index.set(k); // barrier.n
-                gdepW[k] = array.getDouble(index);
-            }
+
+        // If depthT array is 3D, then use 3d depth array
+        // if depthT is 1D, use 1D array to reconstruct 3D one
+        if (array.getShape().length == 3) {
+            depth3d = true;
         } else {
-            // Compute gdepw (approximation)
-            // Reads the T depth from NetCDF file
-            getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
-            array = nc.findVariable(str_gdepT).read().reduce().flip(0);
+            depth3d = false;
+        }
+
+        index = array.getIndex();
+        gdepT = new double[nz][ny][nx];
+        gdepW = new double[nz + 1][ny][nx];
+
+        if (!depth3d) {
+
+            getLogger().log(Level.INFO, "Depth array are 1D arrays (z dimension)");
+
+            // Extraction of depth at T points
             for (int k = 0; k < nz; k++) {
-                index.set(k);
-                gdepW[k] = array.getDouble(index);
                 index.set(k + 1);
-                gdepW[k] += array.getDouble(index);
-                gdepW[k] *= 0.5;
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        gdepT[k][j][i] = array.getDouble(index);
+                    }
+                }
             }
-            gdepW[nz] = 0.;
+
+            /*
+            * Read or compute gdepw
+             */
+            if (null != nc.findVariable(str_gdepW)) {
+                getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
+                // Read gdepw
+                array = nc.findVariable(str_gdepW).read().reduce().flip(0);
+                index = array.getIndex();
+                for (int k = 0; k < nz + 1; k++) {
+                    index.set(k); // barrier.n
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            gdepW[k][j][i] = array.getDouble(index);
+                        }
+                    }
+                }
+            } else {
+                // Compute gdepw (approximation)
+                // Reads the T depth from NetCDF file
+                getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
+
+                array = nc.findVariable(str_gdepT).read().reduce().flip(0);
+                indexbis = array.getIndex();
+
+                for (int k = 0; k < nz; k++) {
+                    index.set(k);
+                    indexbis.set(k + 1);
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            gdepW[k][j][i] = array.getDouble(index);
+                            gdepW[k][j][i] += array.getDouble(indexbis);
+                            gdepW[k][j][i] *= 0.5;
+                        }   // end of i 
+                    }  // end of j 
+                }   // end of k 
+
+                // surface condition on W
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        gdepW[nz][j][i] = 0.;
+                    }
+                }
+            }
+
+        }
+
+        if (depth3d) {
+
+            getLogger().log(Level.INFO, "Depth array are 3D arrays (z, y, z dimensions)");
+
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        index.set(k + 1, j + jpo, i + ipo);
+                        gdepT[k][j][i] = array.getDouble(index);
+                    }
+                }
+            }
+
+            /*
+            * Read or compute gdepw
+             */
+            if (null != nc.findVariable(str_gdepW)) {
+                getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
+                // Read gdepw
+                array = nc.findVariable(str_gdepW).read().reduce().flip(0);
+                index = array.getIndex();
+                for (int k = 0; k < nz + 1; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            index.set(k, j + jpo, i + ipo); // barrier.n
+                            gdepW[k][j][i] = array.getDouble(index);
+                        }
+                    }
+                }
+            } else {
+                // Compute gdepw (approximation)
+                // Reads the T depth from NetCDF file
+                getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
+                array = nc.findVariable(str_gdepT).read().reduce().flip(0);
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            index.set(k, j, i);
+                            gdepW[k][j][i] = array.getDouble(index);
+                            index.set(k + 1, j, i);
+                            gdepW[k][j][i] += array.getDouble(index);
+                            gdepW[k][j][i] *= 0.5;
+                        }   // end of i 
+                    }  // end of j 
+                }   // end of k 
+
+                // surface condition on W
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        gdepW[nz][j][i] = 0.;
+                    }
+                }
+            }
         }
     }
 
@@ -529,21 +622,25 @@ public class NemoDataset extends AbstractDataset {
                             * (.5d - (double) kk - dz));
                     CO += co;
                     index.set(k + kk, j + jj, i + ii);
-                    x = (1.d - x_euler) * w_tp0.getDouble(index)
-                            + x_euler * w_tp1.getDouble(index);
-                    dw += 2.d * x * co
-                            / (gdepW[Math.max(k + kk - 1, 0)]
-                            - gdepW[Math.min(k + kk + 1, nz)]);
+
+                    if (!(Double.isNaN(w_tp0.getDouble(index)))) {
+
+                        x = (1.d - x_euler) * w_tp0.getDouble(index)
+                                + x_euler * w_tp1.getDouble(index);
+
+                        dw += 2.d * x * co
+                                / (gdepW[Math.max(k + kk - 1, 0)][j + jj][i + ii]
+                                - gdepW[Math.min(k + kk + 1, nz)][j + jj][i + ii]);
+                    }
+
                 }
             }
         }
+
         if (CO != 0) {
             dw /= CO;
         }
 
-        /*double dwr = get_dWrz(pGrid, time);
-         float err = (float) Math.abs((dwr - dw) / dwr);
-         System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);*/
         return dw;
     }
 
@@ -650,7 +747,7 @@ public class NemoDataset extends AbstractDataset {
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
 //                    Hvom[k][j][i] = v_tp1[k][j][i] * e1v[j][i] * Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                    index.set(k, j, i); 
+                    index.set(k, j, i);
                     Hvom[k][j][i] = Double.isNaN(v_tp1.getDouble(index))
                             ? 0.f
                             : v_tp1.getDouble(index) * e1v[j][i] * e3v[k][j][i];
@@ -672,7 +769,7 @@ public class NemoDataset extends AbstractDataset {
                  * cell of the column in water.
                  */
                 int k0 = 0;
-                
+
                 /*
                  * pverley 15/02/2011
                  * Ensured that w(0:k0, :, :) = 0;
@@ -681,32 +778,30 @@ public class NemoDataset extends AbstractDataset {
                     w_double[k][j][i] = 0.d;
                     //System.out.println("k: " + k + " k0: " + k0 + " wr: " + wr_   tp1[k][j][i] + " " + isInWater(k, j, i));
                 }
-                for (int k = k0 + 1; k < nz; k++) {     
+                for (int k = k0 + 1; k < nz; k++) {
                     w_double[k][j][i] = w_double[k - 1][j][i]
                             - (Huon[k - 1][j][i] - Huon[k - 1][j][i - 1] + Hvom[k - 1][j][i] - Hvom[k - 1][j - 1][i]);
                 }
-                
+
                 w_double[nz][j][i] = 0.d;  // Because particle at the surface can not "fly" (must remember my GFD classes).
             }
         }
         //---------------------------------------------------
         // Boundary Conditions
-        
-        /*
+
         for (int k = nz + 1; k-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 w_double[k][j][0] = w_double[k][j][1];
                 w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
             }
-        }
+        }        
         for (int k = nz + 1; k-- > 0;) {
             for (int i = nx; i-- > 0;) {
                 w_double[k][0][i] = w_double[k][1][i];
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
         }
-        */
-
+        
         //---------------------------------------------------
         // w * dxu * dyv
         //float[][][] w = new float[nz + 1][ny][nx];
@@ -1067,20 +1162,6 @@ public class NemoDataset extends AbstractDataset {
         }
     }
 
-    /*
-     * Computes the depth of the specified sigma level at the x-y particle
-     * location.
-     *
-     * @param xRho a double, x-coordinate of the grid point
-     * @param yRho a double, y-coordinate of the grid point
-     * @param k an int, the index of the sigma level
-     * @return a double, the depth [meter] at (x, y, k)
-     */
-    public double getDepth(int k) {
-
-        return -1.d * gdepT[k];
-    }
-
     /**
      * Determines whether or not the specified grid cell(i, j) is in water.
      *
@@ -1155,6 +1236,9 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public double depth2z(double x, double y, double depth) {
 
+        int j = (int) Math.floor(y);
+        int i = (int) Math.floor(x);
+
         if (depth > 0) {
             depth = 0.d;
         }
@@ -1166,23 +1250,23 @@ public class NemoDataset extends AbstractDataset {
         /* case particle is going straight up to surface, due to strong
          * buoyancy for instance.
          */
-        if (depth < gdepT[nz - 1]) {
+        if (depth < gdepT[nz - 1][j][i]) {
             //System.out.println("depth: " + depth + " ==> z: " + (nz - 1) + " gdepT[nz - 1]: " + gdepT[nz - 1]);
             return (nz - 1);
         }
         for (int k = nz - 1; k > 0; k--) {
             //System.out.println("t1 " + z_w[k] + " " + (float)depth + " " + z_rho[k]);
-            if (depth <= gdepW[k] && depth > gdepT[k]) {
-                zRho = k + 0.d - 0.5d * Math.abs((gdepT[k] - depth) / (gdepT[k] - gdepW[k]));
+            if (depth <= gdepW[k][j][i] && depth > gdepT[k][j][i]) {
+                zRho = k + 0.d - 0.5d * Math.abs((gdepT[k][j][i] - depth) / (gdepT[k][j][i] - gdepW[k][j][i]));
                 //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k]: " + gdepW[k] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
             }
             //System.out.println("t2 " + z_rho[k] + " " + (float)depth + " " + z_w[k + 1]);
-            if (depth <= gdepT[k] && depth > gdepW[k + 1]) {
+            if (depth <= gdepT[k][j][i] && depth > gdepW[k + 1][j][i]) {
                 zRho = k + 0.d
                         + 0.5d
-                        * Math.abs((gdepT[k] - depth)
-                                / (gdepW[k + 1] - gdepT[k]));
+                        * Math.abs((gdepT[k][j][i] - depth)
+                                / (gdepW[k + 1][j][i] - gdepT[k][j][i]));
                 //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k + 1]: " + gdepW[k + 1] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
             }
@@ -1210,15 +1294,17 @@ public class NemoDataset extends AbstractDataset {
 
         double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         int k = (int) Math.round(kz);
+        int j = (int) Math.floor(y);
+        int i = (int) Math.floor(x);
         dz = z - k;
 
         if (dz < 0) { // >= ?
-            depth = gdepT[k]
-                    + 2 * Math.abs(dz * (gdepT[k] - gdepW[k]));
+            depth = gdepT[k][j][i]
+                    + 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k][j][i]));
             //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k]: " + gdepW[k]) ;
         } else {
-            depth = gdepT[k]
-                    - 2 * Math.abs(dz * (gdepT[k] - gdepW[k + 1]));
+            depth = gdepT[k][j][i]
+                    - 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k + 1][j][i]));
             //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k + 1]: " + gdepW[k + 1]);
         }
         return -depth;
