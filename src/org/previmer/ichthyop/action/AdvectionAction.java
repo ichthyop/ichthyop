@@ -60,12 +60,12 @@ public class AdvectionAction extends AbstractAction {
     }
 
     @Override
-    public void execute(IParticle particle) {
+    public void execute(IParticle particle) {       
         if (isForward) {
             advectForward(particle, getSimulationManager().getTimeManager().getTime());
         } else {
             advectBackward(particle, getSimulationManager().getTimeManager().getTime());
-        }
+        } 
     }
 
     private void advectForward(IParticle particle, double time) throws
@@ -93,18 +93,18 @@ public class AdvectionAction extends AbstractAction {
         dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
         if (Math.abs(dU[0]) > THRESHOLD_CFL) {
             getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
-        }
+        }       
         dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
         if (Math.abs(dU[1]) > THRESHOLD_CFL) {
             getLogger().log(Level.WARNING, "CFL broken for V {0}", (float) dU[1]);
-        }
+        }       
         if (dim > 2) {
             dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time) * dt;
             if (Math.abs(dU[2]) > THRESHOLD_CFL) {
                 getLogger().log(Level.WARNING, "CFL broken for W {0}", (float) dU[2]);
-            }
+            }            
         }
-
+           
         return dU;
     }
 
@@ -135,7 +135,7 @@ public class AdvectionAction extends AbstractAction {
                 return;
             }
             mvt = advectEuler(pgrid, time, dt);
-        } else {
+        } else {           
             mvt = advectRk4(pgrid = particle.getGridCoordinates(), time, dt);
             for (int i = 0; i < mvt.length; i++) {
                 pgrid[i] += mvt[i];
@@ -146,15 +146,15 @@ public class AdvectionAction extends AbstractAction {
             }
             mvt = advectRk4(pgrid, time, dt);
         }
-
+        
         if (!horizontal) {
             mvt[0] = 0;
-            mvt[1] = 1;
+            mvt[1] = 0;
         }
         if (!vertical && mvt.length > 2) {
             mvt[2] = 0;
-        }
-        particle.increment(mvt);
+        }        
+        particle.increment(mvt);       
     }
 
     /**
@@ -176,7 +176,7 @@ public class AdvectionAction extends AbstractAction {
         double[] pk = new double[dim];
 
         double[] k1 = advectEuler(p0, time, dt);
-
+           
         for (int i = 0; i < dim; i++) {
             pk[i] = p0[i] + .5d * k1[i];
         }
