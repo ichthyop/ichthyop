@@ -114,6 +114,12 @@ public class OscarDataset extends AbstractDataset {
      */
     boolean xTore = true;
 
+    private boolean use_constant_mask;
+    private String mask_var;
+    private String mask_file;
+    private double[][] mask_array;
+    
+    
     @Override
     void loadParameters() {
 
@@ -132,6 +138,17 @@ public class OscarDataset extends AbstractDataset {
         } catch (NullPointerException ex) {
             xTore = true;
         }
+        
+        this.use_constant_mask = false;
+        if (this.findParameter("use_constant_mask")) {
+            this.use_constant_mask = Boolean.valueOf(getParameter("use_constant_mask"));
+        }
+
+        if (this.use_constant_mask) {
+            this.mask_file = getParameter("mask_file");
+            this.mask_var = getParameter("mask_var");
+        }
+        
     }
 
     @Override
@@ -166,6 +183,13 @@ public class OscarDataset extends AbstractDataset {
             double lat2 = getLat(0, Math.min(j + 1, nlat - 1));
             dlat[j] = 0.5d * DatasetUtil.geodesicDistance(lat1, 0, lat2, 0);
         }
+
+        if (use_constant_mask) {
+            NetcdfFile ncMask = DatasetUtil.openFile(this.mask_file, true);
+            mask_array = (double[][]) ncMask.findVariable(mask_var).read().flip(0).copyToNDJavaArray();
+            ncMask.close();
+        }
+        
     }
 
     /**
@@ -391,7 +415,21 @@ public class OscarDataset extends AbstractDataset {
         if (ci > nlon - 1) {
             ci -= 1080;
         }
-        return !Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]);
+        
+        if (use_constant_mask) {
+            try {
+                return (mask_array[j][ci] == 1);
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                return false;
+            }
+        }
+        
+        try {
+            return (!Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]));
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return false;
+        }
+        
     }
 
     @Override
