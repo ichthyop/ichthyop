@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
-import static org.previmer.ichthyop.dataset.Mars3dCommon.z_rho_cst;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
@@ -201,7 +200,7 @@ public class Mercator_3D extends AbstractDataset {
         e3t = read_e3_field(nc, stre3t);
         e3u = compute_e3u(e3t);
         e3v = compute_e3v(e3t);
-
+        
         if (!isGridInfoInOneFile) {
             nc.close();
             nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
@@ -282,9 +281,6 @@ public class Mercator_3D extends AbstractDataset {
 
     private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
 
-        Index index;
-        Array array;
-
         gdepT = new double[nz][ny][nx];
         gdepW = new double[nz + 1][ny][nx];
 
@@ -353,7 +349,7 @@ public class Mercator_3D extends AbstractDataset {
     }
 
     /**
-     * Advects the particle with the model velocity vector, using a Forward
+     * Advects the particle with the model velocity vector, using a Forwardf
      * Euler scheme. Let's see how it works with the example of the Zonal
      * component.
      * <pre>
@@ -675,7 +671,7 @@ public class Mercator_3D extends AbstractDataset {
             }
         }
         //---------------------------------------------------
-        // Boundary Conditions
+        // Boundary Conditions       
         for (int k = nz + 1; k-- > 0;) {
             for (int j = ny; j-- > 0;) {
                 w_double[k][j][0] = w_double[k][j][1];
@@ -688,7 +684,7 @@ public class Mercator_3D extends AbstractDataset {
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
         }
-
+        
         //---------------------------------------------------
         // w * dxu * dyv
         //float[][][] w = new float[nz + 1][ny][nx];
@@ -1181,8 +1177,8 @@ public class Mercator_3D extends AbstractDataset {
         }
         depth = Math.abs(depth);
         
-        int i = (int) Math.round(x);
-        int j = (int) Math.round(y);
+        int i = (int) Math.floor(x);
+        int j = (int) Math.floor(y);
             
         //-----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
@@ -1238,8 +1234,8 @@ public class Mercator_3D extends AbstractDataset {
         int k = (int) Math.round(kz);
         dz = z - k;
         
-        int i = (int) Math.round(x);
-        int j = (int) Math.round(y);
+        int i = (int) Math.floor(x);
+        int j = (int) Math.floor(y);
 
         if (dz < 0) { // >= ?
             depth = gdepT[k][j][i]
