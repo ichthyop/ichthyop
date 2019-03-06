@@ -93,6 +93,11 @@ public class Mercator2dDataset extends AbstractDataset {
     private double dyv;
     private List<String> listUFiles, listVFiles;
     private NetcdfFile ncU, ncV;
+    
+    private boolean use_constant_mask;
+    private String mask_var;
+    private String mask_file;
+    private double [][] mask_array;
 
     /**
      * Whether horizontal periodicity should be applied
@@ -123,6 +128,12 @@ public class Mercator2dDataset extends AbstractDataset {
         dxu = new double[ny];
         for (int j = 0; j < ny; j++) {
             dxu[j] = dyv * Math.cos(Math.PI * latitude[j] / 180.d);
+        }
+        
+        if(use_constant_mask) {
+            NetcdfFile ncMask = DatasetUtil.openFile(this.mask_file, true);
+            mask_array = (double[][]) ncMask.findVariable(mask_var).read().copyToNDJavaArray();
+            ncMask.close();
         }
     }
 
@@ -340,6 +351,17 @@ public class Mercator2dDataset extends AbstractDataset {
         } catch (NullPointerException ex ) {
             xTore = true;
         }
+          
+        this.use_constant_mask = false;
+        if (this.findParameter("use_constant_mask")) {
+            this.use_constant_mask = Boolean.valueOf(getParameter("use_constant_mask"));
+        }
+
+        if (this.use_constant_mask) {
+            this.mask_file = getParameter("mask_file");
+            this.mask_var = getParameter("mask_var");
+        }
+          
     }
 
     /**
@@ -467,13 +489,21 @@ public class Mercator2dDataset extends AbstractDataset {
             }
         }
         
-        ci = Math.max(ci, 0);
-        j = Math.max(j, 0);
-        
-        ci = Math.min(ci, nx - 1);
-        j = Math.min(j, ny - 1);
-        
-        return !Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]);
+        if (use_constant_mask) {
+            try {
+                return (mask_array[j][ci] == 1);
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                return false;
+            }
+        }
+    
+        //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
+        try {
+            return (!Double.isNaN(u_tp1[j][ci]) && !Double.isNaN(v_tp1[j][ci]));
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return false;
+        }
+
     }
 
     /**
