@@ -26,8 +26,8 @@ public class BuoyancyAction extends AbstractAction {
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
-    final private static double MEAN_MINOR_AXIS = 0.05f;
-    final private static double MEAN_MAJOR_AXIS = 0.14f;
+    private static double MEAN_MINOR_AXIS = 0.05f;
+    private static double MEAN_MAJOR_AXIS = 0.14f;
     final private static double LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS);
     final private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
     final private static double g = 980.0f; // [cm/s2]
@@ -72,6 +72,17 @@ public class BuoyancyAction extends AbstractAction {
 
     @Override
     public void loadParameters() throws Exception {
+        
+        String key = "mean_major_axis";
+        if (!isNull(key)) {
+              MEAN_MAJOR_AXIS = Double.valueOf(getParameter(key));
+        }
+        
+        key = "mean_minor_axis";
+        if (!isNull(key)) {
+            MEAN_MINOR_AXIS = Double.valueOf(getParameter(key));
+        }
+        
         particleDensity = Float.valueOf(getParameter("particle_density"));
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
