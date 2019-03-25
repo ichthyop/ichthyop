@@ -26,9 +26,9 @@ public class BuoyancyAction extends AbstractAction {
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
-    private static double MEAN_MINOR_AXIS = 0.05f;
-    private static double MEAN_MAJOR_AXIS = 0.14f;
-    final private static double LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS);
+    private static double MEAN_MINOR_AXIS = 0.05f;   // l 
+    private static double MEAN_MAJOR_AXIS = 0.14f;   // d
+    final private static double LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS + 0.5f);   // log value (constant)
     final private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
     final private static double g = 980.0f; // [cm/s2]
     final private static double DR350 = 28.106331f;
@@ -213,8 +213,9 @@ public class BuoyancyAction extends AbstractAction {
          */
         waterDensity = waterDensity(sal, tp);
 
-        return (((g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * (LOGN + 0.5f)
-                * (waterDensity - particleDensity)) / 100.0f) * dt);
+        double wpart =  g * MEAN_MINOR_AXIS * MEAN_MINOR_AXIS / (24.0f * MOLECULAR_VISCOSITY * waterDensity) * LOGN * (waterDensity - particleDensity) / 100.0f;
+        return wpart * dt;
+        
     }
 
     /**
