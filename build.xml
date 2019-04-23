@@ -74,7 +74,7 @@
     <target name="-post-jar">
 
     <!-- barrier.n: create zip files for sources-->
-       <zip update="true" compress="${jar.compress}" file="${dist.dir}/ichthyop-v3u3_src.zip">
+    <zip update="true" compress="${jar.compress}" file="${dist.dir}/${application.title}_src.zip">
            <fileset dir="${basedir}">
                <include name="src/**"/>
                <include name="lib/**"/>
@@ -86,7 +86,7 @@
        </zip>
 
     <!-- barrier.n: create zip files for java jar-->
-       <zip update="true" compress="${jar.compress}" file="${dist.dir}/ichthyop-v3u3.zip">
+    <zip update="true" compress="${jar.compress}" file="${dist.dir}/${application.title}.zip">
            <fileset dir="${basedir}">
                <include name="lib/**"/>
                <include name="filePath.txt"/>
