@@ -81,7 +81,7 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Name of the Variable in NetCDF file
      */
-    private String strU, strV, strTime;
+    private String strU, strV, strTime, strT;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -91,8 +91,8 @@ public class Mercator2dDataset extends AbstractDataset {
      */
     private double[] dxu;
     private double dyv;
-    private List<String> listUFiles, listVFiles;
-    private NetcdfFile ncU, ncV;
+    private List<String> listUFiles, listVFiles, listTFiles;
+    private NetcdfFile ncU, ncV, ncT;
     
     private boolean use_constant_mask;
     private String mask_var;
@@ -322,6 +322,12 @@ public class Mercator2dDataset extends AbstractDataset {
         if (!skipSorting()) {
             DatasetUtil.sort(listVFiles, strTime, timeArrow());
         }
+        
+        listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
+        if (!skipSorting()) {
+            DatasetUtil.sort(listTFiles, strTime, timeArrow());
+        }
+        
         // Open first file
         open(0);
         readConstantField();
@@ -472,6 +478,10 @@ public class Mercator2dDataset extends AbstractDataset {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
+        }
+        
+        for (RequiredVariable variable : requiredVariables.values()) {
+            variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
@@ -734,6 +744,11 @@ public class Mercator2dDataset extends AbstractDataset {
             ncV.close();
         }
         ncV = DatasetUtil.openFile(listVFiles.get(index), true);
+        
+        if (ncT != null) {
+            ncT.close();
+        }
+        ncT = DatasetUtil.openFile(listTFiles.get(index), true);
 
         nbTimeRecords = ncU.findVariable(strTime).getShape(0);
     }
