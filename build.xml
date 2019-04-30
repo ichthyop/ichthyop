@@ -88,7 +88,7 @@
     <!-- barrier.n: create zip files for java jar-->
     <zip update="true" compress="${jar.compress}" file="${dist.dir}/${application.title}.zip">
            <fileset dir="${basedir}">
-               <include name="lib/**"/>
+               <include name="dist/lib/**"/>
                <include name="filePath.txt"/>
                <include name="${dist.jar}"/>
            </fileset>
