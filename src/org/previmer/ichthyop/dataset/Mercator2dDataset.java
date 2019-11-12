@@ -323,9 +323,11 @@ public class Mercator2dDataset extends AbstractDataset {
             DatasetUtil.sort(listVFiles, strTime, timeArrow());
         }
         
-        listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
-        if (!skipSorting()) {
-            DatasetUtil.sort(listTFiles, strTime, timeArrow());
+        if (this.findParameter("gridt_pattern")) {
+            listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
+            if (!skipSorting()) {
+                DatasetUtil.sort(listTFiles, strTime, timeArrow());
+            }
         }
         
         // Open first file
@@ -480,8 +482,10 @@ public class Mercator2dDataset extends AbstractDataset {
             throw ioex;
         }
         
-        for (RequiredVariable variable : requiredVariables.values()) {
-            variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
+        if (this.findParameter("gridt_pattern")) {
+            for (RequiredVariable variable : requiredVariables.values()) {
+                variable.nextStep(readVariable(ncT, variable.getName(), rank), time_tp1, dt_HyMo);
+            }
         }
 
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
@@ -745,10 +749,12 @@ public class Mercator2dDataset extends AbstractDataset {
         }
         ncV = DatasetUtil.openFile(listVFiles.get(index), true);
         
-        if (ncT != null) {
-            ncT.close();
+        if (this.findParameter("gridt_pattern")) {
+            if (ncT != null) {
+                ncT.close();
+            }
+            ncT = DatasetUtil.openFile(listTFiles.get(index), true);
         }
-        ncT = DatasetUtil.openFile(listTFiles.get(index), true);
 
         nbTimeRecords = ncU.findVariable(strTime).getShape(0);
     }
