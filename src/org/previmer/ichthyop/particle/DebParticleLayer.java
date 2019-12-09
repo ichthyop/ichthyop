@@ -25,10 +25,10 @@ public class DebParticleLayer extends ParticleLayer {
     /*
      * DEB PARAMETERS
      */
-    // Variables
-    private double E; // Réserve
+    private double E; // Reserve
     private double V; // Structure
-    private double E_R; // Maturité
+    private double E_R; // Reproduction buffer
+    private double E_H;  // Cumulated energy invested into dev.
 
     public DebParticleLayer(IParticle particle) {
         super(particle);
@@ -61,7 +61,15 @@ public class DebParticleLayer extends ParticleLayer {
     }
 
     public void setE_R(double E_R) {
-
         this.E_R = E_R;
     }
+    
+    public double getE_H() {
+        return E_H;
+    }
+
+    public void setE_H(double E_H) {
+        this.E_H = E_H;
+    }
+    
 }
