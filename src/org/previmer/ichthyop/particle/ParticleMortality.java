@@ -25,11 +25,13 @@ public enum ParticleMortality {
     ALIVE(0),
     DEAD_COLD(1),
     OUT_OF_DOMAIN(2),
-    BEACHED(4),
     OLD(3),
+    BEACHED(4),
     STARVATION(5),
-    DEAD_HOT(6);
-    
+    DEAD_HOT(6),
+    DEAD_FRESH(7),
+    DEAD_SALINE(8);
+
     private int code = 0;
 
     ParticleMortality(int code) {

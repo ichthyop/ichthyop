@@ -24,72 +24,64 @@ import org.previmer.ichthyop.particle.StageParticleLayer;
  */
 public class LethalSaltAction extends AbstractAction {
 
-    private float[] coldLethalTp, hotLethalTp;
+    private float[] freshLethalSal, salineLethalSal;
     private float[] ages;
-    private boolean FLAG_GROWTH, FLAG_LETHAL_TEMP_FUNCTION;
-    private String temperature_field;
+    private boolean FLAG_LETHAL_SALT_FUNCTION;
+    private String salinity_field;
 
     @Override
     public void loadParameters() throws Exception {
 
-        FLAG_GROWTH = getSimulationManager().getActionManager().isEnabled("action.growth");
-        temperature_field = getParameter("temperature_field");
-        if (!FLAG_GROWTH) {
-            /*
+        salinity_field = getParameter("salinity_field");
+
+        /*
              * Check whether there is a lethal temperature CSV file
-             */
-            String lethal_temp_file;
-            try {
-                lethal_temp_file = getParameter("lethal_temp_file");
-            } catch (Exception ex) {
-                lethal_temp_file = null;
-            }
-            if (null != lethal_temp_file && !lethal_temp_file.isEmpty()) {
-                String pathname = IOTools.resolveFile(lethal_temp_file);
-                File f = new File(pathname);
-                if (!f.isFile()) {
-                    throw new FileNotFoundException("Lethal temperature file " + pathname + " not found.");
-                }
-                if (!f.canRead()) {
-                    throw new IOException("Lethal temperature file " + pathname + " cannot be read.");
-                }
-                loadLethalTemperatures(pathname);
-                FLAG_LETHAL_TEMP_FUNCTION = true;
-            } else {
-                /*
-                 * If not just load constant lethal temperature egg
-                 */
-                ages = new float[1];
-                coldLethalTp = new float[]{Float.valueOf(getParameter("cold_lethal_temperature_egg"))};
-                hotLethalTp = new float[]{Float.valueOf(getParameter("hot_lethal_temperature_egg"))};
-                FLAG_LETHAL_TEMP_FUNCTION = false;
-            }
-        } else {
-            coldLethalTp = new float[]{
-                Float.valueOf(getParameter("cold_lethal_temperature_egg")),
-                Float.valueOf(getParameter("cold_lethal_temperature_larva"))};
-            hotLethalTp = new float[]{
-                Float.valueOf(getParameter("hot_lethal_temperature_egg")),
-                Float.valueOf(getParameter("hot_lethal_temperature_larva"))};
+         */
+        String lethal_salt_file;
+        try {
+            lethal_salt_file = getParameter("lethal_salt_file");
+        } catch (Exception ex) {
+            lethal_salt_file = null;
         }
-        getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
+        if (null != lethal_salt_file && !lethal_salt_file.isEmpty()) {
+            String pathname = IOTools.resolveFile(lethal_salt_file);
+            File f = new File(pathname);
+            if (!f.isFile()) {
+                throw new FileNotFoundException("Lethal salinity file " + pathname + " not found.");
+            }
+            if (!f.canRead()) {
+                throw new IOException("Lethal salinity file " + pathname + " cannot be read.");
+            }
+            loadLethalSalinity(pathname);
+            FLAG_LETHAL_SALT_FUNCTION = true;
+        } else {
+            /*
+                 * If not just load constant lethal temperature egg
+             */
+            ages = new float[1];
+            freshLethalSal = new float[]{Float.valueOf(getParameter("fresh_lethal_salinity_egg"))};
+            salineLethalSal = new float[]{Float.valueOf(getParameter("saline_lethal_salinity_egg"))};
+            FLAG_LETHAL_SALT_FUNCTION = false;
+        }
+
+        getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
         boolean addTracker = true;
         try {
-            addTracker = Boolean.valueOf(getParameter("temp_tracker"));
+            addTracker = Boolean.valueOf(getParameter("salt_tracker"));
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
         if (addTracker) {
-            getSimulationManager().getOutputManager().addCustomTracker(temperature_field);
+            getSimulationManager().getOutputManager().addCustomTracker(salinity_field);
         }
     }
-    
+
     @Override
     public void init(IParticle particle) {
         // Nothing to do
     }
 
-    private void loadLethalTemperatures(String csvFile) {
+    private void loadLethalSalinity(String csvFile) {
         Locale.setDefault(Locale.US);
         try {
             // open densities csv file
@@ -98,15 +90,15 @@ public class LethalSaltAction extends AbstractAction {
 
             // init arrays
             ages = new float[lines.size() - 1];
-            coldLethalTp = new float[ages.length];
-            hotLethalTp = new float[ages.length];
+            freshLethalSal = new float[ages.length];
+            salineLethalSal = new float[ages.length];
 
             // read ages (hours converted to seconds) and densities
             for (int i = 0; i < ages.length; i++) {
                 String[] line = lines.get(i + 1);
                 ages[i] = Float.valueOf(line[0]) * 3600.f;
-                coldLethalTp[i] = Float.valueOf(line[1]);
-                hotLethalTp[i] = Float.valueOf(line[2]);
+                freshLethalSal[i] = Float.valueOf(line[1]);
+                salineLethalSal[i] = Float.valueOf(line[2]);
             }
         } catch (IOException ex) {
             Logger.getLogger(BuoyancyAction.class.getName()).log(Level.SEVERE, null, ex);
@@ -115,19 +107,13 @@ public class LethalSaltAction extends AbstractAction {
 
     @Override
     public void execute(IParticle particle) {
-
-        if (FLAG_GROWTH) {
-            checkTpGrowingParticle(particle);
-        } else {
-            checkTp(particle);
-        }
-
+        checkTp(particle);
     }
 
     private void checkTp(IParticle particle) {
-        double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        double salinity = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         int iAge = ages.length - 1;
-        if (FLAG_LETHAL_TEMP_FUNCTION) {
+        if (FLAG_LETHAL_SALT_FUNCTION) {
             float age = particle.getAge();
             for (int i = 0; i < ages.length - 1; i++) {
                 if (ages[i] <= age && age < ages[i + 1]) {
@@ -135,27 +121,12 @@ public class LethalSaltAction extends AbstractAction {
                     break;
                 }
             }
-
         }
-        //System.out.println("I am " + (particle.getAge() / 3600) + " hours old, lethal tp cold: " + coldLethalTp[iAge] + " & hot: " + hotLethalTp[iAge]);
-        if (temperature <= coldLethalTp[iAge]) {
-            particle.kill(ParticleMortality.DEAD_COLD);
-        } else if (temperature >= hotLethalTp[iAge]) {
-            particle.kill(ParticleMortality.DEAD_HOT);
-        }
-    }
-
-    private void checkTpGrowingParticle(IParticle particle) {
-
-        double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
-        int stage = ((StageParticleLayer) particle.getLayer(StageParticleLayer.class)).getStage();
-        // stage == 0 means egg, stage > 0 means larvae
-        boolean frozen = ((stage == 0) && (temperature <= coldLethalTp[0])) || ((stage != 0) && (temperature <= coldLethalTp[1]));
-        boolean heated = ((stage == 0) && (temperature >= hotLethalTp[0])) || ((stage != 0) && (temperature >= hotLethalTp[1]));
-        if (frozen) {
-            particle.kill(ParticleMortality.DEAD_COLD);
-        } else if (heated) {
-            particle.kill(ParticleMortality.DEAD_HOT);
+        //System.out.println("I am " + (particle.getAge() / 3600) + " hours old, lethal tp cold: " + freshLethalSal[iAge] + " & hot: " + salineLethalSal[iAge]);
+        if (salinity <= freshLethalSal[iAge]) {
+            particle.kill(ParticleMortality.DEAD_FRESH);
+        } else if (salinity >= salineLethalSal[iAge]) {
+            particle.kill(ParticleMortality.DEAD_SALINE);
         }
     }
 }
