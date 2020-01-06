@@ -16,7 +16,8 @@
  */
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.io.ETracker;
+import org.previmer.ichthyop.io.DebEHTracker;
+import org.previmer.ichthyop.io.DebETracker;
 import org.previmer.ichthyop.io.DebERTracker;
 import org.previmer.ichthyop.io.DebVTracker;
 import org.previmer.ichthyop.io.LengthTracker;
@@ -102,9 +103,10 @@ public class DebGrowthAction extends AbstractAction {
             // do nothing and just add the tracker
         }
         if (addTracker) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(ETracker.class);
+            getSimulationManager().getOutputManager().addPredefinedTracker(DebETracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebERTracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebVTracker.class);
+            getSimulationManager().getOutputManager().addPredefinedTracker(DebEHTracker.class);
         }
     }
 
