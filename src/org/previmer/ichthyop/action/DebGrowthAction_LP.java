@@ -16,16 +16,14 @@
  */
 package org.previmer.ichthyop.action;
 
-import org.previmer.ichthyop.io.DebDryWTracker;
 import org.previmer.ichthyop.io.DebETracker;
 import org.previmer.ichthyop.io.DebEHTracker;
 import org.previmer.ichthyop.io.DebERTracker;
+import org.previmer.ichthyop.io.DebLbTracker;
+import org.previmer.ichthyop.io.DebLjTracker;
 import org.previmer.ichthyop.io.DebVTracker;
-import org.previmer.ichthyop.io.DebLengthTracker;
-import org.previmer.ichthyop.io.DebWetWTracker;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.ParticleMortality;
 
 /**
@@ -46,7 +44,7 @@ public class DebGrowthAction_LP extends AbstractAction {
     private double TA;      // Arehnius temp (K) Pecquerie et al. 2009
     private double T1;	 // K, Ref temp = 16C (avg. mid-water temp in GoL)
     private static double length_init; // = 0.025d; // Initial length [millimeter] for the particles.
-    private static double feeding_length;// = 4.5d; // hreshold [millimeter] between Yolk-Sac Larvae and Feeding Larvae
+    //private static double feeding_length;// = 4.5d; // hreshold [millimeter] between Yolk-Sac Larvae and Feeding Larvae
     private double shape_larvae; // size related conversion params
     private double E_0; // initial reserve
     //private double Vj; // Structure at mouth opening (yolk_to_feeding)
@@ -55,10 +53,8 @@ public class DebGrowthAction_LP extends AbstractAction {
     private double E_Hj;  // Maturity threshold at metamorphosis
     private double E_Hp;  // Maturity threshold at puberty
     private double k_J;   // Maturity maintenance rate coefficient
-    private double L_b;
-    private double L_j;
     private double Kappa;  // fraction of mobilized reserve allocated to soma
-    private double Kappa_R;  // fraction of reproduction energy fixed in eggs
+    //private double Kappa_R;  // fraction of reproduction energy fixed in eggs
     private double T_AL; // Ahr. temperature at higher boundary
     private double T_L;  // Lower boundary of thermal range
     private double T_AH;  // Ahr. temperature at higher boundary
@@ -67,12 +63,6 @@ public class DebGrowthAction_LP extends AbstractAction {
     //private double F_m;  // surface area specific rate
     private double K;   // half saturation constance
     private double V_dot;   // energy conductance
-
-    private double sigmaMb, sigmaMj;
-    private double dV;
-    private double muV, muE;
-    private double wV, wE;
-    private double dVw, dEw, dE;   // parameters for computation of wet weight
 
     private ModelType modelType;
     private FunctionTcor tcorFunc;
@@ -115,7 +105,6 @@ public class DebGrowthAction_LP extends AbstractAction {
 
         //F_m = Double.valueOf(getParameter("surface_area_searching_rate")) / (86400.0 * 100.0);  // m3/cm2/day converted into m3/mm2/sec
         //this.Kappa_X = Double.valueOf(getParameter("fraction_fixed_reserve"));  // no unit
-
         p_Am = Double.valueOf(getParameter("assimilation rate")) / (86400.0 * 100.0);        // 325;J cm-2 d-1, max. surf. specific ingestion rate
         // divisé par 86400 pour la conversion en secondes et divisé par 100 pour la conversion en mm-2
 
@@ -123,7 +112,7 @@ public class DebGrowthAction_LP extends AbstractAction {
 
         this.Kappa = Double.valueOf(getParameter("fraction_mobilized_somma")); // no unit
 
-        this.Kappa_R = Double.valueOf(getParameter("fraction_fixed_eggs")); // no unit
+        //this.Kappa_R = Double.valueOf(getParameter("fraction_fixed_eggs")); // no unit
 
         // Energetic related parameters
         //E_m = Double.valueOf(getParameter("reserve_capacity")) / 1000.0;       //2700; J/cm^3, reserve capacity 
@@ -134,7 +123,7 @@ public class DebGrowthAction_LP extends AbstractAction {
         // divisé par 1000 pour la conversion en mm-3
         this.E_G = Double.valueOf(getParameter("cost_growth")) / 1000.0;       //4000; J cm-3; // Cost for growth 
 
-        T1 = Double.valueOf(getParameter("ref_temp"));	 //273.15 + 20; K, Ref temp = 20C (avg. mid-water temp in GoL)
+        this.T1 = Double.valueOf(getParameter("ref_temp"));	 //273.15 + 20; K, Ref temp = 20C (avg. mid-water temp in GoL)
         //p= [p_Xm ae XK_chl E_m E_g p_M Kappa TA T1 mu_E shape_larvae ]; // pack params
 
         //this.E_Hh = Double.valueOf(getParameter("maturity_thres_hatching")); // J
@@ -143,13 +132,12 @@ public class DebGrowthAction_LP extends AbstractAction {
         this.E_Hp = Double.valueOf(getParameter("maturity_thres_puberty")); // J
 
         length_init = Double.valueOf(getParameter("initial_length"));
-        feeding_length = Double.valueOf(getParameter("yolk2feeding_length"));
+        //feeding_length = Double.valueOf(getParameter("yolk2feeding_length"));
         shape_larvae = Double.valueOf(getParameter("shape")); //0.152 ; larvae < 3.7cm length and weight data  - Palomera et al.
         E_0 = Double.valueOf(getParameter("initial_reserve")); //0.022;//0.89998;// //-0.087209;      // J, Reserve at size of hatching.
 
         // Structure at mouth opening (yolk_to_feeding)
         // Vj = Math.pow(shape_larvae * feeding_length, 3);
-
         dt = getSimulationManager().getTimeManager().get_dt();
 
         temperature_field = getParameter("temperature_field");
@@ -162,18 +150,6 @@ public class DebGrowthAction_LP extends AbstractAction {
         // K should be defined using physio, but in practice calibration parameter
         this.K = Double.valueOf(getParameter("half_saturation_constant"));
 
-        addPhysTracker = false;
-        try {
-            addPhysTracker = Boolean.valueOf(getParameter("deb_physio_tracker"));
-        } catch (Exception ex) {
-            // do nothing and just add the tracker
-        }
-        if (addPhysTracker) {
-            getSimulationManager().getOutputManager().addPredefinedTracker(DebLengthTracker.class);
-            getSimulationManager().getOutputManager().addPredefinedTracker(DebDryWTracker.class);
-            getSimulationManager().getOutputManager().addPredefinedTracker(DebWetWTracker.class);
-        }
-
         boolean addTracker = false;
         try {
             addTracker = Boolean.valueOf(getParameter("deb_tracker"));
@@ -185,26 +161,8 @@ public class DebGrowthAction_LP extends AbstractAction {
             getSimulationManager().getOutputManager().addPredefinedTracker(DebERTracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebVTracker.class);
             getSimulationManager().getOutputManager().addPredefinedTracker(DebEHTracker.class);
-        }
-
-        if (modelType == ModelType.ABJ) {
-            this.L_j = Double.valueOf(getParameter("length_metam"));
-            this.L_b = Double.valueOf(getParameter("length_birth"));
-        }
-        
-        if (this.addPhysTracker) {
-            this.sigmaMb = Double.valueOf(getParameter("shape_coef_birth"));
-            this.sigmaMj = Double.valueOf(getParameter("shape_coef_metam"));
-            this.dV = Double.valueOf(getParameter("specific_dens_struc")) / (1.0e3);   // conversion from g/cm3 to g/mm3
-            this.dVw = Double.valueOf(getParameter("specific_dens_struc_wet")) / (1.0e3);   // conversion from g/cm3 to g/mm3
-            this.wV = Double.valueOf(getParameter("spec_weight_structure"));
-            this.muV = Double.valueOf(getParameter("chem_pot_structure"));
-            
-            this.dE = Double.valueOf(getParameter("specific_dens_reserve")) / (1.0e3);
-            this.dEw = Double.valueOf(getParameter("specific_dens_reserve_wet")) / (1.0e3);
-            this.wE = Double.valueOf(getParameter("spec_weight_reserve"));
-            this.muE = Double.valueOf(getParameter("chem_pot_reserve"));
-
+            getSimulationManager().getOutputManager().addPredefinedTracker(DebLjTracker.class);
+            getSimulationManager().getOutputManager().addPredefinedTracker(DebLbTracker.class);
         }
 
         // @TODO: add some test to define whether classical or updated Tcor function should
@@ -220,7 +178,7 @@ public class DebGrowthAction_LP extends AbstractAction {
     public void init(IParticle particle) {
         // Init the layer that contains all the DEB variables (state variables + physio)
         DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-        
+
         // Initialization of state variables.
         debLayer.setE(E_0);
         debLayer.setE_R(0);
@@ -237,19 +195,11 @@ public class DebGrowthAction_LP extends AbstractAction {
 
         // Recover the DEB variables for the current particle. 
         DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-        
-        // Computes the DEB growth for the given time step
-        double[] res_deb = grow(dt, debLayer.getE(), debLayer.getV(), debLayer.getE_H(), debLayer.getE_R(), temp, food);
-        debLayer.setE(res_deb[0]);
-        debLayer.setV(res_deb[1]);
-        debLayer.setE_H(res_deb[2]);
-        debLayer.setE_R(res_deb[3]);
-        
-        if (this.addPhysTracker) {
-            this.computeWeight(debLayer);
-        }
 
-        if (res_deb[4] == 0) {
+        // Computes the DEB growth for the given time step
+        boolean starvation = grow(dt, debLayer, temp, food);
+
+        if (starvation) {
             particle.kill(ParticleMortality.STARVATION);
         }
 
@@ -271,13 +221,21 @@ public class DebGrowthAction_LP extends AbstractAction {
      * @param food Food concentration (units?)
      * @return
      */
-    private double[] grow(double dt, double E, double V, double E_H, double E_R, double temperature, double food) {
+    private boolean grow(double dt, DebParticleLayer debLayer, double temperature, double food) {
 
         // Set initial conditions :
         double s_M = 1.0;
 
         // convert temperature (C) into (K)
         double tempK_surface = 273.15 + temperature;
+
+        // Recovers the deb values for the given particle
+        double E_H = debLayer.getE_H();
+        double E = debLayer.getE();
+        double V = debLayer.getV();
+        double L_b = debLayer.getLb();
+        double L_j = debLayer.getLj();
+        double E_R = debLayer.getE_R();
 
         // Ahr. temperature
         double Tcorr = tcorFunc.getCorr(tempK_surface);
@@ -302,11 +260,17 @@ public class DebGrowthAction_LP extends AbstractAction {
             if (E_H < E_Hb) {
                 s_M = 1;
             } else if ((E_Hb <= E_H) && (E_H < E_Hj)) {
+                if (debLayer.getLb() == Double.NaN) {
+                    debLayer.setLb(this.computeLength(V));
+                }
                 s_M = this.computeLength(V) / L_b;
             } else {
+                if (debLayer.getLj() == Double.NaN) {
+                    debLayer.setLj(this.computeLength(V));
+                }
                 s_M = L_j / L_b;
             }
-        }
+        }  // end of test on model type
 
         // only two parameters are accelerated by s_M, p_Am and v
         p_AmT *= s_M;
@@ -348,25 +312,24 @@ public class DebGrowthAction_LP extends AbstractAction {
         }
 
         //Integration
-        E = E + dEdt * dt;
-        V = V + dVdt * dt;
-        E_H = E_H + dHdt * dt;
-        E_R = E_R + dRdt * dt;
+        debLayer.setE(E + dEdt * dt);
+        debLayer.setV(V + dVdt * dt);
+        debLayer.setE_H(E_H + dHdt * dt);
+        debLayer.setE_R(E_R + dRdt * dt);
 
         // compute weight
         //double dV = 1; 
         //W_dw[j] = V * dV  + (E+E_R)/mu_E;  
         //Compute DRY weight (g, dw) * 4.1 = Wet weight
         // starvation test
-        int starvation;
+        boolean starvation;
         if ((Kappa * flow_p_C < flow_p_M) && ((1 - Kappa) * flow_p_C < flow_p_J)) {
-            starvation = 0;
+            starvation = true;
         } else {
-            starvation = 1;
+            starvation = false;
         } //no starvation
 
-        double[] res = {E, V, E_H, E_R, (double) starvation};
-        return res;
+        return starvation;
     }
 
     private double computeTcorr(double T_kelvin) {
@@ -396,37 +359,5 @@ public class DebGrowthAction_LP extends AbstractAction {
         public String toString() {
             return this.description;
         }
-
     }
-
-    private void computeWeight(DebParticleLayer debLayer) {
-
-        double V = debLayer.getV();
-        double E = debLayer.getE();
-        double E_R = debLayer.getE_R();
-
-        if (this.modelType == ModelType.ABJ) {
-            double L = this.computeLength(V);
-            double sigmaM = this.sigmaMb + (this.sigmaMj - this.sigmaMb) * (L - this.L_b) / (this.L_j - this.L_b);
-            double Lw = Math.pow(V, 1.0 / 3.0) / sigmaM;
-
-            double weightV = this.dV * V;
-            double weightE = this.wE / this.muE * E;
-            double weightR = this.wE / this.muE * E_R;
-            double dryW = weightV + weightE + weightR;
-
-            double WVw = this.dVw * V;
-            double WEw = this.wE * this.dEw / (this.muE * this.dE) * E;
-            double WRw = this.wE * this.dEw / (this.muE * this.dE) * E_R;
-            double wetW = WVw + WEw + WRw;
-
-            double F = this.Kappa_R * E_R / this.E_0;
-            debLayer.setLw(Lw);
-            debLayer.setdryW(dryW);
-            debLayer.setwetW(wetW);
-            debLayer.setF(F);
-
-        }
-    }
-
 }

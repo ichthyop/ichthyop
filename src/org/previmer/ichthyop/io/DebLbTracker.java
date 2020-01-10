@@ -23,11 +23,11 @@ import org.previmer.ichthyop.particle.DebParticleLayer;
  *
  * @author gandres
  */
-public class DebLengthTracker extends FloatTracker {
+public class DebLbTracker extends FloatTracker {
 
     @Override
     float getValue(IParticle particle) {
         DebParticleLayer gParticle = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
-        return (float) gParticle.getLw();
+        return (float) gParticle.getLb();
     }
 }

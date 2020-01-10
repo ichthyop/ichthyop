@@ -29,10 +29,8 @@ public class DebParticleLayer extends ParticleLayer {
     private double V; // Structure
     private double E_R; // Reproduction buffer
     private double E_H;  // Cumulated energy invested into dev.
-    private double Lw;  // Physical length
-    private double dryW;  // dry weight (g)
-    private double wetW;  // wet weight (g)
-    private double F;
+    private double Lj = Double.NaN;
+    private double Lb = Double.NaN;
 
     public DebParticleLayer(IParticle particle) {
         super(particle);
@@ -76,36 +74,20 @@ public class DebParticleLayer extends ParticleLayer {
         this.E_H = E_H;
     }
 
-    public double getLw() {
-        return Lw;
+    public double getLj() {
+        return this.Lj;
     }
 
-    public void setLw(double Lw) {
-        this.Lw = Lw;
+    public void setLj(double Lj) {
+        this.Lj = Lj;
     }
 
-    public double getdryW() {
-        return dryW;
+    public double getLb() {
+        return this.Lb;
     }
 
-    public void setdryW(double dryW) {
-        this.dryW = dryW;
-    }
-
-    public double getwetW() {
-        return wetW;
-    }
-
-    public void setwetW(double wetW) {
-        this.wetW = wetW;
-    }
-
-    public double getF() {
-        return wetW;
-    }
-
-    public void setF(double F) {
-        this.F = F;
+    public void setLb(double Lb) {
+        this.Lb = Lb;
     }
 
 }
