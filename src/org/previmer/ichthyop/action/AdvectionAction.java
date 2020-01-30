@@ -90,19 +90,22 @@ public class AdvectionAction extends AbstractAction {
         int dim = pGrid.length;
         double[] dU = new double[dim];
 
-        dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
-        if (Math.abs(dU[0]) > THRESHOLD_CFL) {
-            getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
-        }       
-        dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
-        if (Math.abs(dU[1]) > THRESHOLD_CFL) {
-            getLogger().log(Level.WARNING, "CFL broken for V {0}", (float) dU[1]);
-        }       
-        if (dim > 2) {
+        if (horizontal) {   // barrier.n: activates only if horizontal is on
+            dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
+            if (Math.abs(dU[0]) > THRESHOLD_CFL) {
+                getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
+            }
+            dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
+            if (Math.abs(dU[1]) > THRESHOLD_CFL) {
+                getLogger().log(Level.WARNING, "CFL broken for V {0}", (float) dU[1]);
+            }
+        }
+
+        if (vertical && (dim > 2)) {   // barrier.n: activates only if vertical is on
             dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time) * dt;
             if (Math.abs(dU[2]) > THRESHOLD_CFL) {
                 getLogger().log(Level.WARNING, "CFL broken for W {0}", (float) dU[2]);
-            }            
+            }
         }
            
         return dU;
