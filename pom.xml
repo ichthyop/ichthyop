@@ -105,6 +105,20 @@ knowledge of the CeCILL-B license and that you accept its terms.
     </repositories>
     
     <build>
+        
+        <filters>
+            <filter>
+                src/main/filters/IchthyopApp.properties
+            </filter>                     
+        </filters>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+               
         <plugins>
             <!-- Execute the jar file on "Run Project" -->
             <plugin>
@@ -237,7 +251,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
+        </plugins>      
     </build>
     <dependencies>
         <dependency>
