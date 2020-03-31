@@ -4,7 +4,9 @@
  */
 package org.previmer.ichthyop.action;
 
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -105,7 +107,8 @@ public class MigrationAction extends AbstractAction {
             if (!f.canRead()) {
                 throw new IOException("File of depth at daytime " + pathname + " cannot be read.");
             }
-            CSVReader reader = new CSVReader(new FileReader(pathname), ';');
+            
+            CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
             List<String[]> lines = reader.readAll();
             Iterator iter = lines.iterator();
             while (iter.hasNext()) {
@@ -138,7 +141,7 @@ public class MigrationAction extends AbstractAction {
             if (!f.canRead()) {
                 throw new IOException("File of depth at night " + pathname + " cannot be read.");
             }
-            CSVReader reader = new CSVReader(new FileReader(pathname), ';');
+            CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
             List<String[]> lines = reader.readAll();
             Iterator iter = lines.iterator();
             while (iter.hasNext()) {

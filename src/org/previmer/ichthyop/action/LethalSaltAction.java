@@ -4,7 +4,10 @@
  */
 package org.previmer.ichthyop.action;
 
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -81,11 +84,11 @@ public class LethalSaltAction extends AbstractAction {
         // Nothing to do
     }
 
-    private void loadLethalSalinity(String csvFile) {
+    private void loadLethalSalinity(String csvFile) throws CsvException {
         Locale.setDefault(Locale.US);
         try {
             // open densities csv file
-            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            CSVReader reader = new CSVReaderBuilder(new FileReader(csvFile)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
             List<String[]> lines = reader.readAll();
 
             // init arrays

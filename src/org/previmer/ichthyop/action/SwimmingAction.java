@@ -16,7 +16,9 @@
  */
 package org.previmer.ichthyop.action;
 
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -63,7 +65,7 @@ public class SwimmingAction extends AbstractAction {
         }
         Locale.setDefault(Locale.US);
         // open velocities csv file
-        CSVReader reader = new CSVReader(new FileReader(pathname), ';');
+        CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
         List<String[]> lines = reader.readAll();
         // init arrays
         ages = new float[lines.size() - 1];
