@@ -1,21 +1,9 @@
-====================
-ICHTHYOP readme file
-====================
-http://www.ichthyop.org
+# ICHTHYOP Release notes
 
-Ichthtyop is an individual based model that simulates Lagrangian transport of particles.
 
-Copyright (c) Philippe VERLEY 2006-2017
+## Changes since Ichthyop 3.2
 
-Release: 3.3 (2017/06/30) 
-https://forge.ifremer.fr/svn/ichthyop/branches/stable-3@r1031
-
-Feedback & Bug reports: www.ichthyop.org/forum
-
-==========================
-Changes since Ichthyop 3.2
-
-Bug fixes:
+### Bug fixes:
 * ROMS3D the VertCoordType global attribute was not read correctly and lead to incorrect calculation of the vertical levels.
 * RungeKutta scheme now works in backward for 2D simulations
 * The 'zone' output variable displays -99 for particles that have not been released yet (used to be zero, which is incorrect information)
@@ -26,7 +14,7 @@ Bug fixes:
 * Zone display in Step 3 Mapper has been improved. A zone is now drawed cell by cell, as it is done in the preview. The approach has a few inconvinients though (i) when zones overlap the last one drawn will cover the other ones; (ii) the zone defined in the output NetCDF files prior to this commit will not be drawable anymore; (iii) the WMSMapper.java needs the Dataset to be initialized to be able to draw the zones. Which is fine if the user draw the zones just after running the simulation. It will be an issue when the mapping is down at an other time. Nonetheless the user can still load the corresponding configuration file and click on Preview to initialize the dataset.
 * Random generator number in the horizontal dispersion process was always initialised with the same seed. Set a unique seed for every run.
 
-New features:
+### New features:
 * Linear growth can define custom larval stages with length thresholds
 * "Patches in zones" release mode accepts a new parameter "per_zone" to indicate whether the number of particles is global (as it used to be) or per release zones (new feature).
 * New plugin for ROMS3D OpenDAP
@@ -43,18 +31,16 @@ New features:
 * Replaced ClimatoCalendar by Day360Calendar which takes into account an Origin of time (same parameter used for the Gregorian Calendar).
 * NemoDataset, added new function to reconstruct three-dimensional e3t field from e3t_0, e3t_ps and mbathy
 
-===========
-Requirement
+ 
+### Requirement
 
 Java >= 1.8
 
-============
-Run Ichthyop 
+### Run Ichthyop 
 
 Double click on the JAR file or run it from commmand line 'java -jar ichthyop-3.3.jar'
 
-===================
-License information
+### License information
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -62,8 +48,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 For details about the GNU General Public License, please see http://www.gnu.org/licenses/
 
-================================
-Description of files and folders
+### Description of files and folders
 
 % Files
 ichthyop-3.3.jar, java exectuable
@@ -74,22 +59,19 @@ cfg --> Ichthyop configuration folder
 lib --> Necessary libraries to run the program
 input --> Basic NetCDF input files used for the examples
 
-=====================
-Changes log (history)
-
-% From 3.1 to 3.2
-Bug fixes:
+##  From 3.1 to 3.2
+### Bug fixes:
 Multi release events - Some particles were overwritten at new release event.
 Mapping - The JVM would often crash (architecture and version dependant) when trying to retrieve map background though the computer is offline or behind a proxy. Created and offline tile factory.
 Bactracking - Multi release event did not work in backward mode.
 
-New features:
+### New features:
 Dataset - Ichthyop can read Symphonie (http://sirocco.omp.obs-mip.fr/outils/Symphonie/Accueil/SymphoAccueil.htm) NetCDF output files.
 Lethal temperature - Added a hot lethal temperature. Lethal temperatures (both cold and hot) can be provided as a function of particle age, in a CSV file.
 Buoyancy - Egg density can be provided as a function of age, in a CSV file. 
 
-% From 3.0b to 3.1
-Bug fixes:
+## From 3.0b to 3.1
+### Bug fixes:
 Configuration panel - Crashed at displaying a block with no visible parameter.
 Backtracking - Used to crash for particles reaching the edge of the domain.
 Backtracking - Did not work in batch neither SERIAL mode.
@@ -105,7 +87,7 @@ ROMS Dataset - Wrong calculation of the NEW type of vertical coordinate.
 Coastal advection - 
 
 
-New features:
+### New features:
 Coastline behavior - Now there is a parameter to control coastal behavior. Particle might beach, bounce on the coastline as a billiard ball or just standstill.
 Mars - Handles generalized sigma level (Mars V8).
 Mars - Handles rotated domains (lon & lat as two dimensional fields).
@@ -113,6 +95,3 @@ WMS - Broaden the zoom range.
 Recruitment stain - Look for recruited particles within an area defined by a central point and a radius.
 NetCDF library updated to last version (4.2 April 2011)
 Dataset - Added an option to deactivate a thorough and expensive sorting of the NetCDF input files when the files are already chronologically sorted.
-
-==================
-end of readme file
