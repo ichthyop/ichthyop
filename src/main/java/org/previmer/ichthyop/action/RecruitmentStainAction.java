@@ -62,6 +62,7 @@ import org.previmer.ichthyop.io.RecruitmentStainTracker;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
+import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
@@ -92,7 +93,7 @@ public class RecruitmentStainAction extends AbstractAction {
     public void loadParameters() throws Exception {
 
         isAgeCriterion = getParameter("criterion").equals("Age criterion");
-        boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        boolean isGrowth = CheckGrowthParam.checkParams();  // check if growth or debgrowth is true (xor)
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
         }

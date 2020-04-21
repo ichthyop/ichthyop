@@ -61,6 +61,7 @@ import org.previmer.ichthyop.io.ZoneTracker;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 import org.previmer.ichthyop.particle.ZoneParticleLayer;
+import org.previmer.ichthyop.util.CheckGrowthParam;
 
 /**
  *
@@ -88,8 +89,8 @@ public class RecruitmentZoneAction extends AbstractAction {
 
         timeInZone = 0;
         durationMinInRecruitArea = (int) (Float.valueOf(getParameter("duration_min")) * 24.f * 3600.f);
-        isAgeCriterion = getParameter("criterion").equals("Age criterion");
-        boolean isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
+        isAgeCriterion = getParameter("criterion").equals("Age criterion");        
+        boolean isGrowth = CheckGrowthParam.checkParams();
         if (!isGrowth && !isAgeCriterion) {
             throw new IllegalArgumentException("{Recruitment} Recruitment criterion cannot be based on particle length since the growth model is not activated. Activate the growth model or set a recruitment criterion based on particle age.");
         }
