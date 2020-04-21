@@ -1,5 +1,25 @@
 # ICHTHYOP Release notes
 
+## Changes in Ichthyop 3.3.4
+
+### Bug fixes
+
+- Possibility to use DEB length criterion for the RecruitmentAction (no more conflict with traditional growth actions like linear)
+
+### New features
+
+- Moving to Maven Java system (easier compilation using `mvn install`).
+- Adding possibility to run Ichthyop in map coordinates rather than in lon/lat (developped for polar application, Dennis Jongsomjit).
+
+## Changes in Ichthyop 3.3.3
+
+### Bug fixes
+
+- Correction in the calculation of W in NEMO dataset using divergence equation.
+
+### New features
+
+- Taking into account partial steps in NEMO dataset.
 
 ## Changes since Ichthyop 3.2
 
