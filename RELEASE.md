@@ -5,6 +5,7 @@
 ### Bug fixes
 
 - Possibility to use DEB length criterion for the RecruitmentAction (no more conflict with traditional growth actions like linear)
+- Debugging the configuration update manager (work from resource stream rather than URL, which failed when running the jar file directly)
 
 ### New features
 
