@@ -50,12 +50,13 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.previmer.ichthyop.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,11 +86,11 @@ public class ConfigurationFile {
         this.file = file;
     }
 
-    public ConfigurationFile(URL url) {
+    public ConfigurationFile(InputStream stream) {
+        this.file = null;
         try {
-            this.file = new File(url.toURI());
             SAXBuilder sxb = new SAXBuilder();
-            Element racine = sxb.build(url).getRootElement();
+            Element racine = sxb.build(stream).getRootElement();
             racine.detach();
             structure = new Document(racine);
             map = createMap();
@@ -130,7 +131,7 @@ public class ConfigurationFile {
         if (null != structure.getRootElement().getChild(VERSION)) {
             String number = structure.getRootElement().getChildTextNormalize(VERSION);
             String date = structure.getRootElement().getChild(VERSION).getAttributeValue(DATE);
-            return new Version(number, date);  
+            return new Version(number, date);
         } else {
             return Version.V30B;
         }
@@ -192,6 +193,10 @@ public class ConfigurationFile {
 
     public Iterable<XBlock> getAllBlocks() {
         return map.values();
+    }
+
+    public HashMap<String, XBlock> getMap() {
+        return map;
     }
 
     public Iterable<XBlock> getBlocks(BlockType type) {
@@ -291,7 +296,7 @@ public class ConfigurationFile {
         structure.getRootElement().addContent(block);
         map.put(new BlockId(block.getType(), block.getKey()).toString(), block);
     }
-    
+
     public void removeBlock(final BlockType type, final String key) {
         map.remove(key);
         structure.getRootElement().removeContent(getBlock(type, key));

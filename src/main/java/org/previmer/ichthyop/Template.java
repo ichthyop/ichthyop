@@ -82,6 +82,19 @@ public class Template {
         String path = "templates/" + templateName;
         return Template.class.getResource(path);
     }
+    
+    /** Function that returns resource file as input stream.
+     * 
+     * Used when the jar is executed. 
+     * 
+     * @param templateName
+     * @return 
+     */
+    public static InputStream getTemplateFile(String templateName) {
+        String path = "templates/" + templateName;
+        InputStream stream = Template.class.getResourceAsStream(path);
+        return stream;    
+    }
 
     private static void writeTemplate(URL url, String destination) throws Exception {
 

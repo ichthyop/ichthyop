@@ -122,8 +122,7 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the 3.2 configuration file to 3.3
      */
     private void u32To33() throws Exception {
-        ConfigurationFile cfg33 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
-        cfg33.load();
+        ConfigurationFile cfg33 = new ConfigurationFile(Template.getTemplateFile("cfg-generic.xml"));
         /*
          * Update linear growth 
          */
@@ -159,7 +158,7 @@ public class UpdateManager extends AbstractManager {
      * Upgrade the 3.1 configuration file to 3.2
      */
     private void u31To32() throws Exception {
-        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateURL("cfg-generic.xml"));
+        ConfigurationFile cfg32 = new ConfigurationFile(Template.getTemplateFile("cfg-generic.xml"));
         String treepath, newTreepath;
         /*
          * Update block action.lethal_temp
@@ -176,7 +175,7 @@ public class UpdateManager extends AbstractManager {
         /*
          * Update version number and date
          */
-        getConfigurationFile().setVersion(getApplicationVersion());
+        getConfigurationFile().setVersion(Version.V32);
         StringBuilder str = new StringBuilder(getConfigurationFile().getDescription());
         str.append("  --@@@--  ");
         str.append((new GregorianCalendar()).getTime());
@@ -189,8 +188,8 @@ public class UpdateManager extends AbstractManager {
     /*
      * Upgrade the 3.0b configuration file to 3.1
      */
-    private void u30bTo31() throws Exception {
-        ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateURL("cfg-generic_3.1.xml"));
+    private void u30bTo31() throws Exception {        
+        ConfigurationFile cfg31 = new ConfigurationFile(Template.getTemplateFile("cfg-generic_3.1.xml"));
         String treepath, newTreepath;
         /*
          * Add the density_file parameter in the action.buoyancy block
