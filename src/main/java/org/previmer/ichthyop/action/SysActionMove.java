@@ -84,7 +84,8 @@ public class SysActionMove extends AbstractSysAction {
             }
             particle.grid2Geo();
         }
-        particle.unlock();
+        // barrier.n: remove the unlock, which does seem to be pertinent
+        //particle.unlock();
     }
 
     /*
