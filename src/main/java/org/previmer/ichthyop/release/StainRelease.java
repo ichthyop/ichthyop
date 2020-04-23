@@ -106,7 +106,6 @@ public class StainRelease extends AbstractRelease {
             IParticle particlePatch = null;
             int counter = 0;
             while (null == particlePatch) {
-
                 if (counter++ > DROP_MAX) {
                     throw new NullPointerException("{Release stain} Unable to release particle. Check out the stain definition.");
                 }
@@ -128,10 +127,16 @@ public class StainRelease extends AbstractRelease {
 
     private GeoPosition getGeoPosition() {
 
-        double lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
-        double one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * lat_stain / 180.d);
-        double lon = lon_stain + 2 * radius_stain * (Math.random() - 0.5d) / one_deg_longitude_meter;
-        if (DatasetUtil.geodesicDistance(lat, lon, lat_stain, lon_stain) > radius_stain) {
+        double lat, one_deg_longitude_meter, lon;
+        if (!getSimulationManager().getDataset().isProjected()) {
+            lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d) / ONE_DEG_LATITUDE_IN_METER;
+            one_deg_longitude_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * lat_stain / 180.d);
+            lon = lon_stain + 2 * radius_stain * (Math.random() - 0.5d) / one_deg_longitude_meter;
+        } else {
+            lat = lat_stain + 2.d * radius_stain * (Math.random() - 0.5d);
+            lon = lon_stain + 2.d * radius_stain * (Math.random() - 0.5d);     
+        }
+        if (getSimulationManager().getDataset().getDistGetter().getDistance(lat, lon, lat_stain, lon_stain) > radius_stain) {
             return getGeoPosition();
         } else {
             return new GeoPosition(lat, lon);
