@@ -65,7 +65,9 @@ import ucar.nc2.NetcdfFile;
  * @author pverley
  */
 public abstract class AbstractDataset extends SimulationManagerAccessor implements IDataset, NextStepListener {
-
+    
+    private DistanceGetter distGetter;
+    
     private final String datasetKey;
     /*
      *
@@ -73,11 +75,24 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     HashMap<String, RequiredVariable> requiredVariables;
 
     abstract void loadParameters();
-
-    public AbstractDataset() {
-        datasetKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
+    
+    /** Set the method for distance calculation.
+     * @param distGetter */
+    public void setDistGetter(DistanceGetter distGetter) {
+        this.distGetter = distGetter;
     }
 
+    /** Get the method for distance calculation.
+     * @return  */
+    public DistanceGetter getDistGetter() {
+        return this.distGetter;
+    }
+    
+    public AbstractDataset() {
+        datasetKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
+        distGetter = (lat1, lon1, lat2, lon2) -> DatasetUtil.geodesicDistance(lat1, lon1, lat2, lon2);
+    }
+    
     public String getParameter(String key) {
         return getSimulationManager().getDatasetManager().getParameter(datasetKey, key);
     }
@@ -176,4 +191,9 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
             return true;
         }
     }
+    
+    public boolean isProjected() {
+        return false;
+    }
+    
 }

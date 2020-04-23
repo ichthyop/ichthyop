@@ -1,4 +1,4 @@
-/* 
+/*
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
  *
@@ -50,86 +50,19 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.previmer.ichthyop.dataset;
-
-import org.previmer.ichthyop.event.NextStepListener;
-import ucar.ma2.Array;
-import ucar.nc2.NetcdfFile;
 
 /**
  *
- * @author pverley
+ * @author Nicolas
  */
-public interface IDataset extends NextStepListener {
+public interface DistanceGetter {
 
-    public DistanceGetter getDistGetter();
-    
-    public void setUp() throws Exception ;
+    /**
+     * Interface to determine which distance is to be used with the given
+     * dataset.
+     */
 
-    public double[] latlon2xy(double lat, double lon);
+    double getDistance(double lat1, double lon1, double lat2, double lon2);
 
-    public double[] xy2latlon(double xRho, double yRho);
-
-    public double depth2z(double x, double y, double depth);
-
-    public double z2depth(double x, double y, double z);
-
-    double get_dUx(double[] pGrid, double time);
-
-    double get_dVy(double[] pGrid, double time);
-
-    double get_dWz(double[] pGrid, double time);
-
-    public boolean isInWater(double[] pGrid);
-
-    public boolean isInWater(int i, int j);
-
-    boolean isCloseToCost(double[] pGrid);
-
-    public boolean isOnEdge(double[] pGrid);
-
-    public double getBathy(int i, int j);
-
-    public int get_nx();
-
-    public int get_ny();
-
-    public int get_nz();
-
-    public double getdxi(int j, int i);
-
-    public double getdeta(int j, int i);
-
-    public void init() throws Exception;
-
-    public Number get(String variableName, double[] pGrid, double time);
-
-    public void requireVariable(String name, Class requiredBy);
-
-    public void removeRequiredVariable(String name, Class requiredBy);
-
-    public double getLatMin();
-
-    public double getLatMax();
-
-    public double getLonMin();
-
-    public double getLonMax();
-
-    public double getLon(int igrid, int jgrid);
-
-    public double getLat(int igrid, int jgrid);
-
-    public double getDepthMax();
-
-    public boolean is3D();
-    
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception;
-    
-    public double xTore(double x);
-    
-    public double yTore(double y);
-    
-    public boolean isProjected();
 }
