@@ -74,7 +74,7 @@ public class ParticleFactory extends SimulationManagerAccessor {
             particle.make2D();
         }
         particle.geo2Grid();
-        if (living) {
+        if (living) {          
             if (!particle.isInWater() || particle.isOnEdge()) {
                 return null;
             }

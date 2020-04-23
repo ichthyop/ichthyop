@@ -164,7 +164,8 @@ public class GradientMoveAction extends AbstractAction {
         double distance(Cell cell) {
             double[] pos1 = getSimulationManager().getDataset().xy2latlon(i, j);
             double[] pos2 = getSimulationManager().getDataset().xy2latlon(cell.i, cell.j);
-            return DatasetUtil.geodesicDistance(pos1[0], pos1[1], pos2[0], pos2[1]);
+            return getSimulationManager().getDataset().getDistGetter().getDistance(pos1[0], pos1[1], pos2[0], pos2[1]);
+            //return DatasetUtil.geodesicDistance(pos1[0], pos1[1], pos2[0], pos2[1]);
         }
 
         double[] direction(Cell cell) {
