@@ -406,7 +406,7 @@ public class DatasetUtil {
 
         return d;
     }
-
+    
     /**
      * <p>
      * The functions computes the 2nd order approximate derivative at index
@@ -437,4 +437,22 @@ public class DatasetUtil {
 
         return (X[k + 1] - 2.d * X[k] + X[k - 1]);
     }
+    
+    
+     /**
+     * Computes the geodesic distance between the two points (lat1, lon1) and
+     * (lat2, lon2)
+     *
+     * @param lat1 a double, the latitude of the first point
+     * @param lon1 a double, the longitude of the first point
+     * @param lat2 double, the latitude of the second point
+     * @param lon2 double, the longitude of the second point
+     * @return a double, the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
+     */
+    public static double euclidianDistance(double lat1, double lon1, double lat2, double lon2) {
+
+        double d = Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
+        return d;
+    }
+    
 }

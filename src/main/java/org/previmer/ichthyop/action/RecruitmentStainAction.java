@@ -53,12 +53,15 @@
 
 package org.previmer.ichthyop.action;
 
+import org.previmer.ichthyop.Simulation;
 import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.particle.RecruitableParticleLayer;
 
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.dataset.DatasetUtil;
+import org.previmer.ichthyop.dataset.DistanceGetter;
 import org.previmer.ichthyop.io.RecruitmentStainTracker;
+import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
@@ -148,7 +151,8 @@ public class RecruitmentStainAction extends AbstractAction {
 
     private boolean isParticleInsideStain(IParticle particle) {
 
-        double distance = DatasetUtil.geodesicDistance(lat_stain, lon_stain, particle.getLat(), particle.getLon());
+        DistanceGetter distGetter = SimulationManager.getInstance().getDataset().getDistGetter();
+        double distance = distGetter.getDistance(lat_stain, lon_stain, particle.getLat(), particle.getLon());
         boolean isInside = (distance <= radius_stain);
         if (is3D && isInside) {
             distance = Math.abs((Math.abs(particle.getDepth()) - Math.abs(depth_stain)));
