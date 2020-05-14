@@ -63,8 +63,11 @@ import org.previmer.ichthyop.stage.LengthStage;
 import org.previmer.ichthyop.util.Constant;
 
 /**
- *
+ * Linear growth but with a constrain from a holling II 
+ * functional response.
+ * 
  * @author pverley
+ * @author nbarrier
  */
 public class LinearGrowthAction extends AbstractAction {
 
@@ -75,7 +78,9 @@ public class LinearGrowthAction extends AbstractAction {
     private double tp_threshold;// = 10.d; //°C
     private double coeff1; //0.02d
     private double coeff2; //0.03d
+    private double ks = 0;
     private String temperature_field;
+    private String food_field;
     private LengthStage lengthStage;
 
     @Override
@@ -88,6 +93,18 @@ public class LinearGrowthAction extends AbstractAction {
         lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
         lengthStage.init();
 
+        // barrier.n: modifications for hilaire.
+        if(!isNull("half_saturation")) {
+            // if half saturation parameter exists, load it
+            ks = Float.valueOf(getParameter("half_saturation"));
+        }
+        
+        if(ks > 0) { 
+            // if ks is not null, need to load the food field
+            food_field = getParameter("food_field");
+            getSimulationManager().getDataset().requireVariable(food_field, getClass());
+        }
+        
         boolean addTracker = true;
         try {
             addTracker = Boolean.valueOf(getParameter("length_tracker"));
@@ -119,19 +136,30 @@ public class LinearGrowthAction extends AbstractAction {
     public void execute(IParticle particle
     ) {
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
-        lengthLayer.incrementLength(grow(getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue()));
+        double temperature = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+       
+        // If ks == 0, give food a dummy value since is unused.
+        // If ks i not null, load value from file.
+        double food = (ks == 0) ? 1 : getSimulationManager().getDataset().get(food_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
+        
+        // Increments length providing temperature and food
+        lengthLayer.incrementLength(grow(temperature, food));
+        
         StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
     }
 
-    private double grow(double temperature) {
+    private double grow(double temperature, double food) {
 
+        // if ks = 0, then Q is alwyas 1, independent of food
+        double Q = (ks == 0) ? 1 : food / (food + ks);
+        
         double dt_day = (double) getSimulationManager().getTimeManager().get_dt() / (double) Constant.ONE_DAY;
         // temperature may be NaN in dry cells at low tide
         // improvement suggested by David S Wethey, 2017.02.10
-        return Double.isNaN(temperature)
+        return (Double.isNaN(temperature) || Double.isNaN(food))
                 ? 0.d
-                : (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * dt_day;
+                : (coeff1 + coeff2 * Math.max(temperature, tp_threshold)) * Q * dt_day;
 
     }
 }
