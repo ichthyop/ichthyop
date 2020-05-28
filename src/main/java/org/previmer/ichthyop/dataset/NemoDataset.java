@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.previmer.ichthyop.dataset;
 
 import java.io.File;
@@ -132,7 +131,8 @@ public class NemoDataset extends AbstractDataset {
      */
     private double[][][] gdepT;
     /**
-     * Depth at w point. The free surface elevation is disregarded.
+     * Depth at w point. The free surface elevation is disregarded. For index k,
+     * gdepW[k] is the depth of the W point below the center of the cell.
      */
     private double[][][] gdepW;
     /**
@@ -330,7 +330,6 @@ public class NemoDataset extends AbstractDataset {
                 }
             }
         }
-
     }
 
     private double[][][] compute_e3u(double[][][] e3t) {
@@ -843,14 +842,14 @@ public class NemoDataset extends AbstractDataset {
                 w_double[k][j][0] = w_double[k][j][1];
                 w_double[k][j][nx - 1] = w_double[k][j][nx - 2];
             }
-        }        
+        }
         for (int k = nz + 1; k-- > 0;) {
             for (int i = nx; i-- > 0;) {
                 w_double[k][0][i] = w_double[k][1][i];
                 w_double[k][ny - 1][i] = w_double[k][ny - 2][i];
             }
         }
-        
+
         //---------------------------------------------------
         // w * dxu * dyv
         //float[][][] w = new float[nz + 1][ny][nx];
@@ -1285,8 +1284,8 @@ public class NemoDataset extends AbstractDataset {
     @Override
     public double depth2z(double x, double y, double depth) {
 
-        int j = (int) Math.floor(y);
-        int i = (int) Math.floor(x);
+        int j = (int) Math.round(y);
+        int i = (int) Math.round(x);
 
         if (depth > 0) {
             depth = 0.d;
@@ -1343,18 +1342,18 @@ public class NemoDataset extends AbstractDataset {
 
         double kz = Math.max(0.d, Math.min(z, (double) nz - 1.00001f));
         int k = (int) Math.round(kz);
-        int j = (int) Math.floor(y);
-        int i = (int) Math.floor(x);
+        int j = (int) Math.round(y);
+        int i = (int) Math.round(x);
         dz = z - k;
 
         if (dz < 0) { // >= ?
             depth = gdepT[k][j][i]
                     + 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k][j][i]));
-            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k]: " + gdepW[k]) ;
+            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k][j][i] + " gdepW[k]: " + gdepW[k][j][i]) ;
         } else {
             depth = gdepT[k][j][i]
                     - 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k + 1][j][i]));
-            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k + 1]: " + gdepW[k + 1]);
+            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k][j][i] + " gdepW[k + 1]: " + gdepW[k + 1][j][i]);
         }
         return -depth;
     }

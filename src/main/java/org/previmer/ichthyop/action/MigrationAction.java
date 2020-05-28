@@ -50,7 +50,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.previmer.ichthyop.action;
 
 import com.opencsv.CSVParserBuilder;
@@ -156,7 +155,7 @@ public class MigrationAction extends AbstractAction {
             if (!f.canRead()) {
                 throw new IOException("File of depth at daytime " + pathname + " cannot be read.");
             }
-            
+
             CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
             List<String[]> lines = reader.readAll();
             Iterator iter = lines.iterator();
@@ -250,6 +249,7 @@ public class MigrationAction extends AbstractAction {
                 // diel vertical migration
                 depth = getDepth(particle, getSimulationManager().getTimeManager().getTime());
             }
+
             double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), depth) - particle.getZ();
             particle.increment(new double[]{0.d, 0.d, dz}, false, true);
         }
@@ -274,8 +274,11 @@ public class MigrationAction extends AbstractAction {
         long timeSunrise = getSecondsOfDay(calendar);
         calendar.setTime(sunset);
         long timeSunset = getSecondsOfDay(calendar);
-
+        
+        // get bathy in meter (<0)
         double bottom = getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0);
+        double output;
+        
         if (timeDay >= timeSunrise && timeDay < timeSunset) {
             // day time
             if (null != depthsDay) {
@@ -289,7 +292,7 @@ public class MigrationAction extends AbstractAction {
                     }
                 }
             }
-            return Math.max(bottom, depthDay);
+            output = depthDay;
         } else {
             // night time
             if (null != depthsNight) {
@@ -303,8 +306,12 @@ public class MigrationAction extends AbstractAction {
                     }
                 }
             }
-            return Math.max(bottom, depthNight);
-        }
+            output = depthNight;
+        } 
+        
+        output = (output < bottom) ? particle.getDepth() : output;
+   
+        return output;
     }
 
     /**
