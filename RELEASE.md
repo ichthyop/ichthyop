@@ -4,11 +4,13 @@
 
 ### Bug fixes
 
+- Correction in the reading of gdepT/gdepW in NemoDataset (use of `round` instead of `floor`)
 - Possibility to use DEB length criterion for the RecruitmentAction (no more conflict with traditional growth actions like linear)
 - Debugging the configuration update manager (work from resource stream rather than URL, which failed when running the jar file directly)
 
 ### New features
 
+- Nyctemeral migration not active if the target depth is below the local sea floor
 - Moving to Maven Java system (easier compilation using `mvn install`).
 - Adding possibility to run Ichthyop in map coordinates rather than in lon/lat (developped for polar application, Dennis Jongsomjit).
 
