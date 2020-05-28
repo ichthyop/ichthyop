@@ -13,6 +13,7 @@
 - Nyctemeral migration not active if the target depth is below the local sea floor
 - Moving to Maven Java system (easier compilation using `mvn install`).
 - Adding possibility to run Ichthyop in map coordinates rather than in lon/lat (developped for polar application, Dennis Jongsomjit).
+- Adding functional response to linear growth action (implies reading food variable if activated)
 
 ## Changes in Ichthyop 3.3.3
 
