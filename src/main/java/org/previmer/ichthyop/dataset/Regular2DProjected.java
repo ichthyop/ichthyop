@@ -153,7 +153,7 @@ public class Regular2DProjected extends AbstractDataset {
     /**
      * Whether horizontal periodicity should be applied
      */
-    boolean xTore = true;
+    boolean xTore = false;
 
 ////////////////////////////
 // Definition of the methods
@@ -344,7 +344,6 @@ public class Regular2DProjected extends AbstractDataset {
         if (CO != 0) {
             dv /= CO;
         }
-        
         return dv;
     }
 
@@ -429,14 +428,6 @@ public class Regular2DProjected extends AbstractDataset {
         strTime = getParameter("field_var_time");
         // Time arrow
         time_arrow = timeArrow();
-
-        // Longitudinal toricity (barrier.n)
-        // phv 2018/01/26 true by default
-        try {
-            xTore = Boolean.valueOf(getParameter("longitude_tore"));
-        } catch (NullPointerException ex) {
-            xTore = true;
-        }
 
         if (this.findParameter("conversion_factor")) {
             this.conversionFactor = Double.valueOf(getParameter("conversion_factor"));
@@ -541,6 +532,9 @@ public class Regular2DProjected extends AbstractDataset {
 
         u_tp1 = new double[ny][nx];
         v_tp1 = new double[ny][nx];
+        
+        getLogger().log(Level.INFO, "Reading U file {0} step {1}", new Object[]{ncU.getLocation(), rank});
+        getLogger().log(Level.INFO, "Reading V file {0} step {1}", new Object[]{ncU.getLocation(), rank});
 
         try {
             if (ncU.findVariable(strU).getShape().length > 3) {
@@ -720,16 +714,7 @@ public class Regular2DProjected extends AbstractDataset {
             for (int jj = 0; jj < 2; jj++) {
                 co = Math.abs((1 - ii - dx) * (1 - jj - dy));
                 lat += co * latitude[j + jj];
-                if (Math.abs(longitude[cii] - longitude[ci]) < 180) {
-                    lon += co * longitude[cii];
-                } else {
-                    double dlon = Math.abs(360.d - Math.abs(longitude[cii] - longitude[ci]));
-                    if (longitude[ci] < 0) {
-                        lon += co * (longitude[ci] - dlon);
-                    } else {
-                        lon += co * (longitude[ci] + dlon);
-                    }
-                }
+                lon += co * longitude[cii];
             }
         }
 
@@ -1062,14 +1047,6 @@ public class Regular2DProjected extends AbstractDataset {
 
     @Override
     public double xTore(double x) {
-        if (xTore) {
-            if (x < -0.5d) {
-                return nx + x;
-            }
-            if (x > nx - 0.5d) {
-                return x - nx;
-            }
-        }
         return x;
     }
 
