@@ -532,9 +532,6 @@ public class Regular2DProjected extends AbstractDataset {
 
         u_tp1 = new double[ny][nx];
         v_tp1 = new double[ny][nx];
-        
-        getLogger().log(Level.INFO, "Reading U file {0} step {1}", new Object[]{ncU.getLocation(), rank});
-        getLogger().log(Level.INFO, "Reading V file {0} step {1}", new Object[]{ncU.getLocation(), rank});
 
         try {
             if (ncU.findVariable(strU).getShape().length > 3) {
