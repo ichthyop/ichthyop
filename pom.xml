@@ -58,7 +58,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
     <artifactId>ichthyop</artifactId>
     <version>3.3.3</version>
     <packaging>jar</packaging>
-    <name>Ichthyop Stable 3</name>
+    <name>Ichthyop Develop</name>
     <description></description>
     
     <!-- Project properties -->
