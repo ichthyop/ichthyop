@@ -82,7 +82,7 @@ public class TxtFileRelease extends AbstractRelease {
 
         textFile = getFile(getParameter("txtfile"));
         is3D = getSimulationManager().getDataset().is3D();
-        nbParticles = readNbParticles();
+        nbParticles = -1;
     }
 
     private File getFile(String filename) throws IOException {
@@ -101,6 +101,7 @@ public class TxtFileRelease extends AbstractRelease {
     @Override
     public int release(ReleaseEvent event) throws IOException {
 
+        int cpt = 0;
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
         String[] strCoord;
         double[] coord;
@@ -138,6 +139,7 @@ public class TxtFileRelease extends AbstractRelease {
                     //Logger.getAnonymousLogger().info("Adding new particle: " + particle.getLon() + " " + particle.getLat());
                     getSimulationManager().getSimulation().getPopulation().add(particle);
                     index++;
+                    cpt++;
                 } else {
                     getLogger().log(Level.WARNING, "Drifter release - Drifter at line {0} ({1}) is not in water. Line ignored.", new Object[]{iline, line});
                     //throw new IOException("{Drifter release} Drifter at line " + iline + " (" + line + ") is not in water");
@@ -145,6 +147,9 @@ public class TxtFileRelease extends AbstractRelease {
             }
             iline++;
         }
+        
+        this.nbParticles = cpt;
+        
         return index;
     }
 
