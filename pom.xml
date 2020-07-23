@@ -319,7 +319,13 @@ knowledge of the CeCILL-B license and that you accept its terms.
         <dependency>
             <groupId>org.jdesktop.bsaf</groupId>
             <artifactId>bsaf</artifactId>
-            <version>1.9</version>
+            <version>1.9.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.jnlp</groupId>
+                    <artifactId>jnlp</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>
