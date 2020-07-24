@@ -56,7 +56,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.previmer</groupId>
     <artifactId>ichthyop</artifactId>
-    <version>3.3.3</version>
+    <version>3.3.4</version>
     <packaging>jar</packaging>
     <name>Ichthyop Develop</name>
     <description></description>
