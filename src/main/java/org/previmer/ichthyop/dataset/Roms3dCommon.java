@@ -50,15 +50,17 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
 import ucar.ma2.Array;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Variable;
 
 /**
@@ -133,6 +135,16 @@ abstract public class Roms3dCommon extends RomsCommon {
      * Name of the Variable in NetCDF file
      */
     private String strCs_r, strCs_w, strHC;
+
+    /**
+     * True if W should be read, false if should be computed.
+     */
+    private boolean readW;
+
+    /**
+     * Name of the W variable is read.
+     */
+    private String strW;
 
     private double getHc() throws IOException {
 
@@ -222,6 +234,16 @@ abstract public class Roms3dCommon extends RomsCommon {
         strCs_r = getParameter("field_csr");
         strCs_w = getParameter("field_csw");
         strHC = getParameter("field_hc");
+
+        if (findParameter("read_var_w")) {
+            readW = Boolean.valueOf(getParameter("read_var_w"));
+        } else {
+            readW = false;
+            getLogger().warning("Ichthyop will recalculate W variable from U and V");
+        }
+        if (readW) {
+            strW = getParameter("field_var_w");
+        }
 
     }
 
@@ -559,6 +581,7 @@ abstract public class Roms3dCommon extends RomsCommon {
         Index index;
 
         try {
+            //System.out.println("@@@@@@@@ " + ncIn.getLocation() + " origin " + rank);
             arr = ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce();
             u_tp1 = new float[nz][ny][nx - 1];
             index = arr.getIndex();
@@ -619,10 +642,31 @@ abstract public class Roms3dCommon extends RomsCommon {
             variable.nextStep(readVariable(ncIn, variable.getName(), rank), time_tp1, dt_HyMo);
         }
         z_w_tp1 = getSigLevels();
-        w_tp1 = computeW();
+
+        if (readW) {
+            this.w_tp1 = new float[nz + 1][ny][nx];
+            try {
+                arr = ncIn.findVariable(strW).read(origin, new int[]{1, nz, ny, nx}).reduce();
+                index = arr.getIndex();
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            w_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
+                        }
+                    }
+                }
+            } catch (IOException | InvalidRangeException ex) {
+                IOException ioex = new IOException("Error reading W variable. " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
+            }
+        } else {
+            w_tp1 = computeW();
+        }
+
     }
 
-    private float[][][] computeW() {
+    private float[][][] computeW() throws IOException, InvalidRangeException {
 
         //System.out.println("Compute vertical velocity");
         double[][][] Huon = new double[nz][ny][nx];
@@ -721,6 +765,34 @@ abstract public class Roms3dCommon extends RomsCommon {
         }
         //---------------------------------------------------
         // Return w
+
+        /*
+        Dimension timeD = new Dimension("depth", nz+1);
+	Dimension latD = new Dimension("lat", ny);
+	Dimension lonD = new Dimension("lon", nx);
+        Dimension[] rhPDims = {timeD, latD, lonD};
+ 
+        ArrayFloat.D3 array = new ArrayFloat.D3(nz + 1, ny, nx);
+        for (int k = 0; k < nz + 1; k++) {
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    array.set(k, j, i, w[k][j][i]);
+                }
+            }
+        }
+        
+        NetcdfFileWriteable ncOut;
+        ncOut = NetcdfFileWriteable.createNew("wich.nc");
+        ncOut.addDimension(null, timeD);
+        ncOut.addDimension(null, latD);
+        ncOut.addDimension(null, lonD);
+        ncOut.addVariable("w", float.class, rhPDims);
+        ncOut.create();
+        ncOut.write("w", new int[] {0, 0, 0}, array);
+        ncOut.close();
+        System.exit(0);
+        */
+        
         return w;
 
     }
