@@ -352,6 +352,15 @@ public class DatasetUtil extends IchthyopLinker {
         return null;
     }
 
+    /** For a given dataset, loops over all the files and all the variables and extracts a HashMap 
+     * <Variable Names, List of files containing variable>.
+     * 
+     * @param dataset_prefix Prefix of the dataset (used only for log message)
+     * @param location Location of the files (path or file)
+     * @param coordinateV True if coordinates variables only should be extracted.
+     * @return
+     * @throws IOException 
+     */
     public static HashMap<String, List<String>> mapVariables(String dataset_prefix, String location, boolean coordinateV) throws IOException {
 
         if (!new File(location).exists()) {
