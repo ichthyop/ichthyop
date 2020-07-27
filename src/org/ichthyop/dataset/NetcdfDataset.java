@@ -82,28 +82,37 @@ import ucar.nc2.Variable;
  */
 public class NetcdfDataset extends IchthyopLinker implements IDataset, NextStepListener {
 
-    // constants
+    /** Constants. */
     final int NLAYER = 3;
     final int TILING_H = 100;
     final int TILING_V = 3;
-    // variables
+    
+    /** Variables. */
     final HashMap<String, AbstractDatasetVariable> variables = new HashMap();
+    
     // names of the variables
     final HashMap<String, List<String>> requiredBy = new HashMap();
+    
     // dataset grid
     AbstractRegularGrid grid;
+    
     // prefix in the configuration file
     final String prefix;
     private String path;
-    // 
+     
     final HashMap<String, List<String>> variableMap = new HashMap();
-    //
+    
     private Calendar calendar;
     protected double t0;
-    // 
+     
     int time_arrow;
-    //
+    
     boolean enhanced;
+    
+    /** True if dataset locations should be sorted by alphabetical order.
+     * 
+     * If False, files are sorted given the time variable.
+     */
     private boolean alphabetically_sorted;
 
     // constructor
