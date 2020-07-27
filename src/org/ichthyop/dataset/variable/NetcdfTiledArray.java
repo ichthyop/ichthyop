@@ -69,7 +69,16 @@ import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 /**
- *
+ * Class that manages tiling of NetCDF input variables.
+ * 
+ * Netcdf tiles are ordered as follows:
+ * 
+ * k = 0
+ * (4 5 6 7
+ * 0 1 2 3)
+ * k=1
+ * (12 13 14 15
+ * 8 9 10 11)
  * @author pverley
  */
 public class NetcdfTiledArray extends IchthyopLinker {
@@ -121,9 +130,9 @@ public class NetcdfTiledArray extends IchthyopLinker {
             int i0tile = i0 + ijktile[0];
             int j0tile = j0 + ijktile[1];
             int k0tile = ijktile[2];
-            int nxtile = ((tag + 1) % ntilex == 0) ? nx - ijktile[0] : nh;
-            int nytile = ((tag / ntilex + 1) % ntiley == 0) ? ny - ijktile[1] : nh;
-            int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ijktile[2] : nv;
+            int nxtile = this.getNx(tag, ijktile[0]);
+            int nytile = this.getNy(tag, ijktile[1]);
+            int nztile = this.getNz(tag, ijktile[2]);
 
             // load tile
             int[] origin = null, shape = null;
@@ -182,61 +191,70 @@ public class NetcdfTiledArray extends IchthyopLinker {
 //        if (log) {
 //            System.out.println("i0 " + ijktile[0] + " j0 " + ijktile[1] + " k0 " + ijktile[2]);
 //        }
-        int nxtile = ((tag + 1) % ntilex == 0) ? nx - ijktile[0] : nh;
-        int nytile = ((tag / ntilex + 1) % ntiley == 0) ? ny - ijktile[1] : nh;
-        int nztile = ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ijktile[2] : nv;
+        int nxtile = this.getNx(tag, ijktile[0]);
+        int nytile = this.getNy(tag, ijktile[1]);
+        int nztile = this.getNz(tag, ijktile[2]);
 
         Array tile = getTile(tag);
 
         // Since we apply reduce() on the array, the dimension of the tile may vary        
-        if (nztile <= 1) {
+        if (nztile <= 1) { 
             if (nytile <= 1) {
                 if (nxtile <= 1) {
                     // dim z = 1 y = 1 x = 1
                     return tile.getDouble(0);
                 } else {
                     // dim z = 1 y = 1 x > 1
-                    return tile.getDouble(Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0));
+                    return tile.getDouble(this.getITile(i));
                 }
             } else if (nxtile <= 1) {
                 // dim z = 1 y > 1 x = 1
-                return tile.getDouble(Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0));
+                return tile.getDouble(this.getJTile(j));
             } else {
                 // dim z = 1 y > 1 x > 1
                 return tile.getDouble(tile.getIndex().set(
-                        Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0),
-                        Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)));
+                       this.getJTile(j),
+                       this.getITile(i)));
             }
         } else if (nytile <= 1) {
             if (nxtile <= 1) {
                 // dim z > 1 y = 1 x = 1
-                return tile.getDouble(Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0));
+                return tile.getDouble(this.getKTile(k));
             } else {
                 // dim z > 1 y = 1 x > 1
                 return tile.getDouble(tile.getIndex().set(
-                        Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0),
-                        Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)
+                        this.getKTile(k),
+                        this.getITile(i)
                 ));
             }
         } else if (nxtile <= 1) {
             // dim z > 1 y > 1 x = 1
             return tile.getDouble(tile.getIndex().set(
-                    Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0),
-                    Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0)
+                   this.getKTile(k),
+                   this.getJTile(j)
             ));
         } else {
             // dim z > 1 y > 1 x > 1
             return tile.getDouble(tile.getIndex().set(
-                    Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0),
-                    Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0),
-                    Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0)));
+                    this.getKTile(k),
+                    this.getJTile(j),
+                    this.getITile(i)));
         }
     }
 
+    /** Provides the tag index from the i,j,k index of a point.
+     * Firt element provides index along (X, Y=0, Z=0), second element
+     * adds offset due to Y, third element adds offset due to Z.
+     */
     private int ijk2tag(int i, int j, int k) {
         return Math.min(i / nh, ntilex - 1) + ntilex * Math.min(j / nh, ntiley - 1) + ntilex * ntiley * Math.min(k / nv, ntilez - 1);
     }
 
+    /** Provides the (i, j, k) indexes of the lower left point of the tag'th tile.
+     * tag % ntilex provides the index of the tile along the X axis.
+     * (tag / ntilex) % ntiley provides the index of the tile along Y axis
+     * ((tag / (ntilex * ntiley)) % ntilez) provides the index of the tile along Z axis.
+     */
     int[] tag2ijk(int tag) {
         return new int[]{nh * (tag % ntilex), nh * ((tag / ntilex) % ntiley), nv * ((tag / (ntilex * ntiley)) % ntilez)};
     }
@@ -284,4 +302,87 @@ public class NetcdfTiledArray extends IchthyopLinker {
             return getTile(tag);
         }
     }
+    
+    /** Returns the number of elements along x for the given tile. 
+     * 
+     * For western tiles, Nx can be less than nh (if nh * ntilex != nx)
+     * 
+     * @param tag Tile index
+     * @param itile Global i-index of the tile (0, 0, 0) element
+     * @return 
+     */
+    private int getNx(int tag, int itile) {
+        return ((tag + 1) % ntilex == 0) ? nx - itile : nh;
+    }
+
+    /**
+     * Returns the number of elements along y for the given tile.
+     *
+     * For northern tiles, Ny can be less than nh (if nh * ntiley != ny)
+     *
+     * @param tag Tile index
+     * @param jtile Global j-index of the tile (0, 0, 0) element
+     * @return
+     */
+    private int getNy(int tag, int jtile) {
+        return ((tag / ntilex + 1) % ntiley == 0) ? ny - jtile : nh;
+    }
+
+    /**
+     * Returns the number of elements along z for the given tile.
+     *
+     * For lower tiles, Nz can be less than nv (if nv * ntilez != nz)
+     *
+     * @param tag Tile index
+     * @param ztile Global z-index of the tile (0, 0, 0) element
+     * @return
+     */
+    private int getNz(int tag, int ztile) {
+        return ((tag / (ntilex * ntiley) + 1) % ntilez == 0) ? nz - ztile : nv;
+    }
+    
+    /** Get the i-index of the point to read in the tile. 
+     * 
+     * The first part provides the index when i is within the global tiling
+     * (i < nh * ntilex). 
+     * 
+     * The second part provides the index offset if i >= nh * ntilex
+     * 
+     * @param i  Global index of the point to read
+     * @return Local (tile) index of the point to read in the tile.
+     */
+    private int getITile(int i) {
+        return Math.min(i, nh * ntilex - 1) % nh + Math.max(i - nh * ntilex + 1, 0);
+    }
+
+    /** Get the j-index of the point to read in the tile. 
+     * 
+     * The first part provides the index when i is within the global tiling
+     * (j < nh * ntiley). 
+     * 
+     * The second part provides the index offset if j >= nh * ntiley
+     * 
+     * @param j  Global index of the point to read
+     * @return Local (tile) index of the point to read in the tile.
+     */
+    private int getJTile(int j) {
+        return Math.min(j, nh * ntiley - 1) % nh + Math.max(j - nh * ntiley + 1, 0);
+    }
+
+    
+    /** Get the z-index of the point to read in the tile. 
+     * 
+     * The first part provides the index when k is within the global tiling
+     * (k < nz * ntilez). 
+     * 
+     * The second part provides the index offset if kk >= nv * ntilez
+     * 
+     * @param k  Global index of the point to read
+     * @return Local (tile) index of the point to read in the tile.
+     */
+    private int getKTile(int k) {
+        return Math.min(k, nv * ntilez - 1) % nv + Math.max(k - nv * ntilez + 1, 0);
+    }
+
+    
 }
