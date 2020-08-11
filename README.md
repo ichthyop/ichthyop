@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="http://www.ichthyop.org/sites/all/themes/ichthyop/logo.png">
+  <img src="http://www.ichthyop.org/system/files/userfiles/logo-ichthyop.png">
 </div>
 
 # ICHTHYOP 
