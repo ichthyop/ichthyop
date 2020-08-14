@@ -1,0 +1,7 @@
+dist
+target
+nbactions.xml 
+nbproject
+manifest.mf
+**html
+**.sh
