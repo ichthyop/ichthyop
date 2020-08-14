@@ -10,6 +10,7 @@
 
 ### New features
 
+- Adding NEMO in 2D
 - Possibility to read Roms W field instead of computing it (not fully satisfying though)
 - Nyctemeral migration not active if the target depth is below the local sea floor
 - Moving to Maven Java system (easier compilation using `mvn install`).
