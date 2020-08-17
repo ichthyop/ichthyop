@@ -327,6 +327,21 @@ knowledge of the CeCILL-B license and that you accept its terms.
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
+                <key>field_var_w</key>
+                <long_name>W-momentum component</long_name>
+                <value>w</value>
+                <default>w</default>
+                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+            </parameter>
+            <parameter>
+                <key>read_var_w</key>
+                <long_name>True if W should be read</long_name>
+                <value>false</value>
+                <default>false</default>
+                <format>boolean</format>
+                <description>True if W should be read instead of recomputed.</description>
+            </parameter>
+            <parameter>
                 <key>field_csr</key>
                 <long_name>S-coordinate stretching curves at Rho points</long_name>
                 <value>Cs_r</value>
