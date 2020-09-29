@@ -33,6 +33,7 @@ ${licensePrefix}This program is free software: you can redistribute it and/or mo
 ${licensePrefix}it under the terms of the GNU General Public License as published by
 ${licensePrefix}the Free Software Foundation (version 3 of the License). For a full 
 ${licensePrefix}description, see the LICENSE file.
+${licensePrefix}
 ${licensePrefix}This program is distributed in the hope that it will be useful,
 ${licensePrefix}but WITHOUT ANY WARRANTY; without even the implied warranty of
 ${licensePrefix}MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -44,5 +45,3 @@ ${licensePrefix}
 <#if licenseLast??>
 ${licenseLast}
 </#if>
-
-${licensePrefix}
