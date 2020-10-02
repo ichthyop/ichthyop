@@ -5,7 +5,7 @@
 ICHTHYOP 
 ================
 
-[![Latest Release](https://img.shields.io/github/release/ichthyop/ichthyop-private.svg)](https://github.com/ichthyop/ichthyop-private/releases)
+[![Latest Release](https://img.shields.io/github/release/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop-private/releases)
 [![Java Build Status](https://github.com/ichthyop/ichthyop-private/workflows/java-build/badge.svg)](https://github.com/ichthyop/ichthyop-private/actions)
 [![GitHub issues](https://img.shields.io/github/issues/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop/issues)
 
