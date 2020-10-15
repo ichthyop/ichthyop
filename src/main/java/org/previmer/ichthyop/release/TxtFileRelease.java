@@ -73,7 +73,7 @@ public class TxtFileRelease extends AbstractRelease {
 
         textFile = getFile(getParameter("txtfile"));
         is3D = getSimulationManager().getDataset().is3D();
-        nbParticles = -1;
+        nbParticles = readNbParticles();
     }
 
     private File getFile(String filename) throws IOException {
@@ -139,7 +139,10 @@ public class TxtFileRelease extends AbstractRelease {
             iline++;
         }
         
-        this.nbParticles = cpt;
+        if (cpt != this.nbParticles) {
+            getLogger().log(Level.WARNING, "File contains {0} lines, but {1} drifters were effectively released", new Object[]{this.nbParticles, cpt});
+            getLogger().log(Level.WARNING, "Be carefull when analysing output file");        
+        }
         
         return index;
     }
