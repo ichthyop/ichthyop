@@ -26,12 +26,12 @@ The JAVA excutables will be generated in the `target` directory.
 
 To run Ichthyop, type:
 
-`java -jar targer/ichthyop_3.3.3.jar`
+`java -jar target/ichthyop_3.3.3.jar`
 
 # Resources
 
 Ichthyop website (documentation): [http://www.ichthyop.org](http://www.ichthyop.org).
 
-Feedback & Bug reports: [www.ichthyop.org/forum](mwww.ichthyop.org/forum)
+Feedback & Bug reports: [www.ichthyop.org/forum](www.ichthyop.org/forum)
 
-Python package (post-processing): [https://github.com/umr-marbec/ichthyop-py](https://github.com/umr-marbec/ichthyop-py)
+Python package (post-processing): [https://github.com/ichthyop/ichthyop-python](https://github.com/ichthyop/ichthyop-python)
