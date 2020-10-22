@@ -70,7 +70,8 @@ public class Roms3dDataset extends Roms3dCommon {
 
     private List<String> ncfiles;
     private int ncindex;
-
+    boolean saveWEnabled = false;
+    
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
 
@@ -128,7 +129,11 @@ public class Roms3dDataset extends Roms3dCommon {
 
     @Override
     void setOnFirstTime() throws Exception {
-        this.saveWFiles();
+        
+        if (this.saveWEnabled) {
+            this.saveWFiles();
+        }
+
         double t0 = getSimulationManager().getTimeManager().get_tO();
         ncindex = DatasetUtil.index(ncfiles, t0, timeArrow(), strTime);
         ncIn = DatasetUtil.openFile(ncfiles.get(ncindex), true);
@@ -137,15 +142,15 @@ public class Roms3dDataset extends Roms3dCommon {
         time_tp1 = t0;
     }
 
+    
     public void saveWFiles() throws IOException, InvalidRangeException {
-
+            
         // Init netcdf variables for reading
         int[] origin = new int[]{0, 0, jpo, ipo};
         int[] countU = new int[]{1, nz, ny, (nx - 1)};
         int[] countV = new int[]{1, nz, ny - 1, nx};
         int[] countZeta = new int[]{1, ny, nx};
         int[] originZeta = new int[]{0, jpo, ipo};
-        
         
         // Init outputs and output dimension
         float[][][] w;
