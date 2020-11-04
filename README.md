@@ -6,8 +6,8 @@ ICHTHYOP
 ================
 ![License](https://img.shields.io/github/license/ichthyop/ichthyop)
 [![DOI](https://zenodo.org/badge/286681664.svg)](https://zenodo.org/badge/latestdoi/286681664)
-[![Latest Release](https://img.shields.io/github/release/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop-private/releases)
-[![Java Build Status](https://github.com/ichthyop/ichthyop-private/workflows/java-build/badge.svg)](https://github.com/ichthyop/ichthyop-private/actions)
+[![Latest Release](https://img.shields.io/github/release/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop/releases)
+[![Java Build Status](https://github.com/ichthyop/ichthyop/workflows/java-build/badge.svg)](https://github.com/ichthyop/ichthyop/actions)
 [![GitHub issues](https://img.shields.io/github/issues/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop/issues)
 
 
