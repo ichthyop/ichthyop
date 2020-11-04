@@ -18,7 +18,7 @@ Ichthyop install is achieved by using [Maven](https://maven.apache.org/).
 
 To install it, go in the Ichthyop folder and type:
 
-`mvn install`
+`mvn -B package`
 
 The JAVA excutables will be generated in the `target` directory.
 
