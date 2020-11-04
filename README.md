@@ -4,7 +4,8 @@
 
 ICHTHYOP 
 ================
-
+![License](https://img.shields.io/github/license/ichthyop/ichthyop)
+[![DOI](https://zenodo.org/badge/286681664.svg)](https://zenodo.org/badge/latestdoi/286681664)
 [![Latest Release](https://img.shields.io/github/release/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop-private/releases)
 [![Java Build Status](https://github.com/ichthyop/ichthyop-private/workflows/java-build/badge.svg)](https://github.com/ichthyop/ichthyop-private/actions)
 [![GitHub issues](https://img.shields.io/github/issues/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop/issues)
@@ -26,12 +27,12 @@ The JAVA excutables will be generated in the `target` directory.
 
 To run Ichthyop, type:
 
-`java -jar target/ichthyop_3.3.3.jar`
+`java -jar target/ichthyop_X.Y.Z.jar`, with `X.Y.Z` the Ichthyop version.
 
 # Resources
 
 Ichthyop website (documentation): [http://www.ichthyop.org](http://www.ichthyop.org).
 
-Feedback & Bug reports: [www.ichthyop.org/forum](www.ichthyop.org/forum)
+Feedback & Bug reports: [https://github.com/ichthyop/ichthyop/issues](https://github.com/ichthyop/ichthyop/issues)
 
 Python package (post-processing): [https://github.com/ichthyop/ichthyop-python](https://github.com/ichthyop/ichthyop-python)
