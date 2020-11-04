@@ -64,7 +64,7 @@ abstract public class Roms3dCommon extends RomsCommon {
     /**
      * Vertical grid dimension
      */
-    private int nz;
+    protected int nz;
     /**
      * Ocean free surface elevetation at current time
      */
@@ -122,7 +122,7 @@ abstract public class Roms3dCommon extends RomsCommon {
     /**
      * Name of the Variable in NetCDF file
      */
-    private String strZeta;
+    protected String strZeta;
     /**
      * Name of the Variable in NetCDF file
      */
@@ -658,7 +658,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     }
 
-    private float[][][] computeW() throws IOException, InvalidRangeException {
+    protected float[][][] computeW() throws IOException, InvalidRangeException {
 
         //System.out.println("Compute vertical velocity");
         double[][][] Huon = new double[nz][ny][nx];
@@ -789,7 +789,7 @@ abstract public class Roms3dCommon extends RomsCommon {
 
     }
 
-    private double[][][] getSigLevels() {
+    protected double[][][] getSigLevels() {
 
         //-----------------------------------------------------
         // Daily recalculation of z_w and z_r with zeta
