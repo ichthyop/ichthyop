@@ -27,7 +27,7 @@ The JAVA excutables will be generated in the `target` directory.
 
 To run Ichthyop, type:
 
-`java -jar target/ichthyop_3.3.3.jar`
+`java -jar target/ichthyop_X.Y.Z.jar`, with `X.Y.Z` the Ichthyop version.
 
 # Resources
 
