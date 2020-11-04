@@ -7,6 +7,7 @@
 - Automatic compilation tests using GitHub actions
 - Badges on README.md.
 - New License to allow connections with Zenodo (GPL-3)
+- Adding debugging stuff that saves W computed by Ichthyop and leaves program
 
 ### Bug fixes
 
