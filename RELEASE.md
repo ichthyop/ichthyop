@@ -1,5 +1,19 @@
 # ICHTHYOP Release notes
 
+## Changes in Ichthyop 3.3.5
+
+### New features
+
+- Automatic compilation tests using GitHub actions
+- Badges on README.md.
+- New License to allow connections with Zenodo (GPL-3)
+- Adding debugging stuff that saves W computed by Ichthyop and leaves program
+
+### Bug fixes
+
+- Deactivate the `compile on save` Netbeans feature (compilation errors not always detected)
+- Correction of a bug in the `TxtFileEelease` class. In 3.3.4, changes were made to insure that the output drifter dimension has the same size as the effectively released particles, but in fact the file has a 0 drifter dimension. Moved back to previous state, with the display of a warning message.
+
 ## Changes in Ichthyop 3.3.4
 
 ### Bug fixes
@@ -13,7 +27,7 @@
 - Adding NEMO in 2D
 - Possibility to read Roms W field instead of computing it (not fully satisfying though)
 - Nyctemeral migration not active if the target depth is below the local sea floor
-- Moving to Maven Java system (easier compilation using `mvn install`).
+- Moving to Maven Java system (easier compilation using `mvn -B package`).
 - Adding possibility to run Ichthyop in map coordinates rather than in lon/lat (developped for polar application, Dennis Jongsomjit).
 - Adding functional response to linear growth action (implies reading food variable if activated)
 
