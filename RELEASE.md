@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in Ichthyop 3.3.6
+
+### Bug fixes
+
+- Resolve a problem in the saving of XML files on Windows. Encoding was automatically set to Cp1512, not handled by XML. Now UTF-8 should be saved.
+
 ## Changes in Ichthyop 3.3.5
 
 ### New features
