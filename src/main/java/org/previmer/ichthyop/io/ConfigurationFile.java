@@ -156,7 +156,9 @@ public class ConfigurationFile {
 
     public void write(OutputStream out) throws IOException {
         org.jdom2.output.Format format = org.jdom2.output.Format.getPrettyFormat();
-        format.setEncoding(System.getProperty("file.encoding"));
+        // barrier.n: correct a bug related to Cp1252 encoding (windows).
+        // should force encoding to UTF-8
+        //format.setEncoding(System.getProperty("file.encoding"));
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(structure, out);
     }
