@@ -33,6 +33,6 @@ To run Ichthyop, type:
 
 Ichthyop website (documentation): [http://www.ichthyop.org](http://www.ichthyop.org).
 
-Feedback & Bug reports: [www.ichthyop.org/forum](www.ichthyop.org/forum)
+Feedback & Bug reports: [https://github.com/ichthyop/ichthyop/issues](https://github.com/ichthyop/ichthyop/issues)
 
 Python package (post-processing): [https://github.com/ichthyop/ichthyop-python](https://github.com/ichthyop/ichthyop-python)
