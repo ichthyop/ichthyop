@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="http://www.ichthyop.org/system/files/userfiles/logo-ichthyop.png">
+  <img src="http://www.ichthyop.org/wp-content/uploads/2020/10/cropped-logo_ichtyopsimple_rvb_500dpi.png" height=100>
 </div>
 
 ICHTHYOP 
@@ -7,7 +7,7 @@ ICHTHYOP
 ![License](https://img.shields.io/github/license/ichthyop/ichthyop)
 [![DOI](https://zenodo.org/badge/286681664.svg)](https://zenodo.org/badge/latestdoi/286681664)
 [![Latest Release](https://img.shields.io/github/release/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop/releases)
-[![Java Build Status](https://github.com/ichthyop/ichthyop/workflows/java-build/badge.svg)](https://github.com/ichthyop/ichthyop/actions)
+[![Java Build Status](https://github.com/ichthyop/ichthyop-private/workflows/java-build/badge.svg)](https://github.com/ichthyop/ichthyop-private/actions)
 [![GitHub issues](https://img.shields.io/github/issues/ichthyop/ichthyop.svg)](https://github.com/ichthyop/ichthyop/issues)
 
 
