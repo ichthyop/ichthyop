@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="http://www.ichthyop.org/system/files/userfiles/logo-ichthyop.png">
+  <img src="http://www.ichthyop.org/wp-content/uploads/2020/10/cropped-logo_ichtyopsimple_rvb_500dpi.png" height=100>
 </div>
 
 ICHTHYOP 
