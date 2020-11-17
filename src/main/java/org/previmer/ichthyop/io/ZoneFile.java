@@ -209,7 +209,7 @@ public class ZoneFile {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
-        List<XZone> list = new ArrayList();
+        List<XZone> list = new ArrayList<>();
         for (Object elt : structure.getRootElement().getContent(filtre)) {
             list.add(new XZone((Element) elt));
         }
