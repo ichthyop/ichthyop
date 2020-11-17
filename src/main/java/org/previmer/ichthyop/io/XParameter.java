@@ -46,6 +46,7 @@ package org.previmer.ichthyop.io;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jdom2.Element;
 
 /**
@@ -54,6 +55,10 @@ import org.jdom2.Element;
  */
 public class XParameter extends org.jdom2.Element {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     final public static String PARAMETER = "parameter";
     final public static String KEY = "key";
     final public static String LONGNAME = "long_name";
@@ -134,7 +139,7 @@ public class XParameter extends org.jdom2.Element {
     }
 
     public String[] getAcceptedValues() {
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
         if (getFormat().equals(ParameterFormat.COMBO)) {
             try {
                 for (Object elt : getChildren(ACCEPTED)) {
