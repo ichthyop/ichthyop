@@ -69,7 +69,6 @@ import org.previmer.ichthyop.io.XParameter;
 import java.awt.event.ActionEvent;
 import java.text.ParseException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.event.UndoableEditEvent;
@@ -90,29 +89,19 @@ import org.previmer.ichthyop.manager.TimeManager;
  */
 public class ParameterTable extends JMultiCellEditorsTable {
 
-    ///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    /**
+     *
+     */
+    private static final long serialVersionUID = 3713985755224174088L;
+
     /**
      *
      */
     private ParameterTableModel model;
 
-///////////////
-// Constructors
-///////////////
-
-    /*
-     * No constructor needed
-     */
-////////////////////////////
-// Definition of the methods
-////////////////////////////
     @Override
     public TableModel getModel() {
-        return model == null
-                ? new DefaultTableModel()
-                : model;
+        return model == null ? new DefaultTableModel() : model;
     }
 
     public UndoManager getUndoManager() {
@@ -143,7 +132,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
             Object value = model.getValueAt(row, 1);
             switch (xparam.getFormat()) {
                 case COMBO:
-                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(xparam.getAcceptedValues())));
+                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox<String>(xparam.getAcceptedValues())));
                     break;
                 case INTEGER:
                     editorModel.addEditorForRow(row, new IntegerEditor());
@@ -152,7 +141,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     editorModel.addEditorForRow(row, new FloatEditor());
                     break;
                 case BOOLEAN:
-                    editorModel.addEditorForRow(row, new DefaultCellEditor(new JComboBox(new String[]{"true", "false"})));
+                    editorModel.addEditorForRow(row,
+                            new DefaultCellEditor(new JComboBox<String>(new String[] { "true", "false" })));
                     break;
                 case DURATION:
                     editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION, value));
@@ -201,11 +191,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     public void setAllRowsVisible(final boolean visible) {
         stopEditing();
-        TableRowSorter sorter = new TableRowSorter<ParameterTableModel>(model);
-        sorter.setRowFilter(new RowFilter() {
+        TableRowSorter<ParameterTableModel> sorter = new TableRowSorter<>(model);
+        sorter.setRowFilter(new RowFilter<ParameterTableModel, Integer>() {
 
             @Override
-            public boolean include(Entry entry) {
+            public boolean include(Entry<? extends ParameterTableModel, ? extends Integer> entry) {
                 int row = (Integer) entry.getIdentifier();
                 try {
                     boolean hidden = model.getTableParameter(row).getXParameter().isHidden();
@@ -224,9 +214,8 @@ public class ParameterTable extends JMultiCellEditorsTable {
     }
 
     /*
-     * This method picks good column sizes.
-     * If all column heads are wider than the column's cells'
-     * contents, then you can just use column.sizeWidthToFit().
+     * This method picks good column sizes. If all column heads are wider than the
+     * column's cells' contents, then you can just use column.sizeWidthToFit().
      */
     public void adjustColumnSizes() {
 
@@ -244,12 +233,11 @@ public class ParameterTable extends JMultiCellEditorsTable {
         for (int i = 0; i < getModel().getColumnCount(); i++) {
             column = getColumnModel().getColumn(i);
 
-            comp = headerRenderer.getTableCellRendererComponent(
-                    null, column.getHeaderValue(),
-                    false, false, 0, 0);
+            comp = headerRenderer.getTableCellRendererComponent(null, column.getHeaderValue(), false, false, 0, 0);
             headerWidth = comp.getPreferredSize().width;
             try {
-                comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false, false, 0, i);
+                comp = getDefaultRenderer(getColumnClass(i)).getTableCellRendererComponent(this, longValues[i], false,
+                        false, 0, i);
             } catch (Exception ex) {
                 java.util.logging.Logger.getAnonymousLogger().log(Level.WARNING, ex.toString());
             }
@@ -339,11 +327,15 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     public class ParameterTableModel extends AbstractTableModel {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = 2839672668300180732L;
         private XBlock block;
         private TableParameter[] data;
         final public static String NAME_HEADER = "Name";
         final public static String VALUE_HEADER = "Value";
-        private final String[] HEADERS = new String[]{NAME_HEADER, VALUE_HEADER};
+        private final String[] HEADERS = new String[] { NAME_HEADER, VALUE_HEADER };
         private JUndoManager undoManager;
 
         ParameterTableModel(XBlock block) {
@@ -381,18 +373,17 @@ public class ParameterTable extends JMultiCellEditorsTable {
         }
 
         @Override
-        public Class getColumnClass(int c) {
+        public Class<?> getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
 
         /*
-         * Don't need to implement this method unless your table's
-         * editable.
+         * Don't need to implement this method unless your table's editable.
          */
         @Override
         public boolean isCellEditable(int row, int col) {
-            //Note that the data/cell address is constant,
-            //no matter where the cell appears onscreen.
+            // Note that the data/cell address is constant,
+            // no matter where the cell appears onscreen.
             if (col == 1) {
                 return true;
             } else {
@@ -437,7 +428,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
         private TableParameter[] createData() {
 
             Collection<XParameter> list = block.getXParameters();
-            List<TableParameter> listData = new ArrayList();
+            List<TableParameter> listData = new ArrayList<>();
             TableParameter[] tableData;
             int i = 0;
             for (XParameter xparam : list) {
@@ -460,7 +451,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
         private Object[] getLongValues() {
 
-            String[] longuest = new String[]{"", ""};
+            String[] longuest = new String[] { "", "" };
             Collection<XParameter> list = block.getXParameters();
             for (XParameter xparam : list) {
                 if (xparam.getLongName().length() > longuest[0].length()) {
@@ -476,13 +467,16 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     class ParamTableCellRenderer extends DefaultTableCellRenderer {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = 2456139423440304332L;
+
         @Override
-        public Component getTableCellRendererComponent(JTable table,
-                Object value, boolean isSelected, boolean hasFocus,
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                 int row, int column) {
 
-            Component comp = super.getTableCellRendererComponent(table,
-                    value, isSelected, hasFocus, row, column);
+            Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             if (!table.isEnabled()) {
                 comp.setForeground(Color.LIGHT_GRAY);
@@ -547,6 +541,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     public class JUndoManager extends UndoManager {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = -3420468728090597297L;
         protected Action undoAction;
         protected Action redoAction;
 
@@ -554,7 +552,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
             this.undoAction = new JvUndoAction(this);
             this.redoAction = new JvRedoAction(this);
 
-            synchronizeActions();           // to set initial names
+            synchronizeActions(); // to set initial names
         }
 
         public Action getUndoAction() {
@@ -603,6 +601,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     class JvUndoAction extends AbstractAction {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = 3252938949086146319L;
         protected final UndoManager manager;
 
         public JvUndoAction(UndoManager manager) {
@@ -620,6 +622,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     class JvRedoAction extends AbstractAction {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = 8276297616557380379L;
         protected final UndoManager manager;
 
         public JvRedoAction(UndoManager manager) {
@@ -637,6 +643,10 @@ public class ParameterTable extends JMultiCellEditorsTable {
 
     class JvCellEdit extends AbstractUndoableEdit {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = 7442473802745439443L;
         protected ParameterTableModel tableModel;
         protected Object oldValue;
         protected Object newValue;
