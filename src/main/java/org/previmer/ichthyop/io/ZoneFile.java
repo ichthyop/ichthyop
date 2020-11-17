@@ -45,7 +45,6 @@
 package org.previmer.ichthyop.io;
 
 import java.io.FileNotFoundException;
-import org.previmer.ichthyop.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,7 +58,6 @@ import java.util.logging.Level;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.filter.Filter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 import org.previmer.ichthyop.manager.SimulationManager;
@@ -166,9 +164,12 @@ public class ZoneFile {
         return listBlock;
     }
 
-    private List<XZone> readZones(final TypeZone type) {
+    /*
+    private <E extends Content> List<XZone> readZones(final TypeZone type) {
 
-        Filter filtre = new Filter() {
+        Filter<E> filtre = new Filter<E>() {
+
+            private static final long serialVersionUID = -97784466558307682L;
 
             @Override
             public boolean matches(Object obj) {
@@ -180,41 +181,44 @@ public class ZoneFile {
             }
 
             @Override
-            public List filter(List list) {
+            public List<E> filter(List<?> list) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Object filter(Object o) {
+            public E filter(Object o) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter negate() {
+            public Filter<E> negate() {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter or(Filter filter) {
+            public Filter<E> or(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter and(Filter filter) {
+            public Filter<E> and(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter refine(Filter filter) {
+            public <R> Filter<R> refine(Filter<R> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
+        
         List<XZone> list = new ArrayList<>();
-        for (Object elt : structure.getRootElement().getContent(filtre)) {
+        for (Content elt : structure.getRootElement().getContent(filtre)) {
             list.add(new XZone((Element) elt));
         }
+
         return list;
     }
+    */
 
     private HashMap<String, XZone> createMap() {
         HashMap<String, XZone> lmap = new HashMap<>();
