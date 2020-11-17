@@ -57,14 +57,18 @@ import org.previmer.ichthyop.calendar.InterannualCalendar;
  */
 public class JDateTextField extends JFormattedTextField {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    ///////////////////////////////
+    // Declaration of the variables
+    ///////////////////////////////
 
     /**
-     * The simple date format parses and formats dates in human readable format.
-     * The pattern for date-time formatting depends on the calendar
-     * (Calendar1900 or ClimatoCalendar)
+    *
+    */
+    private static final long serialVersionUID = -5905970269251383288L;
+    /**
+     * The simple date format parses and formats dates in human readable format. The
+     * pattern for date-time formatting depends on the calendar (Calendar1900 or
+     * ClimatoCalendar)
      */
     private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
     /**
@@ -72,9 +76,9 @@ public class JDateTextField extends JFormattedTextField {
      */
     private Calendar calendar;
 
-///////////////
-// Constructors
-///////////////
+    ///////////////
+    // Constructors
+    ///////////////
 
     public JDateTextField() {
         this(new InterannualCalendar());
@@ -87,14 +91,14 @@ public class JDateTextField extends JFormattedTextField {
         setValue(0L);
     }
 
+    /*
     private Calendar getCalendar() {
         return calendar;
     }
+    */
 
     public void setCalendar(Calendar calendar) {
-        long time = (null != this.calendar)
-                ? getTimeInSeconds()
-                : 0L;
+        long time = (null != this.calendar) ? getTimeInSeconds() : 0L;
         this.calendar = calendar;
         dtFormat.setCalendar(calendar);
         setValue(time);
@@ -102,6 +106,7 @@ public class JDateTextField extends JFormattedTextField {
 
     /**
      * Gets the current value of the parameter
+     * 
      * @return a long, the current value of the parameter
      */
     public long getTimeInSeconds() {
@@ -117,5 +122,5 @@ public class JDateTextField extends JFormattedTextField {
         calendar.setTimeInMillis(value * 1000L);
         setValue(calendar.getTime());
     }
-    
+
 }

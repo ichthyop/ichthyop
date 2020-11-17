@@ -67,6 +67,10 @@ import org.previmer.ichthyop.Simulation;
  */
 public class ClassEditor extends DefaultCellEditor {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4306814083888314062L;
     JComboBox cbBox;
 
     public ClassEditor() throws Exception {
@@ -204,6 +208,8 @@ public class ClassEditor extends DefaultCellEditor {
             }
 
         }
+        
+        jfile.close();
 
         return classes;
     }
