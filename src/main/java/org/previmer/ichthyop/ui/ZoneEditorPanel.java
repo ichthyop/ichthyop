@@ -174,7 +174,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         lblFile.setToolTipText(lblFile.getText());
         zoneFile = new ZoneFile(file);
         DefaultTableModel model = new DefaultTableModel();
-        Vector dummyHeader = new Vector();
+        Vector<String> dummyHeader = new Vector<>();
         dummyHeader.addElement("");
         model.setDataVector(array2Vector(zoneFile.getZones()), dummyHeader);
         tableZone.setModel(model);
@@ -184,10 +184,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         }
     }
 
-    private Vector array2Vector(Collection<XZone> zones) {
-        Vector vector = new Vector();
+    private Vector<Vector<String>> array2Vector(Collection<XZone> zones) {
+        Vector<Vector<String>> vector = new Vector<>();
         for (XZone xzone : zones) {
-            Vector v = new Vector();
+            Vector<String> v = new Vector<>();
             v.addElement(xzone.getKey());
             vector.addElement(v);
         }
@@ -217,15 +217,15 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
         txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
 
-        Vector vector = new Vector();
+        Vector<Vector<String>> vector = new Vector<>();
         for (XPoint point : zone.getPolygon()) {
-            Vector v = new Vector();
+            Vector<String> v = new Vector<>();
             v.addElement(point.getLon());
             v.addElement(point.getLat());
             vector.addElement(v);
         }
         DefaultTableModel model = new DefaultTableModel();
-        Vector header = new Vector();
+        Vector<String> header = new Vector<>();
         header.addElement(getResourceMap().getString("tableZone.longitude"));
         header.addElement(getResourceMap().getString("tableZone.latitude"));
         model.setDataVector(vector, header);
@@ -240,7 +240,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             case DegDecimalMin:
                 rdBtnDegDecimalMin.doClick();
                 break;
-            case DecimalDeg:
+            default:
                 rdBtnDecimalDeg.doClick();
                 break;
         }
@@ -258,6 +258,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         ckBoxEnabled.setEnabled(enabled);
         tablePolygon.setEnabled(enabled);
         tablePolygon.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+
+            /**
+             *
+             */
+            private static final long serialVersionUID = -4924727441632979305L;
 
             @Override
             public Component getTableCellRendererComponent(JTable table,
@@ -516,11 +521,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 			 *
 			 */
 			private static final long serialVersionUID = -492128684306836779L;
-			Class[] types = new Class[] {
+			Class<?>[] types = new Class<?>[] {
                 java.lang.String.class
             };
 
-            public Class getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
         });
@@ -641,11 +646,15 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 "Longitude", "Latitude"
             }
         ) {
-            Class[] types = new Class [] {
+            /**
+             *
+             */
+            private static final long serialVersionUID = -6799988937351655507L;
+            Class<?>[] types = new Class[] {
                 java.lang.Float.class, java.lang.Float.class
             };
 
-            public Class getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
         });
@@ -822,9 +831,9 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlTypeZone.setBorder(javax.swing.BorderFactory.createTitledBorder("Type of zone"));
         pnlTypeZone.setName("pnlTypeZone"); // NOI18N
 
-        cbBoxType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbBoxType.setModel(new javax.swing.DefaultComboBoxModel<String>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbBoxType.setName("cbBoxType"); // NOI18N
-        cbBoxType.setModel(new DefaultComboBoxModel(TypeZone.values()));
+        cbBoxType.setModel(new DefaultComboBoxModel<TypeZone>(TypeZone.values()));
 
         javax.swing.GroupLayout pnlTypeZoneLayout = new javax.swing.GroupLayout(pnlTypeZone);
         pnlTypeZone.setLayout(pnlTypeZoneLayout);
@@ -1320,7 +1329,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                             //property change event will be fired.
                             optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
 
-                            int answer = ((Integer) value).intValue();
+                            //int answer = ((Integer) value).intValue();
                             //If you were going to check something
                             //before closing the window, you'd do
                             //it here.
@@ -1345,7 +1354,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     private javax.swing.JButton btnUpPoint;
     private javax.swing.JButton btnUpZone;
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JComboBox cbBoxType;
+    private javax.swing.JComboBox<?> cbBoxType;
     private javax.swing.JCheckBox ckBoxBathyMask;
     private javax.swing.JCheckBox ckBoxEnabled;
     private javax.swing.JCheckBox ckBoxThickness;
