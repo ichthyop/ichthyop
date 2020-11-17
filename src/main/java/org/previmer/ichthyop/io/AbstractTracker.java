@@ -62,8 +62,8 @@ import ucar.nc2.Dimension;
  */
 public abstract class AbstractTracker extends SimulationManagerAccessor {
 
-    private final ArrayList<Dimension> dimensions = new ArrayList();
-    private final List<Attribute> attributes = new ArrayList();
+    private final ArrayList<Dimension> dimensions = new ArrayList<>();
+    private final List<Attribute> attributes = new ArrayList<>();
     private final DataType dataType;
     private final PropertyManager propertyManager = PropertyManager.getInstance(getClass());
     private Array array;
