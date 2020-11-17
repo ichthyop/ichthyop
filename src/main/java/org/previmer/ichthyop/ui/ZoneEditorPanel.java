@@ -58,7 +58,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.EventObject;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,13 +73,11 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.event.CellEditorListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import org.jdesktop.application.ResourceMap;
 import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.TypeZone;
@@ -98,6 +95,11 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 public class ZoneEditorPanel extends javax.swing.JPanel
         implements ListSelectionListener, PropertyChangeListener,
         ActionListener {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4846396600115277018L;
 
     /** Creates new form ZoneEditorPanel */
     public ZoneEditorPanel() {
@@ -419,7 +421,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         pnlColor = new javax.swing.JPanel();
         btnColor = new javax.swing.JButton();
         pnlTypeZone = new javax.swing.JPanel();
-        cbBoxType = new javax.swing.JComboBox();
+        cbBoxType = new javax.swing.JComboBox<DefaultComboBoxModel<String>>();
         pnlOption = new javax.swing.JPanel();
         lblLonlat = new javax.swing.JLabel();
         rdBtnDecimalDeg = new javax.swing.JRadioButton();
@@ -510,7 +512,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
                 "Title 1"
             }
         ) {
-            Class[] types = new Class [] {
+            /**
+             *
+             */
+            private static final long serialVersionUID = -492128684306836779L;
+            Class[] types = new Class[] {
                 java.lang.String.class
             };
 

@@ -83,7 +83,7 @@ public class ActionManager extends AbstractManager {
             XBlock xaction = it.next();
             if (xaction.isEnabled()) {
                 try {
-                    Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
+                    Class<?> actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
                     AbstractAction action = createAction(actionClass);
                     action.loadParameters();
                     actionMap.put(xaction.getKey(), action);
@@ -133,7 +133,7 @@ public class ActionManager extends AbstractManager {
         return actions;
     }
 
-    public AbstractAction createAction(Class actionClass) throws InstantiationException, IllegalAccessException,
+    public AbstractAction createAction(Class<?> actionClass) throws InstantiationException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         return (AbstractAction) actionClass.getDeclaredConstructor().newInstance();
     }

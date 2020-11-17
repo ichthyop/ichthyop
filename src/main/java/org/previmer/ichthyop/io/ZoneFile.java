@@ -78,7 +78,7 @@ public class ZoneFile {
             load();
         } else {
             structure = new Document(new Element(ZONES));
-            zones = new HashMap();
+            zones = new HashMap<>();
             try {
                 save(new String[]{});
             } catch (FileNotFoundException ex) {
@@ -130,8 +130,9 @@ public class ZoneFile {
         structure.getRootElement().removeChildren(XZone.ZONE);
     }
 
+    /*
     private Iterable getZones(TypeZone type) {
-        ArrayList<XZone> list = new ArrayList();
+        ArrayList<XZone> list = new ArrayList<>();
         for (XZone xblock : zones.values()) {
             if (xblock.getTypeZone().equals(type)) {
                 list.add(xblock);
@@ -139,9 +140,10 @@ public class ZoneFile {
         }
         return list;
     }
+    */
 
     public Collection<XZone> getZones() {
-        List<XZone> list = new ArrayList(zones.values().size());
+        List<XZone> list = new ArrayList<>(zones.values().size());
         if (null != sortedKey) {
             Iterator<String> it = sortedKey.iterator();
             while (it.hasNext()) {
@@ -157,7 +159,7 @@ public class ZoneFile {
 
     private List<XZone> readZones() {
         List<Element> list = structure.getRootElement().getChildren(XZone.ZONE);
-        List<XZone> listBlock = new ArrayList(list.size());
+        List<XZone> listBlock = new ArrayList<>(list.size());
         for (Element elt : list) {
             listBlock.add(new XZone(elt));
         }
@@ -215,8 +217,8 @@ public class ZoneFile {
     }
 
     private HashMap<String, XZone> createMap() {
-        HashMap<String, XZone> lmap = new HashMap();
-        sortedKey = new ArrayList();
+        HashMap<String, XZone> lmap = new HashMap<>();
+        sortedKey = new ArrayList<>();
         for (XZone xzone : readZones()) {
             sortedKey.add(xzone.getKey());
             lmap.put(xzone.getKey(), xzone);
@@ -244,4 +246,3 @@ public class ZoneFile {
         zones.put(newKey, zone);
     }
 }
-
