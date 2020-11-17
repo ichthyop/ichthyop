@@ -67,9 +67,9 @@ import ucar.nc2.dataset.NetcdfDataset;
  */
 public class Mercator_3D_Old extends AbstractDataset {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    ///////////////////////////////
+    // Declaration of the variables
+    ///////////////////////////////
     /**
      * Grid dimension
      */
@@ -98,7 +98,7 @@ public class Mercator_3D_Old extends AbstractDataset {
     /**
      * Mask: water = 1, cost = 0
      */
-    private int[][][] maskRho;//, masku, maskv;
+    private int[][][] maskRho;// , masku, maskv;
     /**
      * Zonal component of the velocity field at current time
      */
@@ -146,7 +146,7 @@ public class Mercator_3D_Old extends AbstractDataset {
     /**
      * List on NetCDF input files in which dataset is read.
      */
-    //private ArrayList<String> listInputFiles;
+    // private ArrayList<String> listInputFiles;
     /**
      * Index of the current file read in the {@code listInputFiles}
      */
@@ -182,7 +182,7 @@ public class Mercator_3D_Old extends AbstractDataset {
     private double[][] e1t, e2t, e1v, e2u;
     private String stre3t;
     private String str_gdepT, str_gdepW;
-    private String stre1t, stre2t, stre1v, stre2u, stre3u, stre3v;
+    private String stre1t, stre2t;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
     private String file_hgr, file_zgr, file_mask;
@@ -190,9 +190,9 @@ public class Mercator_3D_Old extends AbstractDataset {
     // Whether vertical velocity should be read from NetCDF or calculated from U & V
     private boolean readW;
 
-////////////////////////////
-// Definition of the methods
-////////////////////////////
+    ////////////////////////////
+    // Definition of the methods
+    ////////////////////////////
     @Override
     public boolean is3D() {
         return true;
@@ -202,7 +202,7 @@ public class Mercator_3D_Old extends AbstractDataset {
      * Reads time non-dependant fields in NetCDF dataset
      */
     private void readConstantField() throws Exception {
-        
+
         System.out.println("+++++++++++ old class");
 
         NetcdfFile nc;
@@ -218,12 +218,10 @@ public class Mercator_3D_Old extends AbstractDataset {
         Index indexLat = arrLat.getIndex();
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                lonRho[j][i] = arrLon.getFloat((arrLon.getShape().length == 2)
-                        ? indexLon.set(jpo + j, ipo + i)
-                        : indexLon.set(ipo + i));
-                latRho[j][i] = arrLat.getFloat((arrLat.getShape().length == 2)
-                        ? indexLat.set(jpo + j, ipo + i)
-                        : indexLat.set(jpo + j));
+                lonRho[j][i] = arrLon.getFloat(
+                        (arrLon.getShape().length == 2) ? indexLon.set(jpo + j, ipo + i) : indexLon.set(ipo + i));
+                latRho[j][i] = arrLat.getFloat(
+                        (arrLat.getShape().length == 2) ? indexLat.set(jpo + j, ipo + i) : indexLat.set(jpo + j));
             }
         }
 
@@ -253,8 +251,8 @@ public class Mercator_3D_Old extends AbstractDataset {
             nc.close();
             nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
-        //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
-        //fichier *mesh*z*
+        // System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
+        // fichier *mesh*z*
         get_gdep_fields(nc);
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
@@ -277,7 +275,7 @@ public class Mercator_3D_Old extends AbstractDataset {
 
         // overwrites the values that have been computed here.
         // compute_e2t_e1t_e1v_e2u();
-        
+
     }
 
     private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
@@ -294,43 +292,6 @@ public class Mercator_3D_Old extends AbstractDataset {
         return field;
     }
 
-    private void compute_e2t_e1t_e1v_e2u() throws IOException {
-        
-        e2t = new double[ny][nx];
-        e1t = new double[ny][nx];
-        e1v = new double[ny][nx];
-        e2u = new double[ny][nx];
-
-        double R = 6339.6 * 1e3;
-        double dlat = Math.abs(latitude[1] - latitude[0]);
-        double dlon = Math.abs(longitude[1] - longitude[0]);
-
-        // Initialisation of e2t from the grid. It is set as constant
-        // since seemingly on a regular grid.
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                e2t[j][i] = R * dlat * Math.PI / 180.d;
-            }
-        }
-
-        // Calculation of e1t with correction of cos(lat)
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                e1t[j][i] = R * dlon * Math.PI / 180.d * Math.cos(latitude[j] * Math.PI / 180.d);
-            }
-        }
-
-        // Correction of scale factor for e1v 
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                e1v[j][i] = R * dlon * Math.PI / 180.d * Math.cos((latitude[j] + 0.5d * dlat) * Math.PI / 180.d);
-            }
-        }
-
-        e2u = e2t;
-
-    }
-
     private double[][][] compute_e3u(double[][][] e3t) {
 
         double[][][] e3u_calc = new double[nz][ny][nx];
@@ -339,10 +300,9 @@ public class Mercator_3D_Old extends AbstractDataset {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx - 1; i++) {
                     /*
-                     * In NEMO domzgr.F90
-                     * e3u (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji+1,jj,jk))
+                     * In NEMO domzgr.F90 e3u (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji+1,jj,jk))
                      */
-                    //e3u_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j][i + 1]);
+                    // e3u_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j][i + 1]);
                     e3u_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
                 }
                 e3u_calc[k][j][nx - 1] = e3t[k][j][nx - 1];
@@ -359,10 +319,9 @@ public class Mercator_3D_Old extends AbstractDataset {
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny - 1; j++) {
                     /*
-                     * In Nemo domzgr.F90
-                     * e3v (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji,jj+1,jk))
+                     * In Nemo domzgr.F90 e3v (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji,jj+1,jk))
                      */
-                    //e3v_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j + 1][i]);
+                    // e3v_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j + 1][i]);
                     e3v_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
                 }
                 e3v_calc[k][ny - 1][i] = e3t[k][ny - 1][i];
@@ -372,7 +331,7 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-        
+
         Array array = nc.findVariable(varname).read().reduce().flip(0);
         Index index = array.getIndex();
         double[][][] field = new double[nz][ny][nx];
@@ -380,9 +339,7 @@ public class Mercator_3D_Old extends AbstractDataset {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
                     index.set(k + 1, j + jpo, i + ipo);
-                    field[k][j][i] = Double.isNaN(array.getDouble(index))
-                            ? 0.d
-                            : array.getDouble(index);
+                    field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
                 }
             }
         }
@@ -433,24 +390,18 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     /*
-    private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-
-        Array array = nc.findVariable(varname).read().reduce();
-        double[][] field = new double[ny][nx];
-        Index index = array.getIndex();
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                index.set(j + jpo, i + ipo);
-                field[j][i] = array.getDouble(index);
-            }
-        }
-        return field;
-    }
+     * private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws
+     * InvalidRangeException, IOException {
+     * 
+     * Array array = nc.findVariable(varname).read().reduce(); double[][] field =
+     * new double[ny][nx]; Index index = array.getIndex(); for (int j = 0; j < ny;
+     * j++) { for (int i = 0; i < nx; i++) { index.set(j + jpo, i + ipo);
+     * field[j][i] = array.getDouble(index); } } return field; }
      */
     /**
-     * Advects the particle with the model velocity vector, using a Forward
-     * Euler scheme. Let's see how it works with the example of the Zonal
-     * component.
+     * Advects the particle with the model velocity vector, using a Forward Euler
+     * scheme. Let's see how it works with the example of the Zonal component.
+     * 
      * <pre>
      * ROMS and MARS uses an Arakawa C grid.
      * Here is the scheme (2D) of cells (i, j) and (i + 1, j):
@@ -500,8 +451,8 @@ public class Mercator_3D_Old extends AbstractDataset {
      * x(t + dt) = x(t) + Ua(t) * dt
      * </pre>
      *
-     * pverley pour chourdin: ici il faudra revoir les adimensionalisations de u
-     * et v par e2u et e1v
+     * pverley pour chourdin: ici il faudra revoir les adimensionalisations de u et
+     * v par e2u et e1v
      *
      * @param pGrid
      * @param time
@@ -530,14 +481,11 @@ public class Mercator_3D_Old extends AbstractDataset {
         for (int ii = 0; ii < 2; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (1.d - (double) kk - dz));
                     CO += co;
                     index.set(k + kk, j + jj, i + ii - 1);
                     if (!(Double.isNaN(u_tp0.getDouble(index)))) {
-                        x = (1.d - x_euler) * u_tp0.getDouble(index)
-                                + x_euler * u_tp1.getDouble(index);
+                        x = (1.d - x_euler) * u_tp0.getDouble(index) + x_euler * u_tp1.getDouble(index);
                         du += x * co / e2u[j + jj][i + ii - 1];
                     }
                 }
@@ -572,17 +520,12 @@ public class Mercator_3D_Old extends AbstractDataset {
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 for (int kk = 0; kk < 2; kk++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (.5d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (.5d - (double) kk - dz));
                     CO += co;
                     index.set(k + kk, j + jj, i + ii);
-                    x = (1.d - x_euler) * w_tp0.getDouble(index)
-                            + x_euler * w_tp1.getDouble(index);
-                    //System.out.println("xxxx = " + x + "co " + co   );
-                    dw += 2.d * x * co
-                            / (gdepW[Math.max(k + kk - 1, 0)]
-                            - gdepW[Math.min(k + kk + 1, nz)]);
+                    x = (1.d - x_euler) * w_tp0.getDouble(index) + x_euler * w_tp1.getDouble(index);
+                    // System.out.println("xxxx = " + x + "co " + co );
+                    dw += 2.d * x * co / (gdepW[Math.max(k + kk - 1, 0)] - gdepW[Math.min(k + kk + 1, nz)]);
                 }
             }
         }
@@ -590,9 +533,10 @@ public class Mercator_3D_Old extends AbstractDataset {
             dw /= CO;
         }
 
-        /*double dwr = get_dWrz(pGrid, time);
-         float err = (float) Math.abs((dwr - dw) / dwr);
-         System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);*/
+        /*
+         * double dwr = get_dWrz(pGrid, time); float err = (float) Math.abs((dwr - dw) /
+         * dwr); System.out.println("dw: " + dw + " - dwr: " + dwr + " - err: " + err);
+         */
         return dw;
     }
 
@@ -618,14 +562,11 @@ public class Mercator_3D_Old extends AbstractDataset {
         for (int kk = 0; kk < 2; kk++) {
             for (int jj = 0; jj < 2; jj++) {
                 for (int ii = 0; ii < n; ii++) {
-                    co = Math.abs((1.d - (double) ii - dx)
-                            * (1.d - (double) jj - dy)
-                            * (1.d - (double) kk - dz));
+                    co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy) * (1.d - (double) kk - dz));
                     CO += co;
                     index.set(k + kk, j + jj - 1, i + ii);
                     if (!Double.isNaN(v_tp0.getDouble(index))) {
-                        x = (1.d - x_euler) * v_tp0.getDouble(index)
-                                + x_euler * v_tp1.getDouble(index);
+                        x = (1.d - x_euler) * v_tp0.getDouble(index) + x_euler * v_tp1.getDouble(index);
                         dv += x * co / e1v[j + jj - 1][i + ii];
                     }
                 }
@@ -639,6 +580,7 @@ public class Mercator_3D_Old extends AbstractDataset {
 
     /**
      * Computes the vertical velocity vector.
+     * 
      * <pre>
      * Drill:
      *
@@ -698,7 +640,8 @@ public class Mercator_3D_Old extends AbstractDataset {
                     // If umask = 0, interpolated speed = 0.
                     // else, ueast = mean over T points
                     u_east[k][j][i] = (Double.isNaN(u_tp1.getDouble(index)) || Double.isNaN(u_tp1.getDouble(indexbis)))
-                            ? 0.d : 0.5 * (u_tp1.getDouble(index) + u_tp1.getDouble(indexbis));
+                            ? 0.d
+                            : 0.5 * (u_tp1.getDouble(index) + u_tp1.getDouble(indexbis));
                 }
             }
         }
@@ -714,13 +657,14 @@ public class Mercator_3D_Old extends AbstractDataset {
                     // If umask = 0, interpolated speed = 0.
                     // else, ueast = mean over T points
                     v_north[k][j][i] = (Double.isNaN(v_tp1.getDouble(index)) || Double.isNaN(v_tp1.getDouble(indexbis)))
-                            ? 0.d : 0.5 * (v_tp1.getDouble(index) + v_tp1.getDouble(indexbis));
+                            ? 0.d
+                            : 0.5 * (v_tp1.getDouble(index) + v_tp1.getDouble(indexbis));
 
                 }
             }
         }
 
-        //---------------------------------------------------
+        // ---------------------------------------------------
         // Calculation Coeff Huon & Hvom
         for (int k = nz; k-- > 0;) {
             for (int i = 0; i < nx; i++) {
@@ -738,28 +682,26 @@ public class Mercator_3D_Old extends AbstractDataset {
             }
         }
 
-        //---------------------------------------------------
+        // ---------------------------------------------------
         // Calcultaion of w(i, j, k)
         double[][][] w_double = new double[nz + 1][ny][nx];
 
         for (int j = 1; j < ny; j++) {
             for (int i = 1; i < nx; i++) {
                 /*
-                 * pverley 15/02/2011
-                 * I must start integrating the vertical velocity at the bottom
-                 * of the water column wich is not necessarily k = 0;
-                 * So first I look for k0 such as (k0 - 1) is bottom, k0 is first
-                 * cell of the column in water.
+                 * pverley 15/02/2011 I must start integrating the vertical velocity at the
+                 * bottom of the water column wich is not necessarily k = 0; So first I look for
+                 * k0 such as (k0 - 1) is bottom, k0 is first cell of the column in water.
                  */
                 int k0 = 0;
 
                 /*
-                 * pverley 15/02/2011
-                 * Ensured that w(0:k0, :, :) = 0;
+                 * pverley 15/02/2011 Ensured that w(0:k0, :, :) = 0;
                  */
                 for (int k = 0; k < k0 + 1; k++) {
                     w_double[k][j][i] = 0.d;
-                    //System.out.println("k: " + k + " k0: " + k0 + " wr: " + wr_tp1[k][j][i] + " " + isInWater(k, j, i));
+                    // System.out.println("k: " + k + " k0: " + k0 + " wr: " + wr_tp1[k][j][i] + " "
+                    // + isInWater(k, j, i));
                 }
                 for (int k = k0 + 1; k < nz; k++) {
                     w_double[k][j][i] = w_double[k - 1][j][i]
@@ -768,7 +710,7 @@ public class Mercator_3D_Old extends AbstractDataset {
                 w_double[nz][j][i] = 0.d;
             }
         }
-        //---------------------------------------------------
+        // ---------------------------------------------------
         // Boundary Conditions
         for (int k = nz + 1; k-- > 0;) {
             for (int j = ny; j-- > 0;) {
@@ -783,9 +725,9 @@ public class Mercator_3D_Old extends AbstractDataset {
             }
         }
 
-        //---------------------------------------------------
+        // ---------------------------------------------------
         // w * dxu * dyv
-        //float[][][] w = new float[nz + 1][ny][nx];
+        // float[][][] w = new float[nz + 1][ny][nx];
         Array w = new ArrayDouble.D3(nz + 1, ny, nx);
         index = w.getIndex();
         for (int i = nx; i-- > 0;) {
@@ -796,7 +738,7 @@ public class Mercator_3D_Old extends AbstractDataset {
             }
         }
 
-        //---------------------------------------------------
+        // ---------------------------------------------------
         // Return w
         return w;
     }
@@ -814,10 +756,10 @@ public class Mercator_3D_Old extends AbstractDataset {
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      *
-     * pverley pour chourdin: même remarque que chaque fois. Les infos dans OPA
-     * se trouvent dans différents fichiers, donc selon la méthode appelée, je
-     * dois recharger le fichier NetCDF correspondant. Au lieu d'utiliser la
-     * variable ncIn globale.
+     * pverley pour chourdin: même remarque que chaque fois. Les infos dans OPA se
+     * trouvent dans différents fichiers, donc selon la méthode appelée, je dois
+     * recharger le fichier NetCDF correspondant. Au lieu d'utiliser la variable
+     * ncIn globale.
      */
     private void readLonLat() throws IOException {
 
@@ -832,12 +774,10 @@ public class Mercator_3D_Old extends AbstractDataset {
             Index indexLat = arrLat.getIndex();
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    lonRho[j][i] = arrLon.getFloat((arrLon.getShape().length == 2)
-                            ? indexLon.set(j, i)
-                            : indexLon.set(i));
-                    latRho[j][i] = arrLat.getFloat((arrLat.getShape().length == 2)
-                            ? indexLat.set(j, i)
-                            : indexLat.set(j));
+                    lonRho[j][i] = arrLon
+                            .getFloat((arrLon.getShape().length == 2) ? indexLon.set(j, i) : indexLon.set(i));
+                    latRho[j][i] = arrLat
+                            .getFloat((arrLat.getShape().length == 2) ? indexLat.set(j, i) : indexLat.set(j));
                 }
             }
 
@@ -855,8 +795,8 @@ public class Mercator_3D_Old extends AbstractDataset {
     /*
      * Gets cell dimension [meter] in the XI-direction.
      *
-     * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans
-     * la définition de e1t et e2t
+     * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans la
+     * définition de e1t et e2t
      */
     @Override
     public double getdxi(int j, int i) {
@@ -872,13 +812,13 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     /*
-     * Sets up the {@code Dataset}. The method first sets the appropriate
-     * variable names, loads the first NetCDF dataset and extract the time
-     * non-dependant information, such as grid dimensions, geographical
-     * boundaries, depth at sigma levels.
+     * Sets up the {@code Dataset}. The method first sets the appropriate variable
+     * names, loads the first NetCDF dataset and extract the time non-dependant
+     * information, such as grid dimensions, geographical boundaries, depth at sigma
+     * levels.
      *
-     * @throws an IOException if an error occurs while setting up the
-     * {@code Dataset}
+     * @throws an IOException if an error occurs while setting up the {@code
+     * Dataset}
      */
     @Override
     public void setUp() throws Exception {
@@ -896,10 +836,14 @@ public class Mercator_3D_Old extends AbstractDataset {
 
         if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
             try {
-                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
-                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon1 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (IOException | NumberFormatException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
@@ -910,10 +854,10 @@ public class Mercator_3D_Old extends AbstractDataset {
     /*
      * Gets the names of the NetCDF variables from the configuration file.
      *
-     * pverley pour chourdin : "Configuration" c'est la classe qui lit le
-     * fichier de configuration. Tu vois que normallement, le nom des variables
-     * est lu dans le fichier cfg. Temporairement je courcircuite cette
-     * opération et je renseigne à la main le nom des variables des sorties OPA.
+     * pverley pour chourdin : "Configuration" c'est la classe qui lit le fichier de
+     * configuration. Tu vois que normallement, le nom des variables est lu dans le
+     * fichier cfg. Temporairement je courcircuite cette opération et je renseigne à
+     * la main le nom des variables des sorties OPA.
      */
     @Override
     public void loadParameters() {
@@ -938,16 +882,13 @@ public class Mercator_3D_Old extends AbstractDataset {
         }
         strTime = getParameter("field_var_time");
         stre3t = getParameter("field_var_e3t");
-        stre3u = getParameter("field_var_e3u");
-        stre3v = getParameter("field_var_e3v");
         str_gdepT = getParameter("field_var_gdept"); // z_rho
         str_gdepW = getParameter("field_var_gdepw"); // z_w
         stre1t = getParameter("field_var_e1t");
         stre2t = getParameter("field_var_e2t");
-        stre1v = getParameter("field_var_e1v");
-        stre2u = getParameter("field_var_e2u");
         if (!findParameter("enhanced_mode")) {
-            getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
+            getLogger().warning(
+                    "Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         }
         time_arrow = timeArrow();
 
@@ -966,10 +907,10 @@ public class Mercator_3D_Old extends AbstractDataset {
      *
      * @throws an IOException if an error occurs while reading the dimensions.
      *
-     * pverley pour chourdin: Pour ROMS ou MARS je lisais les dimensions à
-     * partir de la variable ncIn qui est le premier fichier sortie qui me tombe
-     * sous la main. Avec OPA, les dimensions se lisent dans un fichier
-     * particulier *byte*mask*. A déterminer si toujours vrai ?
+     *            pverley pour chourdin: Pour ROMS ou MARS je lisais les dimensions
+     *            à partir de la variable ncIn qui est le premier fichier sortie qui
+     *            me tombe sous la main. Avec OPA, les dimensions se lisent dans un
+     *            fichier particulier *byte*mask*. A déterminer si toujours vrai ?
      */
     private void getDimNC() throws IOException {
 
@@ -999,16 +940,16 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     /**
-     * Resizes the domain and determines the range of the grid indexes taht will
-     * be used in the simulation. The new domain is limited by the Northwest and
-     * the Southeast corners.
+     * Resizes the domain and determines the range of the grid indexes taht will be
+     * used in the simulation. The new domain is limited by the Northwest and the
+     * Southeast corners.
      *
      * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
-     * corner
+     *               corner
      * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
-     * corner
-     * @throws an IOException if the new domain is not strictly nested within
-     * the NetCDF dataset domain.
+     *               corner
+     * @throws an IOException if the new domain is not strictly nested within the
+     *            NetCDF dataset domain.
      */
     private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
 
@@ -1020,14 +961,14 @@ public class Mercator_3D_Old extends AbstractDataset {
         pGrid1 = latlon2xy(lat1, lon1);
         pGrid2 = latlon2xy(lat2, lon2);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            throw new IOException(
-                    "Impossible to proportion the simulation area : points out of domain");
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
         }
 
         lonRho = null;
         latRho = null;
 
-        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        // System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " +
+        // (float)pGrid2[0] + " " + (float)pGrid2[1]);
         ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
         ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
         jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
@@ -1035,16 +976,16 @@ public class Mercator_3D_Old extends AbstractDataset {
 
         nx = Math.min(nx, ipn - ipo + 1);
         ny = Math.min(ny, jpn - jpo + 1);
-        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+        // System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 
     /**
-     * Determines the geographical boundaries of the domain in longitude,
-     * latitude and depth.
+     * Determines the geographical boundaries of the domain in longitude, latitude
+     * and depth.
      */
     private void getDimGeogArea() {
 
-        //--------------------------------------
+        // --------------------------------------
         // Calculate the Physical Space extrema
         lonMin = Double.MAX_VALUE;
         lonMax = -lonMin;
@@ -1090,12 +1031,11 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     /**
-     * Transforms the specified 2D geographical coordinates into a grid
-     * coordinates.
+     * Transforms the specified 2D geographical coordinates into a grid coordinates.
      *
-     * The algorithme has been adapted from a function in ROMS/UCLA code,
-     * originally written by Alexander F. Shchepetkin and Hernan G. Arango.
-     * Please find below an extract of the ROMS/UCLA documention.
+     * The algorithme has been adapted from a function in ROMS/UCLA code, originally
+     * written by Alexander F. Shchepetkin and Hernan G. Arango. Please find below
+     * an extract of the ROMS/UCLA documention.
      *
      * <pre>
      *  Checks the position to find if it falls inside the whole domain.
@@ -1112,7 +1052,7 @@ public class Mercator_3D_Old extends AbstractDataset {
     @Override
     public double[] latlon2xy(double lat, double lon) {
 
-        //--------------------------------------------------------------------
+        // --------------------------------------------------------------------
         // Physical space (lat, lon) => Computational space (x, y)
         boolean found1 = false;
         boolean found2 = false;
@@ -1167,14 +1107,12 @@ public class Mercator_3D_Old extends AbstractDataset {
         // xgrid
         double xgrid;
         if (lon >= longitude[ci]) {
-            double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d)
-                    ? 360.d + (longitude[cip1] - longitude[ci])
+            double dx = (Math.abs(longitude[cip1] - longitude[ci]) > 180.d) ? 360.d + (longitude[cip1] - longitude[ci])
                     : longitude[cip1] - longitude[ci];
             double deltax = (lon - longitude[ci]) / dx;
             xgrid = xTore(ci + deltax);
         } else {
-            double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d)
-                    ? 360.d + (longitude[ci] - longitude[cim1])
+            double dx = (Math.abs(longitude[ci] - longitude[cim1]) > 180.d) ? 360.d + (longitude[ci] - longitude[cim1])
                     : longitude[ci] - longitude[cim1];
             double deltax = (lon - longitude[cim1]) / dx;
             xgrid = xTore(cim1 + deltax);
@@ -1191,13 +1129,13 @@ public class Mercator_3D_Old extends AbstractDataset {
             ygrid = (double) cjm1 + deltay;
         }
 
-        return (new double[]{xgrid, ygrid});
+        return (new double[] { xgrid, ygrid });
     }
 
     /*
-     * Initializes the {@code Dataset}. Opens the file holding the first time of
-     * the simulation. Checks out the existence of the fields required by the
-     * current simulation. Sets all fields at time for the first time step.
+     * Initializes the {@code Dataset}. Opens the file holding the first time of the
+     * simulation. Checks out the existence of the fields required by the current
+     * simulation. Sets all fields at time for the first time step.
      *
      * @throws an IOException if a required field cannot be found in the NetCDF
      * dataset.
@@ -1218,18 +1156,18 @@ public class Mercator_3D_Old extends AbstractDataset {
      * @param rank an int, the rank of the time dimension in the NetCDF dataset.
      * @throws an IOException if an error occurs while reading the variables.
      *
-     * pverley pour chourdin: la aussi je fais du provisoire en attendant de
-     * voir si on peut dégager une structure systématique des input.
+     *            pverley pour chourdin: la aussi je fais du provisoire en attendant
+     *            de voir si on peut dégager une structure systématique des input.
      */
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, 0, jpo, ipo};
+        int[] origin = new int[] { rank, 0, jpo, ipo };
         double time_tp0 = time_tp1;
 
         try {
-            u_tp1 = ncU.findVariable(strU).read(origin, new int[]{1, nz, ny, nx}).flip(1).reduce();
+            u_tp1 = ncU.findVariable(strU).read(origin, new int[] { 1, nz, ny, nx }).flip(1).reduce();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -1237,7 +1175,7 @@ public class Mercator_3D_Old extends AbstractDataset {
         }
 
         try {
-            v_tp1 = ncV.findVariable(strV).read(origin, new int[]{1, nz, ny, nx}).flip(1).reduce();
+            v_tp1 = ncV.findVariable(strV).read(origin, new int[] { 1, nz, ny, nx }).flip(1).reduce();
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -1258,7 +1196,7 @@ public class Mercator_3D_Old extends AbstractDataset {
         }
         if (readW) {
             try {
-                w_tp1 = ncW.findVariable(strW).read(origin, new int[]{1, nz + 1, ny, nx}).flip(1).reduce();
+                w_tp1 = ncW.findVariable(strW).read(origin, new int[] { 1, nz + 1, ny, nx }).flip(1).reduce();
             } catch (IOException | InvalidRangeException ex) {
                 IOException ioex = new IOException("Error reading W variable. " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());
@@ -1270,12 +1208,14 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     /*
-     * Computes the depth of the specified sigma level at the x-y particle
-     * location.
+     * Computes the depth of the specified sigma level at the x-y particle location.
      *
      * @param xRho a double, x-coordinate of the grid point
+     * 
      * @param yRho a double, y-coordinate of the grid point
+     * 
      * @param k an int, the index of the sigma level
+     * 
      * @return a double, the depth [meter] at (x, y, k)
      */
     public double getDepth(int k) {
@@ -1289,10 +1229,10 @@ public class Mercator_3D_Old extends AbstractDataset {
      * @param i an int, i-coordinate of the cell
      * @param j an intn the j-coordinate of the cell
      * @return <code>true</code> if cell(i, j) is in water, <code>false</code>
-     * otherwise.
+     *         otherwise.
      */
     private boolean isInWater(int i, int j, int k) {
-        //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
+        // System.out.println(i + " " + j + " " + k + " - " + (maskRho[k][j][i] > 0));
         try {
             return (maskRho[k][j][i] > 0);
         } catch (ArrayIndexOutOfBoundsException ex) {
@@ -1309,8 +1249,10 @@ public class Mercator_3D_Old extends AbstractDataset {
      * Determines whether the specified {@code RohPoint} is in water.
      *
      * @param ptRho the RhoPoint
+     * 
      * @return <code>true</code> if the {@code RohPoint} is in water,
      * <code>false</code> otherwise.
+     * 
      * @see #isInWater(int i, int j)
      */
     @Override
@@ -1323,14 +1265,14 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     /**
-     * Determines whether or not the specified grid point is close to cost line.
-     * The method first determines in which quater of the cell the grid point is
-     * located, and then checks wether or not its cell and the three adjacent
-     * cells to the quater are in water.
+     * Determines whether or not the specified grid point is close to cost line. The
+     * method first determines in which quater of the cell the grid point is
+     * located, and then checks wether or not its cell and the three adjacent cells
+     * to the quater are in water.
      *
      * @param pGrid a double[] the coordinates of the grid point
      * @return <code>true</code> if the grid point is close to cost,
-     * <code>false</code> otherwise.
+     *         <code>false</code> otherwise.
      */
     @Override
     public boolean isCloseToCost(double[] pGrid) {
@@ -1348,8 +1290,11 @@ public class Mercator_3D_Old extends AbstractDataset {
      * Transforms the depth at specified x-y particle location into z coordinate
      *
      * @param xRho a double, the x-coordinate
+     * 
      * @param yRho a double, the y-coordinate
+     * 
      * @param depth a double, the depth of the particle
+     * 
      * @return a double, the z-coordinate corresponding to the depth
      *
      * pverley pour chourdin: méthode à tester.
@@ -1361,47 +1306,51 @@ public class Mercator_3D_Old extends AbstractDataset {
             depth = 0.d;
         }
         depth = Math.abs(depth);
-        //-----------------------------------------------
+        // -----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double zRho = 0.d;
 
-        /* case particle is going straight up to surface, due to strong
-         * buoyancy for instance.
+        /*
+         * case particle is going straight up to surface, due to strong buoyancy for
+         * instance.
          */
         if (depth < gdepT[nz - 1]) {
-            //System.out.println("depth: " + depth + " ==> z: " + (nz - 1) + " gdepT[nz - 1]: " + gdepT[nz - 1]);
+            // System.out.println("depth: " + depth + " ==> z: " + (nz - 1) + " gdepT[nz -
+            // 1]: " + gdepT[nz - 1]);
             return (nz - 1);
         }
         for (int k = nz - 1; k > 0; k--) {
-            //System.out.println("t1 " + z_w[k] + " " + (float)depth + " " + z_rho[k]);
+            // System.out.println("t1 " + z_w[k] + " " + (float)depth + " " + z_rho[k]);
             if (depth <= gdepW[k] && depth > gdepT[k]) {
                 zRho = k + 0.d - 0.5d * Math.abs((gdepT[k] - depth) / (gdepT[k] - gdepW[k]));
-                //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k]: " + gdepW[k] + " gdepT[k]: " + gdepT[k]);
+                // System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + "
+                // gdepW[k]: " + gdepW[k] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
             }
-            //System.out.println("t2 " + z_rho[k] + " " + (float)depth + " " + z_w[k + 1]);
+            // System.out.println("t2 " + z_rho[k] + " " + (float)depth + " " + z_w[k + 1]);
             if (depth <= gdepT[k] && depth > gdepW[k + 1]) {
-                zRho = k + 0.d
-                        + 0.5d
-                        * Math.abs((gdepT[k] - depth)
-                                / (gdepW[k + 1] - gdepT[k]));
-                //System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + " gdepW[k + 1]: " + gdepW[k + 1] + " gdepT[k]: " + gdepT[k]);
+                zRho = k + 0.d + 0.5d * Math.abs((gdepT[k] - depth) / (gdepW[k + 1] - gdepT[k]));
+                // System.out.println("depth: " + depth + " ==> z: " + zRho + " - k: " + k + "
+                // gdepW[k + 1]: " + gdepW[k + 1] + " gdepT[k]: " + gdepT[k]);
                 return zRho;
             }
         }
-        //System.out.println("depth: " + depth + " ==> z: " + zRho);
+        // System.out.println("depth: " + depth + " ==> z: " + zRho);
         return zRho;
     }
 
     /*
      * Transdorms the specified z-location into depth
      *
-     * pverley pour chourdin: j'ai testé z2depth et depth2z, ça à l'air de
-     * marcher mais il faudra faire une validation plus sérieuse.
+     * pverley pour chourdin: j'ai testé z2depth et depth2z, ça à l'air de marcher
+     * mais il faudra faire une validation plus sérieuse.
      *
      * @param x double
+     * 
      * @param y double
+     * 
      * @param z double
+     * 
      * @return double
      */
     @Override
@@ -1415,34 +1364,33 @@ public class Mercator_3D_Old extends AbstractDataset {
         dz = z - k;
 
         if (dz < 0) { // >= ?
-            depth = gdepT[k]
-                    + 2 * Math.abs(dz * (gdepT[k] - gdepW[k]));
-            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k]: " + gdepW[k]) ;
+            depth = gdepT[k] + 2 * Math.abs(dz * (gdepT[k] - gdepW[k]));
+            // System.out.println("z: " + z + " => depth: " + depth + " k: " + k + "
+            // gdepT[k]: " + gdepT[k] + " gdepW[k]: " + gdepW[k]) ;
         } else {
-            depth = gdepT[k]
-                    - 2 * Math.abs(dz * (gdepT[k] - gdepW[k + 1]));
-            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k] + " gdepW[k + 1]: " + gdepW[k + 1]);
+            depth = gdepT[k] - 2 * Math.abs(dz * (gdepT[k] - gdepW[k + 1]));
+            // System.out.println("z: " + z + " => depth: " + depth + " k: " + k + "
+            // gdepT[k]: " + gdepT[k] + " gdepW[k + 1]: " + gdepW[k + 1]);
         }
         return -depth;
     }
 
     /**
-     * * Transforms the specified 2D grid coordinates into geographical
-     * coordinates. It merely does a bilinear spatial interpolation of the
-     * surrounding grid nods geographical coordinates.
+     * * Transforms the specified 2D grid coordinates into geographical coordinates.
+     * It merely does a bilinear spatial interpolation of the surrounding grid nods
+     * geographical coordinates.
      *
      * @param xRho a double, the x-coordinate
      * @param yRho a double, the y-coordinate
      * @return a double[], the corresponding geographical coordinates (latitude,
-     * longitude)
+     *         longitude)
      */
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
 
-        //--------------------------------------------------------------------
+        // --------------------------------------------------------------------
         // Computational space (x, y , z) => Physical space (lat, lon, depth)
-        final double jy = Math.max(0.00001f,
-                Math.min(yRho, (double) ny - 1.00001f));
+        final double jy = Math.max(0.00001f, Math.min(yRho, (double) ny - 1.00001f));
 
         final int i = (int) Math.floor(xRho);
         final int j = (int) Math.floor(jy);
@@ -1479,172 +1427,13 @@ public class Mercator_3D_Old extends AbstractDataset {
             }
         }
 
-        return (new double[]{lat, lon});
-    }
-
-    /**
-     * Determines whether the specified geographical point (lon, lat) belongs to
-     * the is inside the polygon defined by (imin, jmin) & (imin, jmax) & (imax,
-     * jmax) & (imax, jmin).
-     *
-     * <p>
-     * The algorithm has been adapted from a function in ROMS/UCLA code,
-     * originally written by Alexander F. Shchepetkin and Hernan G. Arango.
-     * Please find below an extract of the ROMS/UCLA documention.
-     * </p>
-     * <pre>
-     * Given the vectors Xb and Yb of size Nb, defining the coordinates
-     * of a closed polygon,  this function find if the point (Xo,Yo) is
-     * inside the polygon.  If the point  (Xo,Yo)  falls exactly on the
-     * boundary of the polygon, it still considered inside.
-     * This algorithm does not rely on the setting of  Xb(Nb)=Xb(1) and
-     * Yb(Nb)=Yb(1).  Instead, it assumes that the last closing segment
-     * is (Xb(Nb),Yb(Nb)) --> (Xb(1),Yb(1)).
-     *
-     * Reference:
-     * Reid, C., 1969: A long way from Euclid. Oceanography EMR,
-     * page 174.
-     *
-     * Algorithm:
-     *
-     * The decision whether the point is  inside or outside the polygon
-     * is done by counting the number of crossings from the ray (Xo,Yo)
-     * to (Xo,-infinity), hereafter called meridian, by the boundary of
-     * the polygon.  In this counting procedure,  a crossing is counted
-     * as +2 if the crossing happens from "left to right" or -2 if from
-     * "right to left". If the counting adds up to zero, then the point
-     * is outside.  Otherwise,  it is either inside or on the boundary.
-     *
-     * This routine is a modified version of the Reid (1969) algorithm,
-     * where all crossings were counted as positive and the decision is
-     * made  based on  whether the  number of crossings is even or odd.
-     * This new algorithm may produce different results  in cases where
-     * Xo accidentally coinsides with one of the (Xb(k),k=1:Nb) points.
-     * In this case, the crossing is counted here as +1 or -1 depending
-     * of the sign of (Xb(k+1)-Xb(k)).  Crossings  are  not  counted if
-     * Xo=Xb(k)=Xb(k+1).  Therefore, if Xo=Xb(k0) and Yo>Yb(k0), and if
-     * Xb(k0-1) < Xb(k0) < Xb(k0+1),  the crossing is counted twice but
-     * with weight +1 (for segments with k=k0-1 and k=k0). Similarly if
-     * Xb(k0-1) > Xb(k0) > Xb(k0+1), the crossing is counted twice with
-     * weight -1 each time.  If,  on the other hand,  the meridian only
-     * touches the boundary, that is, for example, Xb(k0-1) < Xb(k0)=Xo
-     * and Xb(k0+1) < Xb(k0)=Xo, then the crossing is counted as +1 for
-     * segment k=k0-1 and -1 for segment k=k0, resulting in no crossing.
-     *
-     * Note 1: (Explanation of the logical condition)
-     *
-     * Suppose  that there exist two points  (x1,y1)=(Xb(k),Yb(k))  and
-     * (x2,y2)=(Xb(k+1),Yb(k+1)),  such that,  either (x1 < Xo < x2) or
-     * (x1 > Xo > x2).  Therefore, meridian x=Xo intersects the segment
-     * (x1,y1) -> (x2,x2) and the ordinate of the point of intersection
-     * is:
-     *                y1*(x2-Xo) + y2*(Xo-x1)
-     *            y = -----------------------
-     *                         x2-x1
-     * The mathematical statement that point  (Xo,Yo)  either coinsides
-     * with the point of intersection or lies to the north (Yo>=y) from
-     * it is, therefore, equivalent to the statement:
-     *
-     *      Yo*(x2-x1) >= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 > 0
-     * or
-     *      Yo*(x2-x1) <= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 < 0
-     *
-     * which, after noting that  Yo*(x2-x1) = Yo*(x2-Xo + Xo-x1) may be
-     * rewritten as:
-     *
-     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) >= 0,   if   x2-x1 > 0
-     * or
-     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) <= 0,   if   x2-x1 < 0
-     *
-     * and both versions can be merged into  essentially  the condition
-     * that (Yo-y1)*(x2-Xo)+(Yo-y2)*(Xo-x1) has the same sign as x2-x1.
-     * That is, the product of these two must be positive or zero.
-     * </pre>
-     *
-     * @param imin an int, i-coordinate of the area left corners
-     * @param imax an int, i-coordinate of the area right corners
-     * @param jmin an int, j-coordinate of the area left corners
-     * @param jmax an int, j-coordinate of the area right corners
-     * @param lon a double, the longitude of the geographical point
-     * @param lat a double, the latitude of the geographical point
-     * @return <code>true</code> if (lon, lat) belongs to the polygon,
-     * <code>false</code>otherwise.
-     */
-    private boolean isInsidePolygone(int imin, int imax, int jmin,
-            int jmax, double lon, double lat) {
-
-        //--------------------------------------------------------------
-        // Return true if (lon, lat) is insidide the polygon defined by
-        // (imin, jmin) & (imin, jmax) & (imax, jmax) & (imax, jmin)
-        //-----------------------------------------
-        // Build the polygone
-        int nb, shft;
-        double[] xb, yb;
-        boolean isInPolygone = true;
-
-        nb = 2 * (jmax - jmin + imax - imin);
-        xb = new double[nb + 1];
-        yb = new double[nb + 1];
-        shft = 0 - imin;
-        for (int i = imin; i <= (imax - 1); i++) {
-            xb[i + shft] = lonRho[jmin][i];
-            yb[i + shft] = latRho[jmin][i];
-        }
-        shft = 0 - jmin + imax - imin;
-        for (int j = jmin; j <= (jmax - 1); j++) {
-            xb[j + shft] = lonRho[j][imax];
-            yb[j + shft] = latRho[j][imax];
-        }
-        shft = jmax - jmin + 2 * imax - imin;
-        for (int i = imax; i >= (imin + 1); i--) {
-            xb[shft - i] = lonRho[jmax][i];
-            yb[shft - i] = latRho[jmax][i];
-        }
-        shft = 2 * jmax - jmin + 2 * (imax - imin);
-        for (int j = jmax; j >= (jmin + 1); j--) {
-            xb[shft - j] = lonRho[j][imin];
-            yb[shft - j] = latRho[j][imin];
-        }
-        xb[nb] = xb[0];
-        yb[nb] = yb[0];
-
-        //---------------------------------------------
-        //Check if {lon, lat} is inside polygone
-        int inc, crossings;
-        double dx1, dx2, dxy;
-        crossings = 0;
-
-        for (int k = 0; k < nb; k++) {
-            if (xb[k] != xb[k + 1]) {
-                dx1 = lon - xb[k];
-                dx2 = xb[k + 1] - lon;
-                dxy = dx2 * (lat - yb[k]) - dx1 * (yb[k + 1] - lat);
-                inc = 0;
-                if ((xb[k] == lon) & (yb[k] == lat)) {
-                    crossings = 1;
-                } else if (((dx1 == 0.) & (lat >= yb[k]))
-                        | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
-                    inc = 1;
-                } else if ((dx1 * dx2 > 0.) & ((xb[k + 1] - xb[k]) * dxy >= 0.)) {
-                    inc = 2;
-                }
-                if (xb[k + 1] > xb[k]) {
-                    crossings += inc;
-                } else {
-                    crossings -= inc;
-                }
-            }
-        }
-        if (crossings == 0) {
-            isInPolygone = false;
-        }
-        return (isInPolygone);
+        return (new double[] { lat, lon });
     }
 
     /**
      * Sort OPA input files. First make sure that there is at least and only one
-     * file matching the hgr, zgr and byte mask patterns. Then list the gridU,
-     * gridV and gridT files.
+     * file matching the hgr, zgr and byte mask patterns. Then list the gridU, gridV
+     * and gridT files.
      *
      * @param path
      * @throws java.io.IOException
@@ -1663,17 +1452,20 @@ public class Mercator_3D_Old extends AbstractDataset {
 
         listUFiles = DatasetUtil.list(path, getParameter("gridu_pattern"));
         if (listUFiles.isEmpty()) {
-            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridu_pattern"));
+            throw new IOException(
+                    "{Dataset} " + path + " contains no file matching pattern " + getParameter("gridu_pattern"));
         }
         listVFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridv_pattern"));
         if (listVFiles.isEmpty()) {
-            throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridv_pattern"));
+            throw new IOException(
+                    "{Dataset} " + path + " contains no file matching pattern " + getParameter("gridv_pattern"));
         }
         listTFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridt_pattern"));
         if (readW) {
             listWFiles = DatasetUtil.list(getParameter("input_path"), getParameter("gridw_pattern"));
             if (listWFiles.isEmpty()) {
-                throw new IOException("{Dataset} " + path + " contains no file matching pattern " + getParameter("gridw_pattern"));
+                throw new IOException(
+                        "{Dataset} " + path + " contains no file matching pattern " + getParameter("gridw_pattern"));
             }
         }
         if (!skipSorting()) {
@@ -1742,24 +1534,25 @@ public class Mercator_3D_Old extends AbstractDataset {
     }
 
     /*
-     * Determines whether or not the x-y particle location is on edge of the
-     * domain.
+     * Determines whether or not the x-y particle location is on edge of the domain.
      *
      * @param x a double, the x-coordinate
+     * 
      * @param y a double, the y-coordinate
+     * 
      * @return <code>true</code> if the particle is on edge of the domain
      * <code>false</code> otherwise.
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
         /* barrier.n, 2017-08-02> adding the last two lines for zonal checking */
-        return ((!xTore && (pGrid[0] > (nx - 2.d))) || ((!xTore && (pGrid[0] < 1.d)))
-                || (pGrid[1] > (ny - 2.d)) || (pGrid[1] < 1.d));
+        return ((!xTore && (pGrid[0] > (nx - 2.d))) || ((!xTore && (pGrid[0] < 1.d))) || (pGrid[1] > (ny - 2.d))
+                || (pGrid[1] < 1.d));
     }
 
-//////////
-// Getters
-//////////
+    //////////
+    // Getters
+    //////////
     /**
      * Gets the grid dimension in the XI-direction
      *
@@ -1869,8 +1662,8 @@ public class Mercator_3D_Old extends AbstractDataset {
      *
      * @param i an int, the i-ccordinate
      * @param j an int, the j-coordinate
-     * @return a double, the bathymetry [meter] at (i, j) grid point if is in
-     * water, return NaN otherwise.
+     * @return a double, the bathymetry [meter] at (i, j) grid point if is in water,
+     *         return NaN otherwise.
      */
     @Override
     public double getBathy(int i, int j) {
@@ -1878,10 +1671,9 @@ public class Mercator_3D_Old extends AbstractDataset {
         double bathy = 0.d;
         if (isInWater(i, j, nz - 1)) {
             for (int k = 0; k < nz; k++) {
-                bathy += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i])
-                        ? 0.d
-                        : maskRho[k][j][i] * e3t[k][j][i];
-                //System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + e3t[k][j][i] + " " + bathy);
+                bathy += Double.isNaN(maskRho[k][j][i] * e3t[k][j][i]) ? 0.d : maskRho[k][j][i] * e3t[k][j][i];
+                // System.out.println("k: " + k + " " + maskRho[k][j][i] + " " + e3t[k][j][i] +
+                // " " + bathy);
             }
             return bathy;
         }
@@ -1900,7 +1692,7 @@ public class Mercator_3D_Old extends AbstractDataset {
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
-        //wr_tp0 = wr_tp1;
+        // wr_tp0 = wr_tp1;
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
@@ -1919,22 +1711,22 @@ public class Mercator_3D_Old extends AbstractDataset {
         boolean hasVerticalDim = false;
         switch (variable.getShape().length) {
             case 4:
-                origin = new int[]{rank, 0, jpo, ipo};
-                shape = new int[]{1, nz, ny, nx};
+                origin = new int[] { rank, 0, jpo, ipo };
+                shape = new int[] { 1, nz, ny, nx };
                 hasVerticalDim = true;
                 break;
             case 2:
-                origin = new int[]{jpo, ipo};
-                shape = new int[]{ny, nx};
+                origin = new int[] { jpo, ipo };
+                shape = new int[] { ny, nx };
                 break;
             case 3:
                 if (!variable.isUnlimited()) {
-                    origin = new int[]{0, jpo, ipo};
-                    shape = new int[]{nz, ny, nx};
+                    origin = new int[] { 0, jpo, ipo };
+                    shape = new int[] { nz, ny, nx };
                     hasVerticalDim = true;
                 } else {
-                    origin = new int[]{rank, jpo, ipo};
-                    shape = new int[]{1, ny, nx};
+                    origin = new int[] { rank, jpo, ipo };
+                    shape = new int[] { 1, ny, nx };
                 }
                 break;
         }
@@ -1970,7 +1762,8 @@ public class Mercator_3D_Old extends AbstractDataset {
         String str_e3tps = getParameter("field_var_e3tps");
         String str_mbathy = getParameter("field_var_mbathy");
 
-        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
+        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}",
+                new String[] { str_e3t0, str_e3tps, str_mbathy });
 
         // Open NetCDF file
         NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
