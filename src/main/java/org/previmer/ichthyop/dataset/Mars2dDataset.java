@@ -91,7 +91,7 @@ public class Mars2dDataset extends Mars2dCommon {
         rank += timeArrow;
         if (rank > (nbTimeRecords - 1) || rank < 0) {
             ncIn.close();
-            index = index = DatasetUtil.next(files, index, timeArrow);
+            index = DatasetUtil.next(files, index, timeArrow);
             ncIn = DatasetUtil.openFile(files.get(index), true);
             nbTimeRecords = ncIn.findDimension(strTimeDim).getLength();
             rank = (1 - timeArrow) / 2 * (nbTimeRecords - 1);
