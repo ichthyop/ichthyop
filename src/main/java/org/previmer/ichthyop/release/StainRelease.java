@@ -47,7 +47,6 @@ package org.previmer.ichthyop.release;
 import java.io.IOException;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.event.ReleaseEvent;
 import org.previmer.ichthyop.particle.ParticleFactory;
 import org.previmer.ichthyop.ui.LonLatConverter;
