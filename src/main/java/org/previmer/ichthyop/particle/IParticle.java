@@ -145,7 +145,7 @@ public interface IParticle {
 
     public void unlock();
 
-    public ParticleLayer getLayer(Class layerClass);
+    public ParticleLayer getLayer(Class<?> layerClass);
 
     public double[] getGridCoordinates();
 

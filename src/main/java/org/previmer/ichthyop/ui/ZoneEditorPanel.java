@@ -513,10 +513,10 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             }
         ) {
             /**
-             *
-             */
-            private static final long serialVersionUID = -492128684306836779L;
-            Class[] types = new Class[] {
+			 *
+			 */
+			private static final long serialVersionUID = -492128684306836779L;
+			Class[] types = new Class[] {
                 java.lang.String.class
             };
 

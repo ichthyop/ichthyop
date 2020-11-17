@@ -65,7 +65,7 @@ public class Particle extends GridPoint implements IParticle {
     private final List<ParticleLayer> layers = new ArrayList<>();
 
     @Override
-    public ParticleLayer getLayer(Class layerClass) {
+    public ParticleLayer getLayer(Class<?> layerClass) {
         for (ParticleLayer layer : layers) {
             if (layer.getClass().getCanonicalName().equals(layerClass.getCanonicalName())) {
                 return layer;
