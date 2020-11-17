@@ -56,6 +56,11 @@ import javax.swing.SwingUtilities;
  */
 public class StringCellEditor extends DefaultCellEditor {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -7901739534735663927L;
+
     public StringCellEditor() {
         super(new JFormattedTextField());
         final JFormattedTextField ftf = (JFormattedTextField) getComponent();
