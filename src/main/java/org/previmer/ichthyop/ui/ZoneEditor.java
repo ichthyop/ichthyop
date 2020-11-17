@@ -64,7 +64,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -82,6 +81,10 @@ import org.previmer.ichthyop.manager.SimulationManager;
  */
 public class ZoneEditor extends AbstractCellEditor implements ActionListener, TableCellEditor {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -3176222839153215642L;
     private ZoneEditorPanel zoneEditor;
     private JDialog dialog;
     protected static final String EDIT = "Edit";
