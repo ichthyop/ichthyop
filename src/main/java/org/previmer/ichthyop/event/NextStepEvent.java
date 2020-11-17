@@ -53,6 +53,10 @@ import org.previmer.ichthyop.manager.TimeManager;
  */
 public class NextStepEvent extends EventObject {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 4896287164786382038L;
     private boolean interrupted;
 
     public NextStepEvent(Object source, boolean interrupted) {

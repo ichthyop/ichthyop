@@ -117,6 +117,7 @@ public class RequiredExternalVariable {
     /*
      * computeVariable used to compute the entire grid of th variable without interpolate time
      */
+    /*
     private double computeVariable(double[] pGrid_hydro) {
 
         double[] latlon = dataset.xy2latlon(pGrid_hydro[0], pGrid_hydro[1]);
@@ -139,6 +140,7 @@ public class RequiredExternalVariable {
             return Float.NaN;
         }
     }
+    */
 
     /*
      * getVariable to compute the value of variable in a grid_hydro point with time interpolating

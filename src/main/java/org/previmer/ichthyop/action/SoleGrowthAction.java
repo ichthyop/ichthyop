@@ -45,7 +45,6 @@
 package org.previmer.ichthyop.action;
 
 import java.io.IOException;
-import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.LengthTracker;
 import org.previmer.ichthyop.io.StageTracker;
