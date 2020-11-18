@@ -71,15 +71,16 @@ public class ClassEditor extends DefaultCellEditor {
      *
      */
     private static final long serialVersionUID = -4306814083888314062L;
-    JComboBox cbBox;
-
+    JComboBox<Object> cbBox;
+    
+    @SuppressWarnings("unchecked")
     public ClassEditor() throws Exception {
-        super(new JComboBox());
-        cbBox = (JComboBox) getComponent();
+        super(new JComboBox<Object>());
+        cbBox = (JComboBox<Object>) getComponent();
         try {
             String packageName = Simulation.class.getPackage().getName();
-            DefaultComboBoxModel model = new DefaultComboBoxModel();
-            for (Class aClass : getClasses(packageName)) {
+            DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<>();
+            for (Class<?> aClass : getClasses(packageName)) {
                 try {
                     if (null != aClass && null != aClass.getCanonicalName()) {
                         model.addElement(aClass.getCanonicalName());
@@ -101,9 +102,9 @@ public class ClassEditor extends DefaultCellEditor {
      * @param packageName Le nom du package à lister
      * @return La liste des classes
      */
-    public List<Class> getClasses(String pckgname) throws Exception {
+    public List<Class<?>> getClasses(String pckgname) throws Exception {
         // Création de la liste qui sera retournée
-        ArrayList<Class> classes = new ArrayList<Class>();
+        ArrayList<Class<?>> classes = new ArrayList<>();
 
         // On récupère toutes les entrées du CLASSPATH
         String[] entries = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
@@ -131,8 +132,8 @@ public class ClassEditor extends DefaultCellEditor {
      * @param packageName Le nom du package
      * @return La liste des classes
      */
-    private Collection<Class> scanDirectory(String directory, String packageName) throws Exception {
-        ArrayList<Class> classes = new ArrayList<Class>();
+    private Collection<Class<?>> scanDirectory(String directory, String packageName) throws Exception {
+        ArrayList<Class<?>> classes = new ArrayList<>();
 
         // On génère le chemin absolu du package
         StringBuffer sb = new StringBuffer(directory);
@@ -173,8 +174,8 @@ public class ClassEditor extends DefaultCellEditor {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private Collection<Class> scanJar(String jar, String packageName) throws Exception {
-        ArrayList<Class> classes = new ArrayList<Class>();
+    private Collection<Class<?>> scanJar(String jar, String packageName) throws Exception {
+        ArrayList<Class<?>> classes = new ArrayList<>();
 
         JarFile jfile = new JarFile(jar);
         String pkgpath = packageName.replace(".", "/");
