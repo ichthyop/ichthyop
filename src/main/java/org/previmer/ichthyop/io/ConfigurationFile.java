@@ -219,7 +219,7 @@ public class ConfigurationFile {
 
     public List<XBlock> readBlocks(final BlockType type) {
 
-        Filter<XBlock> filtre = new Filter<XBlock>() {
+        Filter<Element> filtre = new Filter<Element>() {
 
             /**
 			 *
@@ -236,7 +236,7 @@ public class ConfigurationFile {
             }
 
             @Override
-            public List<XBlock> filter(List<?> list) {
+            public List<Element> filter(List<?> list) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
@@ -246,17 +246,17 @@ public class ConfigurationFile {
             }
 
             @Override
-            public Filter<XBlock> negate() {
+            public Filter<Element> negate() {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter<XBlock> or(Filter<?> filter) {
+            public Filter<Element> or(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter<XBlock> and(Filter<?> filter) {
+            public Filter<Element> and(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
@@ -266,7 +266,7 @@ public class ConfigurationFile {
             }
         };
         List<XBlock> list = new ArrayList<>();
-        for (Object elt : structure.getRootElement().getContent(filtre)) {
+        for (Element elt : structure.getRootElement().getContent(filtre)) {
             list.add(new XBlock(type, (Element) elt));
         }
         return list;
