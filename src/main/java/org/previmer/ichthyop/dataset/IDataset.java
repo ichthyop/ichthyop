@@ -96,9 +96,9 @@ public interface IDataset extends NextStepListener {
 
     public Number get(String variableName, double[] pGrid, double time);
 
-    public void requireVariable(String name, Class requiredBy);
+    public void requireVariable(String name, Class<?> requiredBy);
 
-    public void removeRequiredVariable(String name, Class requiredBy);
+    public void removeRequiredVariable(String name, Class<?> requiredBy);
 
     public double getLatMin();
 
