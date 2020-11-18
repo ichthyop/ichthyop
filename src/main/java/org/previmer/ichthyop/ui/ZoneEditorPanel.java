@@ -240,9 +240,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
             case DegDecimalMin:
                 rdBtnDegDecimalMin.doClick();
                 break;
-            default:
+            case DecimalDeg:
                 rdBtnDecimalDeg.doClick();
                 break;
+            default:
+                throw new UnsupportedOperationException("Invalid format for lat/lon");
         }
         if (format.equals(LonLatFormat.DegMinSec)) {
             rdBtnDegMinSec.doClick();
