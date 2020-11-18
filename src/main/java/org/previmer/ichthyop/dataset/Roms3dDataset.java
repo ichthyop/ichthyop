@@ -45,6 +45,8 @@ package org.previmer.ichthyop.dataset;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.io.IOTools;
@@ -57,7 +59,7 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 
 /**
  *
@@ -164,19 +166,21 @@ public class Roms3dDataset extends Roms3dCommon {
             File fout = new File(direc, baseName);
             
             // Creation of file output + definition of dims/vars
-            NetcdfFileWriteable ncOut = NetcdfFileWriteable.createNew(fout.getAbsolutePath());
+            NetcdfFileWriter ncOut = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, fout.getAbsolutePath());
             Dimension timeDim = ncOut.addUnlimitedDimension("time");
-            Dimension xDim = ncOut.addDimension("x", nx);
-            Dimension yDim = ncOut.addDimension("y", ny);
-            Dimension zDim = ncOut.addDimension("z", nz + 1);
+            Dimension xDim = ncOut.addDimension(null, "x", nx);
+            Dimension yDim = ncOut.addDimension(null, "y", ny);
+            Dimension zDim = ncOut.addDimension(null, "z", nz + 1);
             Dimension[] dimArr = {timeDim, zDim, yDim, xDim};
             Dimension[] dimArrZeta = {timeDim, yDim, xDim};
+            List<Dimension> listDimArr = new ArrayList<>(Arrays.asList(dimArr));
+            List<Dimension> listDimArrZeta = new ArrayList<>(Arrays.asList(dimArrZeta));
                        
-            ncOut.addVariable("U", DataType.FLOAT, dimArr);
-            ncOut.addVariable("V", DataType.FLOAT, dimArr);
-            ncOut.addVariable("W", DataType.FLOAT, dimArr);
-            ncOut.addVariable("Zeta", DataType.FLOAT, dimArrZeta);
-            ncOut.addVariable("Depth", DataType.FLOAT, dimArr);
+            ncOut.addVariable(null,"U", DataType.FLOAT, listDimArr);
+            ncOut.addVariable(null,"V", DataType.FLOAT, listDimArr);
+            ncOut.addVariable(null,"W", DataType.FLOAT, listDimArr);
+            ncOut.addVariable(null,"Zeta", DataType.FLOAT, listDimArrZeta);
+            ncOut.addVariable(null,"Depth", DataType.FLOAT, listDimArr);
             ncOut.create();
 
             // Opening of NetCDF file and reading of U/V/Zeta
@@ -279,10 +283,10 @@ public class Roms3dDataset extends Roms3dCommon {
                 }
                 
                 originOut[0] = t;
-                ncOut.write("U", originOut, arrayU);
-                ncOut.write("V", originOut, arrayV);
-                ncOut.write("Depth", originOut, arrayZ);
-                ncOut.write("W", originOut, arrayW);
+                ncOut.write(ncOut.findVariable("U"), originOut, arrayU);
+                ncOut.write(ncOut.findVariable("V"), originOut, arrayV);
+                ncOut.write(ncOut.findVariable("Depth"), originOut, arrayZ);
+                ncOut.write(ncOut.findVariable("W"), originOut, arrayW);
                 
             }  // end of time loop
 
