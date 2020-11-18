@@ -45,20 +45,16 @@
 package org.previmer.ichthyop.ui;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.AbstractCellEditor;
 import javax.swing.table.TableCellEditor;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JTable;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -71,7 +67,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import org.jdesktop.application.ResourceMap;
 
 /**
@@ -80,6 +75,10 @@ import org.jdesktop.application.ResourceMap;
  */
 public class ListEditor extends AbstractCellEditor implements ActionListener, TableCellEditor {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 8087816438893399311L;
     private JListPanel listEditor;
     private JDialog dialog;
     protected static final String EDIT = "edit";
@@ -169,7 +168,7 @@ public class ListEditor extends AbstractCellEditor implements ActionListener, Ta
 
     private Object[] valuesToArray(String valuesAsString) {
         String[] tokens = valuesAsString.split("\"");
-        List<String> vals = new ArrayList();
+        List<String> vals = new ArrayList<>();
         for (String token : tokens) {
             if (!token.trim().isEmpty()) {
                 vals.add(token.trim());

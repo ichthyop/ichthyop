@@ -55,6 +55,10 @@ import javax.swing.JTextArea;
  */
 public class LoggerScrollPane extends JScrollPane {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5300724869980828318L;
     private JTextArea textArea = new JTextArea();
 
 ///////////////

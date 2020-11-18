@@ -57,19 +57,20 @@ import javax.swing.table.TableModel;
  */
 public class JMultiCellEditorsTable extends JTable {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
     /**
-     * TableCellEditor customized to accept one JComboBox per cell (and not
-     * just one per column as for the basic JTable).
+     * Serial UID
+     *
+     */
+    private static final long serialVersionUID = 7557887173385462426L;
+
+    /**
+     * TableCellEditor customized to accept one JComboBox per cell (and not just one
+     * per column as for the basic JTable).
+     * 
      * @see ichthyop.ui.RowEditorModel
      */
     protected RowEditorModel rm;
 
-///////////////
-// Constructors
-///////////////
     /**
      * See constructor JTable()
      */
@@ -115,7 +116,7 @@ public class JMultiCellEditorsTable extends JTable {
     /**
      * See constructor JTable(final Vector rowData, final Vector columnNames)
      */
-    public JMultiCellEditorsTable(final Vector rowData, final Vector columnNames) {
+    public JMultiCellEditorsTable(final Vector<? extends Vector<?>> rowData, final Vector<?> columnNames) {
         super(rowData, columnNames);
         rm = null;
     }
