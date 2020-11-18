@@ -169,7 +169,7 @@ public class FloatEditor extends DefaultCellEditor {
         if (o instanceof Float) {
             return o;
         } else if (o instanceof Number) {
-            return ((Number) o).floatValue();
+            return Float.valueOf(((Number) o).floatValue());
         } else {
             if (DEBUG) {
                 System.out.println("getCellEditorValue: o isn't a Number");
