@@ -1045,7 +1045,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewZoneActionPerformed
-        // TODO add your handling code here:
+        
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
         int index = tableZone.getSelectedRow();
         if (index < 0) {
@@ -1058,7 +1058,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnNewZoneActionPerformed
 
     private void btnDeleteZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteZoneActionPerformed
-        // TODO add your handling code here:
+        
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
         int index = tableZone.getSelectedRow();
         if (index < 0) {
@@ -1075,7 +1075,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnDeleteZoneActionPerformed
 
     private void btnUpZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpZoneActionPerformed
-        // TODO add your handling code here:
+        
         tableZone.getSelectionModel().removeListSelectionListener(this);
         int selectedIndex = tableZone.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
@@ -1090,7 +1090,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnUpZoneActionPerformed
 
     private void btnDownZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownZoneActionPerformed
-        // TODO add your handling code here:
+        
         tableZone.getSelectionModel().removeListSelectionListener(this);
         int selectedIndex = tableZone.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
@@ -1105,7 +1105,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 }//GEN-LAST:event_btnDownZoneActionPerformed
 
     private void btnNewPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewPointActionPerformed
-        // TODO add your handling code here:
+        
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int index = tablePolygon.getSelectedRow() + 1;
         if (index < 0) {
@@ -1121,7 +1121,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnNewPointActionPerformed
 
     private void btnDeletePointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePointActionPerformed
-        // TODO add your handling code here:
+        
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int index = tablePolygon.getSelectedRow();
         if (index < 0) {
@@ -1134,7 +1134,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnDeletePointActionPerformed
 
     private void btnUpPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpPointActionPerformed
-        // TODO add your handling code here:
+        
         int selectedIndex = tablePolygon.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int newIndex = Math.max(selectedIndex - 1, 0);
@@ -1147,7 +1147,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnUpPointActionPerformed
 
     private void btnDownPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownPointActionPerformed
-        // TODO add your handling code here:
+        
         int selectedIndex = tablePolygon.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) tablePolygon.getModel();
         int newIndex = Math.min(selectedIndex + 1, model.getRowCount() - 1);
@@ -1160,12 +1160,12 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnDownPointActionPerformed
 
     private void ckBoxEnabledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxEnabledActionPerformed
-        // TODO add your handling code here:
+        
         setZoneEnabled(zone, ckBoxEnabled.isSelected());
     }//GEN-LAST:event_ckBoxEnabledActionPerformed
 
     private void btnColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorActionPerformed
-        // TODO add your handling code here:
+        
         Color currentColor = btnColor.getBackground();
         Color newColor = JColorChooser.showDialog(btnColor, "", btnColor.getBackground());
         if (null != newColor) {
@@ -1176,19 +1176,19 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnColorActionPerformed
 
     private void ckBoxThicknessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxThicknessActionPerformed
-        // TODO add your handling code here:
+        
         txtFieldUpperDepth.setEnabled(ckBoxThickness.isSelected());
         txtFieldLowerDepth.setEnabled(ckBoxThickness.isSelected());
     }//GEN-LAST:event_ckBoxThicknessActionPerformed
 
     private void ckBoxBathyMaskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxBathyMaskActionPerformed
-        // TODO add your handling code here:
+        
         txtFieldInshore.setEnabled(ckBoxBathyMask.isSelected());
         txtFieldOffshore.setEnabled(ckBoxBathyMask.isSelected());
     }//GEN-LAST:event_ckBoxBathyMaskActionPerformed
 
     private void rdBtnDecimalDegActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdBtnDecimalDegActionPerformed
-        // TODO add your handling code here:
+        
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             String lon = tablePolygon.getModel().getValueAt(i, 0).toString();
             String lat = tablePolygon.getModel().getValueAt(i, 1).toString();
@@ -1203,7 +1203,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_rdBtnDecimalDegActionPerformed
 
     private void rdBtnDegMinSecActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdBtnDegMinSecActionPerformed
-        // TODO add your handling code here:
+        
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             String lon = tablePolygon.getModel().getValueAt(i, 0).toString();
             String lat = tablePolygon.getModel().getValueAt(i, 1).toString();
@@ -1218,7 +1218,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         try {
-            // TODO add your handling code here:
+            
             if (hasZoneChanged) {
                 updateZone(zone);
             }
@@ -1237,7 +1237,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveAsActionPerformed
-        // TODO add your handling code here:
+        
         JFileChooser fc = new JFileChooser(zoneFile.getFile());
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
@@ -1258,7 +1258,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }//GEN-LAST:event_btnSaveAsActionPerformed
 
     private void rdBtnDegDecimalMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdBtnDegDecimalMinActionPerformed
-        // TODO add your handling code here:
+        
 
         for (int i = 0; i < tablePolygon.getRowCount(); i++) {
             String lon = tablePolygon.getModel().getValueAt(i, 0).toString();

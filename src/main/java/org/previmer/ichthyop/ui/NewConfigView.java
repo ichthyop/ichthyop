@@ -470,7 +470,7 @@ public class NewConfigView extends FrameView implements TreeSelectionListener {
     }// </editor-fold>//GEN-END:initComponents
 
     private void textFieldNameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldNameKeyTyped
-        // TODO add your handling code here:
+        
 
         SwingUtilities.invokeLater(new Runnable() {
 

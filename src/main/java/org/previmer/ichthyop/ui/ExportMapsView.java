@@ -304,7 +304,7 @@ public class ExportMapsView extends FrameView {
     }// </editor-fold>//GEN-END:initComponents
 
     private void textFieldNameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldNameKeyTyped
-        // TODO add your handling code here:
+        
         if (!textFieldPath.getText().startsWith("Path")) {
             btnSave.getAction().setEnabled(true);
         }

@@ -181,12 +181,12 @@ public class TextFileEditorPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        // TODO add your handling code here:
+        
         save();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void editorPaneKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_editorPaneKeyTyped
-        // TODO add your handling code here:
+        
         btnSave.setEnabled(true);
     }//GEN-LAST:event_editorPaneKeyTyped
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -889,7 +889,7 @@ public class JConfigurationPanel extends javax.swing.JPanel implements TreeSelec
     }// </editor-fold>//GEN-END:initComponents
 
     private void textFieldTitleKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldTitleKeyTyped
-        // TODO add your handling code here:
+        
         firePropertyChange("configurationFile", null, null);
     }//GEN-LAST:event_textFieldTitleKeyTyped
 

@@ -202,7 +202,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task exportToKMZ() {
+    public Task<?, ?> exportToKMZ() {
         return kmzTask = new ExportToKMZTask(getApplication());
     }
 
@@ -2567,20 +2567,20 @@ public class IchthyopView extends FrameView
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblFramePerSecondMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblFramePerSecondMouseClicked
-        // TODO add your handling code here:
+        
         if (evt.getClickCount() > 1) {
             animationSpeed.setValue(1.5f);
         }
 }//GEN-LAST:event_lblFramePerSecondMouseClicked
 
     private void animationSpeedStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_animationSpeedStateChanged
-        // TODO add your handling code here:
+        
         JSpinner source = (JSpinner) evt.getSource();
         nbfps = (Float) source.getValue();
 }//GEN-LAST:event_animationSpeedStateChanged
 
     private void sliderTimeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliderTimeStateChanged
-        // TODO add your handling code here:
+        
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -2591,17 +2591,17 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_sliderTimeStateChanged
 
     private void hyperLinkLogoMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_hyperLinkLogoMouseEntered
-        // TODO add your handling code here:
+        
         pnlLogo.setAlpha(0.9f);
     }//GEN-LAST:event_hyperLinkLogoMouseEntered
 
     private void hyperLinkLogoMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_hyperLinkLogoMouseExited
-        // TODO add your handling code here:
+        
         pnlLogo.setAlpha(0.4f);
     }//GEN-LAST:event_hyperLinkLogoMouseExited
 
     private void taskPaneConfigurationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneConfigurationPropertyChange
-        // TODO add your handling code here:
+        
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
@@ -2623,7 +2623,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneConfigurationPropertyChange
 
     private void taskPaneSimulationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneSimulationPropertyChange
-        // TODO add your handling code here:
+        
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneConfiguration.setCollapsed(true);
@@ -2641,7 +2641,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneSimulationPropertyChange
 
     private void taskPaneMappingPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneMappingPropertyChange
-        // TODO add your handling code here:
+        
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
@@ -2658,7 +2658,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneMappingPropertyChange
 
     private void taskPaneAnimationPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_taskPaneAnimationPropertyChange
-        // TODO add your handling code here:
+        
         if (evt.getPropertyName().equals("collapsed")) {
             if (!(Boolean) evt.getNewValue()) {
                 taskPaneSimulation.setCollapsed(true);
@@ -2674,7 +2674,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_taskPaneAnimationPropertyChange
 
     private void btnColorMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMinActionPerformed
-        // TODO add your handling code here:
+        
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2685,7 +2685,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnColorMinActionPerformed
 
     private void btnColorMaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMaxActionPerformed
-        // TODO add your handling code here:
+        
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2696,7 +2696,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnColorMaxActionPerformed
 
     private void btnParticleColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnParticleColorActionPerformed
-        // TODO add your handling code here:
+        
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2710,7 +2710,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnParticleColorActionPerformed
 
     private void btnColorMedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnColorMedActionPerformed
-        // TODO add your handling code here:
+        
         final JButton btn = (JButton) evt.getSource();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -2721,7 +2721,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_btnColorMedActionPerformed
 
     private void spinnerParticleSizeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinnerParticleSizeStateChanged
-        // TODO add your handling code here:
+        
         JSpinner source = (JSpinner) evt.getSource();
         final int pixel = (Integer) source.getValue();
         SwingUtilities.invokeLater(new Runnable() {
@@ -2734,7 +2734,7 @@ public class IchthyopView extends FrameView
     }//GEN-LAST:event_spinnerParticleSizeStateChanged
 
     private void ckBoxDrawGridActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckBoxDrawGridActionPerformed
-        // TODO add your handling code here:
+        
         getSimulationUI().setGridVisible(ckBoxDrawGrid.isSelected());
     }//GEN-LAST:event_ckBoxDrawGridActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

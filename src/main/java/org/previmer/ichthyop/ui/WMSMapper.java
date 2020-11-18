@@ -1390,10 +1390,8 @@ public class WMSMapper extends JXMapKit {
 //            Object objData = urlConnect.getContent();
 //
 //        } catch (UnknownHostException e) {
-//            // TODO Auto-generated catch block
 //            return false;
 //        } catch (IOException e) {
-//            // TODO Auto-generated catch block
 //            return false;
 //        }
 //        return true;

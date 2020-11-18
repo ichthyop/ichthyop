@@ -217,7 +217,7 @@ public class JListPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
-        // TODO add your handling code here:
+        
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         int index = table.getSelectedRow();
         if (index < 0) {
@@ -228,7 +228,7 @@ public class JListPanel extends javax.swing.JPanel {
 }//GEN-LAST:event_btnNewActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
+        
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         int index = table.getSelectedRow();
         if (index < 0) {
@@ -240,7 +240,6 @@ public class JListPanel extends javax.swing.JPanel {
 }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpActionPerformed
-        // TODO add your handling code here:
         int selectedIndex = table.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         int newIndex = Math.max(selectedIndex - 1, 0);
@@ -254,7 +253,6 @@ public class JListPanel extends javax.swing.JPanel {
 }//GEN-LAST:event_btnUpActionPerformed
 
     private void btnDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownActionPerformed
-        // TODO add your handling code here:
         int selectedIndex = table.getSelectedRow();
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         int newIndex = Math.min(selectedIndex + 1, model.getRowCount() - 1);
