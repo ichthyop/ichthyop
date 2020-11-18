@@ -53,6 +53,10 @@ import org.previmer.ichthyop.io.XBlock;
  */
 public class JBlockPanel extends JPanel {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -2360080032912000891L;
     private XBlock block;
 
     public XBlock getBlock() {

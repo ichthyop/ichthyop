@@ -73,6 +73,10 @@ import javax.swing.text.NumberFormatter;
  */
 public class IntegerEditor extends DefaultCellEditor {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5547982498435576510L;
     JFormattedTextField ftf;
     NumberFormat integerFormat;
     private Integer minimum, maximum;
@@ -85,8 +89,8 @@ public class IntegerEditor extends DefaultCellEditor {
     public IntegerEditor(int min, int max) {
         super(new JFormattedTextField());
         ftf = (JFormattedTextField) getComponent();
-        minimum = new Integer(min);
-        maximum = new Integer(max);
+        minimum = Integer.valueOf(min);
+        maximum = Integer.valueOf(max);
 
         //Set up the editor for the integer cells.
         integerFormat = NumberFormat.getIntegerInstance(Locale.US);
@@ -122,6 +126,11 @@ public class IntegerEditor extends DefaultCellEditor {
         //JFormattedTextField's focusLostBehavior property.)
         ftf.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "check");
         ftf.getActionMap().put("check", new AbstractAction() {
+
+            /**
+             *
+             */
+            private static final long serialVersionUID = -7711608975705705554L;
 
             public void actionPerformed(ActionEvent e) {
                 if (!ftf.isEditValid()) { //The text is invalid.
@@ -160,7 +169,7 @@ public class IntegerEditor extends DefaultCellEditor {
         if (o instanceof Integer) {
             return o;
         } else if (o instanceof Number) {
-            return new Integer(((Number) o).intValue());
+            return ((Number) o).intValue();
         } else {
             if (DEBUG) {
                 System.out.println("getCellEditorValue: o isn't a Number");
