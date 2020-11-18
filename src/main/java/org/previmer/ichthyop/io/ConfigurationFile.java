@@ -219,9 +219,14 @@ public class ConfigurationFile {
 
     public List<XBlock> readBlocks(final BlockType type) {
 
-        Filter filtre = new Filter() {
+        Filter<XBlock> filtre = new Filter<XBlock>() {
 
-            @Override
+            /**
+			 *
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
             public boolean matches(Object obj) {
                 if (!(obj instanceof Element)) {
                     return false;
@@ -231,36 +236,36 @@ public class ConfigurationFile {
             }
 
             @Override
-            public List filter(List list) {
+            public List<XBlock> filter(List<?> list) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Object filter(Object o) {
+            public XBlock filter(Object o) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter negate() {
+            public Filter<XBlock> negate() {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter or(Filter filter) {
+            public Filter<XBlock> or(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter and(Filter filter) {
+            public Filter<XBlock> and(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter refine(Filter filter) {
+            public <R> Filter<R> refine(Filter<R> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
-        List<XBlock> list = new ArrayList();
+        List<XBlock> list = new ArrayList<>();
         for (Object elt : structure.getRootElement().getContent(filtre)) {
             list.add(new XBlock(type, (Element) elt));
         }
@@ -274,7 +279,7 @@ public class ConfigurationFile {
     }
 
     public HashMap<String, XBlock> createMap() throws Exception {
-        HashMap<String, XBlock> lmap = new HashMap();
+        HashMap<String, XBlock> lmap = new HashMap<>();
         for (XBlock xblock : readBlocks()) {
             lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
         }
