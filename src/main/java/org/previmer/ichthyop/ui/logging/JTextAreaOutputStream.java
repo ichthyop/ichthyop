@@ -85,8 +85,7 @@ class JTextAreaOutputStream extends OutputStream {
         m_textArea.append(newText);
         if (newText.indexOf('\n') > -1) {
             try {
-                m_textArea.scrollRectToVisible(m_textArea.modelToView(
-                        m_textArea.getDocument().getLength()));
+                m_textArea.scrollRectToVisible(m_textArea.modelToView(m_textArea.getDocument().getLength()));
             } catch (javax.swing.text.BadLocationException err) {
             }
         }

@@ -72,7 +72,7 @@ public class DatasetManager extends AbstractManager {
         String className = getParameter(datasetBlock.getKey(), "class_name");
         if (datasetBlock != null) {
             try {
-            dataset = (IDataset) Class.forName(className).newInstance();
+            dataset = (IDataset) Class.forName(className).getDeclaredConstructor().newInstance();
             } catch (Exception ex) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("Dataset instantiation failed ==> ");
@@ -93,7 +93,7 @@ public class DatasetManager extends AbstractManager {
     }
 
     private XBlock findActiveDataset() throws Exception {
-        List<XBlock> list = new ArrayList();
+        List<XBlock> list = new ArrayList<>();
         for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.DATASET)) {
             if (block.isEnabled()) {
                 list.add(block);
