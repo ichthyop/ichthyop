@@ -85,7 +85,7 @@ class JTextAreaOutputStream extends OutputStream {
         m_textArea.append(newText);
         if (newText.indexOf('\n') > -1) {
             try {
-                m_textArea.scrollRectToVisible(m_textArea.modelToView(m_textArea.getDocument().getLength()));
+                m_textArea.scrollRectToVisible(m_textArea.modelToView2D(m_textArea.getDocument().getLength()).getBounds()); 
             } catch (javax.swing.text.BadLocationException err) {
             }
         }
@@ -102,7 +102,7 @@ class JTextAreaOutputStream extends OutputStream {
         String txt = new String(arg0);
         m_textArea.append(txt);
         try {
-            m_textArea.scrollRectToVisible(m_textArea.modelToView(m_textArea.getDocument().getLength()));
+            m_textArea.scrollRectToVisible(m_textArea.modelToView2D(m_textArea.getDocument().getLength()).getBounds()));
         } catch (javax.swing.text.BadLocationException err) {
         }
     }

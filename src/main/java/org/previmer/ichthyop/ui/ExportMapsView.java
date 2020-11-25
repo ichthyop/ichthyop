@@ -165,7 +165,7 @@ public class ExportMapsView extends FrameView {
         getLogger().info(resourceMap.getString("view.close.text"));
         try {
             getFrame().setVisible(false);
-            finalize();
+            //finalize();
         } catch (Throwable ex) {
         }
     }

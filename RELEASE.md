@@ -1,5 +1,12 @@
 # ICHTHYOP Release notes
 
+## Changes in Ichthyop 3.3.7
+
+### New features
+
+- Remove deprecated NetCDF functions, use new NetCDF implementation
+
+
 ## Changes in Ichthyop 3.3.6
 
 ### Bug fixes

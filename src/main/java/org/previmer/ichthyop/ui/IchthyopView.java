@@ -206,7 +206,7 @@ public class IchthyopView extends FrameView
         return kmzTask = new ExportToKMZTask(getApplication());
     }
 
-    private class ExportToKMZTask extends SFTask {
+    private class ExportToKMZTask extends SFTask<Object, Object> {
 
         ExportToKMZTask(Application instance) {
             super(instance);
@@ -260,11 +260,11 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task createMaps() {
+    public Task<?, ?> createMaps() {
         return createMapTask = new CreateMapTask(getApplication());
     }
 
-    private class CreateMapTask extends SFTask<Object, Painter[]> {
+    private class CreateMapTask extends SFTask<Object, Painter<?>[]> {
 
         private int index;
 
@@ -307,8 +307,8 @@ public class IchthyopView extends FrameView
         }
 
         @Override
-        protected void process(List<Painter[]> painters) {
-            for (Painter[] painter : painters) {
+        protected void process(List<Painter<?>[]> painters) {
+            for (Painter<?>[] painter : painters) {
                 wmsMapper.map(painter[0], painter[1]);
                 wmsMapper.screen2File(index++);
             }
@@ -385,7 +385,7 @@ public class IchthyopView extends FrameView
         btnMapping.getAction().setEnabled(false);
         btnExportToKMZ.getAction().setEnabled(false);
         btnCloseNC.getAction().setEnabled(false);
-        cbBoxVariable.setModel(new DefaultComboBoxModel(new String[]{"None"}));
+        cbBoxVariable.setModel(new DefaultComboBoxModel<Object>(new String[]{"None"}));
         setColorbarPanelEnabled(false);
     }
 
@@ -402,7 +402,7 @@ public class IchthyopView extends FrameView
         btnExportToKMZ.getAction().setEnabled(true);
         setMainTitle();
         setColorbarPanelEnabled(true);
-        cbBoxVariable.setModel(new DefaultComboBoxModel(wmsMapper.getVariableList()));
+        cbBoxVariable.setModel(new DefaultComboBoxModel<Object>(wmsMapper.getVariableList()));
     }
 
     public void closeFolderAnimation() {
@@ -413,7 +413,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task openFolderAnimation() {
+    public Task<?, ?> openFolderAnimation() {
 
         stopAnimation();
         File file = (null == outputFolder)
@@ -428,7 +428,7 @@ public class IchthyopView extends FrameView
         return null;
     }
 
-    private class OpenFolderAnimationTask extends SFTask {
+    private class OpenFolderAnimationTask extends SFTask<Object, Object> {
 
         private final File folder;
         int nbPNG = 0;
@@ -492,11 +492,11 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task createAnimatedGif() {
+    public Task<?, ?> createAnimatedGif() {
         return new CreateAnimatedGifTask(getApplication());
     }
 
-    private class CreateAnimatedGifTask extends SFTask {
+    private class CreateAnimatedGifTask extends SFTask<Object, Object> {
 
         CreateAnimatedGifTask(Application instance) {
             super(instance);
@@ -575,7 +575,7 @@ public class IchthyopView extends FrameView
         ckBoxDrawGrid.setEnabled(false);
     }
 
-    private class SimulationPreviewTask extends SFTask {
+    private class SimulationPreviewTask extends SFTask<Object, Object> {
         
         private boolean setupSucceeded;
         private boolean initSucceeded;
@@ -619,7 +619,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task saveAsConfigurationFile() {
+    public Task<?, ?> saveAsConfigurationFile() {
         JFileChooser fc = new JFileChooser(getSimulationManager().getConfigurationFile());
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setAcceptAllFileFilterUsed(false);
@@ -674,11 +674,11 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task saveConfigurationFile() {
+    public Task<?, ?> saveConfigurationFile() {
         return new SaveCfgFileTask(getApplication());
     }
 
-    private class SaveCfgFileTask extends SFTask {
+    private class SaveCfgFileTask extends SFTask<Object, Object> {
 
         SaveCfgFileTask(Application instance) {
             super(instance);
@@ -752,7 +752,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task openConfigurationFile() {
+    public Task<?, ?> openConfigurationFile() {
         JFileChooser chooser = new JFileChooser(cfgPath);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setFileFilter(new FileNameExtensionFilter(getResourceMap().getString("Application.configurationFile"), getResourceMap().getString("Application.configurationFile.extension")));
@@ -835,7 +835,7 @@ public class IchthyopView extends FrameView
         }
     }
 
-    private class FailedTask extends SFTask {
+    private class FailedTask extends SFTask<Object, Object> {
 
         private final Exception exception;
 
@@ -864,7 +864,7 @@ public class IchthyopView extends FrameView
         return SimulationManager.getLogger();
     }
 
-    public Task loadConfigurationFile(File file, Version version) {
+    public Task<?, ?> loadConfigurationFile(File file, Version version) {
         try {
             getSimulationManager().setConfigurationFile(file);
         } catch (Exception e) {
@@ -1052,7 +1052,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task simulationRun() {
+    public Task<?, ?> simulationRun() {
         if (!isRunning) {
             if (btnPreview.isSelected()) {
                 btnPreview.doClick();
@@ -1077,7 +1077,7 @@ public class IchthyopView extends FrameView
         openAnimationMenuItem.getAction().setEnabled(enabled);
     }
 
-    public class SimulationRunTask extends SFTask {
+    public class SimulationRunTask extends SFTask<Object, Object> {
 
         private boolean setupSucceeded;
         private boolean initSucceeded;
@@ -1152,7 +1152,7 @@ public class IchthyopView extends FrameView
         }
 
         @Override
-        protected void process(List values) {
+        protected void process(List<Object> values) {
             if (getSimulationManager().isStopped()) {
                 return;
             }
@@ -1433,7 +1433,7 @@ public class IchthyopView extends FrameView
     }
 
     @Action
-    public Task autoRangeColorbar() {
+    public Task<?, ?> autoRangeColorbar() {
         String varName = (String) cbBoxVariable.getSelectedItem();
         if (varName.startsWith("None")) {
             btnAutoRange.setEnabled(false);
@@ -1530,7 +1530,7 @@ public class IchthyopView extends FrameView
         btnCancelMapping = new javax.swing.JButton();
         btnOpenNC = new javax.swing.JButton();
         pnlWMS = new javax.swing.JPanel();
-        cbBoxWMS = new javax.swing.JComboBox();
+        cbBoxWMS = new javax.swing.JComboBox<Object>();
         lblWMS = new javax.swing.JLabel();
         lblNC = new javax.swing.JLabel();
         btnCloseNC = new javax.swing.JButton();
@@ -1538,7 +1538,7 @@ public class IchthyopView extends FrameView
         pnlColor = new javax.swing.JPanel();
         pnlColorBar = new javax.swing.JPanel();
         lblVariable = new javax.swing.JLabel();
-        cbBoxVariable = new javax.swing.JComboBox();
+        cbBoxVariable = new javax.swing.JComboBox<Object>();
         lblMin = new javax.swing.JLabel();
         lblMax = new javax.swing.JLabel();
         txtFieldMax = new javax.swing.JFormattedTextField();
@@ -1810,7 +1810,7 @@ public class IchthyopView extends FrameView
         pnlWMS.setName("pnlWMS"); // NOI18N
         pnlWMS.setOpaque(false);
 
-        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Offline", "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
+        cbBoxWMS.setModel(new javax.swing.DefaultComboBoxModel<Object>(new String[] { "Offline", "http://www.openstreetmap.org/", "http://www.marine-geo.org/services/wms?", "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&" }));
         cbBoxWMS.setAction(actionMap.get("changeWMS")); // NOI18N
         cbBoxWMS.setName("cbBoxWMS"); // NOI18N
 
@@ -1857,7 +1857,7 @@ public class IchthyopView extends FrameView
         lblVariable.setText(resourceMap.getString("lblVariable.text")); // NOI18N
         lblVariable.setName("lblVariable"); // NOI18N
 
-        cbBoxVariable.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "None" }));
+        cbBoxVariable.setModel(new javax.swing.DefaultComboBoxModel<Object>(new String[] { "None" }));
         cbBoxVariable.setAction(actionMap.get("changeColorbarVariable")); // NOI18N
         cbBoxVariable.setName("cbBoxVariable"); // NOI18N
 
@@ -1874,7 +1874,7 @@ public class IchthyopView extends FrameView
         NumberFormatter floatFormatter = new NumberFormatter(floatFormat);
         floatFormatter.setFormat(floatFormat);
         txtFieldMax.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
-        txtFieldMax.setValue(new Float(100.f));
+        txtFieldMax.setValue(Float.valueOf(100.f));
 
         btnAutoRange.setAction(actionMap.get("autoRangeColorbar")); // NOI18N
         btnAutoRange.setName("btnAutoRange"); // NOI18N
@@ -1905,7 +1905,7 @@ public class IchthyopView extends FrameView
         txtFieldMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
         txtFieldMin.setName("txtFieldMin"); // NOI18N
         txtFieldMin.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
-        txtFieldMin.setValue(new Float(0.f));
+        txtFieldMin.setValue(Float.valueOf(0.f));
 
         lblMed.setText(resourceMap.getString("lblMed.text")); // NOI18N
         lblMed.setName("lblMed"); // NOI18N
@@ -1913,7 +1913,7 @@ public class IchthyopView extends FrameView
         txtFieldMed.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
         txtFieldMed.setName("txtFieldMed"); // NOI18N
         txtFieldMed.setFormatterFactory(new DefaultFormatterFactory(floatFormatter));
-        txtFieldMed.setValue(new Float(50.f));
+        txtFieldMed.setValue(Float.valueOf(50.f));
 
         btnColorMed.setForeground(resourceMap.getColor("btnColorMed.foreground")); // NOI18N
         btnColorMed.setIcon(resourceMap.getIcon("btnColorMed.icon")); // NOI18N
@@ -2771,8 +2771,8 @@ public class IchthyopView extends FrameView
     private javax.swing.JButton btnSaveCfgFile;
     private javax.swing.JButton btnSimulationRun;
     private javax.swing.JMenuItem cancelMapMenuItem;
-    private javax.swing.JComboBox cbBoxVariable;
-    private javax.swing.JComboBox cbBoxWMS;
+    private javax.swing.JComboBox<Object> cbBoxVariable;
+    private javax.swing.JComboBox<Object> cbBoxWMS;
     private javax.swing.JCheckBox ckBoxDrawGrid;
     private javax.swing.JCheckBox ckBoxReverseTime;
     private javax.swing.JMenuItem closeMenuItem;
@@ -2848,9 +2848,9 @@ public class IchthyopView extends FrameView
     private JDialog aboutBox;
     private File cfgPath = new File(System.getProperty("user.dir"));
     private boolean isRunning = false;
-    private Task simulActionTask;
-    private Task createMapTask;
-    private Task kmzTask;
+    private Task<?, ?> simulActionTask;
+    private Task<?, ?> createMapTask;
+    private Task<?, ?> kmzTask;
     private boolean initDone;
     private final ReplayPanel replayPanel = new ReplayPanel();
     private final float TEN_MINUTES = 10.f * 60.f;
