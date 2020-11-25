@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package ichthyop.core;
-
-import ichthyop.util.Constant;
-import java.awt.Color;
+package org.previmer.ichthyop.turtle;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.Zone;
+import org.previmer.ichthyop.util.Constant;
 
 /**
  *
@@ -15,9 +15,9 @@ import java.util.GregorianCalendar;
  */
 public class OrientationZone extends Zone {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    ///////////////////////////////
+    // Declaration of the variables
+    ///////////////////////////////
     private int[] speedActivity, orientationActivity;
     private float[] swimmingSpeed, swimmingOrientation;
     private float[] speedRange, orientationRange;
@@ -27,30 +27,25 @@ public class OrientationZone extends Zone {
     private int[] durationActivePeriod;
     private long turtleActivity;
 
-///////////////
-// Constructors
-///////////////
-    public OrientationZone(int index,
-            double lon1, double lat1,
-            double lon2, double lat2,
-            double lon3, double lat3,
-            double lon4, double lat4,
-            int depth1, int depth2,
-            Color color) {
-
-        super(Constant.ORIENTATION, index, lon1, lat1, lon2, lat2, lon3, lat3, lon4, lat4, depth1, depth2, color);
+    ///////////////
+    // Constructors
+    ///////////////
+    public OrientationZone(TypeZone type, String key, int index) {
+        super(TypeZone.ORIENTATION, key, index);
+        // super(Constant.ORIENTATION, index, lon1, lat1, lon2, lat2, lon3, lat3, lon4,
+        // lat4, depth1, depth2, color);
     }
 
-    public OrientationZone(int index) {
+    /*
+     * public OrientationZone(int index) { this(index, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+     * 12000, Color.WHITE); }
+     */
 
-        this(index, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12000, Color.WHITE);
-    }
-
-////////////////////////////
-// Definition of the methods
-////////////////////////////
+    ////////////////////////////
+    // Definition of the methods
+    ////////////////////////////
     @Override
-    public void init() {
+    public void init() throws Exception {
         super.init();
         //
         startHour = new int[activePeriod.length];
@@ -65,7 +60,7 @@ public class OrientationZone extends Zone {
             endHour[i] = Integer.valueOf(period[1].split(":")[0]);
             endMinute[i] = Integer.valueOf(period[1].split(":")[1]);
         }
-        
+
         durationActivePeriod = new int[activePeriod.length];
         for (int i = 0; i < activePeriod.length; i++) {
             durationActivePeriod[i] = computeActivePeriodDuration(i);
@@ -127,8 +122,10 @@ public class OrientationZone extends Zone {
         now.setTimeInMillis((long) (time * 1e3));
         for (int i = 0; i < activePeriod.length; i++) {
             syncCalendars(i);
-            //SimpleDateFormat dtf = new SimpleDateFormat("HH:mm");
-            //System.out.println(dtf.format(startTime.getTime()) + " " + dtf.format(now.getTime()) + " " + dtf.format(endTime.getTime()) + " " + (now.after(startTime) && now.before(endTime)));
+            // SimpleDateFormat dtf = new SimpleDateFormat("HH:mm");
+            // System.out.println(dtf.format(startTime.getTime()) + " " +
+            // dtf.format(now.getTime()) + " " + dtf.format(endTime.getTime()) + " " +
+            // (now.after(startTime) && now.before(endTime)));
             if (now.equals(startTime) || (now.after(startTime) && now.before(endTime))) {
                 return true;
             }
@@ -143,8 +140,10 @@ public class OrientationZone extends Zone {
         now.setTimeInMillis((long) (time * 1e3));
         for (int i = 0; i < activePeriod.length; i++) {
             syncCalendars(i);
-            //SimpleDateFormat dtf = new SimpleDateFormat("HH:mm");
-            //System.out.println(dtf.format(startTime.getTime()) + " " + dtf.format(now.getTime()) + " " + dtf.format(endTime.getTime()) + " " + (now.after(startTime) && now.before(endTime)));
+            // SimpleDateFormat dtf = new SimpleDateFormat("HH:mm");
+            // System.out.println(dtf.format(startTime.getTime()) + " " +
+            // dtf.format(now.getTime()) + " " + dtf.format(endTime.getTime()) + " " +
+            // (now.after(startTime) && now.before(endTime)));
             if (now.equals(startTime) || (now.after(startTime) && now.before(endTime))) {
                 return i;
             }
