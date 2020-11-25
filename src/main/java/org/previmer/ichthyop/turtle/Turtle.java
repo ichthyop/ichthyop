@@ -4,12 +4,12 @@
 To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package ichthyop.core;
+package org.previmer.ichthyop.turtle;
 
-import ichthyop.io.Configuration;
-import ichthyop.io.Dataset;
-import ichthyop.util.Constant;
 import java.util.HashMap;
+
+import org.previmer.ichthyop.TypeZone;
+import org.previmer.ichthyop.particle.Particle;
 
 /**
  *
@@ -23,6 +23,7 @@ public class Turtle extends Particle {
     private long[] timerZone;
     private boolean[] startTiming;
 
+    /*
     public Turtle(int index, boolean is3D, double xmin, double xmax, double ymin, double ymax, double depthMin, double depthMax) {
         super(index, is3D, xmin, xmax, ymin, ymax, depthMin, depthMax);
     }
@@ -34,15 +35,17 @@ public class Turtle extends Particle {
     public Turtle(int index, boolean is3D, double lon, double lat, double depth, boolean living) {
         super(index, is3D, lon, lat, depth, living);
     }
+    */
 
     @Override
-    void init() {
+    public void init() {
 
         super.init();
-        FLAG_ADVECTION = Configuration.isAdvection();
-        FLAG_ACTIVE_ORIENTATION = Configuration.isActiveOrientation();
+        FLAG_ADVECTION = Boolean.valueOf(getParameter("turle_advection"));
+        FLAG_ACTIVE_ORIENTATION = Boolean.valueOf(getParameter("turle_orientation"));
         if (FLAG_ACTIVE_ORIENTATION) {
-            int nbZones = Configuration.getOrientationZones().size();
+            getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.ORIENTATION);
+            int nbZones = getSimulationManager().getZoneManager().getZones(TypeZone.ORIENTATION).size();
             currentSpeedActivity = new HashMap(nbZones);
             currentOrientationActivity = new HashMap(nbZones);
             for (OrientationZone zone : Configuration.getOrientationZones()) {
@@ -217,4 +220,11 @@ public class Turtle extends Particle {
     public boolean isActivePeriod(double time, OrientationZone zone) {
         return zone.isActivePeriod(time);
     }
+    
+    public String getParameter(String key) {
+        return getSimulationManager().getParameterManager().getParameter("turtle", key);
+    }
+
+
+    
 }
