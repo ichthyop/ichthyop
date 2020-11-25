@@ -100,6 +100,8 @@ public interface Constant {
     final public static int RELEASE = 0;
     /** Label for characterizing recruitment zone */
     final public static int RECRUITMENT = 1;
+    /** Label for characterizing orientation zones */
+    final public static int ORIENTATION = 2; 
 
     /** Label for two-dimension simulation */
     final public static int SIMU_2D = 0;
