@@ -531,7 +531,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* create the NetCDF file */
         try {
-            IOTools.makeDirectories(ncOut.getNetcdfFile().getLocation());
             ncOut.create();
         } catch (Exception ex) {
             IOException ioex = new IOException("Failed to create NetCDF output file ==> " + ex.toString());
