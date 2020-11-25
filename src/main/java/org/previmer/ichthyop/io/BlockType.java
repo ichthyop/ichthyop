@@ -53,7 +53,8 @@ public enum BlockType {
     OPTION,
     ACTION,
     RELEASE,
-    DATASET;
+    DATASET,
+    GRID;
 
     static BlockType getType(String value) {
         for (BlockType type : values()) {

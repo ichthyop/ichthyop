@@ -54,7 +54,7 @@ import org.previmer.ichthyop.event.SetupListener;
  */
 public abstract class AbstractManager extends SimulationManagerAccessor implements SetupListener, InitializeListener {
 
-    AbstractManager() {
+    protected AbstractManager() {
         getSimulationManager().addSetupListener(this);
         getSimulationManager().addInitializeListener(this);
     }
