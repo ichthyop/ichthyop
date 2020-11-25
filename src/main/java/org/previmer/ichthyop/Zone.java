@@ -134,7 +134,7 @@ public class Zone extends SimulationManagerAccessor {
      * @param index, the index of the zone
      */
     public Zone(TypeZone type, String key, int index) {
-        this.polygon = new ArrayList();
+        this.polygon = new ArrayList<>();
         this.type = type;
         this.key = key;
         this.index = index;

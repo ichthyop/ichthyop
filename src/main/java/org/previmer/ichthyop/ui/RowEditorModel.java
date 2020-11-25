@@ -69,7 +69,7 @@ public class RowEditorModel {
      * The <code>HastTable</code> that stores the
      * <code>TableCellEditor</code>s.
      */
-    private Hashtable data;
+    private Hashtable<Integer, TableCellEditor>  data;
 
 ///////////////
 // Constructors
@@ -80,7 +80,7 @@ public class RowEditorModel {
      */
     public RowEditorModel() {
 
-        data = new Hashtable();
+        data = new Hashtable<>();
     }
 
 ////////////////////////////
@@ -96,7 +96,7 @@ public class RowEditorModel {
      */
     public void addEditorForRow(int row, TableCellEditor e) {
 
-        data.put(new Integer(row), e);
+        data.put(Integer.valueOf(row), e);
     }
 
     /**
@@ -107,7 +107,7 @@ public class RowEditorModel {
      */
     public void removeEditorForRow(int row) {
 
-        data.remove(new Integer(row));
+        data.remove(Integer.valueOf(row));
     }
 
     /**
@@ -118,7 +118,7 @@ public class RowEditorModel {
      */
     public TableCellEditor getEditor(int row) {
 
-        return (TableCellEditor) data.get(new Integer(row));
+        return (TableCellEditor) data.get(Integer.valueOf(row));
     }
 
     //---------- End of class

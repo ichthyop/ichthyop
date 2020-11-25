@@ -59,7 +59,6 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.FocusListener;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 import javax.swing.text.DefaultFormatterFactory;
@@ -71,6 +70,10 @@ import javax.swing.text.NumberFormatter;
  */
 public class FloatEditor extends DefaultCellEditor {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -215131367777648409L;
     JFormattedTextField ftf;
     DecimalFormat floatFormat;
     private Float minimum, maximum;
@@ -83,8 +86,8 @@ public class FloatEditor extends DefaultCellEditor {
     public FloatEditor(float min, float max) {
         super(new JFormattedTextField());
         ftf = (JFormattedTextField) getComponent();
-        minimum = new Float(min);
-        maximum = new Float(max);
+        minimum = Float.valueOf(min);
+        maximum = Float.valueOf(max);
 
         //Set up the editor for the integer cells.
         //floatFormat = new DecimalFormat("0.######E0");
@@ -124,6 +127,11 @@ public class FloatEditor extends DefaultCellEditor {
         ftf.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "check");
         ftf.getActionMap().put("check", new AbstractAction() {
 
+            /**
+             *
+             */
+            private static final long serialVersionUID = -3594349915290571887L;
+
             public void actionPerformed(ActionEvent e) {
                 if (!ftf.isEditValid()) { //The text is invalid.
                     if (userSaysRevert()) { //reverted
@@ -161,7 +169,7 @@ public class FloatEditor extends DefaultCellEditor {
         if (o instanceof Float) {
             return o;
         } else if (o instanceof Number) {
-            return new Float(((Number) o).floatValue());
+            return Float.valueOf(((Number) o).floatValue());
         } else {
             if (DEBUG) {
                 System.out.println("getCellEditorValue: o isn't a Number");

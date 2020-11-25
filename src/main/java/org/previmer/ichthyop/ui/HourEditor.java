@@ -69,9 +69,13 @@ import javax.swing.text.DefaultFormatterFactory;
 public class HourEditor extends DefaultCellEditor {
 
     /**
-     * The simple date format parses and formats dates in human readable format.
-     * The pattern for date-time formatting depends on the calendar
-     * (Calendar1900 or ClimatoCalendar)
+     *
+     */
+    private static final long serialVersionUID = -1584779382280154655L;
+    /**
+     * The simple date format parses and formats dates in human readable format. The
+     * pattern for date-time formatting depends on the calendar (Calendar1900 or
+     * ClimatoCalendar)
      */
     private SimpleDateFormat dtFormat;
     private JFormattedTextField ftf;
@@ -95,6 +99,11 @@ public class HourEditor extends DefaultCellEditor {
         //JFormattedTextField's focusLostBehavior property.)
         ftf.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "check");
         ftf.getActionMap().put("check", new AbstractAction() {
+
+            /**
+             *
+             */
+            private static final long serialVersionUID = -1199025179903676187L;
 
             public void actionPerformed(ActionEvent e) {
                 if (!ftf.isEditValid()) { //The text is invalid.

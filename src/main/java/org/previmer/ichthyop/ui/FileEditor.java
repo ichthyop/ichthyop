@@ -55,7 +55,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.net.URI;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -65,6 +64,10 @@ import org.previmer.ichthyop.io.IOTools;
 public class FileEditor extends AbstractCellEditor
         implements TableCellEditor, ActionListener {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -2169430332263594475L;
     private JFileChooser fileChooser;
     private JTextField textField = new JTextField();
     protected static final String EDIT = "edit";

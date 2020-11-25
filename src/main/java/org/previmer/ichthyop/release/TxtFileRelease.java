@@ -109,6 +109,7 @@ public class TxtFileRelease extends AbstractRelease {
                     try {
                         coord[i] = nbFormat.parse(strCoord[i].trim()).doubleValue();
                     } catch (ParseException ex) {
+                        bfIn.close();
                         IOException ioex = new IOException("{Drifter release} Failed to read drifter position at line " + (index + 1) + " ==> " + ex.getMessage());
                         ioex.setStackTrace(ex.getStackTrace());
                         throw ioex;
@@ -139,16 +140,18 @@ public class TxtFileRelease extends AbstractRelease {
             iline++;
         }
         
+        bfIn.close();
+        
         if (cpt != this.nbParticles) {
             getLogger().log(Level.WARNING, "File contains {0} lines, but {1} drifters were effectively released", new Object[]{this.nbParticles, cpt});
             getLogger().log(Level.WARNING, "Be carefull when analysing output file");        
         }
-        
+                
         return index;
     }
 
     private int readNbParticles() throws IOException {
-        
+
         int index = 0;
         BufferedReader bfIn = new BufferedReader(new FileReader(textFile));
         String line;
@@ -157,6 +160,7 @@ public class TxtFileRelease extends AbstractRelease {
                 index++;
             }
         }
+        bfIn.close();
         return index;
     }
 

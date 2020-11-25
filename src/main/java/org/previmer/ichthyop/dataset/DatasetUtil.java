@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -77,7 +77,7 @@ public class DatasetUtil {
      * @throws IOException if no file match the pattern
      */
     public static List<String> list(String path, String pattern) throws IOException {
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
 
         File inputPath = new File(IOTools.resolvePath(path));
         if (!inputPath.isDirectory()) {
@@ -85,7 +85,7 @@ public class DatasetUtil {
         }
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(pattern));
         if (listFile.length > 0) {
-            list = new ArrayList(listFile.length);
+            list = new ArrayList<>(listFile.length);
             for (File file : listFile) {
                 list.add(file.toString());
             }
@@ -102,7 +102,7 @@ public class DatasetUtil {
      * @param strTime, the name of the time variable in the NetCDF file
      * @param timeArrow, 1 forward, -1 backward
      */
-    public static void sort(List list, String strTime, int timeArrow) {
+    public static void sort(List<String> list, String strTime, int timeArrow) {
         if (list.isEmpty() || list.size() == 1) {
             return;
         }
@@ -239,7 +239,7 @@ public class DatasetUtil {
             }
         }
 
-        // Time value not found among NetCDF files        
+        // Time value not found among NetCDF files
         StringBuilder msg = new StringBuilder();
         msg.append("[Dataset] Time value ");
         msg.append(time);
@@ -397,7 +397,7 @@ public class DatasetUtil {
 
         return d;
     }
-    
+
     /**
      * <p>
      * The functions computes the 2nd order approximate derivative at index
@@ -428,8 +428,8 @@ public class DatasetUtil {
 
         return (X[k + 1] - 2.d * X[k] + X[k - 1]);
     }
-    
-    
+
+
      /**
      * Computes the geodesic distance between the two points (lat1, lon1) and
      * (lat2, lon2)
@@ -445,5 +445,5 @@ public class DatasetUtil {
         double d = Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
         return d;
     }
-    
+
 }

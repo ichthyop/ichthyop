@@ -68,6 +68,10 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
  */
 public class LonLatEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 4946465241326753457L;
     private JPanel panel;
     private JTextField textField;
     private JPopupMenu popup;

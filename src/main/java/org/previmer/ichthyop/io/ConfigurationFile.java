@@ -48,8 +48,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +56,6 @@ import java.util.logging.Logger;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
 import org.jdom2.filter.Filter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
@@ -164,7 +161,7 @@ public class ConfigurationFile {
     }
 
     public List<XParameter> getParameters(ParamType paramType) {
-        List<XParameter> list = new ArrayList();
+        List<XParameter> list = new ArrayList<>();
         for (XBlock xblock : map.values()) {
             if (xblock.isEnabled()) {
                 for (XParameter xparam : xblock.getXParameters()) {
@@ -194,7 +191,7 @@ public class ConfigurationFile {
     }
 
     public Iterable<XBlock> getBlocks(BlockType type) {
-        ArrayList<XBlock> list = new ArrayList();
+        ArrayList<XBlock> list = new ArrayList<>();
         for (XBlock xblock : map.values()) {
             if (xblock.getType().equals(type)) {
                 list.add(xblock);
@@ -213,7 +210,7 @@ public class ConfigurationFile {
 
     public List<XBlock> readBlocks() throws IOException {
         List<Element> list = structure.getRootElement().getChildren(XBlock.BLOCK);
-        List<XBlock> listBlock = new ArrayList(list.size());
+        List<XBlock> listBlock = new ArrayList<>(list.size());
         for (Element elt : list) {
             listBlock.add(new XBlock(elt));
         }
@@ -222,9 +219,14 @@ public class ConfigurationFile {
 
     public List<XBlock> readBlocks(final BlockType type) {
 
-        Filter filtre = new Filter() {
+        Filter<Element> filtre = new Filter<Element>() {
 
-            @Override
+            /**
+			 *
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
             public boolean matches(Object obj) {
                 if (!(obj instanceof Element)) {
                     return false;
@@ -234,37 +236,37 @@ public class ConfigurationFile {
             }
 
             @Override
-            public List filter(List list) {
+            public List<Element> filter(List<?> list) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Object filter(Object o) {
+            public XBlock filter(Object o) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter negate() {
+            public Filter<Element> negate() {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter or(Filter filter) {
+            public Filter<Element> or(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter and(Filter filter) {
+            public Filter<Element> and(Filter<?> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
-            public Filter refine(Filter filter) {
+            public <R> Filter<R> refine(Filter<R> filter) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
-        List<XBlock> list = new ArrayList();
-        for (Object elt : structure.getRootElement().getContent(filtre)) {
+        List<XBlock> list = new ArrayList<>();
+        for (Element elt : structure.getRootElement().getContent(filtre)) {
             list.add(new XBlock(type, (Element) elt));
         }
         return list;
@@ -277,7 +279,7 @@ public class ConfigurationFile {
     }
 
     public HashMap<String, XBlock> createMap() throws Exception {
-        HashMap<String, XBlock> lmap = new HashMap();
+        HashMap<String, XBlock> lmap = new HashMap<>();
         for (XBlock xblock : readBlocks()) {
             lmap.put(new BlockId(xblock.getType(), xblock.getKey()).toString(), xblock);
         }

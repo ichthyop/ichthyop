@@ -79,7 +79,12 @@ import org.previmer.ichthyop.manager.SimulationManager;
  */
 public class SimulationUI extends JPanel {
 
-///////////////////////////////
+    /**
+     * Generic ID
+     *
+     */
+    private static final long serialVersionUID = 5522204116243567503L;
+    ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
@@ -173,7 +178,7 @@ public class SimulationUI extends JPanel {
         /* Draw the particles */
         if (getSimulationManager().getSimulation().getPopulation() != null) {
             ParticleUI particleUI = new ParticleUI();
-            Iterator it = getSimulationManager().getSimulation().getPopulation().iterator();
+            Iterator<IParticle> it = getSimulationManager().getSimulation().getPopulation().iterator();
             while (it.hasNext()) {
                 IParticle particle = (IParticle) it.next();
                 if (particle.isLiving()) {
@@ -334,6 +339,10 @@ public class SimulationUI extends JPanel {
      */
     private class CellUI extends Polygon {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = -4230683923042872742L;
         ///////////////////////////////
         // Declaration of the constants
         ///////////////////////////////
@@ -406,7 +415,7 @@ public class SimulationUI extends JPanel {
             if (getSimulationManager().getDataset().isInWater(i, j)) {
                 Color color = getColor(getSimulationManager().getDataset().getBathy(i, j));
                 boolean found = false;
-                ArrayList<Zone> listZones = new ArrayList();
+                ArrayList<Zone> listZones = new ArrayList<>();
                 for (TypeZone typeZone : TypeZone.values()) {
                     if (null != getSimulationManager().getZoneManager().getZones(typeZone)) {
                         listZones.addAll(getSimulationManager().getZoneManager().getZones(typeZone));
@@ -462,6 +471,11 @@ public class SimulationUI extends JPanel {
      */
     private class ParticleUI extends Ellipse2D.Double {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = -6952210349897377916L;
+
         ////////////////////////////
         // Definition of the methods
         ////////////////////////////
@@ -494,10 +508,11 @@ public class SimulationUI extends JPanel {
          * @return <code>x</code> if between 0 and 1, the closest boundary
          * otherwise.
          */
+        /*
         private float bound(float x) {
-
             return Math.max(Math.min(1.f, x), 0.f);
         }
+        */
         //---------- End of class ParticleUI
     }
     //---------- End of class

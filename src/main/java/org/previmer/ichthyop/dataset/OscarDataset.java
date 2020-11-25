@@ -47,8 +47,6 @@ package org.previmer.ichthyop.dataset;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
-import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
-import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.event.NextStepEvent;
 import ucar.ma2.Array;
 import ucar.ma2.Index;

@@ -44,7 +44,6 @@
 
 package org.previmer.ichthyop.particle;
 
-import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.io.BlockType;
 
 /**

@@ -63,6 +63,10 @@ import java.awt.event.ActionListener;
 public class ColorEditor extends AbstractCellEditor
                          implements TableCellEditor,
 			            ActionListener {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7254865564828384842L;
     Color currentColor;
     JButton button;
     JColorChooser colorChooser;

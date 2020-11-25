@@ -1,5 +1,15 @@
 # ICHTHYOP Release notes
 
+## Changes in Ichthyop 3.3.7
+
+### New features
+
+- Remove deprecated NetCDF functions, use new NetCDF implementation
+
+### Bug fix
+
+- Correction of a bug in the saving of zones in NetCDF (file could not be opened with Python Xarray)
+
 ## Changes in Ichthyop 3.3.6
 
 ### Bug fixes

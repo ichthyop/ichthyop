@@ -106,7 +106,7 @@ public class LonLatConverter {
             return value;
         }
 
-        String newValue = value;
+        String newValue;
         switch (valueFormat) {
             case DecimalDeg:
                 newValue = convert(decimalDegToDegDecimalMin(value), format);
@@ -117,6 +117,8 @@ public class LonLatConverter {
             case DegMinSec:
                 newValue = convert(degMinSecToDecimal(value), format);
                 break;
+            default:
+                newValue = value;
         }
 
         return newValue;
@@ -138,6 +140,7 @@ public class LonLatConverter {
         return strCoord.toString();
     }
 
+    /*
     static private String degDecimalMinToDecimal(String coord) throws NumberFormatException {
 
         if (!getFormat(coord).equals(LonLatFormat.DegDecimalMin)) {
@@ -148,6 +151,7 @@ public class LonLatConverter {
         double decicoord = Math.signum(deg) * (Math.abs(deg) + (min / 60));
         return String.valueOf(round(decicoord, 5));
     }
+    */
 
     static private String degDecimalMinToDegMinSec(String coord) throws NumberFormatException {
 
@@ -170,6 +174,7 @@ public class LonLatConverter {
         return strCoord.toString();
     }
 
+    /*
     static private String degMinSecToDegDecimalMin(String coord) throws NumberFormatException {
 
         if (!getFormat(coord).equals(LonLatFormat.DegMinSec)) {
@@ -206,6 +211,7 @@ public class LonLatConverter {
         strCoord.append('\"');
         return strCoord.toString();
     }
+    */
 
     static private String degMinSecToDecimal(String coord) throws NumberFormatException {
 

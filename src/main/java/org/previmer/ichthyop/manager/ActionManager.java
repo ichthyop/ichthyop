@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,30 +20,31 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.manager;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,13 +77,13 @@ public class ActionManager extends AbstractManager {
     }
 
     private void loadActions() throws InstantiationException {
-        actionMap = new HashMap();
+        actionMap = new HashMap<>();
         Iterator<XBlock> it = getSimulationManager().getParameterManager().getBlocks(BlockType.ACTION).iterator();
         while (it.hasNext()) {
             XBlock xaction = it.next();
             if (xaction.isEnabled()) {
                 try {
-                    Class actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
+                    Class<?> actionClass = Class.forName(xaction.getXParameter("class_name").getValue());
                     AbstractAction action = createAction(actionClass);
                     action.loadParameters();
                     actionMap.put(xaction.getKey(), action);
@@ -103,7 +104,7 @@ public class ActionManager extends AbstractManager {
 
     private void implementSysActions() throws InstantiationException {
 
-        sysActionList = new ArrayList();
+        sysActionList = new ArrayList<>();
 
         sysActionList.add(new SysActionAgeMonitoring());
         sysActionList.add(new SysActionMove());
@@ -111,7 +112,8 @@ public class ActionManager extends AbstractManager {
         for (AbstractSysAction sysaction : sysActionList) {
             try {
                 sysaction.loadParameters();
-                getLogger().log(Level.INFO, "Instantiated system action \"{0}\"", sysaction.getClass().getCanonicalName());
+                getLogger().log(Level.INFO, "Instantiated system action \"{0}\"",
+                        sysaction.getClass().getCanonicalName());
             } catch (Exception ex) {
                 StringBuilder msg = new StringBuilder();
                 msg.append("Failed to setup system action ");
@@ -126,13 +128,14 @@ public class ActionManager extends AbstractManager {
     }
 
     private List<AbstractAction> getSortedActions() {
-        List<AbstractAction> actions = new ArrayList(actionMap.values());
+        List<AbstractAction> actions = new ArrayList<>(actionMap.values());
         Collections.sort(actions, new ActionComparator());
         return actions;
     }
 
-    public AbstractAction createAction(Class actionClass) throws InstantiationException, IllegalAccessException {
-        return (AbstractAction) actionClass.newInstance();
+    public AbstractAction createAction(Class<?> actionClass) throws InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        return (AbstractAction) actionClass.getDeclaredConstructor().newInstance();
     }
 
     public void executeActions(Particle particle) {
@@ -142,13 +145,13 @@ public class ActionManager extends AbstractManager {
                 action.execute(particle);
             }
         }
-        
+
         // System actions
         for (AbstractSysAction sysaction : sysActionList) {
             sysaction.execute(particle);
         }
     }
-    
+
     public void initActions(Particle particle) {
         // Pre-defined actions
         for (AbstractAction action : getSortedActions()) {

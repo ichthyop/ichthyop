@@ -52,6 +52,10 @@ import java.util.EventObject;
  */
 public class LastStepEvent extends EventObject {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -5639716687614173140L;
     private boolean interrupted;
 
     public LastStepEvent(Object source, boolean interrupted) {

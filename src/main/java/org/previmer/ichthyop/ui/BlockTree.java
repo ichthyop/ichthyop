@@ -71,6 +71,10 @@ import org.previmer.ichthyop.manager.SimulationManager;
  */
 public class BlockTree extends JTree {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 2207505063928265586L;
     private HashMap<String, XBlock> blockMap;
 
     public BlockTree() {
@@ -141,7 +145,7 @@ public class BlockTree extends JTree {
     }
 
     public void writeStructure(ParameterManager manager) {
-        for (Enumeration e1 = getRoot().postorderEnumeration(); e1.hasMoreElements();) {
+        for (Enumeration<TreeNode> e1 = getRoot().postorderEnumeration(); e1.hasMoreElements();) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
             if (node.isLeaf()) {
                 XBlock block = blockMap.get(nodeToTreePath(node));
@@ -168,27 +172,29 @@ public class BlockTree extends JTree {
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(getSimulationManager().getConfigurationFile().getName());
         setModel(new DefaultTreeModel(root));
-        List<XBlock> listb = new ArrayList();
+        List<XBlock> listb = new ArrayList<>();
         for (XBlock block : getSimulationManager().getParameterManager().readBlocks()) {
             listb.add(block);
         }
         //Collections.sort(listb);
         Collections.reverse(listb);
-        blockMap = new HashMap(listb.size());
+        blockMap = new HashMap<>(listb.size());
         for (XBlock block : listb) {
             insertIntoTree(block);
         }
         setCellRenderer(new TreeRenderer());
     }
 
+    /*
     private DefaultMutableTreeNode getNodeInParent(DefaultMutableTreeNode parent, String nodeName) {
         return getNodeInParent(parent, nodeName, 0, true);
     }
-
+    */
+    /*
     private DefaultMutableTreeNode getNodeInParent(DefaultMutableTreeNode parent, String nodeName, int index, boolean canCreateNode) {
 
         if (parent != null) {
-            for (Enumeration e1 = parent.children(); e1.hasMoreElements();) {
+            for (Enumeration<TreeNode> e1 = parent.children(); e1.hasMoreElements();) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
                 if (node.getUserObject().equals(nodeName)) {
                     return node;
@@ -202,6 +208,7 @@ public class BlockTree extends JTree {
         }
         return null;
     }
+    */
 
     public DefaultMutableTreeNode insertNodeInParent(DefaultMutableTreeNode parent, String nodeName) {
         return insertNodeInParent(parent, nodeName, 0);
@@ -209,7 +216,7 @@ public class BlockTree extends JTree {
 
     public DefaultMutableTreeNode insertNodeInParent(DefaultMutableTreeNode parent, String nodeName, int index) {
         if (parent != null) {
-            for (Enumeration e1 = parent.children(); e1.hasMoreElements();) {
+            for (Enumeration<TreeNode> e1 = parent.children(); e1.hasMoreElements();) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) e1.nextElement();
                 if (node.getUserObject().equals(nodeName)) {
                     return node;
@@ -304,6 +311,7 @@ public class BlockTree extends JTree {
         return find(new TreePath(getRoot()), key.split("/"), 0, true);
     }*/
 
+    /*
     private TreePath find(TreePath parent, Object[] nodes, int depth, boolean byName) {
 
         TreeNode node = (TreeNode) parent.getLastPathComponent();
@@ -334,6 +342,7 @@ public class BlockTree extends JTree {
         // No match at this branch
         return null;
     }
+    */
 
     private SimulationManager getSimulationManager() {
         return SimulationManager.getInstance();
@@ -341,6 +350,10 @@ public class BlockTree extends JTree {
 
     class TreeRenderer extends DefaultTreeCellRenderer {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = -6494118568410078093L;
         Icon iconLeaf, iconRoot, iconNode, iconNodeExpanded;
 
         TreeRenderer() {

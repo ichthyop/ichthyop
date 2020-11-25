@@ -80,10 +80,7 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.LayoutManager;
-import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.Rectangle2D;
@@ -92,6 +89,10 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 
 public class GradientPanel extends JPanel {
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4447504749307136317L;
     protected BufferedImage gradientImage;
     //protected Color gradientStart = new Color(204, 249, 124);
     //protected Color gradientEnd = new Color(174, 222, 94);

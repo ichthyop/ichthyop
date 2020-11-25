@@ -58,9 +58,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.logging.Level;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
+
 import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
@@ -102,12 +105,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     /**
      * Object for creating/writing netCDF files.
      */
-    private static NetcdfFileWriteable ncOut;
+    private static NetcdfFileWriter ncOut;
     /**
      *
      */
     private List<AbstractTracker> trackers;
-    private List<Class> predefinedTrackers;
+    private List<Class<?>> predefinedTrackers;
     private List<String> customTrackers;
     private String basename;
 
@@ -157,7 +160,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void close() {
         try {
             ncOut.close();
-            String strFilePart = ncOut.getLocation();
+            String strFilePart = ncOut.getNetcdfFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             Path filePart = new File(strFilePart).toPath();
             Path fileBase = new File(strFileBase).toPath();
@@ -172,11 +175,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* Add the region edges */
         region = makeRegion();
-        Dimension edge = ncOut.addDimension("edge", region.size());
-        latlonDim = ncOut.addDimension("latlon", 2);
-        ncOut.addVariable("region_edge", DataType.FLOAT, new Dimension[]{edge, latlonDim});
-        ncOut.addVariableAttribute("region_edge", "long_name", "geoposition of region edge");
-        ncOut.addVariableAttribute("region_edge", "unit", "lat degree north lon degree east");
+        Dimension edge = ncOut.addDimension(null, "edge", region.size());
+        latlonDim = ncOut.addDimension(null, "latlon", 2);
+        ncOut.addVariable(null, "region_edge", DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(edge, latlonDim)));
+        ncOut.findVariable("region_edge").addAttribute(new Attribute("long_name", "geoposition of region edge"));
+        ncOut.findVariable("region_edge").addAttribute(new Attribute("unit", "lat degree north lon degree east"));
     }
 
     private void writeRegion() throws IOException, InvalidRangeException {
@@ -188,30 +191,30 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             edge.set(i, 1, (float) gp.getLongitude());
             i++;
         }
-        ncOut.write("region_edge", edge);
+        ncOut.write(ncOut.findVariable("region_edge"), edge);
     }
 
     private void addZones() {
 
         int iZone = 0;
-        zoneAreas = new ArrayList();
+        zoneAreas = new ArrayList<>();
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     zoneAreas.add(iZone, makeZoneArea(zone));
-                    Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
-                    ncOut.addVariable("zone" + iZone, DataType.FLOAT, new Dimension[]{zoneDim, latlonDim});
-                    ncOut.addVariableAttribute("zone" + iZone, "long_name", zone.getKey());
-                    ncOut.addVariableAttribute("zone" + iZone, "unit", "x and y coordinates of the center of the cells in the zone");
-                    ncOut.addVariableAttribute("zone" + iZone, "type", zone.getType().toString());
+                    //Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
+                    Variable varZone = ncOut.addVariable(null, "zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(latlonDim)));
+                    varZone.addAttribute(new Attribute("long_name", zone.getKey()));
+                    varZone.addAttribute(new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
+                    varZone.addAttribute(new Attribute("type", zone.getType().toString()));
                     String color = zone.getColor().toString();
                     color = color.substring(color.lastIndexOf("["));
-                    ncOut.addVariableAttribute("zone" + iZone, "color", color);
+                    varZone.addAttribute(new Attribute("color", color));
                     iZone++;
                 }
             }
         }
-        ncOut.addGlobalAttribute("nb_zones", iZone);
+        ncOut.addGroupAttribute(null, new Attribute("nb_zones", iZone));
     }
 
     private void writeZones() throws IOException, InvalidRangeException {
@@ -225,7 +228,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 arrZoneArea.set(i, 1, (float) xy.getY());
                 i++;
             }
-            ncOut.write("zone" + iZone, arrZoneArea);
+            ncOut.write(ncOut.findVariable("zone" + iZone), arrZoneArea);
             iZone++;
         }
     }
@@ -236,19 +239,19 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         String dim = getSimulationManager().getDataset().is3D()
                 ? "3d"
                 : "2d";
-        ncOut.addGlobalAttribute("transport_dimension", dim);
+        ncOut.addGroupAttribute(null, new Attribute("transport_dimension", dim));
 
         /* Write all parameters */
         for (BlockType type : BlockType.values()) {
             for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
                 if (!block.getType().equals(BlockType.OPTION)) {
-                    ncOut.addGlobalAttribute(block.getKey() + ".enabled", String.valueOf(block.isEnabled()));
+                    ncOut.addGroupAttribute(null, new Attribute(block.getKey() + ".enabled", String.valueOf(block.isEnabled())));
                 }
                 if (block.isEnabled()) {
                     for (XParameter param : block.getXParameters()) {
                         if (!param.isHidden()) {
                             String key = block.getKey() + "." + param.getKey();
-                            ncOut.addGlobalAttribute(key, param.getValue());
+                            ncOut.addGroupAttribute(null, new Attribute(key, param.getValue()));
                         }
                     }
                 }
@@ -256,11 +259,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         /* Add the corresponding xml file */
-        ncOut.addGlobalAttribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath());
+        ncOut.addGroupAttribute(null, new Attribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath()));
     }
 
     private List<Point2D> makeZoneArea(Zone zone) {
-        List<Point2D> list = new ArrayList();
+        List<Point2D> list = new ArrayList<>();
 
         int xmin = (int) Math.floor(zone.getXmin());
         int xmax = (int) Math.ceil(zone.getXmax());
@@ -288,9 +291,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         return list;
     }
 
+    /*
     private double getDistance(Point2D.Float pt1, Point2D.Float pt2) {
         return Math.sqrt(Math.pow(pt2.x - pt1.x, 2) + Math.pow(pt2.y - pt1.y, 2));
     }
+    */
 
     private List<GeoPosition> makeRegion() {
 
@@ -319,9 +324,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         return lregion;
     }
 
-    public void addPredefinedTracker(Class trackerClass) {
+    public void addPredefinedTracker(Class<?> trackerClass) {
         if (null == predefinedTrackers) {
-            predefinedTrackers = new ArrayList();
+            predefinedTrackers = new ArrayList<>();
         }
         if (clearPredefinedTrackerList) {
             predefinedTrackers.clear();
@@ -334,7 +339,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     public void addCustomTracker(String variableName) {
         if (null == customTrackers) {
-            customTrackers = new ArrayList();
+            customTrackers = new ArrayList<>();
         }
         if (clearCustomTrackerList) {
             customTrackers.clear();
@@ -346,7 +351,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private void addPredefinedTrackers() throws Exception {
-        trackers = new ArrayList();
+        trackers = new ArrayList<>();
         trackers.add(new TimeTracker());
         trackers.add(new LonTracker());
         trackers.add(new LatTracker());
@@ -356,9 +361,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
         /* Add trackers requested by external actions */
         if (null != predefinedTrackers) {
-            for (Class trackerClass : predefinedTrackers) {
+            for (Class<?> trackerClass : predefinedTrackers) {
                 try {
-                    AbstractTracker tracker = (AbstractTracker) trackerClass.newInstance();
+                    AbstractTracker tracker = (AbstractTracker) trackerClass.getDeclaredConstructor().newInstance();
                     trackers.add(tracker);
                 } catch (Exception ex) {
                     getLogger().log(Level.SEVERE, "Error adding tracker " + trackerClass.getSimpleName() + " in NetCDF output file. The variable will not be recorded.", ex);
@@ -371,7 +376,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         String userTrackers = getParameter("trackers");
         try {
             String[] tokens = userTrackers.split("\"");
-            List<String> variables = new ArrayList();
+            List<String> variables = new ArrayList<>();
             for (String token : tokens) {
                 if (!token.trim().isEmpty()) {
                     variables.add(token.trim());
@@ -406,7 +411,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     private void writeToNetCDF(int i_record) {
         getLogger().log(Level.INFO, "Saving variables...");
-        List<AbstractTracker> errTrackers = new ArrayList();
+        List<AbstractTracker> errTrackers = new ArrayList<>();
         for (AbstractTracker tracker : trackers) {
             if (tracker.isEnabled()) {
                 /* Retrieve the values of the variable */
@@ -420,7 +425,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
                 /* Write the current time step in the NetCDF file */
                 try {
-                    ncOut.write(tracker.getName(), tracker.origin(i_record), tracker.getArray());
+                    ncOut.write(ncOut.findVariable(tracker.getName()), tracker.origin(i_record), tracker.getArray());
                 } catch (Exception ex) {
                     errTrackers.add(tracker);
                     getSimulationManager().getDataset().removeRequiredVariable(tracker.getName(), tracker.getClass());
@@ -451,8 +456,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public void setupPerformed(SetupEvent e) throws Exception {
 
         /* Create the NetCDF writeable object */
-        ncOut = NetcdfFileWriteable.createNew("");
-        ncOut.setLocation(makeFileLocation());
+        ncOut = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, makeFileLocation());
 
         /* Get record frequency */
         record_frequency = Integer.valueOf(getParameter("record_frequency"));
@@ -471,11 +475,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         addCustomTrackers(getUserTrackers());
 
         /* Initialize all trackers */
-        List<AbstractTracker> errTrackers = new ArrayList();
+        List<AbstractTracker> errTrackers = new ArrayList<>();
         for (AbstractTracker tracker : trackers) {
             try {
                 tracker.init();
-                ncOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
+                ncOut.addVariable(null, tracker.getName(), tracker.getDataType(), tracker.getDimensions());
             } catch (Exception ex) {
                 errTrackers.add(tracker);
                 getLogger().log(Level.WARNING, "Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
@@ -510,7 +514,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             try {
                 if (tracker.getAttributes() != null) {
                     for (Attribute attribute : tracker.getAttributes()) {
-                        ncOut.addVariableAttribute(tracker.getName(), attribute);
+                        ncOut.findVariable(tracker.getName()).addAttribute(attribute);
                     }
                 }
             } catch (Exception ex) {
@@ -527,7 +531,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* create the NetCDF file */
         try {
-            IOTools.makeDirectories(ncOut.getLocation());
             ncOut.create();
         } catch (Exception ex) {
             IOException ioex = new IOException("Failed to create NetCDF output file ==> " + ex.toString());
@@ -560,7 +563,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         /* initialization completed */
-        getLogger().log(Level.INFO, "Created output file {0}", ncOut.getLocation());
+        getLogger().log(Level.INFO, "Created output file {0}", ncOut.getNetcdfFile().getLocation());
         getLogger().info("Output manager initialization [OK]");
     }
 
@@ -571,15 +574,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         private HashMap<String, Dimension> dimensions;
 
         public Dimension createDimension(Dimension dim) {
-            if (dimensions.containsKey(dim.getName())) {
-                if (dim.getLength() != dimensions.get(dim.getName()).getLength()) {
-                    throw new IllegalArgumentException("Dimension (" + dim.getName() + ") has already been defined with a different length.");
+            if (dimensions.containsKey(dim.getShortName())) {
+                if (dim.getLength() != dimensions.get(dim.getShortName()).getLength()) {
+                    throw new IllegalArgumentException("Dimension (" + dim.getShortName() + ") has already been defined with a different length.");
                 } else {
-                    return dimensions.get(dim.getName());
+                    return dimensions.get(dim.getShortName());
                 }
             } else {
-                Dimension newDim = ncOut.addDimension(dim.getName(), dim.getLength());
-                dimensions.put(newDim.getName(), newDim);
+                Dimension newDim = ncOut.addDimension(null, dim.getShortName(), dim.getLength());
+                dimensions.put(newDim.getShortName(), newDim);
                 return newDim;
             }
         }
@@ -587,28 +590,28 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         public Dimension getTimeDimension() {
             if (null == time) {
                 time = ncOut.addUnlimitedDimension("time");
-                dimensions.put(time.getName(), time);
+                dimensions.put(time.getShortName(), time);
             }
             return time;
         }
 
         public Dimension getDrifterDimension() {
             if (null == drifter) {
-                drifter = ncOut.addDimension("drifter", getSimulationManager().getReleaseManager().getNbParticles());
-                dimensions.put(drifter.getName(), drifter);
+                drifter = ncOut.addDimension(null, "drifter", getSimulationManager().getReleaseManager().getNbParticles());
+                dimensions.put(drifter.getShortName(), drifter);
             }
             return drifter;
         }
 
         public Dimension getZoneDimension(TypeZone type) {
             if (null == zoneDimension) {
-                zoneDimension = new HashMap();
+                zoneDimension = new HashMap<>();
             }
             if (null == zoneDimension.get(type)) {
                 String name = type.toString() + "_zone";
-                Dimension zoneDim = ncOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size());
+                Dimension zoneDim = ncOut.addDimension(null, name, getSimulationManager().getZoneManager().getZones(type).size());
                 zoneDimension.put(type, zoneDim);
-                dimensions.put(zoneDim.getName(), zoneDim);
+                dimensions.put(zoneDim.getShortName(), zoneDim);
             }
             return zoneDimension.get(type);
         }
@@ -617,7 +620,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             time = null;
             drifter = null;
             zoneDimension = null;
-            dimensions = new HashMap();
+            dimensions = new HashMap<>();
         }
     }
 }
