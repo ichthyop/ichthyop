@@ -20,7 +20,7 @@ import org.previmer.ichthyop.util.Constant;
  *
  * @author pverley
  */
-public class Turtle extends AbstractAction {
+public class TurtleAction extends AbstractAction {
 
     private static boolean FLAG_ACTIVE_ORIENTATION;
     private HashMap<Integer, Integer[]> currentSpeedActivity, currentOrientationActivity;
