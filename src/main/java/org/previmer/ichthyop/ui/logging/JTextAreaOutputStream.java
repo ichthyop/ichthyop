@@ -102,7 +102,7 @@ class JTextAreaOutputStream extends OutputStream {
         String txt = new String(arg0);
         m_textArea.append(txt);
         try {
-            m_textArea.scrollRectToVisible(m_textArea.modelToView2D(m_textArea.getDocument().getLength()).getBounds()));
+            m_textArea.scrollRectToVisible(m_textArea.modelToView2D(m_textArea.getDocument().getLength()).getBounds());
         } catch (javax.swing.text.BadLocationException err) {
         }
     }
