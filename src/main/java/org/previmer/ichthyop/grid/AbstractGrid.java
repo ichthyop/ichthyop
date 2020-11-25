@@ -43,10 +43,12 @@
 package org.previmer.ichthyop.grid;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
+import org.previmer.ichthyop.event.InitializeListener;
+import org.previmer.ichthyop.event.SetupListener;
 
-public abstract class AbstractGrid extends SimulationManagerAccessor {
+public abstract class AbstractGrid extends SimulationManagerAccessor implements InitializeListener, SetupListener {
 
-    private final String gridFileName;
+    private final String filename;
     private final String gridKey;
 
     /**
@@ -59,13 +61,28 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
      */
     private int ipo, jpo;
 
-    public abstract void init();
-    public abstract void setup();
-
+    private double lonMin, latMin, lonMax, latMax;
+    
+    public abstract void init() throws Exception;
+    public abstract void setUp() throws Exception;
     public abstract boolean is3D();
-
-    public AbstractGrid(String gridFileName) {
-        this.gridFileName = gridFileName;
+    public abstract double getBathy(int i, int j);
+    public abstract double getLon(int i, int j);
+    public abstract double getLat(int i, int j);
+    public abstract double getdxi(int j, int i);
+    public abstract double getdeta(int j, int i);
+    public abstract boolean isInWater(int i, int j);
+    public abstract void loadParameters();
+    public abstract boolean isInWater(double[] pGrid);
+    public abstract boolean isCloseToCost(double[] pGrid);
+    public abstract double depth2z(double x, double y, double depth);
+    public abstract double z2depth(double x, double y, double z);
+    public abstract double[] xy2latlon(double xRho, double yRho);
+    public abstract double[] latlon2xy(double lat, double lon);
+    public abstract boolean isOnEdge(double[] pGrid);
+    
+    public AbstractGrid(String filename) {
+        this.filename = filename;
         this.gridKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
     }
     
@@ -79,48 +96,99 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
     }
 
     public String getParameter(String key) {
-        return getSimulationManager().getDatasetManager().getParameter(gridKey, key);
+        return getSimulationManager().getGridManager().getParameter(gridKey, key);
+    }
+    
+    public boolean findParameter(String key) {
+        // Check whether the parameter can be retrieved
+        try {
+            getSimulationManager().getGridManager().getParameter(gridKey, key);
+        } catch (NullPointerException ex) {
+            // Tue parameter does not exist
+            return false;
+        }
+        // The parameter does exist
+        return true;
     }
 
+    public String getFilename() {
+        return this.filename;
+    }
     
-    public int getNx() {
+    public int get_nx() {
         return this.nx;
     }
 
-    public int getNy() {
+    public int get_ny() {
         return this.ny;
     }
 
-    public int getNz() {
+    public int get_nz() {
         return this.nz;
     }
 
-    public void setNx(int value) {
+    public void set_nx(int value) {
         this.nx = value;
     }
 
-    public void setNy(int value) {
+    public void set_ny(int value) {
         this.ny = value;
     }
 
-    public void setNz(int value) {
+    public void set_nz(int value) {
         this.nz = value;
     }
 
-    public int getIpo() {
+    public int get_ipo() {
         return this.ipo;
     }
 
-    public int getJpo() {
+    public int get_jpo() {
         return this.jpo;
     }
 
-    public void setIpo(int value) {
+    public void set_ipo(int value) {
         this.ipo = value;
     }
 
-    public void setJpo(int value) {
+    public void set_jpo(int value) {
         this.jpo = value;
+    }
+    
+    /**
+     * Gets domain minimum latitude.
+     *
+     * @return a double, the domain minimum latitude [north degree]
+     */
+    public double getLatMin() {
+        return latMin;
+    }
+
+    /**
+     * Gets domain maximum latitude.
+     *
+     * @return a double, the domain maximum latitude [north degree]
+     */
+    public double getLatMax() {
+        return latMax;
+    }
+
+    /**
+     * Gets domain minimum longitude.
+     *
+     * @return a double, the domain minimum longitude [east degree]
+     */
+    public double getLonMin() {
+        return lonMin;
+    }
+
+    /**
+     * Gets domain maximum longitude.
+     *
+     * @return a double, the domain maximum longitude [east degree]
+     */
+    public double getLonMax() {
+        return lonMax;
     }
 
 }

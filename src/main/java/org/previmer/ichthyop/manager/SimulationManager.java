@@ -51,6 +51,7 @@ import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.InitializeListener;
 import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.event.SetupListener;
+import org.previmer.ichthyop.grid.GridManager;
 import org.previmer.ichthyop.io.ParamType;
 import org.previmer.ichthyop.io.XParameter;
 import java.io.File;
@@ -477,5 +478,9 @@ public class SimulationManager {
 
     public TimeManager getTimeManager() {
         return TimeManager.getInstance();
+    }
+    
+    public GridManager getGridManager() {
+        return GridManager.getInstance();
     }
 }
