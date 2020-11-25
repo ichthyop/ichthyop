@@ -240,6 +240,8 @@ public interface Constant {
     final public static String TIME_M = "time";
     final public static String SIGMA = "z";
     final public static String KV_M = "kz";
-
+    
+    final public static double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    
     //---------- End of the interface
 }
