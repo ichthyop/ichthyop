@@ -44,13 +44,12 @@
 
 package org.previmer.ichthyop.grid;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
-import org.previmer.ichthyop.io.IOTools;
+
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
-import org.previmer.ichthyop.util.MetaFilenameFilter;
+
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -61,7 +60,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author Nicolas Barrier
  */
-public class NemoGrid extends AbstractGrid {
+public class RegularGrid extends AbstractGrid {
 
     /**
      * Longitude at rho point.
@@ -81,13 +80,7 @@ public class NemoGrid extends AbstractGrid {
     /**
      * Depth at rho point
      */
-    private double[][][] gdepT;
-    
-    /**
-     * Depth at w point. The free surface elevation is disregarded. For index k,
-     * gdepW[k] is the depth of the W point below the center of the cell.
-     */
-    private double[][][] gdepW;
+    private double[][][] gdepT, gdepW;
 
     /**
      * Name of the Dimension in NetCDF file
@@ -98,17 +91,15 @@ public class NemoGrid extends AbstractGrid {
      * Name of the Variable in NetCDF file
      */
     private String strLon, strLat, strMask;
+    
     /**
      *
      */
-    private double[][][] e3t, e3u, e3v;
-    private double[][] e1t, e2t, e1v, e2u;
-    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
     private String str_gdepT, str_gdepW;
     private String file_hgr, file_zgr, file_mask;
     private boolean isGridInfoInOneFile;
     
-    public NemoGrid(String filename) {
+    public RegularGrid(String filename) {
         super(filename); 
         
     }
@@ -162,150 +153,14 @@ public class NemoGrid extends AbstractGrid {
             nc.close();
             nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
+        
         //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         //fichier *mesh*z*
         get_gdep_fields(nc);
 
-        // phv 20150319 - patch for e3t that can be found in NEMO output spread
-        // into three variables e3t_0, e3t_ps and mbathy
-        if (findParameter("field_var_e3t0") && findParameter("field_var_e3tps") && findParameter("field_var_mbathy")) {
-            compute_e3t();
-        } else {
-            e3t = read_e3_field(nc, stre3t);
-        }
-        if (stre3u.equals(stre3t) || (null == nc.findVariable(stre3u))) {
-            e3u = compute_e3u(e3t);
-        } else {
-            e3u = read_e3_field(nc, stre3u);
-        }
-        if (stre3v.equals(stre3t) || (null == nc.findVariable(stre3v))) {
-            e3v = compute_e3v(e3t);
-        } else {
-            e3v = read_e3_field(nc, stre3v);
-        }
 
-        if (!isGridInfoInOneFile) {
-            nc.close();
-            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
-        }
-        //System.out.println("read e1t e2t " + nc.getLocation());
-        // fichier *mesh*h*
-        e1t = read_e1_e2_field(nc, stre1t);
-        e2t = read_e1_e2_field(nc, stre2t);
-        if (stre1v.equals(stre1t) || (null == nc.findVariable(stre1v))) {
-            e1v = e1t;
-        } else {
-            e1v = read_e1_e2_field(nc, stre1v);
-        }
-        if (stre2u.equals(stre2t) || (null == nc.findVariable(stre2u))) {
-            e2u = e2t;
-        } else {
-            e2u = read_e1_e2_field(nc, stre2u);
-        }
-        nc.close();
     }
 
-    private void compute_e3t() throws IOException {
-
-        String str_e3t0 = getParameter("field_var_e3t0");
-        String str_e3tps = getParameter("field_var_e3tps");
-        String str_mbathy = getParameter("field_var_mbathy");
-
-        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
-
-        // Open NetCDF file
-        NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
-
-        // Read e3t_0 double[get_nz()]
-        Array e3t0 = nc.findVariable(str_e3t0).read().reduce().flip(0);
-
-        // Read e3t_ps double[get_ny()][get_nx()]
-        Array e3tps = nc.findVariable(str_e3tps).read().reduce();
-
-        // Read mbathy int[get_ny()][get_nx()]
-        Array mbathy = nc.findVariable(str_mbathy).read().reduce();
-
-        // Reconstruct e3t_ps
-        e3t = new double[get_nz()][get_ny()][get_nx()];
-        Index ind_e3t0 = e3t0.getIndex();
-        Index ind_e3tps = e3tps.getIndex();
-        Index ind_mbathy = mbathy.getIndex();
-        for (int j = 0; j < get_ny(); j++) {
-            for (int i = 0; i < get_nx(); i++) {
-                // First we initialize e3t with e3t_0
-                for (int k = 0; k < get_nz(); k++) {
-                    e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k + 1));
-                }
-                // From NEMO to Ichthyop grid, we remove the deepest z level
-                // as it is always ocean bottom in NEMO and we flip z-axis
-                // So the index of mbathy must be converted into Ichthyop grid
-                int km = get_nz() - mbathy.getInt(ind_mbathy.set(j + get_jpo(), i + get_ipo())) - 1;
-                // Next we correct the depth of the layer adjacent to the ocean
-                // bottom with e3t_ps
-                if (km > 0) {
-                    e3t[km][j][i] = e3tps.getDouble(ind_e3tps.set(j + get_jpo(), i + get_ipo()));
-                }
-            }
-        }
-    }
-
-    private double[][][] compute_e3u(double[][][] e3t) {
-
-        double[][][] e3u_calc = new double[get_nz()][get_ny()][get_nx()];
-
-        for (int k = 0; k < get_nz(); k++) {
-            for (int j = 0; j < get_ny(); j++) {
-                for (int i = 0; i < get_nx() - 1; i++) {
-                    /*
-                     * In NEMO domzgr.F90
-                     * e3u (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji+1,jj,jk))
-                     */
-                    //e3u_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j][i + 1]);
-                    e3u_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
-                }
-                e3u_calc[k][j][get_nx() - 1] = e3t[k][j][get_nx() - 1];
-            }
-        }
-        return e3u_calc;
-    }
-
-    private double[][][] compute_e3v(double[][][] e3t) {
-
-        double[][][] e3v_calc = new double[get_nz()][get_ny()][get_nx()];
-
-        for (int k = 0; k < get_nz(); k++) {
-            for (int i = 0; i < get_nx(); i++) {
-                for (int j = 0; j < get_ny() - 1; j++) {
-                    /*
-                     * In Nemo domzgr.F90
-                     * e3v (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji,jj+1,jk))
-                     */
-                    //e3v_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j + 1][i]);
-                    e3v_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                }
-                e3v_calc[k][get_ny() - 1][i] = e3t[k][get_ny() - 1][i];
-            }
-        }
-        return e3v_calc;
-    }
-
-    private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-
-        Array array = nc.findVariable(varname).read().reduce().flip(0);
-        Index index = array.getIndex();
-        double[][][] field = new double[get_nz()][get_ny()][get_nx()];
-        for (int k = 0; k < get_nz(); k++) {
-            for (int j = 0; j < get_ny(); j++) {
-                for (int i = 0; i < get_nx(); i++) {
-                    index.set(k + 1, j + get_jpo(), i + get_ipo());
-                    field[k][j][i] = Double.isNaN(array.getDouble(index))
-                            ? 0.d
-                            : array.getDouble(index);
-                }
-            }
-        }
-        return field;
-    }
 
     private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
 
@@ -442,21 +297,6 @@ public class NemoGrid extends AbstractGrid {
             }
         }
     }
-
-    private double[][] read_e1_e2_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
-
-        Array array = nc.findVariable(varname).read().reduce();
-        double[][] field = new double[get_ny()][get_nx()];
-        Index index = array.getIndex();
-        for (int j = 0; j < get_ny(); j++) {
-            for (int i = 0; i < get_nx(); i++) {
-                index.set(j + get_jpo(), i + get_ipo());
-                field[j][i] = array.getDouble(index);
-            }
-        }
-        return field;
-    }
-
     
     /**
      * Reads longitude and latitude fields in NetCDF dataset
@@ -489,25 +329,6 @@ public class NemoGrid extends AbstractGrid {
     }
 
     /*
-     * Gets cell dimension [meter] in the XI-direction.
-     *
-     * pverley pour chourdin: vérifier avec Steph que je ne me trompe pas dans
-     * la définition de e1t et e2t
-     */
-    // @Override
-    // public double getdxi(int j, int i) {
-    //     return e1t[j][i];
-    // }
-
-    /*
-     * Gets cell dimension [meter] in the ETA-direction.
-     */
-    // @Override
-    // public double getdeta(int j, int i) {
-    //     return e2t[j][i];
-    // }
-
-    /*
      * Sets up the {@code Dataset}. The method first sets the appropriate
      * variable names, loads the first NetCDF dataset and extract the time
      * non-dependant information, such as grid dimensions, geographical
@@ -520,8 +341,6 @@ public class NemoGrid extends AbstractGrid {
     public void setUp() throws Exception {
 
         loadParameters();
-        //clearRequiredVariables();
-        sortInputFiles();
         getDimNC();
         shrinkGrid();
         readConstantField();
@@ -560,15 +379,8 @@ public class NemoGrid extends AbstractGrid {
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
         strMask = getParameter("field_var_mask");
-        stre3t = getParameter("field_var_e3t");
-        stre3u = getParameter("field_var_e3u");
-        stre3v = getParameter("field_var_e3v");
         str_gdepT = getParameter("field_var_gdept"); // z_rho
         str_gdepW = getParameter("field_var_gdepw"); // z_w
-        stre1t = getParameter("field_var_e1t");
-        stre2t = getParameter("field_var_e2t");
-        stre1v = getParameter("field_var_e1v");
-        stre2u = getParameter("field_var_e2u");
         if (!findParameter("enhanced_mode")) {
             getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         }
@@ -652,6 +464,7 @@ public class NemoGrid extends AbstractGrid {
         //System.out.println("get_ipo() " + get_ipo() + " get_nx() " + get_nx() + " get_jpo() " + get_jpo() + " get_ny() " + get_ny());
     }
 
+  
     /*
      * Initializes the {@code Dataset}. Opens the file holding the first time of
      * the simulation. Checks out the existence of the fields required by the
@@ -664,7 +477,6 @@ public class NemoGrid extends AbstractGrid {
     public void init() throws Exception {
 
     }
-
    
 
     /**
@@ -1098,42 +910,6 @@ public class NemoGrid extends AbstractGrid {
         return (isInPolygone);
     }
 
-    /**
-     * Sort OPA input files. First make sure that there is at least and only one
-     * file matching the hgr, zgr and byte mask patterns. Then list the gridU,
-     * gridV and gridT files.
-     *
-     * @param path
-     * @throws java.io.IOException
-     */
-    private void sortInputFiles() throws IOException {
-
-        String path = IOTools.resolvePath(getParameter("input_path"));
-        File file = new File(path);
-
-        file_mask = checkExistenceAndUnicity(file, getParameter("byte_mask_pattern"));
-        file_hgr = checkExistenceAndUnicity(file, getParameter("hgr_pattern"));
-        file_zgr = checkExistenceAndUnicity(file, getParameter("zgr_pattern"));
-
-        isGridInfoInOneFile = (new File(file_mask).equals(new File(file_hgr)))
-                && (new File(file_mask).equals(new File(file_zgr)));
-
-    }
-
-    private String checkExistenceAndUnicity(File file, String pattern) throws IOException {
-
-        File[] listFiles = file.listFiles(new MetaFilenameFilter(pattern));
-        int nbFiles = listFiles.length;
-
-        if (nbFiles == 0) {
-            throw new IOException("No file matching pattern " + pattern);
-        } else if (nbFiles > 1) {
-            throw new IOException("More than one file matching pattern " + pattern);
-        }
-
-        return listFiles[0].toString();
-    }
-
     /*
      * Determines whether or not the x-y particle location is on edge of the
      * domain.
@@ -1151,31 +927,6 @@ public class NemoGrid extends AbstractGrid {
                 || (pGrid[1] < 2.0f));
     }
 
-
-    /**
-     * Gets the latitude at (i, j) grid point.
-     *
-     * @param i an int, the i-ccordinate
-     * @param j an int, the j-coordinate
-     * @return a double, the latitude [north degree] at (i, j) grid point.
-     */
-    @Override
-    public double getLat(int i, int j) {
-        return latRho[j][i];
-    }
-
-    /**
-     * Gets the longitude at (i, j) grid point.
-     *
-     * @param i an int, the i-ccordinate
-     * @param j an int, the j-coordinate
-     * @return a double, the longitude [east degree] at (i, j) grid point.
-     */
-    @Override
-    public double getLon(int i, int j) {
-        return lonRho[j][i];
-    }
-
     /**
      * Gets the bathymetry at (i, j) grid point.
      *
@@ -1186,7 +937,10 @@ public class NemoGrid extends AbstractGrid {
      */
     @Override
     public double getBathy(int i, int j) {
+        
+        return 0;
 
+        /*
         double bathy = 0.d;
         if (isInWater(i, j, get_nz() - 1)) {
             for (int k = 0; k < get_nz(); k++) {
@@ -1198,6 +952,7 @@ public class NemoGrid extends AbstractGrid {
             return bathy;
         }
         return Double.NaN;
+        */
     }
     
     

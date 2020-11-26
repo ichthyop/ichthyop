@@ -53,6 +53,8 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
      * Grid dimension
      */
     private int nx, ny, nz;
+    
+    private double[][] lonRho, latRho;
 
     /**
      * Origin for grid index
@@ -60,15 +62,18 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
     private int ipo, jpo;
 
     private double lonMin, latMin, lonMax, latMax;
+            
+    /**
+     * Maximum depth [meter] of the domain
+     */
+    private double depthMax;
     
     public abstract void init() throws Exception;
     public abstract void setUp() throws Exception;
     public abstract boolean is3D();
     public abstract double getBathy(int i, int j);
-    public abstract double getLon(int i, int j);
-    public abstract double getLat(int i, int j);
-    public abstract double getdxi(int j, int i);
-    public abstract double getdeta(int j, int i);
+    //public abstract double getdxi(int j, int i);
+    //public abstract double getdeta(int j, int i);
     public abstract boolean isInWater(int i, int j);
     public abstract void loadParameters();
     public abstract boolean isInWater(double[] pGrid);
@@ -91,6 +96,46 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
         } catch (NullPointerException ex ) {
             return true;
         }
+    }
+    
+    public void setDepthMax(double value) { 
+        this.depthMax = value;
+    }
+    
+    public double getDepthMax() { 
+        return this.depthMax;
+    }
+    
+    public void setLonMin(double value) { 
+        this.lonMin = value;
+    }
+    
+    public double getLonMin() { 
+        return this.lonMin;
+    }
+
+    public void setLonMax(double value) { 
+        this.lonMax = value;
+    }
+    
+    public double getLonMax() { 
+        return this.lonMax;
+    }
+    
+    public void setLatMin(double value) { 
+        this.latMin = value;
+    }
+    
+    public double getLatMin() { 
+        return this.latMin;
+    }
+
+    public void setLatMax(double value) { 
+        this.latMax = value;
+    }
+    
+    public double getLatMax() { 
+        return this.latMax;
     }
 
     public String getParameter(String key) {
@@ -153,40 +198,77 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
         this.jpo = value;
     }
     
-    /**
-     * Gets domain minimum latitude.
-     *
-     * @return a double, the domain minimum latitude [north degree]
+        /**
+     * Determines the geographical boundaries of the domain in longitude,
+     * latitude and depth.
      */
-    public double getLatMin() {
-        return latMin;
+    public void getDimGeogArea() {
+
+        //--------------------------------------
+        // Calculate the Physical Space extrema
+        this.setLonMin(Double.MAX_VALUE);
+        this.setLonMax(-this.getLonMin());
+        this.setLatMin(Double.MAX_VALUE);
+        this.setLatMax(-this.getLatMin());
+        this.setDepthMax(0.d);
+        int i = get_nx();
+
+        while (i-- > 0) {
+            int j = get_ny();
+            while (j-- > 0) {
+                if (lonRho[j][i] >= this.getLonMax()) {
+                    this.setLonMax(lonRho[j][i]);
+                }
+                if (lonRho[j][i] <= this.getLonMin()) {
+                    this.setLonMin(lonRho[j][i]);
+                }
+                if (latRho[j][i] >= this.getLatMax()) {
+                    this.setLatMax(latRho[j][i]);
+                }
+                if (latRho[j][i] <= this.getLatMin()) {
+                    this.setLatMin(latRho[j][i]);
+                }
+                double depth = getBathy(i, j);
+                if (depth > this.getDepthMax()) {
+                    this.setDepthMax(depth);
+                }
+            }
+        }
+
+        double double_tmp;
+        if (this.getLonMin() > this.getLonMax()) {
+            double_tmp = this.getLonMin();
+            this.setLonMin(this.getLonMax());
+            this.setLonMax(double_tmp);
+        }
+
+        if (this.getLatMin() > this.getLatMax()) {
+            double_tmp = this.getLatMin();
+            this.setLatMin(this.getLatMax());
+            this.setLatMax(double_tmp);
+        }
+    }
+    
+        /**
+     * Gets the latitude at (i, j) grid point.
+     *
+     * @param i an int, the i-ccordinate
+     * @param j an int, the j-coordinate
+     * @return a double, the latitude [north degree] at (i, j) grid point.
+     */
+    public double getLat(int i, int j) {
+        return latRho[j][i];
     }
 
     /**
-     * Gets domain maximum latitude.
+     * Gets the longitude at (i, j) grid point.
      *
-     * @return a double, the domain maximum latitude [north degree]
+     * @param i an int, the i-ccordinate
+     * @param j an int, the j-coordinate
+     * @return a double, the longitude [east degree] at (i, j) grid point.
      */
-    public double getLatMax() {
-        return latMax;
+    public double getLon(int i, int j) {
+        return lonRho[j][i];
     }
-
-    /**
-     * Gets domain minimum longitude.
-     *
-     * @return a double, the domain minimum longitude [east degree]
-     */
-    public double getLonMin() {
-        return lonMin;
-    }
-
-    /**
-     * Gets domain maximum longitude.
-     *
-     * @return a double, the domain maximum longitude [east degree]
-     */
-    public double getLonMax() {
-        return lonMax;
-    }
-
+    
 }
