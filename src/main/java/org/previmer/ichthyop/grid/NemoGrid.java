@@ -153,7 +153,7 @@ public class NemoGrid extends AbstractGrid {
         for (int k = 0; k < get_nz(); k++) {
             for (int j = 0; j < get_ny(); j++) {
                 for (int i = 0; i < get_nx(); i++) {
-                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k + 1, j + get_jpo(), i + get_ipo()));
+                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k, j + get_jpo(), i + get_ipo()));
                 }
             }
         }
@@ -162,24 +162,21 @@ public class NemoGrid extends AbstractGrid {
             nc.close();
             nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
         }
-        //System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
-        //fichier *mesh*z*
+        
         get_gdep_fields(nc);
 
         // phv 20150319 - patch for e3t that can be found in NEMO output spread
         // into three variables e3t_0, e3t_ps and mbathy
-        if (findParameter("field_var_e3t0") && findParameter("field_var_e3tps") && findParameter("field_var_mbathy")) {
-            compute_e3t();
-        } else {
-            e3t = read_e3_field(nc, stre3t);
-        }
-        if (stre3u.equals(stre3t) || (null == nc.findVariable(stre3u))) {
-            e3u = compute_e3u(e3t);
+        e3t = read_e3_field(nc, stre3t);
+        
+        if (stre3u.equals(stre3t)) {
+            e3u =e3t;
         } else {
             e3u = read_e3_field(nc, stre3u);
         }
-        if (stre3v.equals(stre3t) || (null == nc.findVariable(stre3v))) {
-            e3v = compute_e3v(e3t);
+        
+        if (stre3v.equals(stre3t)) {
+            e3v = e3t;
         } else {
             e3v = read_e3_field(nc, stre3v);
         }
@@ -188,105 +185,15 @@ public class NemoGrid extends AbstractGrid {
             nc.close();
             nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         }
+        
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
         e1t = read_e1_e2_field(nc, stre1t);
         e2t = read_e1_e2_field(nc, stre2t);
-        if (stre1v.equals(stre1t) || (null == nc.findVariable(stre1v))) {
-            e1v = e1t;
-        } else {
-            e1v = read_e1_e2_field(nc, stre1v);
-        }
-        if (stre2u.equals(stre2t) || (null == nc.findVariable(stre2u))) {
-            e2u = e2t;
-        } else {
-            e2u = read_e1_e2_field(nc, stre2u);
-        }
+        e1v = read_e1_e2_field(nc, stre1v);
+        e2u = read_e1_e2_field(nc, stre2u);
+        
         nc.close();
-    }
-
-    private void compute_e3t() throws IOException {
-
-        String str_e3t0 = getParameter("field_var_e3t0");
-        String str_e3tps = getParameter("field_var_e3tps");
-        String str_mbathy = getParameter("field_var_mbathy");
-
-        getLogger().log(Level.INFO, "Ichthyop now reconstructs the e3t variable from {0}, {1} and {2}", new String[]{str_e3t0, str_e3tps, str_mbathy});
-
-        // Open NetCDF file
-        NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
-
-        // Read e3t_0 double[get_nz()]
-        Array e3t0 = nc.findVariable(str_e3t0).read().reduce().flip(0);
-
-        // Read e3t_ps double[get_ny()][get_nx()]
-        Array e3tps = nc.findVariable(str_e3tps).read().reduce();
-
-        // Read mbathy int[get_ny()][get_nx()]
-        Array mbathy = nc.findVariable(str_mbathy).read().reduce();
-
-        // Reconstruct e3t_ps
-        e3t = new double[get_nz()][get_ny()][get_nx()];
-        Index ind_e3t0 = e3t0.getIndex();
-        Index ind_e3tps = e3tps.getIndex();
-        Index ind_mbathy = mbathy.getIndex();
-        for (int j = 0; j < get_ny(); j++) {
-            for (int i = 0; i < get_nx(); i++) {
-                // First we initialize e3t with e3t_0
-                for (int k = 0; k < get_nz(); k++) {
-                    e3t[k][j][i] = e3t0.getDouble(ind_e3t0.set(k + 1));
-                }
-                // From NEMO to Ichthyop grid, we remove the deepest z level
-                // as it is always ocean bottom in NEMO and we flip z-axis
-                // So the index of mbathy must be converted into Ichthyop grid
-                int km = get_nz() - mbathy.getInt(ind_mbathy.set(j + get_jpo(), i + get_ipo())) - 1;
-                // Next we correct the depth of the layer adjacent to the ocean
-                // bottom with e3t_ps
-                if (km > 0) {
-                    e3t[km][j][i] = e3tps.getDouble(ind_e3tps.set(j + get_jpo(), i + get_ipo()));
-                }
-            }
-        }
-    }
-
-    private double[][][] compute_e3u(double[][][] e3t) {
-
-        double[][][] e3u_calc = new double[get_nz()][get_ny()][get_nx()];
-
-        for (int k = 0; k < get_nz(); k++) {
-            for (int j = 0; j < get_ny(); j++) {
-                for (int i = 0; i < get_nx() - 1; i++) {
-                    /*
-                     * In NEMO domzgr.F90
-                     * e3u (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji+1,jj,jk))
-                     */
-                    //e3u_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j][i + 1]);
-                    e3u_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j][i + 1]);
-                }
-                e3u_calc[k][j][get_nx() - 1] = e3t[k][j][get_nx() - 1];
-            }
-        }
-        return e3u_calc;
-    }
-
-    private double[][][] compute_e3v(double[][][] e3t) {
-
-        double[][][] e3v_calc = new double[get_nz()][get_ny()][get_nx()];
-
-        for (int k = 0; k < get_nz(); k++) {
-            for (int i = 0; i < get_nx(); i++) {
-                for (int j = 0; j < get_ny() - 1; j++) {
-                    /*
-                     * In Nemo domzgr.F90
-                     * e3v (ji,jj,jk) = MIN( e3t(ji,jj,jk), e3t(ji,jj+1,jk))
-                     */
-                    //e3v_calc[k][j][i] = 0.5d * (e3t[k][j][i] + e3t[k][j + 1][i]);
-                    e3v_calc[k][j][i] = Math.min(e3t[k][j][i], e3t[k][j + 1][i]);
-                }
-                e3v_calc[k][get_ny() - 1][i] = e3t[k][get_ny() - 1][i];
-            }
-        }
-        return e3v_calc;
     }
 
     private double[][][] read_e3_field(NetcdfFile nc, String varname) throws InvalidRangeException, IOException {
@@ -294,26 +201,7 @@ public class NemoGrid extends AbstractGrid {
         Array array = nc.findVariable(varname).read().reduce().flip(0);
         Index index = array.getIndex();
         double[][][] field = new double[get_nz()][get_ny()][get_nx()];
-        for (int k = 0; k < get_nz(); k++) {
-            for (int j = 0; j < get_ny(); j++) {
-                for (int i = 0; i < get_nx(); i++) {
-                    index.set(k + 1, j + get_jpo(), i + get_ipo());
-                    field[k][j][i] = Double.isNaN(array.getDouble(index))
-                            ? 0.d
-                            : array.getDouble(index);
-                }
-            }
-        }
-        return field;
-    }
-
-    private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
-
-        Index index, indexbis;
-        Array array;
         boolean depth3d;
-
-        array = nc.findVariable(str_gdepT).read().reduce().flip(0);
 
         // If depthT array is 3D, then use 3d depth array
         // if depthT is 1D, use 1D array to reconstruct 3D one
@@ -323,9 +211,55 @@ public class NemoGrid extends AbstractGrid {
             depth3d = false;
         }
 
-        index = array.getIndex();
+        if (depth3d) {
+
+            for (int k = 0; k < get_nz(); k++) {
+                for (int j = 0; j < get_ny(); j++) {
+                    for (int i = 0; i < get_nx(); i++) {
+                        index.set(k, j + get_jpo(), i + get_ipo());
+                        field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
+                    }
+                }
+            }
+
+        } else {
+
+            for (int k = 0; k < get_nz(); k++) {
+                index.set(k);
+                double value = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
+                for (int j = 0; j < get_ny(); j++) {
+                    for (int i = 0; i < get_nx(); i++) {
+                        index.set(k, j + get_jpo(), i + get_ipo());
+                        field[k][j][i] = value;
+                    }
+                }
+            }
+
+        }
+        return field;
+    }
+
+    private void get_gdep_fields(NetcdfFile nc) throws InvalidRangeException, IOException {
+
+        Index indexT, indexW;
+        Array arrayT, arrayW;
+        boolean depth3d;
+
+        arrayT = nc.findVariable(str_gdepT).read().reduce().flip(0);
+        arrayW = nc.findVariable(str_gdepW).read().reduce().flip(0);
+
+        // If depthT array is 3D, then use 3d depth array
+        // if depthT is 1D, use 1D array to reconstruct 3D one
+        if (arrayT.getShape().length == 3) {
+            depth3d = true;
+        } else {
+            depth3d = false;
+        }
+
+        indexT = arrayT.getIndex();
+        indexW = arrayW.getIndex();
         gdepT = new double[get_nz()][get_ny()][get_nx()];
-        gdepW = new double[get_nz() + 1][get_ny()][get_nx()];
+        gdepW = new double[get_nz()][get_ny()][get_nx()];
 
         if (!depth3d) {
 
@@ -333,113 +267,31 @@ public class NemoGrid extends AbstractGrid {
 
             // Extraction of depth at T points
             for (int k = 0; k < get_nz(); k++) {
-                index.set(k + 1);
+                indexT.set(k);
+                indexW.set(k);
                 for (int j = 0; j < get_ny(); j++) {
                     for (int i = 0; i < get_nx(); i++) {
-                        gdepT[k][j][i] = array.getDouble(index);
+                        gdepT[k][j][i] = arrayT.getDouble(indexT);
+                        gdepW[k][j][i] = arrayW.getDouble(indexW);
                     }
                 }
             }
 
-            /*
-            * Read or compute gdepw
-             */
-            if (null != nc.findVariable(str_gdepW)) {
-                getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
-                // Read gdepw
-                array = nc.findVariable(str_gdepW).read().reduce().flip(0);
-                index = array.getIndex();
-                for (int k = 0; k < get_nz() + 1; k++) {
-                    index.set(k); // barrier.n
-                    for (int j = 0; j < get_ny(); j++) {
-                        for (int i = 0; i < get_nx(); i++) {
-                            gdepW[k][j][i] = array.getDouble(index);
-                        }
-                    }
-                }
-            } else {
-                // Compute gdepw (approximation)
-                // Reads the T depth from NetCDF file
-                getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
-
-                array = nc.findVariable(str_gdepT).read().reduce().flip(0);
-                indexbis = array.getIndex();
-
-                for (int k = 0; k < get_nz(); k++) {
-                    index.set(k);
-                    indexbis.set(k + 1);
-                    for (int j = 0; j < get_ny(); j++) {
-                        for (int i = 0; i < get_nx(); i++) {
-                            gdepW[k][j][i] = array.getDouble(index);
-                            gdepW[k][j][i] += array.getDouble(indexbis);
-                            gdepW[k][j][i] *= 0.5;
-                        }   // end of i 
-                    }  // end of j 
-                }   // end of k 
-
-                // surface condition on W
-                for (int j = 0; j < get_ny(); j++) {
-                    for (int i = 0; i < get_nx(); i++) {
-                        gdepW[get_nz()][j][i] = 0.;
-                    }
-                }
-            }
-
-        }
-
-        if (depth3d) {
+        } else {
 
             getLogger().log(Level.INFO, "Depth array are 3D arrays (z, y, z dimensions)");
 
             for (int k = 0; k < get_nz(); k++) {
                 for (int j = 0; j < get_ny(); j++) {
                     for (int i = 0; i < get_nx(); i++) {
-                        index.set(k + 1, j + get_jpo(), i + get_ipo());
-                        gdepT[k][j][i] = array.getDouble(index);
+                        indexT.set(k, j + get_jpo(), i + get_ipo());
+                        indexW.set(k, j + get_jpo(), i + get_ipo());
+                        gdepT[k][j][i] = arrayT.getDouble(indexT);
+                        gdepW[k][j][i] = arrayT.getDouble(indexT);
                     }
                 }
             }
 
-            /*
-            * Read or compute gdepw
-             */
-            if (null != nc.findVariable(str_gdepW)) {
-                getLogger().log(Level.INFO, "Depth of W points is read from NetCDF file");
-                // Read gdepw
-                array = nc.findVariable(str_gdepW).read().reduce().flip(0);
-                index = array.getIndex();
-                for (int k = 0; k < get_nz() + 1; k++) {
-                    for (int j = 0; j < get_ny(); j++) {
-                        for (int i = 0; i < get_nx(); i++) {
-                            index.set(k, j + get_jpo(), i + get_ipo()); // barrier.n
-                            gdepW[k][j][i] = array.getDouble(index);
-                        }
-                    }
-                }
-            } else {
-                // Compute gdepw (approximation)
-                // Reads the T depth from NetCDF file
-                getLogger().log(Level.INFO, "Depth of W points is computed from depth at T points");
-                array = nc.findVariable(str_gdepT).read().reduce().flip(0);
-                for (int k = 0; k < get_nz(); k++) {
-                    for (int j = 0; j < get_ny(); j++) {
-                        for (int i = 0; i < get_nx(); i++) {
-                            index.set(k, j, i);
-                            gdepW[k][j][i] = array.getDouble(index);
-                            index.set(k + 1, j, i);
-                            gdepW[k][j][i] += array.getDouble(index);
-                            gdepW[k][j][i] *= 0.5;
-                        }   // end of i 
-                    }  // end of j 
-                }   // end of k 
-
-                // surface condition on W
-                for (int j = 0; j < get_ny(); j++) {
-                    for (int i = 0; i < get_nx(); i++) {
-                        gdepW[get_nz()][j][i] = 0.;
-                    }
-                }
-            }
         }
     }
 
@@ -520,7 +372,6 @@ public class NemoGrid extends AbstractGrid {
     public void setUp() throws Exception {
 
         loadParameters();
-        //clearRequiredVariables();
         sortInputFiles();
         getDimNC();
         shrinkGrid();
@@ -594,6 +445,7 @@ public class NemoGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+        
         try {
             this.set_ny(nc.findDimension(strYDim).getLength());
         } catch (Exception ex) {
@@ -601,13 +453,15 @@ public class NemoGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+        
         try {
-            this.set_nz(nc.findDimension(strZDim).getLength() - 1);
+            this.set_nz(nc.findDimension(strZDim).getLength());  // real number of Z values (including sea-bed)
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset Z dimension. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+        
         this.set_ipo(0);
         this.set_jpo(0);
     }
