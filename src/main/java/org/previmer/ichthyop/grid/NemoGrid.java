@@ -1071,32 +1071,36 @@ public class NemoGrid extends AbstractGrid {
      * On NEMO, U points are on the eastern face of the cell.
      * 
     */
-    public double interpolateU(double[] pGrid, double[][] variable) {
-        
+    public double interpolateU(double[] pGrid, double[][][] variable) {
+
         double ix = pGrid[0];
         double jy = pGrid[1];
-        
+        double kz = pGrid[2];
+
         int i = (int) Math.round(ix);
         int j = (int) (jy);
+        int k = (int) kz;
         double output = 0;
         double weight = 0;
-       
-        for (int jj = 0; jj < 1; jj++) {
-            for (int ii = 0; ii < 1; ii++) {
-                double cox = Math.abs(ix - i + 0.5 - ii);
-                double coy = Math.abs(jy - j - 1 + jj);
-                double co = cox * coy;
-                output += variable[i - ii][j + jj] * co * co;
-                weight += co;
+        for (int kk = 0; kk < 1; kk++) {
+            for (int jj = 0; jj < 1; jj++) {
+                for (int ii = 0; ii < 1; ii++) {
+                    double cox = Math.abs(ix - i + 0.5 - ii);
+                    double coy = Math.abs(jy - j - 1 + jj);
+                    double coz = Math.abs(kz - k - 1 + kk);
+                    double co = cox * coy * coz;
+                    output += variable[k + kk][i - ii][j + jj] * co * co;
+                    weight += co;
+                }
             }
         }
-        
-        if(weight != 0) { 
+
+        if (weight != 0) {
             output /= weight;
         }
-        
+
         return output;
-        
+
     }
     
     /** Method to interpolate a V variable. 
@@ -1104,33 +1108,38 @@ public class NemoGrid extends AbstractGrid {
      * V points are locate in the northern faces
      * 
     */
-    public double interpolateV(double[] pGrid, double[][] variable) {
-        
+    public double interpolateV(double[] pGrid, double[][][] variable) {
+
         double ix = pGrid[0];
         double jy = pGrid[1];
-        
+        double kz = pGrid[2];
+
         int i = (int) ix;
         int j = (int) Math.round(jy);
+        int k = (int) kz;
         double output = 0;
         double weight = 0;
-       
+
         // blue case:
-        for (int jj = 0; jj < 1; jj++) {
-            for (int ii = 0; ii < 1; ii++) {
-                double coy = Math.abs(jy - j + 0.5 - jj);
-                double cox = Math.abs(ix - i - 1 + ii);
-                double co = cox * coy;
-                output += variable[i + ii][j - jj] * co * co;
-                weight += co;
+        for (int kk = 0; kk < 1; kk++) {
+            for (int jj = 0; jj < 1; jj++) {
+                for (int ii = 0; ii < 1; ii++) {
+                    double coy = Math.abs(jy - j + 0.5 - jj);
+                    double cox = Math.abs(ix - i - 1 + ii);
+                    double coz = Math.abs(kz - k - 1 + kk);
+                    double co = cox * coy * coz;
+                    output += variable[k + kk][i + ii][j - jj] * co * co;
+                    weight += co;
+                }
             }
         }
-        
-        if(weight != 0) { 
+
+        if (weight != 0) {
             output /= weight;
         }
-        
+
         return output;
-        
+
     }
     
          
@@ -1138,23 +1147,29 @@ public class NemoGrid extends AbstractGrid {
      * On NEMO, T points are in the centerof the cell.
      * 
     */
-    public double interpolateT(double[] pGrid, double[][] variable) {
+    public double interpolateT(double[] pGrid, double[][][] variable) {
         
         double ix = pGrid[0];
         double jy = pGrid[1];
+        double kz = pGrid[2];
         
         int i = (int) (ix);
         int j = (int) (jy);
+        int k = (int) (kz);
+        
         double output = 0;
         double weight = 0;
        
-        for (int jj = 0; jj < 1; jj++) {
-            for (int ii = 0; ii < 1; ii++) {
-                double cox = Math.abs(ix - i - 1 - ii);
-                double coy = Math.abs(jy - j - 1 + jj);
-                double co = cox * coy;
-                output += variable[i + ii][j + jj] * co * co;
-                weight += co;
+        for (int kk = 0; kk < 1; kk++) {
+            for (int jj = 0; jj < 1; jj++) {
+                for (int ii = 0; ii < 1; ii++) {
+                    double cox = Math.abs(ix - i - 1 - ii);
+                    double coy = Math.abs(jy - j - 1 + jj);
+                    double coz = Math.abs(kz - k - 1 + kk);
+                    double co = cox * coy * coz;
+                    output += variable[k + kk][i + ii][j + jj] * co * co;
+                    weight += co;
+                }
             }
         }
         
