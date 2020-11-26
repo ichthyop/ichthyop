@@ -47,8 +47,6 @@ package org.previmer.ichthyop.grid;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
-import org.previmer.ichthyop.event.InitializeEvent;
-import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
@@ -1262,81 +1260,8 @@ public class NemoGrid extends AbstractGrid {
         }
         return Double.NaN;
     }
-
-	@Override
-	public void initializePerformed(InitializeEvent e) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setupPerformed(SetupEvent e) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-    /*
-    @Override
-    public void nextStepTriggered(NextStepEvent e) throws Exception {
-
-        double time = e.getSource().getTime();
-
-        if (time_arrow * time < time_arrow * time_tp1) {
-            return;
-        }
-
-        u_tp0 = u_tp1;
-        v_tp0 = v_tp1;
-        w_tp0 = w_tp1;
-        //wr_tp0 = wr_tp1;
-        rank += time_arrow;
-
-        if (rank > (nbTimeRecords - 1) || rank < 0) {
-            open(indexFile = DatasetUtil.next(listUFiles, indexFile, time_arrow));
-            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
-        }
-
-        setAllFieldsTp1AtTime(rank);
-
-    }
-    */
-
-    /*
-    @Override
-    public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        Variable variable = nc.findVariable(name);
-        int[] origin = null, shape = null;
-        boolean hasVerticalDim = false;
-        switch (variable.getShape().length) {
-            case 4:
-                origin = new int[]{rank, 0, get_jpo(), get_ipo()};
-                shape = new int[]{1, get_nz(), get_ny(), get_nx()};
-                hasVerticalDim = true;
-                break;
-            case 2:
-                origin = new int[]{get_jpo(), get_ipo()};
-                shape = new int[]{get_ny(), get_nx()};
-                break;
-            case 3:
-                if (!variable.isUnlimited()) {
-                    origin = new int[]{0, get_jpo(), get_ipo()};
-                    shape = new int[]{get_nz(), get_ny(), get_nx()};
-                    hasVerticalDim = true;
-                } else {
-                    origin = new int[]{rank, get_jpo(), get_ipo()};
-                    shape = new int[]{1, get_ny(), get_nx()};
-                }
-                break;
-        }
-
-        Array array = variable.read(origin, shape).reduce();
-        if (hasVerticalDim) {
-            array = array.flip(0);
-        }
-        return array;
-    }
-    */
-
+    
+    
     /*
     @Override
     public double xTore(double x) {
@@ -1348,4 +1273,69 @@ public class NemoGrid extends AbstractGrid {
         return y;
     }
     */
+    
+    /** Method to interpolate a U variable. 
+     * On NEMO, U points are on the eastern face of the cell.
+     * 
+    */
+    public double interpolateU(double[] pGrid, double[][] variable) {
+        
+        double ix = pGrid[0];
+        double jy = pGrid[1];
+        
+        int i = (int) Math.round(ix);
+        int j = (int) (jy);
+        double output = 0;
+        double weight = 0;
+       
+        for (int jj = 0; jj < 1; jj++) {
+            for (int ii = 0; ii < 1; ii++) {
+                double cox = Math.abs(ix - i + 0.5 - ii);
+                double coy = Math.abs(jy - j - 1 + jj);
+                double co = cox * coy;
+                output += variable[i - ii][j + jj] * co * co;
+                weight += co;
+            }
+        }
+        
+        if(weight != 0) { 
+            output /= weight;
+        }
+        
+        return output;
+        
+    }
+    
+    /** Method to interpolate a V variable. 
+     * 
+    */
+    public double interpolateV(double[] pGrid, double[][] variable) {
+        
+        double ix = pGrid[0];
+        double jy = pGrid[1];
+        
+        int i = (int) ix;
+        int j = (int) Math.round(jy);
+        double output = 0;
+        double weight = 0;
+       
+        // blue case:
+        for (int jj = 0; jj < 1; jj++) {
+            for (int ii = 0; ii < 1; ii++) {
+                double coy = Math.abs(jy - j + 0.5 - jj);
+                double cox = Math.abs(ix - i - 1 + ii);
+                double co = cox * coy;
+                output += variable[i + ii][j - jj] * co * co;
+                weight += co;
+            }
+        }
+        
+        if(weight != 0) { 
+            output /= weight;
+        }
+        
+        return output;
+        
+    }
+
 }

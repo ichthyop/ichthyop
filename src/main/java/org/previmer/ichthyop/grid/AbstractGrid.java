@@ -43,10 +43,8 @@
 package org.previmer.ichthyop.grid;
 
 import org.previmer.ichthyop.SimulationManagerAccessor;
-import org.previmer.ichthyop.event.InitializeListener;
-import org.previmer.ichthyop.event.SetupListener;
 
-public abstract class AbstractGrid extends SimulationManagerAccessor implements InitializeListener, SetupListener {
+public abstract class AbstractGrid extends SimulationManagerAccessor {
 
     private final String filename;
     private final String gridKey;
