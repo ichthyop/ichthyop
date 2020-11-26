@@ -969,74 +969,24 @@ public class RegularGrid extends AbstractGrid {
     */
     
     /** Method to interpolate a U variable. 
-     * On NEMO, U points are on the eastern face of the cell.
+     * On regular grid, U points are located at the cell center (as T)
      * 
     */
     public double interpolateU(double[] pGrid, double[][] variable) {
-        
-        double ix = pGrid[0];
-        double jy = pGrid[1];
-        
-        int i = (int) Math.round(ix);
-        int j = (int) (jy);
-        double output = 0;
-        double weight = 0;
-       
-        for (int jj = 0; jj < 1; jj++) {
-            for (int ii = 0; ii < 1; ii++) {
-                double cox = Math.abs(ix - i + 0.5 - ii);
-                double coy = Math.abs(jy - j - 1 + jj);
-                double co = cox * coy;
-                output += variable[i - ii][j + jj] * co * co;
-                weight += co;
-            }
-        }
-        
-        if(weight != 0) { 
-            output /= weight;
-        }
-        
-        return output;
-        
+        return this.interpolateT(pGrid, variable);    
     }
     
     /** Method to interpolate a V variable. 
-     * 
-     * V points are locate in the northern faces
+     * On regular grid, U points are located at the cell center (as  T)
      * 
     */
     public double interpolateV(double[] pGrid, double[][] variable) {
-        
-        double ix = pGrid[0];
-        double jy = pGrid[1];
-        
-        int i = (int) ix;
-        int j = (int) Math.round(jy);
-        double output = 0;
-        double weight = 0;
-       
-        // blue case:
-        for (int jj = 0; jj < 1; jj++) {
-            for (int ii = 0; ii < 1; ii++) {
-                double coy = Math.abs(jy - j + 0.5 - jj);
-                double cox = Math.abs(ix - i - 1 + ii);
-                double co = cox * coy;
-                output += variable[i + ii][j - jj] * co * co;
-                weight += co;
-            }
-        }
-        
-        if(weight != 0) { 
-            output /= weight;
-        }
-        
-        return output;
-        
+        return this.interpolateT(pGrid, variable);
     }
     
          
     /** Method to interpolate a T variable. 
-     * On NEMO, T points are in the centerof the cell.
+     * On regular grid, T points are in the center of the cell.
      * 
     */
     public double interpolateT(double[] pGrid, double[][] variable) {
