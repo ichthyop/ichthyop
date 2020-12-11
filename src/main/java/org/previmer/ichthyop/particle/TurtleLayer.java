@@ -19,7 +19,6 @@ package org.previmer.ichthyop.particle;
 import java.util.HashMap;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.arch.IBasicParticle;
 
 /**
  *
@@ -32,7 +31,7 @@ public class TurtleLayer extends ParticleLayer {
     private long[] timerZone;
     private boolean[] startTiming;
 
-    public TurtleLayer(IBasicParticle particle) {
+    public TurtleLayer(IParticle particle) {
         super(particle);
     }
 
@@ -40,8 +39,8 @@ public class TurtleLayer extends ParticleLayer {
     public void init() {
 
         int nbZones = getSimulationManager().getZoneManager().getZones(TypeZone.ORIENTATION).size();
-        currentSpeedActivity = new HashMap(nbZones);
-        currentOrientationActivity = new HashMap(nbZones);
+        currentSpeedActivity = new HashMap<>(nbZones);
+        currentOrientationActivity = new HashMap<>(nbZones);
         for (Zone zone : getSimulationManager().getZoneManager().getZones(TypeZone.ORIENTATION)) {
             resetActivePeriodCounters(zone);
         }

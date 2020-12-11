@@ -46,6 +46,8 @@ package org.previmer.ichthyop;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
+import org.previmer.ichthyop.io.XParameter;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.dataset.IDataset;
 
@@ -75,6 +77,8 @@ import org.previmer.ichthyop.dataset.IDataset;
  * @version 3.3 2013/11/15
  */
 public class Zone extends SimulationManagerAccessor {
+    
+    private HashMap<String, XParameter> parameters = new HashMap<>();
 
     /**
      * A list of {@code GridPoint} that defines the a geographical area.
@@ -456,5 +460,13 @@ public class Zone extends SimulationManagerAccessor {
 
         return zoneStr.toString();
     }
-    //---------- End of class
+    
+    public void addParameter(XParameter xparameter) {
+        parameters.put(xparameter.getKey(), xparameter);
+    }
+
+    public XParameter getParameter(String key) {
+        return parameters.get(key);
+    }
+
 }

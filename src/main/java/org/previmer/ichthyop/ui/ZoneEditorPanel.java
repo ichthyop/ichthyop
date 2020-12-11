@@ -460,7 +460,12 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         btnNewZone.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnNewZone.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNewZoneActionPerformed(evt);
+                try {
+                    btnNewZoneActionPerformed(evt);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
         toolBarZone.add(btnNewZone);
@@ -1044,7 +1049,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnNewZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewZoneActionPerformed
+    private void btnNewZoneActionPerformed(java.awt.event.ActionEvent evt) throws IOException {// GEN-FIRST:event_btnNewZoneActionPerformed
         
         DefaultTableModel model = (DefaultTableModel) tableZone.getModel();
         int index = tableZone.getSelectedRow();

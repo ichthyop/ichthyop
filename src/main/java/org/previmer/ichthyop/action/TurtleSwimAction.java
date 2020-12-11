@@ -21,9 +21,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import org.previmer.ichthyop.TypeZone;
 import org.previmer.ichthyop.Zone;
-import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.arch.IZoneParticle;
 import org.previmer.ichthyop.io.XParameter;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.TurtleLayer;
 import org.previmer.ichthyop.particle.ZoneParticleLayer;
 import org.previmer.ichthyop.util.Constant;
@@ -50,7 +50,7 @@ public class TurtleSwimAction extends AbstractAction {
         dt = getSimulationManager().getTimeManager().get_dt();
     }
 
-    public void execute(IBasicParticle particle) {
+    public void execute(IParticle particle) {
 
         TurtleLayer turtle =  (TurtleLayer) particle.getLayer(TurtleLayer.class);
         int numZone = ((IZoneParticle) particle.getLayer(ZoneParticleLayer.class)).getNumZone(TypeZone.ORIENTATION);
@@ -75,8 +75,8 @@ public class TurtleSwimAction extends AbstractAction {
                 double newLon = particle.getLon() + getdlon(particle, speed, orientation);
                 double newLat = particle.getLat() + getdlat(speed, orientation);
                 //System.out.println(getLon() + " " + newLon + " - " + getLat() + " " + newLat);
-                double[] newPos = getSimulationManager().getDataset().lonlat2xy(newLon, newLat);
-            double[] move = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
+                double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
+                double[] move = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
             particle.increment(move);
             } else {
                 if (turtle.isActive()) {
@@ -149,7 +149,7 @@ public class TurtleSwimAction extends AbstractAction {
         return dlat;
     }
 
-    private double getdlon(IBasicParticle particle, double speed, double direction) {
+    private double getdlon(IParticle particle, double speed, double direction) {
 
         double dlon = 0.d;
         double alpha = Math.PI * (5.d / 2.d - direction / 180.d);
@@ -216,11 +216,11 @@ public class TurtleSwimAction extends AbstractAction {
         }
 
         private float[] readFloats(XParameter xparam) {
-            ArrayList<Float> values = new ArrayList();
+            ArrayList<Float> values = new ArrayList<>();
             String[] tokens = xparam.getValue().split("\"");
             for (String token : tokens) {
                 if (!token.trim().isEmpty()) {
-                    values.add(new Float(token));
+                    values.add(Float.valueOf(token));
                 }
             }
             float[] arrValues = new float[values.size()];
@@ -231,11 +231,11 @@ public class TurtleSwimAction extends AbstractAction {
         }
 
         private int[] readIntegers(XParameter xparam) {
-            ArrayList<Integer> values = new ArrayList();
+            ArrayList<Integer> values = new ArrayList<>();
             String[] tokens = xparam.getValue().split("\"");
             for (String token : tokens) {
                 if (!token.trim().isEmpty()) {
-                    values.add(new Integer(token));
+                    values.add(Integer.valueOf(token));
                 }
             }
             int[] arrValues = new int[values.size()];
@@ -246,7 +246,7 @@ public class TurtleSwimAction extends AbstractAction {
         }
 
         private String[] readStrings(XParameter xparam) {
-            ArrayList<String> values = new ArrayList();
+            ArrayList<String> values = new ArrayList<>();
             String[] tokens = xparam.getValue().split("\"");
             for (String token : tokens) {
                 if (!token.trim().isEmpty()) {
@@ -508,5 +508,11 @@ public class TurtleSwimAction extends AbstractAction {
         public void setOrientationRange(float[] orientationRange) {
             this.orientationRange = orientationRange;
         }
+    }
+
+    @Override
+    public void init(IParticle particle) {
+        // TODO Auto-generated method stub
+
     }
 }

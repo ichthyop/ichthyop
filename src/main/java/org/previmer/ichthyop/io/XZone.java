@@ -45,6 +45,8 @@
 package org.previmer.ichthyop.io;
 
 import java.awt.Color;
+import java.io.IOException;
+
 import org.previmer.ichthyop.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +58,7 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
  *
  * @author pverley
  */
-public class XZone extends org.jdom2.Element {
+public class XZone extends XBlock {
 
     /**
      *
@@ -76,15 +78,15 @@ public class XZone extends org.jdom2.Element {
     private static final String LINE_INSHORE = "line_inshore";
     private static final String LINE_OFFSHORE = "line_offshore";
 
-    public XZone(Element xzone) {
-        super(ZONE);
+    public XZone(Element xzone) throws IOException {
+        super(xzone, ZONE);
         if (xzone != null) {
             addContent(xzone.cloneContent());
         }
     }
 
-    public XZone(String key) {
-        super(ZONE);
+    public XZone(String key) throws IOException {
+        super(null, ZONE);
         setKey(key);
         setEnabled(true);
         setType(TypeZone.RELEASE);

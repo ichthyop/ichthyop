@@ -155,7 +155,7 @@ public class ZoneFile {
         return zones.get(key);
     }
 
-    private List<XZone> readZones() {
+    private List<XZone> readZones() throws IOException {
         List<Element> list = structure.getRootElement().getChildren(XZone.ZONE);
         List<XZone> listBlock = new ArrayList<>(list.size());
         for (Element elt : list) {
@@ -220,7 +220,7 @@ public class ZoneFile {
     }
     */
 
-    private HashMap<String, XZone> createMap() {
+    private HashMap<String, XZone> createMap() throws IOException {
         HashMap<String, XZone> lmap = new HashMap<>();
         sortedKey = new ArrayList<>();
         for (XZone xzone : readZones()) {
@@ -239,7 +239,7 @@ public class ZoneFile {
         zones.remove(key);
     }
 
-    public void addZone(String key) {
+    public void addZone(String key) throws IOException {
         zones.put(key, new XZone(key));
     }
 

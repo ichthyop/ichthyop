@@ -7,3 +7,6 @@ manifest.mf
 **.sh
 cfg
 output
+**/*.save
+**/IBasicParticle.java
+**/*.swp
