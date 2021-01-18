@@ -13,11 +13,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.arch.IBasicParticle;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
-import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
@@ -30,7 +29,8 @@ import ucar.nc2.dataset.NetcdfDataset;
  *
  * @author gwendo
  */
-public class WaveDriftFileAction extends AbstractAction{
+public class WaveDriftFileAction extends AbstractAction {
+
     private double wave_factor;
     public static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     /**
@@ -67,7 +67,6 @@ public class WaveDriftFileAction extends AbstractAction{
      */
     static NetcdfFile ncIn;
 
-
     /**
      * Grid dimension
      */
@@ -79,9 +78,9 @@ public class WaveDriftFileAction extends AbstractAction{
     /**
      * Current time in NetCDF dataset
      */
-    static long time_current;
+    static double time_current;
     /**
-     * latitude and longitude arrays 
+     * latitude and longitude arrays
      */
     static double[][] lonRho, latRho;
     /**
@@ -105,19 +104,19 @@ public class WaveDriftFileAction extends AbstractAction{
      */
     static Array vw_tp1;
     /**
-     * U stokes drift variable 
+     * U stokes drift variable
      */
     RequiredExternalVariable U_variable;
     /**
-     * V stokes drift variable 
+     * V stokes drift variable
      */
     RequiredExternalVariable V_variable;
     /**
-     *  Wave period
+     * Wave period
      */
     RequiredExternalVariable wave_period;
     /**
-     *  Wave speed
+     * Wave speed
      */
     RequiredExternalVariable wave_speed_u, wave_speed_v;
     /**
@@ -145,31 +144,33 @@ public class WaveDriftFileAction extends AbstractAction{
      */
     static Array wave_period_tp1;
 
-
     public void loadParameters() throws Exception {
 
         strTime = getParameter("field_time");
-        time_current=getSimulationManager().getTimeManager().getTime();
+        time_current = getSimulationManager().getTimeManager().getTime();
         openLocation(getParameter("input_path"));
 
-        wave_factor=Double.valueOf(getParameter("wave_factor"));
-        str_wave_period=getParameter("wave_period");
-        str_wave_speed_u=getParameter("wave_u");
-        str_wave_speed_v=getParameter("wave_v");
-        strUW=getParameter("stokes_u");
-        strVW=getParameter("stokes_v");
-        strLon=getParameter("longitude");
-        strLat=getParameter("latitude");
+        wave_factor = Double.valueOf(getParameter("wave_factor"));
+        str_wave_period = getParameter("wave_period");
+        str_wave_speed_u = getParameter("wave_u");
+        str_wave_speed_v = getParameter("wave_v");
+        strUW = getParameter("stokes_u");
+        strVW = getParameter("stokes_v");
+        strLon = getParameter("longitude");
+        strLat = getParameter("latitude");
         getDimNC();
         setOnFirstTime();
         setAllFieldsTp1AtTime(rank);
         readLonLat();
 
-        U_variable=new RequiredExternalVariable(latRho,lonRho,uw_tp0,uw_tp1,getSimulationManager().getDataset());
-        V_variable=new RequiredExternalVariable(latRho,lonRho,vw_tp0,vw_tp1,getSimulationManager().getDataset());
-        wave_period=new RequiredExternalVariable(latRho,lonRho,wave_period_tp0,wave_period_tp1,getSimulationManager().getDataset());
-        wave_speed_u=new RequiredExternalVariable(latRho,lonRho,wave_speed_u_tp0,wave_speed_u_tp1,getSimulationManager().getDataset());
-        wave_speed_v=new RequiredExternalVariable(latRho,lonRho,wave_speed_v_tp0,wave_speed_v_tp1,getSimulationManager().getDataset());
+        U_variable = new RequiredExternalVariable(latRho, lonRho, uw_tp0, uw_tp1, getSimulationManager().getDataset());
+        V_variable = new RequiredExternalVariable(latRho, lonRho, vw_tp0, vw_tp1, getSimulationManager().getDataset());
+        wave_period = new RequiredExternalVariable(latRho, lonRho, wave_period_tp0, wave_period_tp1,
+                getSimulationManager().getDataset());
+        wave_speed_u = new RequiredExternalVariable(latRho, lonRho, wave_speed_u_tp0, wave_speed_u_tp1,
+                getSimulationManager().getDataset());
+        wave_speed_v = new RequiredExternalVariable(latRho, lonRho, wave_speed_v_tp0, wave_speed_v_tp1,
+                getSimulationManager().getDataset());
 
     }
 
@@ -177,24 +178,23 @@ public class WaveDriftFileAction extends AbstractAction{
         try {
             Variable variable = ncIn.findVariable(name);
             int[] origin = null, shape = null;
-            switch (variable.getShape().length){
+            switch (variable.getShape().length) {
                 case 4:
-                    origin = new int[]{rank, 0, 0, 0};
-                    shape = new int[]{1, 1, ny, nx};
+                    origin = new int[] { rank, 0, 0, 0 };
+                    shape = new int[] { 1, 1, ny, nx };
                     break;
                 case 3:
-                    origin = new int[]{rank, 0, 0};
-                    shape = new int[]{1, ny, nx};
+                    origin = new int[] { rank, 0, 0 };
+                    shape = new int[] { 1, ny, nx };
                     break;
             }
-            return variable.read(origin,shape).reduce();
+            return variable.read(origin, shape).reduce();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading UW wave velocity variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-    }   
-
+    }
 
     private void openLocation(String rawPath) throws IOException {
 
@@ -205,7 +205,6 @@ public class WaveDriftFileAction extends AbstractAction{
             open(listInputFiles.get(0));
         }
     }
-
 
     private boolean isDirectory(String location) throws IOException {
 
@@ -290,8 +289,8 @@ public class WaveDriftFileAction extends AbstractAction{
     }
 
     private void nextStepTriggered() throws Exception {
-        long time = getSimulationManager().getTimeManager().getTime();
-        time_current=time;
+        double time = getSimulationManager().getTimeManager().getTime();
+        time_current = time;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
 
         if (time_arrow * time < time_arrow * time_tp1) {
@@ -317,7 +316,7 @@ public class WaveDriftFileAction extends AbstractAction{
 
     private void setOnFirstTime() throws Exception {
 
-        long t0 = getSimulationManager().getTimeManager().get_tO();
+        double t0 = getSimulationManager().getTimeManager().get_tO();
         open(getFile(t0));
         readTimeLength();
         rank = findCurrentRank(t0);
@@ -334,7 +333,7 @@ public class WaveDriftFileAction extends AbstractAction{
         }
     }
 
-    private String getFile(long time) throws Exception {
+    private String getFile(double time) throws Exception {
 
         int indexLast = listInputFiles.size() - 1;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
@@ -359,23 +358,24 @@ public class WaveDriftFileAction extends AbstractAction{
         msg.append(" (");
         msg.append(time);
         msg.append(" seconds) not contained among NetCDF files.");
-        msg.append(" Ckeck if time units and origin of time (hidden parameters) are the good ones. They are usually defined as attributes of the time variable in wave dataset.");
+        msg.append(
+                " Ckeck if time units and origin of time (hidden parameters) are the good ones. They are usually defined as attributes of the time variable in wave dataset.");
         throw new IndexOutOfBoundsException(msg.toString());
     }
 
-    private boolean isTimeIntoFile(long time, int index) throws Exception {
+    private boolean isTimeIntoFile(double time, int index) throws Exception {
 
         String filename = "";
         NetcdfFile nc;
         Array timeArr;
-        long time_r0, time_rf;
+        double time_r0, time_rf;
 
         filename = listInputFiles.get(index);
         nc = NetcdfDataset.openDataset(filename);
         timeArr = nc.findVariable(strTime).read();
-        time_r0 = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
-        time_rf = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(
-                            timeArr.getShape()[0] - 1))));
+        time_r0 = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
+        time_rf = skipSeconds(
+                (long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1))));
         nc.close();
         timeArr = null;
         nc = null;
@@ -383,20 +383,19 @@ public class WaveDriftFileAction extends AbstractAction{
         return (time >= time_r0 && time < time_rf);
     }
 
-    private boolean isTimeBetweenFile(long time, int index) throws Exception {
+    private boolean isTimeBetweenFile(double time, int index) throws Exception {
 
         NetcdfFile nc;
         String filename = "";
         Array timeArr;
-        long[] time_nc = new long[2];
+        double[] time_nc = new double[2];
 
         try {
             for (int i = 0; i < 2; i++) {
                 filename = listInputFiles.get(index + i);
                 nc = NetcdfDataset.openFile(filename, null);
                 timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = DatasetUtil.skipSeconds((long) conversion2seconds(
-                            timeArr.getDouble(timeArr.getIndex().set(0))));
+                time_nc[i] = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
                 timeArr = null;
                 nc.close();
                 nc = null;
@@ -405,42 +404,43 @@ public class WaveDriftFileAction extends AbstractAction{
                 return true;
             }
         } catch (NullPointerException e) {
-            throw new IOException("{Wave dataset} Unable to read " + strTime
-                    + " variable in file " + filename + " : " + e.getCause());
+            throw new IOException("{Wave dataset} Unable to read " + strTime + " variable in file " + filename + " : "
+                    + e.getCause());
         }
         return false;
     }
 
-    double conversion2seconds(double time) throws Exception{
+    double conversion2seconds(double time) throws Exception {
         String units = getParameter("time_unit");
         String time_origin = getParameter("time_origin");
-        double origin=0;
+        double origin = 0;
         try {
             origin = getSimulationManager().getTimeManager().date2seconds(time_origin);
         } catch (ParseException ex) {
-            IOException pex = new IOException("Error converting initial time of wave dataset into seconds ==> " + ex.toString());
+            IOException pex = new IOException(
+                    "Error converting initial time of wave dataset into seconds ==> " + ex.toString());
             pex.setStackTrace(ex.getStackTrace());
             throw pex;
         }
-        if(origin==0){
+        if (origin == 0) {
             Calendar calendartmp;
             SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
             calendartmp = new InterannualCalendar(time_origin, INPUT_DATE_FORMAT);
             INPUT_DATE_FORMAT.setCalendar(calendartmp);
-            String origin_hydro=getSimulationManager().getParameterManager().getParameter("app.time", "time_origin");
+            String origin_hydro = getSimulationManager().getParameterManager().getParameter("app.time", "time_origin");
             calendartmp.setTime(INPUT_DATE_FORMAT.parse(origin_hydro));
-            origin= - calendartmp.getTimeInMillis() / 1000L;
+            origin = -calendartmp.getTimeInMillis() / 1000L;
         }
-        switch(units) {
+        switch (units) {
             case "seconds":
                 return time + origin;
-            case "minutes" : 
-                return time*60.0 + origin;
-            case "hours" : 
-                return time*3600.0 + origin;
-            case "days" :
-                return time*3600L*24L + origin;
-            default :
+            case "minutes":
+                return time * 60.0 + origin;
+            case "hours":
+                return time * 3600.0 + origin;
+            case "days":
+                return time * 3600L * 24L + origin;
+            default:
                 throw new UnsupportedOperationException("{Wave Dataset} Unknown time unit");
         }
     }
@@ -477,21 +477,21 @@ public class WaveDriftFileAction extends AbstractAction{
         }
     }
 
-    int findCurrentRank(long time) throws Exception {
+    int findCurrentRank(double time) throws Exception {
 
         int lrank = 0;
         int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        long time_rank;
+        double time_rank;
         Array timeArr = null;
         try {
             timeArr = ncIn.findVariable(strTime).read();
-            time_rank = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
+            time_rank = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
             while (time >= time_rank) {
                 if (time_arrow < 0 && time == time_rank) {
                     break;
                 }
                 lrank++;
-                time_rank = DatasetUtil.skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
+                time_rank = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = nbTimeRecords;
@@ -514,18 +514,13 @@ public class WaveDriftFileAction extends AbstractAction{
 
     private void setAllFieldsTp1AtTime(int i_time) throws Exception {
 
-        int[] origin = new int[]{i_time, 0, 0};
-
         double time_tp0 = time_tp1;
-
-
 
         uw_tp1 = readVariable(strUW);
         vw_tp1 = readVariable(strVW);
         wave_period_tp1 = readVariable(str_wave_period);
         wave_speed_u_tp1 = readVariable(str_wave_speed_u);
         wave_speed_v_tp1 = readVariable(str_wave_speed_v);
-
 
         try {
             Array xTimeTp1 = ncIn.findVariable(strTime).read();
@@ -538,14 +533,12 @@ public class WaveDriftFileAction extends AbstractAction{
             throw ioex;
         }
 
-
         dt_wave = Math.abs(time_tp1 - time_tp0);
 
     }
 
-
-    public void execute(IBasicParticle particle) {
-        if(time_current!=getSimulationManager().getTimeManager().getTime()){
+    public void execute(IParticle particle) {
+        if (time_current != getSimulationManager().getTimeManager().getTime()) {
             try {
                 nextStepTriggered();
             } catch (Exception ex) {
@@ -558,41 +551,47 @@ public class WaveDriftFileAction extends AbstractAction{
         wave_period.nextStep(wave_period_tp1, time_tp1, dt_wave);
         wave_speed_u.nextStep(wave_speed_u_tp1, time_tp1, dt_wave);
         wave_speed_v.nextStep(wave_speed_v_tp1, time_tp1, dt_wave);
-        try {
-            U_variable.meteo2courant();
-        } catch (IOException ex) {
-            Logger.getLogger(WaveDriftFileAction.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
-        double[] mvt = getDLonLat(particle.getGridCoordinates(),particle.getDepth(),getSimulationManager().getTimeManager().getTime(),getSimulationManager().getTimeManager().get_dt());
+        double[] mvt = getDLonLat(particle.getGridCoordinates(), particle.getDepth(),
+                getSimulationManager().getTimeManager().getTime(), getSimulationManager().getTimeManager().get_dt());
         double newLon = particle.getLon() + mvt[0];
         double newLat = particle.getLat() + mvt[1];
         double[] newPos = getSimulationManager().getDataset().latlon2xy(newLat, newLon);
-        double[] waveincr = new double[]{newPos[0] - particle.getX(), newPos[1] - particle.getY()};
+        double[] waveincr = new double[] { newPos[0] - particle.getX(), newPos[1] - particle.getY() };
         particle.increment(waveincr);
 
     }
 
-    public double[] getDLonLat(double[] pgrid, double depth, double time, double dt){
+    public double[] getDLonLat(double[] pgrid, double depth, double time, double dt) {
         double[] dWi = new double[2];
-        double dx,dy;
+        double dx, dy;
         double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
-        double wave_speed=Math.pow(Math.pow(wave_speed_u.getVariable(pgrid, time),2) + Math.pow(wave_speed_v.getVariable(pgrid, time),2),0.5);
-        double wave_length=wave_speed*wave_period.getVariable(pgrid, time);
-        double wave_number=2*Math.PI/wave_length;
-        dx = dt*U_variable.getVariable(pgrid, time) /one_deg_lon_meter;
-        dy = dt*V_variable.getVariable(pgrid, time) / ONE_DEG_LATITUDE_IN_METER;
-        dWi[0] = wave_factor*dx*Math.exp(2*wave_number*depth);
-        dWi[1] = wave_factor*dy*Math.exp(2*wave_number*depth);
+        double wave_speed = Math.pow(
+                Math.pow(wave_speed_u.getVariable(pgrid, time), 2) + Math.pow(wave_speed_v.getVariable(pgrid, time), 2),
+                0.5);
+        double wave_length = wave_speed * wave_period.getVariable(pgrid, time);
+        double wave_number = 2 * Math.PI / wave_length;
+        dx = dt * U_variable.getVariable(pgrid, time) / one_deg_lon_meter;
+        dy = dt * V_variable.getVariable(pgrid, time) / ONE_DEG_LATITUDE_IN_METER;
+        dWi[0] = wave_factor * dx * Math.exp(2 * wave_number * depth);
+        dWi[1] = wave_factor * dy * Math.exp(2 * wave_number * depth);
 
         /*
-           double tmp;
-           for(double i=0;i<10;i++){
-           System.out.println(" wave number length speed : " + wave_number + " " + wave_length + " " + wave_speed);
-           tmp = Math.exp(-2.0*wave_number*i);
-           System.out.println(" prof atténuation : " + i + " " + tmp );
-           }*/
+         * double tmp; for(double i=0;i<10;i++){
+         * System.out.println(" wave number length speed : " + wave_number + " " +
+         * wave_length + " " + wave_speed); tmp = Math.exp(-2.0*wave_number*i);
+         * System.out.println(" prof atténuation : " + i + " " + tmp ); }
+         */
         return dWi;
-    } 
+    }
+
+    @Override
+    public void init(IParticle particle) {
+        // TODO Auto-generated method stub
+    }
+
+    double skipSeconds(double time) {
+        return 100.d * Math.floor(time / 100.d);
+    }
 }
