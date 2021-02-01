@@ -5,6 +5,8 @@
 ### New features
 
 - Remove deprecated NetCDF functions, use new NetCDF implementation
+- Re-add the `WaveDriftFileAction.java` file.
+- New constructor for the `InterAnnualCalendar` object
 
 ### Bug fix
 
