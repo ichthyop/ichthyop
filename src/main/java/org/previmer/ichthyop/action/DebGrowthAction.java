@@ -44,15 +44,19 @@
 
 package org.previmer.ichthyop.action;
 
+import org.previmer.ichthyop.io.BlockType;
 import org.previmer.ichthyop.io.DebEHTracker;
 import org.previmer.ichthyop.io.DebETracker;
 import org.previmer.ichthyop.io.DebERTracker;
 import org.previmer.ichthyop.io.DebVTracker;
 import org.previmer.ichthyop.io.LengthTracker;
+import org.previmer.ichthyop.io.StageTracker;
 import org.previmer.ichthyop.particle.DebParticleLayer;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.LengthParticleLayer;
 import org.previmer.ichthyop.particle.ParticleMortality;
+import org.previmer.ichthyop.particle.StageParticleLayer;
+import org.previmer.ichthyop.stage.LengthStage;
 
 /**
  *
@@ -78,6 +82,7 @@ public class DebGrowthAction extends AbstractAction {
     private double shape_larvae; // size related conversion params
     private double E_init; // Réserve initiale
     private double Vj; // Structure at mouth opening (yolk_to_feeding)
+    private LengthStage lengthStage;
 
     private double dt;
 
@@ -115,12 +120,27 @@ public class DebGrowthAction extends AbstractAction {
         food_field = getParameter("food_field");
         getSimulationManager().getDataset().requireVariable(food_field, getClass());
 
+        // Init the length stage for tracking length stages.
+        lengthStage = new LengthStage(BlockType.ACTION, getBlockKey());
+        lengthStage.init();
+        
         boolean addTracker = true;
         try {
             addTracker = Boolean.valueOf(getParameter("length_tracker"));
         } catch (Exception ex) {
             // do nothing and just add the tracker
         }
+        
+        addTracker = true;
+        try {
+            addTracker = Boolean.valueOf(getParameter("stage_tracker"));
+        } catch (Exception ex) {
+            // do nothing and just add the tracker
+        }
+        if (addTracker) {
+            getSimulationManager().getOutputManager().addPredefinedTracker(StageTracker.class);
+        }
+        
         if (addTracker) {
             getSimulationManager().getOutputManager().addPredefinedTracker(LengthTracker.class);
         }
@@ -152,6 +172,7 @@ public class DebGrowthAction extends AbstractAction {
     @Override
     public void execute(IParticle particle) {
         DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
+        StageParticleLayer stageLayer = (StageParticleLayer) particle.getLayer(StageParticleLayer.class);
         double temp = getSimulationManager().getDataset().get(temperature_field, debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double food = getSimulationManager().getDataset().get(food_field, debLayer.particle().getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double[] res_deb = grow(dt, debLayer.getE(), debLayer.getV(), debLayer.getE_R(), Vj, temp, food);
@@ -160,6 +181,7 @@ public class DebGrowthAction extends AbstractAction {
         debLayer.setE_R(res_deb[2]);
         LengthParticleLayer lengthLayer = (LengthParticleLayer) particle.getLayer(LengthParticleLayer.class);
         lengthLayer.setLength(computeLength(debLayer.getV()));
+        stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
 
         if (res_deb[3] == 0) {
             particle.kill(ParticleMortality.STARVATION);
@@ -194,7 +216,7 @@ public class DebGrowthAction extends AbstractAction {
         //ENERGETIC FLUXES (J d-1)
         double flow_P_A = p_AmT * f * Math.pow(V, 2 / 3.0); 	                  // assimilated energy
         double flow_P_M = p_MT * V;                              // energy lost to maintenance
-        double flow_Pc = E / (Kappa * (E / V) + E_g) * (E_g * (p_AmT / E_m) * Math.pow(V, -1 / 3.0) + p_M); // energy for utilisation
+        double flow_Pc = E / (Kappa * (E / V) + E_g) * (E_g * (p_AmT / E_m) * Math.pow(V, -1 / 3.0) + p_MT); // energy for utilisation
         double flow_Pg = Math.max((double) 0, Kappa * flow_Pc - flow_P_M);     // energy directed to strucutral growth
         double flow_P_J = V * (1 - Kappa) / Kappa * p_MT;        // maturity maintenance 
         double flow_pR = ((1 - Kappa) * flow_Pc) - flow_P_J;
@@ -215,9 +237,8 @@ public class DebGrowthAction extends AbstractAction {
         //Compute DRY weight (g, dw) * 4.1 = Wet weight
         // starvation test
         int starvation;
-        if (Kappa * flow_Pc < flow_P_M && (1 - Kappa) * flow_Pc < flow_P_J) {
+        if ((Kappa * flow_Pc < flow_P_M) || (((1 - Kappa) * flow_Pc) < flow_P_J)) {
             starvation = 0;
-
         } else {
             starvation = 1;
         } //no starvation
