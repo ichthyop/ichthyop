@@ -7,10 +7,12 @@
 - Remove deprecated NetCDF functions, use new NetCDF implementation
 - Re-add the `WaveDriftFileAction.java` file.
 - New constructor for the `InterAnnualCalendar` object
+- Saving the stage values in the DebGrowthAction
 
 ### Bug fix
 
 - Correction of a bug in the saving of zones in NetCDF (file could not be opened with Python Xarray)
+- Correction of the pC calculation in the classical DEB (forgot Tahr correction) + change starvation correction (`||` instead of `&&`)
 
 ## Changes in Ichthyop 3.3.6
 
