@@ -194,7 +194,7 @@ public class DebGrowthAction extends AbstractAction {
         //ENERGETIC FLUXES (J d-1)
         double flow_P_A = p_AmT * f * Math.pow(V, 2 / 3.0); 	                  // assimilated energy
         double flow_P_M = p_MT * V;                              // energy lost to maintenance
-        double flow_Pc = E / (Kappa * (E / V) + E_g) * (E_g * (p_AmT / E_m) * Math.pow(V, -1 / 3.0) + p_M); // energy for utilisation
+        double flow_Pc = E / (Kappa * (E / V) + E_g) * (E_g * (p_AmT / E_m) * Math.pow(V, -1 / 3.0) + p_MT); // energy for utilisation
         double flow_Pg = Math.max((double) 0, Kappa * flow_Pc - flow_P_M);     // energy directed to strucutral growth
         double flow_P_J = V * (1 - Kappa) / Kappa * p_MT;        // maturity maintenance 
         double flow_pR = ((1 - Kappa) * flow_Pc) - flow_P_J;
@@ -215,9 +215,8 @@ public class DebGrowthAction extends AbstractAction {
         //Compute DRY weight (g, dw) * 4.1 = Wet weight
         // starvation test
         int starvation;
-        if (Kappa * flow_Pc < flow_P_M && (1 - Kappa) * flow_Pc < flow_P_J) {
+        if ((Kappa * flow_Pc < flow_P_M) || (((1 - Kappa) * flow_Pc) < flow_P_J)) {
             starvation = 0;
-
         } else {
             starvation = 1;
         } //no starvation
