@@ -348,7 +348,7 @@ public class DebGrowthAction_LP extends AbstractAction {
         //Compute DRY weight (g, dw) * 4.1 = Wet weight
         // starvation test
         boolean starvation;
-        if ((Kappa * flow_p_C < flow_p_M) && ((1 - Kappa) * flow_p_C < flow_p_J)) {
+        if ((Kappa * flow_p_C < flow_p_M) || ((1 - Kappa) * flow_p_C < flow_p_J)) {
             starvation = true;
         } else {
             starvation = false;
