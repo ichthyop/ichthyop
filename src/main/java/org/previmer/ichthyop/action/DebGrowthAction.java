@@ -183,7 +183,7 @@ public class DebGrowthAction extends AbstractAction {
         lengthLayer.setLength(computeLength(debLayer.getV()));
         stageLayer.setStage(lengthStage.getStage((float) lengthLayer.getLength()));
 
-        if (res_deb[3] == 0) {
+        if (res_deb[3] == 1) {
             particle.kill(ParticleMortality.STARVATION);
         }
 
@@ -238,10 +238,10 @@ public class DebGrowthAction extends AbstractAction {
         // starvation test
         int starvation;
         if ((Kappa * flow_Pc < flow_P_M) || (((1 - Kappa) * flow_Pc) < flow_P_J)) {
-            starvation = 0;
-        } else {
             starvation = 1;
-        } //no starvation
+        } else {
+            starvation = 0;
+        } // no starvation
 
         double[] res = {E, V, E_R, (double) starvation};
         return res;
