@@ -153,11 +153,7 @@ public class DatasetUtil {
     }
 
     public static double timeAtRank(NetcdfFile nc, String strTime, int rank) throws IOException {
-        Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
-        return (convert == 1.d)
-                ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(rank)))
-                : convert * timeArr.getDouble(timeArr.getIndex().set(rank));
+        return DatasetUtil.getDate(nc.getLocation(), strTime, rank);
     }
 
     /**
