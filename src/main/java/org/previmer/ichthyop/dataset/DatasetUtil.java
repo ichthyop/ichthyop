@@ -263,18 +263,13 @@ public class DatasetUtil {
         Array timeArr = null;
         try {
             timeArr = nc.findVariable(strTime).read();
-            double convert = guessTimeConversion(nc.findVariable(strTime));
-            nctime = (convert == 1)
-                    ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(lrank)))
-                    : timeArr.getDouble(timeArr.getIndex().set(lrank)) * convert;
+            nctime = DatasetUtil.getDate(nc.getLocation(), strTime, lrank);
             while (time >= nctime) {
                 if (timeArrow < 0 && time == nctime) {
                     break;
                 }
                 lrank++;
-                nctime = (convert == 1)
-                        ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(lrank)))
-                        : timeArr.getDouble(timeArr.getIndex().set(lrank)) * convert;
+                nctime = DatasetUtil.getDate(nc.getLocation(), strTime, lrank);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = timeArr.getShape()[0];
