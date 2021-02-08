@@ -55,6 +55,9 @@ import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.LastStepListener;
 import org.previmer.ichthyop.event.SetupEvent;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import javax.swing.event.EventListenerList;
 import org.previmer.ichthyop.calendar.Day360Calendar;
@@ -69,8 +72,12 @@ public class TimeManager extends AbstractManager {
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
+    public static final DateTimeFormatter NEW_INPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    
+    /** Reference date: 1900-01-01 00:00 */
+    public static final LocalDateTime DATE_REF = LocalDateTime.of(1900, 1, 1, 0, 0);
 
 ///////////////////////////////
 // Declaration of the variables
@@ -152,38 +159,19 @@ public class TimeManager extends AbstractManager {
 
         /* keep drifting ?*/
         keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
+        LocalDateTime date0 = LocalDateTime.parse(getParameter("initial_time"), NEW_INPUT_DATE_FORMAT);
 
-        // Calendar en origin of time
-        Calendar calendar_o = Calendar.getInstance();
-        INPUT_DATE_FORMAT.setCalendar(calendar_o);
-        calendar_o.setTime(INPUT_DATE_FORMAT.parse(getParameter("time_origin")));
-        int year_o = calendar_o.get(Calendar.YEAR);
-        int month_o = calendar_o.get(Calendar.MONTH);
-        int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
-        int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
-        int minute_o = calendar_o.get(Calendar.MINUTE);
-        if (getParameter("calendar_type").equals(TypeCalendar.CLIMATO.toString())) {
-            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
-        } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
-        }
-
-        /* initial time */
-        try {
-            t0 = date2seconds(getParameter("initial_time"));
-        } catch (ParseException ex) {
-            IOException pex = new IOException("Error converting initial time into seconds ==> " + ex.toString());
-            pex.setStackTrace(ex.getStackTrace());
-            throw pex;
-        }
-        calendar.setTimeInMillis((long) (t0 * 1000));
+        // Conversion of date0 as t0, i.e. the number of seconds between the reference date and the current date. 
+        t0 = Duration.between(DATE_REF, date0).toSeconds(); 
         
         /* output date format */
-        outputDateFormat = new SimpleDateFormat(
+        /*outputDateFormat = new SimpleDateFormat(
                 (calendar.getClass() == InterannualCalendar.class)
                         ? "yyyy/MM/dd HH:mm:ss"
                         : "yy/MM/dd HH:mm:ss");
         outputDateFormat.setCalendar(calendar);
+        */
+        
     }
 
     public boolean keepDrifting() {
@@ -206,17 +194,18 @@ public class TimeManager extends AbstractManager {
                 * Constant.ONE_MINUTE
                 + nbFormat.parse(duration.substring(duration.indexOf("day") + 7,
                                 duration.indexOf("hour")).trim()).longValue()
-                * Constant.ONE_HOUR
+                 * Constant.ONE_HOUR
                 + nbFormat.parse(duration.substring(0, duration.indexOf("day")).trim()).longValue()
                 * Constant.ONE_DAY;
         //System.out.println("seconds " + seconds);
         return seconds;
     }
 
+    /** Converts the date as number of seconds since 1900-01-01 */
     public double date2seconds(String date) throws ParseException {
-        INPUT_DATE_FORMAT.setCalendar(calendar);
-        calendar.setTime(INPUT_DATE_FORMAT.parse(date));
-        return calendar.getTimeInMillis() / 1000L;
+        LocalDateTime dateTime = LocalDateTime.parse(date, NEW_INPUT_DATE_FORMAT);
+        long duration = Duration.between(DATE_REF, dateTime).toSeconds();
+        return (double) duration;
     }
 
     private String getParameter(String key) {
