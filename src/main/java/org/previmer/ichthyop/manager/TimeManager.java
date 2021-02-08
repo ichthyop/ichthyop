@@ -49,7 +49,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.event.NextStepListener;
-import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.LastStepListener;
@@ -60,7 +59,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import javax.swing.event.EventListenerList;
-import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.util.Constant;
 
 /**
@@ -165,12 +163,8 @@ public class TimeManager extends AbstractManager {
         t0 = Duration.between(DATE_REF, date0).toSeconds(); 
         
         /* output date format */
-        /*outputDateFormat = new SimpleDateFormat(
-                (calendar.getClass() == InterannualCalendar.class)
-                        ? "yyyy/MM/dd HH:mm:ss"
-                        : "yy/MM/dd HH:mm:ss");
+        outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         outputDateFormat.setCalendar(calendar);
-        */
         
     }
 
@@ -223,7 +217,6 @@ public class TimeManager extends AbstractManager {
     public boolean hasNextStep() throws Exception {
 
         time += dt;
-        calendar.setTimeInMillis((long) (time * 1000));
         if (Math.abs(time - t0) < simuDuration) {
             fireNextStepTriggered();
             i_step++;
@@ -239,7 +232,8 @@ public class TimeManager extends AbstractManager {
      * @return the current time of the simulation, formatted in a String
      */
     public String timeToString() {
-        return outputDateFormat.format(calendar.getTime());
+        LocalDateTime currentDate = DATE_REF.plusSeconds((long) time);
+        return currentDate.toString();
     }
 
     /**
