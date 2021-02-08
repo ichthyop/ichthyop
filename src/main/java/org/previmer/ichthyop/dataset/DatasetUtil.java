@@ -256,7 +256,7 @@ public class DatasetUtil {
      * @throws an IOException if an error occurs while reading the input file
      *
      */
-    static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws ArrayIndexOutOfBoundsException, IOException {
+    public static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws ArrayIndexOutOfBoundsException, IOException {
 
         int lrank = 0;
         double nctime;
@@ -492,4 +492,5 @@ public class DatasetUtil {
         return output;
 
     }
+        
 }
