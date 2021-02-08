@@ -46,6 +46,8 @@ package org.previmer.ichthyop.action;
 
 import java.io.IOException;
 import java.util.logging.Level;
+
+import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
@@ -92,7 +94,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
         double t0 = getSimulationManager().getTimeManager().get_tO();
         readTimeLength();
         checkInitTime(ncIn, strTime);
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
 
