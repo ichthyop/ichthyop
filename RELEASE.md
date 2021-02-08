@@ -13,6 +13,7 @@
 
 - Correction of a bug in the saving of zones in NetCDF (file could not be opened with Python Xarray)
 - Correction of the pC calculation in the classical DEB (forgot Tahr correction) + change starvation correction (`||` instead of `&&`)
+- Correction in the time management in Ichthtyop. Use `LocalDateTime` extensively.
 
 ## Changes in Ichthyop 3.3.6
 
