@@ -47,12 +47,16 @@ package org.previmer.ichthyop.dataset;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.manager.TimeManager;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
@@ -121,13 +125,9 @@ public class DatasetUtil {
         if (!new File(file).isFile()) {
             throw new FileNotFoundException(file);
         }
-        NetcdfFile nc = NetcdfDataset.openDataset(file);
-        Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
-        nc.close();
-        return convert == 1.d
-                ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(0)))
-                : convert * timeArr.getDouble(timeArr.getIndex().set(0));
+        
+        return getDate(file, strTime, 0);
+        
     }
 
     /**
@@ -144,11 +144,12 @@ public class DatasetUtil {
         }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
         Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
         nc.close();
-        return convert == 1.d
-                ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1)))
-                : convert * timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1));
+        
+        int lastIndex = timeArr.getShape()[0] - 1;
+        
+        return getDate(file, strTime, lastIndex);
+        
     }
 
     public static double timeAtRank(NetcdfFile nc, String strTime, int rank) throws IOException {
@@ -282,7 +283,7 @@ public class DatasetUtil {
 
         return lrank;
     }
-
+    
     /**
      * Guess whether time is expressed in seconds in the NetCDF file and if not
      * return a conversion value to adjust it to seconds. So far it detects
@@ -445,5 +446,50 @@ public class DatasetUtil {
         double d = Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
         return d;
     }
+    
+    public static double getDate(String file, String strTime, int index) throws IOException {
 
+        if (!new File(file).isFile()) {
+            throw new FileNotFoundException(file);
+        }
+      
+        // Date formatter to extract NetCDF time
+        DateTimeFormatter dateFormatter;
+        
+        // Output date
+        LocalDateTime finalDate;
+
+        // Open the NetCDF file
+        // Recover the time variable and units
+        NetcdfFile nc = NetcdfDataset.openDataset(file);
+        Variable timeVar = nc.findVariable(strTime);
+        Attribute attrUnits = timeVar.findAttributeIgnoreCase("units");
+
+        // Recover the time values for the corresponding index
+        Array timeArr = nc.findVariable(strTime).read();
+        long time = (long) timeArr.getDouble(timeArr.getIndex().set(index));
+
+        // Converts string into lower case.
+        String units = attrUnits.getStringValue().toLowerCase();
+
+        // Extract the NetCDF reference date by removing the
+        // prefix (day(s), month(s) or day(s)) and the seconds values
+        int beginIndex = units.indexOf("since") + 5;
+        int endIndex = units.lastIndexOf(":");
+        String subUnits = units.substring(beginIndex, endIndex).trim();
+        dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
+
+        if (units.contains("second")) {
+            finalDate = dateUnit.plusSeconds(time);
+        } else if (units.contains("hour")) {
+            finalDate = dateUnit.plusHours(time);
+        } else {
+            finalDate = dateUnit.plusDays(time);
+        }
+
+        double output = Duration.between(TimeManager.DATE_REF, finalDate).toSeconds();
+        return output;
+
+    }
 }
