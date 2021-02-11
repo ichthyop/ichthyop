@@ -31,7 +31,7 @@
 ### Bug fixes
 
 - Deactivate the `compile on save` Netbeans feature (compilation errors not always detected)
-- Correction of a bug in the `TxtFileEelease` class. In 3.3.4, changes were made to insure that the output drifter dimension has the same size as the effectively released particles, but in fact the file has a 0 drifter dimension. Moved back to previous state, with the display of a warning message.
+- Correction of a bug in the `TxtFileRelease` class. In 3.3.4, changes were made to insure that the output drifter dimension has the same size as the effectively released particles, but in fact the file has a 0 drifter dimension. Moved back to previous state, with the display of a warning message.
 
 ## Changes in Ichthyop 3.3.4
 
