@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.previmer.ichthyop.calendar.InterannualCalendar;
+import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
@@ -317,9 +318,11 @@ public class WaveDriftFileAction extends AbstractAction {
     private void setOnFirstTime() throws Exception {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        open(getFile(t0));
+        int fileRank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
+        
+        open(getFile(fileRank));
         readTimeLength();
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
 
@@ -333,116 +336,8 @@ public class WaveDriftFileAction extends AbstractAction {
         }
     }
 
-    private String getFile(double time) throws Exception {
-
-        int indexLast = listInputFiles.size() - 1;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                indexFile = i;
-                return listInputFiles.get(i);
-            } else if (isTimeBetweenFile(time, i)) {
-                indexFile = i - (time_arrow - 1) / 2;
-                return listInputFiles.get(indexFile);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            indexFile = indexLast;
-            return listInputFiles.get(indexLast);
-        }
-        StringBuffer msg = new StringBuffer();
-        msg.append("{Wave dataset} Time value ");
-        msg.append(getSimulationManager().getTimeManager().timeToString());
-        msg.append(" (");
-        msg.append(time);
-        msg.append(" seconds) not contained among NetCDF files.");
-        msg.append(
-                " Ckeck if time units and origin of time (hidden parameters) are the good ones. They are usually defined as attributes of the time variable in wave dataset.");
-        throw new IndexOutOfBoundsException(msg.toString());
-    }
-
-    private boolean isTimeIntoFile(double time, int index) throws Exception {
-
-        String filename = "";
-        NetcdfFile nc;
-        Array timeArr;
-        double time_r0, time_rf;
-
-        filename = listInputFiles.get(index);
-        nc = NetcdfDataset.openDataset(filename);
-        timeArr = nc.findVariable(strTime).read();
-        time_r0 = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
-        time_rf = skipSeconds(
-                (long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1))));
-        nc.close();
-        timeArr = null;
-        nc = null;
-
-        return (time >= time_r0 && time < time_rf);
-    }
-
-    private boolean isTimeBetweenFile(double time, int index) throws Exception {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        double[] time_nc = new double[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listInputFiles.get(index + i);
-                nc = NetcdfDataset.openFile(filename, null);
-                timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
-                timeArr = null;
-                nc.close();
-                nc = null;
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-        } catch (NullPointerException e) {
-            throw new IOException("{Wave dataset} Unable to read " + strTime + " variable in file " + filename + " : "
-                    + e.getCause());
-        }
-        return false;
-    }
-
-    double conversion2seconds(double time) throws Exception {
-        String units = getParameter("time_unit");
-        String time_origin = getParameter("time_origin");
-        double origin = 0;
-        try {
-            origin = getSimulationManager().getTimeManager().date2seconds(time_origin);
-        } catch (ParseException ex) {
-            IOException pex = new IOException(
-                    "Error converting initial time of wave dataset into seconds ==> " + ex.toString());
-            pex.setStackTrace(ex.getStackTrace());
-            throw pex;
-        }
-        if (origin == 0) {
-            Calendar calendartmp;
-            SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-            calendartmp = new InterannualCalendar(time_origin, INPUT_DATE_FORMAT);
-            INPUT_DATE_FORMAT.setCalendar(calendartmp);
-            String origin_hydro = getSimulationManager().getParameterManager().getParameter("app.time", "time_origin");
-            calendartmp.setTime(INPUT_DATE_FORMAT.parse(origin_hydro));
-            origin = -calendartmp.getTimeInMillis() / 1000L;
-        }
-        switch (units) {
-            case "seconds":
-                return time + origin;
-            case "minutes":
-                return time * 60.0 + origin;
-            case "hours":
-                return time * 3600.0 + origin;
-            case "days":
-                return time * 3600L * 24L + origin;
-            default:
-                throw new UnsupportedOperationException("{Wave Dataset} Unknown time unit");
-        }
+    private String getFile(int fileRank) throws Exception {
+        return listInputFiles.get(fileRank);
     }
 
     void readLonLat() throws IOException {
@@ -477,30 +372,6 @@ public class WaveDriftFileAction extends AbstractAction {
         }
     }
 
-    int findCurrentRank(double time) throws Exception {
-
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        double time_rank;
-        Array timeArr = null;
-        try {
-            timeArr = ncIn.findVariable(strTime).read();
-            time_rank = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = skipSeconds((long) conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
-    }
-
     private String getNextFile(int time_arrow) throws IOException {
 
         int index = indexFile - (1 - time_arrow) / 2;
@@ -523,10 +394,7 @@ public class WaveDriftFileAction extends AbstractAction {
         wave_speed_v_tp1 = readVariable(str_wave_speed_v);
 
         try {
-            Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = conversion2seconds(xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank)));
-            time_tp1 -= time_tp1 % 100;
-            xTimeTp1 = null;
+            time_tp1 = DatasetUtil.getDate(ncIn.getLocation(), strTime, rank);
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -594,4 +462,9 @@ public class WaveDriftFileAction extends AbstractAction {
     double skipSeconds(double time) {
         return 100.d * Math.floor(time / 100.d);
     }
+    
+    int timeArrow() {
+        return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
+    }
+    
 }
