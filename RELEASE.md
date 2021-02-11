@@ -4,10 +4,11 @@
 
 ### New features
 
+- Remove all warnings (VSCode)
 - Remove deprecated NetCDF functions, use new NetCDF implementation
 - Re-add the `WaveDriftFileAction.java` file.
 - New constructor for the `InterAnnualCalendar` object
-- Saving the stage values in the DebGrowthAction
+- Saving the stage values in the `DebGrowthAction.java`
 
 ### Bug fix
 
