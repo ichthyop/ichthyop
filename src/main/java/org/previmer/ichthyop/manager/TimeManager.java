@@ -72,7 +72,8 @@ public class TimeManager extends AbstractManager {
 ///////////////////////////////
     public static final DateTimeFormatter NEW_INPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-    public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    public static final DateTimeFormatter NEW_INPUT_DURATION_FORMAT = DateTimeFormatter.ofPattern("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     
     /** Reference date: 1900-01-01 00:00 */
     public static final LocalDateTime DATE_REF = LocalDateTime.of(1900, 1, 1, 0, 0);
@@ -398,6 +399,15 @@ public class TimeManager extends AbstractManager {
     public SimpleDateFormat getInputDateFormat() {
         return INPUT_DATE_FORMAT;
     }
+    
+    public DateTimeFormatter getNewInputDurationFormat() {
+        return NEW_INPUT_DURATION_FORMAT;
+    }
+
+    public DateTimeFormatter getNewInputDateFormat() {
+        return NEW_INPUT_DATE_FORMAT;
+    }
+    
     //---------- End of class
 
     public enum TimeDirection {
