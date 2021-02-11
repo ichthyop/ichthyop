@@ -362,10 +362,6 @@ public class DatasetUtil {
         return (sinh(x) / cosh(x));
     }
 
-    private static double skipSeconds(double time) {
-        return 100.d * Math.floor(time / 100.d);
-    }
-
     /**
      * Computes the geodesic distance between the two points (lat1, lon1) and
      * (lat2, lon2)

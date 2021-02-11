@@ -6,17 +6,14 @@ package org.previmer.ichthyop.action;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.manager.TimeManager;
 import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
