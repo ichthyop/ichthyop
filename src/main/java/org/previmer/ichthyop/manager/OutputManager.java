@@ -202,8 +202,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     zoneAreas.add(iZone, makeZoneArea(zone));
-                    //Dimension zoneDim = ncOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
-                    Variable varZone = ncOut.addVariable(null, "zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(latlonDim)));
+                    Dimension zoneDim = ncOut.addDimension(null, "zone" + iZone, zoneAreas.get(iZone).size());
+                    Variable varZone = ncOut.addVariable(null, "coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
                     varZone.addAttribute(new Attribute("long_name", zone.getKey()));
                     varZone.addAttribute(new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
                     varZone.addAttribute(new Attribute("type", zone.getType().toString()));
