@@ -46,14 +46,11 @@ package org.previmer.ichthyop.action;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.previmer.ichthyop.calendar.InterannualCalendar;
+import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
@@ -129,6 +126,7 @@ public class WindDriftFileAction extends WindDriftAction {
      * Meridional component of the wind velocity field at time t + dt
      */
     static Array vw_tp1;
+    
     /**
      * U wind variable
      */
@@ -271,7 +269,7 @@ public class WindDriftFileAction extends WindDriftAction {
         double time = getSimulationManager().getTimeManager().getTime();
         time_current = time;
 
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
+        int time_arrow = timeArrow();
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
@@ -294,9 +292,11 @@ public class WindDriftFileAction extends WindDriftAction {
     private void setOnFirstTime() throws Exception {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        open(getFile(t0));
+        int fileRank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
+        
+        open(getFile(fileRank));
         readTimeLength();
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
 
@@ -310,115 +310,11 @@ public class WindDriftFileAction extends WindDriftAction {
         }
     }
 
-    private String getFile(double time) throws Exception {
-
-        int indexLast = listInputFiles.size() - 1;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-
-        for (int i = 0; i < indexLast; i++) {
-            if (isTimeIntoFile(time, i)) {
-                indexFile = i;
-                return listInputFiles.get(i);
-            } else if (isTimeBetweenFile(time, i)) {
-                indexFile = i - (time_arrow - 1) / 2;
-                return listInputFiles.get(indexFile);
-            }
-        }
-
-        if (isTimeIntoFile(time, indexLast)) {
-            indexFile = indexLast;
-            return listInputFiles.get(indexLast);
-        }
-        StringBuilder msg = new StringBuilder();
-        msg.append("{Wind dataset} Time value ");
-        msg.append(getSimulationManager().getTimeManager().timeToString());
-        msg.append(" (");
-        msg.append(time);
-        msg.append(" seconds) not contained among NetCDF files.");
-        msg.append(" Ckeck if time units and origin of time (hidden parameters) are the good ones. They are usually defined as attributes of the time variable in wind dataset.");
-        throw new IndexOutOfBoundsException(msg.toString());
+    private String getFile(int fileRank) throws Exception {
+        return listInputFiles.get(fileRank);
     }
 
-    private boolean isTimeIntoFile(double time, int index) throws Exception {
-
-        String filename = listInputFiles.get(index);
-        NetcdfFile nc = NetcdfDataset.openDataset(filename);
-        Array timeArr = nc.findVariable(strTime).read();
-        double time_r0 = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(0))));
-        double time_rf = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(
-                timeArr.getShape()[0] - 1))));
-        nc.close();
-
-        return (time >= time_r0 && time < time_rf);
-    }
-
-    private boolean isTimeBetweenFile(double time, int index) throws Exception {
-
-        NetcdfFile nc;
-        String filename = "";
-        Array timeArr;
-        double[] time_nc = new double[2];
-
-        try {
-            for (int i = 0; i < 2; i++) {
-                filename = listInputFiles.get(index + i);
-                nc = NetcdfDataset.openFile(filename, null);
-                timeArr = nc.findVariable(strTime).read();
-                time_nc[i] = skipSeconds(conversion2seconds(
-                        timeArr.getDouble(timeArr.getIndex().set(0))));
-                nc.close();
-            }
-            if (time >= time_nc[0] && time < time_nc[1]) {
-                return true;
-            }
-        } catch (NullPointerException e) {
-            throw new IOException("{Wind dataset} Unable to read " + strTime
-                    + " variable in file " + filename + " : " + e.getCause());
-        }
-        return false;
-    }
-
-    double conversion2seconds(double time) throws Exception {
-        String units = getParameter("time_unit");
-        String time_origin = getParameter("time_origin");
-        double origin = 0;
-        try {
-            origin = getSimulationManager().getTimeManager().date2seconds(time_origin);
-            System.out.println("origin : " + origin);
-        } catch (ParseException ex) {
-            IOException pex = new IOException("Error converting initial time of wind dataset into seconds ==> " + ex.toString());
-            pex.setStackTrace(ex.getStackTrace());
-            throw pex;
-        }
-        if (origin == 0) {
-            Calendar calendartmp;
-            SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-            Calendar calendar_o = Calendar.getInstance();
-            calendar_o.setTime(INPUT_DATE_FORMAT.parse(time_origin));
-            int year_o = calendar_o.get(Calendar.YEAR);
-            int month_o = calendar_o.get(Calendar.MONTH);
-            int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
-            int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
-            int min_o = calendar_o.get(Calendar.MINUTE);
-            calendartmp = new InterannualCalendar(year_o, month_o, day_o, hour_o, min_o);
-            INPUT_DATE_FORMAT.setCalendar(calendartmp);
-            String origin_hydro = getSimulationManager().getParameterManager().getParameter("app.time", "time_origin");
-            calendartmp.setTime(INPUT_DATE_FORMAT.parse(origin_hydro));
-            origin = -calendartmp.getTimeInMillis() / 1000L;
-        }
-        switch (units) {
-            case "seconds":
-                return time + origin;
-            case "minutes":
-                return time * 60.0 + origin;
-            case "hours":
-                return time * 3600.0 + origin;
-            case "days":
-                return time * 3600L * 24L + origin;
-            default:
-                throw new UnsupportedOperationException("{Wind Dataset} Unknown time unit");
-        }
-    }
+    
 
     void readLonLat() throws IOException {
         Array arrLon = null, arrLat = null;
@@ -452,28 +348,7 @@ public class WindDriftFileAction extends WindDriftAction {
         }
     }
 
-    int findCurrentRank(double time) throws Exception {
 
-        int lrank = 0;
-        int time_arrow = (int) Math.signum(getSimulationManager().getTimeManager().get_dt());
-        double time_rank;
-        try {
-            Array timeArr = ncIn.findVariable(strTime).read();
-            time_rank = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
-            while (time >= time_rank) {
-                if (time_arrow < 0 && time == time_rank) {
-                    break;
-                }
-                lrank++;
-                time_rank = skipSeconds(conversion2seconds(timeArr.getDouble(timeArr.getIndex().set(lrank))));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            lrank = nbTimeRecords;
-        }
-        lrank = lrank - (time_arrow + 1) / 2;
-
-        return lrank;
-    }
 
     private String getNextFile(int time_arrow) throws IOException {
 
@@ -494,9 +369,7 @@ public class WindDriftFileAction extends WindDriftAction {
         vw_tp1 = readVariable(strVW);
 
         try {
-            Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = conversion2seconds(xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank)));
-            time_tp1 -= time_tp1 % 100;
+            time_tp1 = DatasetUtil.getDate(ncIn.getLocation(), strTime, rank);
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading time variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -546,5 +419,4 @@ public class WindDriftFileAction extends WindDriftAction {
         dWi[1] = convention * wind_factor * (dx * Math.sin(angle) + dy * Math.cos(angle));
         return dWi;
     }
-
 }

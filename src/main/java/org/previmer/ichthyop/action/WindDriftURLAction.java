@@ -46,6 +46,8 @@ package org.previmer.ichthyop.action;
 
 import java.io.IOException;
 import java.util.logging.Level;
+
+import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
@@ -92,7 +94,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
         double t0 = getSimulationManager().getTimeManager().get_tO();
         readTimeLength();
         checkInitTime(ncIn, strTime);
-        rank = findCurrentRank(t0);
+        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
     }
 
@@ -108,8 +110,8 @@ public class WindDriftURLAction extends WindDriftFileAction {
             throw ioex;
         }
         int ntime = timeArr.getShape()[0];
-        double time0 = skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(0))));
-        double timeN = skipSeconds(conversion2seconds(timeArr.getLong(timeArr.getIndex().set(ntime - 1))));
+        double time0 = DatasetUtil.getDate(nc.getLocation(), strTime, 0);
+        double timeN = DatasetUtil.getDate(nc.getLocation(), strTime, ntime - 1);
         if (time < time0 || time > timeN) {
             StringBuilder msg = new StringBuilder();
             msg.append("{Wind dataset} Time value ");
@@ -140,21 +142,13 @@ public class WindDriftURLAction extends WindDriftFileAction {
         setAllFieldsTp1AtTime(rank);
     }
 
-     void setAllFieldsTp1AtTime(int i_time) throws Exception {
+    void setAllFieldsTp1AtTime(int i_time) throws Exception {
 
         double time_tp0 = time_tp1;
         uw_tp1 = readVariable(strUW);
         vw_tp1 = readVariable(strVW);
 
-        try {
-            Array xTimeTp1 = ncIn.findVariable(strTime).read();
-            time_tp1 = conversion2seconds(xTimeTp1.getDouble(xTimeTp1.getIndex().set(rank)));
-            time_tp1 -= time_tp1 % 100;
-        } catch (Exception ex) {
-            IOException ioex = new IOException("Error reading time variable. " + ex.toString());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
+        time_tp1 = DatasetUtil.getDate(ncIn.getLocation(), strTime, rank);
 
         dt_wind = Math.abs(time_tp1 - time_tp0);
     }

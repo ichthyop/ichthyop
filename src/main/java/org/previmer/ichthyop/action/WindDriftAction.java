@@ -45,6 +45,7 @@
 package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.manager.TimeManager;
 
 public class WindDriftAction extends AbstractAction {
 
@@ -121,4 +122,9 @@ public class WindDriftAction extends AbstractAction {
     double skipSeconds(double time) {
         return 100.d * Math.floor(time / 100.d);
     }
+        
+    int timeArrow() {
+        return getSimulationManager().getParameterManager().getParameter("app.time", "time_arrow").equals(TimeManager.TimeDirection.FORWARD.toString()) ? 1 :-1;
+    }
+    
 }
