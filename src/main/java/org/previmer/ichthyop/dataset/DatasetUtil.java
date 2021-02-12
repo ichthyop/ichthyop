@@ -462,8 +462,23 @@ public class DatasetUtil {
         // Extract the NetCDF reference date by removing the
         // prefix (day(s), month(s) or day(s)) and the seconds values
         int beginIndex = units.indexOf("since") + 5;
-        int endIndex = units.lastIndexOf(":");
-        String subUnits = units.substring(beginIndex, endIndex).trim();
+        String subUnits = units.substring(beginIndex);
+        
+        int endIndex = subUnits.lastIndexOf(":");
+        int intIndex = subUnits.indexOf(":");
+        
+        if ((endIndex == -1) && (intIndex == -1)) {
+            // if no hour is found, assumes that 00:00
+            subUnits = subUnits + " 00:00";
+        } else if (endIndex == intIndex) {
+            // if hour-minute, units is used as a whole
+        } else {
+            // if 00:00:00, removes the seconds
+            subUnits = subUnits.substring(0, endIndex).trim();
+        }
+        
+        subUnits = subUnits.trim();
+
         dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
 
