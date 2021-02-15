@@ -494,5 +494,19 @@ public class DatasetUtil {
         return output;
 
     }
+    
+    /** Converts longitudes from one system (Atlantic or Pacific) to another. 
+     * 
+     * Improved from https://stackoverflow.com/questions/53345442/about-changing-longitude-array-from-0-360-to-180-to-180-with-python-xarray
+     */
+    public static double lonFlip(double lon, DatasetCenteringBasin outputBasin) {
+        
+        // Converts longitudes from [-180/180] to [0, 360]
+        if(outputBasin == DatasetCenteringBasin.PACIFIC) { 
+            return (lon + 180) % 360 - 180;
+        } else {
+            return (lon + 360) % 360;
+        }
+    }
         
 }
