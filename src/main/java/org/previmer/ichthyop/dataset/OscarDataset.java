@@ -326,16 +326,20 @@ public class OscarDataset extends AbstractDataset {
         final int j = (int) Math.floor(y);
         final double dy = y - j;
         double lat = (1 - dy) * latitude[j] + dy * latitude[j + 1];
+        
+        // the DAP values are 1081 long, so off was 1080
+        // new files are 1201 long, so off must be 1200
+        int off = this.longitude.length - 1;
 
         // x to longitude
         final int i = (int) Math.floor(x);
         final double dx = x - i;
         int ci = i;
         if (i < 0) {
-            ci = i + 1080;
+            ci = i + off;
         }
         if (i > nlon - 2) {
-            ci = i - 1080;
+            ci = i - off;
         }
         double lon = (1 - dx) * longitude[ci] + dx * longitude[ci + 1];
 
