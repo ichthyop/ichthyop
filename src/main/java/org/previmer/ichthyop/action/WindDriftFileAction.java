@@ -50,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.previmer.ichthyop.dataset.DatasetCenteringBasin;
 import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import org.previmer.ichthyop.io.IOTools;
@@ -135,6 +137,8 @@ public class WindDriftFileAction extends WindDriftAction {
      * V wind variable
      */
     RequiredExternalVariable V_variable;
+    
+    DatasetCenteringBasin basin = null; 
 
     @Override
     public void loadParameters() throws Exception {
@@ -151,14 +155,23 @@ public class WindDriftFileAction extends WindDriftAction {
         strLon = getParameter("longitude");
         strLat = getParameter("latitude");
         convention = getParameter("wind_convention").equals("wind to") ? 1 : -1;
+        
+        if(!this.isNull("basin_center")) {
+            String basinCenter = getParameter("basin_center").toLowerCase();
+            if(basinCenter == "pacific") {
+                basin = DatasetCenteringBasin.PACIFIC;
+            } else {
+                basin =  DatasetCenteringBasin.ATLANTIC;
+            }
+        }
 
         getDimNC();
         setOnFirstTime();
         setAllFieldsTp1AtTime(rank);
         readLonLat();
 
-        U_variable = new RequiredExternalVariable(latRho, lonRho, uw_tp0, uw_tp1, getSimulationManager().getDataset());
-        V_variable = new RequiredExternalVariable(latRho, lonRho, vw_tp0, vw_tp1, getSimulationManager().getDataset());
+        U_variable = new RequiredExternalVariable(latRho, lonRho, uw_tp0, uw_tp1, getSimulationManager().getDataset(), basin);
+        V_variable = new RequiredExternalVariable(latRho, lonRho, vw_tp0, vw_tp1, getSimulationManager().getDataset(), basin);
 
     }
 

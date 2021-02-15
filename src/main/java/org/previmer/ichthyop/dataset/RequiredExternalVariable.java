@@ -63,6 +63,9 @@ public class RequiredExternalVariable {
     private final int ny_file;
     private final double[][] latRho;
     private final double[][] lonRho;
+    
+    /** Values for the centering basin. Initialised as null first. */;
+    private DatasetCenteringBasin centeringBasin = null;
 
     public RequiredExternalVariable(double[][] lat, double[][] lon, Array variable0, Array variable1, IDataset dataset_hydro) throws IOException {
         this.dataset = dataset_hydro;
@@ -81,6 +84,12 @@ public class RequiredExternalVariable {
                     + dataset.getLonMax() + "     " + dataset.getLatMin() + " " + dataset.getLatMax());
         }
     }
+    
+    public RequiredExternalVariable(double[][] lat, double[][] lon, Array variable0, Array variable1, IDataset dataset_hydro, DatasetCenteringBasin basin) throws IOException {
+        this(lat, lon, variable0, variable1, dataset_hydro);
+        this.centeringBasin = basin;
+    }
+
 
     private boolean isInto(IDataset dataset) {
         boolean isInto = true;
@@ -222,6 +231,13 @@ public class RequiredExternalVariable {
         boolean found;
         int imin, imax, jmin, jmax, i0, j0;
         double dx1, dy1, dx2, dy2, c1, c2, deltax, deltay, xgrid, ygrid;
+        
+        // Patch for Taha:
+        // if the centeringBasin class has been initialized (would be the case for Taha)
+        // and if dataset is Oscar (i.e. Pacific centerred), longitudes are converted into [-180, 180]
+        if((this.centeringBasin == DatasetCenteringBasin.ATLANTIC) && (this.dataset.getClass() == OscarDataset.class)) {
+            lon = DatasetUtil.lonFlip(lon, this.centeringBasin); // converts lon from Oscar system to wind system
+        }
 
         xgrid = -1.;
         ygrid = -1.;
