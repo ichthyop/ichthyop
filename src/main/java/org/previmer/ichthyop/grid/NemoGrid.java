@@ -1078,8 +1078,9 @@ public class NemoGrid extends AbstractGrid {
         double kz = pGrid[2];
 
         int i = (int) Math.round(ix);
-        int j = (int) (jy);
-        int k = (int) kz;
+        int j = (int) Math.floor(jy);
+        int k = (int) Math.floor(kz);
+        
         double output = 0;
         double weight = 0;
         for (int kk = 0; kk < 1; kk++) {
@@ -1114,9 +1115,9 @@ public class NemoGrid extends AbstractGrid {
         double jy = pGrid[1];
         double kz = pGrid[2];
 
-        int i = (int) ix;
+        int i = (int) Math.floor(ix);
         int j = (int) Math.round(jy);
-        int k = (int) kz;
+        int k = (int) Math.floor(kz);
         double output = 0;
         double weight = 0;
 
@@ -1153,9 +1154,9 @@ public class NemoGrid extends AbstractGrid {
         double jy = pGrid[1];
         double kz = pGrid[2];
         
-        int i = (int) (ix);
-        int j = (int) (jy);
-        int k = (int) (kz);
+        int i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy);
+        int k = (int) Math.floor(kz);
         
         double output = 0;
         double weight = 0;
