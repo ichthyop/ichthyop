@@ -85,31 +85,48 @@ public class RequiredExternalVariable {
     private boolean isInto(IDataset dataset) {
         boolean isInto = true;
 
+        /** Coordinates for the required dataset, i.e. 
+         * the wind coordinates. */
         double lat_min_meteo = latRho[0][0];
         double lat_max_meteo = latRho[ny_file - 1][0];
         double lon_min_meteo = lonRho[0][0];
         double lon_max_meteo = lonRho[0][nx_file - 1];
 
+        /** Coordinates for the input dataset, i.e. OSCAR */
         double lon_max = dataset.getLonMax();
         double lat_max = dataset.getLatMax();
         double lon_min = dataset.getLonMin();
         double lat_min = dataset.getLatMin();
 
-        if (lon_max > lon_max_meteo) {
-            isInto = false;
-        } else {
+        if (this.dataset.getClass() == OscarDataset.class) {
+            // If Oscar Dataset, we assume that all longitudes are represented.
+            // only latitudes are compared. 
             if (lat_max > lat_max_meteo) {
                 isInto = false;
             } else {
                 if (lat_min < lat_min_meteo) {
                     isInto = false;
+                }
+            }
+        } else {
+            // for the other datasets, longitudes are also compared.
+            if (lon_max > lon_max_meteo) {
+                isInto = false;
+            } else {
+                if (lat_max > lat_max_meteo) {
+                    isInto = false;
                 } else {
-                    if (lon_min < lon_min_meteo) {
+                    if (lat_min < lat_min_meteo) {
                         isInto = false;
+                    } else {
+                        if (lon_min < lon_min_meteo) {
+                            isInto = false;
+                        }
                     }
                 }
             }
         }
+        
 
         return isInto;
     }
