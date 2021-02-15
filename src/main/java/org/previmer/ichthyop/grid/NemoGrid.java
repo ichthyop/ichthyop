@@ -182,7 +182,7 @@ public class NemoGrid extends AbstractGrid {
         e3t = read_e3_field(nc, stre3t);
         
         if (stre3u.equals(stre3t)) {
-            e3u =e3t;
+            e3u = e3t;
         } else {
             e3u = read_e3_field(nc, stre3u);
         }
@@ -246,8 +246,8 @@ public class NemoGrid extends AbstractGrid {
                     }
                 }
             }
-
         }
+        
         return field;
     }
 
