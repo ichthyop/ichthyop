@@ -136,7 +136,6 @@ public class RequiredExternalVariable {
             }
         }
         
-
         return isInto;
     }
 
@@ -224,6 +223,7 @@ public class RequiredExternalVariable {
         this.array_tp1 = array_tp1;
     }
 
+    /** Converts lat/lon from Dataset into X/Y coordinates for the NetCDF file. */
     public double[] latlon2xy(double lat, double lon) {
 
         //--------------------------------------------------------------------

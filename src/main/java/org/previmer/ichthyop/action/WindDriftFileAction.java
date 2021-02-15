@@ -424,8 +424,12 @@ public class WindDriftFileAction extends WindDriftAction {
             }
         }
         double dx, dy;
+        // Recover the lon/lat in Dataset System (Pacific-center for Oscar).
         double[] latlon = getSimulationManager().getDataset().xy2latlon(pgrid[0], pgrid[1]);
         double one_deg_lon_meter = ONE_DEG_LATITUDE_IN_METER * Math.cos(Math.PI * latlon[0] / 180.d);
+        
+        // Recovers the displacement for the particule, given the wind-speed.
+        // Converts from "m" to delta in longitude/latitude.
         dx = dt * U_variable.getVariable(pgrid, time) / one_deg_lon_meter;
         dy = dt * V_variable.getVariable(pgrid, time) / ONE_DEG_LATITUDE_IN_METER;
         dWi[0] = convention * wind_factor * (dx * Math.cos(angle) - dy * Math.sin(angle));
