@@ -189,6 +189,9 @@ public class WindDriftFileAction extends WindDriftAction {
                     shape = new int[]{1, ny, nx};
                     break;
             }
+            
+            getLogger().log(Level.INFO, "Read wind variable {0} at time index {1}", new Object[] {name, rank});
+            
             return variable.read(origin, shape).reduce();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading UW wind velocity variable. " + ex.toString());
