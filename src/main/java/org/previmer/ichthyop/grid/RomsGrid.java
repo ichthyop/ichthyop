@@ -44,6 +44,9 @@ package org.previmer.ichthyop.grid;
 
 import java.io.IOException;
 
+import ucar.ma2.Array;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
@@ -58,7 +61,7 @@ public class RomsGrid extends AbstractGrid {
     /**
      * Name of the Dimension in NetCDF file
      */
-    private String strXiDim, strEtaDim, strTimeDim;
+    private String strXiDim, strEtaDim;
 
     /**
      * Name of the Variable in NetCDF file
@@ -68,6 +71,24 @@ public class RomsGrid extends AbstractGrid {
      * Name of the Variable in NetCDF file
      */
     private String strPn, strPm;
+    
+     /**
+     * Longitude at rho point.
+     */
+    private double[][] lonRho;
+    /**
+     * Latitude at rho point.
+     */
+    private double[][] latRho;
+    /**
+     * Bathymetry
+     */
+    private double[][] hRho;
+
+    /**
+     *
+     */
+    private double[][] pm, pn;
     
     /**
      * Determines whether or not the turbulent diffusivity should be read in the
@@ -152,7 +173,6 @@ public class RomsGrid extends AbstractGrid {
     public void loadParameters() {
         strXiDim = getParameter("field_dim_xi");
         strEtaDim = getParameter("field_dim_eta");
-        strTimeDim = getParameter("field_dim_time");
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
         strBathy = getParameter("field_var_bathy");
@@ -313,5 +333,98 @@ public class RomsGrid extends AbstractGrid {
         return output;
         
     }
+    
+    void readConstantField(String gridFile) throws IOException {
+
+        int[] origin = new int[]{get_jpo(), get_ipo()};
+        int[] size = new int[]{get_ny(), get_nx()};
+        Array arrLon, arrLat, arrMask, arrH, arrPm, arrPn;
+        Index index;
+
+        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
+        try {
+            arrLon = ncGrid.findVariable(strLon).read(origin, size);
+        } catch (IOException | InvalidRangeException e) {
+            IOException ioex = new IOException("Problem reading dataset longitude. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrLat = ncGrid.findVariable(strLat).read(origin, size);
+        } catch (IOException | InvalidRangeException e) {
+            IOException ioex = new IOException("Problem reading dataset latitude. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrMask = ncGrid.findVariable(strMask).read(origin, size);
+        } catch (IOException | InvalidRangeException e) {
+            IOException ioex = new IOException("Problem reading dataset mask. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrH = ncGrid.findVariable(strBathy).read(origin, size);
+        } catch (IOException | InvalidRangeException e) {
+            IOException ioex = new IOException("Problem reading dataset bathymetry. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrPm = ncGrid.findVariable(strPm).read(origin, size);
+        } catch (IOException | InvalidRangeException e) {
+            IOException ioex = new IOException("Problem reading dataset pm metrics. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+
+        try {
+            arrPn = ncGrid.findVariable(strPn).read(origin, size);
+        } catch (IOException | InvalidRangeException e) {
+            IOException ioex = new IOException("Problem reading dataset pn metrics. " + e.toString());
+            ioex.setStackTrace(e.getStackTrace());
+            throw ioex;
+        }
+        ncGrid.close();
+
+        lonRho = new double[get_ny()][get_nx()];
+        latRho = new double[get_ny()][get_nx()];
+        index = arrLon.getIndex();
+        for (int j = 0; j < get_ny(); j++) {
+            for (int i = 0; i < get_nx(); i++) {
+                index.set(j, i);
+                lonRho[j][i] = arrLon.getDouble(index);
+                latRho[j][i] = arrLat.getDouble(index);
+            }
+        }
+
+        maskRho = new byte[get_ny()][get_nx()];
+        index = arrMask.getIndex();
+        for (int j = 0; j < get_ny(); j++) {
+            for (int i = 0; i < get_nx(); i++) {
+                maskRho[j][i] = arrMask.getByte(index.set(j, i));
+            }
+        }
+
+        pm = new double[get_ny()][get_nx()];
+        pn = new double[get_ny()][get_nx()];
+        index = arrPm.getIndex();
+        for (int j = 0; j < get_ny(); j++) {
+            for (int i = 0; i < get_nx(); i++) {
+                index.set(j, i);
+                pm[j][i] = arrPm.getDouble(index);
+                pn[j][i] = arrPn.getDouble(index);
+            }
+        }
+
+        hRho = new double[get_ny()][get_nx()];
+        index = arrH.getIndex();
+        for (int j = 0; j < get_ny(); j++) {
+            for (int i = 0; i < get_nx(); i++) {
+                hRho[j][i] = arrH.getDouble(index.set(j, i));
+            }
+        }
+    }
+    
     
 }
