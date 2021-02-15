@@ -10,6 +10,7 @@
 - New constructor for the `InterAnnualCalendar` object
 - Saving the stage values in the `DebGrowthAction.java`
 - Update in the OpenDap URL of the `Oscar` dataset.
+- Adding a `lonFlip` method in `DatasetUtil.java` to move from `[0, 360]` to `[-180, 180]` longitudes, and conversely. 
 
 ### Bug fix
 
@@ -17,6 +18,7 @@
 - Correction in the saving of zones areas: `zoneX` is the dimension (number of points) while `coord_zoneX` is the coordinates of each point. Allows to read file using Python Xarray without problems.
 - Correction in the time management in Ichthtyop. Use `LocalDateTime` extensively.
 - Correction in zonal cyclicity for `OscarDataset` (hardcoded to `1080` but the file dimension is now `1201`) depending on the file.
+- Adding patch for Taha, when using wind (Atlantic-centerred) with Oscar datasets. In the `RequiredExternalVariable.isInto` method, only latitude is compared. In the `latlon2xy` method, the longitudes are flipped.
 
 ## Changes in Ichthyop 3.3.6
 
