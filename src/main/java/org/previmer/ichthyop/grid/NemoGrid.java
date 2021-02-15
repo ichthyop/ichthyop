@@ -1089,7 +1089,7 @@ public class NemoGrid extends AbstractGrid {
                     double coy = Math.abs(jy - j - 1 + jj);
                     double coz = Math.abs(kz - k - 1 + kk);
                     double co = cox * coy * coz;
-                    output += variable[k + kk][i - ii][j + jj] * co * co;
+                    output += variable[k + kk][i - ii][j + jj] * co;
                     weight += co;
                 }
             }
@@ -1128,7 +1128,7 @@ public class NemoGrid extends AbstractGrid {
                     double cox = Math.abs(ix - i - 1 + ii);
                     double coz = Math.abs(kz - k - 1 + kk);
                     double co = cox * coy * coz;
-                    output += variable[k + kk][i + ii][j - jj] * co * co;
+                    output += variable[k + kk][i + ii][j - jj] * co;
                     weight += co;
                 }
             }
@@ -1167,7 +1167,7 @@ public class NemoGrid extends AbstractGrid {
                     double coy = Math.abs(jy - j - 1 + jj);
                     double coz = Math.abs(kz - k - 1 + kk);
                     double co = cox * coy * coz;
-                    output += variable[k + kk][i + ii][j + jj] * co * co;
+                    output += variable[k + kk][i + ii][j + jj] * co;
                     weight += co;
                 }
             }
