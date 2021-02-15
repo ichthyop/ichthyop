@@ -145,7 +145,7 @@ public class OscarDataset extends AbstractDataset {
     private String mask_file;
     private double[][] mask_array;
     
-    
+
     @Override
     void loadParameters() {
 
