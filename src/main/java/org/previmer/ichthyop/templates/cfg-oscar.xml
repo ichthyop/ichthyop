@@ -201,8 +201,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>opendap_url</key>
                 <long_name>OpenDAP URL</long_name>
-                <value>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/FOR_LAS_ALL_OSCAR_L4_OC_third-deg_FOR_LAS.nc</value>
-                <default>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/FOR_LAS_ALL_OSCAR_L4_OC_third-deg_FOR_LAS.nc</default>
+                <value>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/ALL_OSCAR_L4_OC_third-deg.nc</value>
+                <default>http://thredds.jpl.nasa.gov/thredds/dodsC/ocean_circulation/ALL_OSCAR_L4_OC_third-deg.nc</default>
                 <description>OpenDAP URL of the OSCAR dataset. You can check the validity of the given URL by typing it in the URL adress bar of your web browser and appending ".html" at the end of the URL.</description>
             </parameter>
             <parameter>
