@@ -15,6 +15,7 @@
 - Correction of the pC calculation in the classical DEB (forgot Tahr correction) + change starvation correction (`||` instead of `&&`)
 - Correction in the saving of zones areas: `zoneX` is the dimension (number of points) while `coord_zoneX` is the coordinates of each point. Allows to read file using Python Xarray without problems.
 - Correction in the time management in Ichthtyop. Use `LocalDateTime` extensively.
+- Correction in zonal cyclicity for `OscarDataset` (hardcoded to `1080` but the file dimension is now `1201`) depending on the file.
 
 ## Changes in Ichthyop 3.3.6
 
