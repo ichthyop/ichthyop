@@ -43,6 +43,10 @@
 package org.previmer.ichthyop.grid;
 
 import java.io.IOException;
+import java.util.logging.Level;
+
+import org.previmer.ichthyop.ui.LonLatConverter;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
 import ucar.ma2.Array;
 import ucar.ma2.Index;
@@ -50,6 +54,21 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
+/** Class to manage Roms grid. 
+ * 
+ * The Grid layout in Roms is as follows:
+ * 
+ * +----------+------------+
+ * |          |            |     
+ * |          |            |      
+ * |          |            |       
+ * |----------+--V(i,j+1)--|        
+ * |          |            |  
+ * |        U(i,j) T(i,j) U(i+1, j) 
+ * |          |            |       
+ * +----------+--V(i,j)----+       
+ * 
+ */
 public class RomsGrid extends AbstractGrid {
     
     /**
@@ -89,13 +108,7 @@ public class RomsGrid extends AbstractGrid {
      *
      */
     private double[][] pm, pn;
-    
-    /**
-     * Determines whether or not the turbulent diffusivity should be read in the
-     * NetCDF file, function of the user's options.
-     */
-    String gridFile;
-    
+        
     public RomsGrid(String filename) {
         super(filename);    
     }
@@ -112,15 +125,15 @@ public class RomsGrid extends AbstractGrid {
         openDataset();
         //openLocation(getParameter("input_path"));
         getDimNC();
-        //shrinkGrid();
-        //readConstantField(gridFile);
+        shrinkGrid();
+        readConstantField(this.getFilename());
         getDimGeogArea();
 
 
     }
     
     void openDataset() throws IOException {
-       ncIn = NetcdfDataset.openDataset(gridFile);
+       ncIn = NetcdfDataset.openDataset(this.getFilename());
     }
     
     /**
@@ -150,14 +163,15 @@ public class RomsGrid extends AbstractGrid {
 
     @Override
     public boolean is3D() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public double getBathy(int i, int j) {
-        // TODO Auto-generated method stub
-        return 0;
+        if (isInWater(i, j)) {
+            return hRho[j][i];
+        }
+        return Double.NaN;
     }
 
     @Override
@@ -171,12 +185,12 @@ public class RomsGrid extends AbstractGrid {
 
     @Override
     public void loadParameters() {
-        strXiDim = getParameter("field_dim_xi");
-        strEtaDim = getParameter("field_dim_eta");
-        strLon = getParameter("field_var_lon");
-        strLat = getParameter("field_var_lat");
-        strBathy = getParameter("field_var_bathy");
-        strMask = getParameter("field_var_mask");
+        this.strXiDim = getParameter("field_dim_xi");
+        this.strEtaDim = getParameter("field_dim_eta");
+        this.strLon = getParameter("field_var_lon");
+        this.strLat = getParameter("field_var_lat");
+        this.strBathy = getParameter("field_var_bathy");
+        this.strMask = getParameter("field_var_mask");
         this.strPn = getParameter("field_var_pn");
         this.strPm = getParameter("field_var_pm");
     }
@@ -264,7 +278,7 @@ public class RomsGrid extends AbstractGrid {
         
     }
     
-    /** Interpolation of tracer field on T grid */
+    /** Interpolation of tracer field on U grid */
     public double interpolateU(double[] pGrid, double[][][] variable) { 
         
         double ix = pGrid[0];
@@ -299,7 +313,7 @@ public class RomsGrid extends AbstractGrid {
         
     }
     
-     /** Interpolation of tracer field on T grid */
+     /** Interpolation of tracer field on V grid */
      public double interpolateV(double[] pGrid, double[][][] variable) { 
         
         double ix = pGrid[0];
@@ -426,5 +440,100 @@ public class RomsGrid extends AbstractGrid {
         }
     }
     
+    
+    public void shrinkGrid() {
+        boolean isParamDefined;
+        try {
+            Boolean.valueOf(getParameter("shrink_domain"));
+            isParamDefined = true;
+        } catch (NullPointerException ex) {
+            isParamDefined = false;
+        }
+
+        if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
+            try {
+                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                range(lat1, lon1, lat2, lon2);
+            } catch (IOException | NumberFormatException ex) {
+                getLogger().log(Level.WARNING, "Failed to resize domain", ex);
+            }
+        }
+    }
+    
+    /**
+     * Resizes the domain and determines the range of the grid indexes taht will
+     * be used in the simulation. The new domain is limited by the Northwest and
+     * the Southeast corners.
+     *
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     * corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     * corner
+     * @throws an IOException if the new domain is not strictly nested within
+     * the NetCDF dataset domain.
+     */
+    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        readLonLat(this.getFilename());
+
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
+        }
+        lonRho = null;
+        latRho = null;
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        set_ipo((int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0])));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        set_jpo((int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1])));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        set_nx(Math.min(get_nx(), ipn - get_ipo() + 1));
+        set_ny(Math.min(get_ny(), jpn - get_jpo() + 1));
+        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+    }
+    
+     /**
+     * Reads longitude and latitude fields in NetCDF dataset
+     */
+    void readLonLat(String gridFile) throws IOException {
+
+        Array arrLon, arrLat;
+        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
+        try {
+            arrLon = ncIn.findVariable(strLon).read();
+        } catch (IOException ex) {
+            IOException ioex = new IOException("Error reading dataset longitude. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        try {
+            arrLat = ncIn.findVariable(strLat).read();
+        } catch (IOException ex) {
+            IOException ioex = new IOException("Error reading dataset latitude. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        ncGrid.close();
+
+        latRho = new double[get_ny()][get_nx()];
+        lonRho = new double[get_ny()][get_nx()];
+        Index index = arrLon.getIndex();
+        for (int j = 0; j < get_ny(); j++) {
+            for (int i = 0; i < get_nx(); i++) {
+                index.set(j, i);
+                lonRho[j][i] = arrLon.getDouble(index);
+                latRho[j][i] = arrLat.getDouble(index);
+            }
+        }
+    }
     
 }
