@@ -57,8 +57,20 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.dataset.NetcdfDataset;
 
-/**
- *
+/** Class to manage Nemo grid. 
+ * 
+ * The Grid layout in Roms is as follows:
+ * 
+ * +----------+------------+
+ * |          |            |     
+ * |          |            |      
+ * |          |            |       
+ * |----------+--V(i,j)----|        
+ * |          |            |  
+ * |      U(i-1,j) T(i,j) U(i,j) 
+ * |          |            |       
+ * +----------+--V(i,j-1)--+       
+ * 
  * @author Nicolas Barrier
  */
 public class NemoGrid extends AbstractGrid {
