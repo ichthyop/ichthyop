@@ -308,9 +308,8 @@ public class WindDriftFileAction extends WindDriftAction {
     private void setOnFirstTime() throws Exception {
 
         double t0 = getSimulationManager().getTimeManager().get_tO();
-        int fileRank = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
-        
-        open(getFile(fileRank));
+        this.indexFile = DatasetUtil.index(listInputFiles, t0, timeArrow(), strTime);
+        open(getFile(this.indexFile));
         readTimeLength();
         rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow());
         time_tp1 = t0;
