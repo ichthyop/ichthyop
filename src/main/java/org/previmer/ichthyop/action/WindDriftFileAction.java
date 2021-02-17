@@ -167,7 +167,8 @@ public class WindDriftFileAction extends WindDriftAction {
 
         getDimNC();
         setOnFirstTime();
-        setAllFieldsTp1AtTime(rank);
+        //setAllFieldsTp1AtTime();
+        this.setAllFieldsTpAtInit();
         readLonLat();
 
         U_variable = new RequiredExternalVariable(latRho, lonRho, uw_tp0, uw_tp1, getSimulationManager().getDataset(), basin);
@@ -280,6 +281,32 @@ public class WindDriftFileAction extends WindDriftAction {
             throw ioex;
         }
     }
+    
+    private void setAllFieldsTpAtInit() throws Exception {
+        
+        // read the fields on the left, i.e. the values that are valid for the first step
+        double time_tp0 = DatasetUtil.getDate(ncIn.getLocation(), strTime, rank);
+        uw_tp0 = readVariable(strUW);
+        vw_tp0 = readVariable(strVW);
+        
+        // Now increments the value for the rank value and eventually update the file to read.
+        int time_arrow = timeArrow();
+        rank += time_arrow;
+        if (rank > (nbTimeRecords - 1) || rank < 0) {
+            ncIn.close();
+            open(getNextFile(time_arrow));
+            nbTimeRecords = ncIn.findDimension(strTime).getLength();
+            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
+        }
+        
+        // computation of the right fields
+        uw_tp1 = readVariable(strUW);
+        vw_tp1 = readVariable(strVW);
+        time_tp1 = DatasetUtil.getDate(ncIn.getLocation(), strTime, rank);
+        
+        dt_wind = Math.abs(time_tp1 - time_tp0);
+
+    }
 
     private void nextStepTriggered() throws Exception {
         double time = getSimulationManager().getTimeManager().getTime();
@@ -301,7 +328,7 @@ public class WindDriftFileAction extends WindDriftAction {
             nbTimeRecords = ncIn.findDimension(strTime).getLength();
             rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
         }
-        setAllFieldsTp1AtTime(rank);
+        setAllFieldsTp1AtTime();
 
     }
 
@@ -363,8 +390,6 @@ public class WindDriftFileAction extends WindDriftAction {
         }
     }
 
-
-
     private String getNextFile(int time_arrow) throws IOException {
 
         int index = indexFile - (1 - time_arrow) / 2;
@@ -376,7 +401,7 @@ public class WindDriftFileAction extends WindDriftAction {
         return listInputFiles.get(indexFile);
     }
 
-    private void setAllFieldsTp1AtTime(int i_time) throws Exception {
+    private void setAllFieldsTp1AtTime() throws Exception {
 
         double time_tp0 = time_tp1;
 
