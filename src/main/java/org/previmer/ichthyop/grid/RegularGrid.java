@@ -972,16 +972,16 @@ public class RegularGrid extends AbstractGrid {
      * On regular grid, U points are located at the cell center (as T)
      * 
     */
-    public double interpolateU(double[] pGrid, double[][] variable) {
-        return this.interpolateT(pGrid, variable);    
+    public double interpolate2dU(double[] pGrid, double[][][] variable, int kIndex) {
+        return this.interpolate2dT(pGrid, variable, kIndex);    
     }
     
     /** Method to interpolate a V variable. 
      * On regular grid, U points are located at the cell center (as  T)
      * 
     */
-    public double interpolateV(double[] pGrid, double[][] variable) {
-        return this.interpolateT(pGrid, variable);
+    public double interpolate2dV(double[] pGrid, double[][][] variable, int kIndex) {
+        return this.interpolate2dT(pGrid, variable, kIndex);
     }
     
          
@@ -989,7 +989,7 @@ public class RegularGrid extends AbstractGrid {
      * On regular grid, T points are in the center of the cell.
      * 
     */
-    public double interpolateT(double[] pGrid, double[][] variable) {
+    public double interpolate2dT(double[] pGrid, double[][][] variable, int kIndex) {
         
         double ix = pGrid[0];
         double jy = pGrid[1];
@@ -1004,7 +1004,7 @@ public class RegularGrid extends AbstractGrid {
                 double cox = Math.abs(ix - i - 1 - ii);
                 double coy = Math.abs(jy - j - 1 + jj);
                 double co = cox * coy;
-                output += variable[i + ii][j + jj] * co * co;
+                output += variable[kIndex][i + ii][j + jj] * co * co;
                 weight += co;
             }
         }

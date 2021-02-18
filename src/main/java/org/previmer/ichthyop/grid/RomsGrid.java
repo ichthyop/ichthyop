@@ -244,32 +244,51 @@ public class RomsGrid extends AbstractGrid {
     
     
     /** Interpolation of tracer field on T grid */
-    public double interpolateT(double[] pGrid, double[][][] variable) { 
+    public double interpolate2dT(double[] pGrid, double[][][] variable, int kIndex) { 
         
         double ix = pGrid[0];
         double jy = pGrid[1];
-        double kz = pGrid[2];
         
         int i = (int) Math.floor(ix);
         int j = (int) Math.floor(jy);
+        
+        double output = 0;
+        double weight = 0;
+       
+        for (int jj = 0; jj < 1; jj++) {
+            for (int ii = 0; ii < 1; ii++) {
+                double cox = Math.abs(ix - i - 1 - ii);
+                double coy = Math.abs(jy - j - 1 + jj);
+                double co = cox * coy;
+                output += variable[kIndex][i + ii][j + jj] * co;
+                weight += co;
+            }
+        }
+        
+        if(weight != 0) { 
+            output /= weight;
+        }
+        
+        return output;
+        
+    }
+    
+      /** Interpolation of tracer field on T grid */
+      public double interpolate3dT(double[] pGrid, double[][][] variable) { 
+        
+        double kz = pGrid[2];
+        
         int k = (int) Math.floor(kz);
         
         double output = 0;
         double weight = 0;
        
         for (int kk = 0; kk < 1; kk++) {
-            for (int jj = 0; jj < 1; jj++) {
-                for (int ii = 0; ii < 1; ii++) {
-                    double cox = Math.abs(ix - i - 1 - ii);
-                    double coy = Math.abs(jy - j - 1 + jj);
-                    double coz = Math.abs(kz - k - 1 + kk);
-                    double co = cox * coy * coz;
-                    output += variable[k + kk][i + ii][j + jj] * co;
-                    weight += co;
-                }
-            }
+            double coz = Math.abs(kz - k - 1 + kk);
+            output += this.interpolate2dT(pGrid, variable, k + kk) * coz;
+            weight += coz;
         }
-        
+         
         if(weight != 0) { 
             output /= weight;
         }
@@ -279,29 +298,78 @@ public class RomsGrid extends AbstractGrid {
     }
     
     /** Interpolation of tracer field on U grid */
-    public double interpolateU(double[] pGrid, double[][][] variable) { 
+    public double interpolate2dU(double[] pGrid, double[][][] variable, int kIndex) {
+
+        double ix = pGrid[0];
+        double jy = pGrid[1];
+
+        int i = (int) Math.floor(ix);
+        int j = (int) Math.floor(jy);
+
+        double output = 0;
+        double weight = 0;
+
+        for (int jj = 0; jj < 1; jj++) {
+            for (int ii = 0; ii < 1; ii++) {
+                double cox = Math.abs(ix - i - 0.5 + ii);
+                double coy = Math.abs(jy - j - 1 + jj);
+                double co = cox * coy;
+                output += variable[kIndex][i + ii][j + jj] * co;
+                weight += co;
+            }
+        }
+
+        if (weight != 0) {
+            output /= weight;
+        }
+
+        return output;
+
+    }
+    
+    /** Interpolation of tracer field on U grid */
+    public double interpolate3dU(double[] pGrid, double[][][] variable) { 
+        
+        double kz = pGrid[2];
+        
+        int k = (int) Math.floor(kz);
+ 
+        double output = 0;
+        double weight = 0;
+ 
+        for (int kk = 0; kk < 1; kk++) {
+            double coz = Math.abs(kz - k - 1 + kk);
+            output += this.interpolate2dU(pGrid, variable, k + kk) * coz;
+            weight += coz;
+        }
+
+        if (weight != 0) {
+            output /= weight;
+        }
+        
+        return output;
+        
+    }
+    
+     /** Interpolation of tracer field on V grid */
+     public double interpolate2dV(double[] pGrid, double[][][] variable, int kIndex) { 
         
         double ix = pGrid[0];
         double jy = pGrid[1];
-        double kz = pGrid[2];
         
         int i = (int) Math.floor(ix);
         int j = (int) Math.floor(jy);
-        int k = (int) Math.floor(kz);
         
         double output = 0;
         double weight = 0;
         
-        for (int kk = 0; kk < 1; kk++) {
-            for (int jj = 0; jj < 1; jj++) {
-                for (int ii = 0; ii < 1; ii++) {
-                    double cox = Math.abs(ix - i - 0.5 + ii);
-                    double coy = Math.abs(jy - j - 1 + jj);
-                    double coz = Math.abs(kz - k - 1 + kk);
-                    double co = cox * coy * coz;
-                    output += variable[k + kk][i + ii][j + jj] * co;
-                    weight += co;
-                }
+        for (int jj = 0; jj < 1; jj++) {
+            for (int ii = 0; ii < 1; ii++) {
+                double cox = Math.abs(ix - i - 1 + ii);
+                double coy = Math.abs(jy - j - 0.5 + jj);
+                double co = cox * coy;
+                output += variable[kIndex][i + ii][j + jj] * co;
+                weight += co;
             }
         }
         
@@ -313,34 +381,23 @@ public class RomsGrid extends AbstractGrid {
         
     }
     
-     /** Interpolation of tracer field on V grid */
-     public double interpolateV(double[] pGrid, double[][][] variable) { 
+    /** Interpolation of tracer field on V grid */
+    public double interpolate3dV(double[] pGrid, double[][][] variable) { 
         
-        double ix = pGrid[0];
-        double jy = pGrid[1];
         double kz = pGrid[2];
-        
-        int i = (int) Math.floor(ix);
-        int j = (int) Math.floor(jy);
+
         int k = (int) Math.floor(kz);
         
         double output = 0;
         double weight = 0;
         
         for (int kk = 0; kk < 1; kk++) {
-            for (int jj = 0; jj < 1; jj++) {
-                for (int ii = 0; ii < 1; ii++) {
-                    double cox = Math.abs(ix - i - 1 + ii);
-                    double coy = Math.abs(jy - j - 0.5 + jj);
-                    double coz = Math.abs(kz - k - 1 + kk);
-                    double co = cox * coy * coz;
-                    output += variable[k + kk][i + ii][j + jj] * co;
-                    weight += co;
-                }
-            }
+            double coz = Math.abs(kz - k - 1 + kk);
+            output += this.interpolate2dV(pGrid, variable, k + kk) * coz;
+            weight += coz;
         }
-        
-        if(weight != 0) { 
+
+        if (weight != 0) {
             output /= weight;
         }
         
