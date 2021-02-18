@@ -638,7 +638,7 @@ public class NemoGrid extends AbstractGrid {
     }
 
     /*
-     * Transdorms the specified z-location into depth
+     * Transforms the specified z-location into depth
      *
      * pverley pour chourdin: j'ai testé z2depth et depth2z, ça à l'air de
      * marcher mais il faudra faire une validation plus sérieuse.
@@ -660,16 +660,20 @@ public class NemoGrid extends AbstractGrid {
         int i = (int) Math.round(x);
         dz = z - k;
 
-        if (dz < 0) { // >= ?
-            depth = gdepT[k][j][i]
-                    + 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k][j][i]));
-            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k][j][i] + " gdepW[k]: " + gdepW[k][j][i]) ;
+        if (dz < 0) {
+            // The particule is located below the closest T point
+            // depth regarding T grid needs to be increased (in NEMO, depths are > 0).
+            // The 2 occurs since a chage of dz of 0.5 induces a change in depth of gdepT - gdepW.
+            // Cross product induces a division by 0.5
+            depth = gdepT[k][j][i] + 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k - 1][j][i]));
         } else {
-            depth = gdepT[k][j][i]
-                    - 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k + 1][j][i]));
-            //System.out.println("z: " + z + " => depth: " + depth + " k: " + k + " gdepT[k]: " + gdepT[k][j][i] + " gdepW[k + 1]: " + gdepW[k + 1][j][i]);
+            // The particule is located above the closest T point
+            // depth needs to be decreased
+            depth = gdepT[k][j][i] - 2 * Math.abs(dz * (gdepT[k][j][i] - gdepW[k][j][i]));
         }
+        
         return -depth;
+        
     }
 
     /*
