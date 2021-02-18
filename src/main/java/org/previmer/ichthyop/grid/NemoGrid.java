@@ -121,8 +121,7 @@ public class NemoGrid extends AbstractGrid {
     private boolean isGridInfoInOneFile;
     
     public NemoGrid(String filename) {
-        super(filename); 
-        
+        super(filename);   
     }
 
     @Override
@@ -146,12 +145,8 @@ public class NemoGrid extends AbstractGrid {
         Index indexLat = arrLat.getIndex();
         for (int j = 0; j < get_ny(); j++) {
             for (int i = 0; i < get_nx(); i++) {
-                lonRho[j][i] = arrLon.getFloat((arrLon.getShape().length == 2)
-                        ? indexLon.set(get_jpo() + j, get_ipo() + i)
-                        : indexLon.set(get_ipo() + i));
-                latRho[j][i] = arrLat.getFloat((arrLat.getShape().length == 2)
-                        ? indexLat.set(get_jpo() + j, get_ipo() + i)
-                        : indexLat.set(get_jpo() + j));
+                lonRho[j][i] = arrLon.getFloat(indexLon.set(get_jpo() + j, get_ipo() + i));
+                latRho[j][i] = arrLat.getFloat(indexLat.set(get_jpo() + j, get_ipo() + i));
             }
         }
 
@@ -159,6 +154,7 @@ public class NemoGrid extends AbstractGrid {
             nc.close();
             nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
         }
+        
         maskRho = new int[get_nz()][get_ny()][get_nx()];
         Array arrMask = nc.findVariable(strMask).read().reduce().flip(0);
         Index indexMask = arrMask.getIndex();
@@ -341,12 +337,8 @@ public class NemoGrid extends AbstractGrid {
             Index indexLat = arrLat.getIndex();
             for (int j = 0; j < get_ny(); j++) {
                 for (int i = 0; i < get_nx(); i++) {
-                    lonRho[j][i] = arrLon.getFloat((arrLon.getShape().length == 2)
-                            ? indexLon.set(j, i)
-                            : indexLon.set(i));
-                    latRho[j][i] = arrLat.getFloat((arrLat.getShape().length == 2)
-                            ? indexLat.set(j, i)
-                            : indexLat.set(j));
+                    lonRho[j][i] = arrLon.getFloat(indexLon.set(j, i));
+                    latRho[j][i] = arrLat.getFloat(indexLat.set(j, i));
                 }
             }
         }
@@ -584,13 +576,12 @@ public class NemoGrid extends AbstractGrid {
      */
     @Override
     public boolean isCloseToCost(double[] pGrid) {
-
         int i, j, k, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         k = (int) (Math.round(pGrid[2]));
-        ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;
-        jj = (j - (int) pGrid[1]) == 0 ? 1 : -1;
+        ii = (i - (int) Math.floor(pGrid[0])) == 0 ? 1 : -1;
+        jj = (j - (int) Math.floor(pGrid[1])) == 0 ? 1 : -1;
         return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
     }
 
