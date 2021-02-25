@@ -251,10 +251,13 @@ public class OscarDataset extends AbstractDataset {
                 iclosest = i;
             }
         }
+        
+        int off = this.longitude.length - 1;
+        
         // Handle special case iclosest == nlon - 1
         if (lon >= longitude[iclosest]) {
             if (iclosest == nlon - 1) {
-                iclosest -= 1080;
+                iclosest -= off;
             }
 
         }
@@ -262,7 +265,7 @@ public class OscarDataset extends AbstractDataset {
         if (lon < longitude[iclosest]) {
             iclosest -= 1;
             if (iclosest < 0) {
-                iclosest += 1080;
+                iclosest += off;
             }
         }
         double x = iclosest + (lon - longitude[iclosest]) / (longitude[iclosest + 1] - longitude[iclosest]);
@@ -367,14 +370,15 @@ public class OscarDataset extends AbstractDataset {
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
         double CO = 0.d;
+        int off = this.longitude.length - 1;
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 int ci = i + ii;
                 if (ci < 0) {
-                    ci += 1080;
+                    ci += off;
                 }
                 if (ci > nlon - 2) {
-                    ci -= 1080;
+                    ci -= off;
                 }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
@@ -402,14 +406,15 @@ public class OscarDataset extends AbstractDataset {
         double dx = pGrid[0] - (double) i;
         double dy = pGrid[1] - (double) j;
         double CO = 0.d;
+        int off = this.longitude.length - 1;
         for (int jj = 0; jj < n; jj++) {
             for (int ii = 0; ii < n; ii++) {
                 int ci = i + ii;
                 if (ci < 0) {
-                    ci += 1080;
+                    ci += off;
                 }
                 if (ci > nlon - 2) {
-                    ci -= 1080;
+                    ci -= off;
                 }
                 double co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 CO += co;
@@ -439,11 +444,12 @@ public class OscarDataset extends AbstractDataset {
     @Override
     public boolean isInWater(int i, int j) {
         int ci = i;
+        int off = this.longitude.length - 1;
         if (ci < 0) {
-            ci += 1080;
+            ci += off;
         }
         if (ci > nlon - 1) {
-            ci -= 1080;
+            ci -= off;
         }
         
         if (use_constant_mask) {
@@ -684,11 +690,12 @@ public class OscarDataset extends AbstractDataset {
     @Override
     public double xTore(double x) {
         if (xTore) {
+            double off = (double) this.longitude.length - 1;
             if (x < 0) {
-                return x + 1080.d;
+                return x + off;
             }
             if (x > nlon - 1) {
-                return x - 1080.d;
+                return x - off;
             }
         }
         return x;
