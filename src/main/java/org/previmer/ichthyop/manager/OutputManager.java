@@ -228,7 +228,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 arrZoneArea.set(i, 1, (float) xy.getY());
                 i++;
             }
-            ncOut.write(ncOut.findVariable("zone" + iZone), arrZoneArea);
+            ncOut.write(ncOut.findVariable("coord_zone" + iZone), arrZoneArea);
             iZone++;
         }
     }
