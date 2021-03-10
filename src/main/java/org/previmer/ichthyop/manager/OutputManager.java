@@ -210,10 +210,16 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     String color = zone.getColor().toString();
                     color = color.substring(color.lastIndexOf("["));
                     varZone.addAttribute(new Attribute("color", color));
+                    
+                    Dimension geoDim = ncOut.addDimension(null, "geozone" + iZone, zone.getLat().size());
+                    Variable lonlatZone = ncOut.addVariable(null, "coord_geo_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(geoDim, latlonDim)));
+                    
                     iZone++;
+                    
+                    
                 }
             }
-        }
+        }        
         ncOut.addGroupAttribute(null, new Attribute("nb_zones", iZone));
     }
 
@@ -231,6 +237,22 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             ncOut.write(ncOut.findVariable("coord_zone" + iZone), arrZoneArea);
             iZone++;
         }
+        
+        iZone = 0 ;
+        for (TypeZone type : TypeZone.values()) {
+            if (null != getSimulationManager().getZoneManager().getZones(type)) {
+                for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
+                    int nPoints = zone.getLon().size();
+                    ArrayFloat.D2 arrZoneArea = new ArrayFloat.D2(nPoints, 2);
+                    for(int k = 0; k < nPoints; k++) { 
+                        arrZoneArea.set(k, 0,  ((float) zone.getLat().get(k)));
+                        arrZoneArea.set(k, 1, (float) (zone.getLon().get(k)));
+                    }      
+                    ncOut.write(ncOut.findVariable("coord_geo_zone" + iZone), arrZoneArea);
+                    iZone++;
+                }
+            }
+        }    
     }
 
     private void addGlobalAttributes() {
