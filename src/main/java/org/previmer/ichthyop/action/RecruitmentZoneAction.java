@@ -138,6 +138,10 @@ public class RecruitmentZoneAction extends AbstractAction {
                 rParticle.setNumRecruitmentZone(numCurrentZone);
                 rParticle.setNewRecruited(timeInZone >= durationMinInRecruitArea);
                 rParticle.setRecruited(numCurrentZone, rParticle.isNewRecruited());
+                rParticle.isRecruited();
+                if (stopMovingOnceRecruited && rParticle.isRecruited()) {
+                    particle.lock();
+                }
             }
         }
     }
