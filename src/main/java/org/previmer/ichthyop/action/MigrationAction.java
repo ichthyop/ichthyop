@@ -44,23 +44,21 @@
 
 package org.previmer.ichthyop.action;
 
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-
-import org.previmer.ichthyop.particle.IParticle;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
@@ -205,7 +203,6 @@ public class MigrationAction extends AbstractAction {
         }
         // Sunset and sunrise definition
         DateTimeFormatter hourFormat = DateTimeFormatter.ofPattern("HH:mm");
-        //hourFormat.setCalendar(calendar);
         sunset = LocalTime.parse(getParameter("sunset"), hourFormat);
         sunrise = LocalTime.parse(getParameter("sunrise"), hourFormat);
         // Check whether depth at day and depth at night are constant in the
