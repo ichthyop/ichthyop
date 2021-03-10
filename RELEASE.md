@@ -15,6 +15,7 @@
 - Correction of the pC calculation in the classical DEB (forgot Tahr correction) + change starvation correction (`||` instead of `&&`)
 - Correction in the saving of zones areas: `zoneX` is the dimension (number of points) while `coord_zoneX` is the coordinates of each point. Allows to read file using Python Xarray without problems.
 - Correction in the time management in Ichthtyop. Use `LocalDateTime` extensively.
+- Correction in the lock of particles when recruited. This insures that analysing recruitment from `zones` or `recruited_zones` variables gives the same result
 
 ## Changes in Ichthyop 3.3.6
 
