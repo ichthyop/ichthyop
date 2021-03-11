@@ -203,23 +203,25 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     zoneAreas.add(iZone, makeZoneArea(zone));
                     Dimension zoneDim = ncOut.addDimension(null, "zone" + iZone, zoneAreas.get(iZone).size());
-                    Variable varZone = ncOut.addVariable(null, "coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
+                    Variable varZone = ncOut.addVariable(null, "coord_zone" + iZone, DataType.FLOAT,
+                            new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
                     varZone.addAttribute(new Attribute("long_name", zone.getKey()));
-                    varZone.addAttribute(new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
+                    varZone.addAttribute(
+                            new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
                     varZone.addAttribute(new Attribute("type", zone.getType().toString()));
                     String color = zone.getColor().toString();
                     color = color.substring(color.lastIndexOf("["));
                     varZone.addAttribute(new Attribute("color", color));
-                    
+
                     Dimension geoDim = ncOut.addDimension(null, "geozone" + iZone, zone.getLat().size());
-                    Variable lonlatZone = ncOut.addVariable(null, "coord_geo_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(geoDim, latlonDim)));
-                    
+                    Variable lonlatZone = ncOut.addVariable(null, "coord_geo_zone" + iZone, DataType.FLOAT,
+                            new ArrayList<Dimension>(Arrays.asList(geoDim, latlonDim)));
+
                     iZone++;
-                    
-                    
+
                 }
             }
-        }        
+        }
         ncOut.addGroupAttribute(null, new Attribute("nb_zones", iZone));
     }
 
@@ -529,8 +531,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
-        if(!ncOut.isDefineMode()) { 
-            // If the file is not in defined mode, assumes that everything has been already created
+        if (!ncOut.isDefineMode()) {
+            /* add listeners */
+            getSimulationManager().getTimeManager().addNextStepListener(this);
+            getSimulationManager().getTimeManager().addLastStepListener(this);
+            getLogger().info("Output manager initialization [OK]");
+            // If the file is not in defined mode, assumes that everything has been already
+            // created
             return;
         }
         

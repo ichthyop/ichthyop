@@ -44,13 +44,6 @@
 
 package org.previmer.ichthyop.ui;
 
-import de.micromata.opengis.kml.v_2_2_0.Document;
-import de.micromata.opengis.kml.v_2_2_0.Folder;
-import de.micromata.opengis.kml.v_2_2_0.IconStyle;
-import de.micromata.opengis.kml.v_2_2_0.Kml;
-import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
-import de.micromata.opengis.kml.v_2_2_0.Placemark;
-import de.micromata.opengis.kml.v_2_2_0.Style;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -69,16 +62,17 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
+
 import org.jdesktop.swingx.JXMapKit;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
@@ -90,12 +84,17 @@ import org.jdesktop.swingx.mapviewer.empty.EmptyTileFactory;
 import org.jdesktop.swingx.mapviewer.wms.WMSService;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.previmer.ichthyop.calendar.Day360Calendar;
 import org.previmer.ichthyop.dataset.IDataset;
-import org.previmer.ichthyop.calendar.InterannualCalendar;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
-import org.previmer.ichthyop.manager.TimeManager;
+
+import de.micromata.opengis.kml.v_2_2_0.Document;
+import de.micromata.opengis.kml.v_2_2_0.Folder;
+import de.micromata.opengis.kml.v_2_2_0.IconStyle;
+import de.micromata.opengis.kml.v_2_2_0.Kml;
+import de.micromata.opengis.kml.v_2_2_0.KmlFactory;
+import de.micromata.opengis.kml.v_2_2_0.Placemark;
+import de.micromata.opengis.kml.v_2_2_0.Style;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D0;
@@ -118,6 +117,7 @@ public class WMSMapper extends JXMapKit {
     /**
      *
      */
+    LocalDateTime dateRef = LocalDateTime.of(1900, 1, 1, 0, 0);
     private static final long serialVersionUID = 7832980650722821920L;
     private List<GeoPosition> region;
     private HashMap<String, WMSMapper.DrawableZone> zones;
@@ -129,7 +129,6 @@ public class WMSMapper extends JXMapKit {
     boolean loadFromHeap = false;
     private double defaultLat = 48.38, defaultLon = -4.62;
     private int defaultZoom = 10;
-    private Calendar calendar;
     private Kml kml;
     private Document kmlDocument;
     private Folder kmlMainFolder;
@@ -241,33 +240,6 @@ public class WMSMapper extends JXMapKit {
         vlat = nc.findVariable("lat");
         vmortality = nc.findVariable("mortality");
         vtime = nc.findVariable("time");
-        // Set origin of time
-        Calendar calendar_o = Calendar.getInstance();
-        int year_o = 1;
-        int month_o = Calendar.JANUARY;
-        int day_o = 1;
-        int hour_o = 0;
-        int minute_o = 0;
-        if (null != vtime.findAttribute("origin")) {
-            try {
-                SimpleDateFormat dFormat = TimeManager.INPUT_DATE_FORMAT;
-                dFormat.setCalendar(calendar_o);
-                calendar_o.setTime(dFormat.parse(vtime.findAttribute("origin").getStringValue()));
-                year_o = calendar_o.get(Calendar.YEAR);
-                month_o = calendar_o.get(Calendar.MONTH);
-                day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
-                hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
-                minute_o = calendar_o.get(Calendar.MINUTE);
-            } catch (ParseException ex) {
-                // Something went wrong, default origin of time
-                // set to 0001/01/01 00:00
-            }
-        }
-        if (vtime.findAttribute("calendar").getStringValue().equals("climato")) {
-            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
-        } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
-        }
 
         time = new double[nbSteps];
         for (int i = 0; i < nbSteps; i++) {
@@ -513,7 +485,7 @@ public class WMSMapper extends JXMapKit {
             for (int iZone = 0; iZone < nbZones; iZone++) {
                 List<Point2D.Float> points = new ArrayList<>();
                 try {
-                    Variable varZone = nc.findVariable("zone" + iZone);
+                    Variable varZone = nc.findVariable("coord_zone" + iZone);
                     ArrayFloat.D2 zoneEdge = (D2) varZone.read();
                     String type = varZone.findAttribute("type").getStringValue();
                     String color = varZone.findAttribute("color").getStringValue();
@@ -799,9 +771,9 @@ public class WMSMapper extends JXMapKit {
                 g.setColor(Color.WHITE);
                 g.fill(bar);
 
-                SimpleDateFormat dtFormat = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-                dtFormat.setCalendar(calendar);
-                String time = "Time: " + dtFormat.format(getTime(index));
+                DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+                LocalDateTime dateTime = dateRef.plusSeconds((long) getTime(index));                
+                String time = "Time: " + dateTime.format(dtFormat);
                 FontRenderContext context = g.getFontRenderContext();
                 Font font = new Font("Dialog", Font.PLAIN, 11);
                 TextLayout layout = new TextLayout(time, font, context);
@@ -1011,19 +983,23 @@ public class WMSMapper extends JXMapKit {
     public String getKMZPath() {
         return getFile().getPath().replace(".nc", ".kmz");
     }
+    
+    public String formatDate(DateTimeFormatter dtFormat, double time) {
+        LocalDateTime dateNow = this.dateRef.plusSeconds((long) time);
+        return dateNow.format(dtFormat);
+    }
 
     public void writeKMLStep(int i) {
 
-        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        SimpleDateFormat dtFormat2 = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateTimeFormatter dtFormat2 = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         Folder stepFolder = new Folder();
-        dtFormat.setCalendar(calendar);
-        dtFormat2.setCalendar(calendar);
-        stepFolder.withName(dtFormat2.format(getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
-        if (getTime(i).before(getTime(i + 1))) {
-            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i))).withEnd(dtFormat.format(getTime(i + 1)));
+        
+        stepFolder.withName(this.formatDate(dtFormat2, getTime(i)));//.createAndSetTimeStamp().setWhen(dtFormat.format(cld.getTime()));
+        if (getTime(i) < getTime(i + 1)) {
+            stepFolder.createAndSetTimeSpan().withBegin(this.formatDate(dtFormat, getTime(i))).withEnd(this.formatDate(dtFormat, getTime(i + 1)));
         } else {
-            stepFolder.createAndSetTimeSpan().withBegin(dtFormat.format(getTime(i + 1))).withEnd(dtFormat.format(getTime(i)));
+            stepFolder.createAndSetTimeSpan().withBegin(this.formatDate(dtFormat, getTime(i + 1))).withEnd(this.formatDate(dtFormat, getTime(i)));
         }
         for (WMSMapper.DrawableParticle particle : getParticles(i)) {
             String coord = Double.toString(particle.getLongitude()) + "," + Double.toString(particle.getLatitude());
@@ -1086,33 +1062,30 @@ public class WMSMapper extends JXMapKit {
         new Thread(new WMSMapper.ImageWriter(index, bi)).start();
     }
 
-    Date getTime(int index) {
+    double getTime(int index) {
         if (index > nbSteps - 1) {
             double dt = time[1] - time[0];
             long ltime = (long) (time[0] + index * dt) * 1000L;
-            calendar.setTimeInMillis(ltime);
+            return ltime;
         } else {
-            calendar.setTimeInMillis((long) (time[index] * 1000L));
+            return time[index];
         }
-        return calendar.getTime();
-
     }
 
     private class ImageWriter implements Runnable {
 
         private int index;
         private BufferedImage bi;
-        SimpleDateFormat dtFormat;
+        DateTimeFormatter dtFormat;
 
         ImageWriter(int index, BufferedImage bi) {
             this.index = index;
             this.bi = bi;
-            dtFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+            dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
         }
 
         @Override
         public void run() {
-            dtFormat.setCalendar(calendar);
             StringBuilder filename = new StringBuilder(getFile().getParent());
             filename.append(File.separator);
             String id = getFile().getName().substring(0, getFile().getName().indexOf(".nc"));
@@ -1120,7 +1093,10 @@ public class WMSMapper extends JXMapKit {
             filename.append(File.separator);
             filename.append(id);
             filename.append("_img");
-            filename.append(dtFormat.format(getTime(index)));
+            
+            LocalDateTime dateNow = LocalDateTime.of(1900, 1, 1, 0, 0).plusSeconds((long)getTime(index));
+            
+            filename.append(dateNow.format(dtFormat));
             filename.append(".png");
             try {
                 IOTools.makeDirectories(filename.toString());
