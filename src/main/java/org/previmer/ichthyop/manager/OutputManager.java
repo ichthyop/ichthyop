@@ -476,7 +476,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     @Override
     public void setupPerformed(SetupEvent e) throws Exception {
-
+        
+        if((ncOut != null) && (!ncOut.isDefineMode())) {
+            // if ncOut is not null, i.e. if file is defined,
+            // and if not in defined mode, nothing is done here
+            return;
+        }
         /* Create the NetCDF writeable object */
         ncOut = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, makeFileLocation());
 
@@ -524,10 +529,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
+        if(!ncOut.isDefineMode()) { 
+            // If the file is not in defined mode, assumes that everything has been already created
+            return;
+        }
+        
         /* add the zones
          * It cannnot be done in the setup because the definition of the zones
          * requires that dataset has been initialized first.
-         */
+         */ 
         addZones();
 
         // Add attributes
