@@ -529,8 +529,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     @Override
     public void initializePerformed(InitializeEvent e) throws Exception {
 
-        if(!ncOut.isDefineMode()) { 
-            // If the file is not in defined mode, assumes that everything has been already created
+        if (!ncOut.isDefineMode()) {
+            /* add listeners */
+            getSimulationManager().getTimeManager().addNextStepListener(this);
+            getSimulationManager().getTimeManager().addLastStepListener(this);
+            getLogger().info("Output manager initialization [OK]");
+            // If the file is not in defined mode, assumes that everything has been already
+            // created
             return;
         }
         
