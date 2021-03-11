@@ -17,6 +17,7 @@
 - Correction in the time management in Ichthtyop. Use `LocalDateTime` extensively.
 - Correction in the lock of particles when recruited. This insures that analysing recruitment from `zones` or `recruited_zones` variables gives the same result (spotted by Stephane Pous)
 - Correction of a bug in the saving of ouput file with Zones + Gui (spotted by Stephane Pous)
+- Correction of a bug in the display of zones in GUI (used the wrong variable to display variables on maps)
 
 ## Changes in Ichthyop 3.3.6
 
