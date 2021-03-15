@@ -369,12 +369,16 @@ public class WindDriftFileAction extends WindDriftAction {
 
     void readLonLat() throws IOException {
         
-        int[] origin = new int[] {jpo, ipo};
-        int[] shape = new int[] {ny, nx};       
+        int[] originLon = new int[] {ipo};
+        int[] shapeLon = new int[] {nx};
+        
+              
+        int[] originLat = new int[] {jpo};
+        int[] shapeLat = new int[] {ny};
         
         Array arrLon = null, arrLat = null;
         try {
-            arrLon = ncIn.findVariable(strLon).read(origin, shape);
+            arrLon = ncIn.findVariable(strLon).read(originLon, shapeLon);
 
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading wind dataset longitude. " + ex.toString());
@@ -382,7 +386,7 @@ public class WindDriftFileAction extends WindDriftAction {
             throw ioex;
         }
         try {
-            arrLat = ncIn.findVariable(strLat).read(origin, shape);
+            arrLat = ncIn.findVariable(strLat).read(originLat, shapeLat);
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading wind dataset latitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
