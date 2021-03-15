@@ -475,7 +475,7 @@ public class DatasetUtil {
             finalDate = dateUnit.plusDays(time);
         }
 
-        double output = Duration.between(TimeManager.DATE_REF, finalDate).toSeconds();
+        double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
         return output;
 
     }

@@ -161,7 +161,7 @@ public class TimeManager extends AbstractManager {
         LocalDateTime date0 = LocalDateTime.parse(getParameter("initial_time"), NEW_INPUT_DATE_FORMAT);
 
         // Conversion of date0 as t0, i.e. the number of seconds between the reference date and the current date. 
-        t0 = Duration.between(DATE_REF, date0).toSeconds(); 
+        t0 = Duration.between(DATE_REF, date0).getSeconds();
         
         /* output date format */
         outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -199,7 +199,7 @@ public class TimeManager extends AbstractManager {
     /** Converts the date as number of seconds since 1900-01-01 */
     public double date2seconds(String date) throws ParseException {
         LocalDateTime dateTime = LocalDateTime.parse(date, NEW_INPUT_DATE_FORMAT);
-        long duration = Duration.between(DATE_REF, dateTime).toSeconds();
+        long duration = Duration.between(DATE_REF, dateTime).getSeconds();
         return (double) duration;
     }
 
