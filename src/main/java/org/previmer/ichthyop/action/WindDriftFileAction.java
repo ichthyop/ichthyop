@@ -56,6 +56,8 @@ import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.particle.IParticle;
+import org.previmer.ichthyop.ui.LonLatConverter;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
@@ -129,6 +131,10 @@ public class WindDriftFileAction extends WindDriftAction {
      */
     static Array vw_tp1;
     
+    /** Start index for shrinking */
+    int ipo = 0;
+    int jpo = 0;
+    
     /**
      * U wind variable
      */
@@ -166,6 +172,9 @@ public class WindDriftFileAction extends WindDriftAction {
         }
 
         getDimNC();
+        
+        this.shrinkGrid();
+        
         setOnFirstTime();
         //setAllFieldsTp1AtTime();
         this.setAllFieldsTpAtInit();
@@ -182,11 +191,11 @@ public class WindDriftFileAction extends WindDriftAction {
             int[] origin = null, shape = null;
             switch (variable.getShape().length) {
                 case 4:
-                    origin = new int[]{rank, 0, 0, 0};
+                    origin = new int[]{rank, 0, jpo, ipo};
                     shape = new int[]{1, 1, ny, nx};
                     break;
                 case 3:
-                    origin = new int[]{rank, 0, 0};
+                    origin = new int[]{rank, jpo, ipo};
                     shape = new int[]{1, ny, nx};
                     break;
             }
@@ -359,9 +368,13 @@ public class WindDriftFileAction extends WindDriftAction {
     
 
     void readLonLat() throws IOException {
+        
+        int[] origin = new int[] {jpo, ipo};
+        int[] shape = new int[] {ny, nx};       
+        
         Array arrLon = null, arrLat = null;
         try {
-            arrLon = ncIn.findVariable(strLon).read();
+            arrLon = ncIn.findVariable(strLon).read(origin, shape);
 
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading wind dataset longitude. " + ex.toString());
@@ -369,12 +382,14 @@ public class WindDriftFileAction extends WindDriftAction {
             throw ioex;
         }
         try {
-            arrLat = ncIn.findVariable(strLat).read();
+            arrLat = ncIn.findVariable(strLat).read(origin, shape);
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading wind dataset latitude. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+
+        
 
         lonRho = new double[ny][nx];
         latRho = new double[ny][nx];
@@ -463,4 +478,96 @@ public class WindDriftFileAction extends WindDriftAction {
         dWi[1] = convention * wind_factor * (dx * Math.sin(angle) + dy * Math.cos(angle));
         return dWi;
     }
+    
+    /**
+     * Resizes the domain and determines the range of the grid indexes taht will
+     * be used in the simulation. The new domain is limited by the Northwest and
+     * the Southeast corners.
+     *
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     * corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     * corner
+     * @throws an IOException if the new domain is not strictly nested within
+     * the NetCDF dataset domain.
+     */
+    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        readLonLat();
+
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
+        }
+        lonRho = null;
+        latRho = null;
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        nx = Math.min(nx, ipn - ipo + 1);
+        ny = Math.min(ny, jpn - jpo + 1);
+        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+    }
+    
+    private double[] latlon2xy(double lat1, double lon1) {
+
+        // Init output
+        double[] output = new double[2];
+        
+        // Init dimensions
+        int nLat = lonRho.length;
+        int nLon = lonRho[0].length;
+        
+        // Init distance as a maximum value
+        double distOut = Double.MAX_VALUE;
+        for (int j = 0; j < nLat; j++) {
+            for (int i = 0; i < nLon; i++) {
+                double tempDist = Math.pow(lonRho[j][i] - lon1, 2) + Math.pow(latRho[j][i] - lat1, 2);
+                if (tempDist < distOut) {
+                    output[0] = i;
+                    output[1] = j;
+                    distOut = tempDist;
+                }
+            }
+        }
+        
+        return output;
+        
+    }
+    
+    public void shrinkGrid() {
+
+        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
+            try {
+                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                range(lat1, lon1, lat2, lon2);
+            } catch (IOException | NumberFormatException ex) {
+                getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
+            }
+        }
+    }
+    
+    public boolean findParameter(String key) {
+        // Check whether the parameter can be retrieved
+        try {
+            getParameter(key);
+        } catch (NullPointerException ex) {
+            // Tue parameter does not exist
+            return false;
+        }
+        // The parameter does exist
+        return true;
+    }
+
 }
