@@ -66,6 +66,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.avalon.framework.container.ContainerUtil;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.dataset.IDataset;
@@ -403,6 +405,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             List<String> variables = new ArrayList<>();
             for (String token : tokens) {
                 if (!token.trim().isEmpty()) {
+                    String varname = token.trim();
+                    if(this.customTrackers.contains(varname)) {
+                        // If the variable is already included in customTracker, nothing is done
+                        continue;
+                    }
                     variables.add(token.trim());
                 }
             }
