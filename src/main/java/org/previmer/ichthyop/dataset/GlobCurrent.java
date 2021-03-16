@@ -48,6 +48,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.ui.LonLatConverter;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
+
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -94,6 +97,11 @@ public class GlobCurrent extends AbstractDataset {
      * Meridional component of the velocity field at time t + dt
      */
     private float[][] v_tp1;
+    
+    
+    private int ipo = 0;
+    private int jpo = 0;
+    
     /**
      * Geographical boundary of the domain
      */
@@ -156,10 +164,16 @@ public class GlobCurrent extends AbstractDataset {
      * Reads time non-dependant fields in NetCDF dataset
      */
     private void readConstantField() throws Exception {
+        
+        int[] originLon = new int[] {ipo};
+        int[] shapeLon = new int[] {nx};
+    
+        int[] originLat = new int[] {jpo};
+        int[] shapeLat = new int[] {ny};
 
         getLogger().log(Level.INFO, "Read longitude and latitude from {0}", ncU.getLocation());
-        longitude = (float[]) ncU.findVariable(strLon).read().copyToNDJavaArray();
-        latitude = (float[]) ncU.findVariable(strLat).read().copyToNDJavaArray();
+        longitude = (float[]) ncU.findVariable(strLon).read(originLon, shapeLon).copyToNDJavaArray();
+        latitude = (float[]) ncU.findVariable(strLat).read(originLat, shapeLat).copyToNDJavaArray();
         nx = longitude.length;
         ny = latitude.length;
 
@@ -364,6 +378,7 @@ public class GlobCurrent extends AbstractDataset {
         }
         // Open first file
         open(0);
+        shrinkGrid();
         readConstantField();
         getDimGeogArea();
         setAllFieldsTp1AtTime(0);
@@ -483,14 +498,14 @@ public class GlobCurrent extends AbstractDataset {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, 0, 0, 0};
+        int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
         try {
             if (ncU.findVariable(strU).getShape().length > 3) {
                 u_tp1 = (float[][]) ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
             } else {
-                u_tp1 = (float[][]) ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+                u_tp1 = (float[][]) ncU.findVariable(strU).read(new int[]{rank, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
@@ -502,7 +517,7 @@ public class GlobCurrent extends AbstractDataset {
             if (ncV.findVariable(strV).getShape().length > 3) {
                 v_tp1 = (float[][]) ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce().copyToNDJavaArray();
             } else {
-                v_tp1 = (float[][]) ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
+                v_tp1 = (float[][]) ncV.findVariable(strV).read(new int[]{rank, jpo, ipo}, new int[]{1, ny, nx}).reduce().copyToNDJavaArray();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
@@ -1002,5 +1017,59 @@ public class GlobCurrent extends AbstractDataset {
     @Override
     public double yTore(double y) {
         return y;
+    }
+    
+    /**
+     * Resizes the domain and determines the range of the grid indexes taht will
+     * be used in the simulation. The new domain is limited by the Northwest and
+     * the Southeast corners.
+     *
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     * corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     * corner
+     * @throws an IOException if the new domain is not strictly nested within
+     * the NetCDF dataset domain.
+     */
+    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        longitude = (float[]) ncU.findVariable(strLon).read().copyToNDJavaArray();
+        latitude = (float[]) ncU.findVariable(strLat).read().copyToNDJavaArray();
+
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
+        }
+        longitude = null;
+        latitude = null;
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        nx = Math.min(nx, ipn - ipo + 1);
+        ny = Math.min(ny, jpn - jpo + 1);
+        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+    }
+    
+    public void shrinkGrid() {
+
+        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
+            try {
+                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                range(lat1, lon1, lat2, lon2);
+            } catch (IOException | NumberFormatException ex) {
+                getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
+            }
+        }
     }
 }
