@@ -1038,6 +1038,9 @@ public class GlobCurrent extends AbstractDataset {
 
         longitude = (float[]) ncU.findVariable(strLon).read().copyToNDJavaArray();
         latitude = (float[]) ncU.findVariable(strLat).read().copyToNDJavaArray();
+        
+        ny = latitude.length;
+        nx = longitude.length;
 
         pGrid1 = latlon2xy(lat1, lon1);
         pGrid2 = latlon2xy(lat2, lon2);
