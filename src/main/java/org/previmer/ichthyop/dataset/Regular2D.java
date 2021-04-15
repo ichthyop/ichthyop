@@ -1129,8 +1129,8 @@ public class Regular2D extends AbstractDataset {
         // Reads longitude, either from 1d or 2d array
         variable = ncU.findVariable(strLat).read(originLat, countLat).reduce();
         index = variable.getIndex();
-        latitude = new double[nx];
-        for (int i = 0; i < nx; i++) {
+        latitude = new double[ny];
+        for (int i = 0; i < ny; i++) {
             index.set(i);
             latitude[i] = variable.getDouble(index);
         }
