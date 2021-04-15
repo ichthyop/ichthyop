@@ -48,6 +48,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.ui.LonLatConverter;
+import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
+
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -140,6 +143,9 @@ public class Regular2D extends AbstractDataset {
     private String mask_file;
     private double [][] mask_array;
 
+    private int jpo = 0;
+    private int ipo = 0;
+    
     /**
      * Whether horizontal periodicity should be applied
      */
@@ -162,41 +168,8 @@ public class Regular2D extends AbstractDataset {
         Index index;
         
         getLogger().log(Level.INFO, "Read longitude and latitude from {0}", ncU.getLocation());
-        
-        // Reads longitude, either from 1d or 2d array
-        variable = ncU.findVariable(strLon).read().reduce();
-        index = variable.getIndex();
-        if (variable.getRank() == 1) {
-            nx = variable.getShape()[0];
-            longitude = new double[nx];
-            for (int i = 0; i < nx; i++) {
-                index.set(i);
-                longitude[i] = variable.getDouble(index);
-            }
-        } else {
-            nx = variable.getShape()[1];
-            longitude = new double[nx];
-            for (int i = 0; i < nx; i++) {
-                index.set(0, i);
-                longitude[i] = variable.getDouble(index);
-            }
-        }
-        
-        variable = ncU.findVariable(strLat).read().reduce();
-        index = variable.getIndex();     
-        ny = variable.getShape()[0];
-        latitude = new double[ny];
-        if (variable.getRank() == 1) {
-            for (int i = 0; i < ny; i++) {
-                index.set(i);
-                latitude[i] = variable.getDouble(index);
-            }
-        } else {
-            for (int i = 0; i < ny; i++) {
-                index.set(i, 0);
-                latitude[i] = variable.getDouble(index);
-            }
-        }
+            
+        readLonLat();
         
         // scale factors
         dyv = 111138.d * (latitude[1] - latitude[0]);
@@ -206,8 +179,10 @@ public class Regular2D extends AbstractDataset {
         }
         
         if(use_constant_mask) {
+            int[] origin = {jpo, ipo};
+            int[] count = {ny, nx};
             NetcdfFile ncMask = DatasetUtil.openFile(this.mask_file, true);
-            mask_array = (double[][]) ncMask.findVariable(mask_var).read().copyToNDJavaArray();
+            mask_array = (double[][]) ncMask.findVariable(mask_var).read(origin, count).copyToNDJavaArray();
             ncMask.close();
         }
     }
@@ -397,8 +372,19 @@ public class Regular2D extends AbstractDataset {
         if (!skipSorting()) {
             DatasetUtil.sort(listVFiles, strTime, timeArrow());
         }
+        
         // Open first file
         open(0);
+        
+        // First read of nx
+        Array lonArr = ncU.findVariable(strLon).read().reduce();
+        nx = lonArr.getShape()[0];
+        
+        Array latArr = ncU.findVariable(strLat).read().reduce();
+        ny = latArr.getShape()[0];
+        
+        shrinkGrid();
+        
         readConstantField();
         getDimGeogArea();
         setAllFieldsTp1AtTime(0);
@@ -518,7 +504,7 @@ public class Regular2D extends AbstractDataset {
 
         getLogger().info("Reading NetCDF variables...");
 
-        int[] origin = new int[]{rank, 0, 0, 0};
+        int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
         
         Array variable;
@@ -531,7 +517,7 @@ public class Regular2D extends AbstractDataset {
             if (ncU.findVariable(strU).getShape().length > 3) {
                 variable = ncU.findVariable(strU).read(origin, new int[]{1, 1, ny, nx}).reduce();              
             } else {
-                variable = ncU.findVariable(strU).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce();
+                variable = ncU.findVariable(strU).read(new int[]{rank, jpo, ipo}, new int[]{1, ny, nx}).reduce();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
@@ -551,7 +537,7 @@ public class Regular2D extends AbstractDataset {
             if (ncV.findVariable(strV).getShape().length > 3) {
                 variable = ncV.findVariable(strV).read(origin, new int[]{1, 1, ny, nx}).reduce();
             } else {
-                variable = ncV.findVariable(strV).read(new int[]{rank, 0, 0}, new int[]{1, ny, nx}).reduce();
+                variable = ncV.findVariable(strV).read(new int[]{rank, jpo, ipo}, new int[]{1, ny, nx}).reduce();
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
@@ -1009,21 +995,21 @@ public class Regular2D extends AbstractDataset {
         boolean hasVerticalDim = false;
         switch (variable.getShape().length) {
             case 4:
-                origin = new int[]{rank, 0, 0, 0};
+                origin = new int[]{rank, 0, jpo, ipo};
                 shape = new int[]{1, 1, ny, nx};
                 hasVerticalDim = true;
                 break;
             case 2:
-                origin = new int[]{0, 0};
+                origin = new int[]{jpo, ipo};
                 shape = new int[]{ny, nx};
                 break;
             case 3:
                 if (!variable.isUnlimited()) {
-                    origin = new int[]{0, 0, 0};
+                    origin = new int[]{0, jpo, ipo};
                     shape = new int[]{1, ny, nx};
                     hasVerticalDim = true;
                 } else {
-                    origin = new int[]{rank, 0, 0};
+                    origin = new int[]{rank, jpo, ipo};
                     shape = new int[]{1, ny, nx};
                 }
                 break;
@@ -1058,4 +1044,97 @@ public class Regular2D extends AbstractDataset {
     public double yTore(double y) {
         return y;
     }
+
+    public void shrinkGrid() throws InvalidRangeException {
+
+        if (findParameter("shrink_domain") && Boolean.valueOf(getParameter("shrink_domain"))) {
+            try {
+                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                range(lat1, lon1, lat2, lon2);
+            } catch (IOException | NumberFormatException ex) {
+                getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
+            }
+        }
+    }
+
+    /**
+     * Resizes the domain and determines the range of the grid indexes taht will
+     * be used in the simulation. The new domain is limited by the Northwest and
+     * the Southeast corners.
+     *
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     * corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     * corner
+     * @throws InvalidRangeException
+     * @throws an IOException if the new domain is not strictly nested within
+     * the NetCDF dataset domain.
+     */
+    private void range(double lat1, double lon1, double lat2, double lon2) throws IOException, InvalidRangeException {
+
+        double[] pGrid1, pGrid2;
+        int ipn, jpn;
+
+        readLonLat();
+
+        pGrid1 = latlon2xy(lat1, lon1);
+        pGrid2 = latlon2xy(lat2, lon2);
+        if (pGrid1[0] < 0 || pGrid2[0] < 0) {
+            throw new IOException(
+                    "Impossible to proportion the simulation area : points out of domain");
+        }
+        
+        longitude = null;
+        latitude = null;
+
+        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        ipo = (int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0]));
+        ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
+        jpo = (int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1]));
+        jpn = (int) Math.max(Math.ceil(pGrid1[1]), Math.ceil(pGrid2[1]));
+
+        nx = Math.min(nx, ipn - ipo + 1);
+        ny = Math.min(ny, jpn - jpo + 1);
+        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+    }
+
+    /** Reads all the longitudes and latitudes. 
+     * @throws InvalidRangeException
+    */
+    private void readLonLat() throws IOException, InvalidRangeException {
+        
+        getLogger().log(Level.INFO, "Read longitude and latitude from {0}", ncU.getLocation());
+                   
+        Array variable;
+        Index index;
+
+        int [] originLon = {ipo};
+        int [] countLon = {nx};
+        
+        int [] originLat = {jpo};
+        int [] countLat = {ny};
+        
+        // Reads longitude, either from 1d or 2d array
+        variable = ncU.findVariable(strLon).read(originLon, countLon).reduce();
+        index = variable.getIndex();
+        longitude = new double[nx];
+        for (int i = 0; i < nx; i++) {
+            index.set(i);
+            longitude[i] = variable.getDouble(index);
+        }
+          
+        // Reads longitude, either from 1d or 2d array
+        variable = ncU.findVariable(strLat).read(originLat, countLat).reduce();
+        index = variable.getIndex();
+        latitude = new double[nx];
+        for (int i = 0; i < nx; i++) {
+            index.set(i);
+            latitude[i] = variable.getDouble(index);
+        }
+        
+    }
+
 }
