@@ -1098,7 +1098,7 @@ public class Regular2D extends AbstractDataset {
 
         nx = Math.min(nx, ipn - ipo + 1);
         ny = Math.min(ny, jpn - jpo + 1);
-        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+        System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
 
     /** Reads all the longitudes and latitudes. 
