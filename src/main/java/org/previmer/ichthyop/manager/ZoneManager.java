@@ -73,7 +73,7 @@ public class ZoneManager extends AbstractManager {
 
     private ZoneManager() {
         super();
-        map = new HashMap();
+        map = new HashMap<>();
     }
 
     public void cleanup() {
@@ -93,7 +93,7 @@ public class ZoneManager extends AbstractManager {
 
         ZoneFile zoneFile = new ZoneFile(f);
         if (!map.containsKey(type)) {
-            map.put(type, new ArrayList());
+            map.put(type, new ArrayList<>());
         }
         for (XZone xzone : zoneFile.getZones()) {
             if (xzone.getTypeZone().equals(type) && xzone.isEnabled()) {

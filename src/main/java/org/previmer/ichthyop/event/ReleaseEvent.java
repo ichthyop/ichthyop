@@ -53,6 +53,11 @@ import java.util.EventObject;
  */
 public class ReleaseEvent extends EventObject {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -2880618981808280436L;
+
     public ReleaseEvent(ReleaseManager source) {
         super(source);
     }

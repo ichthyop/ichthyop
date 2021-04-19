@@ -62,10 +62,10 @@ public class Particle extends GridPoint implements IParticle {
     private ParticleMortality deathCause;
     private boolean living = true;
     private boolean locked = false;
-    private final List<ParticleLayer> layers = new ArrayList();
+    private final List<ParticleLayer> layers = new ArrayList<>();
 
     @Override
-    public ParticleLayer getLayer(Class layerClass) {
+    public ParticleLayer getLayer(Class<?> layerClass) {
         for (ParticleLayer layer : layers) {
             if (layer.getClass().getCanonicalName().equals(layerClass.getCanonicalName())) {
                 return layer;

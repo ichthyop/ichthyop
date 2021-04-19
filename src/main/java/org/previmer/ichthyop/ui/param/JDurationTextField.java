@@ -44,12 +44,10 @@
 
 package org.previmer.ichthyop.ui.param;
 
-import java.awt.Dimension;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.JFormattedTextField;
-import javax.swing.JTextField;
 import javax.swing.text.MaskFormatter;
 
 /**
@@ -58,14 +56,20 @@ import javax.swing.text.MaskFormatter;
  */
 public class JDurationTextField extends JFormattedTextField {
 
-///////////////////////////////
-// Declaration of the constants
-///////////////////////////////
+    /**
+     * Generic UID
+     *
+     */
+    private static final long serialVersionUID = -6627458168717480480L;
+    
+    ///////////////////////////////
+    // Declaration of the constants
+    ///////////////////////////////
     private static final int ONE_SECOND = 1;
     private static final int ONE_MINUTE = 60 * ONE_SECOND;
     private static final int ONE_HOUR = 60 * ONE_MINUTE;
     private static final long ONE_DAY = 24 * ONE_HOUR;
-///////////////////////////////
+    ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**

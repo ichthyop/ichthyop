@@ -1,5 +1,25 @@
 # ICHTHYOP Release notes
 
+## Changes in Ichthyop 3.3.7
+
+### New features
+
+- Remove all warnings (VSCode)
+- Remove deprecated NetCDF functions, use new NetCDF implementation
+- Re-add the `WaveDriftFileAction.java` file.
+- New constructor for the `InterAnnualCalendar` object
+- Saving the stage values in the `DebGrowthAction.java`
+
+### Bug fix
+
+- Correction of the pC calculation in the classical DEB (forgot Tahr correction) + change starvation correction (`||` instead of `&&`)
+- Correction in the saving of zones areas: `zoneX` is the dimension (number of points) while `coord_zoneX` is the coordinates of each point. Allows to read file using Python Xarray without problems.
+- Correction in the time management in Ichthtyop. Use `LocalDateTime` extensively.
+- Correction in the lock of particles when recruited. This insures that analysing recruitment from `zones` or `recruited_zones` variables gives the same result (spotted by Stephane Pous)
+- Correction of a bug in the saving of ouput file with Zones + Gui (spotted by Stephane Pous)
+- Correction of a bug in the display of zones in GUI (used the wrong variable to display variables on maps)
+- Do not include a user-defined track variable if already included (for instance `temperature` in `LethalTempAction.java`)
+
 ## Changes in Ichthyop 3.3.6
 
 ### Bug fixes
@@ -18,7 +38,7 @@
 ### Bug fixes
 
 - Deactivate the `compile on save` Netbeans feature (compilation errors not always detected)
-- Correction of a bug in the `TxtFileEelease` class. In 3.3.4, changes were made to insure that the output drifter dimension has the same size as the effectively released particles, but in fact the file has a 0 drifter dimension. Moved back to previous state, with the display of a warning message.
+- Correction of a bug in the `TxtFileRelease` class. In 3.3.4, changes were made to insure that the output drifter dimension has the same size as the effectively released particles, but in fact the file has a 0 drifter dimension. Moved back to previous state, with the display of a warning message.
 
 ## Changes in Ichthyop 3.3.4
 

@@ -46,7 +46,6 @@ package org.previmer.ichthyop.dataset;
 
 import java.util.HashMap;
 import java.util.logging.Level;
-import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.manager.TimeManager;
 import ucar.nc2.NetcdfFile;
@@ -55,7 +54,7 @@ import ucar.nc2.NetcdfFile;
  *
  * @author pverley
  */
-public abstract class AbstractDataset extends SimulationManagerAccessor implements IDataset, NextStepListener {
+public abstract class AbstractDataset extends SimulationManagerAccessor implements IDataset {
     
     private DistanceGetter distGetter;
     
@@ -109,7 +108,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     }
 
     @Override
-    public void requireVariable(String name, Class requiredBy) {
+    public void requireVariable(String name, Class<?> requiredBy) {
         if (!requiredVariables.containsKey(name)) {
             requiredVariables.put(name, new RequiredVariable(name, requiredBy));
         } else {
@@ -121,12 +120,12 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         if (requiredVariables != null) {
             requiredVariables.clear();
         } else {
-            requiredVariables = new HashMap();
+            requiredVariables = new HashMap<>();
         }
     }
 
     @Override
-    public void removeRequiredVariable(String name, Class requiredBy) {
+    public void removeRequiredVariable(String name, Class<?> requiredBy) {
         RequiredVariable var = requiredVariables.get(name);
         if (null != var) {
             if (var.getRequiredBy().size() > 1) {
@@ -152,7 +151,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
                 msg.append(ex.toString());
                 msg.append("\n");
                 msg.append("Required by classes ");
-                for (Class aClass : variable.getRequiredBy()) {
+                for (Class<?> aClass : variable.getRequiredBy()) {
                     msg.append(aClass.getCanonicalName());
                     msg.append(", ");
                 }

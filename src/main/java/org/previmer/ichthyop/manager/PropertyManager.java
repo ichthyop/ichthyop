@@ -56,10 +56,10 @@ import java.util.logging.Logger;
 public class PropertyManager {
 
     private static final Logger logger = Logger.getLogger(PropertyManager.class.getName());
-    private final Class myClass;
+    private final Class<?> myClass;
     private ResourceBundle bundle = null;
 
-    private PropertyManager(Class myClass) {
+    private PropertyManager(Class<?> myClass) {
         this.myClass = myClass;
 
         String bundleName = myClass.getPackage().getName() + ".resources." + myClass.getSimpleName();
@@ -71,7 +71,7 @@ public class PropertyManager {
         }
     }
 
-    public static PropertyManager getInstance(Class forClass) {
+    public static PropertyManager getInstance(Class<?> forClass) {
         return new PropertyManager(forClass);
     }
 

@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,44 +20,45 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.action;
 
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import org.previmer.ichthyop.particle.IParticle;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
+
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.particle.IParticle;
 import org.previmer.ichthyop.particle.StageParticleLayer;
 
 /**
@@ -93,16 +94,12 @@ public class MigrationAction extends AbstractAction {
     /**
      * Time of sunrise.
      */
-    private Date sunrise;
+    private LocalTime sunrise;
     /**
      * Time of sunset.
      */
-    private Date sunset;
-    /**
-     * Clone of the simulation calendar for assessing whether current time is
-     * day time or night.
-     */
-    private Calendar calendar;
+    private LocalTime sunset;
+
     /**
      * Whether the depth at day equals the depth at night.
      */
@@ -132,7 +129,7 @@ public class MigrationAction extends AbstractAction {
 
         // Check whether the growth module is enabled
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
-        calendar = (Calendar) getSimulationManager().getTimeManager().getCalendar().clone();
+
         // Otherwise read migration minimal age
         if (!isGrowth) {
             minimumAge = (long) (Float.valueOf(getParameter("age_min")) * 24.f * 3600.f);
@@ -150,7 +147,7 @@ public class MigrationAction extends AbstractAction {
 
             CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
             List<String[]> lines = reader.readAll();
-            Iterator iter = lines.iterator();
+            Iterator<String[]> iter = lines.iterator();
             while (iter.hasNext()) {
                 String[] line = (String[]) iter.next();
                 if (line.length != 2 || line[0].isEmpty() || line[1].isEmpty()) {
@@ -183,7 +180,7 @@ public class MigrationAction extends AbstractAction {
             }
             CSVReader reader = new CSVReaderBuilder(new FileReader(pathname)).withCSVParser(new CSVParserBuilder().withSeparator(';').build()).build();
             List<String[]> lines = reader.readAll();
-            Iterator iter = lines.iterator();
+            Iterator<String[]> iter = lines.iterator();
             while (iter.hasNext()) {
                 String[] line = (String[]) iter.next();
                 if (line.length != 2 || line[0].isEmpty() || line[1].isEmpty()) {
@@ -205,10 +202,9 @@ public class MigrationAction extends AbstractAction {
             depthNight = Float.valueOf(getParameter("nighttime_depth"));
         }
         // Sunset and sunrise definition
-        SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
-        hourFormat.setCalendar(calendar);
-        sunset = hourFormat.parse(getParameter("sunset"));
-        sunrise = hourFormat.parse(getParameter("sunrise"));
+        DateTimeFormatter hourFormat = DateTimeFormatter.ofPattern("HH:mm");
+        sunset = LocalTime.parse(getParameter("sunset"), hourFormat);
+        sunrise = LocalTime.parse(getParameter("sunrise"), hourFormat);
         // Check whether depth at day and depth at night are constant in the
         // case they are not function of age
         isodepth = (null == depthsDay && null == depthsNight) && (depthDay == depthNight);
@@ -259,19 +255,18 @@ public class MigrationAction extends AbstractAction {
      * simulation.
      */
     private double getDepth(IParticle particle, double time) {
-        // Time in milliseconds
-        calendar.setTimeInMillis((long) (time * 1000));
-        long timeDay = getSecondsOfDay(calendar);
-        calendar.setTime(sunrise);
-        long timeSunrise = getSecondsOfDay(calendar);
-        calendar.setTime(sunset);
-        long timeSunset = getSecondsOfDay(calendar);
+
+        double realHour = (time / (60 * 60)) % 24;
+        int hour = (int) Math.floor(realHour);
+        double minute = (int) ((realHour - hour) * 60) ;
         
+        LocalTime currentTime = LocalTime.of(hour, (int) minute);
+
         // get bathy in meter (<0)
         double bottom = getSimulationManager().getDataset().z2depth(particle.getX(), particle.getY(), 0);
         double output;
-        
-        if (timeDay >= timeSunrise && timeDay < timeSunset) {
+
+        if ((currentTime.compareTo(sunrise) >= 0) && (currentTime.compareTo(sunset) < 0)) {
             // day time
             if (null != depthsDay) {
                 // Update the depth as function of age
@@ -299,20 +294,10 @@ public class MigrationAction extends AbstractAction {
                 }
             }
             output = depthNight;
-        } 
-        
-        output = (output < bottom) ? particle.getDepth() : output;
-   
-        return output;
-    }
+        }
 
-    /**
-     * Express current time as a number of seconds since midnight.
-     *
-     * @param calendar the calendar set to current time
-     * @return the number of seconds elapsed since midnight
-     */
-    private long getSecondsOfDay(Calendar calendar) {
-        return calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60;
+        output = (output < bottom) ? particle.getDepth() : output;
+
+        return output;
     }
 }

@@ -75,9 +75,12 @@ import org.previmer.ichthyop.ui.logging.JStatusBarHandler;
  */
 public class JStatusBar extends JXStatusBar {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    /**
+     * Generic UID
+     *
+     */
+    private static final long serialVersionUID = -3815486304549078987L;
+
     private JLabel statusMessageLabel = new JLabel();
     private JXBusyLabel statusAnimationLabel = new JXBusyLabel();
     private JPanel pnlProgressBar = new JPanel();
@@ -85,17 +88,11 @@ public class JStatusBar extends JXStatusBar {
     private JLabel lblFlag = new JLabel();
     private Timer messageTimer;
 
-///////////////
-// Constructors
-///////////////
     public JStatusBar() {
         initComponents();
         monitorTasks();
     }
 
-////////////////////////////
-// Definition of the methods
-////////////////////////////
     private void initComponents() {
 
         // Set opacity of the compoments to false

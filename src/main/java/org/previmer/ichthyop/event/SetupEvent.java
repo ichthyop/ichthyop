@@ -52,6 +52,11 @@ import java.util.EventObject;
  */
 public class SetupEvent extends EventObject {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -2777446217645085716L;
+
     public SetupEvent(Object source) {
         super(source);
     }

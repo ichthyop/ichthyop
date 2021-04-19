@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -47,12 +47,16 @@ package org.previmer.ichthyop.dataset;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
 import org.previmer.ichthyop.io.IOTools;
+import org.previmer.ichthyop.manager.TimeManager;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
@@ -77,7 +81,7 @@ public class DatasetUtil {
      * @throws IOException if no file match the pattern
      */
     public static List<String> list(String path, String pattern) throws IOException {
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
 
         File inputPath = new File(IOTools.resolvePath(path));
         if (!inputPath.isDirectory()) {
@@ -85,7 +89,7 @@ public class DatasetUtil {
         }
         File[] listFile = inputPath.listFiles(new MetaFilenameFilter(pattern));
         if (listFile.length > 0) {
-            list = new ArrayList(listFile.length);
+            list = new ArrayList<>(listFile.length);
             for (File file : listFile) {
                 list.add(file.toString());
             }
@@ -102,7 +106,7 @@ public class DatasetUtil {
      * @param strTime, the name of the time variable in the NetCDF file
      * @param timeArrow, 1 forward, -1 backward
      */
-    public static void sort(List list, String strTime, int timeArrow) {
+    public static void sort(List<String> list, String strTime, int timeArrow) {
         if (list.isEmpty() || list.size() == 1) {
             return;
         }
@@ -121,13 +125,9 @@ public class DatasetUtil {
         if (!new File(file).isFile()) {
             throw new FileNotFoundException(file);
         }
-        NetcdfFile nc = NetcdfDataset.openDataset(file);
-        Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
-        nc.close();
-        return convert == 1.d
-                ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(0)))
-                : convert * timeArr.getDouble(timeArr.getIndex().set(0));
+        
+        return getDate(file, strTime, 0);
+        
     }
 
     /**
@@ -144,19 +144,16 @@ public class DatasetUtil {
         }
         NetcdfFile nc = NetcdfDataset.openDataset(file);
         Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
         nc.close();
-        return convert == 1.d
-                ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1)))
-                : convert * timeArr.getDouble(timeArr.getIndex().set(timeArr.getShape()[0] - 1));
+        
+        int lastIndex = timeArr.getShape()[0] - 1;
+        
+        return getDate(file, strTime, lastIndex);
+        
     }
 
     public static double timeAtRank(NetcdfFile nc, String strTime, int rank) throws IOException {
-        Array timeArr = nc.findVariable(strTime).read();
-        double convert = guessTimeConversion(nc.findVariable(strTime));
-        return (convert == 1.d)
-                ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(rank)))
-                : convert * timeArr.getDouble(timeArr.getIndex().set(rank));
+        return DatasetUtil.getDate(nc.getLocation(), strTime, rank);
     }
 
     /**
@@ -239,7 +236,7 @@ public class DatasetUtil {
             }
         }
 
-        // Time value not found among NetCDF files        
+        // Time value not found among NetCDF files
         StringBuilder msg = new StringBuilder();
         msg.append("[Dataset] Time value ");
         msg.append(time);
@@ -255,25 +252,20 @@ public class DatasetUtil {
      * @throws an IOException if an error occurs while reading the input file
      *
      */
-    static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws ArrayIndexOutOfBoundsException, IOException {
+    public static int rank(double time, NetcdfFile nc, String strTime, int timeArrow) throws ArrayIndexOutOfBoundsException, IOException {
 
         int lrank = 0;
         double nctime;
         Array timeArr = null;
         try {
             timeArr = nc.findVariable(strTime).read();
-            double convert = guessTimeConversion(nc.findVariable(strTime));
-            nctime = (convert == 1)
-                    ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(lrank)))
-                    : timeArr.getDouble(timeArr.getIndex().set(lrank)) * convert;
+            nctime = DatasetUtil.getDate(nc.getLocation(), strTime, lrank);
             while (time >= nctime) {
                 if (timeArrow < 0 && time == nctime) {
                     break;
                 }
                 lrank++;
-                nctime = (convert == 1)
-                        ? skipSeconds(timeArr.getDouble(timeArr.getIndex().set(lrank)))
-                        : timeArr.getDouble(timeArr.getIndex().set(lrank)) * convert;
+                nctime = DatasetUtil.getDate(nc.getLocation(), strTime, lrank);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             lrank = timeArr.getShape()[0];
@@ -282,7 +274,7 @@ public class DatasetUtil {
 
         return lrank;
     }
-
+    
     /**
      * Guess whether time is expressed in seconds in the NetCDF file and if not
      * return a conversion value to adjust it to seconds. So far it detects
@@ -370,10 +362,6 @@ public class DatasetUtil {
         return (sinh(x) / cosh(x));
     }
 
-    private static double skipSeconds(double time) {
-        return 100.d * Math.floor(time / 100.d);
-    }
-
     /**
      * Computes the geodesic distance between the two points (lat1, lon1) and
      * (lat2, lon2)
@@ -397,7 +385,7 @@ public class DatasetUtil {
 
         return d;
     }
-    
+
     /**
      * <p>
      * The functions computes the 2nd order approximate derivative at index
@@ -428,8 +416,8 @@ public class DatasetUtil {
 
         return (X[k + 1] - 2.d * X[k] + X[k - 1]);
     }
-    
-    
+
+
      /**
      * Computes the geodesic distance between the two points (lat1, lon1) and
      * (lat2, lon2)
@@ -446,4 +434,50 @@ public class DatasetUtil {
         return d;
     }
     
+    public static double getDate(String file, String strTime, int index) throws IOException {
+
+        if (!new File(file).isFile()) {
+            throw new FileNotFoundException(file);
+        }
+      
+        // Date formatter to extract NetCDF time
+        DateTimeFormatter dateFormatter;
+        
+        // Output date
+        LocalDateTime finalDate;
+
+        // Open the NetCDF file
+        // Recover the time variable and units
+        NetcdfFile nc = NetcdfDataset.openDataset(file);
+        Variable timeVar = nc.findVariable(strTime);
+        Attribute attrUnits = timeVar.findAttributeIgnoreCase("units");
+
+        // Recover the time values for the corresponding index
+        Array timeArr = nc.findVariable(strTime).read();
+        long time = (long) timeArr.getDouble(timeArr.getIndex().set(index));
+
+        // Converts string into lower case.
+        String units = attrUnits.getStringValue().toLowerCase();
+
+        // Extract the NetCDF reference date by removing the
+        // prefix (day(s), month(s) or day(s)) and the seconds values
+        int beginIndex = units.indexOf("since") + 5;
+        int endIndex = units.lastIndexOf(":");
+        String subUnits = units.substring(beginIndex, endIndex).trim();
+        dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
+
+        if (units.contains("second")) {
+            finalDate = dateUnit.plusSeconds(time);
+        } else if (units.contains("hour")) {
+            finalDate = dateUnit.plusHours(time);
+        } else {
+            finalDate = dateUnit.plusDays(time);
+        }
+
+        double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
+        return output;
+
+    }
+        
 }

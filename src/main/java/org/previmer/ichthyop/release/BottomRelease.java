@@ -57,16 +57,12 @@ import org.previmer.ichthyop.particle.ParticleFactory;
 public class BottomRelease extends AbstractRelease {
 
  private int nbReleaseZones, nParticles;
-    private boolean is3D;
 
     @Override
     public void loadParameters() throws Exception {
 
         /* Get number of particles to release */
         nParticles = Integer.valueOf(getParameter("number_particles"));
-
-        /* Check whether 2D or 3D simulation */
-        is3D = true;
 
         /* Load release zones*/
         getSimulationManager().getZoneManager().loadZonesFromFile(getParameter("zone_file"), TypeZone.RELEASE);
@@ -80,7 +76,6 @@ public class BottomRelease extends AbstractRelease {
     public int release(ReleaseEvent event) throws Exception {
 
         double xmin, xmax, ymin, ymax;
-        double upDepth = Double.MAX_VALUE, lowDepth = 0.d;
         /** Reduces the release area function of the user-defined zones */
         xmin = Double.MAX_VALUE;
         ymin = Double.MAX_VALUE;

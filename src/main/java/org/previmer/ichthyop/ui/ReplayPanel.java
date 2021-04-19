@@ -66,6 +66,10 @@ import org.previmer.ichthyop.util.MetaFilenameFilter;
  */
 public class ReplayPanel extends JXImageView {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -1656635235226587220L;
     private List<BufferedImage> pictures = null;
     private List<String> pictureNames = null;
     private Thread picturesFinder = null;
@@ -76,8 +80,8 @@ public class ReplayPanel extends JXImageView {
 
     public ReplayPanel() {
         setOpaque(false);
-        pictures = new ArrayList();
-        pictureNames = new ArrayList();
+        pictures = new ArrayList<>();
+        pictureNames = new ArrayList<>();
         setFolder(null);
     }
 

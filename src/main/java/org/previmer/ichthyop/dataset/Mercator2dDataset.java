@@ -121,7 +121,7 @@ public class Mercator2dDataset extends AbstractDataset {
     /**
      * Name of the Variable in NetCDF file
      */
-    private String strU, strV, strTime, strT;
+    private String strU, strV, strTime;
     /**
      * Name of the Variable in NetCDF file
      */

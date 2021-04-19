@@ -65,12 +65,12 @@ public class RequiredVariable {
     private Array array_tp0, array_tp1;
     private double time_tp1, dt_dataset;
     private boolean isUnlimited;
-    private List<Class> requiredByList;
+    private List<Class<?>> requiredByList;
 
-    public RequiredVariable(String name, Class requiredBy) {
+    public RequiredVariable(String name, Class<?> requiredBy) {
         this.name = name;
         this.dataset = SimulationManager.getInstance().getDataset();
-        requiredByList = new ArrayList();
+        requiredByList = new ArrayList<>();
         requiredByList.add(requiredBy);
     }
 
@@ -86,11 +86,11 @@ public class RequiredVariable {
         this.isUnlimited = unlim;
     }
     
-    public void addRequiredBy(Class requiredBy) {
+    public void addRequiredBy(Class<?> requiredBy) {
         requiredByList.add(requiredBy);
     }
 
-    public List<Class> getRequiredBy() {
+    public List<Class<?>> getRequiredBy() {
         return requiredByList;
     }
 

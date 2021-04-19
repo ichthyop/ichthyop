@@ -61,7 +61,7 @@ public class ZoneParticleLayer extends ParticleLayer {
         int nZone = -1;
         boolean foundZone = false;
         if (null != getSimulationManager().getZoneManager().getZones(type)) {
-            Iterator iter = getSimulationManager().getZoneManager().getZones(type).iterator();
+            Iterator<Zone> iter = getSimulationManager().getZoneManager().getZones(type).iterator();
             while (!foundZone && iter.hasNext()) {
                 Zone znTmp = (Zone) iter.next();
                 if (znTmp.isParticleInZone(particle())) {

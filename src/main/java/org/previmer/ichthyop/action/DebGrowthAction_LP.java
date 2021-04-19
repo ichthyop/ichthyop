@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.action;
@@ -64,7 +64,7 @@ public class DebGrowthAction_LP extends AbstractAction {
     private String food_field;
     private double p_Am;        // J cm-2 d-1, max. surf. specific assimilation rate
     // Energetic related parameters
-    //private double E_m;       // J/cm^3, reserve capacity 
+    //private double E_m;       // J/cm^3, reserve capacity
     private double E_G;       // Volume specific costs of strcture
     private double p_M;         // J cm-3 d-1; Volume specific maint. cost
     // private double Kappa_X;       // Fraction of odd energy fixed in reserves
@@ -94,7 +94,6 @@ public class DebGrowthAction_LP extends AbstractAction {
 
     private ModelType modelType;
     private FunctionTcor tcorFunc;
-    private boolean addPhysTracker;
 
     /**
      * Pointer to the class method to compute Tcorr.
@@ -143,13 +142,13 @@ public class DebGrowthAction_LP extends AbstractAction {
         //this.Kappa_R = Double.valueOf(getParameter("fraction_fixed_eggs")); // no unit
 
         // Energetic related parameters
-        //E_m = Double.valueOf(getParameter("reserve_capacity")) / 1000.0;       //2700; J/cm^3, reserve capacity 
+        //E_m = Double.valueOf(getParameter("reserve_capacity")) / 1000.0;       //2700; J/cm^3, reserve capacity
         this.p_M = Double.valueOf(getParameter("volume_specific_somatic_maintenance")) / (86400 * 1e3); // J/cm3/day conversion into J/mm3/day
 
-        this.k_J = Double.valueOf(getParameter("maturity_maintenance_rate")) / (86400);  // day-1, converted into s-1 
+        this.k_J = Double.valueOf(getParameter("maturity_maintenance_rate")) / (86400);  // day-1, converted into s-1
 
         // divisé par 1000 pour la conversion en mm-3
-        this.E_G = Double.valueOf(getParameter("cost_growth")) / 1000.0;       //4000; J cm-3; // Cost for growth 
+        this.E_G = Double.valueOf(getParameter("cost_growth")) / 1000.0;       //4000; J cm-3; // Cost for growth
 
         this.T1 = Double.valueOf(getParameter("ref_temp"));	 //273.15 + 20; K, Ref temp = 20C (avg. mid-water temp in GoL)
         //p= [p_Xm ae XK_chl E_m E_g p_M Kappa TA T1 mu_E shape_larvae ]; // pack params
@@ -193,13 +192,11 @@ public class DebGrowthAction_LP extends AbstractAction {
             getSimulationManager().getOutputManager().addPredefinedTracker(DebLbTracker.class);
         }
 
-        // @TODO: add some test to define whether classical or updated Tcor function should
-        // be used.
-        if (false) {
-            tcorFunc = (double z) -> this.computeTcorr(z);
-        } else {
-            tcorFunc = (double z) -> this.computeTcorrLp(z);
-        }
+        // @TODO: add some test to define whether classical or updated Tcor function
+        // should be used.
+        // tcorFunc = (double z) -> this.computeTcorr(z);
+        tcorFunc = (double z) -> this.computeTcorrLp(z);
+
     }
 
     @Override
@@ -221,7 +218,7 @@ public class DebGrowthAction_LP extends AbstractAction {
         double temp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
         double food = getSimulationManager().getDataset().get(food_field, particle.getGridCoordinates(), getSimulationManager().getTimeManager().getTime()).doubleValue();
 
-        // Recover the DEB variables for the current particle. 
+        // Recover the DEB variables for the current particle.
         DebParticleLayer debLayer = (DebParticleLayer) particle.getLayer(DebParticleLayer.class);
 
         // Computes the DEB growth for the given time step
@@ -318,7 +315,7 @@ public class DebGrowthAction_LP extends AbstractAction {
         double flow_p_M = p_MT * V;                              // energy lost to maintenance
 
         double flow_p_C = (E / V) * (this.E_G * V_dotT * Math.pow(V, 2 / 3.0) + flow_p_M) / (this.Kappa * E / V + this.E_G);// energy for utilisation
-        double flow_p_J = k_JT * E_H;        // maturity maintenance 
+        double flow_p_J = k_JT * E_H;        // maturity maintenance
 
         // Corresponds to (kappa_pc - pm)
         double flow_p_G = Math.max(0.0, Kappa * flow_p_C - flow_p_M) / this.E_G;     // energy directed to structural growth
@@ -346,12 +343,12 @@ public class DebGrowthAction_LP extends AbstractAction {
         debLayer.setE_R(E_R + dRdt * dt);
 
         // compute weight
-        //double dV = 1; 
-        //W_dw[j] = V * dV  + (E+E_R)/mu_E;  
+        //double dV = 1;
+        //W_dw[j] = V * dV  + (E+E_R)/mu_E;
         //Compute DRY weight (g, dw) * 4.1 = Wet weight
         // starvation test
         boolean starvation;
-        if ((Kappa * flow_p_C < flow_p_M) && ((1 - Kappa) * flow_p_C < flow_p_J)) {
+        if ((Kappa * flow_p_C < flow_p_M) || ((1 - Kappa) * flow_p_C < flow_p_J)) {
             starvation = true;
         } else {
             starvation = false;

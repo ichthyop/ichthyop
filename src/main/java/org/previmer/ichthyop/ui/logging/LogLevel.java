@@ -52,6 +52,10 @@ import java.util.logging.Level;
  */
 public class LogLevel extends Level {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -2456053035098483147L;
     public static final LogLevel COMPLETE = new LogLevel("INFO");
 
     public LogLevel(String name) {

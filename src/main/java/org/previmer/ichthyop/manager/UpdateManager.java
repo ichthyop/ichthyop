@@ -285,7 +285,7 @@ public class UpdateManager extends AbstractManager {
          */
         if (null != getXBlock(BlockType.ACTION, "action.lethal_temp")) {
             try {
-                float f = Float.valueOf(getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
+                Float.valueOf(getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").getValue());
             } catch (NumberFormatException ex) {
                 getXParameter(BlockType.ACTION, "action.lethal_temp", "lethal_temperature_larva").setValue("12.0");
             }

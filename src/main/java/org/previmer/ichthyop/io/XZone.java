@@ -58,6 +58,10 @@ import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
  */
 public class XZone extends org.jdom2.Element {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 3940266835048156944L;
     final public static String ZONE = "zone";
     final public static String TYPE_ZONE = "type";
     final public static String INDEX = "index";
@@ -190,8 +194,8 @@ public class XZone extends org.jdom2.Element {
 
     public ArrayList<XPoint> getPolygon() {
 
-        List list = getChild(POLYGON).getChildren(XPoint.POINT);
-        ArrayList<XPoint> polygon = new ArrayList(list.size());
+        List<Element> list = getChild(POLYGON).getChildren(XPoint.POINT);
+        ArrayList<XPoint> polygon = new ArrayList<>(list.size());
         for (Object elt : list) {
             XPoint point = new XPoint((Element) elt);
             polygon.add(point.getIndex(), point);
@@ -295,6 +299,10 @@ public class XZone extends org.jdom2.Element {
 
     public class XPoint extends org.jdom2.Element {
 
+        /**
+         *
+         */
+        private static final long serialVersionUID = -1159434634014551888L;
         private static final String POINT = "point";
         private static final String LON = "lon";
         private static final String LAT = "lat";

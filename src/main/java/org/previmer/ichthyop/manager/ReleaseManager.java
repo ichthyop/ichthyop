@@ -94,7 +94,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
         XBlock releaseBlock = findActiveReleaseProcess();
         String className = getParameter(releaseBlock.getKey(), "class_name");
         try {
-            releaseProcess = (AbstractRelease) Class.forName(className).newInstance();
+            releaseProcess = (AbstractRelease) Class.forName(className).getDeclaredConstructor().newInstance();
             releaseProcess.loadParameters();
         } catch (Exception ex) {
             StringBuilder sb = new StringBuilder();
@@ -111,7 +111,7 @@ public class ReleaseManager extends AbstractManager implements ReleaseListener, 
     }
 
     private XBlock findActiveReleaseProcess() throws Exception {
-        List<XBlock> list = new ArrayList();
+        List<XBlock> list = new ArrayList<>();
         for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.RELEASE)) {
             if (block.isEnabled()) {
                 list.add(block);

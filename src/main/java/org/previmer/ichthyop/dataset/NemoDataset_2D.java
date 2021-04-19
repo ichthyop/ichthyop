@@ -54,7 +54,6 @@ import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayDouble;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -307,7 +306,7 @@ public class NemoDataset_2D extends AbstractDataset {
     public double get_dUx(double[] pGrid, double time) {
 
         double du = 0.d;
-        double ix, jy, kz;
+        double ix, jy;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
@@ -342,7 +341,7 @@ public class NemoDataset_2D extends AbstractDataset {
     @Override
     public double get_dVy(double[] pGrid, double time) {
         double dv = 0.d;
-        double ix, jy, kz;
+        double ix, jy;
         int n = isCloseToCost(pGrid) ? 1 : 2;
         ix = pGrid[0];
         jy = pGrid[1];
@@ -735,7 +734,7 @@ public class NemoDataset_2D extends AbstractDataset {
     @Override
     public boolean isCloseToCost(double[] pGrid) {
 
-        int i, j, k, ii, jj;
+        int i, j, ii, jj;
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         ii = (i - (int) pGrid[0]) == 0 ? 1 : -1;

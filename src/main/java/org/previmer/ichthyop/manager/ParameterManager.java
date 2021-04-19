@@ -116,7 +116,7 @@ public class ParameterManager extends AbstractManager {
 
     public String[] getListParameter(BlockType blockType, String blockKey, String key) {
         String[] tokens = getParameter(blockType, blockKey, key).split("\"");
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
         for (String token : tokens) {
             if (!token.trim().isEmpty()) {
                 list.add(token.trim());

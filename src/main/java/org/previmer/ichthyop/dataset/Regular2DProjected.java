@@ -689,10 +689,6 @@ public class Regular2DProjected extends AbstractDataset {
         final double dy = jy - (double) j;
         double co;
         for (int ii = 0; ii < 2; ii++) {
-            int ci = i;
-            if (i < 0) {
-                ci = nx - 1;
-            }
             int cii = i + ii;
             if (cii > nx - 1) {
                 cii = 0;
@@ -786,7 +782,6 @@ public class Regular2DProjected extends AbstractDataset {
         int cjp1 = cj + 1 > ny - 1 ? ny - 1 : cj + 1;
         int cjm1 = cj - 1 < 0 ? 0 : cj - 1;
         // xgrid
-        String toto;
         double xgrid;
         if (lon >= longitude[ci]) {
             double dx = longitude[cip1] - longitude[ci];

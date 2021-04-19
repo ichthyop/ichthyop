@@ -44,7 +44,6 @@
 
 package org.previmer.ichthyop.io;
 
-import static org.previmer.ichthyop.SimulationManagerAccessor.getSimulationManager;
 import org.previmer.ichthyop.particle.IParticle;
 
 /**

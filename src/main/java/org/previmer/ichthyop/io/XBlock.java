@@ -47,7 +47,6 @@ package org.previmer.ichthyop.io;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +60,10 @@ import org.jdom2.Element;
  */
 public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5504576033373599230L;
     public final static String BLOCK = "block";
     final public static String KEY = "key";
     final public static String TREEPATH = "tree_path";
@@ -159,8 +162,8 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
     }
 
     private HashMap<String, XParameter> createMap() {
-        HashMap<String, XParameter> lmap = new HashMap();
-        sortedKey = new ArrayList();
+        HashMap<String, XParameter> lmap = new HashMap<>();
+        sortedKey = new ArrayList<>();
         for (XParameter xparam : readParameters()) {
             lmap.put(xparam.getKey(), xparam);
             sortedKey.add(xparam.getKey());
@@ -179,7 +182,7 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
     }
 
     private ArrayList<XParameter> readParameters() {
-        ArrayList<XParameter> list = new ArrayList();
+        ArrayList<XParameter> list = new ArrayList<>();
         try {
             for (Object elt : getChild(PARAMETERS).getChildren(XParameter.PARAMETER)) {
                 list.add(new XParameter((Element) elt));
@@ -195,7 +198,7 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
     }
 
     public Collection<XParameter> getXParameters() {
-        List<XParameter> list = new ArrayList(map.values().size());
+        List<XParameter> list = new ArrayList<>(map.values().size());
         Iterator<String> it = sortedKey.iterator();
         while (it.hasNext()) {
             list.add(map.get(it.next()));
@@ -285,6 +288,7 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
     }
 
     }*/
+    /*
     private class XParameterComparator implements Comparator<XParameter> {
 
         @Override
@@ -304,4 +308,5 @@ public class XBlock extends org.jdom2.Element implements Comparable<XBlock> {
             }
         }
     }
+    */
 }

@@ -45,7 +45,6 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Level;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
@@ -201,6 +200,7 @@ abstract class RomsCommon extends AbstractDataset {
         setAllFieldsTp1AtTime(rank);
     }
 
+    /*
     private void test() {
 
         for (int i = 0; i < 100; i++) {
@@ -217,6 +217,7 @@ abstract class RomsCommon extends AbstractDataset {
             System.out.println("x: " + x0 + " errx: " + errx + " y: " + y0 + " erry: " + erry);
         }
     }
+    */
 
     void readConstantField(String gridFile) throws IOException {
 

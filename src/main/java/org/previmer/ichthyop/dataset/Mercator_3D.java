@@ -175,8 +175,7 @@ public class Mercator_3D extends AbstractDataset {
      */
     private double[][][] e3t, e3u, e3v;
     private double[][] e1t, e2t, e1v, e2u;
-    private String stre1t, stre2t, stre3t, stre1v, stre2u, stre3u, stre3v;
-    private String str_gdepT, str_gdepW;
+    private String stre1t, stre2t, stre3t;
     private List<String> listUFiles, listVFiles, listWFiles, listTFiles;
     private NetcdfFile ncU, ncV, ncW, ncT;
     private String file_hgr, file_zgr, file_mask;
@@ -868,14 +867,8 @@ public class Mercator_3D extends AbstractDataset {
         }
         strTime = getParameter("field_var_time");
         stre3t = getParameter("field_var_e3t");
-        stre3u = getParameter("field_var_e3u");
-        stre3v = getParameter("field_var_e3v");
-        str_gdepT = getParameter("field_var_gdept"); // z_rho
-        str_gdepW = getParameter("field_var_gdepw"); // z_w
         stre1t = getParameter("field_var_e1t");
         stre2t = getParameter("field_var_e2t");
-        stre1v = getParameter("field_var_e1v");
-        stre2u = getParameter("field_var_e2u");
         if (!findParameter("enhanced_mode")) {
             getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         }

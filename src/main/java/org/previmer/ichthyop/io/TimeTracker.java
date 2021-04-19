@@ -68,7 +68,7 @@ public class TimeTracker extends AbstractTracker {
 
     @Override
     public Attribute[] getAttributes() {
-        List<Attribute> listAttributes = new ArrayList();
+        List<Attribute> listAttributes = new ArrayList<>();
         String calendarName = getSimulationManager().getTimeManager().getCalendar().getClass().getSimpleName();
         if (calendarName.toLowerCase().contains("interannual")) {
             listAttributes.add(new Attribute("calendar", "gregorian"));

@@ -48,6 +48,11 @@ import org.jdesktop.application.Action;
 
 public class IchthyopAboutBox extends javax.swing.JDialog {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 8239352571680342597L;
+
     public IchthyopAboutBox(java.awt.Frame parent) {
         super(parent);
         initComponents();

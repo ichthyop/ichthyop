@@ -459,7 +459,7 @@ public class SimulationManager {
         return ParameterManager.getInstance();
     }
 
-    public PropertyManager getPropertyManager(Class forClass) {
+    public PropertyManager getPropertyManager(Class<?> forClass) {
         return PropertyManager.getInstance(forClass);
     }
 

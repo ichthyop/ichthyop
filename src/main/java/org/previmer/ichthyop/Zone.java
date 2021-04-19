@@ -80,6 +80,8 @@ public class Zone extends SimulationManagerAccessor {
      * A list of {@code GridPoint} that defines the a geographical area.
      */
     private final ArrayList<GridPoint> polygon;
+    private final ArrayList<Float> lon;
+    private final ArrayList<Float> lat;
     /**
      * The type of zone (release, recruitment, etc.)
      */
@@ -134,7 +136,9 @@ public class Zone extends SimulationManagerAccessor {
      * @param index, the index of the zone
      */
     public Zone(TypeZone type, String key, int index) {
-        this.polygon = new ArrayList();
+        this.polygon = new ArrayList<>();
+        this.lon = new ArrayList<>();
+        this.lat = new ArrayList<>();
         this.type = type;
         this.key = key;
         this.index = index;
@@ -206,6 +210,8 @@ public class Zone extends SimulationManagerAccessor {
     public void init() throws Exception {
 
         for (GridPoint rhoPoint : polygon) {
+            lat.add((float) rhoPoint.getLat());
+            lon.add((float) rhoPoint.getLon());
             rhoPoint.geo2Grid();
             /* make sure the point belongs to the simulated domain */
             if (rhoPoint.getX() < 0 || rhoPoint.getY() < 0) {
@@ -256,6 +262,16 @@ public class Zone extends SimulationManagerAccessor {
 
         /* Closes the polygon adding first point as last point */
         polygon.add((GridPoint) polygon.get(0).clone());
+        lon.add((Float) lon.get(0));
+        lat.add((Float) lat.get(0));
+    }
+    
+    public  ArrayList<Float> getLon() {
+        return lon;
+    }
+    
+    public  ArrayList<Float> getLat() {
+        return lat;
     }
 
     public boolean isParticleInZone(IParticle particle) {
@@ -411,7 +427,7 @@ public class Zone extends SimulationManagerAccessor {
         }
         return xmax;
     }
-
+    
     /**
      * Gets the biggest y-coordinate of the demarcation points.
      *

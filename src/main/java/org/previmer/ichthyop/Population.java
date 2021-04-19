@@ -52,7 +52,6 @@ import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.event.SetupListener;
 import org.previmer.ichthyop.manager.SimulationManager;
 import org.previmer.ichthyop.particle.IParticle;
-import org.previmer.ichthyop.particle.Particle;
 
 /**
  * The Population is the intermediate level of the hierarchy of the IBM:
@@ -65,9 +64,15 @@ import org.previmer.ichthyop.particle.Particle;
  *
  * @author P.Verley (philippe.verley@ird.fr)
  */
-public class Population extends ArrayList implements SetupListener {
+public class Population extends ArrayList<IParticle> implements SetupListener {
 
-///////////////////////////////
+    /**
+     * Generated UID
+     *
+     */
+    private static final long serialVersionUID = 8333953290278302700L;
+    
+    ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
     /**
@@ -118,8 +123,8 @@ public class Population extends ArrayList implements SetupListener {
             ForkJoinPool pool = new ForkJoinPool();
             pool.invoke(step);
         } else {
-            Iterator<Particle> iter = iterator();
-            Particle particle;
+            Iterator<IParticle> iter = iterator();
+            IParticle particle;
             while (iter.hasNext()) {
                 particle = iter.next();
                 if (particle.isLiving()) {
@@ -146,6 +151,10 @@ public class Population extends ArrayList implements SetupListener {
      */
     private class ForkStep extends RecursiveAction {
 
+        /** Generated UID
+         *
+         */
+        private static final long serialVersionUID = 8131998743884750289L;
         private final int iStart, iEnd;
 
         /**
@@ -167,7 +176,7 @@ public class Population extends ArrayList implements SetupListener {
          */
         private void processDirectly() {
             for (int iParticle = iStart; iParticle < iEnd; iParticle++) {
-                Particle particle = (Particle) Population.this.get(iParticle);
+                IParticle particle = (IParticle) Population.this.get(iParticle);
                 if (particle.isLiving()) {
                     particle.step();
                 }
