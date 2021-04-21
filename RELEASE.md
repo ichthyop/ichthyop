@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in Ichthyop 3.3.8
+
+### Bug fix
+
+- Correct output issue when running multiple simulations (pointed out by Amael Dupaix)
+
 ## Changes in Ichthyop 3.3.7
 
 ### New features

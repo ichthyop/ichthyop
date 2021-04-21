@@ -168,6 +168,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             Path fileBase = new File(strFileBase).toPath();
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
+            ncOut = null;
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
