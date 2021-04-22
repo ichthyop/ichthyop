@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.9
+
+### New features
+
+- Resources have been moved in a new folder (`src/main/resources`). This allows the VSCOde debugger to work more  nicely (debugging in `java` files and not in `class` files). 
+
 ## Changes in Ichthyop 3.3.8
 
 ### Bug fix

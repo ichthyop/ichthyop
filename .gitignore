@@ -7,3 +7,4 @@ manifest.mf
 **.sh
 cfg
 output
+.classpath
