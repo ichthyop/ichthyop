@@ -55,14 +55,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter type="serial">
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
-                <value>year 1998 month 03 day 11 at 00:00</value>
+                <value>year 1998 month 03 day 11 at 01:00</value>
                 <format>date</format>
                 <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
             <parameter type="serial">
                 <key>transport_duration</key>
                 <long_name>Transport duration</long_name>
-                <value>0001 day(s) 00 hour(s) 00 minute(s)</value>
+                <value>0000 day(s) 20 hour(s) 00 minute(s)</value>
                 <format>duration</format>
                 <description>Set the duration of particle transport. Format: #### day(s) ## hour(s) ## minute(s)</description>
             </parameter>
@@ -1046,7 +1046,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <block type="action">
         <key>action.growthDeb</key>
         <tree_path>Advanced/Biology/DebGrowth</tree_path>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <description>Block of options for setting up the growth model. It simulates the growth in length of particles depending on water temperature and food. Dynamic Energy Budget is used to compute length.</description>
         <parameters>
             <parameter>
