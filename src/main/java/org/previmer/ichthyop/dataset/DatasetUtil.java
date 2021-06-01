@@ -271,7 +271,6 @@ public class DatasetUtil {
             lrank = timeArr.getShape()[0];
         }
         lrank = lrank - (timeArrow + 1) / 2;
-
         return lrank;
     }
     
@@ -436,9 +435,6 @@ public class DatasetUtil {
     
     public static double getDate(String file, String strTime, int index) throws IOException {
 
-        if (!new File(file).isFile()) {
-            throw new FileNotFoundException(file);
-        }
       
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;
