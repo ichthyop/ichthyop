@@ -55,7 +55,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter type="serial">
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
-                <value>year 01 month 05 day 03 at 00:00</value>
+                <value>year 1900 month 05 day 03 at 00:00</value>
                 <format>date</format>
                 <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
