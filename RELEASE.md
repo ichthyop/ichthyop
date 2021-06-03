@@ -9,6 +9,7 @@
 ### Bug fix
 
 - Template configuration and forcing files have been updated to match the new management of time (use of units attributes in the NetCDF)
+- Closing of NetcdfFile in the `getDate()` method (`DatasetUtil.java`), which causes errors after multiple opening (pointed out by Amael Dupaix)
 
 ## Changes in Ichthyop 3.3.8
 
