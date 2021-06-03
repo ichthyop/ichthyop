@@ -435,7 +435,6 @@ public class DatasetUtil {
     
     public static double getDate(String file, String strTime, int index) throws IOException {
 
-      
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;
         
@@ -473,6 +472,9 @@ public class DatasetUtil {
         }
 
         double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
+        
+        nc.close();
+        
         return output;
 
     }
