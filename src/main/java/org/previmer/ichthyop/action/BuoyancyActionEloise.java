@@ -241,16 +241,16 @@ public class BuoyancyActionEloise extends AbstractAction {
     private double move(double diameter, double sal, double tp, double dt) {
 
         waterDensity = waterDensity(sal, tp); 
-        double delta = Math.abs((particleDensity-waterDensity)/waterDensity);
+        double delta = Math.abs((particleDensity/waterDensity)-1);
         double A = delta*g*Math.pow(diameter, 3)/Math.pow(KINEMATIC_VISCOSITY,2);
         double C1 = 0.055f * Math.tanh(12*Math.pow(A, -0.59)*Math.exp(-0.0004*A));
         double C2 = 1.06f * Math.tanh(0.016*Math.pow(A, 0.5)*Math.exp(-120/A));
         double wpart =  C1 * delta * g * diameter * diameter * (1/KINEMATIC_VISCOSITY) + C2 * Math.pow(delta*g*diameter,0.5);
-        double u = wpart ;
+        double u = 0 ;
         
-        if((float) particleDensity<(float) waterDensity){
-            u = -u ; 
-        }
+        if((float) particleDensity>(float) waterDensity){
+            u = -wpart ; 
+        } else {u = wpart;}
         return u * dt / 100.0f;
         
     }
