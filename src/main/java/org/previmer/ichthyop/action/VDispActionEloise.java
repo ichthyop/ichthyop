@@ -124,21 +124,15 @@ public class VDispActionEloise extends AbstractAction {
         //double R = 2.d * random.nextDouble() - 1.d;
         double dz = -(kvSpline[0] * dt + R * Math.sqrt(6.d * kvSpline[1] * dt));    //ajout du - !!! 
         /** adimensionalize */
-        //System.out.println("dz "+dz);
         dz /= kvSpline[2];
-        //System.out.println("dz coord "+dz);
-        //System.out.println("HZ "+kvSpline[2]);
-        kvSpline = null;
+        kvSpline = null; 
         /** Reflecting boundary conditions */
         double newz = pGrid[2] + dz;
         if (newz < 0) {
             dz = -(2.d * pGrid[2] + dz);
-            System.out.println("bottom");
-        }
-        System.out.println("dz "+dz);
+        } 
         if (newz >= nz - 1) {
             dz = 2.d * (nz - 1 - pGrid[2]) - dz;
-            //System.out.println("new dz " + dz*kvSpline[2]);
         }
         return new double[]{0.d, 0.d, dz};
     }
@@ -157,41 +151,30 @@ public class VDispActionEloise extends AbstractAction {
         x = pGrid[0];
         y = pGrid[1];
         z = Math.max(0.d, Math.min(pGrid[2], dataset.get_nz() - 1.00001f));
-        //System.out.println(z);
         depth = dataset.z2depth(x, y, z);
-        //System.out.println(depth);
         i = (int) x;
         j = (int) y;
         k = (int) Math.round(z);
-        System.out.println("k "+k);
         dx = x - Math.floor(x);
         dy = y - Math.floor(y);
 
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
-               // System.out.println("i+ii "+maillei +" j+jj "+maillej );
                 co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
-                //System.out.println("co "+co);
                 kvSpline = getKv(i + ii, j + jj, depth, time, dt);
                 if (Double.isNaN(kvSpline[1])==false && Double.isNaN(kvSpline[0])==false){
-                    //System.out.println("ok");
                     Kv += kvSpline[1] * co;
                     diffKv += kvSpline[0] * co;
                     CO += co;
-                    //System.out.print("boucle"); 
-                    Hz += co * (dataset.z2depth(i + ii, j + jj, k + 1.5) - dataset.z2depth(i + ii, j + jj, Math.max(k - 1.5, 0)));                 
+                    Hz += co * (dataset.z2depth(i + ii, j + jj, k + 1.5) - dataset.z2depth(i + ii, j + jj, Math.max(k - 1.5, 0)));  
                 } 
-
-                //System.out.println("Hz "+Hz);
             }
         }
-        //System.out.println(CO);
         if (CO != 0) {
             diffKv /= CO;
             Kv /= CO;
             Hz /= CO;
         }
-        System.out.println("HZ "+Hz);
         return new double[]{diffKv, Kv, Hz};
     }
 
@@ -209,12 +192,9 @@ public class VDispActionEloise extends AbstractAction {
 
         z = Math.min(dataset.depth2z(i, j, depth), dataset.get_nz() - 1.00001f);
         k = (int) z;
-        //dz = z - Math.floor(z);
-        //ddepth = depth - dataset.z2depth(k, j, i);
-        ddepth = depth - dataset.z2depth(i,j,k);
-        if (Double.isNaN(ddepth)){
-            System.out.println("data "+ dataset.z2depth(i,j,k));
-        }
+        dz = z - Math.floor(z);
+       
+        ddepth = depth - dataset.z2depth(k,j,i);
         /** Compute the polynomial coefficients of the piecewise of the spline
          * contained between [k; k + 1]. Let's take M = Kv''
          * a = (M(k + 1) - M(k)) / 6
@@ -240,8 +220,8 @@ public class VDispActionEloise extends AbstractAction {
                     - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
             d = Kv[k];
         }
-        //ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(k, j, i);
-        ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(i,j,k);
+        //ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(i, j, k);
+        ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(k,j,i);
         /** Compute Kv(z)
          * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
         Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
