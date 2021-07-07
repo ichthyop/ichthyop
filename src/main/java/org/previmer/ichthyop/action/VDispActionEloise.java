@@ -116,24 +116,30 @@ public class VDispActionEloise extends AbstractAction {
      * first derivative.
      */
     public double[] getVDispersion(double[] pGrid, double time, double dt) {
-        int nz = getSimulationManager().getDataset().get_nz();
+        IDataset dataset = getSimulationManager().getDataset();
         double[] kvSpline = getKv(pGrid, time, dt);
-        kvSpline[0] = 0 ; 
-        kvSpline[1] = 0.09 ;
-        double R = -0.5;
-        //double R = 2.d * random.nextDouble() - 1.d;
-        double dz = -(kvSpline[0] * dt + R * Math.sqrt(6.d * kvSpline[1] * dt));    //ajout du - !!! 
-        /** adimensionalize */
-        dz /= kvSpline[2];
+        kvSpline[0] = 0.0;
+        kvSpline[1] = 0.09 ; 
+        double R = 2.d * random.nextDouble() - 1.d;
+
+        double dz = -(kvSpline[0] * dt + R * Math.sqrt(6.d * kvSpline[1] * dt));    
         kvSpline = null; 
+        double newz = dataset.z2depth(pGrid[0],pGrid[1],pGrid[2]) + dz;   
+        double depth_max = dataset.z2depth(pGrid[0],pGrid[1],0);
+
         /** Reflecting boundary conditions */
-        double newz = pGrid[2] + dz;
-        if (newz < 0) {
-            dz = -(2.d * pGrid[2] + dz);
-        } 
-        if (newz >= nz - 1) {
-            dz = 2.d * (nz - 1 - pGrid[2]) - dz;
+        if (newz>0){
+            newz = -newz ; 
         }
+        if (newz<depth_max){
+            newz = depth_max - newz + depth_max;
+        }
+        
+        // Using sigma coordinates 
+        double vgrid = pGrid[2];
+        double vgrid_newz = dataset.depth2z(pGrid[0],pGrid[1],newz);
+        dz = vgrid_newz-vgrid;
+
         return new double[]{0.d, 0.d, dz};
     }
 
@@ -166,7 +172,7 @@ public class VDispActionEloise extends AbstractAction {
                     Kv += kvSpline[1] * co;
                     diffKv += kvSpline[0] * co;
                     CO += co;
-                    Hz += co * (dataset.z2depth(i + ii, j + jj, k + 1.5) - dataset.z2depth(i + ii, j + jj, Math.max(k - 1.5, 0)));  
+                    Hz += co*(dataset.z2depth(i+ii,j+jj,k+1)-dataset.z2depth(i+ii,j+jj,Math.max(k,0)));
                 } 
             }
         }
@@ -194,7 +200,7 @@ public class VDispActionEloise extends AbstractAction {
         k = (int) z;
         dz = z - Math.floor(z);
        
-        ddepth = depth - dataset.z2depth(k,j,i);
+        ddepth = depth - dataset.z2depth(i,j,k);
         /** Compute the polynomial coefficients of the piecewise of the spline
          * contained between [k; k + 1]. Let's take M = Kv''
          * a = (M(k + 1) - M(k)) / 6
@@ -220,8 +226,7 @@ public class VDispActionEloise extends AbstractAction {
                     - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
             d = Kv[k];
         }
-        //ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(i, j, k);
-        ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(k,j,i);
+        ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(i, j, k);
         /** Compute Kv(z)
          * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
         Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
