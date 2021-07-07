@@ -118,38 +118,36 @@ public class VDispActionEloise extends AbstractAction {
     public double[] getVDispersion(double[] pGrid, double time, double dt) {
         IDataset dataset = getSimulationManager().getDataset();
         double[] kvSpline = getKv(pGrid, time, dt);
-        kvSpline[0] = 0.0;
-        kvSpline[1] = 0.09 ; 
         double R = 2.d * random.nextDouble() - 1.d;
 
         double dz = -(kvSpline[0] * dt + R * Math.sqrt(6.d * kvSpline[1] * dt));    
-        kvSpline = null; 
-        double newz = dataset.z2depth(pGrid[0],pGrid[1],pGrid[2]) + dz;   
-        double depth_max = dataset.z2depth(pGrid[0],pGrid[1],0);
+        double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;   
+        double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
 
         /** Reflecting boundary conditions */
-        if (newz>0){
+        if (newz > 0){
             newz = -newz ; 
         }
-        if (newz<depth_max){
+        if (newz < depth_max){
             newz = depth_max - newz + depth_max;
         }
         
         // Using sigma coordinates 
         double vgrid = pGrid[2];
-        double vgrid_newz = dataset.depth2z(pGrid[0],pGrid[1],newz);
-        dz = vgrid_newz-vgrid;
+        double vgrid_newz = dataset.depth2z(pGrid[0], pGrid[1], newz);
+        dz = vgrid_newz - vgrid;
 
         return new double[]{0.d, 0.d, dz};
+        
     }
 
-
+    /** Spatial interpolation of the Kv and diffKv values */
     private double[] getKv(double[] pGrid, double time, double dt) {
 
         IDataset dataset = getSimulationManager().getDataset();
-        double co, CO = 0.d, Kv = 0.d, diffKv = 0.d, Hz = 0.d;
+        double co, CO = 0.d, Kv = 0.d, diffKv = 0.d;
         double x, y, z, dx, dy;
-        int i, j, k;
+        int i, j;
         int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
         double[] kvSpline;
         double depth;
@@ -160,7 +158,6 @@ public class VDispActionEloise extends AbstractAction {
         depth = dataset.z2depth(x, y, z);
         i = (int) x;
         j = (int) y;
-        k = (int) Math.round(z);
         dx = x - Math.floor(x);
         dy = y - Math.floor(y);
 
@@ -172,68 +169,42 @@ public class VDispActionEloise extends AbstractAction {
                     Kv += kvSpline[1] * co;
                     diffKv += kvSpline[0] * co;
                     CO += co;
-                    Hz += co*(dataset.z2depth(i+ii,j+jj,k+1)-dataset.z2depth(i+ii,j+jj,Math.max(k,0)));
                 } 
             }
         }
         if (CO != 0) {
             diffKv /= CO;
             Kv /= CO;
-            Hz /= CO;
         }
-        return new double[]{diffKv, Kv, Hz};
+        return new double[]{diffKv, Kv};
     }
-
+    
+    /** Computes, for a given i, j (index) and depth (m), the values of K and K'
+     * (equation 6 in Visser). Note that K' is computed at the particle depth, 
+     * while the K value is computed at a depth of (depth + 0.5 * K' * dt) */
     private double[] getKv(int i, int j, double depth, double time, double dt) {
 
         IDataset dataset = getSimulationManager().getDataset();
-        double diffzKv, Kvzz, ddepth, dz, zz;
+        double diffzKv;
         double[] Kv = new double[dataset.get_nz()];
-        double a, b, c, d;
         int k;
-        double z;
+        
+        // Extraction of the Kv values for all depths
         for (k = dataset.get_nz(); k-- > 0;) {
             Kv[k] = dataset.get(kv_field, new double[] {i, j, k}, time).doubleValue();
         }
-
-        z = Math.min(dataset.depth2z(i, j, depth), dataset.get_nz() - 1.00001f);
-        k = (int) z;
-        dz = z - Math.floor(z);
-       
-        ddepth = depth - dataset.z2depth(i,j,k);
-        /** Compute the polynomial coefficients of the piecewise of the spline
-         * contained between [k; k + 1]. Let's take M = Kv''
-         * a = (M(k + 1) - M(k)) / 6
-         * b = M(k) / 2
-         * c = Kv(k + 1) - Kv(k) - (M(k + 1) - M(k)) / 6
-         * d = Kv(k);
-         */
-        a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
-        b = diff2(Kv, k) / 2.d;
-        c = (Kv[k + 1] - Kv[k]) - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
-        d = Kv[k];
-
-        /** Compute Kv'(z)
-         * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c; */
-        diffzKv = c + ddepth * (2.d * b + 3.d * a * ddepth);
-        zz = Math.min(dataset.depth2z(i, j, depth + 0.5d * diffzKv * dt), dataset.get_nz() - 1.00001f);
-        dz = zz - Math.floor(z);
-        if (dz >= 1.f || dz < 0) {
-            k = (int) zz;
-            a = (diff2(Kv, k + 1) - diff2(Kv, k)) / 6.d;
-            b = diff2(Kv, k) / 2.d;
-            c = (Kv[k + 1] - Kv[k])
-                    - (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
-            d = Kv[k];
-        }
-        ddepth = depth + 0.5d * diffzKv * dt - dataset.z2depth(i, j, k);
-        /** Compute Kv(z)
-         * Kv(z) = a * dz3 + b * dz2 + c * dz + d;*/
-        Kvzz = d + ddepth * (c + ddepth * (b + ddepth * a));
-        Kvzz = Math.max(0.d, Kvzz);
         
+        // Compute the spline values (dK and K) for the particle's depth
+        double[] spline = this.compute_spline(Kv, i, j, depth);
+        diffzKv = spline[0];
+        
+        // Update the spline values for the updated particle's position
+        double updatedZ = depth + 0.5d * diffzKv * dt;
+        double[] updatedSpline = this.compute_spline(Kv, i, j, updatedZ);
+        double updatedKv = updatedSpline[1];
+        
+        return new double[]{diffzKv, updatedKv};
 
-        return new double[]{diffzKv, Kvzz};
     }
 
     private double diff2(double[] X, int k) {
@@ -252,4 +223,42 @@ public class VDispActionEloise extends AbstractAction {
 
         return (X[k + 1] - 2.d * X[k] + X[k - 1]);
     }
+    
+    /** Computes the cubic spline interpolation based on the equations of
+     * CUBIC SPLINE INTERPOLATION: A REVIEW, by George Walberg
+     * https://core.ac.uk/download/pdf/161439407.pdf */
+    private double[] compute_spline(double[] Kv, int i, int j, double depth) {
+        
+        double a, b, c, d;
+        
+        IDataset dataset = getSimulationManager().getDataset();
+        
+        double z = Math.min(dataset.depth2z(i, j, depth), dataset.get_nz() - 1.00001f);
+        int k = (int) Math.floor(z);   // k is the cell point below the particle
+
+        double ddepth = depth - dataset.z2depth(i, j, k);  // ddepth is always positive as well
+        /** Compute the polynomial coefficients of the piecewise of the spline
+         * contained between [k; k + 1]. Let's take M = Kv''
+         * a = (M(k + 1) - M(k)) / 6  ==> A3
+         * b = M(k) / 2  ==> A2
+         * c = Kv(k + 1) - Kv(k) - (M(k + 1) - M(k)) / 6  ==> A1
+         * d = Kv(k);  ==> A0
+         */
+         
+        // depth between two consecutives cells
+        
+        double deltaZK = dataset.z2depth(i, j, k + 1) - dataset.z2depth(i, j, k);
+        d = Kv[k];
+        c = (Kv[k + 1] - Kv[k]) / deltaZK - deltaZK * (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
+        b = diff2(Kv, k) / 2.d;
+        a = (diff2(Kv, k + 1) - diff2(Kv, k)) / (6.d * deltaZK);
+
+        /** Compute Kv'(z) based on a(dx)^3 + b(dx)^2 + cdx + d
+         * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c; */
+        double diffKv = c + ddepth * (2.d * b + 3.d * a * ddepth);
+        double kZ = d + ddepth * (c + ddepth * (b + ddepth * a));
+        return new double[] {diffKv, kZ};
+        
+    }
+
 }
