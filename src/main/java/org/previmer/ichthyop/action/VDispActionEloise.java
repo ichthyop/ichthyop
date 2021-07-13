@@ -59,6 +59,9 @@ public class VDispActionEloise extends AbstractAction {
     
     /** Increase of resolution for the linear interpolation */
     private final int N = 5;
+    
+    private final int window = 8;
+    private final int window2 = window / 2;
 
     public void loadParameters() throws Exception {
         random = new MTRandom(true);
@@ -307,6 +310,29 @@ public class VDispActionEloise extends AbstractAction {
         return output;
     }
     
-    
+    /** Computes a linear interpolation of the Kv field stored at the Zk depth. 
+     * The output grid is regular and resolution is increased by a N factor. 
+     * Output is returned as a 2D array.
+     * output[0][] = interpolated depths
+     * output[1][] = interpolated K
+     * */
+    public double[][] runningMean(double[][] input) { 
+
+        int p;
+        int nz = input[0].length;
+        int newN = nz - 2 * window2 + 1;
+        
+        double[][] output = new double[2][newN];
+
+        for (p = this.window2; p < nz - this.window2 + 1; p++) {
+            for (int i = 0; i < window; i++) {
+                output[0][p - window2] += input[0][i + p - window2] / window;
+                output[1][p - window2] += input[1][i + p - window2] / window;
+            }
+        }
+
+        return output;
+
+    }
 
 }
