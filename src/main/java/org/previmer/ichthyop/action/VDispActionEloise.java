@@ -56,6 +56,9 @@ public class VDispActionEloise extends AbstractAction {
 
     private MTRandom random;
     private String kv_field;
+    
+    /** Increase of resolution for the linear interpolation */
+    private final int N = 5;
 
     public void loadParameters() throws Exception {
         random = new MTRandom(true);
@@ -169,7 +172,7 @@ public class VDispActionEloise extends AbstractAction {
                     Kv += kvSpline[1] * co;
                     diffKv += kvSpline[0] * co;
                     CO += co;
-                } 
+                }
             }
         }
         if (CO != 0) {
@@ -260,5 +263,50 @@ public class VDispActionEloise extends AbstractAction {
         return new double[] {diffKv, kZ};
         
     }
+    
+    /** Computes a linear interpolation of the Kv field stored at the Zk depth. 
+     * The output grid is regular and resolution is increased by a N factor. 
+     * Output is returned as a 2D array.
+     * output[0][] = interpolated depths
+     * output[1][] = interpolated K
+     * */
+    public double[][] linearInterpolation(double[] Kv, double[] Zk) { 
+        
+        int p;
+        int nz = Zk.length;
+        double[][] output = new double[2][this.N * nz];
+        
+        // creation of the interpolated depth
+        double zMin = Zk[0];
+        double zMax = Zk[nz - 1];
+        double steps = (zMax - zMin) / (this.N * nz - 1);
+        for (int k = 0; k < this.N * nz; k++) {
+            output[0][k] = zMin + k * steps;
+        }
+        
+        // interpolation of data
+        for (int k = 0; k < this.N * nz; k++) {
+            
+            // Interpolated depth
+            double zTemp = output[0][k];
+            
+            // Looking for the input k index used for the interpolation.
+            // p is the index of the right most interpolation depth
+            for (p = 0; p < nz; p++) { 
+                if(zTemp < Zk[p]) { 
+                    break;
+                }   
+            }
+            // move p index to the left
+            p--;
+            double frac = (zTemp - Zk[p]) / (Zk[p + 1] - Zk[p]);
+            output[1][k] = (1 - frac) * Kv[p] + frac * Kv[p + 1];
+            
+        }
+        
+        return output;
+    }
+    
+    
 
 }
