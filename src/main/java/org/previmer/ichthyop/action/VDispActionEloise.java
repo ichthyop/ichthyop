@@ -56,12 +56,10 @@ public class VDispActionEloise extends AbstractAction {
 
     private MTRandom random;
     private String kv_field;
-    
-    /** Increase of resolution for the linear interpolation */
-    private final int N = 5;
-    
+        
     private final int window = 8;
     private final int window2 = window / 2;
+    private final double dZ = 0.1;
 
     public void loadParameters() throws Exception {
         random = new MTRandom(true);
@@ -206,6 +204,12 @@ public class VDispActionEloise extends AbstractAction {
         }
         k--;
         
+        // if the particle depth is above the last depth of the the rolling mean
+        // spline is computing by taking the upper most values for K and profile
+        if(k == nz - 1) { 
+            k -= 1;   
+        }
+        
         double a, b, c, d;
         
         double ddepth = depth - Zk[k];  // ddepth is always positive as well
@@ -246,28 +250,32 @@ public class VDispActionEloise extends AbstractAction {
         double[] Zk = input[0];
         double[] Kv = input[1];
         int nz = Zk.length;
-        double[][] output = new double[2][this.N * nz];
-        
+                
         // creation of the interpolated depth
-        double zMin = Zk[0];
+        double zMin = Math.floor(Zk[0]);
         double zMax = Zk[nz - 1];
-        double steps = (zMax - zMin) / (this.N * nz - 1);
-        for (k = 0; k < this.N * nz; k++) {
-            output[0][k] = zMin + k * steps;
+        zMax = 0;
+        
+        int NNN = (int) ((zMax - zMin) / this.dZ + 1);
+        double[][] output = new double[2][NNN];
+         
+        //double steps = (zMax - zMin) / (this.N * nz - 1);
+        for (k = 0; k < NNN; k++) {
+            output[0][k] = zMin + k * this.dZ;
         }
         
         k = 0;
         // interpolation of data
-        for (k = 0; k < this.N * nz; k++) {
+        for (k = 0; k < NNN; k++) {
             
             // Interpolated depth
             double zTemp = output[0][k];
-            if(k == 0) {
+            if(zTemp <= Zk[0]) {
                 output[1][k] = Kv[0];
                 continue;
             }
             
-            if(k == this.N * nz - 1) {
+            if(zTemp >= zMax) {
                 output[1][k] = Kv[nz - 1];
                 continue;
             }
