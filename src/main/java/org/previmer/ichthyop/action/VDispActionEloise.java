@@ -251,19 +251,19 @@ public class VDispActionEloise extends AbstractAction {
         double zMin = Zk[0];
         double zMax = Zk[nz - 1];
         double steps = (zMax - zMin) / (this.N * nz - 1);
-        for (int k = 0; k < this.N * nz; k++) {
+        for (int k = 0; k < this.N * nz - 1; k++) {
             output[0][k] = zMin + k * steps;
         }
         
         // interpolation of data
-        for (int k = 0; k < this.N * nz; k++) {
+        for (int k = 0; k < this.N * nz - 1; k++) {
             
             // Interpolated depth
             double zTemp = output[0][k];
             
             // Looking for the input k index used for the interpolation.
             // p is the index of the right most interpolation depth
-            for (p = 0; p < nz; p++) { 
+            for (p = 0; p < nz - 1; p++) { 
                 if(zTemp < Zk[p]) { 
                     break;
                 }   
