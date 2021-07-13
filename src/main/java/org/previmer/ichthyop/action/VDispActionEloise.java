@@ -122,7 +122,18 @@ public class VDispActionEloise extends AbstractAction {
      * first derivative.
      */
     public double[] getVDispersion(double[] pGrid, double time, double dt) {
+        
         IDataset dataset = getSimulationManager().getDataset();
+        
+        // Horizontal interpolation of the data
+        double[][] verticalProfile = this.horizontalInterpolation(pGrid, time, dt);
+        
+        // Linear interpolation
+        double[][] interpolatedProfile = this.linearInterpolation(verticalProfile);
+        
+        // Running mean
+        double[][] runningMeanProfile = this.runningMean(verticalProfile);
+        
         double[] kvSpline = getKv(pGrid, time, dt);
         double R = 2.d * random.nextDouble() - 1.d;
 
@@ -273,11 +284,14 @@ public class VDispActionEloise extends AbstractAction {
      * output[0][] = interpolated depths
      * output[1][] = interpolated K
      * */
-    public double[][] linearInterpolation(double[] Kv, double[] Zk) { 
+    public double[][] linearInterpolation(double[][] input) { 
         
         int p;
+        double[] Zk = input[0];
+        double[] Kv = input[1];
         int nz = Zk.length;
         double[][] output = new double[2][this.N * nz];
+        
         
         // creation of the interpolated depth
         double zMin = Zk[0];
@@ -333,6 +347,65 @@ public class VDispActionEloise extends AbstractAction {
 
         return output;
 
+    }
+    
+    
+    /** Spatial interpolation of the Kv and diffKv values.
+     * 
+     * Returns a 2D array of dimension (2, nz) with 
+     * output[0] = interpolated depth
+     * output[1] = interpolated Kz
+     * 
+     * @param pGrid
+     * @param time
+     * @param dt
+     * @return
+     */
+    private double[][] horizontalInterpolation(double[] pGrid, double time, double dt) {
+
+        int nz = getSimulationManager().getDataset().get_nz();
+        // init the output for the spatially interpolated depths (first row) and Kv
+        // (second row)
+        double[][] output = new double[2][nz];
+        IDataset dataset = getSimulationManager().getDataset();
+        double co;
+        double x, y, dx, dy;
+        int i, j;
+        int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
+
+        double[] CO = new double[nz];
+
+        x = pGrid[0];
+        y = pGrid[1];
+        i = (int) x;
+        j = (int) y;
+        dx = x - Math.floor(x);
+        dy = y - Math.floor(y);
+
+        for (int ii = 0; ii < n; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                // Interpolation weight for horizontal interpolation
+                co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
+                for (int kk = 0; kk < nz; kk++) {
+                    double tempKv = dataset.get(kv_field, new double[] { i + ii, j + jj, kk }, time).doubleValue();
+                    double tempZ = dataset.z2depth(i + ii, j + jj, kk);
+                    if (!Double.isNaN(tempKv)) {
+                        output[0][kk] += tempZ * co;
+                        output[1][kk] += tempKv * co;
+                        CO[kk] += co;
+                    }
+                }
+            }
+        }
+
+        for (int kk = 0; kk < nz; kk++) {
+            if (CO[kk] != 0) {
+                output[0][kk] /= CO[kk];
+                output[1][kk] /= CO[kk];
+            }
+        }
+
+        return output;
     }
 
 }
