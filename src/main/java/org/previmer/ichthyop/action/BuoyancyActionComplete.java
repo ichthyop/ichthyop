@@ -73,6 +73,7 @@ public class BuoyancyActionComplete extends AbstractAction {
     //private static double MEAN_MAJOR_AXIS = 0.14f;   // d
     //final private static double LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS + 0.5f);   // log value (constant)
     final private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
+    final private static double KINEMATIC_VISCOSITY = 1.1*Math.pow(10, -2);   //[cm2/s]
     final private static double g = 980.0f; // [cm/s2]
     final private static double DR350 = 28.106331f;
     final private static double C1 = 4.8314f * Math.pow(10, -4);
@@ -114,6 +115,8 @@ public class BuoyancyActionComplete extends AbstractAction {
     private BuoyancyModel buoyancyModel;
     private static double MEAN_MINOR_AXIS;
     private static double MEAN_MAJOR_AXIS;
+    private static double diameter;
+
 
     @Override
     public void loadParameters() throws Exception {
@@ -127,7 +130,7 @@ public class BuoyancyActionComplete extends AbstractAction {
         // if (!isNull(key)) {
         //     MEAN_MINOR_AXIS = Double.valueOf(getParameter(key));
         // }
-        
+
         particleDensity = Float.valueOf(getParameter("particle_density"));
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
@@ -199,30 +202,44 @@ public class BuoyancyActionComplete extends AbstractAction {
             canApplyBuoyancy = particle.getAge() < maximumAge;
         }
 
+
         if (canApplyBuoyancy) {
             /*
              * For case of particle density varying with particle age, we
              * determine what is current density for the particle
              */
-            if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
-                particleDensity = particleDensities[ages.length - 1];
-                float age = particle.getAge();
-                for (int i = 0; i < ages.length - 1; i++) {
-                    if (ages[i] <= age && age < ages[i + 1]) {
-                        particleDensity = particleDensities[i];
-                        break;
+            if (MEAN_MINOR_AXIS==MEAN_MAJOR_AXIS) {  
+        
+                if (buoyancyModel == BuoyancyModel.DENSITY_AS_AGE_FUNCTION) {
+                    particleDensity = particleDensities[ages.length - 1];
+                    float age = particle.getAge();
+                    for (int i = 0; i < ages.length - 1; i++) {
+                        if (ages[i] <= age && age < ages[i + 1]) {
+                            particleDensity = particleDensities[i];
+                            break;
+                        }
                     }
                 }
+                MEAN_MINOR_AXIS = Double.valueOf(getParameter("MEAN_MINOR_AXIS"));
+                MEAN_MAJOR_AXIS = Double.valueOf(getParameter("MEAN_MAJOR_AXIS"));
+                diameter = MEAN_MAJOR_AXIS;  
+                double time = getSimulationManager().getTimeManager().getTime();
+                double dt = getSimulationManager().getTimeManager().get_dt();
+                double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
+                double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
+                double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + moveSphere(diameter, sal, tp, dt)) - particle.getZ();
+                particle.increment(new double[]{0.d, 0.d, dz});
             }
-            //System.out.println("My age is " + (particle.getAge() / 3600.f) + " density: " + particleDensity);
-            double time = getSimulationManager().getTimeManager().getTime();
-            double dt = getSimulationManager().getTimeManager().get_dt();
-            MEAN_MINOR_AXIS = Double.valueOf(getParameter("MEAN_MINOR_AXIS"));
-            MEAN_MAJOR_AXIS = Double.valueOf(getParameter("MEAN_MAJOR_AXIS"));
-            double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
-            double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
-            double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + move(MEAN_MINOR_AXIS,MEAN_MAJOR_AXIS,sal, tp, dt)) - particle.getZ();
-            particle.increment(new double[]{0.d, 0.d, dz});
+            else {
+                double time = getSimulationManager().getTimeManager().getTime();
+                double dt = getSimulationManager().getTimeManager().get_dt();
+                MEAN_MINOR_AXIS = Double.valueOf(getParameter("MEAN_MINOR_AXIS"));
+                MEAN_MAJOR_AXIS = Double.valueOf(getParameter("MEAN_MAJOR_AXIS"));
+                double sal = getSimulationManager().getDataset().get(salinity_field, particle.getGridCoordinates(), time).doubleValue();
+                double tp = getSimulationManager().getDataset().get(temperature_field, particle.getGridCoordinates(), time).doubleValue();
+                double dz = getSimulationManager().getDataset().depth2z(particle.getX(), particle.getY(), particle.getDepth() + moveEgg(MEAN_MINOR_AXIS,MEAN_MAJOR_AXIS,sal, tp, dt)) - particle.getZ();
+                particle.increment(new double[]{0.d, 0.d, dz});
+        } 
         }
     }
 
@@ -246,7 +263,7 @@ public class BuoyancyActionComplete extends AbstractAction {
      * location
      * @return a double, the vertical move of the particle [meter] dw * dt / 100
      */
-    private double move(double MEAN_MINOR_AXIS, double MEAN_MAJOR_AXIS, double sal, double tp, double dt) {
+    private double moveEgg(double MEAN_MINOR_AXIS, double MEAN_MAJOR_AXIS, double sal, double tp, double dt) {
 
         /* Methodology:
          waterDensity = waterDensity(salt, temperature);
@@ -264,6 +281,51 @@ public class BuoyancyActionComplete extends AbstractAction {
         return wpart * dt;
         
     }
+
+    /**
+     * Given the density of the water, the salinity and the temperature, the
+     * function returns the vertical movement due to the bouyancy, in meter.
+     * <pre>
+     * We use the fall velocity from Ahrens formula to compute the vertical velocity due to buoyancy for spherical particles. 
+     * John P. Ahrens, A fall velocity equation, JOURNAL OF WATERWAY, PORT, COASTAL, AND OCEAN ENGINEERING, 2000. 
+     * 
+     * w : vertical velocity [cm/second] due to buoyancy
+     * g = acceleration of gravity [cm.s-2]
+     * rho_p : egg density [g.cm-3]
+     * rho_water : sea water density 
+     * Delta : (rho_p-rho_water)/rho_water
+     * nu : water kinematic viscosity [cm2/s]
+     * 
+     * A : Archimedes buoyancy index          A = (Delta * g * diameter^2)/(nu^2)
+     * C1 : Coefficient for laminar flow regime     C1 = 0.055 * tanh(12 * A^(-0.59) * exp(-0.0004 * A))
+     * Ct : Coefficient for turbulent flow regime   Ct = 1.06 * tanh(0.016 * A^(0.5) * exp(-120/A))
+     * 
+     * w = C1 * Delta * g * diameter^2 * (1/nu) + Ct * (Delta * g * diameter)^0.5
+     * </pre>
+     *
+     * @param diameter a double, the diameter of the spherical particle [cm] 
+     * @param salt a double, the sea water salinity [psu] at particle location
+     * @param tp a double, the sea water temperature [celcius] at particle
+     * location
+     * @return a double, the vertical move of the particle [meter] dw * dt / 100
+     */
+    private double moveSphere(double diameter, double sal, double tp, double dt) {
+
+        waterDensity = waterDensity(sal, tp); 
+        double delta = Math.abs((particleDensity/waterDensity)-1);
+        double A = delta*g*Math.pow(diameter, 3)/Math.pow(KINEMATIC_VISCOSITY,2);
+        double C1 = 0.055f * Math.tanh(12*Math.pow(A, -0.59)*Math.exp(-0.0004*A));
+        double C2 = 1.06f * Math.tanh(0.016*Math.pow(A, 0.5)*Math.exp(-120/A));
+        double wpart =  C1 * delta * g * diameter * diameter * (1/KINEMATIC_VISCOSITY) + C2 * Math.pow(delta*g*diameter,0.5);
+        double u = 0 ;
+        
+        if((float) particleDensity>(float) waterDensity){
+            u = -wpart ; 
+        } else {u = wpart;}
+        return u * dt / 100.0f;
+        
+    }
+
 
     /**
      * Calculates the water density according with the Unesco equation.
@@ -309,5 +371,30 @@ public class BuoyancyActionComplete extends AbstractAction {
         CONSTANT_DENSITY,
         DENSITY_AS_AGE_FUNCTION;
     }
+
+
+
+    //Choices for particles type (for buoyancy type) 
+    public enum BuoyancyType {
+
+        EGG_SHAPED("egg", "Egg-shaped"),
+        SPHERICAL("sphere", "Spherical");
+        private String key;
+        private String name;
+
+        BuoyancyType(String key, String name) {
+            this.key = key;
+            this.name = name;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
     //---------- End of class
 }
