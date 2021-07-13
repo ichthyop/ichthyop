@@ -125,11 +125,7 @@ public class VDispActionEloise extends AbstractAction {
 
         // Computing the dz using depths 
         double dz = -(kvSpline[0] * dt + R * Math.sqrt(6.d * kvSpline[1] * dt));    
-<<<<<<< HEAD
-        double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;     
-=======
         double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;   
->>>>>>> 36ce18acb1b263fca375b3b02f4c8b8952bfce42
         double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
 
         /** Reflecting boundary conditions */
@@ -177,11 +173,7 @@ public class VDispActionEloise extends AbstractAction {
                     Kv += kvSpline[1] * co;
                     diffKv += kvSpline[0] * co;
                     CO += co;
-<<<<<<< HEAD
-                } 
-=======
                 }
->>>>>>> 36ce18acb1b263fca375b3b02f4c8b8952bfce42
             }
         }
         if (CO != 0) {
@@ -272,8 +264,6 @@ public class VDispActionEloise extends AbstractAction {
         return new double[] {diffKv, kZ};
         
     }
-<<<<<<< HEAD
-=======
     
     /** Computes a linear interpolation of the Kv field stored at the Zk depth. 
      * The output grid is regular and resolution is increased by a N factor. 
@@ -319,6 +309,5 @@ public class VDispActionEloise extends AbstractAction {
     }
     
     
->>>>>>> 36ce18acb1b263fca375b3b02f4c8b8952bfce42
 
 }
