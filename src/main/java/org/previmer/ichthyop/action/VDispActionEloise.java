@@ -122,16 +122,37 @@ public class VDispActionEloise extends AbstractAction {
      * first derivative.
      */
     public double[] getVDispersion(double[] pGrid, double time, double dt) {
+        
+        double dz, diffzKv;
+        
         IDataset dataset = getSimulationManager().getDataset();
-        double[] kvSpline = getKv(pGrid, time, dt);
+        double depth = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]);
+        
+        // Horizontal mean of the depth and K profiles
+        double[][] verticalProfile = this.horizontalMean(pGrid, time, dt);
+        
+        // Linear interpolation of the vertical profile
+        double[][] interpolatedProfile = this.linearInterpolation(verticalProfile);
+        
+        // Running mean of the interpolated profile
+        double[][] runningMeanProfile = this.runningMean(interpolatedProfile);
+                
+        // Compute the spline values (dK and K) for the particle's depth
+        double[] spline = this.compute_spline(runningMeanProfile, depth);
+        diffzKv = spline[0];
+        
+        // Update the spline values for the updated particle's position
+        double updatedZ = depth + 0.5d * diffzKv * dt;
+        double[] updatedSpline = this.compute_spline(runningMeanProfile, updatedZ);
+        double updatedKv = updatedSpline[1];
+        
         double R = 2.d * random.nextDouble() - 1.d;
 
-        // Computing the dz using depths 
-        double dz = -(kvSpline[0] * dt + R * Math.sqrt(6.d * kvSpline[1] * dt));    
+        dz = -(diffzKv * dt + R * Math.sqrt(6.d * updatedKv * dt));    
         double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;   
         double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
 
-        /** Reflecting boundary conditions */
+        // Reflecting boundary conditions 
         if (newz > 0){
             newz = -newz ; 
         }
@@ -143,78 +164,13 @@ public class VDispActionEloise extends AbstractAction {
         double vgrid = pGrid[2];
         double vgrid_newz = dataset.depth2z(pGrid[0], pGrid[1], newz);
         dz = vgrid_newz - vgrid;
-
+        
         return new double[]{0.d, 0.d, dz};
         
     }
 
-    /** Spatial interpolation of the Kv and diffKv values */
-    private double[] getKv(double[] pGrid, double time, double dt) {
-
-        IDataset dataset = getSimulationManager().getDataset();
-        double co, CO = 0.d, Kv = 0.d, diffKv = 0.d;
-        double x, y, z, dx, dy;
-        int i, j;
-        int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
-        double[] kvSpline;
-        double depth;
-
-        x = pGrid[0];
-        y = pGrid[1];
-        z = Math.max(0.d, Math.min(pGrid[2], dataset.get_nz() - 1.00001f));
-        depth = dataset.z2depth(x, y, z);
-        i = (int) x;
-        j = (int) y;
-        dx = x - Math.floor(x);
-        dy = y - Math.floor(y);
-
-        for (int ii = 0; ii < n; ii++) {
-            for (int jj = 0; jj < n; jj++) {
-                co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
-                kvSpline = getKv(i + ii, j + jj, depth, time, dt);
-                if (Double.isNaN(kvSpline[1])==false && Double.isNaN(kvSpline[0])==false){
-                    Kv += kvSpline[1] * co;
-                    diffKv += kvSpline[0] * co;
-                    CO += co;
-                }
-            }
-        }
-        if (CO != 0) {
-            diffKv /= CO;
-            Kv /= CO;
-        }
-        return new double[]{diffKv, Kv};
-    }
-    
-    /** Computes, for a given i, j (index) and depth (m), the values of K and K'
-     * (equation 6 in Visser). Note that K' is computed at the particle depth, 
-     * while the K value is computed at a depth of (depth + 0.5 * K' * dt) */
-    private double[] getKv(int i, int j, double depth, double time, double dt) {
-
-        IDataset dataset = getSimulationManager().getDataset();
-        double diffzKv;
-        double[] Kv = new double[dataset.get_nz()];
-        int k;
-        
-        // Extraction of the Kv values for all depths
-        for (k = dataset.get_nz(); k-- > 0;) {
-            Kv[k] = dataset.get(kv_field, new double[] {i, j, k}, time).doubleValue();
-        }
-        
-        // Compute the spline values (dK and K) for the particle's depth
-        double[] spline = this.compute_spline(Kv, i, j, depth);
-        diffzKv = spline[0];
-        
-        // Update the spline values for the updated particle's position
-        double updatedZ = depth + 0.5d * diffzKv * dt;
-        double[] updatedSpline = this.compute_spline(Kv, i, j, updatedZ);
-        double updatedKv = updatedSpline[1];
-        
-        return new double[]{diffzKv, updatedKv};
-
-    }
-
-    private double diff2(double[] X, int k) {
+    /** Computes the second derivative */
+    private double diff2(double[] X, double[] Z, int k) {
 
         int length = X.length;
         /** Returns NaN if size <= 2 */
@@ -227,23 +183,32 @@ public class VDispActionEloise extends AbstractAction {
         if ((k <= 0) || (k >= (length - 1))) {
             return 0.d;
         }
-
-        return (X[k + 1] - 2.d * X[k] + X[k - 1]);
+        
+        return (X[k + 1] - 2.d * X[k] + X[k - 1]) / (Math.pow(Z[k + 1] - Z[k], 2));
+        
     }
     
     /** Computes the cubic spline interpolation based on the equations of
      * CUBIC SPLINE INTERPOLATION: A REVIEW, by George Walberg
      * https://core.ac.uk/download/pdf/161439407.pdf */
-    private double[] compute_spline(double[] Kv, int i, int j, double depth) {
+    private double[] compute_spline(double[][] input, double depth) {
+        
+        double[] Zk = input[0];
+        double[] Kv = input[1];
+        int nz = Kv.length;
+        int k;
+        
+        // First, find the k index of the interpolated depths
+        for (k = 0; k < nz; k++) { 
+            if (depth < Zk[k]) {
+                break;
+            }
+        }
+        k--;
         
         double a, b, c, d;
         
-        IDataset dataset = getSimulationManager().getDataset();
-        
-        double z = Math.min(dataset.depth2z(i, j, depth), dataset.get_nz() - 1.00001f);
-        int k = (int) Math.floor(z);   // k is the cell point below the particle
-
-        double ddepth = depth - dataset.z2depth(i, j, k);  // ddepth is always positive as well
+        double ddepth = depth - Zk[k];  // ddepth is always positive as well
         /** Compute the polynomial coefficients of the piecewise of the spline
          * contained between [k; k + 1]. Let's take M = Kv''
          * a = (M(k + 1) - M(k)) / 6  ==> A3
@@ -254,11 +219,11 @@ public class VDispActionEloise extends AbstractAction {
          
         // depth between two consecutives cells
         
-        double deltaZK = dataset.z2depth(i, j, k + 1) - dataset.z2depth(i, j, k);
+        double deltaZK = Zk[k + 1] - Zk[k];
         d = Kv[k];
-        c = (Kv[k + 1] - Kv[k]) / deltaZK - deltaZK * (diff2(Kv, k + 1) + 2.d * diff2(Kv, k)) / 6.d;
-        b = diff2(Kv, k) / 2.d;
-        a = (diff2(Kv, k + 1) - diff2(Kv, k)) / (6.d * deltaZK);
+        c = (Kv[k + 1] - Kv[k]) / deltaZK - deltaZK * (diff2(Kv, Zk, k + 1) + 2.d * diff2(Kv, Zk, k)) / 6.d;
+        b = diff2(Kv, Zk, k) / 2.d;
+        a = (diff2(Kv, Zk, k + 1) - diff2(Kv, Zk, k)) / (6.d * deltaZK);
 
         /** Compute Kv'(z) based on a(dx)^3 + b(dx)^2 + cdx + d
          * Kv'(z) = 3.d * a * dz2 + 2.d * b * dz + c; */
@@ -274,9 +239,11 @@ public class VDispActionEloise extends AbstractAction {
      * output[0][] = interpolated depths
      * output[1][] = interpolated K
      * */
-    public double[][] linearInterpolation(double[] Kv, double[] Zk) { 
+    public double[][] linearInterpolation(double[][] input) { 
         
         int p;
+        double[] Zk = input[0];
+        double[] Kv = input[1];
         int nz = Zk.length;
         double[][] output = new double[2][this.N * nz];
         
@@ -335,5 +302,64 @@ public class VDispActionEloise extends AbstractAction {
         return output;
 
     }
+    
+    
+    /** Spatial interpolation of the Kv and diffKv values.
+     * 
+     * Returns a 2D array of dimension (2, nz) with 
+     * output[0] = interpolated depth
+     * output[1] = interpolated Kz
+     * 
+     * @param pGrid
+     * @param time
+     * @param dt
+     * @return
+     */
+    private double[][] horizontalMean(double[] pGrid, double time, double dt) {
 
+        int nz = getSimulationManager().getDataset().get_nz();
+        
+        // init the output for the spatially interpolated depths (first row) and Kv
+        // (second row)
+        double[][] output = new double[2][nz];
+        IDataset dataset = getSimulationManager().getDataset();
+        double co;
+        double x, y, dx, dy;
+        int i, j;
+        int n = dataset.isCloseToCost(pGrid) ? 1 : 2;
+
+        double[] CO = new double[nz];
+
+        x = pGrid[0];
+        y = pGrid[1];
+        i = (int) x;
+        j = (int) y;
+        dx = x - Math.floor(x);
+        dy = y - Math.floor(y);
+
+        for (int ii = 0; ii < n; ii++) {
+            for (int jj = 0; jj < n; jj++) {
+                // Interpolation weight for horizontal interpolation
+                co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
+                for (int kk = 0; kk < nz; kk++) {
+                    double tempKv = dataset.get(kv_field, new double[] { i + ii, j + jj, kk }, time).doubleValue();
+                    double tempZ = dataset.z2depth(i + ii, j + jj, kk);
+                    if (!Double.isNaN(tempKv)) {
+                        output[0][kk] += tempZ * co;
+                        output[1][kk] += tempKv * co;
+                        CO[kk] += co;
+                    }
+                }
+            }
+        }
+
+        for (int kk = 0; kk < nz; kk++) {
+            if (CO[kk] != 0) {
+                output[0][kk] /= CO[kk];
+                output[1][kk] /= CO[kk];
+            }
+        }
+
+        return output;
+    }
 }
