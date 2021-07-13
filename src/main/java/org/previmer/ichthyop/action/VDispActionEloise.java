@@ -200,7 +200,7 @@ public class VDispActionEloise extends AbstractAction {
         
         // First, find the k index of the interpolated depths
         for (k = 0; k < nz; k++) { 
-            if (depth < Zk[k]) {
+            if (depth <= Zk[k]) {
                 break;
             }
         }
@@ -242,6 +242,7 @@ public class VDispActionEloise extends AbstractAction {
     public double[][] linearInterpolation(double[][] input) { 
         
         int p;
+        int k;
         double[] Zk = input[0];
         double[] Kv = input[1];
         int nz = Zk.length;
@@ -251,20 +252,30 @@ public class VDispActionEloise extends AbstractAction {
         double zMin = Zk[0];
         double zMax = Zk[nz - 1];
         double steps = (zMax - zMin) / (this.N * nz - 1);
-        for (int k = 0; k < this.N * nz - 1; k++) {
+        for (k = 0; k < this.N * nz; k++) {
             output[0][k] = zMin + k * steps;
         }
         
+        k = 0;
         // interpolation of data
-        for (int k = 0; k < this.N * nz - 1; k++) {
+        for (k = 0; k < this.N * nz; k++) {
             
             // Interpolated depth
             double zTemp = output[0][k];
+            if(k == 0) {
+                output[1][k] = Kv[0];
+                continue;
+            }
+            
+            if(k == this.N * nz - 1) {
+                output[1][k] = Kv[nz - 1];
+                continue;
+            }
             
             // Looking for the input k index used for the interpolation.
             // p is the index of the right most interpolation depth
-            for (p = 0; p < nz - 1; p++) { 
-                if(zTemp < Zk[p]) { 
+            for (p = 0; p < nz; p++) { 
+                if(zTemp <= Zk[p]) { 
                     break;
                 }   
             }
