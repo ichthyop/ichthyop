@@ -271,7 +271,6 @@ public class DatasetUtil {
             lrank = timeArr.getShape()[0];
         }
         lrank = lrank - (timeArrow + 1) / 2;
-
         return lrank;
     }
     
@@ -436,10 +435,6 @@ public class DatasetUtil {
     
     public static double getDate(String file, String strTime, int index) throws IOException {
 
-        if (!new File(file).isFile()) {
-            throw new FileNotFoundException(file);
-        }
-      
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;
         
@@ -464,9 +459,10 @@ public class DatasetUtil {
         int beginIndex = units.indexOf("since") + 5;
         int endIndex = units.lastIndexOf(":");
         String subUnits = units.substring(beginIndex, endIndex).trim();
+        subUnits = subUnits.replace("t", " ");
         dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
-
+            
         if (units.contains("second")) {
             finalDate = dateUnit.plusSeconds(time);
         } else if (units.contains("hour")) {
@@ -476,6 +472,9 @@ public class DatasetUtil {
         }
 
         double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
+        
+        nc.close();
+        
         return output;
 
     }

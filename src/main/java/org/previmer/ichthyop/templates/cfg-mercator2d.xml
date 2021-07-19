@@ -56,14 +56,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter type="serial">
                 <key>initial_time</key>
                 <long_name>Beginning of simulation</long_name>
-                <value>year 2014 month 02 day 01 at 12:00</value>
+                <value>year 2001 month 10 day 20 at 12:00</value>
                 <format>date</format>
                 <description>Set the beginning date and time of the simulation. Format: year #### month ## day ## at HH:mm.</description>
             </parameter>
             <parameter type="serial">
                 <key>transport_duration</key>
                 <long_name>Transport duration</long_name>
-                <value>0025 day(s) 00 hour(s) 00 minute(s)</value>
+                <value>0015 day(s) 00 hour(s) 00 minute(s)</value>
                 <format>duration</format>
                 <description>Set the duration of particle transport. Format: #### day(s) ## hour(s) ## minute(s)</description>
             </parameter>
@@ -174,14 +174,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>gridu_pattern</key>
                 <long_name>gridU file pattern</long_name>
-                <value>*gridU*.nc</value>
+                <value>mercator*gridU*.nc</value>
                 <default>*gridU*.nc</default>
                 <description>Filename filter for identifying the "gridU" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the time dimension, the time variable and the zonal velocity variable.</description>
             </parameter>
             <parameter>
                 <key>gridv_pattern</key>
                 <long_name>gridV file pattern</long_name>
-                <value>*gridV*.nc</value>
+                <value>mercator*gridV*.nc</value>
                 <default>*gridV*.nc</default>
                 <description>Filename filter for identifying the "gridV" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the meridional velocity variable.</description>
             </parameter>
@@ -209,14 +209,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>field_var_u</key>
                 <long_name>Zonal velocity</long_name>
-                <value>u</value>
+                <value>vozocrtx</value>
                 <default>u</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_v</key>
                 <long_name>Meridional velocity</long_name>
-                <value>v</value>
+                <value>vomecrty</value>
                 <default>v</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
@@ -247,7 +247,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>lon_stain</key>
                 <long_name>Longitude [East degree]</long_name>
-                <value>75</value>
+                <value>52.25</value>
                 <default>-20</default>
                 <format>lonlat</format>
                 <description>Longitude [East degree] of the stain. You can change the coordinate format when editing the value.</description>
@@ -255,7 +255,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>lat_stain</key>
                 <long_name>Latitude [North degree]</long_name>
-                <value>0</value>
+                <value>-11.4</value>
                 <default>48.4</default>
                 <format>lonlat</format>
                 <description>Latitude [North degree] of the stain. You can change the coordinate format when editing the value.</description>
