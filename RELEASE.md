@@ -1,5 +1,11 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.10
+
+### Bug fix
+
+- Add the `units` attribute (which replaces the `origin` attribute) to the time variable. It was lost with the new time management in Ichthyop.
+
 ## Changes in 3.3.9
 
 ### New features
