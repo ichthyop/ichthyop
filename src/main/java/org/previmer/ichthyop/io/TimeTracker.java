@@ -44,8 +44,13 @@
 
 package org.previmer.ichthyop.io;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.previmer.ichthyop.manager.TimeManager;
+
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.DataType;
@@ -69,13 +74,13 @@ public class TimeTracker extends AbstractTracker {
     @Override
     public Attribute[] getAttributes() {
         List<Attribute> listAttributes = new ArrayList<>();
-        String calendarName = getSimulationManager().getTimeManager().getCalendar().getClass().getSimpleName();
-        if (calendarName.toLowerCase().contains("interannual")) {
-            listAttributes.add(new Attribute("calendar", "gregorian"));
-        } else {
-            listAttributes.add(new Attribute("calendar", "climato"));
-        }
-        listAttributes.add(new Attribute("origin", getSimulationManager().getParameterManager().getParameter("app.time", "time_origin")));
+        listAttributes.add(new Attribute("calendar", "gregorian"));
+
+        LocalDateTime dateRef = TimeManager.DATE_REF;
+        DateTimeFormatter unitsFormatter = DateTimeFormatter.ofPattern("'seconds since' yyyy-MM-dd HH:mm");
+        String timeUnits = dateRef.format(unitsFormatter);
+        
+        listAttributes.add(new Attribute("units", timeUnits));
         return listAttributes.toArray(new Attribute[listAttributes.size()]);
     }
 
