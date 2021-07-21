@@ -60,6 +60,7 @@ public class VDispActionEloise extends AbstractAction {
     private final int window = 8;
     private final int window2 = window / 2;
     private final double dZ = 0.1;
+    final private static double KINEMATIC_VISCOSITY = 1.1*Math.pow(10, -6);  //[m2/s]
 
     public void loadParameters() throws Exception {
         random = new MTRandom(true);
@@ -128,28 +129,26 @@ public class VDispActionEloise extends AbstractAction {
         
         // Horizontal mean of the depth and K profiles
         double[][] verticalProfile = this.horizontalMean(pGrid, time, dt);
-        
-        // Linear interpolation of the vertical profile
+
         double[][] interpolatedProfile = this.linearInterpolation(verticalProfile);
-        
+
         // Running mean of the interpolated profile
         double[][] runningMeanProfile = this.runningMean(interpolatedProfile);
-                
+
         // Compute the spline values (dK and K) for the particle's depth
         double[] spline = this.compute_spline(runningMeanProfile, depth);
-        diffzKv = spline[0];
-        
+        diffzKv = -spline[0];   // - added because the depths are negative (the opposite of the paper)
+   
         // Update the spline values for the updated particle's position
         double updatedZ = depth + 0.5d * diffzKv * dt;
         double[] updatedSpline = this.compute_spline(runningMeanProfile, updatedZ);
-        double updatedKv = updatedSpline[1];
-        
-        double R = 2.d * random.nextDouble() - 1.d;
+        double updatedKv = Math.abs(updatedSpline[1]) + KINEMATIC_VISCOSITY;   // Adding kinematic viscosity to avoid null value
 
-        dz = -(diffzKv * dt + R * Math.sqrt(6.d * updatedKv * dt));    
+        double R = 2.d * random.nextDouble() - 1.d;
+        dz = -(diffzKv * dt + R * Math.sqrt(6.d * updatedKv * dt));
         double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;   
         double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
-
+        
         // Reflecting boundary conditions 
         if (newz > 0){
             newz = -newz ; 
@@ -208,6 +207,11 @@ public class VDispActionEloise extends AbstractAction {
         // spline is computing by taking the upper most values for K and profile
         if(k == nz - 1) { 
             k -= 1;   
+        }
+
+        // if the particle depth is bellow the last depth. 
+        if(k==-1){
+            k +=1;
         }
         
         double a, b, c, d;
@@ -355,6 +359,7 @@ public class VDispActionEloise extends AbstractAction {
         j = (int) y;
         dx = x - Math.floor(x);
         dy = y - Math.floor(y);
+        
 
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
@@ -371,6 +376,7 @@ public class VDispActionEloise extends AbstractAction {
                 }
             }
         }
+        
 
         for (int kk = 0; kk < nz; kk++) {
             if (CO[kk] != 0) {
@@ -378,6 +384,19 @@ public class VDispActionEloise extends AbstractAction {
                 output[1][kk] /= CO[kk];
             }
         }
+
+        // Without horizontal mean 
+        // for (int kk=0;kk<nz;kk++){
+        //     double tempKv = dataset.get(kv_field, new double[] { i , j , kk }, time).doubleValue();
+        //     double tempZ = dataset.z2depth(i  , j , kk);
+        //     //double tempKv = KZ_Fev10[kk];
+        //     //double tempZ = z0[kk];
+        //     if (!Double.isNaN(tempKv)){
+        //         output[0][kk] =tempZ ; 
+        //         output[1][kk] = tempKv;
+        //     }
+        // }
+        
 
         return output;
     }
