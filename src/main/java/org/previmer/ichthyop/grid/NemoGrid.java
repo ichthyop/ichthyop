@@ -76,16 +76,6 @@ import ucar.nc2.dataset.NetcdfDataset;
 public class NemoGrid extends AbstractGrid {
 
     /**
-     * Longitude at rho point.
-     */
-    private float[][] lonRho;
-    
-    /**
-     * Latitude at rho point.
-     */
-     private float[][] latRho;
-     
-    /**
      * Mask: water = 1, cost = 0
      */
     private int[][][] maskRho;//, masku, maskv;
@@ -137,8 +127,8 @@ public class NemoGrid extends AbstractGrid {
         NetcdfFile nc;
         nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
-        lonRho = new float[get_ny()][get_nx()];
-        latRho = new float[get_ny()][get_nx()];
+        lonRho = new double[get_ny()][get_nx()];
+        latRho = new double[get_ny()][get_nx()];
         Array arrLon = nc.findVariable(strLon).read().reduce();
         Array arrLat = nc.findVariable(strLat).read().reduce();
         Index indexLon = arrLon.getIndex();
@@ -329,8 +319,8 @@ public class NemoGrid extends AbstractGrid {
     private void readLonLat() throws IOException {
 
         try (NetcdfFile nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null)) {
-            lonRho = new float[get_ny()][get_nx()];
-            latRho = new float[get_ny()][get_nx()];
+            lonRho = new double[get_ny()][get_nx()];
+            latRho = new double[get_ny()][get_nx()];
             Array arrLon = nc.findVariable(strLon).read().reduce();
             Array arrLat = nc.findVariable(strLat).read().reduce();
             Index indexLon = arrLon.getIndex();
@@ -1090,9 +1080,9 @@ public class NemoGrid extends AbstractGrid {
         double weight = 0;
         
         for (int jj = 0; jj < 1; jj++) {
+            double coy = 1 - Math.abs(jy - (j + jj));
             for (int ii = 0; ii < 1; ii++) {
-                double cox = Math.abs(ix - i + 0.5 - ii);
-                double coy = Math.abs(jy - j - 1 + jj);
+                double cox = 1 - Math.abs(ix - (i - ii + 0.5));
                 double co = cox * coy;
                 output += variable[kIndex][i - ii][j + jj] * co;
                 weight += co;
@@ -1150,9 +1140,9 @@ public class NemoGrid extends AbstractGrid {
         // blue case:
         for (int kk = 0; kk < 1; kk++) {
             for (int jj = 0; jj < 1; jj++) {
+                double coy = 1 - Math.abs(jy - (j - jj + 0.5));
                 for (int ii = 0; ii < 1; ii++) {
-                    double coy = Math.abs(jy - j + 0.5 - jj);
-                    double cox = Math.abs(ix - i - 1 + ii);
+                    double cox = 1 - Math.abs(ix - (i + ii));
                     double co = cox * coy;
                     output += variable[kIndex][i + ii][j - jj] * co;
                     weight += co;
@@ -1214,9 +1204,9 @@ public class NemoGrid extends AbstractGrid {
        
         for (int kk = 0; kk < 1; kk++) {
             for (int jj = 0; jj < 1; jj++) {
+                double coy = 1 - Math.abs(jy - (j + jj));
                 for (int ii = 0; ii < 1; ii++) {
-                    double cox = Math.abs(ix - i - 1 - ii);
-                    double coy = Math.abs(jy - j - 1 + jj);
+                    double cox = 1 - Math.abs(ix - (i + ii));
                     double co = cox * coy;
                     output += variable[kIndex][i + ii][j + jj] * co;
                     weight += co;
