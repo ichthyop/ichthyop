@@ -46,6 +46,8 @@ package org.previmer.ichthyop.action;
 
 import org.previmer.ichthyop.util.MTRandom;
 import org.previmer.ichthyop.particle.IParticle;
+
+
 import org.previmer.ichthyop.dataset.IDataset;
 
 /**
@@ -121,49 +123,49 @@ public class VDispActionEloise extends AbstractAction {
      * first derivative.
      */
     public double[] getVDispersion(double[] pGrid, double time, double dt) {
-        
+
         double dz, diffzKv;
-        
         IDataset dataset = getSimulationManager().getDataset();
-        double depth = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]);
-        
-        // Horizontal mean of the depth and K profiles
-        double[][] verticalProfile = this.horizontalMean(pGrid, time, dt);
+        if(dataset.isInWater((int) pGrid[0],(int) pGrid[1])){
+            double depth = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]);
+            // Horizontal mean of the depth and K profiles
+            double[][] verticalProfile = this.horizontalMean(pGrid, time, dt);
 
-        double[][] interpolatedProfile = this.linearInterpolation(verticalProfile);
+            double[][] interpolatedProfile = this.linearInterpolation(verticalProfile);
+            double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
+            // Running mean of the interpolated profile
+            double[][] runningMeanProfile = this.runningMean(interpolatedProfile);
 
-        // Running mean of the interpolated profile
-        double[][] runningMeanProfile = this.runningMean(interpolatedProfile);
+            // Compute the spline values (dK and K) for the particle's depth
+            double[] spline = this.compute_spline(runningMeanProfile, depth);
+            diffzKv = -spline[0];    // - added because the depths are negative (the opposite of the paper)
 
-        // Compute the spline values (dK and K) for the particle's depth
-        double[] spline = this.compute_spline(runningMeanProfile, depth);
-        diffzKv = -spline[0];   // - added because the depths are negative (the opposite of the paper)
-   
-        // Update the spline values for the updated particle's position
-        double updatedZ = depth + 0.5d * diffzKv * dt;
-        double[] updatedSpline = this.compute_spline(runningMeanProfile, updatedZ);
-        double updatedKv = Math.abs(updatedSpline[1]) + KINEMATIC_VISCOSITY;   // Adding kinematic viscosity to avoid null value
+            // Update the spline values for the updated particle's position
+            double updatedZ = depth + 0.5d * diffzKv * dt;
+            double[] updatedSpline = this.compute_spline(runningMeanProfile, updatedZ);
+            double updatedKv = Math.abs(updatedSpline[1]) + KINEMATIC_VISCOSITY;   // Adding kinematic viscosity to avoid null value
 
-        double R = 2.d * random.nextDouble() - 1.d;
-        dz = -(diffzKv * dt + R * Math.sqrt(6.d * updatedKv * dt));
-        double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;   
-        double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
-        
-        // Reflecting boundary conditions 
-        if (newz > 0){
-            newz = -newz ; 
-        }
-        if (newz < depth_max){
-            newz = depth_max - newz + depth_max;
-        }
-        
-        // Computing the sigma coordinates for vertical positions to deduce the dz in sigma coordinates  
-        double vgrid = pGrid[2];
-        double vgrid_newz = dataset.depth2z(pGrid[0], pGrid[1], newz);
-        dz = vgrid_newz - vgrid;
-        
-        return new double[]{0.d, 0.d, dz};
-        
+            double R = 2.d * random.nextDouble() - 1.d;
+            dz = -(diffzKv * dt + R * Math.sqrt(6.d * updatedKv * dt));
+            double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;   
+            //double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
+            
+            // Reflecting boundary conditions 
+            if (newz > 0){
+                newz = -newz ; 
+            }
+            if (newz < depth_max){
+                newz = depth_max - newz + depth_max;
+            }
+            
+            // Computing the sigma coordinates for vertical positions to deduce the dz in sigma coordinates  
+            double vgrid = pGrid[2];
+            double vgrid_newz = dataset.depth2z(pGrid[0], pGrid[1], newz);
+            dz = vgrid_newz - vgrid;
+            
+            return new double[]{0.d, 0.d, dz};}
+            else{return new double[]{0.d,0.d,0.d};}
+    
     }
 
     /** Computes the second derivative */
@@ -312,7 +314,7 @@ public class VDispActionEloise extends AbstractAction {
         int p;
         int nz = input[0].length;
         int newN = nz - 2 * window2 + 1;
-        
+
         double[][] output = new double[2][newN];
 
         for (p = this.window2; p < nz - this.window2 + 1; p++) {
