@@ -1249,5 +1249,39 @@ public class NemoGrid extends AbstractGrid {
         return output;
         
     }
+    
+    /**
+     * Method to interpolate a W variable. On NEMO, W points are in the northern
+     * faces of the cell. However, Ichthyop flips data on the vertical, so the W
+     * point is below!
+     * 
+     */
+    public double interpolate3dW(double[] pGrid, double[][][] variable) {
+
+        double kz = pGrid[2];
+
+        int k = (int) Math.round(kz);
+
+        double output = 0;
+        double weight = 0;
+
+        for (int kk = 0; kk < 1; kk++) {
+            double coz = 1 - Math.abs(kz - (k + kk - 0.5));
+            output += this.interpolate2dW(pGrid, variable, k + kk) * coz;
+            weight += coz;
+        }
+
+        if (weight != 0) {
+            output /= weight;
+        }
+
+        return output;
+
+    }
+
+    public double interpolate2dW(double[] pGrid, double[][][] variable, int kIndex) {
+        return this.interpolate2dT(pGrid, variable, kIndex);
+    }
+    
 
 }
