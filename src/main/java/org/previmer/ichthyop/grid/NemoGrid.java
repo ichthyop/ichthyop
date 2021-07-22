@@ -1107,7 +1107,7 @@ public class NemoGrid extends AbstractGrid {
         double weight = 0;
         
         for (int kk = 0; kk < 1; kk++) {
-            double coz = Math.abs(kz - k - 1 + kk);
+            double coz = 1 - Math.abs(kz - (k + kk));
             output += this.interpolate2dU(pGrid, variable, k + kk) * coz;
             weight += coz;
         }
@@ -1173,9 +1173,9 @@ public class NemoGrid extends AbstractGrid {
 
         // blue case:
         for (int kk = 0; kk < 1; kk++) {
-            double co = Math.abs(kz - k - 1 + kk);
-            output += this.interpolate2dV(pGrid, variable, k + kk) * co;
-            weight += co;
+            double coz = 1 - Math.abs(kz - (k + kk));
+            output += this.interpolate2dV(pGrid, variable, k + kk) * coz;
+            weight += coz;
         }
   
         if (weight != 0) {
@@ -1236,7 +1236,7 @@ public class NemoGrid extends AbstractGrid {
         double weight = 0;
 
         for (int kk = 0; kk < 1; kk++) {
-            double coz = Math.abs(kz - k - 1 + kk);
+            double coz = 1 - Math.abs(kz - (k + kk));
             output += this.interpolate2dT(pGrid, variable, k + kk) * coz;
             weight += coz;
         }
