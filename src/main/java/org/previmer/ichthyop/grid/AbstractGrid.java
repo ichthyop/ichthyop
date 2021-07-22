@@ -46,15 +46,21 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 
 public abstract class AbstractGrid extends SimulationManagerAccessor {
 
+    /** Name of the grid file */
     private final String filename;
+    
+    /** Name of the XML settings key */
     private final String gridKey;
 
     /**
-     * Grid dimension
+     * Grid dimension.
+     * nx = number of longitudes in mesh file
+     * ny = number of latitudes in mesh file.
+     * nz = number of vertical levels in mesh file (T points)
      */
     private int nx, ny, nz;
     
-    private double[][] lonRho, latRho;
+    protected double[][] lonRho, latRho;
 
     /**
      * Origin for grid index
