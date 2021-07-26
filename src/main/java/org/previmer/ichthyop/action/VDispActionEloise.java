@@ -145,7 +145,7 @@ public class VDispActionEloise extends AbstractAction {
             double[] updatedSpline = this.compute_spline(runningMeanProfile, updatedZ);
             double updatedKv = Math.abs(updatedSpline[1]) + KINEMATIC_VISCOSITY;   // Adding kinematic viscosity to avoid null value
 
-            double R = 2.d * random.nextDouble() - 1.d;
+            double R = random.nextGaussian();
             dz = -(diffzKv * dt + R * Math.sqrt(6.d * updatedKv * dt));
             double newz = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]) + dz;   
             //double depth_max = dataset.z2depth(pGrid[0], pGrid[1], 0);
