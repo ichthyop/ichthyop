@@ -3,7 +3,6 @@ package org.previmer.ichthyop.grid;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
@@ -16,7 +15,7 @@ import ucar.nc2.dataset.NetcdfDataset;
 /**
  * Class to manage Mars grid.
  * 
- *  
+ * 
  * @author Nicolas Barrier
  */
 public class MarsGrid extends AbstractGrid {
@@ -67,13 +66,7 @@ public class MarsGrid extends AbstractGrid {
     private VerticalMode verticalMode;
 
     private enum VerticalMode {
-        GENERALIZED("generalized"), STANDARD("standard");
-
-        private String mode;
-
-        private VerticalMode(String mode) {
-            this.mode = mode;
-        }
+        GENERALIZED, STANDARD;
     }
 
     public MarsGrid(String filename) {
@@ -223,7 +216,7 @@ public class MarsGrid extends AbstractGrid {
         strDy = getParameter("field_var_dy");
         strDxV = getParameter("field_var_dxv");
         strDyU = getParameter("field_var_dyv");
-        verticalMode = VerticalMode.valueOf(getParameter("z_rec_mode"));
+        verticalMode = VerticalMode.valueOf(getParameter("depth_mode").toUpperCase());
     }
 
     @Override
@@ -673,7 +666,7 @@ public class MarsGrid extends AbstractGrid {
         this.depthW = new double[get_nz() + 1][get_ny()][get_ny()];
 
         if (verticalMode.equals(VerticalMode.STANDARD)) {
-            
+
             // If standard mode
             for (int k = 0; k < this.get_nz(); k++) {
                 for (int j = 0; j < this.get_ny(); j++) {
