@@ -52,11 +52,11 @@ public class MarsGrid extends AbstractGrid {
     /**
      *
      */
-    double[][] dxu;
+    double[][] dyu, dx;
     /**
      *
      */
-    double[][] dyv;
+    double[][] dxv, dy;
     /**
      *
      */
@@ -67,6 +67,10 @@ public class MarsGrid extends AbstractGrid {
     private String strLat;
     private String strBathy;
     private NetcdfFile ncIn;
+    private String strDx, strDy;
+    private String strDxV, strDyU;
+    private String strLevW, strLev;
+       
 
     public MarsGrid(String filename) {
         super(filename);
@@ -200,6 +204,12 @@ public class MarsGrid extends AbstractGrid {
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
         strBathy = getParameter("field_var_bathy");
+        strLevW = getParameter("field_var_sigw");
+        strLev = getParameter("field_var_sig");
+        strDx = getParameter("field_var_dx");
+        strDy = getParameter("field_var_dy");
+        strDxV = getParameter("field_var_dxv");
+        strDyU = getParameter("field_var_dyv");
     }
 
     @Override
@@ -558,8 +568,10 @@ public class MarsGrid extends AbstractGrid {
         lonRho = new double[ny][nx];
         latRho = new double[ny][nx];
         maskRho = new byte[ny][nx];
-        dxu = new double[ny][nx];
-        dyv = new double[ny][nx];
+        dx = new double[ny][nx];
+        dy = new double[ny][nx];
+        this.dxv = new double[ny][nx];
+        this.dyu = new double[ny][nx];
 
         /* Read longitude & latitude */
         readLonLat();
@@ -572,6 +584,7 @@ public class MarsGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+        
         hRho = new double[ny][nx];
         index = arrH.getIndex();
         for (int j = 0; j < ny; j++) {
@@ -583,37 +596,48 @@ public class MarsGrid extends AbstractGrid {
         /* Compute mask */
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                maskRho[j][i] = (Double.isNaN(hRho[j][i]) || (hRho[j][i] < 0))
+                maskRho[j][i] = (Double.isNaN(hRho[j][i]) || (hRho[j][i] <= 0))
                         ? (byte) 0
                         : (byte) 1;
             }
         }
 
-        /* Compute metrics dxu & dyv */
-        double[] ptGeo1, ptGeo2;
-        for (int j = 1; j < ny - 1; j++) {
-            for (int i = 1; i < nx - 1; i++) {
-                ptGeo1 = xy2latlon(i - 0.5d, (double) j);
-                ptGeo2 = xy2latlon(i + 0.5d, (double) j);
-                dxu[j][i] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
-                ptGeo1 = xy2latlon((double) i, j - 0.5d);
-                ptGeo2 = xy2latlon((double) i, j + 0.5d);
-                dyv[j][i] = DatasetUtil.geodesicDistance(ptGeo1[0], ptGeo1[1], ptGeo2[0], ptGeo2[1]);
+        // Reads width of T cells
+        arrH = ncIn.findVariable(strDx).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+        index = arrH.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                dx[j][i] = arrH.getDouble(index.set(j, i));
             }
         }
-        /* Boundary conditions */
-        for (int j = ny; j-- > 0;) {
-            dxu[j][0] = dxu[j][1];
-            dxu[j][nx - 1] = dxu[j][nx - 2];
-            dyv[j][0] = dyv[j][1];
-            dyv[j][nx - 1] = dyv[j][nx - 2];
+        
+        // Reads width of V cell
+        arrH = ncIn.findVariable(strDxV).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+        index = arrH.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                dxv[j][i] = arrH.getDouble(index.set(j, i));
+            }
         }
-        for (int i = nx; i-- > 0;) {
-            dxu[0][i] = dxu[1][i];
-            dxu[ny - 1][i] = dxu[ny - 2][i];
-            dyv[0][i] = dyv[1][i];
-            dyv[ny - 1][i] = dyv[ny - 2][i];
+        
+        // Reads height of T cells
+        arrH = ncIn.findVariable(strDy).read(new int[] { jpo, ipo }, new int[] { ny, nx });
+        index = arrH.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                dy[j][i] = arrH.getDouble(index.set(j, i));
+            }
         }
+
+        // Reads height of U cell
+        arrH = ncIn.findVariable(strDyU).read(new int[] { jpo, ipo }, new int[] { ny, nx });
+        index = arrH.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                dyu[j][i] = arrH.getDouble(index.set(j, i));
+            }
+        }
+        
     }
 
 }
