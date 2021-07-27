@@ -76,9 +76,9 @@ import ucar.nc2.dataset.NetcdfDataset;
 public class NemoGrid extends AbstractGrid {
 
     /**
-     * Mask: water = 1, cost = 0
+     * Mask: water = 1, land = 0
      */
-    private int[][][] maskRho;//, masku, maskv;
+    private int[][][] maskRho;
     
     /**
      * Depth at rho point
@@ -109,6 +109,7 @@ public class NemoGrid extends AbstractGrid {
     private String str_gdepT, str_gdepW;
     private String file_hgr, file_zgr, file_mask;
     private boolean isGridInfoInOneFile;
+    private boolean is3Denabled;
     
     public NemoGrid(String filename) {
         super(filename);   
@@ -116,35 +117,23 @@ public class NemoGrid extends AbstractGrid {
 
     @Override
     public boolean is3D() {
-        return true;
+        return is3Denabled;
     }
     
     /**
      * Reads time non-dependant fields in NetCDF dataset
      */
-    private void readConstantField() throws Exception {
-
-        NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
-        getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
-        lonRho = new double[get_ny()][get_nx()];
-        latRho = new double[get_ny()][get_nx()];
-        Array arrLon = nc.findVariable(strLon).read().reduce();
-        Array arrLat = nc.findVariable(strLat).read().reduce();
-        Index indexLon = arrLon.getIndex();
-        Index indexLat = arrLat.getIndex();
-        for (int j = 0; j < get_ny(); j++) {
-            for (int i = 0; i < get_nx(); i++) {
-                lonRho[j][i] = arrLon.getFloat(indexLon.set(get_jpo() + j, get_ipo() + i));
-                latRho[j][i] = arrLat.getFloat(indexLat.set(get_jpo() + j, get_ipo() + i));
-            }
-        }
-
-        if (!isGridInfoInOneFile) {
-            nc.close();
-            nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
-        }
+     private void readConstantField() throws Exception {
         
+        NetcdfFile nc;
+        
+        // Reads longitude and latitudes
+        // This time, only the shrinked domain has been extracted
+        this.readLonLat();
+
+        nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
+        
+        // Note that here, only the NZ is equal to (NZ - 1)
         maskRho = new int[get_nz()][get_ny()][get_nx()];
         Array arrMask = nc.findVariable(strMask).read().reduce().flip(0);
         Index indexMask = arrMask.getIndex();
@@ -257,13 +246,14 @@ public class NemoGrid extends AbstractGrid {
         indexT = arrayT.getIndex();
         indexW = arrayW.getIndex();
         gdepT = new double[get_nz()][get_ny()][get_nx()];
-        gdepW = new double[get_nz()][get_ny()][get_nx()];
+        gdepW = new double[get_nz() + 1][get_ny()][get_nx()];
 
         if (!depth3d) {
 
             getLogger().log(Level.INFO, "Depth array are 1D arrays (z dimension)");
 
-            // Extraction of depth at T points
+            // Extraction of depth at T points  
+            // and extract of W points below the T points
             for (int k = 0; k < get_nz(); k++) {
                 indexT.set(k);
                 indexW.set(k);
@@ -274,7 +264,16 @@ public class NemoGrid extends AbstractGrid {
                     }
                 }
             }
-
+            
+            // get the W point which corresponds to the surface.
+            int k = get_nz();
+            indexW.set(k);
+            for (int j = 0; j < get_ny(); j++) {
+                for (int i = 0; i < get_nx(); i++) {
+                    gdepW[k][j][i] = arrayW.getDouble(indexW);
+                }
+            }
+            
         } else {
 
             getLogger().log(Level.INFO, "Depth array are 3D arrays (z, y, z dimensions)");
@@ -289,7 +288,17 @@ public class NemoGrid extends AbstractGrid {
                     }
                 }
             }
-
+            
+            // get the W point which corresponds to the surface (k = nz)
+            int k = get_nz();
+            for (int j = 0; j < get_ny(); j++) {
+                for (int i = 0; i < get_nx(); i++) {
+                    indexT.set(k, j + get_jpo(), i + get_ipo());
+                    indexW.set(k, j + get_jpo(), i + get_ipo());
+                    gdepT[k][j][i] = arrayT.getDouble(indexT);
+                    gdepW[k][j][i] = arrayT.getDouble(indexT);
+                }
+            }
         }
     }
 
@@ -327,8 +336,8 @@ public class NemoGrid extends AbstractGrid {
             Index indexLat = arrLat.getIndex();
             for (int j = 0; j < get_ny(); j++) {
                 for (int i = 0; i < get_nx(); i++) {
-                    lonRho[j][i] = arrLon.getFloat(indexLon.set(j, i));
-                    latRho[j][i] = arrLat.getFloat(indexLat.set(j, i));
+                    lonRho[j][i] = arrLon.getFloat(indexLon.set(get_jpo() + j, get_ipo() + i));
+                    latRho[j][i] = arrLat.getFloat(indexLat.set(get_jpo() + j, get_ipo() + i));
                 }
             }
         }
@@ -414,6 +423,12 @@ public class NemoGrid extends AbstractGrid {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
+        if (findParameter("is_3d_enabled")) {
+            this.is3Denabled = Boolean.valueOf(getParameter("is_3d_enabled"));
+        } else {
+            this.is3Denabled = true;
+        }
+        
         if (!findParameter("enhanced_mode")) {
             getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
         }
@@ -432,6 +447,7 @@ public class NemoGrid extends AbstractGrid {
     private void getDimNC() throws IOException {
 
         NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
+        // Recovers X dimension
         try {
             this.set_nx(nc.findDimension(strXDim).getLength());
         } catch (Exception ex) {
@@ -440,6 +456,7 @@ public class NemoGrid extends AbstractGrid {
             throw ioex;
         }
         
+        // Recover Y dimension
         try {
             this.set_ny(nc.findDimension(strYDim).getLength());
         } catch (Exception ex) {
@@ -448,14 +465,19 @@ public class NemoGrid extends AbstractGrid {
             throw ioex;
         }
         
+        // Recover Z dimension. 
+        // remove one element in Z, in order to remove the last T point which is only land
+        // and have (N - 1) T points and (N) W points
         try {
-            this.set_nz(nc.findDimension(strZDim).getLength());  // real number of Z values (including sea-bed)
+            this.set_nz(nc.findDimension(strZDim).getLength() - 1); 
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset Z dimension. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         
+        // Init the ipo and the jpo values to 0. 
+        // Because they are used in readLonLat.
         this.set_ipo(0);
         this.set_jpo(0);
     }
@@ -477,6 +499,7 @@ public class NemoGrid extends AbstractGrid {
         double[] pGrid1, pGrid2;
         int ipn, jpn;
 
+        // Reads the entire lon/lat fields.
         readLonLat();
 
         pGrid1 = latlon2xy(lat1, lon1);
@@ -488,7 +511,6 @@ public class NemoGrid extends AbstractGrid {
         lonRho = null;
         latRho = null;
 
-        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
         set_ipo((int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0])));
         ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
         
@@ -497,7 +519,7 @@ public class NemoGrid extends AbstractGrid {
 
         set_nx(Math.min(get_nx(), ipn - get_ipo() + 1));
         set_ny(Math.min(get_ny(), jpn - get_jpo() + 1));
-        //System.out.println("get_ipo() " + get_ipo() + " get_nx() " + get_nx() + " get_jpo() " + get_jpo() + " get_ny() " + get_ny());
+
     }
 
     /*
