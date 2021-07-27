@@ -554,6 +554,7 @@ public class NemoGrid extends AbstractGrid {
         }
     }
 
+    /** Functon that checks if the point is in water (2D mode) */
     @Override
     public boolean isInWater(int i, int j) {
         return isInWater(i, j, get_nz() - 1);
@@ -592,7 +593,9 @@ public class NemoGrid extends AbstractGrid {
         i = (int) (Math.round(pGrid[0]));
         j = (int) (Math.round(pGrid[1]));
         k = (int) (Math.round(pGrid[2]));
+        // Determines whether the adjacent cell is on the left (particle left of T center) or on the right (particle right of T center).
         ii = (i - (int) Math.floor(pGrid[0])) == 0 ? 1 : -1;
+        // Determines whether the adjacent cell is on the north (particle north of T center) or on the south (particle south of T center).
         jj = (j - (int) Math.floor(pGrid[1])) == 0 ? 1 : -1;
         return !(isInWater(i + ii, j, k) && isInWater(i + ii, j + jj, k) && isInWater(i, j + jj, k));
     }
