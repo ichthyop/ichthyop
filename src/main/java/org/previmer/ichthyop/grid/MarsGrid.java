@@ -16,18 +16,7 @@ import ucar.nc2.dataset.NetcdfDataset;
 /**
  * Class to manage Mars grid.
  * 
- * The Grid layout in Roms is as follows:
- * 
- * +----------+------------+
- * |          |            |     
- * |          |            |      
- * |          |            |       
- * |----------+--V(i,j)----|        
- * |          |            |  
- * |      U(i-1,j) T(i,j) U(i,j) 
- * |          |            |       
- * +----------+--V(i,j-1)--+  
- * 
+ *  
  * @author Nicolas Barrier
  */
 public class MarsGrid extends AbstractGrid {
@@ -48,7 +37,7 @@ public class MarsGrid extends AbstractGrid {
      * Mask: water = 1, cost = 0
      */
     private byte[][] maskRho;
-    
+
     /**
      *
      */
@@ -61,8 +50,13 @@ public class MarsGrid extends AbstractGrid {
      *
      */
 
+    double[][][] depth, depthW;
+
+    private double[] sigma, sigmaW;
+
     private String strLonDim;
     private String strLatDim;
+    private String strZDim;
     private String strLon;
     private String strLat;
     private String strBathy;
@@ -70,7 +64,17 @@ public class MarsGrid extends AbstractGrid {
     private String strDx, strDy;
     private String strDxV, strDyU;
     private String strLevW, strLev;
-       
+    private VerticalMode verticalMode;
+
+    private enum VerticalMode {
+        GENERALIZED("generalized"), STANDARD("standard");
+
+        private String mode;
+
+        private VerticalMode(String mode) {
+            this.mode = mode;
+        }
+    }
 
     public MarsGrid(String filename) {
         super(filename);
@@ -90,9 +94,8 @@ public class MarsGrid extends AbstractGrid {
         shrinkGrid();
         readConstantField();
         getDimGeogArea();
-
     }
-    
+
     /**
      * Determines the geographical boundaries of the domain in longitude, latitude
      * and depth.
@@ -149,9 +152,10 @@ public class MarsGrid extends AbstractGrid {
             this.setLatMax(double_tmp);
         }
     }
-    
-     /**
+
+    /**
      * Reads the dimensions of the NetCDF dataset
+     * 
      * @throws an IOException if an error occurs while reading the dimensions.
      */
     void getDimNC() throws IOException {
@@ -170,7 +174,15 @@ public class MarsGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
+        try {
+            set_ny(ncIn.findDimension(strZDim).getLength());
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset latitude dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
         set_ipo(0);
         set_jpo(0);
     }
@@ -201,6 +213,7 @@ public class MarsGrid extends AbstractGrid {
     public void loadParameters() {
         strLonDim = getParameter("field_dim_lon");
         strLatDim = getParameter("field_dim_lat");
+        strZDim = getParameter("field_dim_z");
         strLon = getParameter("field_var_lon");
         strLat = getParameter("field_var_lat");
         strBathy = getParameter("field_var_bathy");
@@ -210,6 +223,7 @@ public class MarsGrid extends AbstractGrid {
         strDy = getParameter("field_var_dy");
         strDxV = getParameter("field_var_dxv");
         strDyU = getParameter("field_var_dyv");
+        verticalMode = VerticalMode.valueOf(getParameter("z_rec_mode"));
     }
 
     @Override
@@ -253,7 +267,7 @@ public class MarsGrid extends AbstractGrid {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     /**
      * Method to interpolate a U variable. On NEMO, U points are on the eastern face
      * of the cell.
@@ -286,7 +300,7 @@ public class MarsGrid extends AbstractGrid {
         return output;
 
     }
-    
+
     /**
      * Method to interpolate a U variable. On NEMO, U points are on the eastern face
      * of the cell.
@@ -313,12 +327,13 @@ public class MarsGrid extends AbstractGrid {
         return output;
 
     }
-    
-    /** Method to interpolate a V variable. 
+
+    /**
+     * Method to interpolate a V variable.
      * 
      * V points are locate in the northern faces
      * 
-    */
+     */
     public double interpolate2dV(double[] pGrid, double[][][] variable, int kIndex) {
 
         double ix = pGrid[0];
@@ -347,12 +362,13 @@ public class MarsGrid extends AbstractGrid {
         return output;
 
     }
-    
-    /** Method to interpolate a V variable. 
+
+    /**
+     * Method to interpolate a V variable.
      * 
      * V points are locate in the northern faces
      * 
-    */
+     */
     public double interpolate3dV(double[] pGrid, double[][][] variable) {
 
         double kz = pGrid[2];
@@ -368,7 +384,6 @@ public class MarsGrid extends AbstractGrid {
             weight += coz;
         }
 
-
         if (weight != 0) {
             output /= weight;
         }
@@ -376,12 +391,12 @@ public class MarsGrid extends AbstractGrid {
         return output;
 
     }
-    
-         
-    /** Method to interpolate a T variable. 
-     * On NEMO, T points are in the centerof the cell.
+
+    /**
+     * Method to interpolate a T variable. On NEMO, T points are in the centerof the
+     * cell.
      * 
-    */
+     */
     public double interpolate2dT(double[] pGrid, double[][][] variable, int kIndex) {
 
         double ix = pGrid[0];
@@ -410,34 +425,35 @@ public class MarsGrid extends AbstractGrid {
         return output;
 
     }
-    
-    /** Method to interpolate a T variable. 
-     * On NEMO, T points are in the centerof the cell.
+
+    /**
+     * Method to interpolate a T variable. On NEMO, T points are in the centerof the
+     * cell.
      * 
-    */
+     */
     public double interpolate3dT(double[] pGrid, double[][][] variable) {
 
         double kz = pGrid[2];
-        
+
         int k = (int) Math.floor(kz);
-        
+
         double output = 0;
         double weight = 0;
-       
+
         for (int kk = 0; kk < 1; kk++) {
             double coz = Math.abs(kz - k - 1 + kk);
             output += this.interpolate2dT(pGrid, variable, k + kk) * coz;
             weight += coz;
         }
-        
-        if(weight != 0) { 
+
+        if (weight != 0) {
             output /= weight;
         }
-        
+
         return output;
-        
+
     }
-    
+
     public void shrinkGrid() {
         boolean isParamDefined;
         try {
@@ -449,10 +465,14 @@ public class MarsGrid extends AbstractGrid {
 
         if (isParamDefined && Boolean.valueOf(getParameter("shrink_domain"))) {
             try {
-                float lon1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat1 = Float.valueOf(LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
-                float lon2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
-                float lat2 = Float.valueOf(LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon1 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("north-west-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat1 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("north-west-corner.lat"), LonLatFormat.DecimalDeg));
+                float lon2 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("south-east-corner.lon"), LonLatFormat.DecimalDeg));
+                float lat2 = Float.valueOf(
+                        LonLatConverter.convert(getParameter("south-east-corner.lat"), LonLatFormat.DecimalDeg));
                 range(lat1, lon1, lat2, lon2);
             } catch (IOException | NumberFormatException ex) {
                 getLogger().log(Level.WARNING, "Failed to resize domain. " + ex.toString(), ex);
@@ -461,15 +481,16 @@ public class MarsGrid extends AbstractGrid {
     }
 
     /**
-     * Resizes the domain and determines the range of the grid indexes
-     * taht will be used in the simulation.
-     * The new domain is limited by the Northwest and the Southeast corners.
-     * @param pGeog1 a float[], the geodesic coordinates of the domain
-     * Northwest corner
-     * @param pGeog2  a float[], the geodesic coordinates of the domain
-     * Southeast corner
-     * @throws an IOException if the new domain is not strictly nested
-     * within the NetCDF dataset domain.
+     * Resizes the domain and determines the range of the grid indexes taht will be
+     * used in the simulation. The new domain is limited by the Northwest and the
+     * Southeast corners.
+     * 
+     * @param pGeog1 a float[], the geodesic coordinates of the domain Northwest
+     *               corner
+     * @param pGeog2 a float[], the geodesic coordinates of the domain Southeast
+     *               corner
+     * @throws an IOException if the new domain is not strictly nested within the
+     *            NetCDF dataset domain.
      */
     private void range(double lat1, double lon1, double lat2, double lon2) throws IOException {
 
@@ -481,13 +502,13 @@ public class MarsGrid extends AbstractGrid {
         pGrid1 = latlon2xy(lat1, lon1);
         pGrid2 = latlon2xy(lat2, lon2);
         if (pGrid1[0] < 0 || pGrid2[0] < 0) {
-            throw new IOException(
-                    "Impossible to proportion the simulation area : points out of domain");
+            throw new IOException("Impossible to proportion the simulation area : points out of domain");
         }
         lonRho = null;
         latRho = null;
 
-        //System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " + (float)pGrid2[0] + " " + (float)pGrid2[1]);
+        // System.out.println((float)pGrid1[0] + " " + (float)pGrid1[1] + " " +
+        // (float)pGrid2[0] + " " + (float)pGrid2[1]);
         set_ipo((int) Math.min(Math.floor(pGrid1[0]), Math.floor(pGrid2[0])));
         ipn = (int) Math.max(Math.ceil(pGrid1[0]), Math.ceil(pGrid2[0]));
         set_jpo((int) Math.min(Math.floor(pGrid1[1]), Math.floor(pGrid2[1])));
@@ -495,9 +516,9 @@ public class MarsGrid extends AbstractGrid {
 
         set_nx(Math.min(get_nx(), ipn - get_ipo() + 1));
         set_ny(Math.min(get_ny(), jpn - get_jpo() + 1));
-        //System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
+        // System.out.println("ipo " + ipo + " nx " + nx + " jpo " + jpo + " ny " + ny);
     }
-    
+
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      */
@@ -505,9 +526,10 @@ public class MarsGrid extends AbstractGrid {
         Array arrLon = null, arrLat = null;
         try {
             if (ncIn.findVariable(strLon).getShape().length > 1) {
-                arrLon = ncIn.findVariable(strLon).read(new int[]{get_jpo(), get_ipo()}, new int[]{get_ny(), get_nx()});
+                arrLon = ncIn.findVariable(strLon).read(new int[] { get_jpo(), get_ipo() },
+                        new int[] { get_ny(), get_nx() });
             } else {
-                arrLon = ncIn.findVariable(strLon).read(new int[]{get_ipo()}, new int[]{get_nx()});
+                arrLon = ncIn.findVariable(strLon).read(new int[] { get_ipo() }, new int[] { get_nx() });
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset longitude. " + ex.toString());
@@ -516,9 +538,10 @@ public class MarsGrid extends AbstractGrid {
         }
         try {
             if (ncIn.findVariable(strLat).getShape().length > 1) {
-                arrLat = ncIn.findVariable(strLat).read(new int[]{get_jpo(), get_ipo()}, new int[]{get_ny(), get_nx()});
+                arrLat = ncIn.findVariable(strLat).read(new int[] { get_jpo(), get_ipo() },
+                        new int[] { get_ny(), get_nx() });
             } else {
-                arrLat = ncIn.findVariable(strLat).read(new int[]{get_jpo()}, new int[]{get_ny()});
+                arrLat = ncIn.findVariable(strLat).read(new int[] { get_jpo() }, new int[] { get_ny() });
             }
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("Error reading dataset latitude. " + ex.toString());
@@ -578,13 +601,13 @@ public class MarsGrid extends AbstractGrid {
 
         /* Read bathymetry */
         try {
-            arrH = ncIn.findVariable(strBathy).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+            arrH = ncIn.findVariable(strBathy).read(new int[] { jpo, ipo }, new int[] { ny, nx });
         } catch (IOException | InvalidRangeException ex) {
             IOException ioex = new IOException("{Dataset} Error reading bathymetry variable. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         hRho = new double[ny][nx];
         index = arrH.getIndex();
         for (int j = 0; j < ny; j++) {
@@ -596,30 +619,28 @@ public class MarsGrid extends AbstractGrid {
         /* Compute mask */
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                maskRho[j][i] = (Double.isNaN(hRho[j][i]) || (hRho[j][i] <= 0))
-                        ? (byte) 0
-                        : (byte) 1;
+                maskRho[j][i] = (Double.isNaN(hRho[j][i]) || (hRho[j][i] <= 0)) ? (byte) 0 : (byte) 1;
             }
         }
 
         // Reads width of T cells
-        arrH = ncIn.findVariable(strDx).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+        arrH = ncIn.findVariable(strDx).read(new int[] { jpo, ipo }, new int[] { ny, nx });
         index = arrH.getIndex();
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 dx[j][i] = arrH.getDouble(index.set(j, i));
             }
         }
-        
+
         // Reads width of V cell
-        arrH = ncIn.findVariable(strDxV).read(new int[]{jpo, ipo}, new int[]{ny, nx});
+        arrH = ncIn.findVariable(strDxV).read(new int[] { jpo, ipo }, new int[] { ny, nx });
         index = arrH.getIndex();
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 dxv[j][i] = arrH.getDouble(index.set(j, i));
             }
         }
-        
+
         // Reads height of T cells
         arrH = ncIn.findVariable(strDy).read(new int[] { jpo, ipo }, new int[] { ny, nx });
         index = arrH.getIndex();
@@ -637,7 +658,75 @@ public class MarsGrid extends AbstractGrid {
                 dyu[j][i] = arrH.getDouble(index.set(j, i));
             }
         }
-        
+
+        this.reconstructDepth();
+
+    }
+
+    private void reconstructDepth() throws IOException, InvalidRangeException {
+
+        // Reading the Sigma levels at T and W depths
+        this.sigma = (double[]) ncIn.findVariable(this.strLev).read().copyTo1DJavaArray();
+        this.sigmaW = (double[]) ncIn.findVariable(this.strLevW).read().copyTo1DJavaArray();
+
+        this.depth = new double[get_nz()][get_ny()][get_ny()];
+        this.depthW = new double[get_nz() + 1][get_ny()][get_ny()];
+
+        if (verticalMode.equals(VerticalMode.STANDARD)) {
+            
+            // If standard mode
+            for (int k = 0; k < this.get_nz(); k++) {
+                for (int j = 0; j < this.get_ny(); j++) {
+                    for (int i = 0; i < this.get_nx(); i++) {
+                        this.depth[k][j][i] = this.sigma[k] * hRho[j][i];
+                        this.depthW[k][j][i] = this.sigmaW[k] * hRho[j][i];
+                    }
+                }
+            }
+
+            // reconstruct of W depth at the surface
+            int k = get_nz();
+            for (int j = 0; j < this.get_ny(); j++) {
+                for (int i = 0; i < this.get_nx(); i++) {
+                    this.depthW[k][j][i] = this.sigmaW[k] * hRho[j][i];
+                }
+            }
+
+        } else {
+
+            // Using generalized mode.
+            // First, the C(sigma) values at T and W points are extracted
+            String strCs = getParameter("field_var_cs");
+            String strCsW = getParameter("field_var_csw");
+            double[] Cs = (double[]) ncIn.findVariable(strCs).read().copyTo1DJavaArray();
+            double[] CsW = (double[]) ncIn.findVariable(strCsW).read().copyTo1DJavaArray();
+
+            // Reading the Hc value
+            String strHc = getParameter("field_var_hc");
+            Array arrHc = ncIn.findVariable(strHc).read(new int[] { get_jpo(), get_ipo() },
+                    new int[] { get_ny(), get_nx() });
+            Index indexHc = arrHc.getIndex();
+            for (int k = 0; k < this.get_nz(); k++) {
+                for (int j = 0; j < this.get_ny(); j++) {
+                    for (int i = 0; i < this.get_nx(); i++) {
+                        indexHc.set(k, j, i);
+                        double hc = arrHc.getDouble(indexHc);
+                        this.depth[k][j][i] = hc * (this.sigma[k] - Cs[k]) + hRho[j][i] * Cs[k];
+                        this.depthW[k][j][i] = hc * (this.sigmaW[k] - CsW[k]) + hRho[j][i] * CsW[k];
+                    }
+                }
+            }
+
+            // Reconstructing the last ocean grid (ocean surface).
+            int k = get_nz();
+            for (int j = 0; j < this.get_ny(); j++) {
+                for (int i = 0; i < this.get_nx(); i++) {
+                    indexHc.set(k, j, i);
+                    double hc = arrHc.getDouble(indexHc);
+                    this.depthW[k][j][i] = hc * (this.sigmaW[k] - CsW[k]) + hRho[j][i] * CsW[k];
+                }
+            }
+        }
     }
 
 }
