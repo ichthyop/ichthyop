@@ -111,6 +111,12 @@ public class NemoGrid extends AbstractGrid {
     private boolean isGridInfoInOneFile;
     private boolean is3Denabled;
     
+    public interface Cyclicity {
+        double getX(double x);
+    }
+    
+    private Cyclicity cyclicity;
+    
     public NemoGrid(String filename) {
         super(filename);   
     }
@@ -423,10 +429,17 @@ public class NemoGrid extends AbstractGrid {
         stre2t = getParameter("field_var_e2t");
         stre1v = getParameter("field_var_e1v");
         stre2u = getParameter("field_var_e2u");
+        
         if (findParameter("is_3d_enabled")) {
             this.is3Denabled = Boolean.valueOf(getParameter("is_3d_enabled"));
         } else {
             this.is3Denabled = true;
+        }
+        
+        if (findParameter("is_global")) {
+            this.cyclicity = (double x) -> x;
+        } else {
+            this.cyclicity = (double x) -> this.getCyclicValue(x);
         }
         
         if (!findParameter("enhanced_mode")) {
@@ -1307,6 +1320,17 @@ public class NemoGrid extends AbstractGrid {
     public double interpolate2dW(double[] pGrid, double[][][] variable, int kIndex) {
         return this.interpolate2dT(pGrid, variable, kIndex);
     }
-    
+
+    private double getCyclicValue(double x) {
+        if(x >= this.get_nx() - 1 - 0.5) {
+            double delta = x - (this.get_nx() - 1 - 0.5);
+            x = 0.5 + delta;
+        } else if (x <= 0.5) {
+            double delta = 0.5 - x; 
+            x = this.get_nx() - 1 - 0.5 - delta;
+        } else {}
+        
+        return x;   
+    }
 
 }
