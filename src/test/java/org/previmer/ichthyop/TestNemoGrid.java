@@ -69,6 +69,20 @@ public class TestNemoGrid extends SimulationManagerAccessor{
         assertEquals(45, nemoGrid.get_nz());
     }
     
+    @Test
+    public void testCyclic() {
+        // nx = 26
+        double precision = 1e-4;
+        assertEquals(1, nemoGrid.getCyclicValue(25), precision);
+        assertEquals(24, nemoGrid.getCyclicValue(0), precision);
+        assertEquals(1, nemoGrid.getCyclicValue(1), precision);
+        assertEquals(24, nemoGrid.getCyclicValue(24), precision);
+        assertEquals(0.6, nemoGrid.getCyclicValue(24.6), precision);
+        assertEquals(23.9, nemoGrid.getCyclicValue(-0.1), precision);
+        
+    }
+    
+    
     @Before 
     public void prepareData() throws Exception{
         String fileName = getClass().getResource("/test-nemo3d.xml").getFile();
