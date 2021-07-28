@@ -186,14 +186,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>field_var_sig</key>
                 <long_name>Sigma variable</long_name>
-                <value>SIG</value>
+                <value>s_rho</value>
                 <default>SIG</default>
                 <description></description>
             </parameter>
             <parameter>
                 <key>field_var_sigw</key>
                 <long_name>Sigma W variable</long_name>
-                <value>SIG_W</value>
+                <value>s_w</value>
                 <default>SIG_W</default>
                 <description></description>
             </parameter>
@@ -407,6 +407,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <long_name>S-coordinate critical depth</long_name>
                 <value>hc</value>
                 <default>hc</default>
+                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
+            </parameter>
+            <parameter>
+                <key>field_var_cs</key>
+                <long_name>S-coordinate critical depth</long_name>
+                <value>Cs_r</value>
+                <default>Cs_r</default>
+                <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
+            </parameter>
+            <parameter>
+                <key>field_var_csw</key>
+                <long_name>S-coordinate critical depth</long_name>
+                <value>Cs_w</value>
+                <default>Cs_w</default>
                 <description>Name of the NetCDF field in the hydrodynamic dataset (global attribute or variable depending on whether it is UCLA or Rutgers version).</description>
             </parameter>
             <parameter hidden="true">
