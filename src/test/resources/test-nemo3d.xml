@@ -323,35 +323,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>field_var_e3t</key>
                 <long_name>Vertical scale factor at T points</long_name>
-                <value>e3t_ps</value>
-                <default>e3t_ps</default>
+                <value>e3t_1d</value>
+                <default>e3t_1d</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_e3u</key>
                 <long_name>Vertical scale factor at U points</long_name>
-                <value>e3u_ps</value>
-                <default>e3u_ps</default>
+                <value>e3t_1d</value>
+                <default>e3t_1d</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_e3v</key>
                 <long_name>Vertical scale factor at V points</long_name>
-                <value>e3v_ps</value>
-                <default>e3v_ps</default>
+                <value>e3t_1d</value>
+                <default>e3t_1d</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_gdept</key>
                 <long_name>Depth at T points</long_name>
-                <value>gdept</value>
+                <value>gdept_1d</value>
                 <default>gdept</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
                 <key>field_var_gdepw</key>
                 <long_name>Depth at W points</long_name>
-                <value>gdepw</value>
+                <value>gdepw_1d</value>
                 <default>gdepw</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
