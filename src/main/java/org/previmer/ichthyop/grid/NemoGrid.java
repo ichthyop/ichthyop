@@ -457,7 +457,7 @@ public class NemoGrid extends AbstractGrid {
      * sous la main. Avec OPA, les dimensions se lisent dans un fichier
      * particulier *byte*mask*. A déterminer si toujours vrai ?
      */
-    private void getDimNC() throws IOException {
+    public void getDimNC() throws IOException {
 
         NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
         // Recovers X dimension
@@ -995,7 +995,7 @@ public class NemoGrid extends AbstractGrid {
      * @param path
      * @throws java.io.IOException
      */
-    private void sortInputFiles() throws IOException {
+    public void sortInputFiles() throws IOException {
 
         String path = IOTools.resolvePath(getParameter("input_path"));
         File file = new File(path);
