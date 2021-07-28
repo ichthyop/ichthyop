@@ -1321,7 +1321,7 @@ public class NemoGrid extends AbstractGrid {
         return this.interpolate2dT(pGrid, variable, kIndex);
     }
 
-    private double getCyclicValue(double x) {
+    public double getCyclicValue(double x) {
         if(x >= this.get_nx() - 1 - 0.5) {
             double delta = x - (this.get_nx() - 1 - 0.5);
             x = 0.5 + delta;
