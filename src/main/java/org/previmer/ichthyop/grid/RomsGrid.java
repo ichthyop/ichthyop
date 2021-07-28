@@ -71,7 +71,7 @@ public class RomsGrid extends AbstractGrid {
     /**
      * Name of the Dimension in NetCDF file
      */
-    private String strXiDim, strEtaDim;
+    private String strXiDim, strEtaDim, strSigDim;
 
     private String strHc, strCs_r, strCs_w;
 
@@ -159,6 +159,14 @@ public class RomsGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+        try {
+            this.set_nz(ncIn.findDimension(strSigDim).getLength());
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset grid dimensions SIGMA. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        
         set_ipo(0);
         set_jpo(0);
     }
@@ -189,6 +197,7 @@ public class RomsGrid extends AbstractGrid {
     public void loadParameters() {
         this.strXiDim = getParameter("field_dim_xi");
         this.strEtaDim = getParameter("field_dim_eta");
+        this.strSigDim = getParameter("field_dim_sig");
         this.strLon = getParameter("field_var_lon");
         this.strLat = getParameter("field_var_lat");
         this.strBathy = getParameter("field_var_bathy");
@@ -196,6 +205,8 @@ public class RomsGrid extends AbstractGrid {
         this.strPn = getParameter("field_var_pn");
         this.strPm = getParameter("field_var_pm");
         this.meshFile = getParameter("grid_file");
+        this.strSig = getParameter("field_var_sig");
+        this.strSig_W = getParameter("field_var_sigw");
         this.verticalMode = VerticalMode.valueOf(getParameter("depth_mode").toUpperCase());
     }
 
