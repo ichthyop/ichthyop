@@ -42,26 +42,31 @@
 
 package org.previmer.ichthyop;
 
-import org.previmer.ichthyop.grid.NemoGrid;
-import org.previmer.ichthyop.io.IOTools;
-
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
-
-import com.amazonaws.services.s3.model.GetRequestPaymentConfigurationRequest;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.previmer.ichthyop.grid.NemoGrid;
 
 public class TestNemoGrid extends SimulationManagerAccessor{
     
     private NemoGrid nemoGrid;
 
     @Test
-    public void testLucky() {
-        assertEquals(7, 7);
+    public void testNx() {
+        assertEquals(26, nemoGrid.get_nx());
+    }
+    
+    @Test
+    public void testNy() {
+        assertEquals(16, nemoGrid.get_ny());
+    }
+    
+    @Test
+    public void testNz() {
+        assertEquals(45, nemoGrid.get_nz());
     }
     
     @Before 
@@ -70,5 +75,7 @@ public class TestNemoGrid extends SimulationManagerAccessor{
         getSimulationManager().getParameterManager().setConfigurationFile(new File(fileName));
         nemoGrid = new NemoGrid();
         nemoGrid.loadParameters();
+        nemoGrid.sortInputFiles();
+        nemoGrid.getDimNC();
     }
 }
