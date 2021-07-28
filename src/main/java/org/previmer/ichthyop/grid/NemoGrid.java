@@ -129,7 +129,7 @@ public class NemoGrid extends AbstractGrid {
     /**
      * Reads time non-dependant fields in NetCDF dataset
      */
-     private void readConstantField() throws Exception {
+     public void readConstantField() throws Exception {
         
         NetcdfFile nc;
         
@@ -222,7 +222,6 @@ public class NemoGrid extends AbstractGrid {
                 double value = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
                 for (int j = 0; j < get_ny(); j++) {
                     for (int i = 0; i < get_nx(); i++) {
-                        index.set(k, j + get_jpo(), i + get_ipo());
                         field[k][j][i] = value;
                     }
                 }
@@ -1331,6 +1330,14 @@ public class NemoGrid extends AbstractGrid {
         } else {}
         
         return x;   
+    }
+    
+    public double[][][] getDepthT() { 
+        return this.gdepT;   
+    }
+    
+    public double[][][] getDepthW() { 
+        return this.gdepW;   
     }
 
 }
