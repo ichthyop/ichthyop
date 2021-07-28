@@ -46,9 +46,6 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 
 public abstract class AbstractGrid extends SimulationManagerAccessor {
 
-    /** Name of the grid file */
-    private final String filename;
-    
     /** Name of the XML settings key */
     private final String gridKey;
 
@@ -90,8 +87,7 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
     public abstract double[] latlon2xy(double lat, double lon);
     public abstract boolean isOnEdge(double[] pGrid);
     
-    public AbstractGrid(String filename) {
-        this.filename = filename;
+    public AbstractGrid() {
         this.gridKey = getSimulationManager().getPropertyManager(getClass()).getProperty("block.key");
     }
     
@@ -158,10 +154,6 @@ public abstract class AbstractGrid extends SimulationManagerAccessor {
         }
         // The parameter does exist
         return true;
-    }
-
-    public String getFilename() {
-        return this.filename;
     }
     
     public int get_nx() {

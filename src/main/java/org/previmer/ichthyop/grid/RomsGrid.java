@@ -105,13 +105,15 @@ public class RomsGrid extends AbstractGrid {
     private double[][] pm, pn;
 
     private VerticalMode verticalMode;
+    
+    private String meshFile;
 
     private enum VerticalMode {
         UCLA, STANDARD;
     }
 
-    public RomsGrid(String filename) {
-        super(filename);
+    public RomsGrid() {
+        super();
     }
 
     @Override
@@ -127,13 +129,13 @@ public class RomsGrid extends AbstractGrid {
         // openLocation(getParameter("input_path"));
         getDimNC();
         shrinkGrid();
-        readConstantField(this.getFilename());
+        readConstantField(this.meshFile);
         getDimGeogArea();
 
     }
 
     void openDataset() throws IOException {
-        ncIn = NetcdfDataset.openDataset(this.getFilename());
+        ncIn = NetcdfDataset.openDataset(this.meshFile);
     }
 
     /**
@@ -193,6 +195,7 @@ public class RomsGrid extends AbstractGrid {
         this.strMask = getParameter("field_var_mask");
         this.strPn = getParameter("field_var_pn");
         this.strPm = getParameter("field_var_pm");
+        this.meshFile = getParameter("mesh_file");
         this.verticalMode = VerticalMode.valueOf(getParameter("depth_mode").toUpperCase());
     }
 
@@ -541,7 +544,7 @@ public class RomsGrid extends AbstractGrid {
         double[] pGrid1, pGrid2;
         int ipn, jpn;
 
-        readLonLat(this.getFilename());
+        readLonLat(this.meshFile);
 
         pGrid1 = latlon2xy(lat1, lon1);
         pGrid2 = latlon2xy(lat2, lon2);

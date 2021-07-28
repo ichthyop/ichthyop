@@ -99,8 +99,8 @@ public class RegularGrid extends AbstractGrid {
     private String file_hgr, file_zgr, file_mask;
     private boolean isGridInfoInOneFile;
     
-    public RegularGrid(String filename) {
-        super(filename); 
+    public RegularGrid() {
+        super(); 
         
     }
 

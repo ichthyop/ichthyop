@@ -64,13 +64,15 @@ public class MarsGrid extends AbstractGrid {
     private String strDxV, strDyU;
     private String strLevW, strLev;
     private VerticalMode verticalMode;
+    
+    private String meshFile;
 
     private enum VerticalMode {
         GENERALIZED, STANDARD;
     }
 
-    public MarsGrid(String filename) {
-        super(filename);
+    public MarsGrid() {
+        super();
     }
 
     @Override
@@ -181,7 +183,7 @@ public class MarsGrid extends AbstractGrid {
     }
 
     private void openDataset() throws IOException {
-        ncIn = NetcdfDataset.openDataset(this.getFilename());
+        ncIn = NetcdfDataset.openDataset(this.meshFile);
     }
 
     @Override
@@ -216,6 +218,7 @@ public class MarsGrid extends AbstractGrid {
         strDy = getParameter("field_var_dy");
         strDxV = getParameter("field_var_dxv");
         strDyU = getParameter("field_var_dyv");
+        this.meshFile = getParameter("mesh_mask");
         verticalMode = VerticalMode.valueOf(getParameter("depth_mode").toUpperCase());
     }
 

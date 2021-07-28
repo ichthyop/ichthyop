@@ -117,8 +117,8 @@ public class NemoGrid extends AbstractGrid {
     
     private Cyclicity cyclicity;
     
-    public NemoGrid(String filename) {
-        super(filename);   
+    public NemoGrid() {
+        super();   
     }
 
     @Override
