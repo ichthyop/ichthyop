@@ -69,14 +69,14 @@ public class GridManager extends AbstractManager {
 
     private void instantiateGrid() throws Exception {
 
-        XBlock datasetBlock = findActiveGrid();
-        String className = getParameter(datasetBlock.getKey(), "class_name");
-        if (datasetBlock != null) {
+        XBlock gridBlock = findActiveGrid();
+        String className = getParameter(gridBlock.getKey(), "class_name");
+        if (gridBlock != null) {
             try {
             grid = (AbstractGrid) Class.forName(className).getDeclaredConstructor().newInstance();
             } catch (Exception ex) {
                 StringBuffer sb = new StringBuffer();
-                sb.append("Dataset instantiation failed ==> ");
+                sb.append("Grid instantiation failed ==> ");
                 sb.append(ex.toString());
                 InstantiationException ieex = new InstantiationException(sb.toString());
                 ieex.setStackTrace(ex.getStackTrace());
@@ -90,21 +90,21 @@ public class GridManager extends AbstractManager {
     }
 
     public String getParameter(String gridKey, String key) {
-        return getSimulationManager().getParameterManager().getParameter(BlockType.DATASET, gridKey, key);
+        return getSimulationManager().getParameterManager().getParameter(BlockType.GRID, gridKey, key);
     }
 
     private XBlock findActiveGrid() throws Exception {
         List<XBlock> list = new ArrayList<>();
-        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.DATASET)) {
+        for (XBlock block : getSimulationManager().getParameterManager().getBlocks(BlockType.GRID)) {
             if (block.isEnabled()) {
                 list.add(block);
             }
         }
         if (list.isEmpty()) {
-            throw new NullPointerException("Could not find any " + BlockType.DATASET.toString() + " block in the configuration file.");
+            throw new NullPointerException("Could not find any " + BlockType.GRID.toString() + " block in the configuration file.");
         }
         if (list.size() > 1) {
-            throw new IOException("Found several " + BlockType.DATASET.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
+            throw new IOException("Found several " + BlockType.GRID.toString() + " blocks enabled in the configuration file. Please only keep one enabled.");
         }
         return list.get(0);
     }
