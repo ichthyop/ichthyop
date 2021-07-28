@@ -232,8 +232,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>byte_mask_pattern</key>
                 <long_name>Mask file pattern</long_name>
-                <value>*mask*.nc</value>
-                <default>*mask*.nc</default>
+                <value>nemo-indian-new-mesh-mask.nc</value>
+                <default>nemo-indian-new-mesh-mask.nc</default>
                 <description>Filename filter for identifying the "mask" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the dimensions x, y, z and the variable land/ocean mask at T points</description>
             </parameter>
             <parameter>
@@ -265,13 +265,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
             <parameter>
-                <key>gridt_pattern</key>
-                <long_name>gridT file pattern</long_name>
-                <value>*gridT*</value>
-                <default>*gridT*</default>
-                <description>Filename filter for identifying the "gridT" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files variables longitude and latitude at T points. It is also assumed that all the additional tracked variables (see section Output/Variable tracking) will be found in these "gridT" files.</description>
-            </parameter>
-            <parameter>
                 <key>field_var_lat</key>
                 <long_name>Latitude of Rho points</long_name>
                 <value>nav_lat</value>
@@ -288,8 +281,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>hgr_pattern</key>
                 <long_name>HGR file pattern</long_name>
-                <value>*hgr*.nc</value>
-                <default>*hgr*.nc</default>
+                <value>nemo-indian-new-mesh-mask.nc</value>
+                <default>nemo-indian-new-mesh-mask.nc</default>
                 <description>Filename filter for identifying the "HGR" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file e1t, e2t, e1v and e2u variables.</description>
             </parameter>
             <parameter>
@@ -323,8 +316,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>zgr_pattern</key>
                 <long_name>ZGR file pattern</long_name>
-                <value>*zgr*.nc</value>
-                <default>*zgr*.nc</default>
+                <value>nemo-indian-new-mesh-mask.nc</value>
+                <default>nemo-indian-new-mesh-mask.nc</default>
                 <description>Filename filter for identifying the "ZGR" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the variables depth at T points, depth at W points and vertical scale factor at T points.</description>
             </parameter>
             <parameter>
@@ -362,67 +355,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <default>gdepw</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
-            <parameter>
-                <key>gridu_pattern</key>
-                <long_name>gridU file pattern</long_name>
-                <value>*gridU*.nc</value>
-                <default>*gridU*.nc</default>
-                <description>Filename filter for identifying the "gridU" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the time dimension, the time variable and the zonal velocity variable.</description>
-            </parameter>
-            <parameter>
-                <key>field_dim_time</key>
-                <long_name>Dimension in time</long_name>
-                <value>time_counter</value>
-                <default>time_counter</default>
-                <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_time</key>
-                <long_name>Averaged time since initialization</long_name>
-                <value>time_counter</value>
-                <default>time_counter</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_u</key>
-                <long_name>Zonal velocity</long_name>
-                <value>vozocrtx</value>
-                <default>vozocrtx</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>gridv_pattern</key>
-                <long_name>gridV file pattern</long_name>
-                <value>*gridV*.nc</value>
-                <default>*gridV*.nc</default>
-                <description>Filename filter for identifying the "gridV" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the meridional velocity variable.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_v</key>
-                <long_name>Meridional velocity</long_name>
-                <value>vomecrty</value>
-                <default>vomecrty</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
-            <parameter>
-                <key>gridw_pattern</key>
-                <long_name>gridW file pattern</long_name>
-                <value>*gridW*.nc</value>
-                <default>*gridW*.nc</default>
-                <description>Filename filter for identifying the "gridW" NetCDF output files. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in these files the meridional velocity variable.</description>
-            </parameter>
-            <parameter>
-                <key>field_var_w</key>
-                <long_name>Vertical velocity</long_name>
-                <value>vovecrtz</value>
-                <default>vovecrtz</default>
-                <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
-            </parameter>
             <parameter hidden="true">
                 <key>class_name</key>
                 <long_name>Java Class file</long_name>
-                <value>org.previmer.ichthyop.dataset.NemoDataset</value>
-                <default>org.previmer.ichthyop.dataset.NemoDataset</default>
+                <value>org.previmer.ichthyop.grid.NemoGrid</value>
+                <default>org.previmer.ichthyop.grid.NemoGrid</default>
                 <format>class</format>
                 <description>The Java class called by the application to implement this dataset.</description>
             </parameter>
