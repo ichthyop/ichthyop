@@ -103,6 +103,9 @@ public class RomsGrid extends AbstractGrid {
      *
      */
     private double[][] pm, pn;
+    
+    private double[] sigma, sigmaW;
+    private double[] Cs_r, Cs_w;
 
     private VerticalMode verticalMode;
     
@@ -129,7 +132,7 @@ public class RomsGrid extends AbstractGrid {
         // openLocation(getParameter("input_path"));
         getDimNC();
         shrinkGrid();
-        readConstantField(this.meshFile);
+        readConstantField();
         getDimGeogArea();
 
     }
@@ -207,6 +210,9 @@ public class RomsGrid extends AbstractGrid {
         this.meshFile = getParameter("grid_file");
         this.strSig = getParameter("field_var_sig");
         this.strSig_W = getParameter("field_var_sigw");
+        this.strCs_r = getParameter("field_var_cs");
+        this.strCs_w = getParameter("field_var_csw");
+        this.strHc = getParameter("field_hc");
         this.verticalMode = VerticalMode.valueOf(getParameter("depth_mode").toUpperCase());
     }
 
@@ -417,14 +423,14 @@ public class RomsGrid extends AbstractGrid {
 
     }
 
-    void readConstantField(String gridFile) throws IOException {
+    public void readConstantField() throws IOException {
 
         int[] origin = new int[] { get_jpo(), get_ipo() };
         int[] size = new int[] { get_ny(), get_nx() };
         Array arrLon, arrLat, arrMask, arrH, arrPm, arrPn;
         Index index;
 
-        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
+        NetcdfFile ncGrid = NetcdfDataset.openDataset(this.meshFile);
         try {
             arrLon = ncGrid.findVariable(strLon).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
@@ -555,7 +561,7 @@ public class RomsGrid extends AbstractGrid {
         double[] pGrid1, pGrid2;
         int ipn, jpn;
 
-        readLonLat(this.meshFile);
+        readLonLat();
 
         pGrid1 = latlon2xy(lat1, lon1);
         pGrid2 = latlon2xy(lat2, lon2);
@@ -580,10 +586,10 @@ public class RomsGrid extends AbstractGrid {
     /**
      * Reads longitude and latitude fields in NetCDF dataset
      */
-    void readLonLat(String gridFile) throws IOException {
+    void readLonLat() throws IOException {
 
         Array arrLon, arrLat;
-        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
+        NetcdfFile ncGrid = NetcdfDataset.openDataset(this.meshFile);
         try {
             arrLon = ncIn.findVariable(strLon).read();
         } catch (IOException ex) {
@@ -675,29 +681,27 @@ public class RomsGrid extends AbstractGrid {
         }
     }
 
-    private void reconstructDepth() throws IOException {
+    public void reconstructDepth() throws IOException {
 
         int k;
         double hc = getHc();
 
-        double[] sigma = new double[get_nz()];
-        double[] Cs_r;
-        double[] sigmaW = new double[get_nz() + 1];
-        double[] Cs_w;
-
         Cs_r = this.getCs_r();
         Cs_w = this.getCs_w();
 
-        sigma = (double[]) ncIn.findVariable(strSig_W).read().copyTo1DJavaArray();
-        sigmaW = (double[]) ncIn.findVariable(strSig).read().copyTo1DJavaArray();
+        sigmaW = (double[]) ncIn.findVariable(strSig_W).read().copyTo1DJavaArray();
+        sigma = (double[]) ncIn.findVariable(strSig).read().copyTo1DJavaArray();
 
+        this.depth = new double[get_nz()][get_ny()][get_nx()];
+        this.depthW = new double[get_nz() + 1][get_ny()][get_nx()];
+        
         switch (verticalMode) {
             case UCLA:
                 for (int i = 0; i < get_nx(); i++) {
                     for (int j = 0; j < get_ny(); j++) {
                         for (k = 0; k < get_nz(); k++) {
                             depth[k][j][i] = hRho[j][i] * (sigma[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]);
-                            depthW[k + 1][j][i] = hRho[j][i] * (sigmaW[k + 1] * hc + Cs_w[k + 1] * hRho[j][i])
+                            depthW[k][j][i] = hRho[j][i] * (sigmaW[k] * hc + Cs_w[k] * hRho[j][i])
                                     / (hc + hRho[j][i]);
                         }
                     }
@@ -706,7 +710,7 @@ public class RomsGrid extends AbstractGrid {
                 k = get_nz();
                 for (int i = 0; i < get_nx(); i++) {
                     for (int j = 0; j < get_ny(); j++) {
-                        depthW[k + 1][j][i] = hRho[j][i] * (sigmaW[k + 1] * hc + Cs_w[k + 1] * hRho[j][i])
+                        depthW[k][j][i] = hRho[j][i] * (sigmaW[k] * hc + Cs_w[k] * hRho[j][i])
                                 / (hc + hRho[j][i]);
                     }
                 }
@@ -729,9 +733,23 @@ public class RomsGrid extends AbstractGrid {
                     }
                 }
                 break;
-
         }
-
+    }
+    
+    public double[] getSigma() { 
+        return this.sigma;   
     }
 
+    public double[] getSigmaW() { 
+        return this.sigmaW;   
+    }
+    
+    public double[] getCs() { 
+        return this.Cs_r;   
+    }
+
+    public double[] getCsW() { 
+        return this.Cs_w;   
+    }
+    
 }
