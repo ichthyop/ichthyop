@@ -10,3 +10,5 @@ output
 .classpath
 .project
 .settings
+**/*.py
+**/*ipynb
