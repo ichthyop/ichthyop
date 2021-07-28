@@ -134,7 +134,7 @@ public class RomsGrid extends AbstractGrid {
 
     }
 
-    void openDataset() throws IOException {
+    public void openDataset() throws IOException {
         ncIn = NetcdfDataset.openDataset(this.meshFile);
     }
 
@@ -143,7 +143,7 @@ public class RomsGrid extends AbstractGrid {
      *
      * @throws an IOException if an error occurs while reading the dimensions.
      */
-    void getDimNC() throws Exception {
+    public void getDimNC() throws Exception {
 
         try {
             this.set_nx(ncIn.findDimension(strXiDim).getLength());
@@ -195,7 +195,7 @@ public class RomsGrid extends AbstractGrid {
         this.strMask = getParameter("field_var_mask");
         this.strPn = getParameter("field_var_pn");
         this.strPm = getParameter("field_var_pm");
-        this.meshFile = getParameter("mesh_file");
+        this.meshFile = getParameter("grid_file");
         this.verticalMode = VerticalMode.valueOf(getParameter("depth_mode").toUpperCase());
     }
 
