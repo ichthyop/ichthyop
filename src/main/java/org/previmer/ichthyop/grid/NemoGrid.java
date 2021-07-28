@@ -442,9 +442,9 @@ public class NemoGrid extends AbstractGrid {
             this.cyclicity = (double x) -> this.getCyclicValue(x);
         }
         
-        if (!findParameter("enhanced_mode")) {
-            getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
-        }
+        //if (!findParameter("enhanced_mode")) {
+        //    getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
+        //}
     }
 
     /**

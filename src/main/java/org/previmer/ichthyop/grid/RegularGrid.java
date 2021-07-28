@@ -381,9 +381,9 @@ public class RegularGrid extends AbstractGrid {
         strMask = getParameter("field_var_mask");
         str_gdepT = getParameter("field_var_gdept"); // z_rho
         str_gdepW = getParameter("field_var_gdepw"); // z_w
-        if (!findParameter("enhanced_mode")) {
-            getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
-        }
+        //if (!findParameter("enhanced_mode")) {
+        //    getLogger().warning("Ichthyop assumes that by default the NEMO NetCDF files must be opened in enhanced mode (with scale, offset and missing attributes).");
+        //}
     }
 
     /**
