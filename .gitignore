@@ -12,3 +12,7 @@ output
 .settings
 **/*.py
 **/*ipynb
+**/.classpath
+**/.project
+**/.settings
+
