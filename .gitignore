@@ -8,3 +8,5 @@ manifest.mf
 cfg
 output
 .classpath
+.project
+.settings
