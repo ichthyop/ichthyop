@@ -5,6 +5,7 @@
 ### Bug fix
 
 - Add the `units` attribute (which replaces the `origin` attribute) to the time variable. It was lost with the new time management in Ichthyop.
+- **Correct bug in template creation (templates were considered as resources by Ichthyop but were kept in `java` folder, which was not used as resource folder).**
 
 ## Changes in 3.3.9
 
