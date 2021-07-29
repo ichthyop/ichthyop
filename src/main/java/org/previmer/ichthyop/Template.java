@@ -70,7 +70,7 @@ public class Template {
     }
 
     public static URL getTemplateURL(String templateName) {
-        String path = "templates/" + templateName;
+        String path = "/templates/" + templateName;
         return Template.class.getResource(path);
     }
     
@@ -82,7 +82,7 @@ public class Template {
      * @return 
      */
     public static InputStream getTemplateFile(String templateName) {
-        String path = "templates/" + templateName;
+        String path = "/templates/" + templateName;
         InputStream stream = Template.class.getResourceAsStream(path);
         return stream;    
     }
