@@ -16,8 +16,8 @@
             "request": "launch",
             "mainClass": "org.previmer.ichthyop.ui.IchthyopApp",
             "projectName": "ichthyop",
-            "cwd": "/home/barrier/Work/ichthyop/pous/bug-zones/TEST_NICO",
-            "args": "" // "nemo3d_GLORYS_02januaryr2014_VM_forward_stop_zoom.xml"
+            "cwd": "",
+            "args": ""
         }
     ]
 }
