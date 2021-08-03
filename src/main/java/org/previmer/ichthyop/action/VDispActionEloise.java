@@ -260,9 +260,8 @@ public class VDispActionEloise extends AbstractAction {
         // creation of the interpolated depth
         double zMin = Math.floor(Zk[0]);
         double zMax = Zk[nz - 1];
-        zMax = 0;
         
-        int NNN = (int) ((zMax - zMin) / this.dZ + 1);
+        int NNN = (int) ((0.0 - zMin) / this.dZ + 1);
         double[][] output = new double[2][NNN];
          
         //double steps = (zMax - zMin) / (this.N * nz - 1);
@@ -288,13 +287,16 @@ public class VDispActionEloise extends AbstractAction {
             
             // Looking for the input k index used for the interpolation.
             // p is the index of the right most interpolation depth
-            for (p = 0; p < nz; p++) { 
+
+            for (p = 0; p < nz ; p++) { 
                 if(zTemp <= Zk[p]) { 
                     break;
                 }   
             }
+
             // move p index to the left
             p--;
+
             double frac = (zTemp - Zk[p]) / (Zk[p + 1] - Zk[p]);
             output[1][k] = (1 - frac) * Kv[p] + frac * Kv[p + 1];
             
