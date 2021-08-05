@@ -186,4 +186,7 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return false;
     }
     
+    public double get_kz(double time, double[] pGrid){
+        return 0.0; 
+    }
 }

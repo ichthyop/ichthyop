@@ -47,7 +47,6 @@ package org.previmer.ichthyop.action;
 import org.previmer.ichthyop.util.MTRandom;
 import org.previmer.ichthyop.particle.IParticle;
 
-
 import org.previmer.ichthyop.dataset.IDataset;
 
 /**
@@ -129,6 +128,7 @@ public class VDispActionEloise extends AbstractAction {
         if(dataset.isInWater((int) pGrid[0],(int) pGrid[1])){
             double depth = dataset.z2depth(pGrid[0], pGrid[1], pGrid[2]);
             // Horizontal mean of the depth and K profiles
+
             double[][] verticalProfile = this.horizontalMean(pGrid, time, dt);
 
             double[][] interpolatedProfile = this.linearInterpolation(verticalProfile);
@@ -370,7 +370,8 @@ public class VDispActionEloise extends AbstractAction {
                 // Interpolation weight for horizontal interpolation
                 co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 for (int kk = 0; kk < nz; kk++) {
-                    double tempKv = dataset.get(kv_field, new double[] { i + ii, j + jj, kk }, time).doubleValue();
+                    double[] coord = {i+ii,j+jj,kk};
+                    double tempKv = dataset.get_kz(time,coord);
                     double tempZ = dataset.z2depth(i + ii, j + jj, kk);
                     if (!Double.isNaN(tempKv)) {
                         output[0][kk] += tempZ * co;
@@ -380,8 +381,6 @@ public class VDispActionEloise extends AbstractAction {
                 }
             }
         }
-        
-
         for (int kk = 0; kk < nz; kk++) {
             if (CO[kk] != 0) {
                 output[0][kk] /= CO[kk];

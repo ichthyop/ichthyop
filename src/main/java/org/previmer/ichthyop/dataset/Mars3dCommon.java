@@ -124,6 +124,63 @@ abstract class Mars3dCommon extends MarsCommon {
      */
     private String strHC, strA, strB;
 
+    private String kv_field;
+
+
+    public double get_kz(double time, double[] pGrid){
+        IDataset dataset = getSimulationManager().getDataset();
+
+        final double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
+        final double KARMAN = 0.40f; // von Karman constant
+    
+        double[][][] kz_tp0 = new double[nx][ny][nz];  
+        double[][][] kz_tp1 = new double[nx][ny][nz]; 
+        double coef = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double[][][] kz = new double[nx][ny][nz];
+
+
+        for(int i=0; i<nx-1; i++){
+            for(int j=0; j<ny-1; j++){
+                if (!findParameter("read_kv")){
+                    for(int k=0; k<nz-1; k++){
+                        //Computing at time t
+                        double depth_tp0 = (z_w_tp0[k + 1][j][i] + z_w_tp0[k][j][i])*0.5;
+                        double depth_max_tp0 = z_w_tp0[0][j][i];
+                        double dz_tp0 = depth_tp0 - (z_w_tp0[k + 1][j][i]+z_w_tp0[k + 2][j][i])*0.5;  //grid length
+                        double du_tp0 = (u_tp0[k + 1][j][i]-u_tp0[k][j][i])/dz_tp0;    //du/dz
+                        double dv_tp0 = (v_tp0[k + 1][j][i]-v_tp0[k][j][i])/dz_tp0;    //dv/dz
+                        kz_tp0[i][j][k]  = MOLECULAR_VISCOSITY + Math.pow((KARMAN * depth_tp0)*(1 - depth_tp0/depth_max_tp0),2) * Math.sqrt(Math.pow(du_tp0,2) + Math.pow(dv_tp0,2));
+
+                        //Computing at time t+dt
+                        double depth_tp1 = (z_w_tp1[k + 1][j][i]+z_w_tp1[k][j][i])*0.5;
+                        double depth_max_tp1 = z_w_tp1[0][j][k];
+                        double dz_tp1 = Math.abs(depth_tp1 - (z_w_tp1[k + 1][j][i]+z_w_tp1[k][j][i])*0.5);
+                        double du_tp1 = (u_tp1[k + 1][j][i]-u_tp1[k][j][i])/dz_tp1;
+                        double dv_tp1 = (v_tp1[k + 1][j][i]-v_tp1[k][j][i])/dz_tp1;
+                        kz_tp1[i][j][k]  = MOLECULAR_VISCOSITY + Math.pow((KARMAN * depth_tp1)*(1 - depth_tp1/depth_max_tp1),2) * Math.sqrt(Math.pow(du_tp1,2) + Math.pow(dv_tp1,2));
+
+                        //Interpolation to get kz
+                        kz[i][j][k] = (1.d - coef) * kz_tp0[i][j][k] + coef * kz_tp1[i][j][k];
+                    }
+                }
+                else{
+                    for (int kk = 0; kk < nz; kk++) {
+                        kz[i][j][kk] = dataset.get(kv_field, new double[] { i , j , kk }, time).doubleValue();   
+                    }                    
+                }
+            }
+        }     
+        double x = pGrid[0];
+        double y = pGrid[1];
+        double z = pGrid[2];
+        int ii = (int) x;
+        int jj = (int) y;
+        int kk = (int) z;
+        double kz_part = kz[ii][jj][kk];
+        return kz_part; 
+    }
+
+
     @Override
     public void setUp() throws Exception {
 
@@ -573,6 +630,8 @@ abstract class Mars3dCommon extends MarsCommon {
         }
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
+
+
     }
 
     float[][][] computeW() {

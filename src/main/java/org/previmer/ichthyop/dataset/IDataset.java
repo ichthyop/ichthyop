@@ -72,6 +72,8 @@ public interface IDataset extends NextStepListener {
 
     double get_dWz(double[] pGrid, double time);
 
+    public double get_kz(double time, double[] pGrid);
+
     public boolean isInWater(double[] pGrid);
 
     public boolean isInWater(int i, int j);
@@ -123,4 +125,5 @@ public interface IDataset extends NextStepListener {
     public double yTore(double y);
     
     public boolean isProjected();
+
 }
