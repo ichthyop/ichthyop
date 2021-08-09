@@ -364,14 +364,13 @@ public class VDispActionEloise extends AbstractAction {
         dx = x - Math.floor(x);
         dy = y - Math.floor(y);
         
-
+        double[][][] Kz = dataset.get_kz(time);
         for (int ii = 0; ii < n; ii++) {
             for (int jj = 0; jj < n; jj++) {
                 // Interpolation weight for horizontal interpolation
                 co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 for (int kk = 0; kk < nz; kk++) {
-                    double[] coord = {i+ii,j+jj,kk};
-                    double tempKv = dataset.get_kz(time,coord);
+                    double tempKv = Kz[i + ii][j+ jj][kk];
                     double tempZ = dataset.z2depth(i + ii, j + jj, kk);
                     if (!Double.isNaN(tempKv)) {
                         output[0][kk] += tempZ * co;
