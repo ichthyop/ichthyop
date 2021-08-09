@@ -128,8 +128,16 @@ public class RequiredVariable {
 
         this.time_tp1 = time_tp1;
         this.dt_dataset = dt_dataset;
-        array_tp0 = this.array_tp1;
+        this.array_tp0 = this.array_tp1;
         this.array_tp1 = array_tp1;
+    }
+    
+    public Array getArray0() {
+        return this.array_tp0;   
+    }
+    
+    public Array getArray1() {
+        return this.array_tp1;   
     }
 
     public Number get(double[] pGrid, double time) {
