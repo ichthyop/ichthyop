@@ -56,7 +56,7 @@ import org.previmer.ichthyop.dataset.IDataset;
 public class VDispActionEloise extends AbstractAction {
 
     private MTRandom random;
-    private String kv_field;
+    //private String kv_field;
         
     private final int window = 8;
     private final int window2 = window / 2;
@@ -65,8 +65,8 @@ public class VDispActionEloise extends AbstractAction {
 
     public void loadParameters() throws Exception {
         random = new MTRandom(true);
-        kv_field = getParameter("kv_field");
-        getSimulationManager().getDataset().requireVariable(kv_field, getClass());
+        //kv_field = getParameter("kv_field");
+        //getSimulationManager().getDataset().requireVariable(kv_field, getClass());
     }
     
      @Override
@@ -370,13 +370,19 @@ public class VDispActionEloise extends AbstractAction {
                 // Interpolation weight for horizontal interpolation
                 co = Math.abs((1.d - (double) ii - dx) * (1.d - (double) jj - dy));
                 for (int kk = 0; kk < nz; kk++) {
-                    double tempKv = Kz[i + ii][j+ jj][kk];
+                    double tempKv = Kz[kk][j+ jj][i + ii];
                     double tempZ = dataset.z2depth(i + ii, j + jj, kk);
-                    if (!Double.isNaN(tempKv)) {
+                    if (!Double.isNaN(tempKv)) { 
                         output[0][kk] += tempZ * co;
                         output[1][kk] += tempKv * co;
                         CO[kk] += co;
                     }
+                    // else{
+                    //     tempKv = dataset.get(kv_field, new double[] { i+ii , j+jj , kk }, time).doubleValue();   
+                    //     output[0][kk] += tempZ * co;
+                    //     output[1][kk] += tempKv * co;
+                    //     CO[kk] += co;
+                    // }
                 }
             }
         }
