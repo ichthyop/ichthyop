@@ -113,6 +113,9 @@ abstract class Mars3dCommon extends MarsCommon {
      * Depth at w point. The free surface elevation is disregarded.
      */
     static double[][][] z_w_cst;
+    
+    private float[][][] kz_tp0, kz_tp1;
+    
     /**
      * Name of the Dimension in NetCDF file
      */
@@ -128,54 +131,48 @@ abstract class Mars3dCommon extends MarsCommon {
 
     private String kv_field;
 
-
-    public double[][][] get_kz(double time){
-        //IDataset dataset = getSimulationManager().getDataset();
-
+    private float[][][] computeKz() {
+        
         final double MOLECULAR_VISCOSITY = Math.pow(10,-6); //[kg/m/s]
         final double KARMAN = 0.40f; // von Karman constant
-    
-        double[][][] kz_tp0 = new double[nz][ny][nx];  
-        double[][][] kz_tp1 = new double[nz][ny][nx]; 
-        double coef = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        double[][][] kz = new double[nz][ny][nx];
-
-        if(!read_kz){
-            for(int k=0; k<nz-1; k++){
-                for(int j=0; j<ny-1; j++){
-                    for(int i=0; i<nx-1; i++){
-                        //Computing at time t
-                        double depth_tp0 = (z_w_tp0[k + 1][j][i] + z_w_tp0[k][j][i])*0.5;
-                        double depth_max_tp0 = z_w_tp0[0][j][i];
-                        double dz_tp0 = Math.abs(depth_tp0 - (z_w_tp0[k + 1][j][i]+z_w_tp0[k + 2][j][i])*0.5);  //grid length
-                        double du_tp0 = (u_tp0[k + 1][j][i]-u_tp0[k][j][i])/dz_tp0;    //du/dz
-                        double dv_tp0 = (v_tp0[k + 1][j][i]-v_tp0[k][j][i])/dz_tp0;    //dv/dz
-                        kz_tp0[k][j][i]  = MOLECULAR_VISCOSITY + Math.pow((KARMAN * depth_tp0)*(1 - depth_tp0/depth_max_tp0),2) * Math.sqrt(Math.pow(du_tp0,2) + Math.pow(dv_tp0,2));
-
-                        //Computing at time t+dt
-                        double depth_tp1 = (z_w_tp1[k + 1][j][i]+z_w_tp1[k][j][i])*0.5;
-                        double depth_max_tp1 = z_w_tp1[0][j][i];
-                        double dz_tp1 = Math.abs(depth_tp1 - (z_w_tp1[k + 1][j][i]+z_w_tp1[k+2][j][i])*0.5);
-                        double du_tp1 = (u_tp1[k + 1][j][i]-u_tp1[k][j][i])/dz_tp1;
-                        double dv_tp1 = (v_tp1[k + 1][j][i]-v_tp1[k][j][i])/dz_tp1;
-                        kz_tp1[k][j][i]  = MOLECULAR_VISCOSITY + Math.pow((KARMAN * depth_tp1)*(1 - depth_tp1/depth_max_tp1),2) * Math.sqrt(Math.pow(du_tp1,2) + Math.pow(dv_tp1,2));
-
-                        //Interpolation to get kz
-                        kz[k][j][i] = (1.d - coef) * kz_tp0[k][j][i] + coef * kz_tp1[k][j][i];
-                    }
+        
+        float[][][] output = new float[nz][ny][nx];  
+        
+        for(int k=0; k<nz-1; k++){
+            for(int j=0; j<ny-1; j++){
+                for(int i=0; i<nx-1; i++){
+                    //Computing at time t
+                    double depth_tp1 = (z_w_tp1[k + 1][j][i] + z_w_tp1[k][j][i])*0.5;
+                    double depth_max_tp1 = z_w_tp1[0][j][i];
+                    double dz_tp1 = Math.abs(depth_tp1 - (z_w_tp1[k + 1][j][i]+z_w_tp1[k + 2][j][i])*0.5);  //grid length
+                    double du_tp1 = (u_tp1[k + 1][j][i]-u_tp1[k][j][i])/dz_tp1;    //du/dz
+                    double dv_tp1 = (v_tp1[k + 1][j][i]-v_tp1[k][j][i])/dz_tp1;    //dv/dz
+                    output[k][j][i]  = (float) (MOLECULAR_VISCOSITY + Math.pow((KARMAN * depth_tp1)*(1 - depth_tp1/depth_max_tp1),2) * Math.sqrt(Math.pow(du_tp1,2) + Math.pow(dv_tp1,2)));
                 }
             }
         }
-        else{
-            for(int k=0; k<nz; k++){
-                for(int j=0; j<ny-1; j++){
-                    for(int i=0; i<nx-1; i++){
-                        kz[k][j][i] = this.get(kv_field, new double[] { i , j , k }, time).doubleValue();   
-                    }                    
+        
+        return output;
+        
+    }
+    
+    public double[][][] get_kz(double time) {
+        // IDataset dataset = getSimulationManager().getDataset();
+
+        double coef = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        double[][][] output = new double[nz][ny][nx];
+
+        // Interpolation to get kz
+        for (int k = 0; k < nz; k++) {
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    output[k][j][i] = (1.d - coef) * kz_tp0[k][j][i] + coef * kz_tp1[k][j][i];
                 }
             }
-        }     
-        return kz; 
+        }
+        
+        return output;
+
     }
 
 
@@ -598,7 +595,6 @@ abstract class Mars3dCommon extends MarsCommon {
         int[] origin = new int[]{rank, 0, jpo, ipo};
         double time_tp0 = time_tp1;
 
-
         try {
             u_tp1 = (float[][][]) ncIn.findVariable(strU).read(origin, new int[]{1, nz, ny, (nx - 1)}).reduce().copyToNDJavaArray();
         } catch (IOException | InvalidRangeException ex) {
@@ -638,7 +634,12 @@ abstract class Mars3dCommon extends MarsCommon {
         }
         z_w_tp1 = getSigLevels();
         w_tp1 = computeW();
-
+        
+        if(read_kz) { 
+            this.kz_tp1 = (float[][][]) requiredVariables.get(this.kv_field).getArray1().copyToNDJavaArray();
+        } else { 
+            this.kz_tp1 = this.computeKz();
+        }
 
     }
 
