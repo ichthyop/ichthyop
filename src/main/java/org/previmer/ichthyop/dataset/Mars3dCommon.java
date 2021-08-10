@@ -114,7 +114,7 @@ abstract class Mars3dCommon extends MarsCommon {
      */
     static double[][][] z_w_cst;
     
-    private float[][][] kz_tp0, kz_tp1;
+    static float[][][] kz_tp0, kz_tp1;
     
     /**
      * Name of the Dimension in NetCDF file
@@ -636,9 +636,9 @@ abstract class Mars3dCommon extends MarsCommon {
         w_tp1 = computeW();
         
         if(read_kz) { 
-            this.kz_tp1 = (float[][][]) requiredVariables.get(this.kv_field).getArray1().copyToNDJavaArray();
+            kz_tp1 = (float[][][]) requiredVariables.get(this.kv_field).getArray1().copyToNDJavaArray();
         } else { 
-            this.kz_tp1 = this.computeKz();
+            kz_tp1 = this.computeKz();
         }
 
     }
@@ -784,5 +784,9 @@ abstract class Mars3dCommon extends MarsCommon {
         }
 
         return variable.read(origin, shape).reduce();
+    }
+    
+    public boolean readKz() {
+        return this.read_kz;   
     }
 }
