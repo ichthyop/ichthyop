@@ -89,6 +89,11 @@ public class Mars3dDataset extends Mars3dCommon {
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         w_tp0 = w_tp1;
+        
+        if(this.readKz()) { 
+            kz_tp0 = kz_tp1;   
+        }
+        
         zeta_tp0 = zeta_tp1;
         if (z_w_tp1 != null) {
             z_w_tp0 = z_w_tp1;
