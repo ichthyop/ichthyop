@@ -1,10 +1,16 @@
 # ICHTHYOP Release notes
 
-## Changes in 3.3.11
+## Changes in 3.3.12
 
 ### Bug fix
 
 - Consideration of the case where HH:mm is not provided in units (issues #22) 
+
+## Changes in 3.3.11
+
+### Bug fix
+
+- Resolve a problem in the saving of XML Zone files on Windows. Encoding was automatically set to Cp1512, not handled by XML. Now UTF-8 should be saved. Bug was corrected for configuration files in 3.3.6 but not for zone files.
 
 ## Changes in 3.3.10
 
@@ -54,7 +60,7 @@
 
 ### Bug fixes
 
-- Resolve a problem in the saving of XML files on Windows. Encoding was automatically set to Cp1512, not handled by XML. Now UTF-8 should be saved.
+- Resolve a problem in the saving of XML configuration files on Windows. Encoding was automatically set to Cp1512, not handled by XML. Now UTF-8 should be saved.
 
 ## Changes in Ichthyop 3.3.5
 
