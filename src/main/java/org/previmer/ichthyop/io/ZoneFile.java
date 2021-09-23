@@ -119,7 +119,7 @@ public class ZoneFile {
 
     private void write(OutputStream out) throws IOException {
         org.jdom2.output.Format format = org.jdom2.output.Format.getPrettyFormat();
-        format.setEncoding(System.getProperty("file.encoding"));
+        //format.setEncoding(System.getProperty("file.encoding"));
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(structure, out);
     }
