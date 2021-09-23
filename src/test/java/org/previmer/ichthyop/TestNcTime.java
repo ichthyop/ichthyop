@@ -42,16 +42,86 @@
 
 package org.previmer.ichthyop;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.previmer.ichthyop.dataset.DatasetUtil;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
 public class TestNcTime {
     
+    /** Test when units are in seconds */
     @Test
     public void testDate1() throws Exception {
         
+        // check for units in seconds.
+        String units = "seconds since 1950-01-01 00:00:00";
+        
+        // first test the unit date
+        assertEquals(1577836800.0, DatasetUtil.getDate(0, units));
+        
+        // then test the date + 800 days, i.e 1952-03-11
+        assertEquals(1646956800.0, DatasetUtil.getDate(800 * 24 * 60 * 60, units));
+        
+        // then test the date - 800 days, i.e 1947-10-24
+        assertEquals(1508716800.0, DatasetUtil.getDate(-800 * 24 * 60 * 60, units));
+        
     }
+    
+    /** Test when units are in seconds, but seconds are not provided in units */
+    @Test
+    public void testDate2() throws Exception {
+        
+        // check for units in seconds.
+        String units = "seconds since 1950-01-01";
+        
+        // first test the unit date
+        assertEquals(1577836800.0, DatasetUtil.getDate(0, units));
+        
+        // then test the date + 800 days, i.e 1952-03-11
+        assertEquals(1646956800.0, DatasetUtil.getDate(800 * 24 * 60 * 60, units));
+        
+        // then test the date - 800 days, i.e 1947-10-24
+        assertEquals(1508716800.0, DatasetUtil.getDate(-800 * 24 * 60 * 60, units));
+        
+    }
+    
+        /** Test when units are in days, but seconds are not provided in units */
+        @Test
+        public void testDate3() throws Exception {
+            
+            // check for units in seconds.
+            String units = "days since 2000-01-01";
+            
+            // first test the unit date
+            assertEquals(3155673600.0, DatasetUtil.getDate(0, units));
+            
+            // then test the date + 800 days
+            assertEquals(3224793600.0, DatasetUtil.getDate(800, units));
+            
+            // then test the date - 800 days
+            assertEquals(3086553600.0, DatasetUtil.getDate(-800, units));
+            
+        }
+        
+        /** Test when units are in hours, but seconds are not provided in units */
+        @Test
+        public void testDate4() throws Exception {
+
+            // check for units in seconds.
+            String units = "hour since 2000-01-01";
+
+            // first test the unit date
+            assertEquals(3155673600.0, DatasetUtil.getDate(0, units));
+
+            // then test the date + 800 days
+            assertEquals(3224793600.0, DatasetUtil.getDate(800 * 24, units));
+
+            // then test the date - 800 days
+            assertEquals(3086553600.0, DatasetUtil.getDate(-800 * 24, units));
+
+        }
     
 }
