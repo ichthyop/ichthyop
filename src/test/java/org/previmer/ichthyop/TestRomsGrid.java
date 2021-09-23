@@ -42,34 +42,38 @@
 
 package org.previmer.ichthyop;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.File;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+
+import org.junit.jupiter.api.Test;
 import org.previmer.ichthyop.grid.RomsGrid;
 
-public class TestRomsGrid extends SimulationManagerAccessor{
-    
+import org.junit.jupiter.api.TestInstance;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class TestRomsGrid extends SimulationManagerAccessor {
+
     private RomsGrid romsGrid;
     private final double precision = 1e-3;
-    
+
     private double[] s_rho = new double[] { -0.983333333333333, -0.95, -0.916666666666667, -0.883333333333333, -0.85,
             -0.816666666666667, -0.783333333333333, -0.75, -0.716666666666667, -0.683333333333333, -0.65,
             -0.616666666666667, -0.583333333333333, -0.55, -0.516666666666667, -0.483333333333333, -0.45,
             -0.416666666666667, -0.383333333333333, -0.35, -0.316666666666667, -0.283333333333333, -0.25,
             -0.216666666666667, -0.183333333333333, -0.15, -0.116666666666667, -0.0833333333333333, -0.05,
             -0.0166666666666667 };
- 
+
     private double[] s_w = new double[] { -1, -0.966666666666667, -0.933333333333333, -0.9, -0.866666666666667,
             -0.833333333333333, -0.8, -0.766666666666667, -0.733333333333333, -0.7, -0.666666666666667,
             -0.633333333333333, -0.6, -0.566666666666667, -0.533333333333333, -0.5, -0.466666666666667,
             -0.433333333333333, -0.4, -0.366666666666667, -0.333333333333333, -0.3, -0.266666666666667,
             -0.233333333333333, -0.2, -0.166666666666667, -0.133333333333333, -0.1, -0.0666666666666667,
             -0.0333333333333333, 0 };
-            
+
     private double[] Cs_r = new double[] { -0.9330103960714, -0.809234736243082, -0.698779852506126, -0.601008925572155,
             -0.515058561515485, -0.439938912698822, -0.374609180608102, -0.318031817255204, -0.269209327002322,
             -0.227207488202582, -0.191168387407458, -0.160316096993735, -0.133957252986043, -0.111478267917945,
@@ -85,48 +89,45 @@ public class TestRomsGrid extends SimulationManagerAccessor{
             -0.0363614034315018, -0.0287277532969529, -0.0223306847108676, -0.0169995632230193, -0.0125913198106613,
             -0.00898705697568842, -0.00608916159254806, -0.00381888978335541, -0.00211438942163368,
             -0.000929128642234142, -0.000230703091829562, 0 };
-    
-    
+
     @Test
     public void testNx() {
         assertEquals(671, romsGrid.get_nx());
     }
-    
+
     @Test
     public void testNy() {
         assertEquals(191, romsGrid.get_ny());
     }
-    
-    
+
     @Test
     public void testNz() {
         assertEquals(30, romsGrid.get_nz());
     }
-    
+
     @Test
     public void testSigma() {
         assertArrayEquals(this.s_rho, romsGrid.getSigma(), precision);
     }
-    
+
     @Test
     public void testSigmaW() {
         assertArrayEquals(this.s_w, romsGrid.getSigmaW(), precision);
     }
-    
+
     public void testCsW() {
         assertArrayEquals(this.Cs_w, romsGrid.getCsW(), precision);
     }
-    
+
     public void testCs() {
         assertArrayEquals(this.Cs_r, romsGrid.getCs(), precision);
     }
-    
-    
-    
-    @Before 
-    public void prepareData() throws Exception{
-        String fileName = getClass().getResource("/test-roms3d.xml").getFile();
+
+    @BeforeAll
+    public void prepareData() throws Exception {
+        String fileName = getClass().getClassLoader().getResource("test-roms3d.xml").getFile();
         getSimulationManager().getParameterManager().setConfigurationFile(new File(fileName));
+
         romsGrid = new RomsGrid();
         romsGrid.loadParameters();
         romsGrid.openDataset();
