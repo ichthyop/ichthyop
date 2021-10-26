@@ -113,6 +113,10 @@ public class ParameterManager extends AbstractManager {
     public String getParameter(String blockKey, String key) {
         return getParameter(BlockType.OPTION, blockKey, key);
     }
+    
+    public boolean isNull(String blockKey, String key) {
+        return isNull(BlockType.OPTION, blockKey, key);
+    }
 
     public String[] getListParameter(BlockType blockType, String blockKey, String key) {
         String[] tokens = getParameter(blockType, blockKey, key).split("\"");
@@ -134,6 +138,18 @@ public class ParameterManager extends AbstractManager {
             throw new NullPointerException("Could not retrieve parameter " + blockKey + "/" + key);
         }
     }
+    
+    /** Adding method to check if a parameter is null (not in cfg) or not (exists) */
+    public boolean isNull(BlockType blockType, String blockKey, String key) {
+
+        XParameter xparam = cfgFile.getBlock(blockType, blockKey).getXParameter(key);
+        if (xparam != null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     public boolean isBlockEnabled(BlockType type, String key) {
         return cfgFile.getBlock(type, key).isEnabled();
