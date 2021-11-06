@@ -652,7 +652,38 @@ abstract public class Roms3dCommon extends RomsCommon {
         } else {
             w_tp1 = computeW();
         }
-
+        if (read_stokesvelocity) {
+            this.ustokes_tp1 = new float[nz + 1][ny][nx];
+            try {
+                arr = ncIn.findVariable(strUstokes).read(origin, new int[]{1, nz, ny, nx}).reduce();
+                index = arr.getIndex();
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            ustokes_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
+                            u_tp1[k][j][i] = u_tp1[k][j][i] + ustokes_tp1[k][j][i];
+                        }
+                    }
+                }
+                arr = ncIn.findVariable(strVstokes).read(origin, new int[]{1, nz, ny, nx}).reduce();
+                index = arr.getIndex();
+                for (int k = 0; k < nz; k++) {
+                    for (int j = 0; j < ny; j++) {
+                        for (int i = 0; i < nx; i++) {
+                            vstokes_tp1[k][j][i] = arr.getFloat(index.set(k, j, i));
+                            v_tp1[k][j][i] = v_tp1[k][j][i] + vstokes_tp1[k][j][i];
+                        }
+                    }
+                }
+            } catch (IOException | InvalidRangeException ex) {
+                IOException ioex = new IOException("Error reading Stokes velocity " + ex.toString());
+                ioex.setStackTrace(ex.getStackTrace());
+                throw ioex;
+            }
+        } else {
+            ustokes_tp1 = 0;
+            vstokes_tp1 = 0;
+        }
     }
 
     protected float[][][] computeW() throws IOException, InvalidRangeException {
