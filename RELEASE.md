@@ -1,5 +1,15 @@
 # ICHTHYOP Release notes
 
+## Changes in 3.3.12
+
+### New features
+
+- Possibility to select the output format (usefull for Windows users).
+
+### Bug fix
+
+- Consideration of the case where HH:mm is not provided in units (issues #22) 
+
 ## Changes in 3.3.11
 
 ### Bug fix
