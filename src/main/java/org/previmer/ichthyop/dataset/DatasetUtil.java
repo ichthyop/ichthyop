@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -459,21 +458,10 @@ public class DatasetUtil {
         // prefix (day(s), month(s) or day(s)) and the seconds values
         int beginIndex = units.indexOf("since") + 5;
         int endIndex = units.lastIndexOf(":");
-        
-        LocalDateTime dateUnit;
-        if(endIndex != -1) { 
-            String subUnits = units.substring(beginIndex, endIndex).trim();
-            subUnits = subUnits.replace("t", " ");
-            dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
-        } else { 
-            endIndex = units.length();
-            String subUnits = units.substring(beginIndex, endIndex).trim();
-            subUnits = subUnits.replace("t", " ");
-            dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate dateDay = LocalDate.parse( subUnits, dateFormatter);
-            dateUnit = dateDay.atStartOfDay();
-        }
+        String subUnits = units.substring(beginIndex, endIndex).trim();
+        subUnits = subUnits.replace("t", " ");
+        dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
             
         if (units.contains("second")) {
             finalDate = dateUnit.plusSeconds(time);

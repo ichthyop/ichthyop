@@ -136,20 +136,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <tree_path>Main/Output</tree_path>
         <parameters>
             <parameter>
-                <key>netcdf_output_format</key>
-                <long_name>Netcdf output format</long_name>
-                <value>netcdf3</value>
-                <default>netcdf3</default>
-                <description>NetCDF output format. Run "nc-config --all" to see the settings of your NetCDF-C library. If no HDF5, choose netcdf3. Else, choose netcdf4 or netcdf4_classic</description>
-                <format>combo</format>
-                <accepted>netcdf3</accepted>
-                <accepted>netcdf4</accepted>
-                <accepted>netcdf4_classic</accepted>
-                <accepted>netcdf3c</accepted>
-                <accepted>netcdf3c64</accepted>
-                <accepted>ncstream</accepted>
-            </parameter>     
-            <parameter>
                 <key>file_prefix</key>
                 <long_name>Prefix of the NetCDF output file</long_name>
                 <value>roms2d</value>

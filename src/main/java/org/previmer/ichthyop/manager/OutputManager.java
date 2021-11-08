@@ -67,6 +67,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.avalon.framework.container.ContainerUtil;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
 import org.previmer.ichthyop.dataset.IDataset;
@@ -128,10 +129,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     public String getParameter(String key) {
         return getSimulationManager().getParameterManager().getParameter(block_key, key);
-    }
-    
-    public boolean isNull(String key) {
-        return getSimulationManager().getParameterManager().isNull(block_key, key);
     }
 
     public String getFileLocation() {
@@ -495,38 +492,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             // and if not in defined mode, nothing is done here
             return;
         }
-        
-        // barrier.n: adding control over the version format
-        NetcdfFileWriter.Version ncVersion;
-        String key = "netcdf_output_format";
-        if (this.isNull(key)) {
-            ncVersion = NetcdfFileWriter.Version.netcdf3;
-        } else {
-            String ncOutputFormat = getParameter(key);
-            switch (ncOutputFormat) {
-                case "ncstream":
-                    ncVersion = NetcdfFileWriter.Version.ncstream;
-                case "netcdf3":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3;
-                case "netcdf3c":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3c;
-                case "netcdf3c64":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3c64;
-                case "netcdf4":
-                    ncVersion = NetcdfFileWriter.Version.netcdf4;
-                    break;
-                case "netcdf4_classic":
-                    ncVersion = NetcdfFileWriter.Version.netcdf4_classic;
-                    break;
-                default:
-                    ncVersion = NetcdfFileWriter.Version.netcdf3;
-                    break;
-            }
-        }
-    
-        
         /* Create the NetCDF writeable object */
-        ncOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation());
+        ncOut = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, makeFileLocation());
 
         /* Get record frequency */
         record_frequency = Integer.valueOf(getParameter("record_frequency"));
