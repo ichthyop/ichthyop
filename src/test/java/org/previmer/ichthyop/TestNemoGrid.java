@@ -43,6 +43,7 @@
 package org.previmer.ichthyop;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.File;
 
@@ -56,11 +57,18 @@ public class TestNemoGrid extends SimulationManagerAccessor {
 
     private NemoGrid nemoGrid;
 
-    double[] depthT = new double[] { 5624.9517, 5375.177, 5125.919, 4877.303, 4629.485, 4382.6543, 4137.047, 3892.9497,
-            3650.712, 3410.7559, 3173.5884, 2939.8118, 2710.1333, 2485.3708, 2266.4536, 2054.4138, 1850.3655, 1655.4717,
-            1470.893, 1297.7244, 1136.922, 989.2289, 855.1112, 734.715, 627.8525, 534.0197, 452.4429, 382.14438,
-            322.0169, 270.8962, 227.62332, 191.09251, 160.284, 134.28227, 112.283485, 93.594124, 77.62451, 63.87905,
-            51.94513, 41.481853, 32.20929, 23.89871, 16.363966, 9.454049, 3.0467727 };
+    double[] depthT = new double[] { 5.62495166e+03, 5.37517676e+03, 5.12591895e+03, 4.87730322e+03,
+        4.62948486e+03, 4.38265430e+03, 4.13704688e+03, 3.89294971e+03,
+        3.65071191e+03, 3.41075586e+03, 3.17358838e+03, 2.93981177e+03,
+        2.71013330e+03, 2.48537085e+03, 2.26645361e+03, 2.05441382e+03,
+        1.85036548e+03, 1.65547168e+03, 1.47089294e+03, 1.29772437e+03,
+        1.13692200e+03, 9.89228882e+02, 8.55111206e+02, 7.34715027e+02,
+        6.27852478e+02, 5.34019714e+02, 4.52442902e+02, 3.82144379e+02,
+        3.22016907e+02, 2.70896210e+02, 2.27623322e+02, 1.91092514e+02,
+        1.60283997e+02, 1.34282272e+02, 1.12283485e+02, 9.35941238e+01,
+        7.76245117e+01, 6.38790512e+01, 5.19451294e+01, 4.14818535e+01,
+        3.22092896e+01, 2.38987103e+01, 1.63639660e+01, 9.45404911e+00,
+        3.04677272e+00};
 
     double[] depthW = new double[] { 5750.0, 5500.0063, 5250.476, 5001.522, 4753.283, 4505.9326, 4259.681, 4014.7896,
             3771.574, 3530.419, 3291.788, 3056.2346, 2824.4119, 2597.082, 2375.1194, 2159.5059, 1951.3186, 1751.701,
@@ -94,6 +102,30 @@ public class TestNemoGrid extends SimulationManagerAccessor {
         assertEquals(0.6, nemoGrid.getCyclicValue(24.6), precision);
         assertEquals(23.9, nemoGrid.getCyclicValue(-0.1), precision);
 
+    }
+    
+    @Test
+    public void testDepthT() {
+        
+        double[] actual = new double[nemoGrid.get_nz()];
+        double[][][] nemoDepthT = nemoGrid.getDepthT();
+        for (int k = 0; k < nemoGrid.get_nz(); k++) { 
+            actual[k] =   nemoDepthT[k][5][5]; 
+        }
+        assertArrayEquals(depthT, actual, 0.001);
+        
+    }
+    
+    @Test
+    public void testDepthW() {
+        
+        double[] actual = new double[nemoGrid.get_nz() + 1];
+        double[][][] nemoDepthW = nemoGrid.getDepthW();
+        for (int k = 0; k < nemoGrid.get_nz() + 1; k++) { 
+            actual[k] =   nemoDepthW[k][5][5]; 
+        }
+        assertArrayEquals(depthW, actual, 0.001);
+        
     }
 
     @BeforeAll

@@ -260,7 +260,7 @@ public class NemoGrid extends AbstractGrid {
             // Extraction of depth at T points  
             // and extract of W points below the T points
             for (int k = 0; k < get_nz(); k++) {
-                indexT.set(k);
+                indexT.set(k + 1);
                 indexW.set(k);
                 for (int j = 0; j < get_ny(); j++) {
                     for (int i = 0; i < get_nx(); i++) {
@@ -286,7 +286,7 @@ public class NemoGrid extends AbstractGrid {
             for (int k = 0; k < get_nz(); k++) {
                 for (int j = 0; j < get_ny(); j++) {
                     for (int i = 0; i < get_nx(); i++) {
-                        indexT.set(k, j + get_jpo(), i + get_ipo());
+                        indexT.set(k + 1, j + get_jpo(), i + get_ipo());
                         indexW.set(k, j + get_jpo(), i + get_ipo());
                         gdepT[k][j][i] = arrayT.getDouble(indexT);
                         gdepW[k][j][i] = arrayW.getDouble(indexW);
