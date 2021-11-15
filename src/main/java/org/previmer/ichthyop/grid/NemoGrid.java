@@ -289,21 +289,19 @@ public class NemoGrid extends AbstractGrid {
                         indexT.set(k, j + get_jpo(), i + get_ipo());
                         indexW.set(k, j + get_jpo(), i + get_ipo());
                         gdepT[k][j][i] = arrayT.getDouble(indexT);
-                        gdepW[k][j][i] = arrayT.getDouble(indexT);
+                        gdepW[k][j][i] = arrayW.getDouble(indexW);
                     }
                 }
             }
             
-            // get the W point which corresponds to the surface (k = nz)
             int k = get_nz();
             for (int j = 0; j < get_ny(); j++) {
                 for (int i = 0; i < get_nx(); i++) {
-                    indexT.set(k, j + get_jpo(), i + get_ipo());
                     indexW.set(k, j + get_jpo(), i + get_ipo());
-                    gdepT[k][j][i] = arrayT.getDouble(indexT);
-                    gdepW[k][j][i] = arrayT.getDouble(indexT);
+                    gdepW[k][j][i] = arrayW.getDouble(indexW);
                 }
             }
+            
         }
     }
 
