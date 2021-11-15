@@ -260,7 +260,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>field_var_mask</key>
                 <long_name>Land/ocean mask at T points</long_name>
-                <value>fmask</value>
+                <value>tmask</value>
                 <default>fmask</default>
                 <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
             </parameter>
