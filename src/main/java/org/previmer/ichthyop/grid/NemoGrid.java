@@ -146,7 +146,7 @@ public class NemoGrid extends AbstractGrid {
         for (int k = 0; k < get_nz(); k++) {
             for (int j = 0; j < get_ny(); j++) {
                 for (int i = 0; i < get_nx(); i++) {
-                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k, j + get_jpo(), i + get_ipo()));
+                    maskRho[k][j][i] = arrMask.getInt(indexMask.set(k + 1, j + get_jpo(), i + get_ipo()));
                 }
             }
         }
@@ -555,7 +555,7 @@ public class NemoGrid extends AbstractGrid {
      * @return <code>true</code> if cell(i, j) is in water, <code>false</code>
      * otherwise.
      */
-    private boolean isInWater(int i, int j, int k) {
+    public boolean isInWater(int i, int j, int k) {
         //System.out.println(i + " " + j + " " + k + " - "  + (maskRho[k][j][i] > 0));
         try {
             return (maskRho[k][j][i] > 0);

@@ -57,18 +57,14 @@ public class TestNemoGrid extends SimulationManagerAccessor {
 
     private NemoGrid nemoGrid;
 
-    double[] depthT = new double[] { 5.62495166e+03, 5.37517676e+03, 5.12591895e+03, 4.87730322e+03,
-        4.62948486e+03, 4.38265430e+03, 4.13704688e+03, 3.89294971e+03,
-        3.65071191e+03, 3.41075586e+03, 3.17358838e+03, 2.93981177e+03,
-        2.71013330e+03, 2.48537085e+03, 2.26645361e+03, 2.05441382e+03,
-        1.85036548e+03, 1.65547168e+03, 1.47089294e+03, 1.29772437e+03,
-        1.13692200e+03, 9.89228882e+02, 8.55111206e+02, 7.34715027e+02,
-        6.27852478e+02, 5.34019714e+02, 4.52442902e+02, 3.82144379e+02,
-        3.22016907e+02, 2.70896210e+02, 2.27623322e+02, 1.91092514e+02,
-        1.60283997e+02, 1.34282272e+02, 1.12283485e+02, 9.35941238e+01,
-        7.76245117e+01, 6.38790512e+01, 5.19451294e+01, 4.14818535e+01,
-        3.22092896e+01, 2.38987103e+01, 1.63639660e+01, 9.45404911e+00,
-        3.04677272e+00};
+    double[] depthT = new double[] { 5.62495166e+03, 5.37517676e+03, 5.12591895e+03, 4.87730322e+03, 4.62948486e+03,
+            4.38265430e+03, 4.13704688e+03, 3.89294971e+03, 3.65071191e+03, 3.41075586e+03, 3.17358838e+03,
+            2.93981177e+03, 2.71013330e+03, 2.48537085e+03, 2.26645361e+03, 2.05441382e+03, 1.85036548e+03,
+            1.65547168e+03, 1.47089294e+03, 1.29772437e+03, 1.13692200e+03, 9.89228882e+02, 8.55111206e+02,
+            7.34715027e+02, 6.27852478e+02, 5.34019714e+02, 4.52442902e+02, 3.82144379e+02, 3.22016907e+02,
+            2.70896210e+02, 2.27623322e+02, 1.91092514e+02, 1.60283997e+02, 1.34282272e+02, 1.12283485e+02,
+            9.35941238e+01, 7.76245117e+01, 6.38790512e+01, 5.19451294e+01, 4.14818535e+01, 3.22092896e+01,
+            2.38987103e+01, 1.63639660e+01, 9.45404911e+00, 3.04677272e+00 };
 
     double[] depthW = new double[] { 5750.0, 5500.0063, 5250.476, 5001.522, 4753.283, 4505.9326, 4259.681, 4014.7896,
             3771.574, 3530.419, 3291.788, 3056.2346, 2824.4119, 2597.082, 2375.1194, 2159.5059, 1951.3186, 1751.701,
@@ -109,41 +105,54 @@ public class TestNemoGrid extends SimulationManagerAccessor {
         assertEquals(23.9, nemoGrid.getCyclicValue(-0.1), precision);
 
     }
-    
+
+    @Test
+    public void testMask() {
+        assertEquals(false, nemoGrid.isInWater(8, 15));
+        assertEquals(false, nemoGrid.isInWater(8, 15, nemoGrid.get_nz() - 1));
+        assertEquals(false, nemoGrid.isInWater(1, 4));
+        assertEquals(false, nemoGrid.isInWater(1, 4));
+        assertEquals(true, nemoGrid.isInWater(0, 4));
+        assertEquals(true, nemoGrid.isInWater(0, 4, nemoGrid.get_nz() - 5));
+        assertEquals(false, nemoGrid.isInWater(0, 4, nemoGrid.get_nz() - 6));
+        assertEquals(true, nemoGrid.isInWater(17, 2, 4));
+        assertEquals(false, nemoGrid.isInWater(18, 2, 4));
+    }
+
     @Test
     public void testDepthT() {
-        
+
         double[] actual = new double[nemoGrid.get_nz()];
         double[][][] nemoDepthT = nemoGrid.getDepthT();
-        for (int k = 0; k < nemoGrid.get_nz(); k++) { 
-            actual[k] =   nemoDepthT[k][5][5]; 
+        for (int k = 0; k < nemoGrid.get_nz(); k++) {
+            actual[k] = nemoDepthT[k][5][5];
         }
         assertArrayEquals(depthT, actual, 0.001);
-        
+
     }
-    
+
     @Test
     public void testE3T() {
-        
+
         double[] actual = new double[nemoGrid.get_nz()];
         double[][][] nemoE3T = nemoGrid.getE3T();
-        for (int k = 0; k < nemoGrid.get_nz(); k++) { 
-            actual[k] =   nemoE3T[k][5][5]; 
+        for (int k = 0; k < nemoGrid.get_nz(); k++) {
+            actual[k] = nemoE3T[k][5][5];
         }
         assertArrayEquals(e3t, actual, 0.001);
-        
+
     }
-    
+
     @Test
     public void testDepthW() {
-        
+
         double[] actual = new double[nemoGrid.get_nz() + 1];
         double[][][] nemoDepthW = nemoGrid.getDepthW();
-        for (int k = 0; k < nemoGrid.get_nz() + 1; k++) { 
-            actual[k] =   nemoDepthW[k][5][5]; 
+        for (int k = 0; k < nemoGrid.get_nz() + 1; k++) {
+            actual[k] = nemoDepthW[k][5][5];
         }
         assertArrayEquals(depthW, actual, 0.001);
-        
+
     }
 
     @BeforeAll
