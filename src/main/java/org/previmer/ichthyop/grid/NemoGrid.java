@@ -209,7 +209,7 @@ public class NemoGrid extends AbstractGrid {
             for (int k = 0; k < get_nz(); k++) {
                 for (int j = 0; j < get_ny(); j++) {
                     for (int i = 0; i < get_nx(); i++) {
-                        index.set(k, j + get_jpo(), i + get_ipo());
+                        index.set(k + 1, j + get_jpo(), i + get_ipo());
                         field[k][j][i] = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
                     }
                 }
@@ -218,7 +218,7 @@ public class NemoGrid extends AbstractGrid {
         } else {
 
             for (int k = 0; k < get_nz(); k++) {
-                index.set(k);
+                index.set(k + 1);
                 double value = Double.isNaN(array.getDouble(index)) ? 0.d : array.getDouble(index);
                 for (int j = 0; j < get_ny(); j++) {
                     for (int i = 0; i < get_nx(); i++) {
@@ -1336,6 +1336,10 @@ public class NemoGrid extends AbstractGrid {
     
     public double[][][] getDepthW() { 
         return this.gdepW;   
+    }
+    
+    public double[][][] getE3T() {
+        return this.e3t;   
     }
 
 }

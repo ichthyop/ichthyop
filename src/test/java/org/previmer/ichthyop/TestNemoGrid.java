@@ -76,6 +76,12 @@ public class TestNemoGrid extends SimulationManagerAccessor {
             350.88147, 295.4039, 248.3496, 208.58119, 175.03276, 146.73515, 122.82839, 102.56431, 85.30241, 70.50136,
             57.708504, 46.548466, 36.712124, 27.946293, 20.04454, 12.839149, 6.1942425, 0.0 };
 
+    double[] e3t = new double[] { 249.99731, 249.53499, 248.96004, 248.24577, 247.35962, 246.26195, 244.90497,
+            243.23154, 241.17409, 238.65388, 235.58086, 231.8545, 227.3662, 222.00368, 215.65831, 208.23524, 199.66656,
+            189.9266, 179.04709, 167.12944, 154.35034, 140.9574, 127.25339, 113.5706, 100.23924, 87.55642, 75.761406,
+            65.02142, 55.428616, 47.00673, 39.72388, 33.507984, 28.261766, 23.875618, 20.23743, 17.239403, 14.782234,
+            12.777269, 11.147204, 9.825839, 8.757267, 7.894795, 7.1997576, 6.640353, 6.19057 };
+
     @Test
     public void testNx() {
         assertEquals(26, nemoGrid.get_nx());
@@ -113,6 +119,18 @@ public class TestNemoGrid extends SimulationManagerAccessor {
             actual[k] =   nemoDepthT[k][5][5]; 
         }
         assertArrayEquals(depthT, actual, 0.001);
+        
+    }
+    
+    @Test
+    public void testE3T() {
+        
+        double[] actual = new double[nemoGrid.get_nz()];
+        double[][][] nemoE3T = nemoGrid.getE3T();
+        for (int k = 0; k < nemoGrid.get_nz(); k++) { 
+            actual[k] =   nemoE3T[k][5][5]; 
+        }
+        assertArrayEquals(e3t, actual, 0.001);
         
     }
     
