@@ -1022,7 +1022,7 @@ public class NemoGrid extends AbstractGrid {
 
     /*
      * Determines whether or not the x-y particle location is on edge of the
-     * domain.
+     * domain. It on edge if U/V/T points cannot be interpolated.
      *
      * @param x a double, the x-coordinate
      * @param y a double, the y-coordinate
@@ -1031,10 +1031,22 @@ public class NemoGrid extends AbstractGrid {
      */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return ((pGrid[0] > (get_nx() - 3.0f))
-                || (pGrid[0] < 2.0f)
-                || (pGrid[1] > (get_ny() - 3.0f))
-                || (pGrid[1] < 2.0f));
+        
+        boolean output = false;
+        
+        // southern edge
+        output = output && (pGrid[1] <= 0.5);
+        
+        // western edge
+        output = output && (pGrid[0] <= 0.5);
+        
+        // northern edge
+        output = output && (pGrid[1] >= get_ny() -1);
+          
+        // eastern edge
+        output = output && (pGrid[0] >= get_nx() - 1);
+        
+        return output;
     }
 
 
