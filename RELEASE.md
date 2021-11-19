@@ -5,6 +5,7 @@
 ### New features
 
 - Possibility to select the output format (usefull for Windows users).
+- Adding some unit tests (NetCDF time)
 
 ### Bug fix
 
