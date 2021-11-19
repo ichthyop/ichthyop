@@ -435,13 +435,7 @@ public class DatasetUtil {
     }
     
     public static double getDate(String file, String strTime, int index) throws IOException {
-
-        // Date formatter to extract NetCDF time
-        DateTimeFormatter dateFormatter;
         
-        // Output date
-        LocalDateTime finalDate;
-
         // Open the NetCDF file
         // Recover the time variable and units
         NetcdfFile nc = NetcdfDataset.openDataset(file);
@@ -451,10 +445,24 @@ public class DatasetUtil {
         // Recover the time values for the corresponding index
         Array timeArr = nc.findVariable(strTime).read();
         long time = (long) timeArr.getDouble(timeArr.getIndex().set(index));
-
+        
         // Converts string into lower case.
         String units = attrUnits.getStringValue().toLowerCase();
-
+        
+        nc.close();
+        
+        return getDate(time, units);
+        
+    }
+    
+    public static double getDate(long time, String units) { 
+        
+        // Date formatter to extract NetCDF time
+        DateTimeFormatter dateFormatter;
+        
+        // Output date
+        LocalDateTime finalDate;
+        
         // Extract the NetCDF reference date by removing the
         // prefix (day(s), month(s) or day(s)) and the seconds values
         int beginIndex = units.indexOf("since") + 5;
@@ -471,7 +479,7 @@ public class DatasetUtil {
             String subUnits = units.substring(beginIndex, endIndex).trim();
             subUnits = subUnits.replace("t", " ");
             dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate dateDay = LocalDate.parse( subUnits, dateFormatter);
+            LocalDate dateDay = LocalDate.parse(subUnits, dateFormatter);
             dateUnit = dateDay.atStartOfDay();
         }
             
@@ -484,8 +492,6 @@ public class DatasetUtil {
         }
 
         double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
-        
-        nc.close();
         
         return output;
 
