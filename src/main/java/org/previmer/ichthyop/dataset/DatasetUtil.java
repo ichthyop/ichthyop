@@ -56,6 +56,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
+
+import org.apache.commons.lang3.StringUtils;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.TimeManager;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
@@ -466,6 +468,14 @@ public class DatasetUtil {
         // Extract the NetCDF reference date by removing the
         // prefix (day(s), month(s) or day(s)) and the seconds values
         int beginIndex = units.indexOf("since") + 5;
+        
+        // Count the occurrence of : char. If 1, format is HH:MM then we add :00 to the units
+        // to convert to HH:mm:ss
+        int count = StringUtils.countMatches(units, ":");
+        if(count == 1) {
+            units = units + ":00";   
+        }
+        
         int endIndex = units.lastIndexOf(":");
         
         LocalDateTime dateUnit;
