@@ -9,7 +9,8 @@
 
 ### Bug fix
 
-- Consideration of the case where HH:mm is not provided in units (issues #22) 
+- Consideration of the case where HH:mm:ss is not provided in units (issues #22) 
+- Consideration of the case where time is provided as HH:mm instead of HH:mm:ss (issue #32) 
 
 ## Changes in 3.3.11
 
