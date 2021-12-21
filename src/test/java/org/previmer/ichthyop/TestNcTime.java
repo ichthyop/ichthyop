@@ -44,9 +44,13 @@ package org.previmer.ichthyop;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.previmer.ichthyop.dataset.DatasetUtil;
+import org.previmer.ichthyop.manager.TimeManager;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
@@ -142,4 +146,20 @@ public class TestNcTime {
 
     }
 
+    /** Test when units are in seconds */
+    @Test
+    public void testDurationNoLeap() throws Exception {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime date = LocalDateTime.parse("2010-03-01 00:00:00", formatter);
+        assertEquals(3474057600., TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
+        
+        date = LocalDateTime.parse("2020-01-15 00:00:00", formatter);
+        assertEquals(3785529600., TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
+        
+        date = LocalDateTime.parse("2020-12-31 05:00:00", formatter);
+        assertEquals(3815787600.0, TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
+        
+    }
+    
 }

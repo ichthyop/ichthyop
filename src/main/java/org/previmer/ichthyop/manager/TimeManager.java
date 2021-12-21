@@ -74,9 +74,13 @@ public class TimeManager extends AbstractManager {
     public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     public static final DateTimeFormatter NEW_INPUT_DURATION_FORMAT = DateTimeFormatter.ofPattern("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    public static final int YEAR_REF = 1900;
+    
+    // Array containing the latest day of each month. Used only when no leap calendar is used.
+    public static final double[] monthEdges = {31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
     
     /** Reference date: 1900-01-01 00:00 */
-    public static final LocalDateTime DATE_REF = LocalDateTime.of(1900, 1, 1, 0, 0);
+    public static final LocalDateTime DATE_REF = LocalDateTime.of(YEAR_REF, 1, 1, 0, 0);
 
 ///////////////////////////////
 // Declaration of the variables
@@ -124,12 +128,29 @@ public class TimeManager extends AbstractManager {
      */
     private SimpleDateFormat outputDateFormat;
     private final EventListenerList listeners = new EventListenerList();
-
+    
+    private boolean noLeapCalendarEnabled = false;
+    
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
     public static TimeManager getInstance() {
         return timeManager;
+    }
+    
+    public static double getDurationNoLeap(LocalDateTime DATE_REF, LocalDateTime date0) {
+        
+        int year = date0.getYear();
+        int month = date0.getMonth().getValue();
+        int day = date0.getDayOfMonth();
+        int hour = date0.getHour();
+        int minute = date0.getMinute();
+        int seconds = date0.getSecond();
+        double month_offset = (month == 1) ? 0 : monthEdges[month - 2] * Constant.ONE_DAY;
+        double duration = month_offset + (year - YEAR_REF) * Constant.ONE_YEAR + (day - 1) * Constant.ONE_DAY
+                + hour * Constant.ONE_HOUR + minute * Constant.ONE_MINUTE + seconds;
+        return duration;
+    
     }
 
     public void firstStepTriggered() throws Exception {
@@ -160,8 +181,11 @@ public class TimeManager extends AbstractManager {
         keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
         LocalDateTime date0 = LocalDateTime.parse(getParameter("initial_time"), NEW_INPUT_DATE_FORMAT);
 
-        // Conversion of date0 as t0, i.e. the number of seconds between the reference date and the current date. 
-        t0 = Duration.between(DATE_REF, date0).getSeconds();
+        // Conversion of date0 as t0, i.e. the number of seconds between the reference date and the current date.
+        if (!noLeapCalendarEnabled) {
+            t0 = Duration.between(DATE_REF, date0).getSeconds();
+        } else {
+        }
         
         /* output date format */
         outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
