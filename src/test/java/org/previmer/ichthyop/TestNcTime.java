@@ -173,4 +173,21 @@ public class TestNcTime {
         
     }
     
+    @Test
+    public void testDatesNoLeap() throws Exception {
+
+        String units = "hour since 2000-01-01";
+        
+        // first test date 2020-12-31 05:00 in leap mode
+        assertEquals(3818379600., DatasetUtil.getDate(184085, units));
+        
+        // then test date 2020-12-31 05:00 in no leap mode
+        //assertEquals(3815787600.0, DatasetUtil.getDateNoLeap(184085, units));
+
+        units = "hour since 2000-03-15";
+        // first test date 2020-12-31 05:00 in leap mode
+        assertEquals(3818379600., DatasetUtil.getDate(182309, units));
+        
+    }
+    
 }

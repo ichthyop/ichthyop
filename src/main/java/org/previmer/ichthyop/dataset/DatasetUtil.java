@@ -457,7 +457,44 @@ public class DatasetUtil {
         
     }
     
-    public static double getDate(long time, String units) { 
+    public static double getDate(long time, String units) {
+        
+        LocalDateTime finalDate;
+        LocalDateTime dateUnit = getDateUnit(time, units);
+            
+        if (units.contains("second")) {
+            finalDate = dateUnit.plusSeconds(time);
+        } else if (units.contains("hour")) {
+            finalDate = dateUnit.plusHours(time);
+        } else {
+            finalDate = dateUnit.plusDays(time);
+        }
+
+        double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
+        
+        return output;
+
+    }
+    
+    public static double getDateNoLeap(long time, String units) { 
+        
+        // LocalDateTime finalDate;
+        // LocalDateTime dateUnit = getDateUnit(time, units);
+            
+        // if (units.contains("second")) {
+        //     finalDate = dateUnit.plusSeconds(time);
+        // } else if (units.contains("hour")) {
+        //     finalDate = dateUnit.plusHours(time);
+        // } else {
+        //     finalDate = dateUnit.plusDays(time);
+        // }
+            return 0.0;
+        
+        
+    }
+    
+    
+    public static LocalDateTime getDateUnit(long time, String units) {
         
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;
@@ -492,19 +529,10 @@ public class DatasetUtil {
             LocalDate dateDay = LocalDate.parse(subUnits, dateFormatter);
             dateUnit = dateDay.atStartOfDay();
         }
-            
-        if (units.contains("second")) {
-            finalDate = dateUnit.plusSeconds(time);
-        } else if (units.contains("hour")) {
-            finalDate = dateUnit.plusHours(time);
-        } else {
-            finalDate = dateUnit.plusDays(time);
-        }
-
-        double output = Duration.between(TimeManager.DATE_REF, finalDate).getSeconds();
         
-        return output;
-
+        return dateUnit;
+        
     }
+    
         
 }
