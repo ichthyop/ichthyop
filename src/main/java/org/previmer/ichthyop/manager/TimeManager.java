@@ -226,6 +226,13 @@ public class TimeManager extends AbstractManager {
         long duration = Duration.between(DATE_REF, dateTime).getSeconds();
         return (double) duration;
     }
+    
+    /** Converts the date as number of seconds since 1900-01-01 */
+    public double date2secondsNoLeap(String date) throws ParseException {
+        LocalDateTime dateTime = LocalDateTime.parse(date, NEW_INPUT_DATE_FORMAT);
+        return getDurationNoLeap(DATE_REF, dateTime);
+    }
+    
 
     private String getParameter(String key) {
         return getSimulationManager().getParameterManager().getParameter("app.time", key);

@@ -159,6 +159,17 @@ public class TestNcTime {
         
         date = LocalDateTime.parse("2020-12-31 05:00:00", formatter);
         assertEquals(3815787600.0, TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
+
+        TimeManager timeManager = new TimeManager();
+        String dateStr = "year 2010 month 03 day 01 at 00:00";
+        assertEquals(3474057600.0, timeManager.date2secondsNoLeap(dateStr));
+        
+        dateStr = "year 2020 month 01 day 15 at 00:00";
+        assertEquals(3785529600.0, timeManager.date2secondsNoLeap(dateStr));
+        
+        dateStr = "year 2020 month 12 day 31 at 05:00";
+        assertEquals(3815787600.0, timeManager.date2secondsNoLeap(dateStr));
+        
         
     }
     
