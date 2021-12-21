@@ -167,10 +167,11 @@ public interface Constant {
     public static final int BACKWARD = -1;
 
     // Time constants
-    public static final int ONE_SECOND = 1;
-    public static final int ONE_MINUTE = 60 * ONE_SECOND;
-    public static final int ONE_HOUR = 60 * ONE_MINUTE;
-    public static final int ONE_DAY = 24 * ONE_HOUR;
+    public static final double ONE_SECOND = 1.;
+    public static final double ONE_MINUTE = 60. * ONE_SECOND;
+    public static final double ONE_HOUR = 60. * ONE_MINUTE;
+    public static final double ONE_DAY = 24. * ONE_HOUR;
+    public static final double ONE_YEAR = 365. * ONE_DAY;
 
     // Default values for the range of the particle colorbar.
     public static final float TP_MIN = 10.0f;
