@@ -159,22 +159,27 @@ public class TestNcTime {
         
         date = LocalDateTime.parse("2020-12-31 05:00:00", formatter);
         assertEquals(3815787600.0, TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
-
-        TimeManager timeManager = new TimeManager();
-        String dateStr = "year 2010 month 03 day 01 at 00:00";
-        assertEquals(3474057600.0, timeManager.date2secondsNoLeap(dateStr));
-        
-        dateStr = "year 2020 month 01 day 15 at 00:00";
-        assertEquals(3785529600.0, timeManager.date2secondsNoLeap(dateStr));
-        
-        dateStr = "year 2020 month 12 day 31 at 05:00";
-        assertEquals(3815787600.0, timeManager.date2secondsNoLeap(dateStr));
-        
         
     }
     
+       /** Test when units are in seconds */
     @Test
-    public void testDatesNoLeap() throws Exception {
+    public void testDurationLeap() throws Exception {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime date = LocalDateTime.parse("2010-03-01 00:00:00", formatter);
+        assertEquals(3476390400., TimeManager.getDurationLeap(TimeManager.DATE_REF, date));
+
+        date = LocalDateTime.parse("2020-01-15 00:00:00", formatter);
+        assertEquals(3788035200., TimeManager.getDurationLeap(TimeManager.DATE_REF, date));
+
+        date = LocalDateTime.parse("2020-12-31 05:00:00", formatter);
+        assertEquals(3818379600.0, TimeManager.getDurationLeap(TimeManager.DATE_REF, date));
+
+    }
+    
+    @Test
+    public void testDatesLeapNoLeap() throws Exception {
 
         String units = "hour since 2000-01-01";
         

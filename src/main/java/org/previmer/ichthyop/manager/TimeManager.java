@@ -129,7 +129,17 @@ public class TimeManager extends AbstractManager {
     private SimpleDateFormat outputDateFormat;
     private final EventListenerList listeners = new EventListenerList();
     
-    private boolean noLeapCalendarEnabled = false;
+    private boolean noLeapCalendarEnabled;
+    
+    private IchthyopDuration ichthyopDuration;
+    
+    /** Interface for getting the duration between two dates. Function
+     * called depends on the calendar type.
+    */
+    @FunctionalInterface
+    public interface IchthyopDuration {
+        public double getDuration(LocalDateTime DATE_REF, LocalDateTime date0);        
+    }
     
 ////////////////////////////
 // Definition of the methods
@@ -138,6 +148,16 @@ public class TimeManager extends AbstractManager {
         return timeManager;
     }
     
+    /** Method for getting the time in seconds since reference date for gregorian 
+     * calendar. */
+    public static double getDurationLeap(LocalDateTime DATE_REF, LocalDateTime date0) {
+        return Duration.between(DATE_REF, date0).getSeconds();
+    }
+    
+    /**
+     * Method for getting the time in seconds since reference date for noleap
+     * calendar.
+     */
     public static double getDurationNoLeap(LocalDateTime DATE_REF, LocalDateTime date0) {
         
         int year = date0.getYear();
@@ -158,7 +178,27 @@ public class TimeManager extends AbstractManager {
     }
 
     private void loadParameters() throws Exception {
-
+        
+        // Define whether to use the no leap calendar or not.
+        // If no parameter is found, assume that gregorian calendar is considered.
+        noLeapCalendarEnabled = false;
+        try {
+            String calendar = getParameter("calendar");
+            if (calendar.toLowerCase() == "noleap") {
+                noLeapCalendarEnabled = true;
+            } else {
+                noLeapCalendarEnabled = false;
+            }
+        } catch (NullPointerException ex) {
+            noLeapCalendarEnabled = false;
+        }
+        
+        if (noLeapCalendarEnabled) {
+            ichthyopDuration = (date1, date2) -> getDurationNoLeap(date1, date2);
+        } else {
+            ichthyopDuration = (date1, date2) -> getDurationLeap(date1, date2);
+        }
+                
         /* time step */
         dt = Integer.valueOf(getParameter("time_step"));
 
@@ -182,11 +222,8 @@ public class TimeManager extends AbstractManager {
         LocalDateTime date0 = LocalDateTime.parse(getParameter("initial_time"), NEW_INPUT_DATE_FORMAT);
 
         // Conversion of date0 as t0, i.e. the number of seconds between the reference date and the current date.
-        if (!noLeapCalendarEnabled) {
-            t0 = Duration.between(DATE_REF, date0).getSeconds();
-        } else {
-        }
-        
+        t0 = ichthyopDuration.getDuration(DATE_REF, date0);
+
         /* output date format */
         outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         outputDateFormat.setCalendar(calendar);
@@ -223,16 +260,9 @@ public class TimeManager extends AbstractManager {
     /** Converts the date as number of seconds since 1900-01-01 */
     public double date2seconds(String date) throws ParseException {
         LocalDateTime dateTime = LocalDateTime.parse(date, NEW_INPUT_DATE_FORMAT);
-        long duration = Duration.between(DATE_REF, dateTime).getSeconds();
+        double duration = ichthyopDuration.getDuration(DATE_REF, dateTime);
         return (double) duration;
     }
-    
-    /** Converts the date as number of seconds since 1900-01-01 */
-    public double date2secondsNoLeap(String date) throws ParseException {
-        LocalDateTime dateTime = LocalDateTime.parse(date, NEW_INPUT_DATE_FORMAT);
-        return getDurationNoLeap(DATE_REF, dateTime);
-    }
-    
 
     private String getParameter(String key) {
         return getSimulationManager().getParameterManager().getParameter("app.time", key);
