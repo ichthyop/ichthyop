@@ -60,6 +60,7 @@ import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
 import org.apache.commons.lang3.StringUtils;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.TimeManager;
+import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
 import ucar.ma2.Array;
@@ -476,32 +477,60 @@ public class DatasetUtil {
 
     }
     
-    public static double getDateNoLeap(long time, String units) { 
+    public static double getDateNoLeap(long time, String units) {
+
+        LocalDateTime dateUnit = getDateUnit(time, units);
+
+        if (units.contains("hour")) {
+            time *= Constant.ONE_HOUR;
+        } else if (units.contains("day")) {
+            time *= Constant.ONE_DAY;
+        }
+
+        int yr = dateUnit.getYear();
+        int mr = dateUnit.getMonthValue();
+        int dr = dateUnit.getDayOfMonth();
+        int hr = dateUnit.getHour();
+        int minr = dateUnit.getMinute();
+
+        // Count the total number of years between the 1st of January of the reference
+        // month and
+        // the given date. Then get the year corresponding to the time.
+        int nyears = (int) (time / (Constant.ONE_YEAR));
+        int yearout = yr + nyears;
+
+        // Count the number of seconds for the remaining.
+        double remaining_secs = time % Constant.ONE_YEAR;
+
+        // Count the time by considering as reference the 1st of Jan of the reference
+        // year
+        double duration = (yearout - TimeManager.YEAR_REF) * Constant.ONE_YEAR + remaining_secs;
+
+        // Offset the duration to take into account different reference times.
+        double offset = 0;
+        offset = (dr - 1) * Constant.ONE_DAY + hr * Constant.ONE_HOUR + minr * Constant.ONE_MINUTE;
         
-        // LocalDateTime finalDate;
-        // LocalDateTime dateUnit = getDateUnit(time, units);
-            
-        // if (units.contains("second")) {
-        //     finalDate = dateUnit.plusSeconds(time);
-        // } else if (units.contains("hour")) {
-        //     finalDate = dateUnit.plusHours(time);
-        // } else {
-        //     finalDate = dateUnit.plusDays(time);
-        // }
-            return 0.0;
+        // Computing the offset due to other reference months.
+        double moffset = 0;
+        if (mr > 1) {
+            moffset = TimeManager.monthEdges[mr - 2] * Constant.ONE_DAY;
+        }
+        offset += moffset;
         
+        // update duration by adding the time offset due to different reference times
+        duration += offset;
+        
+        return duration;
         
     }
+
     
     
     public static LocalDateTime getDateUnit(long time, String units) {
         
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;
-        
-        // Output date
-        LocalDateTime finalDate;
-        
+
         // Extract the NetCDF reference date by removing the
         // prefix (day(s), month(s) or day(s)) and the seconds values
         int beginIndex = units.indexOf("since") + 5;
