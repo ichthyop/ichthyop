@@ -70,6 +70,8 @@ public class TimeManager extends AbstractManager {
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
+    public static final String datePattern = "'year' yyyy 'month' MM 'day' dd 'at' HH:mm";
+    public static final String durationPattern = "DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'";
     public static final DateTimeFormatter NEW_INPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
     public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
