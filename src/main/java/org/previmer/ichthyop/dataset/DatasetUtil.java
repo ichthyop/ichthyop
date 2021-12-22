@@ -459,6 +459,14 @@ public class DatasetUtil {
     }
     
     public static double getDate(long time, String units) {
+        if(TimeManager.getInstance().isNoLeapEnabled()) { 
+            return getDateNoLeap(time, units);
+        } else {
+            return getDateLeap(time, units);
+        }  
+    }
+    
+    public static double getDateLeap(long time, String units) {
         
         LocalDateTime finalDate;
         LocalDateTime dateUnit = getDateUnit(time, units);

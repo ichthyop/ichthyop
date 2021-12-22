@@ -141,6 +141,10 @@ public class TimeManager extends AbstractManager {
         public double getDuration(LocalDateTime DATE_REF, LocalDateTime date0);        
     }
     
+    public boolean isNoLeapEnabled() {
+        return noLeapCalendarEnabled;   
+    }
+    
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////

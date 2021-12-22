@@ -184,14 +184,14 @@ public class TestNcTime {
         String units = "hour since 2000-01-01";
         
         // first test date 2020-12-31 05:00 in leap mode
-        assertEquals(3818379600., DatasetUtil.getDate(184085, units));
+        assertEquals(3818379600., DatasetUtil.getDateLeap(184085, units));
         
         // then test date 2020-12-31 05:00 in no leap mode
         assertEquals(3815787600.0, DatasetUtil.getDateNoLeap(183941, units));
 
         units = "days since 2000-03-05";
         // first test date 2020-12-31 05:00 in leap mode
-        assertEquals(3818361600., DatasetUtil.getDate(7606, units));
+        assertEquals(3818361600., DatasetUtil.getDateLeap(7606, units));
         
         // first test date 2020-12-31 05:00 in no-leap mode
         assertEquals(3815769600., DatasetUtil.getDateNoLeap(7601, units));
