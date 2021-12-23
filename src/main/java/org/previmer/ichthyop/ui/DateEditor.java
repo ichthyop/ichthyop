@@ -47,11 +47,9 @@ package org.previmer.ichthyop.ui;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.swing.AbstractAction;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JFormattedTextField;
@@ -59,12 +57,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.text.DateFormatter;
-import javax.swing.text.DefaultFormatterFactory;
-import org.previmer.ichthyop.calendar.Day360Calendar;
-import org.previmer.ichthyop.manager.SimulationManager;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -90,9 +82,9 @@ public class DateEditor extends DefaultCellEditor {
     public final static int DATE = 0;
     public final static int DURATION = 1;
     final String datePattern = "year \\d\\d\\d\\d month \\d\\d day \\d\\d at \\d\\d:\\d\\d";
-    final String durationPattern = "\\d\\d\\d day\\(s\\) \\d\\d hour\\(s\\) \\d\\d minute\\(s\\)";
+    final String durationPattern = "\\d\\d\\d\\d day\\(s\\) \\d\\d hour\\(s\\) \\d\\d minute\\(s\\)";
     final String displayDatePattern = "year YYYY month \\d\\d day \\d\\d at \\d\\d:\\d\\d";
-    final String displayDurationPattern = "DDD day(s) HH hour(s) MM minute(s)";
+    final String displayDurationPattern = "DDDD day(s) HH hour(s) MM minute(s)";
     String displayPattern;
     Matcher matcher;
     Pattern pattern;
@@ -125,8 +117,6 @@ public class DateEditor extends DefaultCellEditor {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean test1 = ftf.isEditValid();
-                boolean test2 = pattern.matcher(ftf.getText()).matches();
                 if (!ftf.isEditValid() || !pattern.matcher(ftf.getText()).matches()) { //The text is invalid.
                     if (userSaysRevert()) { //reverted
                         ftf.postActionEvent(); //inform the editor
