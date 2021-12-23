@@ -73,8 +73,8 @@ public class TimeManager extends AbstractManager {
     public static final String datePattern = "'year' yyyy 'month' MM 'day' dd 'at' HH:mm";
     public static final String durationPattern = "DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'";
     public static final DateTimeFormatter NEW_INPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-    public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-    public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    //public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+    //public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     public static final DateTimeFormatter NEW_INPUT_DURATION_FORMAT = DateTimeFormatter.ofPattern("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     public static final int YEAR_REF = 1900;
     
@@ -117,18 +117,14 @@ public class TimeManager extends AbstractManager {
      */
     private int nb_steps;
     /**
-     * A Calendar for time management
-     */
-    private Calendar calendar;
-    /**
      * Determine whether particle should keep drifting when age exceeds
      * transport duration
      */
     private boolean keepDrifting;
-    /**
-     * The simple date format parses and formats dates in human readable format.
-     */
-    private SimpleDateFormat outputDateFormat;
+    // /**
+    //  * The simple date format parses and formats dates in human readable format.
+    //  */
+    // private SimpleDateFormat outputDateFormat;
     private final EventListenerList listeners = new EventListenerList();
     
     private boolean noLeapCalendarEnabled;
@@ -189,8 +185,8 @@ public class TimeManager extends AbstractManager {
         // If no parameter is found, assume that gregorian calendar is considered.
         noLeapCalendarEnabled = false;
         try {
-            String calendar = getParameter("calendar");
-            if (calendar.toLowerCase() == "noleap") {
+            String calendar = getParameter("calendar_type");
+            if (calendar.equalsIgnoreCase("noleap")) {
                 noLeapCalendarEnabled = true;
             } else {
                 noLeapCalendarEnabled = false;
@@ -231,8 +227,8 @@ public class TimeManager extends AbstractManager {
         t0 = ichthyopDuration.getDuration(DATE_REF, date0);
 
         /* output date format */
-        outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        outputDateFormat.setCalendar(calendar);
+        //outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        //outputDateFormat.setCalendar(calendar);
         
     }
 
@@ -343,14 +339,14 @@ public class TimeManager extends AbstractManager {
         return t0;
     }
 
-    /**
-     * Gets the calendar used for time management
-     *
-     * @return the Calendar of the simulation
-     */
-    public Calendar getCalendar() {
-        return calendar;
-    }
+    // /**
+    //  * Gets the calendar used for time management
+    //  *
+    //  * @return the Calendar of the simulation
+    //  */
+    // public Calendar getCalendar() {
+    //     return calendar;
+    // }
 
     /**
      * Gets the simulation duration
@@ -459,21 +455,21 @@ public class TimeManager extends AbstractManager {
         getLogger().info("Time manager initialization [OK]");
     }
 
-    public SimpleDateFormat getInputDurationFormat() {
-        return INPUT_DURATION_FORMAT;
-    }
+    // public SimpleDateFormat getInputDurationFormat() {
+    //     return INPUT_DURATION_FORMAT;
+    // }
 
-    public SimpleDateFormat getInputDateFormat() {
-        return INPUT_DATE_FORMAT;
-    }
+    // public SimpleDateFormat getInputDateFormat() {
+    //     return INPUT_DATE_FORMAT;
+    // }
     
-    public DateTimeFormatter getNewInputDurationFormat() {
-        return NEW_INPUT_DURATION_FORMAT;
-    }
+    // public DateTimeFormatter getNewInputDurationFormat() {
+    //     return NEW_INPUT_DURATION_FORMAT;
+    // }
 
-    public DateTimeFormatter getNewInputDateFormat() {
-        return NEW_INPUT_DATE_FORMAT;
-    }
+    // public DateTimeFormatter getNewInputDateFormat() {
+    //     return NEW_INPUT_DATE_FORMAT;
+    // }
     
     //---------- End of class
 
