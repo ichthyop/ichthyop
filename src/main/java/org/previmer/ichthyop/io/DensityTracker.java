@@ -6,9 +6,12 @@ import org.previmer.ichthyop.Population;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.particle.IParticle;
 
+import ucar.ma2.Array;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.Index;
+
 public class DensityTracker extends SimulationManagerAccessor {
 
-    private int[][] density;
     private float lonMin;
     private float lonMax;
     private float deltaLon;
@@ -71,17 +74,15 @@ public class DensityTracker extends SimulationManagerAccessor {
             latCell[i] = 0.5f * (latEdges[i] + latEdges[i + 1]);
         }
 
-        density = new int[nLat][nLon];
-
     }
 
     public String getParameter(String key) {
         return getSimulationManager().getParameterManager().getParameter(BlockType.OPTION, "app.output", key);
     }
 
-    public void incrementDensity() {
+    public Array getDensity() {
 
-        density = new int[nLat][nLon];
+        int[][] density = new int[nLat][nLon];
 
         Population population = getSimulationManager().getSimulation().getPopulation();
         Iterator<IParticle> iter = population.iterator();
@@ -100,6 +101,17 @@ public class DensityTracker extends SimulationManagerAccessor {
                 density[indexLat][indexLon] += 1;
             }
         }
+        
+        ArrayFloat.D2 output = new ArrayFloat.D2(nLat, nLon);
+        Index index = output.getIndex();
+        for(int j=0; j<nLat; j++) {
+            for(int i=0; i<nLon; i++) {
+                   index.set(j, i);
+                   output.set(index, density[j][i]);
+            }
+        }
+        
+        return output;
     }
 
     public int getNLon() {
