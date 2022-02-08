@@ -7,7 +7,7 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.particle.IParticle;
 
 import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
 import ucar.ma2.Index;
 
 public class DensityTracker extends SimulationManagerAccessor {
@@ -26,9 +26,10 @@ public class DensityTracker extends SimulationManagerAccessor {
 
         // Provides the minimum and maximum longitudes
         // of output grid edge.
-        lonMin = Float.valueOf("output.density.lonmin");
-        lonMax = Float.valueOf("output.density.lonmax");
-        deltaLon = Float.valueOf("output.density.dlon");
+        // getParameter("output.density.lonmin")
+        lonMin = Float.valueOf(getParameter("output.density.lonmin"));
+        lonMax = Float.valueOf(getParameter("output.density.lonmax"));
+        deltaLon = Float.valueOf(getParameter("output.density.dlon"));
         // swap arrays if bad definition
         if (lonMin > lonMax) {
             float temp = lonMin;
@@ -36,9 +37,9 @@ public class DensityTracker extends SimulationManagerAccessor {
             lonMax = temp;
         }
 
-        latMin = Float.valueOf("output.density.latmin");
-        latMax = Float.valueOf("output.density.latmax");
-        deltaLat = Float.valueOf("output.density.dlat");
+        latMin = Float.valueOf(getParameter("output.density.latmin"));
+        latMax = Float.valueOf(getParameter("output.density.latmax"));
+        deltaLat = Float.valueOf(getParameter("output.density.dlat"));
         // swap arrays if bad definition
         if (latMin > latMax) {
             float temp = latMin;
@@ -93,7 +94,7 @@ public class DensityTracker extends SimulationManagerAccessor {
                 float lonPart = (float) particle.getLon();
                 float latPart = (float) particle.getLat();
                 // If particle is out of the density domain, nothing is done.
-                if((lonPart > lonMax) || (lonPart < lonMin) || (latPart > latMax) || (latPart < latMin)) {
+                if ((lonPart > lonMax) || (lonPart < lonMin) || (latPart > latMax) || (latPart < latMin)) {
                     continue;
                 }
                 int indexLon = (int) Math.floor(nLon * (lonPart - lonMin) / (lonMax - lonMin));
@@ -101,16 +102,16 @@ public class DensityTracker extends SimulationManagerAccessor {
                 density[indexLat][indexLon] += 1;
             }
         }
-        
-        ArrayFloat.D2 output = new ArrayFloat.D2(nLat, nLon);
+
+        ArrayInt.D2 output = new ArrayInt.D2(nLat, nLon);
         Index index = output.getIndex();
-        for(int j=0; j<nLat; j++) {
-            for(int i=0; i<nLon; i++) {
-                   index.set(j, i);
-                   output.set(index, density[j][i]);
+        for (int j = 0; j < nLat; j++) {
+            for (int i = 0; i < nLon; i++) {
+                index.set(j, i);
+                output.set(index, density[j][i]);
             }
         }
-        
+
         return output;
     }
 
@@ -129,6 +130,5 @@ public class DensityTracker extends SimulationManagerAccessor {
     public float[] getLatCells() {
         return this.latCell;
     }
-
 
 }
