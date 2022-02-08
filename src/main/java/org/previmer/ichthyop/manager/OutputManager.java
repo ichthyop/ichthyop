@@ -473,12 +473,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (((long) (timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
 
             if (this.isTrajectoryEnabled) {
-                writeToNetCDF(i_record++);
+                writeToNetCDF(i_record);
             }
 
             if (this.isDensityEnabled) {
-                writeDensToNetCDF(i_record++);
+                writeDensToNetCDF(i_record);
             }
+            
+            i_record++;
+            
         }
     }
     
@@ -596,6 +599,31 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         
     /** Setup density outputs */
     private void setupDensityOutput() throws IOException { 
+        
+        // If the file is defined and not in define mode, nothing is done.
+        if ((densNcOut != null) && (!densNcOut.isDefineMode())) {
+            return;
+        }
+
+        // Initialize the density tracker
+        this.densTracker = new DensityTracker();
+        this.densTracker.init();
+
+        Dimension dimTime;
+        Dimension dimLongitude;
+        Dimension dimLatitude;
+
+        densNcOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation().replace(".nc", "_density.nc"));
+
+        dimTime = densNcOut.addUnlimitedDimension("time");
+        dimLongitude = densNcOut.addDimension(null, "longitude", densTracker.getNLon());
+        dimLatitude = densNcOut.addDimension(null, "latitude", densTracker.getNLat());
+
+        List<Dimension> dimsDens = new ArrayList<>(Arrays.asList(dimTime, dimLatitude, dimLongitude));
+
+        densNcOut.addVariable(null, "longitude", ucar.ma2.DataType.FLOAT, "longitude");
+        densNcOut.addVariable(null, "latitude", ucar.ma2.DataType.FLOAT, "latitude");
+        densNcOut.addVariable(null, "density", ucar.ma2.DataType.INT, dimsDens);
                         
     }
     
@@ -727,34 +755,19 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     /** Initialize trajectory outputs. */
     private void initializeDensityOutputs() throws Exception {
-
-        // If the file is defined and not in define mode, nothing is done.
-        if ((densNcOut != null) && (!densNcOut.isDefineMode())) {
+        
+        // write the lon/lat coordinates
+        if (!densNcOut.isDefineMode()) {
+            // If the file is not in defined mode, assumes that everything has been already
+            // created
             return;
         }
-
-        // Initialize the density tracker
-        this.densTracker = new DensityTracker();
-        this.densTracker.init();
-
-        Dimension dimTime;
-        Dimension dimLongitude;
-        Dimension dimLatitude;
-
-        densNcOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation().replace(".nc", "_density.nc"));
-
-        dimTime = densNcOut.addUnlimitedDimension("time");
-        dimLongitude = densNcOut.addDimension(null, "longitude", densTracker.getNLon());
-        dimLatitude = densNcOut.addDimension(null, "latitude", densTracker.getNLat());
-
-        List<Dimension> dimsDens = new ArrayList<>(Arrays.asList(dimTime, dimLatitude, dimLongitude));
-
-        densNcOut.addVariable(null, "longitude", ucar.ma2.DataType.FLOAT, "longitude");
-        densNcOut.addVariable(null, "latitude", ucar.ma2.DataType.FLOAT, "latitude");
-        densNcOut.addVariable(null, "density", ucar.ma2.DataType.INT, dimsDens);
-
+        
         densNcOut.create();
-
+        
+        densNcOut.write(densNcOut.findVariable("longitude"), densTracker.getLonCells());
+        densNcOut.write(densNcOut.findVariable("latitude"), densTracker.getLatCells());
+        
     }
     
     @Override
