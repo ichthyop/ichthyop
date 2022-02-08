@@ -172,9 +172,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     /**
-     * Closes the NetCDF file.
+     * Closes the Trajectory output NetCDF file.
      */
-    private void close() {
+    private void closeTraj() {
         try {
             ncOut.close();
             String strFilePart = ncOut.getNetcdfFile().getLocation();
@@ -184,6 +184,24 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
             ncOut = null;
+        } catch (Exception ex) {
+            getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
+        }
+    }
+    
+    /**
+     * Closes the Distribution NetCDF file.
+     */
+    private void closeDist() {
+        try {
+            densNcOut.close();
+            String strFilePart = densNcOut.getNetcdfFile().getLocation();
+            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+            Path filePart = new File(strFilePart).toPath();
+            Path fileBase = new File(strFileBase).toPath();
+            Files.move(filePart, fileBase, REPLACE_EXISTING);
+            getLogger().info("Closed NetCDF output file.");
+            densNcOut = null;
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
@@ -451,8 +469,27 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return;
         }
         TimeManager timeManager = e.getSource();
-        if (((long)(timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
-            writeToNetCDF(i_record++);
+
+        if (((long) (timeManager.getTime() - timeManager.get_tO()) % dt_record) == 0) {
+
+            if (this.isTrajectoryEnabled) {
+                writeToNetCDF(i_record++);
+            }
+
+            if (this.isDensityEnabled) {
+                writeDensToNetCDF(i_record++);
+            }
+        }
+    }
+    
+    private void writeDensToNetCDF(int i_record) {
+        getLogger().log(Level.INFO, "Saving variables...");
+        int[] origin = new int[] {i_record, 0, 0};
+        try {
+            densNcOut.write(densNcOut.findVariable("density"), origin, this.densTracker.getDensity());
+        } catch (IOException | InvalidRangeException e) {
+            getLogger().log(Level.SEVERE, "Error saving density value");
+            e.printStackTrace();
         }
     }
 
@@ -487,10 +524,21 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     @Override
     public void lastStepOccurred(LastStepEvent e) {
-        if (!e.isInterrupted()) {
-            writeToNetCDF(i_record);
+        
+        if (this.isTrajectoryEnabled) {
+            if (!e.isInterrupted()) {
+                writeToNetCDF(i_record);
+                this.closeTraj();
+            }
         }
-        close();
+        
+        if (this.isDensityEnabled) {
+            if (!e.isInterrupted()) {
+                writeDensToNetCDF(i_record);
+                this.closeDist();
+            }
+        }
+        
         if (null != predefinedTrackers) {
             predefinedTrackers.clear();
         }
@@ -499,68 +547,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
     }
     
-    private void setupDensityOutput() throws IOException { 
-        
-        // If density output is not activated, nothing is done.
-        if (!this.isDensityEnabled) {
-            return;
-        }
-        
-        // If the file is defined and not in define mode, nothing is done.
-        if((densNcOut != null) && (!densNcOut.isDefineMode())) {
-            return;   
-        }
-        
-        Dimension dimTime;
-        Dimension dimLongitude;
-        Dimension dimLatitude;
-        
-        densNcOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation().replace(".nc", "_density.nc"));
-        dimTime = densNcOut.addUnlimitedDimension("time");
-        dimLongitude = densNcOut.addDimension(null, "longitude", densTracker.getNLon());
-        dimLatitude = densNcOut.addDimension(null, "latitude", densTracker.getNLat());
-        
-        List<Dimension> dimsDens = new ArrayList<>(Arrays.asList(dimTime, dimLatitude, dimLongitude));
-        
-        ncOut.addVariable(null, "longitude", ucar.ma2.DataType.FLOAT, "longitude");
-        ncOut.addVariable(null, "latitude", ucar.ma2.DataType.FLOAT, "latitude");
-        ncOut.addVariable(null, "density", ucar.ma2.DataType.FLOAT, dimsDens);
-        
-    }
-
-    @Override
-    public void setupPerformed(SetupEvent e) throws Exception {
-        
-
-        String key = "netcdf_output_format";
-        if (this.isNull(key)) {
-            ncVersion = NetcdfFileWriter.Version.netcdf3;
-        } else {
-            String ncOutputFormat = getParameter(key);
-            switch (ncOutputFormat) {
-                case "ncstream":
-                    ncVersion = NetcdfFileWriter.Version.ncstream;
-                case "netcdf3":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3;
-                case "netcdf3c":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3c;
-                case "netcdf3c64":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3c64;
-                case "netcdf4":
-                    ncVersion = NetcdfFileWriter.Version.netcdf4;
-                    break;
-                case "netcdf4_classic":
-                    ncVersion = NetcdfFileWriter.Version.netcdf4_classic;
-                    break;
-                default:
-                    ncVersion = NetcdfFileWriter.Version.netcdf3;
-                    break;
-            }
-        }
-        
-        /* Get record frequency */
-        record_frequency = Integer.valueOf(getParameter("record_frequency"));
-        dt_record = record_frequency * Math.abs(getSimulationManager().getTimeManager().get_dt());
+    /** Setup trajectory outputs */
+    private void setupTrajectoryOutput() throws Exception {
         
         if((ncOut != null) && (!ncOut.isDefineMode())) {
             // if ncOut is not null, i.e. if file is defined,
@@ -604,18 +592,73 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         clearPredefinedTrackerList = true;
         clearCustomTrackerList = true;
-
-        getLogger().info("Output manager setup [OK]");
     }
+        
+    /** Setup density outputs */
+    private void setupDensityOutput() throws IOException { 
+                        
+    }
+    
 
     @Override
-    public void initializePerformed(InitializeEvent e) throws Exception {
+    public void setupPerformed(SetupEvent e) throws Exception {
 
+        String key = "netcdf_output_format";
+        if (this.isNull(key)) {
+            ncVersion = NetcdfFileWriter.Version.netcdf3;
+        } else {
+            String ncOutputFormat = getParameter(key);
+            switch (ncOutputFormat) {
+                case "ncstream":
+                    ncVersion = NetcdfFileWriter.Version.ncstream;
+                case "netcdf3":
+                    ncVersion = NetcdfFileWriter.Version.netcdf3;
+                case "netcdf3c":
+                    ncVersion = NetcdfFileWriter.Version.netcdf3c;
+                case "netcdf3c64":
+                    ncVersion = NetcdfFileWriter.Version.netcdf3c64;
+                case "netcdf4":
+                    ncVersion = NetcdfFileWriter.Version.netcdf4;
+                    break;
+                case "netcdf4_classic":
+                    ncVersion = NetcdfFileWriter.Version.netcdf4_classic;
+                    break;
+                default:
+                    ncVersion = NetcdfFileWriter.Version.netcdf3;
+                    break;
+            }
+        }
+        
+        /* Get record frequency */
+        record_frequency = Integer.valueOf(getParameter("record_frequency"));
+        dt_record = record_frequency * Math.abs(getSimulationManager().getTimeManager().get_dt());
+
+        key = "output.trajectory.enabled";
+        if(!this.isNull(key)) { 
+            this.isTrajectoryEnabled = Boolean.valueOf(getParameter(key));
+        }
+
+        key = "output.density.enabled";
+        if(!this.isNull(key)) { 
+            this.isDensityEnabled = Boolean.valueOf(getParameter(key));
+        }
+        
+        if(this.isDensityEnabled) { 
+            this.setupDensityOutput();
+        }
+        
+        if(this.isTrajectoryEnabled) {
+            this.setupTrajectoryOutput();   
+        }
+        
+        getLogger().info("Output manager setup [OK]");
+    }
+    
+    
+    /** Initialize trajectory outputs. */
+    private void initializeTrajectoryOutputs() throws Exception {
+        
         if (!ncOut.isDefineMode()) {
-            /* add listeners */
-            getSimulationManager().getTimeManager().addNextStepListener(this);
-            getSimulationManager().getTimeManager().addLastStepListener(this);
-            getLogger().info("Output manager initialization [OK]");
             // If the file is not in defined mode, assumes that everything has been already
             // created
             return;
@@ -683,7 +726,58 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* initialization completed */
         getLogger().log(Level.INFO, "Created output file {0}", ncOut.getNetcdfFile().getLocation());
+        
+    }
+
+    /** Initialize trajectory outputs. */
+    private void initializeDensityOutputs() throws Exception {
+
+        // If the file is defined and not in define mode, nothing is done.
+        if ((densNcOut != null) && (!densNcOut.isDefineMode())) {
+            return;
+        }
+
+        // Initialize the density tracker
+        this.densTracker = new DensityTracker();
+        this.densTracker.init();
+
+        Dimension dimTime;
+        Dimension dimLongitude;
+        Dimension dimLatitude;
+
+        densNcOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation().replace(".nc", "_density.nc"));
+
+        dimTime = densNcOut.addUnlimitedDimension("time");
+        dimLongitude = densNcOut.addDimension(null, "longitude", densTracker.getNLon());
+        dimLatitude = densNcOut.addDimension(null, "latitude", densTracker.getNLat());
+
+        List<Dimension> dimsDens = new ArrayList<>(Arrays.asList(dimTime, dimLatitude, dimLongitude));
+
+        ncOut.addVariable(null, "longitude", ucar.ma2.DataType.FLOAT, "longitude");
+        ncOut.addVariable(null, "latitude", ucar.ma2.DataType.FLOAT, "latitude");
+        ncOut.addVariable(null, "density", ucar.ma2.DataType.INT, dimsDens);
+
+        densNcOut.create();
+
+    }
+    
+    @Override
+    public void initializePerformed(InitializeEvent e) throws Exception {
+
         getLogger().info("Output manager initialization [OK]");
+        if(this.isTrajectoryEnabled) { 
+            this.initializeTrajectoryOutputs();  
+        }
+        
+        if(this.isDensityEnabled) { 
+            this.initializeDensityOutputs();  
+        }
+        
+        /* add listeners */
+        getSimulationManager().getTimeManager().addNextStepListener(this);
+        getSimulationManager().getTimeManager().addLastStepListener(this);
+        getLogger().info("Output manager initialization [OK]");
+        
     }
 
     public class NCDimFactory {
