@@ -2,8 +2,6 @@ package org.previmer.ichthyop.io;
 
 import java.util.Iterator;
 
-import com.sleepycat.je.config.IntConfigParam;
-
 import org.previmer.ichthyop.Population;
 import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.particle.IParticle;
@@ -18,7 +16,8 @@ public class DensityTracker extends SimulationManagerAccessor {
     private float latMax;
     private float deltaLat;
     private int nLon, nLat;
-    private float[] lonOut, latOut;
+    private float[] lonEdges, latEdges;
+    private float[] lonCell, latCell;
 
     public void init() {
 
@@ -48,15 +47,28 @@ public class DensityTracker extends SimulationManagerAccessor {
         // but edges will have nLon+1, nLat+1 elements
         nLon = (int) ((lonMax - lonMin) / deltaLon);
         nLat = (int) ((latMax - latMin) / deltaLat);
-
-        lonOut = new float[nLon + 1];
+        
+        // Reconstructing longitude edges
+        lonEdges = new float[nLon + 1];
         for (int i = 0; i < nLon + 1; i++) {
-            lonOut[i] = lonMin + i * deltaLon;
+            lonEdges[i] = lonMin + i * deltaLon;
+        }
+        
+        // reconstructing longitude centers
+        lonCell = new float[nLon];
+        for (int i = 0; i < nLon; i++) {
+            lonCell[i] = 0.5f * (lonEdges[i] + lonEdges[i + 1]);
         }
 
-        latOut = new float[nLat + 1];
-        for (int i = 0; i < nLon; i++) {
-            latOut[i] = latMin + 1 + i * deltaLat;
+        latEdges = new float[nLat + 1];
+        for (int i = 0; i < nLat + 1; i++) {
+            latEdges[i] = latMin + 1 + i * deltaLat;
+        }
+
+        // reconstructing latitude centers
+        latCell = new float[nLat];
+        for (int i = 0; i < nLat; i++) {
+            latCell[i] = 0.5f * (latEdges[i] + latEdges[i + 1]);
         }
 
         density = new int[nLat][nLon];
@@ -79,11 +91,32 @@ public class DensityTracker extends SimulationManagerAccessor {
             if (particle.isLiving()) {
                 float lonPart = (float) particle.getLon();
                 float latPart = (float) particle.getLat();
+                // If particle is out of the density domain, nothing is done.
+                if((lonPart > lonMax) || (lonPart < lonMin) || (latPart > latMax) || (latPart < latMin)) {
+                    continue;
+                }
                 int indexLon = (int) Math.floor(nLon * (lonPart - lonMin) / (lonMax - lonMin));
                 int indexLat = (int) Math.floor(nLat * (latPart - latMin) / (latMax - latMin));
                 density[indexLat][indexLon] += 1;
             }
         }
     }
+
+    public int getNLon() {
+        return this.nLon;
+    }
+
+    public int getNLat() {
+        return this.nLat;
+    }
+
+    public float[] getLonCells() {
+        return this.lonCell;
+    }
+
+    public float[] getLatCells() {
+        return this.latCell;
+    }
+
 
 }
