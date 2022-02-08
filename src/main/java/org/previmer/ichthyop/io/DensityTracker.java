@@ -7,6 +7,7 @@ import org.previmer.ichthyop.SimulationManagerAccessor;
 import org.previmer.ichthyop.particle.IParticle;
 
 import ucar.ma2.Array;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.Index;
 
@@ -20,7 +21,7 @@ public class DensityTracker extends SimulationManagerAccessor {
     private float deltaLat;
     private int nLon, nLat;
     private float[] lonEdges, latEdges;
-    private float[] lonCell, latCell;
+    private ArrayFloat.D1 lonCell, latCell;
 
     public void init() {
 
@@ -59,9 +60,11 @@ public class DensityTracker extends SimulationManagerAccessor {
         }
         
         // reconstructing longitude centers
-        lonCell = new float[nLon];
+        lonCell = new ArrayFloat.D1(nLon);
+        Index index = lonCell.getIndex();
         for (int i = 0; i < nLon; i++) {
-            lonCell[i] = 0.5f * (lonEdges[i] + lonEdges[i + 1]);
+            index.set(i);
+            lonCell.setFloat(index, 0.5f * (lonEdges[i] + lonEdges[i + 1]));
         }
 
         latEdges = new float[nLat + 1];
@@ -70,9 +73,11 @@ public class DensityTracker extends SimulationManagerAccessor {
         }
 
         // reconstructing latitude centers
-        latCell = new float[nLat];
+        latCell = new ArrayFloat.D1(nLat);
+        index = latCell.getIndex();
         for (int i = 0; i < nLat; i++) {
-            latCell[i] = 0.5f * (latEdges[i] + latEdges[i + 1]);
+            index.set(i);
+            latCell.set(index, 0.5f * (latEdges[i] + latEdges[i + 1]));
         }
 
     }
@@ -123,11 +128,11 @@ public class DensityTracker extends SimulationManagerAccessor {
         return this.nLat;
     }
 
-    public float[] getLonCells() {
+    public Array getLonCells() {
         return this.lonCell;
     }
 
-    public float[] getLatCells() {
+    public Array getLatCells() {
         return this.latCell;
     }
 
