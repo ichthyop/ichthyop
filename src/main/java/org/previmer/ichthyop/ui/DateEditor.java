@@ -47,11 +47,9 @@ package org.previmer.ichthyop.ui;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.swing.AbstractAction;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JFormattedTextField;
@@ -59,10 +57,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.text.DateFormatter;
-import javax.swing.text.DefaultFormatterFactory;
-import org.previmer.ichthyop.calendar.Day360Calendar;
-import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  *
@@ -79,29 +73,34 @@ public class DateEditor extends DefaultCellEditor {
      * pattern for date-time formatting depends on the calendar (Calendar1900 or
      * ClimatoCalendar)
      */
-    private SimpleDateFormat dtFormat;
+    // private SimpleDateFormat dtFormat;
     /**
      * The calendar to convert specific instant in time to date.
      */
-    private Calendar calendar = new Day360Calendar();
     private JFormattedTextField ftf;
     //private boolean DEBUG = false;
     public final static int DATE = 0;
     public final static int DURATION = 1;
-
+    final String datePattern = "year \\d\\d\\d\\d month \\d\\d day \\d\\d at \\d\\d:\\d\\d";
+    final String durationPattern = "\\d\\d\\d\\d day\\(s\\) \\d\\d hour\\(s\\) \\d\\d minute\\(s\\)";
+    final String displayDatePattern = "year YYYY month \\d\\d day \\d\\d at \\d\\d:\\d\\d";
+    final String displayDurationPattern = "DDDD day(s) HH hour(s) MM minute(s)";
+    String displayPattern;
+    Matcher matcher;
+    Pattern pattern;
+    
     public DateEditor(int type, Object value) {
         super(new JFormattedTextField());
         ftf = (JFormattedTextField) getComponent();
-        dtFormat = (type == DATE)
-                ? getSimulationManager().getTimeManager().getInputDateFormat()
-                : getSimulationManager().getTimeManager().getInputDurationFormat();
-        dtFormat.setCalendar(getCalendar());
-        ftf.setFormatterFactory(new DefaultFormatterFactory(new DateFormatter(dtFormat)));
-        try {
-            ftf.setValue(dtFormat.parse(value.toString()));
-        } catch (ParseException ex) {
-            Logger.getLogger(DateEditor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        // dtFormat = (type == DATE)
+        //         ? getSimulationManager().getTimeManager().getInputDateFormat()
+        //         : getSimulationManager().getTimeManager().getInputDurationFormat();
+        pattern = (type == DATE) ? Pattern.compile(datePattern) : Pattern.compile(durationPattern);
+        displayPattern = (type == DATE) ? displayDatePattern : displayDurationPattern;
+        //dtFormat.setCalendar(getCalendar());
+        //ftf.setFormatterFactory(new DefaultFormatterFactory(new DateFormatter(dtFormat)));=
+        // ftf.setValue(dtFormat.parse(value.toString()));
+        ftf.setValue(value.toString());
         ftf.setHorizontalAlignment(JTextField.TRAILING);
         ftf.setFocusLostBehavior(JFormattedTextField.PERSIST);
 
@@ -118,7 +117,7 @@ public class DateEditor extends DefaultCellEditor {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!ftf.isEditValid()) { //The text is invalid.
+                if (!ftf.isEditValid() || !pattern.matcher(ftf.getText()).matches()) { //The text is invalid.
                     if (userSaysRevert()) { //reverted
                         ftf.postActionEvent(); //inform the editor
                     }
@@ -133,14 +132,14 @@ public class DateEditor extends DefaultCellEditor {
         });
     }
 
-    private Calendar getCalendar() {
-        return calendar;
-    }
+    // private Calendar getCalendar() {
+    //     return calendar;
+    // }
 
-    public void setCalendar(Calendar calendar) {
-        this.calendar = calendar;
-        dtFormat.setCalendar(calendar);
-    }
+    // public void setCalendar(Calendar calendar) {
+    //     this.calendar = calendar;
+    //     dtFormat.setCalendar(calendar);
+    // }
 
     //Override to check whether the edit is valid,
     //setting the value if it is and complaining if
@@ -177,7 +176,7 @@ public class DateEditor extends DefaultCellEditor {
         Object[] options = {"Edit", "Revert"};
         int answer = JOptionPane.showOptionDialog(
                 SwingUtilities.getWindowAncestor(ftf),
-                "The value must match the pattern " + dtFormat.toPattern() + "\n"
+                "The value must match the pattern " + displayPattern + "\n"
                 + "You can either continue editing "
                 + "or revert to the last valid value.",
                 "Invalid Text Entered",
@@ -194,7 +193,7 @@ public class DateEditor extends DefaultCellEditor {
         return false;
     }
 
-    private SimulationManager getSimulationManager() {
-        return SimulationManager.getInstance();
-    }
+    // private SimulationManager getSimulationManager() {
+    //     return SimulationManager.getInstance();
+    // }
 }

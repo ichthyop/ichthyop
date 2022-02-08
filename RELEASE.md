@@ -4,6 +4,7 @@
 
 ### New features
 
+- Adding the reading of noleap calendars.
 - Possibility to select the output format (usefull for Windows users).
 - Adding some unit tests (NetCDF time)
 

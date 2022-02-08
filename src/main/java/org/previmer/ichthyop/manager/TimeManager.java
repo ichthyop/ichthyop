@@ -70,13 +70,19 @@ public class TimeManager extends AbstractManager {
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
+    public static final String datePattern = "'year' yyyy 'month' MM 'day' dd 'at' HH:mm";
+    public static final String durationPattern = "DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'";
     public static final DateTimeFormatter NEW_INPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-    public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
-    public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    //public static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("'year' yyyy 'month' MM 'day' dd 'at' HH:mm");
+    //public static final SimpleDateFormat INPUT_DURATION_FORMAT = new SimpleDateFormat("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
     public static final DateTimeFormatter NEW_INPUT_DURATION_FORMAT = DateTimeFormatter.ofPattern("DDD 'day(s)' HH 'hour(s)' mm 'minute(s)'");
+    public static final int YEAR_REF = 1900;
+    
+    // Array containing the latest day of each month. Used only when no leap calendar is used.
+    public static final double[] monthEdges = {31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
     
     /** Reference date: 1900-01-01 00:00 */
-    public static final LocalDateTime DATE_REF = LocalDateTime.of(1900, 1, 1, 0, 0);
+    public static final LocalDateTime DATE_REF = LocalDateTime.of(YEAR_REF, 1, 1, 0, 0);
 
 ///////////////////////////////
 // Declaration of the variables
@@ -111,25 +117,62 @@ public class TimeManager extends AbstractManager {
      */
     private int nb_steps;
     /**
-     * A Calendar for time management
-     */
-    private Calendar calendar;
-    /**
      * Determine whether particle should keep drifting when age exceeds
      * transport duration
      */
     private boolean keepDrifting;
-    /**
-     * The simple date format parses and formats dates in human readable format.
-     */
-    private SimpleDateFormat outputDateFormat;
+    // /**
+    //  * The simple date format parses and formats dates in human readable format.
+    //  */
+    // private SimpleDateFormat outputDateFormat;
     private final EventListenerList listeners = new EventListenerList();
-
+    
+    private boolean noLeapCalendarEnabled;
+    
+    private IchthyopDuration ichthyopDuration;
+    
+    /** Interface for getting the duration between two dates. Function
+     * called depends on the calendar type.
+    */
+    @FunctionalInterface
+    public interface IchthyopDuration {
+        public double getDuration(LocalDateTime DATE_REF, LocalDateTime date0);        
+    }
+    
+    public boolean isNoLeapEnabled() {
+        return noLeapCalendarEnabled;   
+    }
+    
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
     public static TimeManager getInstance() {
         return timeManager;
+    }
+    
+    /** Method for getting the time in seconds since reference date for gregorian 
+     * calendar. */
+    public static double getDurationLeap(LocalDateTime DATE_REF, LocalDateTime date0) {
+        return Duration.between(DATE_REF, date0).getSeconds();
+    }
+    
+    /**
+     * Method for getting the time in seconds since reference date for noleap
+     * calendar.
+     */
+    public static double getDurationNoLeap(LocalDateTime DATE_REF, LocalDateTime date0) {
+        
+        int year = date0.getYear();
+        int month = date0.getMonth().getValue();
+        int day = date0.getDayOfMonth();
+        int hour = date0.getHour();
+        int minute = date0.getMinute();
+        int seconds = date0.getSecond();
+        double month_offset = (month == 1) ? 0 : monthEdges[month - 2] * Constant.ONE_DAY;
+        double duration = month_offset + (year - YEAR_REF) * Constant.ONE_YEAR + (day - 1) * Constant.ONE_DAY
+                + hour * Constant.ONE_HOUR + minute * Constant.ONE_MINUTE + seconds;
+        return duration;
+    
     }
 
     public void firstStepTriggered() throws Exception {
@@ -137,7 +180,27 @@ public class TimeManager extends AbstractManager {
     }
 
     private void loadParameters() throws Exception {
-
+        
+        // Define whether to use the no leap calendar or not.
+        // If no parameter is found, assume that gregorian calendar is considered.
+        noLeapCalendarEnabled = false;
+        try {
+            String calendar = getParameter("calendar_type");
+            if (calendar.equalsIgnoreCase("noleap")) {
+                noLeapCalendarEnabled = true;
+            } else {
+                noLeapCalendarEnabled = false;
+            }
+        } catch (NullPointerException ex) {
+            noLeapCalendarEnabled = false;
+        }
+        
+        if (noLeapCalendarEnabled) {
+            ichthyopDuration = (date1, date2) -> getDurationNoLeap(date1, date2);
+        } else {
+            ichthyopDuration = (date1, date2) -> getDurationLeap(date1, date2);
+        }
+                
         /* time step */
         dt = Integer.valueOf(getParameter("time_step"));
 
@@ -160,12 +223,12 @@ public class TimeManager extends AbstractManager {
         keepDrifting = Boolean.valueOf(getParameter("keep_drifting"));
         LocalDateTime date0 = LocalDateTime.parse(getParameter("initial_time"), NEW_INPUT_DATE_FORMAT);
 
-        // Conversion of date0 as t0, i.e. the number of seconds between the reference date and the current date. 
-        t0 = Duration.between(DATE_REF, date0).getSeconds();
-        
+        // Conversion of date0 as t0, i.e. the number of seconds between the reference date and the current date.
+        t0 = ichthyopDuration.getDuration(DATE_REF, date0);
+
         /* output date format */
-        outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        outputDateFormat.setCalendar(calendar);
+        //outputDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        //outputDateFormat.setCalendar(calendar);
         
     }
 
@@ -199,7 +262,7 @@ public class TimeManager extends AbstractManager {
     /** Converts the date as number of seconds since 1900-01-01 */
     public double date2seconds(String date) throws ParseException {
         LocalDateTime dateTime = LocalDateTime.parse(date, NEW_INPUT_DATE_FORMAT);
-        long duration = Duration.between(DATE_REF, dateTime).getSeconds();
+        double duration = ichthyopDuration.getDuration(DATE_REF, dateTime);
         return (double) duration;
     }
 
@@ -276,14 +339,14 @@ public class TimeManager extends AbstractManager {
         return t0;
     }
 
-    /**
-     * Gets the calendar used for time management
-     *
-     * @return the Calendar of the simulation
-     */
-    public Calendar getCalendar() {
-        return calendar;
-    }
+    // /**
+    //  * Gets the calendar used for time management
+    //  *
+    //  * @return the Calendar of the simulation
+    //  */
+    // public Calendar getCalendar() {
+    //     return calendar;
+    // }
 
     /**
      * Gets the simulation duration
@@ -392,21 +455,21 @@ public class TimeManager extends AbstractManager {
         getLogger().info("Time manager initialization [OK]");
     }
 
-    public SimpleDateFormat getInputDurationFormat() {
-        return INPUT_DURATION_FORMAT;
-    }
+    // public SimpleDateFormat getInputDurationFormat() {
+    //     return INPUT_DURATION_FORMAT;
+    // }
 
-    public SimpleDateFormat getInputDateFormat() {
-        return INPUT_DATE_FORMAT;
-    }
+    // public SimpleDateFormat getInputDateFormat() {
+    //     return INPUT_DATE_FORMAT;
+    // }
     
-    public DateTimeFormatter getNewInputDurationFormat() {
-        return NEW_INPUT_DURATION_FORMAT;
-    }
+    // public DateTimeFormatter getNewInputDurationFormat() {
+    //     return NEW_INPUT_DURATION_FORMAT;
+    // }
 
-    public DateTimeFormatter getNewInputDateFormat() {
-        return NEW_INPUT_DATE_FORMAT;
-    }
+    // public DateTimeFormatter getNewInputDateFormat() {
+    //     return NEW_INPUT_DATE_FORMAT;
+    // }
     
     //---------- End of class
 

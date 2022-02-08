@@ -44,9 +44,13 @@ package org.previmer.ichthyop;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.previmer.ichthyop.dataset.DatasetUtil;
+import org.previmer.ichthyop.manager.TimeManager;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
@@ -142,4 +146,56 @@ public class TestNcTime {
 
     }
 
+    /** Test when units are in seconds */
+    @Test
+    public void testDurationNoLeap() throws Exception {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime date = LocalDateTime.parse("2010-03-01 00:00:00", formatter);
+        assertEquals(3474057600., TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
+        
+        date = LocalDateTime.parse("2020-01-15 00:00:00", formatter);
+        assertEquals(3785529600., TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
+        
+        date = LocalDateTime.parse("2020-12-31 05:00:00", formatter);
+        assertEquals(3815787600.0, TimeManager.getDurationNoLeap(TimeManager.DATE_REF, date));
+        
+    }
+    
+       /** Test when units are in seconds */
+    @Test
+    public void testDurationLeap() throws Exception {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime date = LocalDateTime.parse("2010-03-01 00:00:00", formatter);
+        assertEquals(3476390400., TimeManager.getDurationLeap(TimeManager.DATE_REF, date));
+
+        date = LocalDateTime.parse("2020-01-15 00:00:00", formatter);
+        assertEquals(3788035200., TimeManager.getDurationLeap(TimeManager.DATE_REF, date));
+
+        date = LocalDateTime.parse("2020-12-31 05:00:00", formatter);
+        assertEquals(3818379600.0, TimeManager.getDurationLeap(TimeManager.DATE_REF, date));
+
+    }
+    
+    @Test
+    public void testDatesLeapNoLeap() throws Exception {
+
+        String units = "hour since 2000-01-01";
+        
+        // first test date 2020-12-31 05:00 in leap mode
+        assertEquals(3818379600., DatasetUtil.getDateLeap(184085, units));
+        
+        // then test date 2020-12-31 05:00 in no leap mode
+        assertEquals(3815787600.0, DatasetUtil.getDateNoLeap(183941, units));
+
+        units = "days since 2000-03-05";
+        // first test date 2020-12-31 05:00 in leap mode
+        assertEquals(3818361600., DatasetUtil.getDateLeap(7606, units));
+        
+        // first test date 2020-12-31 05:00 in no-leap mode
+        assertEquals(3815769600., DatasetUtil.getDateNoLeap(7601, units));
+
+    }
+    
 }
