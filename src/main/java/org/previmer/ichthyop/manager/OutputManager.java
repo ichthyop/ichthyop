@@ -528,15 +528,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         if (this.isTrajectoryEnabled) {
             if (!e.isInterrupted()) {
                 writeToNetCDF(i_record);
-                this.closeTraj();
             }
+            this.closeTraj();
         }
         
         if (this.isDensityEnabled) {
             if (!e.isInterrupted()) {
                 writeDensToNetCDF(i_record);
-                this.closeDist();
             }
+            this.closeDist();
         }
         
         if (null != predefinedTrackers) {
@@ -684,10 +684,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             }
         }
 
-        /* add listeners */
-        getSimulationManager().getTimeManager().addNextStepListener(this);
-        getSimulationManager().getTimeManager().addLastStepListener(this);
-
         /* reset counter */
         i_record = 0;
 
@@ -753,9 +749,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         List<Dimension> dimsDens = new ArrayList<>(Arrays.asList(dimTime, dimLatitude, dimLongitude));
 
-        ncOut.addVariable(null, "longitude", ucar.ma2.DataType.FLOAT, "longitude");
-        ncOut.addVariable(null, "latitude", ucar.ma2.DataType.FLOAT, "latitude");
-        ncOut.addVariable(null, "density", ucar.ma2.DataType.INT, dimsDens);
+        densNcOut.addVariable(null, "longitude", ucar.ma2.DataType.FLOAT, "longitude");
+        densNcOut.addVariable(null, "latitude", ucar.ma2.DataType.FLOAT, "latitude");
+        densNcOut.addVariable(null, "density", ucar.ma2.DataType.INT, dimsDens);
 
         densNcOut.create();
 
