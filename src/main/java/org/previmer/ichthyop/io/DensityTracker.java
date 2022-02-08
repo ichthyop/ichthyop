@@ -103,11 +103,11 @@ public class DensityTracker extends SimulationManagerAccessor {
             }
         }
 
-        ArrayInt.D2 output = new ArrayInt.D2(nLat, nLon);
+        ArrayInt.D3 output = new ArrayInt.D3(1, nLat, nLon);
         Index index = output.getIndex();
         for (int j = 0; j < nLat; j++) {
             for (int i = 0; i < nLon; i++) {
-                index.set(j, i);
+                index.set(0, j, i);
                 output.set(index, density[j][i]);
             }
         }
