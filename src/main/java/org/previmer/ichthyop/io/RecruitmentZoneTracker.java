@@ -75,7 +75,7 @@ public class RecruitmentZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        return new ArrayInt.D3(1, getNParticle(), getZones().size());
+        return new ArrayInt(new int[]{1, getNParticle(), getZones().size()}, false);
     }
 
     @Override

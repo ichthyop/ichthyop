@@ -76,11 +76,13 @@ public class ZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        ArrayInt.D3 array = new ArrayInt.D3(1, getNParticle(), TypeZone.values().length);
+        ArrayInt array = new ArrayInt(new int[]{1, getNParticle(), TypeZone.values().length}, false);
         // Initialises zone array with -99
+        Index index = array.getIndex();
         for (int iZone = 0; iZone < TypeZone.values().length; iZone++) {
             for (int iP = 0; iP < getNParticle(); iP++) {
-                array.set(0, iP, iZone, -99);
+                index.set(0, iP, iZone);
+                array.set(index, -99);
             }
         }
         return array;

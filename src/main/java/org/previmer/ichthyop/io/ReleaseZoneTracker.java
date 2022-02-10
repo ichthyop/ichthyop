@@ -74,7 +74,7 @@ public class ReleaseZoneTracker extends AbstractTracker {
 
     @Override
     Array createArray() {
-        Array array = new ArrayInt.D1(getNParticle());
+        Array array = new ArrayInt(new int[] {getNParticle()}, false);
         // Particle not released yet set to -99
         for (int i = 0; i < getNParticle(); i++) {
             array.setInt(i, -99);
