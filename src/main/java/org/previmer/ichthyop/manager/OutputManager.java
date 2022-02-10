@@ -223,7 +223,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         region = makeRegion();
         Dimension edge = bNcOut.addDimension("edge", region.size());
         latlonDim = bNcOut.addDimension("latlon", 2);
-        Variable.Builder variable = bNcOut.addVariable("region_edge", DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(edge, latlonDim)));
+        Variable.Builder<?> variable = bNcOut.addVariable("region_edge", DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(edge, latlonDim)));
         variable.addAttribute(new Attribute("long_name", "geoposition of region edge"));
         variable.addAttribute(new Attribute("unit", "lat degree north lon degree east"));
     }
@@ -249,7 +249,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     zoneAreas.add(iZone, makeZoneArea(zone));
                     Dimension zoneDim = bNcOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
-                    Variable.Builder varZone = bNcOut.addVariable("coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
+                    Variable.Builder<?> varZone = bNcOut.addVariable("coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
                     varZone.addAttribute(new Attribute("long_name", zone.getKey()));
                     varZone.addAttribute(
                             new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
@@ -259,7 +259,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     varZone.addAttribute(new Attribute("color", color));
 
                     Dimension geoDim = bNcOut.addDimension("geozone" + iZone, zone.getLat().size());
-                    Variable.Builder lonlatZone = bNcOut.addVariable("coord_geo_zone" + iZone, DataType.FLOAT,
+                    bNcOut.addVariable("coord_geo_zone" + iZone, DataType.FLOAT,
                             new ArrayList<Dimension>(Arrays.asList(geoDim, latlonDim)));
 
                     iZone++;
@@ -592,7 +592,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         for (AbstractTracker tracker : trackers) {
             try {
                 tracker.init();
-                Variable.Builder variable = bNcOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
+                Variable.Builder<?> variable = bNcOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
                 tracker.addRuntimeAttributes();
                 if (tracker.getAttributes() != null) {
                     for (Attribute attribute : tracker.getAttributes()) {
