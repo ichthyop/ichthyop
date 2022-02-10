@@ -58,10 +58,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.logging.Level;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 import ucar.nc2.write.Nc4Chunking;
 import ucar.nc2.write.Nc4ChunkingStrategy;
+import ucar.nc2.write.NetcdfFileFormat;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
@@ -88,7 +89,6 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -109,8 +109,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private boolean clearCustomTrackerList = false;
     private boolean isDensityEnabled = false;
     private boolean isTrajectoryEnabled = true;
+    
     // barrier.n: adding control over the version format
-    NetcdfFileWriter.Version ncVersion;
+    NetcdfFileFormat ncVersion;
     
     boolean isCompressed = false;
     
@@ -119,14 +120,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     /**
      * Object for creating/writing netCDF files.
      */
-    private static NetcdfFileWriter ncOut;
+    private static NetcdfFormatWriter ncOut;
+    private static NetcdfFormatWriter.Builder bNcOut;
     
     /** Object for creating/writting netCDF density files */
-    private static NetcdfFileWriter densNcOut;
+    private static NetcdfFormatWriter densNcOut;
+    private static NetcdfFormatWriter.Builder bDensNcOut;
     
     private Nc4Chunking chunker;
-   
-     
+
     /**
      *
      */
@@ -185,7 +187,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void closeTraj() {
         try {
             ncOut.close();
-            String strFilePart = ncOut.getNetcdfFile().getLocation();
+            String strFilePart = ncOut.getOutputFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             Path filePart = new File(strFilePart).toPath();
             Path fileBase = new File(strFileBase).toPath();
@@ -203,7 +205,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void closeDist() {
         try {
             densNcOut.close();
-            String strFilePart = densNcOut.getNetcdfFile().getLocation();
+            String strFilePart = densNcOut.getOutputFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             Path filePart = new File(strFilePart).toPath();
             Path fileBase = new File(strFileBase).toPath();
@@ -219,11 +221,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* Add the region edges */
         region = makeRegion();
-        Dimension edge = ncOut.addDimension(null, "edge", region.size());
-        latlonDim = ncOut.addDimension(null, "latlon", 2);
-        ncOut.addVariable(null, "region_edge", DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(edge, latlonDim)));
-        ncOut.findVariable("region_edge").addAttribute(new Attribute("long_name", "geoposition of region edge"));
-        ncOut.findVariable("region_edge").addAttribute(new Attribute("unit", "lat degree north lon degree east"));
+        Dimension edge = bNcOut.addDimension("edge", region.size());
+        latlonDim = bNcOut.addDimension("latlon", 2);
+        Variable.Builder variable = bNcOut.addVariable("region_edge", DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(edge, latlonDim)));
+        variable.addAttribute(new Attribute("long_name", "geoposition of region edge"));
+        variable.addAttribute(new Attribute("unit", "lat degree north lon degree east"));
     }
 
     private void writeRegion() throws IOException, InvalidRangeException {
@@ -239,16 +241,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
 
     private void addZones() {
-
+        
         int iZone = 0;
         zoneAreas = new ArrayList<>();
         for (TypeZone type : TypeZone.values()) {
             if (null != getSimulationManager().getZoneManager().getZones(type)) {
                 for (Zone zone : getSimulationManager().getZoneManager().getZones(type)) {
                     zoneAreas.add(iZone, makeZoneArea(zone));
-                    Dimension zoneDim = ncOut.addDimension(null, "zone" + iZone, zoneAreas.get(iZone).size());
-                    Variable varZone = ncOut.addVariable(null, "coord_zone" + iZone, DataType.FLOAT,
-                            new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
+                    Dimension zoneDim = bNcOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
+                    Variable.Builder varZone = bNcOut.addVariable("coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
                     varZone.addAttribute(new Attribute("long_name", zone.getKey()));
                     varZone.addAttribute(
                             new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
@@ -257,8 +258,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     color = color.substring(color.lastIndexOf("["));
                     varZone.addAttribute(new Attribute("color", color));
 
-                    Dimension geoDim = ncOut.addDimension(null, "geozone" + iZone, zone.getLat().size());
-                    Variable lonlatZone = ncOut.addVariable(null, "coord_geo_zone" + iZone, DataType.FLOAT,
+                    Dimension geoDim = bNcOut.addDimension("geozone" + iZone, zone.getLat().size());
+                    Variable.Builder lonlatZone = bNcOut.addVariable("coord_geo_zone" + iZone, DataType.FLOAT,
                             new ArrayList<Dimension>(Arrays.asList(geoDim, latlonDim)));
 
                     iZone++;
@@ -266,7 +267,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 }
             }
         }
-        ncOut.addGroupAttribute(null, new Attribute("nb_zones", iZone));
+        bNcOut.addAttribute(new Attribute("nb_zones", iZone));
     }
 
     private void writeZones() throws IOException, InvalidRangeException {
@@ -307,19 +308,19 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         String dim = getSimulationManager().getDataset().is3D()
                 ? "3d"
                 : "2d";
-        ncOut.addGroupAttribute(null, new Attribute("transport_dimension", dim));
+        bNcOut.addAttribute(new Attribute("transport_dimension", dim));
 
         /* Write all parameters */
         for (BlockType type : BlockType.values()) {
             for (XBlock block : getSimulationManager().getParameterManager().getBlocks(type)) {
                 if (!block.getType().equals(BlockType.OPTION)) {
-                    ncOut.addGroupAttribute(null, new Attribute(block.getKey() + ".enabled", String.valueOf(block.isEnabled())));
+                    bNcOut.addAttribute(new Attribute(block.getKey() + ".enabled", String.valueOf(block.isEnabled())));
                 }
                 if (block.isEnabled()) {
                     for (XParameter param : block.getXParameters()) {
                         if (!param.isHidden()) {
                             String key = block.getKey() + "." + param.getKey();
-                            ncOut.addGroupAttribute(null, new Attribute(key, param.getValue()));
+                            bNcOut.addAttribute(new Attribute(key, param.getValue()));
                         }
                     }
                 }
@@ -327,7 +328,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         /* Add the corresponding xml file */
-        ncOut.addGroupAttribute(null, new Attribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath()));
+        bNcOut.addAttribute(new Attribute("xml_file", getSimulationManager().getConfigurationFile().getAbsolutePath()));
     }
 
     private List<Point2D> makeZoneArea(Zone zone) {
@@ -561,19 +562,19 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     /** Setup trajectory outputs */
     private void setupTrajectoryOutput() throws Exception {
         
-        if((ncOut != null) && (!ncOut.isDefineMode())) {
+        if(bNcOut != null) {
             // if ncOut is not null, i.e. if file is defined,
             // and if not in defined mode, nothing is done here
             return;
         }
-         
+        
         /* Create the NetCDF writeable object */
         if(!this.isCompressed) { 
-            ncOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation());
+            bNcOut = NetcdfFormatWriter.createNewNetcdf3(makeFileLocation());
         } else {
-            //NetcdfFormatWriter test = NetcdfFormatWriter.createNewNetcdf4(NetcdfFileFormat.NETCDF4, makeFileLocation(), this.chunker);    
+            bNcOut = NetcdfFormatWriter.createNewNetcdf4(NetcdfFileFormat.NETCDF4, makeFileLocation(), this.chunker);    
         }
-
+    
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
 
@@ -591,12 +592,20 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         for (AbstractTracker tracker : trackers) {
             try {
                 tracker.init();
-                ncOut.addVariable(null, tracker.getName(), tracker.getDataType(), tracker.getDimensions());
+                Variable.Builder variable = bNcOut.addVariable(tracker.getName(), tracker.getDataType(), tracker.getDimensions());
+                tracker.addRuntimeAttributes();
+                if (tracker.getAttributes() != null) {
+                    for (Attribute attribute : tracker.getAttributes()) {
+                        variable.addAttribute(attribute);
+                    }
+                }
+                
             } catch (Exception ex) {
                 errTrackers.add(tracker);
                 getLogger().log(Level.WARNING, "Error adding tracker " + tracker.getName() + " in NetCDF output file. The variable will not be recorded.", ex);
             }
         }
+        
         trackers.removeAll(errTrackers);
 
         /* add gloabal attributes */
@@ -604,7 +613,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* add definition of the simulated area */
         addRegion();
-
+        
         clearPredefinedTrackerList = true;
         clearCustomTrackerList = true;
     }
@@ -613,7 +622,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void setupDensityOutput() throws IOException { 
         
         // If the file is defined and not in define mode, nothing is done.
-        if ((densNcOut != null) && (!densNcOut.isDefineMode())) {
+        if ((bDensNcOut != null)) {
             return;
         }
 
@@ -624,18 +633,24 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         Dimension dimTime;
         Dimension dimLongitude;
         Dimension dimLatitude;
-
-        densNcOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation().replace(".nc", "_density.nc"));
-
-        dimTime = densNcOut.addUnlimitedDimension("time");
-        dimLongitude = densNcOut.addDimension(null, "longitude", densTracker.getNLon());
-        dimLatitude = densNcOut.addDimension(null, "latitude", densTracker.getNLat());
+        String fileName = makeFileLocation().replace(".nc", "_density.nc"); 
+        
+        /* Create the NetCDF writeable object */
+        if (!this.isCompressed) {
+            bDensNcOut = NetcdfFormatWriter.createNewNetcdf3(fileName);
+        } else {
+            bDensNcOut = NetcdfFormatWriter.createNewNetcdf4(NetcdfFileFormat.NETCDF4, fileName, this.chunker);
+        }
+        
+        dimTime = bDensNcOut.addUnlimitedDimension("time");
+        dimLongitude = bDensNcOut.addDimension("longitude", densTracker.getNLon());
+        dimLatitude = bDensNcOut.addDimension("latitude", densTracker.getNLat());
 
         List<Dimension> dimsDens = new ArrayList<>(Arrays.asList(dimTime, dimLatitude, dimLongitude));
 
-        densNcOut.addVariable(null, "longitude", ucar.ma2.DataType.FLOAT, "longitude");
-        densNcOut.addVariable(null, "latitude", ucar.ma2.DataType.FLOAT, "latitude");
-        densNcOut.addVariable(null, "density", ucar.ma2.DataType.INT, dimsDens);
+        bDensNcOut.addVariable("longitude", ucar.ma2.DataType.FLOAT, "longitude");
+        bDensNcOut.addVariable("latitude", ucar.ma2.DataType.FLOAT, "latitude");
+        bDensNcOut.addVariable("density", ucar.ma2.DataType.INT, dimsDens);
                         
     }
     
@@ -645,32 +660,32 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         String key = "netcdf_output_format";
         if (this.isNull(key)) {
-            ncVersion = NetcdfFileWriter.Version.netcdf3;
+            ncVersion = NetcdfFileFormat.NETCDF3;
         } else {
             String ncOutputFormat = getParameter(key);
             switch (ncOutputFormat) {
                 case "ncstream":
-                    ncVersion = NetcdfFileWriter.Version.ncstream;
+                    ncVersion = NetcdfFileFormat.NCSTREAM;
                 case "netcdf3":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3;
-                case "netcdf3c":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3c;
-                case "netcdf3c64":
-                    ncVersion = NetcdfFileWriter.Version.netcdf3c64;
+                    ncVersion = NetcdfFileFormat.NETCDF3;
+                case "netcdf3_64bit_data":
+                    ncVersion = NetcdfFileFormat.NETCDF3_64BIT_DATA;
+                case "netcdf3_64bit_offset":
+                    ncVersion = NetcdfFileFormat.NETCDF3_64BIT_OFFSET;
                 case "netcdf4":
-                    ncVersion = NetcdfFileWriter.Version.netcdf4;
+                    ncVersion = NetcdfFileFormat.NETCDF4;
                     break;
                 case "netcdf4_classic":
-                    ncVersion = NetcdfFileWriter.Version.netcdf4_classic;
+                    ncVersion = NetcdfFileFormat.NETCDF4_CLASSIC;
                     break;
                 default:
-                    ncVersion = NetcdfFileWriter.Version.netcdf3;
+                    ncVersion = NetcdfFileFormat.NETCDF3;
                     break;
             }
         }
         
         // adding options for NetCDF compression
-        if(ncVersion == NetcdfFileWriter.Version.netcdf4) { 
+        if(ncVersion == NetcdfFileFormat.NETCDF4) { 
             
             int deflateLevel = 0;
             boolean shuffle = false;
@@ -741,7 +756,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     /** Initialize trajectory outputs. */
     private void initializeTrajectoryOutputs() throws Exception {
         
-        if (!ncOut.isDefineMode()) {
+        if (ncOut != null) {
             // If the file is not in defined mode, assumes that everything has been already
             // created
             return;
@@ -753,26 +768,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
          */ 
         addZones();
 
-        // Add attributes
-        for (AbstractTracker tracker : trackers) {
-            tracker.addRuntimeAttributes();
-            try {
-                if (tracker.getAttributes() != null) {
-                    for (Attribute attribute : tracker.getAttributes()) {
-                        ncOut.findVariable(tracker.getName()).addAttribute(attribute);
-                    }
-                }
-            } catch (Exception ex) {
-                // do nothing, attributes have minor importance
-            }
-        }
-
         /* reset counter */
         i_record = 0;
 
         /* create the NetCDF file */
         try {
-            ncOut.create();
+            ncOut = bNcOut.build();
         } catch (Exception ex) {
             IOException ioex = new IOException("Failed to create NetCDF output file ==> " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
@@ -804,7 +805,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
 
         /* initialization completed */
-        getLogger().log(Level.INFO, "Created output file {0}", ncOut.getNetcdfFile().getLocation());
+        getLogger().log(Level.INFO, "Created output file {0}", ncOut.getOutputFile().getLocation());
         
     }
 
@@ -812,13 +813,13 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void initializeDensityOutputs() throws Exception {
         
         // write the lon/lat coordinates
-        if (!densNcOut.isDefineMode()) {
+        if (densNcOut != null) {
             // If the file is not in defined mode, assumes that everything has been already
             // created
             return;
         }
         
-        densNcOut.create();
+        densNcOut = bDensNcOut.build();
         
         densNcOut.write(densNcOut.findVariable("longitude"), densTracker.getLonCells());
         densNcOut.write(densNcOut.findVariable("latitude"), densTracker.getLatCells());
@@ -858,7 +859,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     return dimensions.get(dim.getShortName());
                 }
             } else {
-                Dimension newDim = ncOut.addDimension(null, dim.getShortName(), dim.getLength());
+                Dimension newDim = bNcOut.addDimension(dim.getShortName(), dim.getLength());
                 dimensions.put(newDim.getShortName(), newDim);
                 return newDim;
             }
@@ -866,7 +867,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         public Dimension getTimeDimension() {
             if (null == time) {
-                time = ncOut.addUnlimitedDimension("time");
+                time = bNcOut.addUnlimitedDimension("time");
                 dimensions.put(time.getShortName(), time);
             }
             return time;
@@ -874,7 +875,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         public Dimension getDrifterDimension() {
             if (null == drifter) {
-                drifter = ncOut.addDimension(null, "drifter", getSimulationManager().getReleaseManager().getNbParticles());
+                drifter = bNcOut.addDimension("drifter", getSimulationManager().getReleaseManager().getNbParticles());
                 dimensions.put(drifter.getShortName(), drifter);
             }
             return drifter;
@@ -886,7 +887,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             }
             if (null == zoneDimension.get(type)) {
                 String name = type.toString() + "_zone";
-                Dimension zoneDim = ncOut.addDimension(null, name, getSimulationManager().getZoneManager().getZones(type).size());
+                Dimension zoneDim = bNcOut.addDimension(name, getSimulationManager().getZoneManager().getZones(type).size());
                 zoneDimension.put(type, zoneDim);
                 dimensions.put(zoneDim.getShortName(), zoneDim);
             }
