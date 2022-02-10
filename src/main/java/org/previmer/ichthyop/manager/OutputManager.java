@@ -60,6 +60,8 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.logging.Level;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4Chunking;
+import ucar.nc2.write.Nc4ChunkingStrategy;
 
 import org.previmer.ichthyop.event.LastStepListener;
 import java.util.ArrayList;
@@ -86,6 +88,7 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -109,6 +112,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     // barrier.n: adding control over the version format
     NetcdfFileWriter.Version ncVersion;
     
+    boolean isCompressed = false;
+    
     DensityTracker densTracker;
     
     /**
@@ -119,6 +124,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     /** Object for creating/writting netCDF density files */
     private static NetcdfFileWriter densNcOut;
     
+    private Nc4Chunking chunker;
+   
+     
     /**
      *
      */
@@ -560,7 +568,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
          
         /* Create the NetCDF writeable object */
-        ncOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation());
+        if(!this.isCompressed) { 
+            ncOut = NetcdfFileWriter.createNew(ncVersion, makeFileLocation());
+        } else {
+            //NetcdfFormatWriter test = NetcdfFormatWriter.createNewNetcdf4(NetcdfFileFormat.NETCDF4, makeFileLocation(), this.chunker);    
+        }
 
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
@@ -654,6 +666,49 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                 default:
                     ncVersion = NetcdfFileWriter.Version.netcdf3;
                     break;
+            }
+        }
+        
+        // adding options for NetCDF compression
+        if(ncVersion == NetcdfFileWriter.Version.netcdf4) { 
+            
+            int deflateLevel = 0;
+            boolean shuffle = false;
+            
+            // if netcdf4 output, check if deflate level is set.
+            key = "netcdf_output_compression";
+            if (!this.isNull(key)) {
+                deflateLevel = Integer.getInteger(getParameter(key));
+            }
+            
+            // if deflate > 0, compression is on.
+            if(deflateLevel > 0) {
+                this.isCompressed = true;   
+                key = "netcdf_output_shuffle";
+                // we read whether shuffle parameter is on.
+                if(!this.isNull(key)) {
+                    shuffle = Boolean.getBoolean(getParameter(key));
+                }
+                
+                Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
+                key = "netcdf_output_compression_stragegy";
+                if (!this.isNull(key)) {
+                    switch (getParameter(key)) {
+                        case "standard":
+                            strategy = Nc4Chunking.Strategy.standard;
+                            break;
+                        case "grib":
+                            strategy = Nc4Chunking.Strategy.grib;
+                            break;
+                        case "none":
+                            strategy = Nc4Chunking.Strategy.grib;
+                            break;
+                        default:
+                            strategy = Nc4Chunking.Strategy.none;
+                    }
+                }
+
+                this.chunker = Nc4ChunkingStrategy.factory(strategy, deflateLevel, shuffle);
             }
         }
         
