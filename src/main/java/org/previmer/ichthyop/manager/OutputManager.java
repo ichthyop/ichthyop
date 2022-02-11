@@ -113,8 +113,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     // barrier.n: adding control over the version format
     NetcdfFileFormat ncVersion;
     
-    boolean isCompressed = false;
-    
     DensityTracker densTracker;
     
     /**
@@ -570,12 +568,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return;
         }
         
-        /* Create the NetCDF writeable object */
-        if(!this.isCompressed) { 
-            bNcOut = NetcdfFormatWriter.createNewNetcdf3(makeFileLocation());
-        } else {
-            bNcOut = NetcdfFormatWriter.createNewNetcdf4(NetcdfFileFormat.NETCDF4, makeFileLocation(), this.chunker);    
-        }
+        bNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, makeFileLocation(), this.chunker);
     
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
@@ -636,13 +629,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         Dimension dimLongitude;
         Dimension dimLatitude;
         String fileName = makeFileLocation().replace(".nc", "_density.nc"); 
-        
-        /* Create the NetCDF writeable object */
-        if (!this.isCompressed) {
-            bDensNcOut = NetcdfFormatWriter.createNewNetcdf3(fileName);
-        } else {
-            bDensNcOut = NetcdfFormatWriter.createNewNetcdf4(NetcdfFileFormat.NETCDF4, fileName, this.chunker);
-        }
+              
+        bDensNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, fileName, this.chunker);
         
         dimTime = bDensNcOut.addUnlimitedDimension("time");
         dimLongitude = bDensNcOut.addDimension("longitude", densTracker.getNLon());
@@ -668,12 +656,16 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             switch (ncOutputFormat) {
                 case "ncstream":
                     ncVersion = NetcdfFileFormat.NCSTREAM;
+                    break;
                 case "netcdf3":
                     ncVersion = NetcdfFileFormat.NETCDF3;
+                    break;
                 case "netcdf3_64bit_data":
                     ncVersion = NetcdfFileFormat.NETCDF3_64BIT_DATA;
+                    break;
                 case "netcdf3_64bit_offset":
                     ncVersion = NetcdfFileFormat.NETCDF3_64BIT_OFFSET;
+                    break;
                 case "netcdf4":
                     ncVersion = NetcdfFileFormat.NETCDF4;
                     break;
@@ -695,16 +687,15 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             // if netcdf4 output, check if deflate level is set.
             key = "netcdf_output_compression";
             if (!this.isNull(key)) {
-                deflateLevel = Integer.getInteger(getParameter(key));
+                deflateLevel = Integer.valueOf(getParameter(key));
             }
             
             // if deflate > 0, compression is on.
             if(deflateLevel > 0) {
-                this.isCompressed = true;   
                 key = "netcdf_output_shuffle";
                 // we read whether shuffle parameter is on.
                 if(!this.isNull(key)) {
-                    shuffle = Boolean.getBoolean(getParameter(key));
+                    shuffle = Boolean.valueOf(getParameter(key));
                 }
                 
                 Nc4Chunking.Strategy strategy = Nc4Chunking.Strategy.none;
@@ -718,7 +709,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                             strategy = Nc4Chunking.Strategy.grib;
                             break;
                         case "none":
-                            strategy = Nc4Chunking.Strategy.grib;
+                            strategy = Nc4Chunking.Strategy.none;
                             break;
                         default:
                             strategy = Nc4Chunking.Strategy.none;
