@@ -194,6 +194,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
             ncOut = null;
+            bNcOut = null;
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
@@ -212,6 +213,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
             densNcOut = null;
+            bDensNcOut = null;
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
