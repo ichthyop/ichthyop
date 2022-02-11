@@ -101,8 +101,10 @@ import ucar.ma2.ArrayDouble.D0;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayFloat.D2;
 import ucar.ma2.ArrayInt;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
+import ucar.nc2.AttributeContainer;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -322,7 +324,7 @@ public class WMSMapper extends JXMapKit {
                 excluded = !(dimensions.get(0).getShortName().equals("time") && dimensions.get(1).getShortName().equals("drifter"));
             }
             if (!excluded) {
-                list.add(variable.getShortName());
+                list.add(variable.getNameAndDimensions());
             }
         }
         return list.toArray(new String[list.size()]);
@@ -332,7 +334,7 @@ public class WMSMapper extends JXMapKit {
 
         Array array = nc.findVariable(variable).read();
 
-        float[] dataset = (float[]) array.get1DJavaArray(Float.class);
+        float[] dataset = (float[]) array.get1DJavaArray(DataType.FLOAT);
         if (variable.equals("time")) {
             if (dataset[0] > dataset[dataset.length - 1]) {
                 return new float[]{dataset[dataset.length - 1], dataset[0]};
@@ -844,12 +846,12 @@ public class WMSMapper extends JXMapKit {
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 
-                String vname = pcolorVariable.getShortName();
+                String vname = pcolorVariable.getNameAndDimensions();
                 try {
-                    List<Attribute> attributes = pcolorVariable.getAttributes();
+                    AttributeContainer attributes = pcolorVariable.attributes();
 
                     for (Attribute attribute : attributes) {
-                        if (attribute.getShortName().equals("unit")) {
+                        if (attribute.getName().equals("unit")) {
                             vname += " (" + attribute.getStringValue() + ")";
                             break;
                         }
@@ -928,7 +930,7 @@ public class WMSMapper extends JXMapKit {
             ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                if (pcolorVariable.getShortName().equals("time")) {
+                if (pcolorVariable.getNameAndDimensions().startsWith("time")) {
                     arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
                 } else {
                     arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
