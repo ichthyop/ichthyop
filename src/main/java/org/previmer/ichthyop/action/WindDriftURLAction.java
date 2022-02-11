@@ -51,7 +51,7 @@ import org.previmer.ichthyop.dataset.DatasetUtil;
 import org.previmer.ichthyop.dataset.RequiredExternalVariable;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 public class WindDriftURLAction extends WindDriftFileAction {
 
@@ -81,7 +81,7 @@ public class WindDriftURLAction extends WindDriftFileAction {
 
     static void openURL(String opendapURL) throws IOException {
         try {
-            ncIn = NetcdfDataset.openDataset(opendapURL);
+            ncIn = NetcdfDatasets.openDataset(opendapURL);
             getLogger().log(Level.INFO, "'{'Wind Dataset'}' Open remote {0}", opendapURL);
         } catch (Exception e) {
             IOException ioex = new IOException("{Wind Dataset} Problem opening " + opendapURL + " ==> " + e.toString());

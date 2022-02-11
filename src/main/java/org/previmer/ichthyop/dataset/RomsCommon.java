@@ -52,7 +52,7 @@ import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -226,7 +226,7 @@ abstract class RomsCommon extends AbstractDataset {
         Array arrLon, arrLat, arrMask, arrH, arrPm, arrPn;
         Index index;
 
-        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
+        NetcdfFile ncGrid = NetcdfDatasets.openDataset(gridFile);
         try {
             arrLon = ncGrid.findVariable(strLon).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
@@ -580,7 +580,7 @@ abstract class RomsCommon extends AbstractDataset {
     void readLonLat(String gridFile) throws IOException {
 
         Array arrLon, arrLat;
-        NetcdfFile ncGrid = NetcdfDataset.openDataset(gridFile);
+        NetcdfFile ncGrid = NetcdfDatasets.openDataset(gridFile);
         try {
             arrLon = ncIn.findVariable(strLon).read();
         } catch (IOException ex) {

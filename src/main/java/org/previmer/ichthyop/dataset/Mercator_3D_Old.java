@@ -59,7 +59,7 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -206,7 +206,7 @@ public class Mercator_3D_Old extends AbstractDataset {
         System.out.println("+++++++++++ old class");
 
         NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
+        nc = NetcdfDatasets.openDataset(file_hgr, enhanced(), null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
         lonRho = new float[ny][nx];
         latRho = new float[ny][nx];
@@ -234,7 +234,7 @@ public class Mercator_3D_Old extends AbstractDataset {
 
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
+            nc = NetcdfDatasets.openDataset(file_mask, enhanced(), null);
         }
         maskRho = new int[nz][ny][nx];
         Array arrMask = nc.findVariable(strMask).read().reduce().flip(0);
@@ -249,7 +249,7 @@ public class Mercator_3D_Old extends AbstractDataset {
 
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
+            nc = NetcdfDatasets.openDataset(file_zgr, enhanced(), null);
         }
         // System.out.println("read bathy gdept gdepw e3t " + nc.getLocation());
         // fichier *mesh*z*
@@ -763,7 +763,7 @@ public class Mercator_3D_Old extends AbstractDataset {
      */
     private void readLonLat() throws IOException {
 
-        try (NetcdfFile nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null)) {
+        try (NetcdfFile nc = NetcdfDatasets.openDataset(file_hgr, enhanced(), null)) {
             lonRho = new float[ny][nx];
             latRho = new float[ny][nx];
             longitude = new float[nx];
@@ -914,7 +914,7 @@ public class Mercator_3D_Old extends AbstractDataset {
      */
     private void getDimNC() throws IOException {
 
-        NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
+        NetcdfFile nc = NetcdfDatasets.openDataset(file_mask, enhanced(), null);
         try {
             nx = nc.findDimension(strXDim).getLength();
         } catch (Exception ex) {
@@ -1766,7 +1766,7 @@ public class Mercator_3D_Old extends AbstractDataset {
                 new String[] { str_e3t0, str_e3tps, str_mbathy });
 
         // Open NetCDF file
-        NetcdfFile nc = NetcdfDataset.openDataset(file_zgr, enhanced(), null);
+        NetcdfFile nc = NetcdfDatasets.openDataset(file_zgr, enhanced(), null);
 
         // Read e3t_0 double[nz]
         Array e3t0 = nc.findVariable(str_e3t0).read().reduce().flip(0);

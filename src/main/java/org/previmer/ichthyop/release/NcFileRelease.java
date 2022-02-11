@@ -57,7 +57,7 @@ import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -88,7 +88,7 @@ public class NcFileRelease extends AbstractRelease {
         double time = event.getSource().getTime();
         int index = Math.max(getSimulationManager().getSimulation().getPopulation().size(), 0);
 
-        NetcdfFile nc = NetcdfDataset.openFile(filename, null);
+        NetcdfFile nc = NetcdfDatasets.openFile(filename, null);
         ArrayDouble.D1 timeArr = (ArrayDouble.D1) nc.findVariable("time").read();
         int rank = 0;
         int length = timeArr.getShape()[0];
@@ -161,7 +161,7 @@ public class NcFileRelease extends AbstractRelease {
     public int getNbParticles() {
 
         try {
-            NetcdfFile nc = NetcdfDataset.open(filename);
+            NetcdfFile nc = NetcdfDatasets.openDataset(filename);
             int nParticle = nc.findDimension("drifter").getLength();
             nc.close();
             return nParticle;

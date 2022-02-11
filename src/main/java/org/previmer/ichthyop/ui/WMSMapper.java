@@ -106,7 +106,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -279,7 +279,7 @@ public class WMSMapper extends JXMapKit {
 
         if (ncfile != null && ncfile.isFile()) {
             try {
-                nc = NetcdfDataset.openFile(ncfile.getAbsolutePath(), null);
+                nc = NetcdfDatasets.openFile(ncfile.getAbsolutePath(), null);
                 init();
                 CompoundPainter<?> cp = new CompoundPainter<>();
                 cp.setPainters(getBgPainter());
