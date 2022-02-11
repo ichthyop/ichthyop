@@ -53,11 +53,9 @@ import org.previmer.ichthyop.event.InitializeEvent;
 import org.previmer.ichthyop.event.LastStepEvent;
 import org.previmer.ichthyop.event.LastStepListener;
 import org.previmer.ichthyop.event.SetupEvent;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import javax.swing.event.EventListenerList;
 import org.previmer.ichthyop.util.Constant;
 
