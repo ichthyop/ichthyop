@@ -99,12 +99,16 @@ public class DensityTracker extends SimulationManagerAccessor {
                 float lonPart = (float) particle.getLon();
                 float latPart = (float) particle.getLat();
                 // If particle is out of the density domain, nothing is done.
-                if ((lonPart > lonMax) || (lonPart < lonMin) || (latPart > latMax) || (latPart < latMin)) {
+                if ((lonPart >= lonMax) || (lonPart <= lonMin) || (latPart >= latMax) || (latPart <= latMin)) {
                     continue;
                 }
                 int indexLon = (int) Math.floor(nLon * (lonPart - lonMin) / (lonMax - lonMin));
                 int indexLat = (int) Math.floor(nLat * (latPart - latMin) / (latMax - latMin));
-                density[indexLat][indexLon] += 1;
+                try {
+                    density[indexLat][indexLon] += 1;
+                } catch (ArrayIndexOutOfBoundsException e) { 
+                    getLogger().warning("Index out of bound");
+                }
             }
         }
 
