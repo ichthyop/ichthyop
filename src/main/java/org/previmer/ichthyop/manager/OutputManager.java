@@ -125,6 +125,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private static NetcdfFormatWriter densNcOut;
     private static NetcdfFormatWriter.Builder bDensNcOut;
     
+    private String trajectoryFileName;
+    private String densityFileName;
+    
     private Nc4Chunking chunker;
 
     /**
@@ -185,9 +188,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void closeTraj() {
         try {
             ncOut.close();
-            String strFilePart = ncOut.getOutputFile().getLocation();
-            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
-            Path filePart = new File(strFilePart).toPath();
+            String strFileBase = this.trajectoryFileName.substring(0, this.trajectoryFileName.indexOf(".part"));
+            Path filePart = new File(this.trajectoryFileName).toPath();
             Path fileBase = new File(strFileBase).toPath();
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
@@ -204,9 +206,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     private void closeDist() {
         try {
             densNcOut.close();
-            String strFilePart = densNcOut.getOutputFile().getLocation();
-            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
-            Path filePart = new File(strFilePart).toPath();
+            String strFileBase = this.densityFileName.substring(0, this.densityFileName.indexOf(".part"));
+            Path filePart = new File(this.densityFileName).toPath();
             Path fileBase = new File(strFileBase).toPath();
             Files.move(filePart, fileBase, REPLACE_EXISTING);
             getLogger().info("Closed NetCDF output file.");
@@ -568,7 +569,8 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return;
         }
         
-        bNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, makeFileLocation(), this.chunker);
+        this.trajectoryFileName = makeFileLocation();
+        bNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, this.trajectoryFileName, this.chunker);
     
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
@@ -628,9 +630,9 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         Dimension dimTime;
         Dimension dimLongitude;
         Dimension dimLatitude;
-        String fileName = makeFileLocation().replace(".nc", "_density.nc"); 
+        this.densityFileName = makeFileLocation().replace(".nc", "_density.nc"); 
               
-        bDensNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, fileName, this.chunker);
+        bDensNcOut = NetcdfFormatWriter.createNewNetcdf4(ncVersion, this.densityFileName, this.chunker);
         
         dimTime = bDensNcOut.addUnlimitedDimension("time");
         dimLongitude = bDensNcOut.addDimension("longitude", densTracker.getNLon());
