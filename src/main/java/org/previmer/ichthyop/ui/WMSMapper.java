@@ -945,7 +945,7 @@ public class WMSMapper extends JXMapKit {
             ArrayInt.D1 arrMortality = (ArrayInt.D1) vmortality.read(new int[]{index, 0}, new int[]{1, vmortality.getShape(1)}).reduce(0);
             Array arrColorVariable = null;
             if (null != pcolorVariable) {
-                if (pcolorVariable.getNameAndDimensions().startsWith("time")) {
+                if (pcolorVariable.getNameAndDimensions().startsWith("time") || pcolorVariable.getNameAndDimensions().startsWith("drifter")) {
                     arrColorVariable = pcolorVariable.read(new int[]{index}, new int[]{1}).reduce();
                 } else {
                     arrColorVariable = pcolorVariable.read(new int[]{index, 0}, new int[]{1, pcolorVariable.getShape(1)}).reduce();
