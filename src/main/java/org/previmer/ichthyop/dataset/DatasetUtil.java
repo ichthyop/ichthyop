@@ -44,6 +44,8 @@
 
 package org.previmer.ichthyop.dataset;
 
+import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -55,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import static org.previmer.ichthyop.SimulationManagerAccessor.getLogger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.previmer.ichthyop.io.IOTools;
@@ -63,6 +64,7 @@ import org.previmer.ichthyop.manager.TimeManager;
 import org.previmer.ichthyop.util.Constant;
 import org.previmer.ichthyop.util.MetaFilenameFilter;
 import org.previmer.ichthyop.util.NCComparator;
+
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
@@ -468,9 +470,14 @@ public class DatasetUtil {
     
     public static double getDateLeap(long time, String units) {
         
-        LocalDateTime finalDate;
-        LocalDateTime dateUnit = getDateUnit(time, units);
-            
+        LocalDateTime finalDate, dateUnit;
+        try { 
+            dateUnit = getDateUnit(time, units);
+        } catch(Exception e) {
+            units = TimeManager.getInstance().getTimeOfOrigin();
+            dateUnit = getDateUnit(time, units);
+        }
+              
         if (units.contains("second")) {
             finalDate = dateUnit.plusSeconds(time);
         } else if (units.contains("hour")) {
@@ -487,7 +494,13 @@ public class DatasetUtil {
     
     public static double getDateNoLeap(long time, String units) {
 
-        LocalDateTime dateUnit = getDateUnit(time, units);
+        LocalDateTime dateUnit;
+        try { 
+            dateUnit = getDateUnit(time, units);
+        } catch(Exception e) {
+            units = TimeManager.getInstance().getTimeOfOrigin();
+            dateUnit = getDateUnit(time, units);
+        }
 
         if (units.contains("hour")) {
             time *= Constant.ONE_HOUR;
@@ -532,13 +545,11 @@ public class DatasetUtil {
         
     }
 
-    
-    
     public static LocalDateTime getDateUnit(long time, String units) {
         
         // Date formatter to extract NetCDF time
         DateTimeFormatter dateFormatter;
-
+        
         // Extract the NetCDF reference date by removing the
         // prefix (day(s), month(s) or day(s)) and the seconds values
         int beginIndex = units.indexOf("since") + 5;
