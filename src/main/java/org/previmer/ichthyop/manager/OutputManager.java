@@ -85,7 +85,9 @@ import org.previmer.ichthyop.io.CustomTracker;
 import org.previmer.ichthyop.io.DensityTracker;
 import org.previmer.ichthyop.io.XParameter;
 import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -240,6 +242,26 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         }
         ncOut.write(ncOut.findVariable("region_edge"), edge);
     }
+    
+    private void addDrifters() {
+        Variable.Builder<?> variable = bNcOut.addVariable("drifter", DataType.INT, "drifters");
+        variable.addAttribute(new Attribute("long_name", "drifter index"));
+        variable.addAttribute(new Attribute("unit", ""));
+    }
+    
+    /**
+     * Add drifter coordinates in the Netcdf. Used mainly for visualisation purposes
+     */
+    private void writeDrifters() throws IOException, InvalidRangeException {
+        int nDrifters = getSimulationManager().getReleaseManager().getNbParticles();
+        ArrayInt drifterIndex = new ArrayInt(new int[] {nDrifters}, false);
+        Index index = drifterIndex.getIndex();
+        for (int i = 0; i < nDrifters; i++) {
+            index.set(i);
+            drifterIndex.set(index, i);
+        }
+        ncOut.write(ncOut.findVariable("drifter"), drifterIndex);
+    }
 
     private void addZones() {
         
@@ -252,8 +274,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
                     Dimension zoneDim = bNcOut.addDimension("zone" + iZone, zoneAreas.get(iZone).size());
                     Variable.Builder<?> varZone = bNcOut.addVariable("coord_zone" + iZone, DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(zoneDim, latlonDim)));
                     varZone.addAttribute(new Attribute("long_name", zone.getKey()));
-                    varZone.addAttribute(
-                            new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
+                    varZone.addAttribute(new Attribute("unit", "x and y coordinates of the center of the cells in the zone"));
                     varZone.addAttribute(new Attribute("type", zone.getType().toString()));
                     String color = zone.getColor().toString();
                     color = color.substring(color.lastIndexOf("["));
@@ -574,7 +595,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     
         /* Reset NetCDF dimensions */
         getDimensionFactory().resetDimensions();
-
+        
         /* add application trackers lon lat depth time */
         addPredefinedTrackers();
 
@@ -605,11 +626,14 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         
         trackers.removeAll(errTrackers);
 
-        /* add gloabal attributes */
+        // add gloabal attributes 
         addGlobalAttributes();
 
-        /* add definition of the simulated area */
+        // add definition of the simulated area 
         addRegion();
+        
+        // add drifter variables
+        addDrifters();
         
         clearPredefinedTrackerList = true;
         clearCustomTrackerList = true;
@@ -757,12 +781,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             return;
         }
         
-        /* add the zones
-         * It cannnot be done in the setup because the definition of the zones
-         * requires that dataset has been initialized first.
-         */ 
+        // add the zones It cannnot be done in the setup because the definition of the
+        // zones requires that dataset has been initialized first.
         addZones();
-
+        
         /* reset counter */
         i_record = 0;
 
@@ -785,6 +807,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             sb.append("\n");
             sb.append("Map creation might not work correctly later on.");
             getLogger().log(Level.WARNING, sb.toString());
+        }
+        
+        try {
+            writeDrifters();
+        } catch(Exception ex) {
+            
         }
 
         /* write the zones */
