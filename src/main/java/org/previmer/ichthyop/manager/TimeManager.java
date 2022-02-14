@@ -47,18 +47,18 @@ package org.previmer.ichthyop.manager;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import org.previmer.ichthyop.event.NextStepEvent;
-import org.previmer.ichthyop.event.NextStepListener;
-import org.previmer.ichthyop.event.InitializeEvent;
-import org.previmer.ichthyop.event.LastStepEvent;
-import org.previmer.ichthyop.event.LastStepListener;
-import org.previmer.ichthyop.event.SetupEvent;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
+
 import javax.swing.event.EventListenerList;
+
+import org.previmer.ichthyop.event.InitializeEvent;
+import org.previmer.ichthyop.event.LastStepEvent;
+import org.previmer.ichthyop.event.LastStepListener;
+import org.previmer.ichthyop.event.NextStepEvent;
+import org.previmer.ichthyop.event.NextStepListener;
+import org.previmer.ichthyop.event.SetupEvent;
 import org.previmer.ichthyop.util.Constant;
 
 /**
@@ -83,7 +83,7 @@ public class TimeManager extends AbstractManager {
     
     /** Reference date: 1900-01-01 00:00 */
     public static final LocalDateTime DATE_REF = LocalDateTime.of(YEAR_REF, 1, 1, 0, 0);
-
+    
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -177,6 +177,11 @@ public class TimeManager extends AbstractManager {
 
     public void firstStepTriggered() throws Exception {
         fireNextStepTriggered();
+    }
+    
+    public String getTimeOfOrigin() {
+        String output = getParameter("time_origin");
+        return output;
     }
 
     private void loadParameters() throws Exception {
