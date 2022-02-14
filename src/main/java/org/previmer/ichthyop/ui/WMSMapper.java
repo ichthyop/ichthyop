@@ -313,10 +313,25 @@ public class WMSMapper extends JXMapKit {
         }
     }
 
+    /** Recover the name of the variable by removing the dimension part. */
+    private String getVariableName(Variable variable) {
+        String variableNameDim = variable.getNameAndDimensions();
+        int endIndex = variableNameDim.indexOf("(");
+        String variableName;
+        if (endIndex != -1) {
+            variableName = variableNameDim.substring(0, endIndex);
+        } else {
+            variableName = variableNameDim;
+        }
+
+        return variableName;
+    }
+    
     public String[] getVariableList() {
         List<String> list = new ArrayList<>();
         list.add("None");
         list.add("time");
+        list.add("drifter");
         for (Variable variable : nc.getVariables()) {
             List<Dimension> dimensions = variable.getDimensions();
             boolean excluded = (dimensions.size() != 2);
@@ -324,7 +339,7 @@ public class WMSMapper extends JXMapKit {
                 excluded = !(dimensions.get(0).getShortName().equals("time") && dimensions.get(1).getShortName().equals("drifter"));
             }
             if (!excluded) {
-                list.add(variable.getNameAndDimensions());
+                list.add(this.getVariableName(variable));
             }
         }
         return list.toArray(new String[list.size()]);
@@ -335,7 +350,7 @@ public class WMSMapper extends JXMapKit {
         Array array = nc.findVariable(variable).read();
 
         float[] dataset = (float[]) array.get1DJavaArray(DataType.FLOAT);
-        if (variable.equals("time")) {
+        if (variable.equals("time") || variable.equals("drifer")) {
             if (dataset[0] > dataset[dataset.length - 1]) {
                 return new float[]{dataset[dataset.length - 1], dataset[0]};
             } else {
@@ -846,7 +861,7 @@ public class WMSMapper extends JXMapKit {
                 g.setColor(Color.BLACK);
                 layout.draw(g, text_x, text_y);
 
-                String vname = pcolorVariable.getNameAndDimensions();
+                String vname = getVariableName(pcolorVariable);
                 try {
                     AttributeContainer attributes = pcolorVariable.attributes();
 
