@@ -244,7 +244,7 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     }
     
     private void addDrifters() {
-        Variable.Builder<?> variable = bNcOut.addVariable("drifter", DataType.INT, "drifters");
+        Variable.Builder<?> variable = bNcOut.addVariable("drifter", DataType.INT, "drifter");
         variable.addAttribute(new Attribute("long_name", "drifter index"));
         variable.addAttribute(new Attribute("unit", ""));
     }
