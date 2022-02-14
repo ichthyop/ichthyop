@@ -235,7 +235,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
-            <version>4.6.6</version>
+            <version>5.4.1</version>
         </dependency>
         <dependency>
             <groupId>ml.options</groupId>

@@ -58,7 +58,7 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -174,7 +174,7 @@ public class NemoDataset_2D extends AbstractDataset {
     private void readConstantField() throws Exception {
 
         NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
+        nc = NetcdfDatasets.openDataset(file_hgr, enhanced(), null);
         getLogger().log(Level.INFO, "read lon, lat & mask from {0}", nc.getLocation());
         lonRho = new float[ny][nx];
         latRho = new float[ny][nx];
@@ -195,7 +195,7 @@ public class NemoDataset_2D extends AbstractDataset {
 
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
+            nc = NetcdfDatasets.openDataset(file_mask, enhanced(), null);
         }
 
         maskRho = new int[ny][nx];
@@ -209,7 +209,7 @@ public class NemoDataset_2D extends AbstractDataset {
 
         if (!isGridInfoInOneFile) {
             nc.close();
-            nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null);
+            nc = NetcdfDatasets.openDataset(file_hgr, enhanced(), null);
         }
         //System.out.println("read e1t e2t " + nc.getLocation());
         // fichier *mesh*h*
@@ -393,7 +393,7 @@ public class NemoDataset_2D extends AbstractDataset {
      */
     private void readLonLat() throws IOException {
 
-        try (NetcdfFile nc = NetcdfDataset.openDataset(file_hgr, enhanced(), null)) {
+        try (NetcdfFile nc = NetcdfDatasets.openDataset(file_hgr, enhanced(), null)) {
             lonRho = new float[ny][nx];
             latRho = new float[ny][nx];
             Array arrLon = nc.findVariable(strLon).read().reduce();
@@ -510,7 +510,7 @@ public class NemoDataset_2D extends AbstractDataset {
      */
     private void getDimNC() throws IOException {
 
-        NetcdfFile nc = NetcdfDataset.openDataset(file_mask, enhanced(), null);
+        NetcdfFile nc = NetcdfDatasets.openDataset(file_mask, enhanced(), null);
         try {
             nx = nc.findDimension(strXDim).getLength();
         } catch (Exception ex) {

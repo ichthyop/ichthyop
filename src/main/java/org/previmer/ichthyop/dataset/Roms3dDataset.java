@@ -58,8 +58,8 @@ import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.dataset.NetcdfDatasets;
+import ucar.nc2.write.NetcdfFormatWriter;
 
 /**
  *
@@ -166,26 +166,26 @@ public class Roms3dDataset extends Roms3dCommon {
             File fout = new File(direc, baseName);
             
             // Creation of file output + definition of dims/vars
-            NetcdfFileWriter ncOut = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, fout.getAbsolutePath());
-            Dimension timeDim = ncOut.addUnlimitedDimension("time");
-            Dimension xDim = ncOut.addDimension(null, "x", nx);
-            Dimension yDim = ncOut.addDimension(null, "y", ny);
-            Dimension zDim = ncOut.addDimension(null, "z", nz + 1);
+            NetcdfFormatWriter.Builder builderNcOut = NetcdfFormatWriter.createNewNetcdf3(fout.getAbsolutePath());
+            Dimension timeDim = builderNcOut.addUnlimitedDimension("time");
+            Dimension xDim = builderNcOut.addDimension("x", nx);
+            Dimension yDim = builderNcOut.addDimension("y", ny);
+            Dimension zDim = builderNcOut.addDimension("z", nz + 1);
             Dimension[] dimArr = {timeDim, zDim, yDim, xDim};
             Dimension[] dimArrZeta = {timeDim, yDim, xDim};
             List<Dimension> listDimArr = new ArrayList<>(Arrays.asList(dimArr));
             List<Dimension> listDimArrZeta = new ArrayList<>(Arrays.asList(dimArrZeta));
                        
-            ncOut.addVariable(null,"U", DataType.FLOAT, listDimArr);
-            ncOut.addVariable(null,"V", DataType.FLOAT, listDimArr);
-            ncOut.addVariable(null,"W", DataType.FLOAT, listDimArr);
-            ncOut.addVariable(null,"Zeta", DataType.FLOAT, listDimArrZeta);
-            ncOut.addVariable(null,"Depth", DataType.FLOAT, listDimArr);
-            ncOut.create();
+            builderNcOut.addVariable("U", DataType.FLOAT, listDimArr);
+            builderNcOut.addVariable("V", DataType.FLOAT, listDimArr);
+            builderNcOut.addVariable("W", DataType.FLOAT, listDimArr);
+            builderNcOut.addVariable("Zeta", DataType.FLOAT, listDimArrZeta);
+            builderNcOut.addVariable("Depth", DataType.FLOAT, listDimArr);
+            NetcdfFormatWriter ncOut = builderNcOut.build();
 
             // Opening of NetCDF file and reading of U/V/Zeta
             NetcdfFile nc;
-            nc = NetcdfDataset.openDataset(f);
+            nc = NetcdfDatasets.openDataset(f);
             
             // Correct the time counter to read all variables
             int ntime = nc.findDimension("time").getLength();

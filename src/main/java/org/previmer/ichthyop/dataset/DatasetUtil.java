@@ -69,7 +69,7 @@ import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -148,7 +148,7 @@ public class DatasetUtil {
         if (!new File(file).isFile()) {
             throw new FileNotFoundException(file);
         }
-        NetcdfFile nc = NetcdfDataset.openDataset(file);
+        NetcdfFile nc = NetcdfDatasets.openDataset(file);
         Array timeArr = nc.findVariable(strTime).read();
         nc.close();
         
@@ -292,7 +292,7 @@ public class DatasetUtil {
      */
     public static double guessTimeConversion(Variable time) {
         // Try to read the units attribute to confirm it is seconds
-        Attribute attrUnits = time.findAttributeIgnoreCase("units");
+        Attribute attrUnits = time.findAttribute("units");
         if (null != attrUnits) {
             String units = attrUnits.getStringValue().toLowerCase();
             if (units.contains("second")) {
@@ -316,7 +316,7 @@ public class DatasetUtil {
 
     static NetcdfFile openFile(String filename, boolean enhanced) throws IOException {
         NetcdfFile nc;
-        nc = NetcdfDataset.openDataset(filename, enhanced, null);
+        nc = NetcdfDatasets.openDataset(filename, enhanced, null);
         getLogger().log(Level.INFO, "'{'Dataset'}' Open {0}", filename);
         return nc;
     }
@@ -332,7 +332,7 @@ public class DatasetUtil {
 
         NetcdfFile ncIn;
         getLogger().log(Level.INFO, "Opening remote URL {0} Please wait...", opendapURL);
-        ncIn = NetcdfDataset.openDataset(opendapURL, enhanced, null);
+        ncIn = NetcdfDatasets.openDataset(opendapURL, enhanced, null);
         getLogger().log(Level.INFO, "'{'Dataset'}' Open remote {0}", opendapURL);
         return ncIn;
     }
@@ -443,9 +443,9 @@ public class DatasetUtil {
         
         // Open the NetCDF file
         // Recover the time variable and units
-        NetcdfFile nc = NetcdfDataset.openDataset(file);
+        NetcdfFile nc = NetcdfDatasets.openDataset(file);
         Variable timeVar = nc.findVariable(strTime);
-        Attribute attrUnits = timeVar.findAttributeIgnoreCase("units");
+        Attribute attrUnits = timeVar.findAttribute("units");
 
         // Recover the time values for the corresponding index
         Array timeArr = nc.findVariable(strTime).read();

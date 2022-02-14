@@ -54,7 +54,7 @@ import org.previmer.ichthyop.ui.LonLatConverter;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -661,7 +661,7 @@ public class SymphonieDataset extends AbstractDataset {
         if (!filename.exists()) {
             throw new IOException("Grid file " + filename + " does not exist");
         }
-        ncGrid = NetcdfDataset.openDataset(filename.toString());
+        ncGrid = NetcdfDatasets.openDataset(filename.toString());
     }
 
     void open(String filename) throws IOException {
@@ -670,7 +670,7 @@ public class SymphonieDataset extends AbstractDataset {
                 ncIn.close();
             }
             try {
-                ncIn = NetcdfDataset.openDataset(filename);
+                ncIn = NetcdfDatasets.openDataset(filename);
             } catch (Exception ex) {
                 IOException ioex = new IOException("Error opening dataset " + filename + " ==> " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());

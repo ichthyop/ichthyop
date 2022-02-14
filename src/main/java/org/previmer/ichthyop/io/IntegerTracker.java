@@ -49,6 +49,7 @@ import org.previmer.ichthyop.particle.IParticle;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
 
 /**
  *
@@ -70,9 +71,11 @@ public abstract class IntegerTracker extends AbstractTracker {
     
     @Override
     public Array createArray() {
-        ArrayInt.D2 array = new ArrayInt.D2(1, getNParticle());
+        ArrayInt array = new ArrayInt(new int[]{1, getNParticle()}, false);
+        Index index = array.getIndex();
         for (int i = 0; i < getNParticle(); i++) {
-            array.set(0, i, -99);
+            index.set(0, i);
+            array.set(index, -99);
         }
         return array;
     }

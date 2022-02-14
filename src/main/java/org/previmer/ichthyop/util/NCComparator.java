@@ -51,7 +51,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import ucar.ma2.InvalidRangeException;
 
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -116,10 +116,10 @@ public class NCComparator implements Comparator<String> {
         Double n2;
         NetcdfFile ncdf;
         try {
-            ncdf = NetcdfDataset.openFile(nc1, null);
+            ncdf = NetcdfDatasets.openFile(nc1, null);
             n1 = ncdf.findVariable(strTime).read(new int[]{0}, new int[]{1}).getDouble(0);
             ncdf.close();
-            ncdf = NetcdfDataset.openFile(nc2, null);
+            ncdf = NetcdfDatasets.openFile(nc2, null);
             n2 = ncdf.findVariable(strTime).read(new int[]{0}, new int[]{1}).getDouble(0);
             ncdf.close();
         } catch (IOException | InvalidRangeException e) {
