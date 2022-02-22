@@ -542,97 +542,9 @@ public class FvcomDataset extends AbstractDataset {
     /**
      * Determines whether the specified geographical point (lon, lat) belongs to the
      * is inside the polygon defined by (imin, jmin) & (imin, jmax) & (imax, jmax) &
-     * (imax, jmin).
-     *
-     * <p>
-     * The algorithm has been adapted from a function in ROMS/UCLA code, originally
-     * written by Alexander F. Shchepetkin and Hernan G. Arango. Please find below
-     * an extract of the ROMS/UCLA documention.
-     * </p>
+     * (imax, jmin). 
      * 
-     * <pre>
-     * Given the vectors Xb and Yb of size Nb, defining the coordinates
-     * of a closed polygon,  this function find if the point (Xo,Yo) is
-     * inside the polygon.  If the point  (Xo,Yo)  falls exactly on the
-     * boundary of the polygon, it still considered inside.
-     * This algorithm does not rely on the setting of  Xb(Nb)=Xb(1) and
-     * Yb(Nb)=Yb(1).  Instead, it assumes that the last closing segment
-     * is (Xb(Nb),Yb(Nb)) --> (Xb(1),Yb(1)).
-     *
-     * Reference:
-     * Reid, C., 1969: A long way from Euclid. Oceanography EMR,
-     * page 174.
-     *
-     * Algorithm:
-     *
-     * The decision whether the point is  inside or outside the polygon
-     * is done by counting the number of crossings from the ray (Xo,Yo)
-     * to (Xo,-infinity), hereafter called meridian, by the boundary of
-     * the polygon.  In this counting procedure,  a crossing is counted
-     * as +2 if the crossing happens from "left to right" or -2 if from
-     * "right to left". If the counting adds up to zero, then the point
-     * is outside.  Otherwise,  it is either inside or on the boundary.
-     *
-     * This routine is a modified version of the Reid (1969) algorithm,
-     * where all crossings were counted as positive and the decision is
-     * made  based on  whether the  number of crossings is even or odd.
-     * This new algorithm may produce different results  in cases where
-     * Xo accidentally coinsides with one of the (Xb(k),k=1:Nb) points.
-     * In this case, the crossing is counted here as +1 or -1 depending
-     * of the sign of (Xb(k+1)-Xb(k)).  Crossings  are  not  counted if
-     * Xo=Xb(k)=Xb(k+1).  Therefore, if Xo=Xb(k0) and Yo>Yb(k0), and if
-     * Xb(k0-1) < Xb(k0) < Xb(k0+1),  the crossing is counted twice but
-     * with weight +1 (for segments with k=k0-1 and k=k0). Similarly if
-     * Xb(k0-1) > Xb(k0) > Xb(k0+1), the crossing is counted twice with
-     * weight -1 each time.  If,  on the other hand,  the meridian only
-     * touches the boundary, that is, for example, Xb(k0-1) < Xb(k0)=Xo
-     * and Xb(k0+1) < Xb(k0)=Xo, then the crossing is counted as +1 for
-     * segment k=k0-1 and -1 for segment k=k0, resulting in no crossing.
-     *
-     * Note 1: (Explanation of the logical condition)
-     *
-     * Suppose  that there exist two points  (x1,y1)=(Xb(k),Yb(k))  and
-     * (x2,y2)=(Xb(k+1),Yb(k+1)),  such that,  either (x1 < Xo < x2) or
-     * (x1 > Xo > x2).  Therefore, meridian x=Xo intersects the segment
-     * (x1,y1) -> (x2,x2) and the ordinate of the point of intersection
-     * is:
-     *                y1*(x2-Xo) + y2*(Xo-x1)
-     *            y = -----------------------
-     *                         x2-x1
-     * The mathematical statement that point  (Xo,Yo)  either coinsides
-     * with the point of intersection or lies to the north (Yo>=y) from
-     * it is, therefore, equivalent to the statement:
-     *
-     *      Yo*(x2-x1) >= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 > 0
-     * or
-     *      Yo*(x2-x1) <= y1*(x2-Xo) + y2*(Xo-x1),   if   x2-x1 < 0
-     *
-     * which, after noting that  Yo*(x2-x1) = Yo*(x2-Xo + Xo-x1) may be
-     * rewritten as:
-     *
-     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) >= 0,   if   x2-x1 > 0
-     * or
-     *      (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) <= 0,   if   x2-x1 < 0
-     *
-     * and both versions can be merged into  essentially  the condition
-     * that (Yo-y1)*(x2-Xo)+(Yo-y2)*(Xo-x1) has the same sign as x2-x1.
-     * That is, the product of these two must be positive or zero.
-     * </pre>
-     *
-     * @param imin
-     *            an int, i-coordinate of the area left corners
-     * @param imax
-     *            an int, i-coordinate of the area right corners
-     * @param jmin
-     *            an int, j-coordinate of the area left corners
-     * @param jmax
-     *            an int, j-coordinate of the area right corners
-     * @param lon
-     *            a double, the longitude of the geographical point
-     * @param lat
-     *            a double, the latitude of the geographical point
-     * @return <code>true</code> if (lon, lat) belongs to the polygon,
-     *         <code>false</code>otherwise.
+     * Detail description here: http://forge.ipsl.jussieu.fr/roms_locean/browser/Roms_tools/Roms_Agrif/init_floats.F?rev=2
      */
     private boolean isInsidePolygone(float[] xpol, float ypol[], float x, float y) {
 
