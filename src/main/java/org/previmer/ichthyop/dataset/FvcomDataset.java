@@ -671,7 +671,6 @@ public class FvcomDataset extends AbstractDataset {
                 // (Yo-y1)*(x2-Xo) + (Yo-y2)*(Xo-x1) >= 0, if x2-x1 > 0
                 inc = 0;
                 if ((xpol4[k] == x) & (ypol4[k] == y)) {
-                    crossings = 1;
                     return (true);
                 } else if (((dx1 == 0.) & (y >= ypol4[k])) | ((dx2 == 0.) & (y >= ypol4[k + 1]))) {
                     inc = 1;
