@@ -1613,7 +1613,7 @@ public class NemoDataset extends AbstractDataset {
                 dxy = dx2 * (lat - yb[k]) - dx1 * (yb[k + 1] - lat);
                 inc = 0;
                 if ((xb[k] == lon) & (yb[k] == lat)) {
-                    crossings = 1;
+                    return(true);
                 } else if (((dx1 == 0.) & (lat >= yb[k]))
                         | ((dx2 == 0.) & (lat >= yb[k + 1]))) {
                     inc = 1;

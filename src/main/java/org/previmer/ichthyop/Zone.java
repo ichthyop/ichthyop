@@ -345,7 +345,7 @@ public class Zone extends SimulationManagerAccessor {
                 dxy = dx2 * (y - polygon.get(k).getY()) - dx1 * (polygon.get(k + 1).getY() - y);
                 inc = 0;
                 if ((polygon.get(k).getX() == x) & (polygon.get(k).getY() == y)) {
-                    crossings = 1;
+                    return(true);
                 } else if (((dx1 == 0.) & (y >= polygon.get(k).getY()))
                         | ((dx2 == 0.) & (y >= polygon.get(k + 1).getY()))) {
                     inc = 1;
