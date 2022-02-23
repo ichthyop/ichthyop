@@ -56,6 +56,9 @@ import org.previmer.ichthyop.io.XBlock;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.logging.Level;
 import ucar.nc2.Variable;
@@ -84,6 +87,9 @@ import org.previmer.ichthyop.io.TimeTracker;
 import org.previmer.ichthyop.io.CustomTracker;
 import org.previmer.ichthyop.io.DensityTracker;
 import org.previmer.ichthyop.io.XParameter;
+
+import ucar.ma2.Array;
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
@@ -525,6 +531,17 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
             getLogger().log(Level.SEVERE, "Error saving density value");
             e.printStackTrace();
         }
+        
+        // Write time.
+        origin = new int[] {i_record, 0, 0};
+        Array timeArray = new ArrayDouble.D1(1);
+        timeArray.setDouble(0, getSimulationManager().getTimeManager().getTime());
+        try {
+            densNcOut.write(densNcOut.findVariable("time"), origin, timeArray);
+        } catch (IOException | InvalidRangeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }      
     }
 
     private void writeToNetCDF(int i_record) {
@@ -667,7 +684,20 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         bDensNcOut.addVariable("longitude", ucar.ma2.DataType.FLOAT, "longitude");
         bDensNcOut.addVariable("latitude", ucar.ma2.DataType.FLOAT, "latitude");
         bDensNcOut.addVariable("density", ucar.ma2.DataType.INT, dimsDens);
-                        
+        
+        // Create time variable and add attributes
+        Variable.Builder<?> timeVar = bDensNcOut.addVariable("time", ucar.ma2.DataType.DOUBLE, "time");
+        List<Attribute> listAttributes = new ArrayList<>();
+        listAttributes.add(new Attribute("calendar", "gregorian"));
+
+        LocalDateTime dateRef = TimeManager.DATE_REF;
+        DateTimeFormatter unitsFormatter = DateTimeFormatter.ofPattern("'seconds since' yyyy-MM-dd HH:mm");
+        String timeUnits = dateRef.format(unitsFormatter);
+        listAttributes.add(new Attribute("units", timeUnits));
+        for (Attribute attribute : listAttributes) {
+            timeVar.addAttribute(attribute);
+        }
+                      
     }
     
 
