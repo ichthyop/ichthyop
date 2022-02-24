@@ -815,9 +815,6 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         // zones requires that dataset has been initialized first.
         addZones();
         
-        /* reset counter */
-        i_record = 0;
-
         /* create the NetCDF file */
         try {
             ncOut = bNcOut.build();
@@ -883,6 +880,10 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
     public void initializePerformed(InitializeEvent e) throws Exception {
 
         getLogger().info("Output manager initialization [OK]");
+        
+        /* reset counter */
+        i_record = 0;
+        
         if(this.isTrajectoryEnabled) { 
             this.initializeTrajectoryOutputs();  
         }
