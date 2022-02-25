@@ -144,9 +144,11 @@ public class FvcomDataset extends AbstractDataset {
 
         loadParameters();
         clearRequiredVariables();
+        openDataset();
         getDimNC();
         readConstantField();
-
+        //System.exit(0);
+        
     }
 
     @Override
@@ -329,6 +331,9 @@ public class FvcomDataset extends AbstractDataset {
     void loadParameters() {
         strEleDim = getParameter("field_dim_elements");
         strNodesDim = getParameter("field_dim_nodes");
+        strTimeDim = getParameter("field_dim_time");
+        strTime = getParameter("field_var_time");
+        
         xVarName = getParameter("field_var_x");
         yVarName = getParameter("field_var_y");
         lonVarName = getParameter("field_var_lon");
@@ -336,9 +341,11 @@ public class FvcomDataset extends AbstractDataset {
         
         strA1U = getParameter("field_var_a1u");
         strA2U = getParameter("field_var_a2u");      
-        strAW0 = getParameter("field_var_a2u");
+        strAW0 = getParameter("field_var_aw0");
         strAWX = getParameter("field_var_awx");
         strAWY = getParameter("field_var_awy");
+        
+        strNodes = getParameter("field_var_nodes");
 
         timeArrow = timeArrow();
 
@@ -439,11 +446,11 @@ public class FvcomDataset extends AbstractDataset {
             }
         }
 
-        a1u = this.read_variable(this.strA1U, 3);
-        a2u = this.read_variable(this.strA2U, 3);
-        aw0 = this.read_variable(this.strAW0, 4);
-        awx = this.read_variable(this.strAWY, 4);
-        awy = this.read_variable(this.strAWX, 4);
+        a1u = this.read_variable(this.strA1U, 4);
+        a2u = this.read_variable(this.strA2U, 4);
+        aw0 = this.read_variable(this.strAW0, 3);
+        awx = this.read_variable(this.strAWY, 3);
+        awy = this.read_variable(this.strAWX, 3);
 
     }
 
