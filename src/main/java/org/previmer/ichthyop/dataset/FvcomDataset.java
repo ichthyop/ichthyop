@@ -476,17 +476,21 @@ public class FvcomDataset extends AbstractDataset {
 
     void findNeighbouringTriangles() {
 
-        this.neighbouringTriangles = new int[nTriangles][];
+        this.neighbouringTriangles = new int[nTriangles][3];
+        
+        // init array with negative values;
+        for(int i = 0; i < nTriangles; i++) { 
+            for(int p = 0; p < 3; p++) {
+                neighbouringTriangles[i][p] =  -1;
+            }
+        }
 
         for (int iele = 0; iele < nTriangles; iele++) {
 
             // get the nodes of the target triangle
             int[] target = this.triangleNodes[iele];
-
-            // Init the list of neighbouring triangles
-            List<Integer> tempOutput = new ArrayList<>();
             
-            // Loop over the three edges, jeeping the order (clockwise)
+            // Loop over the three edges, keeping the order (clockwise)
             for (int k = 0; k < 3; k++) {
 
                 // coordinates of the nodes
@@ -510,23 +514,17 @@ public class FvcomDataset extends AbstractDataset {
                         int p2 = temp[(p + 1) % 3];
 
                         if ((p1 == x1) & (p2 == x2)) {
-                            tempOutput.add(i);
+                            neighbouringTriangles[iele][k] = i;
                             break;
                         }
                         
                         if ((p1 == x2) & (p2 == x1)) {
-                            tempOutput.add(i);
+                            neighbouringTriangles[iele][k] = i;
                             break;
                         }
                     }  // end of loop over test edges
                 }  // end of loop over triangles
             }  // end of loop over target edges
-
-            int nNeighbour = tempOutput.size();
-            neighbouringTriangles[iele] = new int[nNeighbour];
-            for (int p = 0; p < nNeighbour; p++) {
-                neighbouringTriangles[iele][p] = tempOutput.get(p);
-            }
 
         } // end of loop over target triangles
     } // end of method
@@ -636,23 +634,52 @@ public class FvcomDataset extends AbstractDataset {
         double[][] du_dx = new double[this.nTriangles][this.nLayer];
         for(int i =0; i < nTriangles; i++) {
             for(int l = 0; l < this.nLayer; l++) {
-                du_dx[i][l] = a1u[i][0] * u[i][l];
                 
-                // TODO Verify that the neighbours index are consistent.
-                // i.e
-                int cpt = 0;
-                for(int n : this.neighbouringTriangles[i]) { 
-                    du_dx[i][l] += a1u[i][cpt] * u[n][l];
-                    cpt += 1;
+                // get the composant for the given triangle
+                // a1u(E0, 1) * u(E0, Li) in equation
+                du_dx[i][l] += a1u[i][0] * u[i][l];
+                
+
+                // we loop over the neighbours
+                // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
+                // equation
+                for (int n = 0; n < 3; n++) {
+                    int neighbour = this.neighbouringTriangles[i][n];
+                    if (neighbour >= 0) {
+                        du_dx[i][l] += a1u[i][n] * u[neighbour][l];
+                    }
                 }
-                
             }   
         }        
         
         return du_dx;
         
-        
-        
+    }
+    
+    private double[][] compute_du_dy(double[][] u) {
+
+        double[][] du_dy = new double[this.nTriangles][this.nLayer];
+        for (int i = 0; i < nTriangles; i++) {
+            for (int l = 0; l < this.nLayer; l++) {
+
+                // get the composant for the given triangle
+                // a1u(E0, 1) * u(E0, Li) in equation
+                du_dy[i][l] += a1u[i][0] * u[i][l];
+
+                // we loop over the neighbours
+                // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
+                // equation
+                for (int n = 0; n < 3; n++) {
+                    int neighbour = this.neighbouringTriangles[i][n];
+                    if (neighbour >= 0) {
+                        du_dy[i][l] += a2u[i][n] * u[neighbour][l];
+                    }
+                }
+            }
+        }
+
+        return du_dy;
+
     }
         
 
