@@ -166,6 +166,10 @@ public class FvcomDataset extends AbstractDataset {
         findNeighbouringTriangles();
         time_arrow = timeArrow();
         //System.exit(0);
+
+        // Change the way distance is computed. Move to Euclidian in this case,
+        // since data is already provided in meters.
+        this.setDistGetter((lat1, lon1, lat2, lon2) -> DatasetUtil.euclidianDistance(lat1, lon1, lat2, lon2));
         
     }
 
@@ -811,5 +815,10 @@ public class FvcomDataset extends AbstractDataset {
         
     }
         
-
+    @Override
+    public boolean isProjected() {
+        return true;
+    }
+    
+    
 }
