@@ -70,7 +70,8 @@ public class FvcomDataset extends AbstractDataset {
     private double[][] dudy_0, dudy_1;    
     private double[][] dvdx_0, dvdx_1;
     private double[][] dvdy_0, dvdy_1;    
-    
+    private Array u_tp1, u_tp0;
+    private Array v_tp1, v_tp0;
     
     /**
      * NetCDF file object
@@ -202,8 +203,29 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        // TODO Auto-generated method stub
-        return 0;
+        
+        int iTriangle = findTriangle(pGrid);
+        if(iTriangle < 0) {
+            return 0;   
+        }
+        
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        
+        // compute the dX value
+        double dX = pGrid[0] - xBarycenter[iTriangle];
+        double dY = pGrid[1] - yBarycenter[iTriangle];
+        
+        // TODO here we work at the surface only. It is just a start.
+        Index index0 = u_tp0.getIndex();
+        Index index1 = u_tp1.getIndex();
+        
+        index0.set(0, iTriangle);
+        index1.set(0, iTriangle);
+        
+        double output_0 = u_tp0.getDouble(index0) + dudx_0[0][iTriangle] * dX + dudy_0[0][iTriangle] * dY;
+        double output_1 = u_tp1.getDouble(index0) + dudx_1[0][iTriangle] * dX + dudy_1[0][iTriangle] * dY;
+        return ((1.d - x_euler) * output_0 + x_euler * output_1);
+        
     }
 
     @Override
@@ -365,12 +387,12 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double xTore(double x) {
-        return 0;
+        return x;
     }
 
     @Override
     public double yTore(double y) {
-        return 0;
+        return y;
     }
 
     @Override
@@ -381,6 +403,9 @@ public class FvcomDataset extends AbstractDataset {
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
         }
+        
+        u_tp0 = u_tp1;
+        v_tp0 = v_tp1;
         
         // Swap arrays;
         dudx_0 = dudx_1;
@@ -774,8 +799,6 @@ public class FvcomDataset extends AbstractDataset {
     void setAllFieldsTp1AtTime(int rank) throws Exception {
 
         getLogger().info("Reading NetCDF variables...");
-        
-        Array u_tp1, v_tp1;
 
         int[] origin = new int[] { rank, 0, 0};
         double time_tp0 = time_tp1;
