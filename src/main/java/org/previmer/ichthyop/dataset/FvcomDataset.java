@@ -96,8 +96,6 @@ public class FvcomDataset extends AbstractDataset {
     private String strYVarName;
     private String strU;
     private String strV;
-    private String strLonVarName;
-    private String strLatVarName;
     private String strTime;
     private String strTimeDim;
     private String strA1U, strA2U;
@@ -105,7 +103,9 @@ public class FvcomDataset extends AbstractDataset {
     private String stringLayerDim;
     private int nLayer;
     private int indexFile;
-
+    private float cflThreshold;
+    
+    
     int nbTimeRecords;
     int rank;
     double time_tp0;
@@ -122,12 +122,6 @@ public class FvcomDataset extends AbstractDataset {
 
     /** Index of the neighbouring neighbours */
     private int[][] neighbouringTriangles;
-
-    /** Longitude of the nodes */
-    private double[] lonNodes;
-
-    /** Latitude of the nodes */
-    private double[] latNodes;
 
     /** X coordinates of the nodes */
     private double[] xNodes;
@@ -166,7 +160,6 @@ public class FvcomDataset extends AbstractDataset {
         readConstantField();
         findNeighbouringTriangles();
         time_arrow = timeArrow();
-        //System.exit(0);
 
         // Change the way distance is computed. Move to Euclidian in this case,
         // since data is already provided in meters.
@@ -227,11 +220,32 @@ public class FvcomDataset extends AbstractDataset {
         return ((1.d - x_euler) * output_0 + x_euler * output_1);
         
     }
-
+    
     @Override
     public double get_dVy(double[] pGrid, double time) {
-        // TODO Auto-generated method stub
-        return 0;
+        
+        int iTriangle = findTriangle(pGrid);
+        if(iTriangle < 0) {
+            return 0;
+        }
+        
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+        
+        // compute the dX value
+        double dX = pGrid[0] - xBarycenter[iTriangle];
+        double dY = pGrid[1] - yBarycenter[iTriangle];
+        
+        // TODO here we work at the surface only. It is just a start.
+        Index index0 = v_tp0.getIndex();
+        Index index1 = v_tp1.getIndex();
+        
+        index0.set(0, iTriangle);
+        index1.set(0, iTriangle);
+        
+        double output_0 = v_tp0.getDouble(index0) + dvdx_0[0][iTriangle] * dX + dvdy_0[0][iTriangle] * dY;
+        double output_1 = v_tp1.getDouble(index0) + dvdx_1[0][iTriangle] * dX + dvdy_1[0][iTriangle] * dY;
+        return ((1.d - x_euler) * output_0 + x_euler * output_1);
+        
     }
 
     @Override
@@ -435,8 +449,6 @@ public class FvcomDataset extends AbstractDataset {
         
         strXVarName = getParameter("field_var_x");
         strYVarName = getParameter("field_var_y");
-        strLonVarName = getParameter("field_var_lon");
-        strLatVarName = getParameter("field_var_lat");
         
         strA1U = getParameter("field_var_a1u");
         strA2U = getParameter("field_var_a2u");      
@@ -573,6 +585,16 @@ public class FvcomDataset extends AbstractDataset {
         xNodes = this.read_coordinates(this.strXVarName);
         yNodes = this.read_coordinates(this.strYVarName);
         
+        this.cflThreshold = Float.MAX_VALUE;
+        for (int i = 0; i < this.nTriangles; i++) {
+            for (int p = 0; p < 3; p++) {
+                int node1 = this.triangleNodes[i][p];
+                int node2 = this.triangleNodes[i][(p + 1) % 3];
+                double dist = Math.sqrt(Math.pow(xNodes[node1] - xNodes[node2], 2)  + Math.pow(yNodes[node1] - yNodes[node2], 2));
+                this.cflThreshold = Math.min(this.cflThreshold, (float) dist);
+            }
+        }
+        
         xBarycenter = new double[this.nTriangles];
         for (int i = 0; i < this.nTriangles; i++) {
             for (int p = 0; p < 3; p++) {
@@ -593,6 +615,11 @@ public class FvcomDataset extends AbstractDataset {
             }
         }
         
+    }
+    
+    @Override
+    public float getCflThreshold() {
+        return this.cflThreshold;
     }
 
     void findNeighbouringTriangles() {

@@ -58,6 +58,9 @@ public class AdvectionAction extends AbstractAction {
     private boolean isForward;
     private boolean horizontal;
     private boolean vertical;
+    
+    // Threshold for CFL error message
+    public static final float VERTICAL_THRESHOLD_CFL = 1.0f;
 
     @Override
     public void loadParameters() throws Exception {
@@ -132,17 +135,17 @@ public class AdvectionAction extends AbstractAction {
         if (horizontal) {   // barrier.n: activates only if horizontal is on
             dU[0] = getSimulationManager().getDataset().get_dUx(pGrid, time) * dt;
             if (Math.abs(dU[0]) > THRESHOLD_CFL) {
-                getLogger().log(Level.WARNING, "CFL broken for U {0}", (float) dU[0]);
+                getLogger().log(Level.WARNING, "CFL broken for U {0} / {1}", new Object[] {dU[0], THRESHOLD_CFL});
             }
             dU[1] = getSimulationManager().getDataset().get_dVy(pGrid, time) * dt;
             if (Math.abs(dU[1]) > THRESHOLD_CFL) {
-                getLogger().log(Level.WARNING, "CFL broken for V {0}", (float) dU[1]);
+                getLogger().log(Level.WARNING, "CFL broken for V {0} / {1}", new Object[] {dU[1], THRESHOLD_CFL});
             }
         }
 
         if (vertical && (dim > 2)) {   // barrier.n: activates only if vertical is on
             dU[2] = getSimulationManager().getDataset().get_dWz(pGrid, time) * dt;
-            if (Math.abs(dU[2]) > THRESHOLD_CFL) {
+            if (Math.abs(dU[2]) > VERTICAL_THRESHOLD_CFL) {
                 getLogger().log(Level.WARNING, "CFL broken for W {0}", (float) dU[2]);
             }
         }
