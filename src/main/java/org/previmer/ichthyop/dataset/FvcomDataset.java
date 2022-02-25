@@ -124,6 +124,8 @@ public class FvcomDataset extends AbstractDataset {
     /** Y coordinates of the nodes */
     private double[] yNodes;
     
+    private int[] nNeighbours;
+    
     /**
      * Scale factors used for interpolation of tracer/velocities. Dimensions are
      * [nEle, 4 or 3] depending on the variables. They are transposed compared to
@@ -204,15 +206,16 @@ public class FvcomDataset extends AbstractDataset {
         return false;
     }
 
+    /** Points are considered close to the coast when they have less than 3 neighbours */
     @Override
     public boolean isCloseToCost(double[] pGrid) {
-        // TODO Auto-generated method stub
-        return false;
+        int triangle = this.findTriangle(pGrid);
+        return (this.nNeighbours[triangle] < 3);
     }
 
+    /** We consider that points are always out of edge. */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -477,6 +480,7 @@ public class FvcomDataset extends AbstractDataset {
     void findNeighbouringTriangles() {
 
         this.neighbouringTriangles = new int[nTriangles][3];
+        this.nNeighbours = new int[nTriangles];
         
         // init array with negative values;
         for(int i = 0; i < nTriangles; i++) { 
@@ -515,11 +519,13 @@ public class FvcomDataset extends AbstractDataset {
 
                         if ((p1 == x1) & (p2 == x2)) {
                             neighbouringTriangles[iele][k] = i;
+                            this.nNeighbours[iele] += 1;
                             break;
                         }
                         
                         if ((p1 == x2) & (p2 == x1)) {
                             neighbouringTriangles[iele][k] = i;
+                            this.nNeighbours[iele] += 1;
                             break;
                         }
                     }  // end of loop over test edges
