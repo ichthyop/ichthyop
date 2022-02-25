@@ -224,6 +224,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
         /* Add the region edges */
         region = makeRegion();
+        
+        // If no bounding box, nothing is done.
+        if(region.size() == 0) { 
+            return;
+        }
+            
         Dimension edge = bNcOut.addDimension("edge", region.size());
         latlonDim = bNcOut.addDimension("latlon", 2);
         Variable.Builder<?> variable = bNcOut.addVariable("region_edge", DataType.FLOAT, new ArrayList<Dimension>(Arrays.asList(edge, latlonDim)));
@@ -233,6 +239,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
 
     private void writeRegion() throws IOException, InvalidRangeException {
 
+        // If no bounding box, nothing is done.
+        if (region.size() == 0) {
+            return;
+        }
+        
         ArrayFloat.D2 edge = new ArrayFloat.D2(region.size(), 2);
         int i = 0;
         for (GeoPosition gp : region) {
