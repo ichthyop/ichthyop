@@ -93,6 +93,7 @@ public class FvcomDataset extends AbstractDataset {
     private String strTimeDim;
     private String strA1U, strA2U;
     private String strAW0, strAWX, strAWY;
+    private int nLayer;
 
     int nbTimeRecords;
     int rank;
@@ -122,7 +123,7 @@ public class FvcomDataset extends AbstractDataset {
 
     /** Y coordinates of the nodes */
     private double[] yNodes;
-
+    
     /**
      * Scale factors used for interpolation of tracer/velocities. Dimensions are
      * [nEle, 4 or 3] depending on the variables. They are transposed compared to
@@ -148,6 +149,7 @@ public class FvcomDataset extends AbstractDataset {
         getDimNC();
         readConstantField();
         findNeighbouringTriangles();
+        System.exit(0);
         
     }
 
@@ -483,43 +485,43 @@ public class FvcomDataset extends AbstractDataset {
 
             // Init the list of neighbouring triangles
             List<Integer> tempOutput = new ArrayList<>();
+            
+            // Loop over the three edges, jeeping the order (clockwise)
+            for (int k = 0; k < 3; k++) {
 
-            // Loop over all the triangles to find the neighbours
-            for (int i = 0; i < nTriangles; i++) {
+                // coordinates of the nodes
+                int x1 = target[k];
+                int x2 = target[(k + 1) % 3];
 
-                // discard the target triangle
-                if (i == iele) {
-                    continue;
-                }
+                // Loop over all the triangles to find the neighbours
+                for (int i = 0; i < nTriangles; i++) {
 
-                // get the nodes of the loop triangle
-                int[] temp = this.triangleNodes[i];
-
-                // init number of common nodes.
-                int cpt = 0;
-
-                // loop the nodes of the loop triangle
-                for (int j = 0; j < 3; j++) {
-                    int p1 = temp[j];
-                    // loop over the nodes of the target triangle
-                    for (int k = 0; k < 3; k++) {
-                        int n1 = target[k];
-                        if (n1 == p1) {
-                            // if node1 = node2: iterate
-                            cpt += 1;
-                        }
+                    // discard the target triangle
+                    if (i == iele) {
+                        continue;
                     }
-                }
 
-                // neighbouring triangles are triangles for which cpt=2, i.e
-                // two nodes (one edge) are shared.
-                // in this case, we add the i index in the temporary list
-                if (cpt == 2) {
-                    tempOutput.add(i);
-                }
-            } // end of inner triangle list
+                    // get the nodes of the loop triangle
+                    int[] temp = this.triangleNodes[i];
 
-            //
+                    for (int p = 0; p < 3; p++) {
+
+                        int p1 = temp[p];
+                        int p2 = temp[(p + 1) % 3];
+
+                        if ((p1 == x1) & (p2 == x2)) {
+                            tempOutput.add(i);
+                            break;
+                        }
+                        
+                        if ((p1 == x2) & (p2 == x1)) {
+                            tempOutput.add(i);
+                            break;
+                        }
+                    }  // end of loop over test edges
+                }  // end of loop over triangles
+            }  // end of loop over target edges
+
             int nNeighbour = tempOutput.size();
             neighbouringTriangles[iele] = new int[nNeighbour];
             for (int p = 0; p < nNeighbour; p++) {
@@ -627,5 +629,31 @@ public class FvcomDataset extends AbstractDataset {
 
         return (isInPolygone);
     }
+    
+    
+    private double[][] compute_du_dx(double[][] u) {
+        
+        double[][] du_dx = new double[this.nTriangles][this.nLayer];
+        for(int i =0; i < nTriangles; i++) {
+            for(int l = 0; l < this.nLayer; l++) {
+                du_dx[i][l] = a1u[i][0] * u[i][l];
+                
+                // TODO Verify that the neighbours index are consistent.
+                // i.e
+                int cpt = 0;
+                for(int n : this.neighbouringTriangles[i]) { 
+                    du_dx[i][l] += a1u[i][cpt] * u[n][l];
+                    cpt += 1;
+                }
+                
+            }   
+        }        
+        
+        return du_dx;
+        
+        
+        
+    }
+        
 
 }
