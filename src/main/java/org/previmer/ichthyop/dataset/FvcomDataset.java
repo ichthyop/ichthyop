@@ -295,13 +295,11 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double getDepthMax() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public boolean is3D() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -313,13 +311,11 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double xTore(double x) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double yTore(double y) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -337,6 +333,13 @@ public class FvcomDataset extends AbstractDataset {
         yVarName = getParameter("field_var_y");
         lonVarName = getParameter("field_var_lon");
         latVarName = getParameter("field_var_lat");
+        
+        strA1U = getParameter("field_var_a1u");
+        strA2U = getParameter("field_var_a2u");      
+        strAW0 = getParameter("field_var_a2u");
+        strAWX = getParameter("field_var_awx");
+        strAWY = getParameter("field_var_awy");
+
         timeArrow = timeArrow();
 
     }
