@@ -85,10 +85,10 @@ public class FvcomDataset extends AbstractDataset {
     private String strEleDim;
     private String strNodesDim;
     private String strNodes;
-    private String xVarName;
-    private String yVarName;
-    private String lonVarName;
-    private String latVarName;
+    private String strXVarName;
+    private String strYVarName;
+    private String strLonVarName;
+    private String strLatVarName;
     private String strTime;
     private String strTimeDim;
     private String strA1U, strA2U;
@@ -112,16 +112,16 @@ public class FvcomDataset extends AbstractDataset {
     private int[][] neighbouringTriangles;
 
     /** Longitude of the nodes */
-    private float[] lonNodes;
+    private double[] lonNodes;
 
     /** Latitude of the nodes */
-    private float[] latNodes;
+    private double[] latNodes;
 
     /** X coordinates of the nodes */
-    private float[] xNodes;
+    private double[] xNodes;
 
     /** Y coordinates of the nodes */
-    private float[] yNodes;
+    private double[] yNodes;
 
     /**
      * Scale factors used for interpolation of tracer/velocities. Dimensions are
@@ -147,20 +147,18 @@ public class FvcomDataset extends AbstractDataset {
         openDataset();
         getDimNC();
         readConstantField();
-        //System.exit(0);
+        findNeighbouringTriangles();
         
     }
 
     @Override
     public double[] latlon2xy(double lat, double lon) {
-        // TODO Auto-generated method stub
-        return null;
+        return new double[] {lon, lat};
     }
 
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
-        // TODO Auto-generated method stub
-        return null;
+        return new double[] {yRho, xRho};
     }
 
     @Override
@@ -195,8 +193,7 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public boolean isInWater(double[] pGrid) {
-        // TODO Auto-generated method stub
-        return false;
+        return (this.findTriangle(pGrid) >= 0);
     }
 
     @Override
@@ -334,10 +331,10 @@ public class FvcomDataset extends AbstractDataset {
         strTimeDim = getParameter("field_dim_time");
         strTime = getParameter("field_var_time");
         
-        xVarName = getParameter("field_var_x");
-        yVarName = getParameter("field_var_y");
-        lonVarName = getParameter("field_var_lon");
-        latVarName = getParameter("field_var_lat");
+        strXVarName = getParameter("field_var_x");
+        strYVarName = getParameter("field_var_y");
+        strLonVarName = getParameter("field_var_lon");
+        strLatVarName = getParameter("field_var_lat");
         
         strA1U = getParameter("field_var_a1u");
         strA2U = getParameter("field_var_a2u");      
@@ -434,7 +431,25 @@ public class FvcomDataset extends AbstractDataset {
         return array;
 
     }
+    
+    /**
+     * Read a scale factor
+     */
+    double[] read_coordinates(String varname) throws IOException {
 
+        Index index;
+        Array variable = ncIn.findVariable(varname).read();
+        index = variable.getIndex();
+        double[] array = new double[this.nNodes];
+        for (int i = 0; i < nNodes; i++) {
+            index.set(i);
+            array[i] = variable.getDouble(index);
+        }
+
+        return array;
+
+    }
+    
     void readConstantField() throws IOException {
 
         // Convert the variable of node index from float to int.
@@ -451,6 +466,9 @@ public class FvcomDataset extends AbstractDataset {
         aw0 = this.read_variable(this.strAW0, 3);
         awx = this.read_variable(this.strAWY, 3);
         awy = this.read_variable(this.strAWX, 3);
+        
+        xNodes = this.read_coordinates(this.strXVarName);
+        yNodes = this.read_coordinates(this.strYVarName);
 
     }
 
@@ -510,19 +528,19 @@ public class FvcomDataset extends AbstractDataset {
 
         } // end of loop over target triangles
     } // end of method
-
+    
     /**
      * Return the index of the triangle containing the given particle
      * 
      * @throws Exception
      */
-    private int findTriangle(IParticle particle) throws Exception {
-
-        int i = -1;
-        float[] xpol = new float[3];
-        float[] ypol = new float[3];
-        float x = (float) particle.getX();
-        float y = (float) particle.getY();
+    private int findTriangle(double[] pGrid) {
+           
+        int i = -999;
+        double[] xpol = new double[3];
+        double[] ypol = new double[3];
+        double x = pGrid[0];
+        double y = pGrid[1];
 
         for (i = 0; i < nTriangles; i++) {
 
@@ -540,12 +558,7 @@ public class FvcomDataset extends AbstractDataset {
             }
         }
 
-        if (i == -1) {
-            Exception ex = new Exception("Particle triangle cannot be determined");
-            throw ex;
-        }
-
-        return i;
+        return -999;
 
     }
 
@@ -556,7 +569,7 @@ public class FvcomDataset extends AbstractDataset {
      * 
      * Detail description here: http://forge.ipsl.jussieu.fr/roms_locean/browser/Roms_tools/Roms_Agrif/init_floats.F?rev=2
      */
-    private boolean isInsidePolygone(float[] xpol, float ypol[], float x, float y) {
+    private boolean isInsidePolygone(double[] xpol, double ypol[], double x, double y) {
 
         // --------------------------------------------------------------
         // Return true if (lon, lat) is insidide the polygon defined by
@@ -566,13 +579,13 @@ public class FvcomDataset extends AbstractDataset {
         boolean isInPolygone = true;
 
         // Close the polygon
-        float[] xpol4 = new float[4];
+        double[] xpol4 = new double[4];
         for (int i = 0; i < 3; i++) {
             xpol4[i] = xpol[i];
         }
         xpol4[3] = xpol[0];
 
-        float[] ypol4 = new float[4];
+        double[] ypol4 = new double[4];
         for (int i = 0; i < 3; i++) {
             ypol4[i] = ypol[i];
         }
