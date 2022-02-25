@@ -101,6 +101,7 @@ public class FvcomDataset extends AbstractDataset {
     private String strTimeDim;
     private String strA1U, strA2U;
     private String strAW0, strAWX, strAWY;
+    private String stringLayerDim;
     private int nLayer;
     private int indexFile;
 
@@ -164,15 +165,20 @@ public class FvcomDataset extends AbstractDataset {
         readConstantField();
         findNeighbouringTriangles();
         time_arrow = timeArrow();
-        System.exit(0);
+        //System.exit(0);
         
     }
 
+    /** In FVCOM, everything runs in projected coordinates. So X/Y and lon/lat are the same*/
     @Override
     public double[] latlon2xy(double lat, double lon) {
         return new double[] {lon, lat};
     }
 
+    /**
+     * In FVCOM, everything runs in projected coordinates. So X/Y and lon/lat are
+     * the same
+     */
     @Override
     public double[] xy2latlon(double xRho, double yRho) {
         return new double[] {yRho, xRho};
@@ -208,6 +214,7 @@ public class FvcomDataset extends AbstractDataset {
         return 0;
     }
 
+    /** We consider that a point is in water if it lies within a triangle. */
     @Override
     public boolean isInWater(double[] pGrid) {
         return (this.findTriangle(pGrid) >= 0);
@@ -394,6 +401,7 @@ public class FvcomDataset extends AbstractDataset {
         strEleDim = getParameter("field_dim_elements");
         strNodesDim = getParameter("field_dim_nodes");
         strTimeDim = getParameter("field_dim_time");
+        stringLayerDim = getParameter("field_dim_layer");
         strTime = getParameter("field_var_time");
         
         strXVarName = getParameter("field_var_x");
@@ -449,9 +457,15 @@ public class FvcomDataset extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+        try {
+            this.nLayer = ncIn.findDimension(this.stringLayerDim).getLength();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("Error reading dataset Y dimension. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
     }
-
-    
+        
     void openDataset() throws Exception {
         files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
         if (!skipSorting()) {
@@ -718,7 +732,7 @@ public class FvcomDataset extends AbstractDataset {
         for (int i = 0; i < nTriangles; i++) {
             for (int l = 0; l < this.nLayer; l++) {
                 
-                index.set(i, l);
+                index.set(l, i);
 
                 // get the composant for the given triangle
                 // a1u(E0, 1) * u(E0, Li) in equation
