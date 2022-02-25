@@ -71,6 +71,10 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
     public void setDistGetter(DistanceGetter distGetter) {
         this.distGetter = distGetter;
     }
+    
+    public float getCflThreshold() { 
+        return 1.0f;
+    }
 
     /** Get the method for distance calculation.
      * @return  */

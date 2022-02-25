@@ -58,8 +58,6 @@ public class AdvectionAction extends AbstractAction {
     private boolean isForward;
     private boolean horizontal;
     private boolean vertical;
-    // Threshold for CFL error message
-    public static final float THRESHOLD_CFL = 1.0f;
 
     @Override
     public void loadParameters() throws Exception {
@@ -127,6 +125,7 @@ public class AdvectionAction extends AbstractAction {
 
     private double[] advectEuler(double pGrid[], double time, double dt) {
 
+        float THRESHOLD_CFL = getSimulationManager().getDataset().getCflThreshold();
         int dim = pGrid.length;
         double[] dU = new double[dim];
 

@@ -54,6 +54,8 @@ import ucar.nc2.NetcdfFile;
  */
 public interface IDataset extends NextStepListener {
 
+    public float getCflThreshold();
+    
     public DistanceGetter getDistGetter();
     
     public void setUp() throws Exception ;
