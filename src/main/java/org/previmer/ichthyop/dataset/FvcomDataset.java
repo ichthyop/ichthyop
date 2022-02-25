@@ -45,20 +45,15 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections.functors.NullIsTruePredicate;
 import org.previmer.ichthyop.event.NextStepEvent;
 import org.previmer.ichthyop.manager.TimeManager;
-import org.previmer.ichthyop.particle.IParticle;
 
 import ucar.ma2.Array;
 import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDatasets;
-import ucar.units.RaiseException;
 
 /**
  *
@@ -66,6 +61,17 @@ import ucar.units.RaiseException;
  */
 public class FvcomDataset extends AbstractDataset {
 
+    private int time_arrow;
+    private double dt_HyMo;
+    
+        
+    /** Array containing the derivatives used to interpolate the velocities. */
+    private double[][] dudx_0, dudx_1;
+    private double[][] dudy_0, dudy_1;    
+    private double[][] dvdx_0, dvdx_1;
+    private double[][] dvdy_0, dvdy_1;    
+    
+    
     /**
      * NetCDF file object
      */
@@ -87,6 +93,8 @@ public class FvcomDataset extends AbstractDataset {
     private String strNodes;
     private String strXVarName;
     private String strYVarName;
+    private String strU;
+    private String strV;
     private String strLonVarName;
     private String strLatVarName;
     private String strTime;
@@ -94,6 +102,7 @@ public class FvcomDataset extends AbstractDataset {
     private String strA1U, strA2U;
     private String strAW0, strAWX, strAWY;
     private int nLayer;
+    private int indexFile;
 
     int nbTimeRecords;
     int rank;
@@ -124,6 +133,9 @@ public class FvcomDataset extends AbstractDataset {
     /** Y coordinates of the nodes */
     private double[] yNodes;
     
+    private double[] xBarycenter;
+    private double[] yBarycenter;
+    
     private int[] nNeighbours;
     
     /**
@@ -151,6 +163,7 @@ public class FvcomDataset extends AbstractDataset {
         getDimNC();
         readConstantField();
         findNeighbouringTriangles();
+        time_arrow = timeArrow();
         System.exit(0);
         
     }
@@ -255,10 +268,36 @@ public class FvcomDataset extends AbstractDataset {
         return 0;
     }
 
+    /*
+     * Initializes the {@code Dataset}. Opens the file holding the first time of
+     * the simulation. Checks out the existence of the fields required by the
+     * current simulation. Sets all fields at time for the first time step.
+     *
+     * @throws an IOException if a required field cannot be found in the NetCDF
+     * dataset.
+     */
     @Override
     public void init() throws Exception {
-        // TODO Auto-generated method stub
 
+        double t0 = getSimulationManager().getTimeManager().get_tO();
+        open(indexFile = DatasetUtil.index(files, t0, timeArrow(), strTime));
+        setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow()));
+        time_tp1 = t0;
+    }
+    
+    /**
+     * Loads the NetCDF dataset from the specified filename.
+     *
+     * @param filename a String that can be a local pathname or an OPeNDAP URL.
+     * @throws IOException
+     */
+    private void open(int index) throws IOException {
+        if(ncIn != null) {
+            ncIn.close();   
+        }
+        
+        ncIn = DatasetUtil.openFile(files.get(index), enhanced());
+        
     }
 
     @Override
@@ -325,7 +364,28 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
-        // TODO Auto-generated method stub
+        
+        double time = e.getSource().getTime();
+
+        if (time_arrow * time < time_arrow * time_tp1) {
+            return;
+        }
+        
+        // Swap arrays;
+        dudx_0 = dudx_1;
+        dudy_0 = dudy_1;
+        
+        dvdx_0 = dvdx_1;
+        dvdy_0 = dvdy_1;
+
+        rank += time_arrow;
+
+        if (rank > (nbTimeRecords - 1) || rank < 0) {
+            open(indexFile = DatasetUtil.next(files, indexFile, time_arrow));
+            rank = (1 - time_arrow) / 2 * (nbTimeRecords - 1);
+        }
+
+        setAllFieldsTp1AtTime(rank);
 
     }
 
@@ -346,6 +406,9 @@ public class FvcomDataset extends AbstractDataset {
         strAW0 = getParameter("field_var_aw0");
         strAWX = getParameter("field_var_awx");
         strAWY = getParameter("field_var_awy");
+        
+        strU = getParameter("field_var_u");
+        strV = getParameter("field_var_v");
         
         strNodes = getParameter("field_var_nodes");
 
@@ -388,15 +451,7 @@ public class FvcomDataset extends AbstractDataset {
         }
     }
 
-    void setOnFirstTime() throws Exception {
-        double t0 = getSimulationManager().getTimeManager().get_tO();
-        index = DatasetUtil.index(files, t0, timeArrow, strTime);
-        ncIn = DatasetUtil.openFile(files.get(index), true);
-        readTimeLength();
-        rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow);
-        time_tp1 = t0;
-    }
-
+    
     void openDataset() throws Exception {
         files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
         if (!skipSorting()) {
@@ -462,7 +517,7 @@ public class FvcomDataset extends AbstractDataset {
         this.triangleNodes = new int[nTriangles][3];
         for (int i = 0; i < nTriangles; i++) {
             for (int j = 0; j < 3; j++) {
-                this.triangleNodes[i][j] = (int) temp[i][j];
+                this.triangleNodes[i][j] = (int) temp[i][j] - 1;  // remove 1 to convert from Fortran to Java
             }
         }
 
@@ -474,7 +529,27 @@ public class FvcomDataset extends AbstractDataset {
         
         xNodes = this.read_coordinates(this.strXVarName);
         yNodes = this.read_coordinates(this.strYVarName);
+        
+        xBarycenter = new double[this.nTriangles];
+        for (int i = 0; i < this.nTriangles; i++) {
+            for (int p = 0; p < 3; p++) {
+                int node = this.triangleNodes[i][p];
+                try {
+                    xBarycenter[i] += (1 / 3.) * xNodes[node];
+                } catch (Exception ex) {
+                    getLogger().warning("Error");
+                }
+            }
+        }
 
+        yBarycenter = new double[this.nTriangles];
+        for(int i = 0; i < this.nTriangles; i++) {
+            for (int p = 0; p < 3; p++) {
+                int node = this.triangleNodes[i][p];
+                yBarycenter[i] += (1 / 3.) * yNodes[node];   
+            }
+        }
+        
     }
 
     void findNeighbouringTriangles() {
@@ -635,57 +710,91 @@ public class FvcomDataset extends AbstractDataset {
     }
     
     
-    private double[][] compute_du_dx(double[][] u) {
-        
-        double[][] du_dx = new double[this.nTriangles][this.nLayer];
-        for(int i =0; i < nTriangles; i++) {
-            for(int l = 0; l < this.nLayer; l++) {
-                
-                // get the composant for the given triangle
-                // a1u(E0, 1) * u(E0, Li) in equation
-                du_dx[i][l] += a1u[i][0] * u[i][l];
-                
+    private double[][] compute_du_dx(Array u, float[][] a1) {
 
-                // we loop over the neighbours
-                // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
-                // equation
-                for (int n = 0; n < 3; n++) {
-                    int neighbour = this.neighbouringTriangles[i][n];
-                    if (neighbour >= 0) {
-                        du_dx[i][l] += a1u[i][n] * u[neighbour][l];
-                    }
-                }
-            }   
-        }        
+        double[][] du_dx = new double[this.nLayer][this.nTriangles];
+        Index index = u.getIndex();
         
-        return du_dx;
-        
-    }
-    
-    private double[][] compute_du_dy(double[][] u) {
-
-        double[][] du_dy = new double[this.nTriangles][this.nLayer];
         for (int i = 0; i < nTriangles; i++) {
             for (int l = 0; l < this.nLayer; l++) {
+                
+                index.set(i, l);
 
                 // get the composant for the given triangle
                 // a1u(E0, 1) * u(E0, Li) in equation
-                du_dy[i][l] += a1u[i][0] * u[i][l];
-
+                du_dx[l][i] += a1u[i][0] * u.getDouble(index);
+                
                 // we loop over the neighbours
                 // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
                 // equation
                 for (int n = 0; n < 3; n++) {
                     int neighbour = this.neighbouringTriangles[i][n];
                     if (neighbour >= 0) {
-                        du_dy[i][l] += a2u[i][n] * u[neighbour][l];
+                        index.set(l, neighbour);
+                        du_dx[l][i] += a1[i][n] * u.getDouble(index);
                     }
                 }
             }
         }
 
-        return du_dy;
+        return du_dx;
 
+    }
+     
+    /**
+     * Reads time dependant variables in NetCDF dataset at specified rank.
+     *
+     * @param rank
+     *            an int, the rank of the time dimension in the NetCDF dataset.
+     * @throws an
+     *             IOException if an error occurs while reading the variables.
+     *
+     *             pverley pour chourdin: la aussi je fais du provisoire en
+     *             attendant de voir si on peut dégager une structure systématique
+     *             des input.
+     */
+    void setAllFieldsTp1AtTime(int rank) throws Exception {
+
+        getLogger().info("Reading NetCDF variables...");
+        
+        Array u_tp1, v_tp1;
+
+        int[] origin = new int[] { rank, 0, 0};
+        double time_tp0 = time_tp1;
+
+        try {
+            u_tp1 = ncIn.findVariable(strU).read(origin, new int[] { 1, this.nLayer, this.nTriangles }).reduce();
+        } catch (IOException | InvalidRangeException ex) {
+            IOException ioex = new IOException("Error reading U velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
+        try {
+            v_tp1 = ncIn.findVariable(strV).read(origin, new int[] { 1, this.nLayer, this.nTriangles }).reduce();
+        } catch (IOException | InvalidRangeException ex) {
+            IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+
+        try {
+            time_tp1 = DatasetUtil.timeAtRank(ncIn, strTime, rank);
+        } catch (IOException ex) {
+            IOException ioex = new IOException("Error reading time variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        
+        // Computation of derivatives
+        dudx_1 = this.compute_du_dx(u_tp1, a1u);
+        dvdx_1 = this.compute_du_dx(v_tp1, a1u);
+        dudy_1 = this.compute_du_dx(u_tp1, a2u);
+        dvdy_1 = this.compute_du_dx(v_tp1, a2u);
+        
+        
+        dt_HyMo = Math.abs(time_tp1 - time_tp0);
+        
     }
         
 
