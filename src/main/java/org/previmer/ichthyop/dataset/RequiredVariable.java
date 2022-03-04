@@ -66,10 +66,25 @@ public class RequiredVariable {
     private double time_tp1, dt_dataset;
     private boolean isUnlimited;
     private List<Class<?>> requiredByList;
+    
+    private FvcomDataset fvcom;
+    
+    private interface Getter {
+        public Number get(double[] pGrid, double time);
+    }
+    
+    Getter getter;
 
     public RequiredVariable(String name, Class<?> requiredBy) {
         this.name = name;
         this.dataset = SimulationManager.getInstance().getDataset();
+        if(this.dataset instanceof FvcomDataset) {
+            fvcom = (FvcomDataset) this.dataset;
+            getter = (pGrid, time) -> getFVCOM(pGrid, time);   
+        } else {
+            getter = (pGrid, time) -> getStandard(pGrid, time);   
+        }
+        
         requiredByList = new ArrayList<>();
         requiredByList.add(requiredBy);
     }
@@ -131,8 +146,30 @@ public class RequiredVariable {
         array_tp0 = this.array_tp1;
         this.array_tp1 = array_tp1;
     }
+    
+    public Number getFVCOM(double[] pGrid, double time) { 
+        
+        double[][] tracer_0 = fvcom.getTracer0(name);
+        double[][] dT_dX = fvcom.getDtDx(name);
+        double[][] dT_dY = fvcom.getDtDy(name);
+        
+        int iTriangle = fvcom.findTriangle(pGrid);
+        double xB = fvcom.getXBarycenter(iTriangle);
+        double yB = fvcom.getYBarycenter(iTriangle);
+        double dX = pGrid[0] - xB;
+        double dY = pGrid[1] - yB;
+        
+        double output = tracer_0[0][iTriangle] + dT_dX[0][iTriangle] * dX + dT_dY[0][iTriangle] * dY;
+        return output;
+        
+    }
+    
+    public  Number get(double[] pGrid, double time) {
+        return getter.get(pGrid, time);
+    }
 
-    public Number get(double[] pGrid, double time) {
+    
+    public Number getStandard(double[] pGrid, double time) {
 
         int[] origin;
         int[] shape;
