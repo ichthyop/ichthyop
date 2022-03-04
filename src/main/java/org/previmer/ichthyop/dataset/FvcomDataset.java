@@ -168,6 +168,7 @@ public class FvcomDataset extends AbstractDataset {
 
         loadParameters();
         clearRequiredVariables();
+        initHashMaps();
         openDataset();
         getDimNC();
         readConstantField();
@@ -177,6 +178,23 @@ public class FvcomDataset extends AbstractDataset {
         // Change the way distance is computed. Move to Euclidian in this case,
         // since data is already provided in meters.
         this.setDistGetter((lat1, lon1, lat2, lon2) -> DatasetUtil.euclidianDistance(lat1, lon1, lat2, lon2));
+        
+    }
+    
+    /** HashMap initialization */
+    private void initHashMaps() {
+        
+        tracer0_0 = new HashMap<>();
+        dTdX_0 = new HashMap<>();
+        dTdY_0 = new HashMap<>();
+    
+        tracer0_1 = new HashMap<>();
+        dTdX_1 = new HashMap<>();
+        dTdY_1 = new HashMap<>();
+        
+        tracer0 = new HashMap<>();
+        dTdX = new HashMap<>();
+        dTdY = new HashMap<>();
         
     }
 
@@ -426,6 +444,8 @@ public class FvcomDataset extends AbstractDataset {
     public void nextStepTriggered(NextStepEvent e) throws Exception {
         
         double time = e.getSource().getTime();
+        
+        this.updateTracerFields(time);
 
         if (time_arrow * time < time_arrow * time_tp1) {
             return;
@@ -947,6 +967,42 @@ public class FvcomDataset extends AbstractDataset {
     
     public double getYBarycenter(int iTriangle) {
         return yBarycenter[iTriangle];
+    }
+    
+    private void updateTracerFields(double time) {
+        
+        double[][] output = new double[this.nLayer][this.nNodes];
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
+        for (String name : this.requiredVariables.keySet()) {
+            double[][] temp0 = this.tracer0_0.get(name);
+            double[][] temp1 = this.tracer0_1.get(name);
+            for (int l = 0; l < this.nLayer; l++) {
+                for (int n = 0; n < this.nNodes; n++) {
+                    output[l][n] =  (1.d - x_euler) * temp0[l][n] + x_euler * temp1[l][n];
+                }   
+            }
+            this.tracer0.put(name, output);
+            
+            temp0 = this.dTdX_0.get(name);
+            temp1 = this.dTdX_1.get(name);
+            for (int l = 0; l < this.nLayer; l++) {
+                for (int n = 0; n < this.nNodes; n++) {
+                    output[l][n] =  (1.d - x_euler) * temp0[l][n] + x_euler * temp1[l][n];
+                }   
+            }
+            this.dTdX.put(name, output);
+            
+            temp0 = this.dTdY_0.get(name);
+            temp1 = this.dTdY_1.get(name);
+            for (int l = 0; l < this.nLayer; l++) {
+                for (int n = 0; n < this.nNodes; n++) {
+                    output[l][n] =  (1.d - x_euler) * temp0[l][n] + x_euler * temp1[l][n];
+                }   
+            }
+            this.dTdY.put(name, output);
+            
+        }   
     }
     
         
