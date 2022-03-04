@@ -72,6 +72,7 @@ import java.util.List;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.previmer.ichthyop.Zone;
+import org.previmer.ichthyop.dataset.FvcomDataset;
 import org.previmer.ichthyop.dataset.IDataset;
 import org.previmer.ichthyop.event.NextStepListener;
 import org.previmer.ichthyop.io.AbstractTracker;
@@ -641,7 +642,12 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         addGlobalAttributes();
 
         // add definition of the simulated area 
-        addRegion();
+        IDataset dataset = getSimulationManager().getDataset();
+        
+        // if no fvcom output, write zone in file
+        if(!(dataset instanceof FvcomDataset)) { 
+            addRegion();
+        }
         
         // add drifter variables
         addDrifters();
@@ -794,7 +800,11 @@ public class OutputManager extends AbstractManager implements LastStepListener, 
         
         // add the zones It cannnot be done in the setup because the definition of the
         // zones requires that dataset has been initialized first.
-        addZones();
+        // if FvcomDataset, no writting of Zones in Netcdf
+        IDataset dataset = getSimulationManager().getDataset();
+        if (!(dataset instanceof FvcomDataset)) {
+            addZones();
+        }
         
         /* reset counter */
         i_record = 0;
