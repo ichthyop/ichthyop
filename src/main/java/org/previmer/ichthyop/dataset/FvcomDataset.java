@@ -45,6 +45,7 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.previmer.ichthyop.event.NextStepEvent;
@@ -133,6 +134,18 @@ public class FvcomDataset extends AbstractDataset {
     private double[] yBarycenter;
     
     private int[] nNeighbours;
+    
+    private HashMap<String, double[][]> tracer0_0;
+    private HashMap<String, double[][]> dTdX_0;
+    private HashMap<String, double[][]> dTdY_0;
+    
+    private HashMap<String, double[][]> tracer0_1;
+    private HashMap<String, double[][]> dTdX_1;
+    private HashMap<String, double[][]> dTdY_1;
+    
+    private HashMap<String, double[][]> tracer0;
+    private HashMap<String, double[][]> dTdX;
+    private HashMap<String, double[][]> dTdY;
     
     /**
      * Scale factors used for interpolation of tracer/velocities. Dimensions are
@@ -685,7 +698,7 @@ public class FvcomDataset extends AbstractDataset {
      * 
      * @throws Exception
      */
-    private int findTriangle(double[] pGrid) {
+    public int findTriangle(double[] pGrid) {
            
         int i = -999;
         double[] xpol = new double[3];
@@ -860,7 +873,6 @@ public class FvcomDataset extends AbstractDataset {
         dudy_1 = this.compute_du_dx(u_tp1, a2u);
         dvdy_1 = this.compute_du_dx(v_tp1, a2u);
         
-        
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         
     }
@@ -903,5 +915,26 @@ public class FvcomDataset extends AbstractDataset {
         
     }
     
+    public double[][] getTracer0(String name) {
+        return tracer0.get(name);
+    }
+    
+    public double[][] getDtDx(String name) {
+        return this.dTdX.get(name);
+    }
+    
+    public double[][] getDtDy(String name) {
+        return this.dTdY.get(name);
+    }
+
+    public double getXBarycenter(int iTriangle) {
+        return xBarycenter[iTriangle];
+    }
+    
+    public double getYBarycenter(int iTriangle) {
+        return yBarycenter[iTriangle];
+    }
+    
+        
     
 }
