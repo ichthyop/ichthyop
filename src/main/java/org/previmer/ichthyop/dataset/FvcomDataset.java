@@ -882,6 +882,13 @@ public class FvcomDataset extends AbstractDataset {
         
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
         
+        for(String name : this.getRequiredVariables().keySet()) {
+            Array tracer = ncIn.findVariable(name).read(origin, new int[] { 1, this.nLayer, this.nNodes }).reduce();
+            this.tracer0_1.put(name, this.compute_dt_dx(tracer, aw0));
+            this.dTdX_1.put(name, this.compute_dt_dx(tracer, awx));
+            this.dTdY_1.put(name, this.compute_dt_dx(tracer, awy));
+        }
+        
     }
         
     @Override
@@ -895,7 +902,7 @@ public class FvcomDataset extends AbstractDataset {
      * If aw = awx, returns dT/dX
      * If aw = awy, returns dT/dY
     */
-    private double[][] get_dt_dx(Array tracer, float[][] aw) {
+    private double[][] compute_dt_dx(Array tracer, float[][] aw) {
 
         double[][] dt_dx = new double[this.nLayer][this.nTriangles];
         Index index = tracer.getIndex();
