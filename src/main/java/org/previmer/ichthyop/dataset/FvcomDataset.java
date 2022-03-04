@@ -445,9 +445,8 @@ public class FvcomDataset extends AbstractDataset {
         
         double time = e.getSource().getTime();
         
-        this.updateTracerFields(time);
-
         if (time_arrow * time < time_arrow * time_tp1) {
+            this.updateTracerFields(time);
             return;
         }
         
@@ -464,8 +463,8 @@ public class FvcomDataset extends AbstractDataset {
         // Swap arrays for required variables
         for(String name : this.getRequiredVariables().keySet()) { 
             tracer0_0.put(name, tracer0_1.get(name)); 
-            dTdX_0.put(name, dTdX_0.get(name)); 
-            dTdY_0.put(name, dTdY_0.get(name)); 
+            dTdX_0.put(name, dTdX_1.get(name)); 
+            dTdY_0.put(name, dTdY_1.get(name)); 
         }
         
         rank += time_arrow;
@@ -476,6 +475,8 @@ public class FvcomDataset extends AbstractDataset {
         }
 
         setAllFieldsTp1AtTime(rank);
+        
+        this.updateTracerFields(time);
 
     }
 
@@ -929,8 +930,6 @@ public class FvcomDataset extends AbstractDataset {
 
         for (int i = 0; i < nTriangles; i++) {
             for (int l = 0; l < this.nLayer; l++) {
-
-                index.set(l, i);
 
                 // we loop over the neighbours
                 // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
