@@ -870,5 +870,38 @@ public class FvcomDataset extends AbstractDataset {
         return true;
     }
     
+   
+    /** Compute the differente variables used for the interpolation. 
+     * If aw = aw0, returns T0
+     * If aw = awx, returns dT/dX
+     * If aw = awy, returns dT/dY
+    */
+    private double[][] get_dt_dx(Array tracer, float[][] aw) {
+
+        double[][] dt_dx = new double[this.nLayer][this.nTriangles];
+        Index index = tracer.getIndex();
+
+        for (int i = 0; i < nTriangles; i++) {
+            for (int l = 0; l < this.nLayer; l++) {
+
+                index.set(l, i);
+
+                // we loop over the neighbours
+                // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
+                // equation
+                for (int n = 0; n < 3; n++) {
+                    int neighbour = this.triangleNodes[i][n];
+                    if (neighbour >= 0) {
+                        index.set(l, neighbour);
+                        dt_dx[l][i] += aw[i][n] * tracer.getDouble(index);
+                    }
+                }
+            }
+        }
+    
+        return dt_dx;
+        
+    }
+    
     
 }
