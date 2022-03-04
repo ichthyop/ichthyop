@@ -138,7 +138,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     break;
                 case BOOLEAN:
                     editorModel.addEditorForRow(row,
-                            new DefaultCellEditor(new JComboBox<String>(new String[] { "true", "false" })));
+                    new DefaultCellEditor(new JComboBox<String>(new String[] { "true", "false" })));
                     break;
                 case DURATION:
                     editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION, value));
