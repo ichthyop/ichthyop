@@ -57,6 +57,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultFormatterFactory;
 
 /**
  *
@@ -92,14 +93,14 @@ public class DateEditor extends DefaultCellEditor {
     public DateEditor(int type, Object value) {
         super(new JFormattedTextField());
         ftf = (JFormattedTextField) getComponent();
+
         // dtFormat = (type == DATE)
         //         ? getSimulationManager().getTimeManager().getInputDateFormat()
         //         : getSimulationManager().getTimeManager().getInputDurationFormat();
         pattern = (type == DATE) ? Pattern.compile(datePattern) : Pattern.compile(durationPattern);
         displayPattern = (type == DATE) ? displayDatePattern : displayDurationPattern;
-        //dtFormat.setCalendar(getCalendar());
-        //ftf.setFormatterFactory(new DefaultFormatterFactory(new DateFormatter(dtFormat)));=
-        // ftf.setValue(dtFormat.parse(value.toString()));
+        
+        ftf.setFormatterFactory(new DefaultFormatterFactory());
         ftf.setValue(value.toString());
         ftf.setHorizontalAlignment(JTextField.TRAILING);
         ftf.setFocusLostBehavior(JFormattedTextField.PERSIST);
