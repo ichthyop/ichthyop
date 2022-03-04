@@ -190,4 +190,8 @@ public abstract class AbstractDataset extends SimulationManagerAccessor implemen
         return false;
     }
     
+    public HashMap<String, RequiredVariable> getRequiredVariables() {
+        return this.requiredVariables;
+    }
+    
 }
