@@ -440,7 +440,14 @@ public class FvcomDataset extends AbstractDataset {
         
         dvdx_0 = dvdx_1;
         dvdy_0 = dvdy_1;
-
+        
+        // Swap arrays for required variables
+        for(String name : this.getRequiredVariables().keySet()) { 
+            tracer0_0.put(name, tracer0_1.get(name)); 
+            dTdX_0.put(name, dTdX_0.get(name)); 
+            dTdY_0.put(name, dTdY_0.get(name)); 
+        }
+        
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
