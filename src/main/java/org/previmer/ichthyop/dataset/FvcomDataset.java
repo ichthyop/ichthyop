@@ -80,6 +80,7 @@ public class FvcomDataset extends AbstractDataset {
     private double[] dzetadx_0, dzetadx_1;
     private double[] dzetady_0, dzetady_1;
     private double[] zeta0_0, zeta0_1;
+    private double[] dzetadx, dzetady, zeta0;  
     
     /** Sigma levels (dims=[number of W layers]) */
     private double[] sigma;
@@ -425,6 +426,30 @@ public class FvcomDataset extends AbstractDataset {
     @Override
     public boolean is3D() {
         return false;
+    }
+    
+    private double getDepth(double xRho, double yRho, int k) {
+            
+        double pGrid[] = new double[] {xRho, yRho};
+        int iTriangle = this.findTriangle(pGrid);
+        double xB = this.getXBarycenter(iTriangle);
+        double yB = this.getYBarycenter(iTriangle);
+        double dX = xRho - xB;
+        double dY = yRho - yB;
+        
+        // Interpolation of the bathy on the given location
+        double Ht = H0[iTriangle] + dHdx[iTriangle] * dX + dHdx[iTriangle] * dY;
+        // interpolation of zeta on the given location
+        double zetaT =  zeta0[iTriangle] + dzetadx[iTriangle] * dX + dzetady[iTriangle] * dY;
+        
+        // getting the sigma value
+        double sig = sigma[k];
+        
+        // getting the depth value
+        double depth = zetaT + sig * (zetaT + Ht);
+
+        return depth;
+
     }
 
     @Override
@@ -1011,8 +1036,6 @@ public class FvcomDataset extends AbstractDataset {
         
     }
     
-    
-    
     public double[][] getTracer0(String name) {
         return tracer0.get(name);
     }
@@ -1035,9 +1058,15 @@ public class FvcomDataset extends AbstractDataset {
     
     private void updateTracerFields(double time) {
         
-        double[][] output = new double[this.nLayer][this.nNodes];
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-
+        
+        for (int n = 0; n < this.nNodes; n++) {
+            dzetadx[n] =  (1.d - x_euler) * dzetadx_0[n] + x_euler * dzetadx_1[n];
+            dzetady[n] =  (1.d - x_euler) * dzetady_0[n] + x_euler * dzetady_1[n];
+            zeta0[n] =  (1.d - x_euler) * zeta0_0[n] + x_euler * zeta0_1[n];   
+        }   
+        
+        double[][] output = new double[this.nLayer][this.nNodes];
         for (String name : this.requiredVariables.keySet()) {
             double[][] temp0 = this.tracer0_0.get(name);
             double[][] temp1 = this.tracer0_1.get(name);
