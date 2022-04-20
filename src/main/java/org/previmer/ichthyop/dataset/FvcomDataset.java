@@ -317,6 +317,10 @@ public class FvcomDataset extends AbstractDataset {
 
     }
 
+    public int getNLayer() {
+        return this.nLayer;
+    }
+
     @Override
     public double get_dVy(double[] pGrid, double time) {
 
