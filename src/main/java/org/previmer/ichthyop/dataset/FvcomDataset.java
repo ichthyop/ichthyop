@@ -86,7 +86,6 @@ public class FvcomDataset extends AbstractDataset {
     private double[] sigma;
     
     // Bathymetry (dims = number of nodes)
-    private double[] H;
     private double[] dHdx;
     private double[] dHdy;
     private double[] H0;
@@ -235,12 +234,38 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double depth2z(double x, double y, double depth) {
-        return 0;
+
+        //-----------------------------------------------
+        // Return z[grid] corresponding to depth[meters]
+        double z;
+        int lk = nLayer;
+        while ((lk > 0) && (getDepth(x, y, lk) < depth)) {
+            lk--;
+        }
+        if (lk == (nLayer)) {
+            z = (double) lk;
+        } else {
+            double pr = getDepth(x, y, lk);
+            z = Math.max(0.d,
+                    (double) lk
+                    + (depth - pr) / (getDepth(x, y, lk - 1) - pr));
+        }
+        return (z);
+        
     }
 
     @Override
     public double z2depth(double x, double y, double z) {
-        return 0;
+        
+        // index of the W layer above
+        int kz = (int) Math.floor(z);
+        
+        // distance between the particle and the above W layer;
+        double dz = z - kz;
+        
+        double output = (1 - dz) * getDepth(x, y, kz) + dz * getDepth(x, y, kz);
+        return output;
+        
     }
 
     @Override
@@ -438,7 +463,7 @@ public class FvcomDataset extends AbstractDataset {
         double dY = yRho - yB;
         
         // Interpolation of the bathy on the given location
-        double Ht = H0[iTriangle] + dHdx[iTriangle] * dX + dHdx[iTriangle] * dY;
+        double Ht = H0[iTriangle] + dHdx[iTriangle] * dX + dHdy[iTriangle] * dY;
         // interpolation of zeta on the given location
         double zetaT =  zeta0[iTriangle] + dzetadx[iTriangle] * dX + dzetady[iTriangle] * dY;
         
