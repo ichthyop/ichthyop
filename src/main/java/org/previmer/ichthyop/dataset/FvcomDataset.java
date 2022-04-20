@@ -74,6 +74,22 @@ public class FvcomDataset extends AbstractDataset {
     private Array u_tp1, u_tp0;
     private Array v_tp1, v_tp0;
     
+    /** Arrays for before/after sigma levels */
+    private Array zeta_tp1, zeta_tp0;
+    
+    private double[] dzetadx_0, dzetadx_1;
+    private double[] dzetady_0, dzetady_1;
+    private double[] zeta0_0, zeta0_1;
+    
+    /** Sigma levels (dims=[number of W layers]) */
+    private double[] sigma;
+    
+    // Bathymetry (dims = number of nodes)
+    private double[] H;
+    private double[] dHdx;
+    private double[] dHdy;
+    private double[] H0;
+    
     /**
      * NetCDF file object
      */
@@ -97,6 +113,9 @@ public class FvcomDataset extends AbstractDataset {
     private String strYVarName;
     private String strU;
     private String strV;
+    private String strSigma;
+    private String strBathy;
+    private String strZeta;
     private String strTime;
     private String strTimeDim;
     private String strA1U, strA2U;
@@ -215,13 +234,11 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double depth2z(double x, double y, double depth) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double z2depth(double x, double y, double z) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -281,7 +298,6 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double get_dWz(double[] pGrid, double time) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -293,7 +309,6 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public boolean isInWater(int i, int j) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -312,37 +327,31 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double getBathy(int i, int j) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public int get_nx() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public int get_ny() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public int get_nz() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getdxi(int j, int i) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getdeta(int j, int i) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -380,37 +389,31 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double getLatMin() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getLatMax() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getLonMin() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getLonMax() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getLon(int igrid, int jgrid) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public double getLat(int igrid, int jgrid) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -426,7 +429,6 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public Array readVariable(NetcdfFile nc, String name, int rank) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -450,8 +452,10 @@ public class FvcomDataset extends AbstractDataset {
             return;
         }
         
+        // Swap arrays
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
+        zeta_tp0 = zeta_tp1;
         
         // Swap arrays;
         dudx_0 = dudx_1;
@@ -499,6 +503,10 @@ public class FvcomDataset extends AbstractDataset {
         
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
+        strZeta = getParameter("field_var_zeta");
+        
+        strSigma = getParameter("field_var_sigma");
+        strBathy = getParameter("field_var_bathy");
         
         strNodes = getParameter("field_var_nodes");
 
@@ -625,6 +633,21 @@ public class FvcomDataset extends AbstractDataset {
         
         xNodes = this.read_coordinates(this.strXVarName);
         yNodes = this.read_coordinates(this.strYVarName);
+        
+        // reads the bathymetry on the nodes (as the coordinates)
+        Array HArray = ncIn.findVariable(strBathy).read();
+        this.dHdx = this.compute_dzeta_dx(HArray, awx);
+        this.dHdy = this.compute_dzeta_dx(HArray, awy);
+        this.H0 = this.compute_dzeta_dx(HArray, aw0);
+        
+        // Reading of the sigma array on Z levels
+        Array sigArray = ncIn.findVariable(strSigma).read().reduce();
+        sigma = new double[this.nLayer + 1];
+        Index index = sigArray.getIndex();
+        for(int k = 0; k < this.nLayer + 1; k++) { 
+            index.set(k); 
+            sigma[k] = sigArray.getDouble(index);
+        }
         
         this.cflThreshold = Float.MAX_VALUE;
         for (int i = 0; i < this.nTriangles; i++) {
@@ -886,6 +909,14 @@ public class FvcomDataset extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
+        
+        try {
+            zeta_tp1 = ncIn.findVariable(strZeta).read(origin, new int[] { 1, this.nNodes }).reduce();
+        } catch (IOException | InvalidRangeException ex) {
+            IOException ioex = new IOException("Error reading V velocity variable. " + ex.toString());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
 
         try {
             time_tp1 = DatasetUtil.timeAtRank(ncIn, strTime, rank);
@@ -909,6 +940,11 @@ public class FvcomDataset extends AbstractDataset {
             this.dTdX_1.put(name, this.compute_dt_dx(tracer, awx));
             this.dTdY_1.put(name, this.compute_dt_dx(tracer, awy));
         }
+        
+        // Update the computation of the zeta derivatives used for interpolation
+        this.dzetadx_1 = this.compute_dzeta_dx(zeta_tp1, awx);
+        this.dzetady_1 = this.compute_dzeta_dx(zeta_tp1, awy);
+        this.zeta0_1 = this.compute_dzeta_dx(zeta_tp1, aw0);
         
     }
         
@@ -947,6 +983,35 @@ public class FvcomDataset extends AbstractDataset {
         return dt_dx;
         
     }
+    
+    /** Compute the differente variables used for the interpolation. 
+     * If aw = aw0, returns T0
+     * If aw = awx, returns dT/dX
+     * If aw = awy, returns dT/dY
+    */
+    private double[] compute_dzeta_dx(Array tracer, float[][] aw) {
+
+        double[] dt_dx = new double[this.nTriangles];
+        Index index = tracer.getIndex();
+
+        for (int i = 0; i < nTriangles; i++) {
+            // we loop over the neighbours
+            // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
+            // equation
+            for (int n = 0; n < 3; n++) {
+                int neighbour = this.triangleNodes[i][n];
+                if (neighbour >= 0) {
+                    index.set(neighbour);
+                    dt_dx[i] += aw[i][n] * tracer.getDouble(index);
+                }
+            }
+        }
+    
+        return dt_dx;
+        
+    }
+    
+    
     
     public double[][] getTracer0(String name) {
         return tracer0.get(name);
