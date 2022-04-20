@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -64,32 +64,32 @@ public class FvcomDataset extends AbstractDataset {
 
     private int time_arrow;
     private double dt_HyMo;
-    
-        
+
+
     /** Array containing the derivatives used to interpolate the velocities. */
     private double[][] dudx_0, dudx_1;
-    private double[][] dudy_0, dudy_1;    
+    private double[][] dudy_0, dudy_1;
     private double[][] dvdx_0, dvdx_1;
-    private double[][] dvdy_0, dvdy_1;    
+    private double[][] dvdy_0, dvdy_1;
     private Array u_tp1, u_tp0;
     private Array v_tp1, v_tp0;
-    
+
     /** Arrays for before/after sigma levels */
     private Array zeta_tp1;
-    
+
     private double[] dzetadx_0, dzetadx_1;
     private double[] dzetady_0, dzetady_1;
     private double[] zeta0_0, zeta0_1;
-    private double[] dzetadx, dzetady, zeta0;  
-    
+    private double[] dzetadx, dzetady, zeta0;
+
     /** Sigma levels (dims=[number of W layers]) */
     private double[] sigma;
-    
+
     // Bathymetry (dims = number of nodes)
     private double[] dHdx;
     private double[] dHdy;
     private double[] H0;
-    
+
     /**
      * NetCDF file object
      */
@@ -124,8 +124,8 @@ public class FvcomDataset extends AbstractDataset {
     private int nLayer;
     private int indexFile;
     private float cflThreshold;
-    
-    
+
+
     int nbTimeRecords;
     int rank;
     double time_tp0;
@@ -148,24 +148,24 @@ public class FvcomDataset extends AbstractDataset {
 
     /** Y coordinates of the nodes */
     private double[] yNodes;
-    
+
     private double[] xBarycenter;
     private double[] yBarycenter;
-    
+
     private int[] nNeighbours;
-    
+
     private HashMap<String, double[][]> tracer0_0;
     private HashMap<String, double[][]> dTdX_0;
     private HashMap<String, double[][]> dTdY_0;
-    
+
     private HashMap<String, double[][]> tracer0_1;
     private HashMap<String, double[][]> dTdX_1;
     private HashMap<String, double[][]> dTdY_1;
-    
+
     private HashMap<String, double[][]> tracer0;
     private HashMap<String, double[][]> dTdX;
     private HashMap<String, double[][]> dTdY;
-    
+
     /**
      * Scale factors used for interpolation of tracer/velocities. Dimensions are
      * [nEle, 4 or 3] depending on the variables. They are transposed compared to
@@ -197,24 +197,24 @@ public class FvcomDataset extends AbstractDataset {
         // Change the way distance is computed. Move to Euclidian in this case,
         // since data is already provided in meters.
         this.setDistGetter((lat1, lon1, lat2, lon2) -> DatasetUtil.euclidianDistance(lat1, lon1, lat2, lon2));
-        
+
     }
-    
+
     /** HashMap initialization */
     private void initHashMaps() {
-        
+
         tracer0_0 = new HashMap<>();
         dTdX_0 = new HashMap<>();
         dTdY_0 = new HashMap<>();
-    
+
         tracer0_1 = new HashMap<>();
         dTdX_1 = new HashMap<>();
         dTdY_1 = new HashMap<>();
-        
+
         tracer0 = new HashMap<>();
         dTdX = new HashMap<>();
         dTdY = new HashMap<>();
-        
+
     }
 
     /** In FVCOM, everything runs in projected coordinates. So X/Y and lon/lat are the same*/
@@ -251,75 +251,123 @@ public class FvcomDataset extends AbstractDataset {
                     + (depth - pr) / (getDepth(x, y, lk - 1) - pr));
         }
         return (z);
-        
+
     }
 
     @Override
     public double z2depth(double x, double y, double z) {
-        
+
         // index of the W layer above
         int kz = (int) Math.floor(z);
-        
+
         // distance between the particle and the above W layer;
         double dz = z - kz;
-        
+
         double output = (1 - dz) * getDepth(x, y, kz) + dz * getDepth(x, y, kz);
         return output;
-        
+
     }
 
     @Override
     public double get_dUx(double[] pGrid, double time) {
-        
-        int iTriangle = findTriangle(pGrid);
-        if(iTriangle < 0) {
-            return 0;   
-        }
-        
-        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        
-        // compute the dX value
-        double dX = pGrid[0] - xBarycenter[iTriangle];
-        double dY = pGrid[1] - yBarycenter[iTriangle];
-        
-        // TODO here we work at the surface only. It is just a start.
-        Index index0 = u_tp0.getIndex();
-        Index index1 = u_tp1.getIndex();
-        
-        index0.set(0, iTriangle);
-        index1.set(0, iTriangle);
-        
-        double output_0 = u_tp0.getDouble(index0) + dudx_0[0][iTriangle] * dX + dudy_0[0][iTriangle] * dY;
-        double output_1 = u_tp1.getDouble(index0) + dudx_1[0][iTriangle] * dX + dudy_1[0][iTriangle] * dY;
-        return ((1.d - x_euler) * output_0 + x_euler * output_1);
-        
-    }
-    
-    @Override
-    public double get_dVy(double[] pGrid, double time) {
-        
+
         int iTriangle = findTriangle(pGrid);
         if(iTriangle < 0) {
             return 0;
         }
-        
+
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        
+
         // compute the dX value
         double dX = pGrid[0] - xBarycenter[iTriangle];
         double dY = pGrid[1] - yBarycenter[iTriangle];
-        
-        // TODO here we work at the surface only. It is just a start.
+
+        Index index0 = u_tp0.getIndex();
+        Index index1 = u_tp1.getIndex();
+
+        // index along the W axis (0 = surface, nz = bottom)
+        double z = pGrid[2];
+
+        // getting the value at the T-cell to which the particle belongs
+        int kz = (int) Math.floor(z);
+        double dist = 1;
+
+        index0.set(kz, iTriangle);
+        index1.set(kz, iTriangle);
+        double output_0_kz = u_tp0.getDouble(index0) + dudx_0[kz][iTriangle] * dX + dudy_0[kz][iTriangle] * dY;
+        double output_1_kz = u_tp1.getDouble(index0) + dudx_1[kz][iTriangle] * dX + dudy_1[kz][iTriangle] * dY;
+
+        // getting the value at the T-cell below the particle
+
+        double output_0_kzp1 = 0;
+        double output_1_kzp1 = 0;
+
+        if (z >= 0.5 || z <= nLayer + 0.5) {
+            // if the depth of the particle is between two T layers, we recover the value
+            // at the T layer which is below
+            index0.set(kz + 1, iTriangle);
+            index1.set(kz + 1, iTriangle);
+            output_0_kzp1 = u_tp0.getDouble(index0) + dudx_0[kz + 1][iTriangle] * dX + dudy_0[kz + 1][iTriangle] * dY;
+            output_1_kzp1 = u_tp1.getDouble(index0) + dudx_1[kz + 1][iTriangle] * dX + dudy_1[kz + 1][iTriangle] * dY;
+            dist = kz + 0.5 - z;
+        }
+
+        double output_0 = dist * output_0_kz + (1 - dist) * output_0_kzp1;
+        double output_1 = dist * output_1_kz + (1 - dist) * output_1_kzp1;
+
+        return ((1.d - x_euler) * output_0 + x_euler * output_1);
+
+    }
+
+    @Override
+    public double get_dVy(double[] pGrid, double time) {
+
+        int iTriangle = findTriangle(pGrid);
+        if(iTriangle < 0) {
+            return 0;
+        }
+
+        double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
+
+        // compute the dX value
+        double dX = pGrid[0] - xBarycenter[iTriangle];
+        double dY = pGrid[1] - yBarycenter[iTriangle];
+
         Index index0 = v_tp0.getIndex();
         Index index1 = v_tp1.getIndex();
-        
-        index0.set(0, iTriangle);
-        index1.set(0, iTriangle);
-        
-        double output_0 = v_tp0.getDouble(index0) + dvdx_0[0][iTriangle] * dX + dvdy_0[0][iTriangle] * dY;
-        double output_1 = v_tp1.getDouble(index0) + dvdx_1[0][iTriangle] * dX + dvdy_1[0][iTriangle] * dY;
+
+        // index along the W axis (0 = surface, nz = bottom)
+        double z = pGrid[2];
+
+        // getting the value at the T-cell to which the particle belongs
+        int kz = (int) Math.floor(z);
+        double dist = 1;
+
+        index0.set(kz, iTriangle);
+        index1.set(kz, iTriangle);
+        double output_0_kz = v_tp0.getDouble(index0) + dvdx_0[kz][iTriangle] * dX + dvdy_0[kz][iTriangle] * dY;
+        double output_1_kz = v_tp1.getDouble(index0) + dvdx_1[kz][iTriangle] * dX + dvdy_1[kz][iTriangle] * dY;
+
+        // getting the value at the T-cell below the particle
+
+        double output_0_kzp1 = 0;
+        double output_1_kzp1 = 0;
+
+        if (z >= 0.5 || z <= nLayer + 0.5) {
+            // if the depth of the particle is between two T layers, we recover the value
+            // at the T layer which is below
+            index0.set(kz + 1, iTriangle);
+            index1.set(kz + 1, iTriangle);
+            output_0_kzp1 = v_tp0.getDouble(index0) + dvdx_0[kz + 1][iTriangle] * dX + dvdy_0[kz + 1][iTriangle] * dY;
+            output_1_kzp1 = v_tp1.getDouble(index0) + dvdx_1[kz + 1][iTriangle] * dX + dvdy_1[kz + 1][iTriangle] * dY;
+            dist = kz + 0.5 - z;
+        }
+
+        double output_0 = dist * output_0_kz + (1 - dist) * output_0_kzp1;
+        double output_1 = dist * output_1_kz + (1 - dist) * output_1_kzp1;
+
         return ((1.d - x_euler) * output_0 + x_euler * output_1);
-        
+
     }
 
     @Override
@@ -397,7 +445,7 @@ public class FvcomDataset extends AbstractDataset {
         setAllFieldsTp1AtTime(rank = DatasetUtil.rank(t0, ncIn, strTime, timeArrow()));
         time_tp1 = t0;
     }
-    
+
     /**
      * Loads the NetCDF dataset from the specified filename.
      *
@@ -406,11 +454,11 @@ public class FvcomDataset extends AbstractDataset {
      */
     private void open(int index) throws IOException {
         if(ncIn != null) {
-            ncIn.close();   
+            ncIn.close();
         }
-        
+
         ncIn = DatasetUtil.openFile(files.get(index), enhanced());
-        
+
     }
 
     @Override
@@ -450,26 +498,26 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public boolean is3D() {
-        return false;
+        return true;
     }
-    
+
     private double getDepth(double xRho, double yRho, int k) {
-            
+
         double pGrid[] = new double[] {xRho, yRho};
         int iTriangle = this.findTriangle(pGrid);
         double xB = this.getXBarycenter(iTriangle);
         double yB = this.getYBarycenter(iTriangle);
         double dX = xRho - xB;
         double dY = yRho - yB;
-        
+
         // Interpolation of the bathy on the given location
         double Ht = H0[iTriangle] + dHdx[iTriangle] * dX + dHdy[iTriangle] * dY;
         // interpolation of zeta on the given location
         double zetaT =  zeta0[iTriangle] + dzetadx[iTriangle] * dX + dzetady[iTriangle] * dY;
-        
+
         // getting the sigma value
         double sig = sigma[k];
-        
+
         // getting the depth value
         double depth = zetaT + sig * (zetaT + Ht);
 
@@ -494,33 +542,33 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public void nextStepTriggered(NextStepEvent e) throws Exception {
-        
+
         double time = e.getSource().getTime();
-        
+
         if (time_arrow * time < time_arrow * time_tp1) {
             this.updateTracerFields(time);
             return;
         }
-        
+
         // Swap arrays
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
         // zeta_tp0 = zeta_tp1;
-        
+
         // Swap arrays;
         dudx_0 = dudx_1;
         dudy_0 = dudy_1;
-        
+
         dvdx_0 = dvdx_1;
         dvdy_0 = dvdy_1;
-        
+
         // Swap arrays for required variables
-        for(String name : this.getRequiredVariables().keySet()) { 
-            tracer0_0.put(name, tracer0_1.get(name)); 
-            dTdX_0.put(name, dTdX_1.get(name)); 
-            dTdY_0.put(name, dTdY_1.get(name)); 
+        for(String name : this.getRequiredVariables().keySet()) {
+            tracer0_0.put(name, tracer0_1.get(name));
+            dTdX_0.put(name, dTdX_1.get(name));
+            dTdY_0.put(name, dTdY_1.get(name));
         }
-        
+
         rank += time_arrow;
 
         if (rank > (nbTimeRecords - 1) || rank < 0) {
@@ -529,7 +577,7 @@ public class FvcomDataset extends AbstractDataset {
         }
 
         setAllFieldsTp1AtTime(rank);
-        
+
         this.updateTracerFields(time);
 
     }
@@ -541,23 +589,23 @@ public class FvcomDataset extends AbstractDataset {
         strTimeDim = getParameter("field_dim_time");
         stringLayerDim = getParameter("field_dim_layer");
         strTime = getParameter("field_var_time");
-        
+
         strXVarName = getParameter("field_var_x");
         strYVarName = getParameter("field_var_y");
-        
+
         strA1U = getParameter("field_var_a1u");
-        strA2U = getParameter("field_var_a2u");      
+        strA2U = getParameter("field_var_a2u");
         strAW0 = getParameter("field_var_aw0");
         strAWX = getParameter("field_var_awx");
         strAWY = getParameter("field_var_awy");
-        
+
         strU = getParameter("field_var_u");
         strV = getParameter("field_var_v");
         strZeta = getParameter("field_var_zeta");
-        
+
         strSigma = getParameter("field_var_sigma");
         strBathy = getParameter("field_var_bathy");
-        
+
         strNodes = getParameter("field_var_nodes");
 
         timeArrow = timeArrow();
@@ -605,7 +653,7 @@ public class FvcomDataset extends AbstractDataset {
             throw ioex;
         }
     }
-        
+
     void openDataset() throws Exception {
         files = DatasetUtil.list(getParameter("input_path"), getParameter("file_filter"));
         if (!skipSorting()) {
@@ -645,7 +693,7 @@ public class FvcomDataset extends AbstractDataset {
         return array;
 
     }
-    
+
     /**
      * Read a scale factor
      */
@@ -663,7 +711,7 @@ public class FvcomDataset extends AbstractDataset {
         return array;
 
     }
-    
+
     void readConstantField() throws IOException {
 
         // Convert the variable of node index from float to int.
@@ -680,25 +728,25 @@ public class FvcomDataset extends AbstractDataset {
         aw0 = this.read_variable(this.strAW0, 3);
         awx = this.read_variable(this.strAWY, 3);
         awy = this.read_variable(this.strAWX, 3);
-        
+
         xNodes = this.read_coordinates(this.strXVarName);
         yNodes = this.read_coordinates(this.strYVarName);
-        
+
         // reads the bathymetry on the nodes (as the coordinates)
         Array HArray = ncIn.findVariable(strBathy).read();
         this.dHdx = this.compute_dzeta_dx(HArray, awx);
         this.dHdy = this.compute_dzeta_dx(HArray, awy);
         this.H0 = this.compute_dzeta_dx(HArray, aw0);
-        
+
         // Reading of the sigma array on Z levels
         Array sigArray = ncIn.findVariable(strSigma).read().reduce();
         sigma = new double[this.nLayer + 1];
         Index index = sigArray.getIndex();
-        for(int k = 0; k < this.nLayer + 1; k++) { 
-            index.set(k); 
+        for(int k = 0; k < this.nLayer + 1; k++) {
+            index.set(k);
             sigma[k] = sigArray.getDouble(index);
         }
-        
+
         this.cflThreshold = Float.MAX_VALUE;
         for (int i = 0; i < this.nTriangles; i++) {
             for (int p = 0; p < 3; p++) {
@@ -708,7 +756,7 @@ public class FvcomDataset extends AbstractDataset {
                 this.cflThreshold = Math.min(this.cflThreshold, (float) dist);
             }
         }
-        
+
         xBarycenter = new double[this.nTriangles];
         for (int i = 0; i < this.nTriangles; i++) {
             for (int p = 0; p < 3; p++) {
@@ -725,12 +773,12 @@ public class FvcomDataset extends AbstractDataset {
         for(int i = 0; i < this.nTriangles; i++) {
             for (int p = 0; p < 3; p++) {
                 int node = this.triangleNodes[i][p];
-                yBarycenter[i] += (1 / 3.) * yNodes[node];   
+                yBarycenter[i] += (1 / 3.) * yNodes[node];
             }
         }
-        
+
     }
-    
+
     @Override
     public float getCflThreshold() {
         return this.cflThreshold;
@@ -740,9 +788,9 @@ public class FvcomDataset extends AbstractDataset {
 
         this.neighbouringTriangles = new int[nTriangles][3];
         this.nNeighbours = new int[nTriangles];
-        
+
         // init array with negative values;
-        for(int i = 0; i < nTriangles; i++) { 
+        for(int i = 0; i < nTriangles; i++) {
             for(int p = 0; p < 3; p++) {
                 neighbouringTriangles[i][p] =  -1;
             }
@@ -752,7 +800,7 @@ public class FvcomDataset extends AbstractDataset {
 
             // get the nodes of the target triangle
             int[] target = this.triangleNodes[iele];
-            
+
             // Loop over the three edges, keeping the order (clockwise)
             for (int k = 0; k < 3; k++) {
 
@@ -781,7 +829,7 @@ public class FvcomDataset extends AbstractDataset {
                             this.nNeighbours[iele] += 1;
                             break;
                         }
-                        
+
                         if ((p1 == x2) & (p2 == x1)) {
                             neighbouringTriangles[iele][k] = i;
                             this.nNeighbours[iele] += 1;
@@ -793,14 +841,14 @@ public class FvcomDataset extends AbstractDataset {
 
         } // end of loop over target triangles
     } // end of method
-    
+
     /**
      * Return the index of the triangle containing the given particle
-     * 
+     *
      * @throws Exception
      */
     public int findTriangle(double[] pGrid) {
-           
+
         int i = -999;
         double[] xpol = new double[3];
         double[] ypol = new double[3];
@@ -830,8 +878,8 @@ public class FvcomDataset extends AbstractDataset {
     /**
      * Determines whether the specified geographical point (lon, lat) belongs to the
      * is inside the polygon defined by (imin, jmin) & (imin, jmax) & (imax, jmax) &
-     * (imax, jmin). 
-     * 
+     * (imax, jmin).
+     *
      * Detail description here: http://forge.ipsl.jussieu.fr/roms_locean/browser/Roms_tools/Roms_Agrif/init_floats.F?rev=2
      */
     private boolean isInsidePolygone(double[] xpol, double ypol[], double x, double y) {
@@ -892,22 +940,22 @@ public class FvcomDataset extends AbstractDataset {
 
         return (isInPolygone);
     }
-    
-    
+
+
     private double[][] compute_du_dx(Array u, float[][] a1) {
 
         double[][] du_dx = new double[this.nLayer][this.nTriangles];
         Index index = u.getIndex();
-        
+
         for (int i = 0; i < nTriangles; i++) {
             for (int l = 0; l < this.nLayer; l++) {
-                
+
                 index.set(l, i);
 
                 // get the composant for the given triangle
                 // a1u(E0, 1) * u(E0, Li) in equation
                 du_dx[l][i] += a1u[i][0] * u.getDouble(index);
-                
+
                 // we loop over the neighbours
                 // a1u(E0, 2) * u(E1, Li) + a1u(E0, 3) * u(E2, Li) + a1u(E0, 4) * u(E3, Li) in
                 // equation
@@ -924,7 +972,7 @@ public class FvcomDataset extends AbstractDataset {
         return du_dx;
 
     }
-     
+
     /**
      * Reads time dependant variables in NetCDF dataset at specified rank.
      *
@@ -959,7 +1007,7 @@ public class FvcomDataset extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         try {
             zeta_tp1 = ncIn.findVariable(strZeta).read(origin, new int[] { 1, this.nNodes }).reduce();
         } catch (IOException | InvalidRangeException ex) {
@@ -975,36 +1023,36 @@ public class FvcomDataset extends AbstractDataset {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        
+
         // Computation of derivatives
         dudx_1 = this.compute_du_dx(u_tp1, a1u);
         dvdx_1 = this.compute_du_dx(v_tp1, a1u);
         dudy_1 = this.compute_du_dx(u_tp1, a2u);
         dvdy_1 = this.compute_du_dx(v_tp1, a2u);
-        
+
         dt_HyMo = Math.abs(time_tp1 - time_tp0);
-        
+
         for(String name : this.getRequiredVariables().keySet()) {
             Array tracer = ncIn.findVariable(name).read(origin, new int[] { 1, this.nLayer, this.nNodes }).reduce();
             this.tracer0_1.put(name, this.compute_dt_dx(tracer, aw0));
             this.dTdX_1.put(name, this.compute_dt_dx(tracer, awx));
             this.dTdY_1.put(name, this.compute_dt_dx(tracer, awy));
         }
-        
+
         // Update the computation of the zeta derivatives used for interpolation
         this.dzetadx_1 = this.compute_dzeta_dx(zeta_tp1, awx);
         this.dzetady_1 = this.compute_dzeta_dx(zeta_tp1, awy);
         this.zeta0_1 = this.compute_dzeta_dx(zeta_tp1, aw0);
-        
+
     }
-        
+
     @Override
     public boolean isProjected() {
         return true;
     }
-    
-   
-    /** Compute the differente variables used for the interpolation. 
+
+
+    /** Compute the differente variables used for the interpolation.
      * If aw = aw0, returns T0
      * If aw = awx, returns dT/dX
      * If aw = awy, returns dT/dY
@@ -1029,12 +1077,12 @@ public class FvcomDataset extends AbstractDataset {
                 }
             }
         }
-    
+
         return dt_dx;
-        
+
     }
-    
-    /** Compute the differente variables used for the interpolation. 
+
+    /** Compute the differente variables used for the interpolation.
      * If aw = aw0, returns T0
      * If aw = awx, returns dT/dX
      * If aw = awy, returns dT/dY
@@ -1056,19 +1104,19 @@ public class FvcomDataset extends AbstractDataset {
                 }
             }
         }
-    
+
         return dt_dx;
-        
+
     }
-    
+
     public double[][] getTracer0(String name) {
         return tracer0.get(name);
     }
-    
+
     public double[][] getDtDx(String name) {
         return this.dTdX.get(name);
     }
-    
+
     public double[][] getDtDy(String name) {
         return this.dTdY.get(name);
     }
@@ -1076,21 +1124,21 @@ public class FvcomDataset extends AbstractDataset {
     public double getXBarycenter(int iTriangle) {
         return xBarycenter[iTriangle];
     }
-    
+
     public double getYBarycenter(int iTriangle) {
         return yBarycenter[iTriangle];
     }
-    
+
     private void updateTracerFields(double time) {
-        
+
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
-        
+
         for (int n = 0; n < this.nNodes; n++) {
             dzetadx[n] =  (1.d - x_euler) * dzetadx_0[n] + x_euler * dzetadx_1[n];
             dzetady[n] =  (1.d - x_euler) * dzetady_0[n] + x_euler * dzetady_1[n];
-            zeta0[n] =  (1.d - x_euler) * zeta0_0[n] + x_euler * zeta0_1[n];   
-        }   
-        
+            zeta0[n] =  (1.d - x_euler) * zeta0_0[n] + x_euler * zeta0_1[n];
+        }
+
         double[][] output = new double[this.nLayer][this.nNodes];
         for (String name : this.requiredVariables.keySet()) {
             double[][] temp0 = this.tracer0_0.get(name);
@@ -1098,31 +1146,31 @@ public class FvcomDataset extends AbstractDataset {
             for (int l = 0; l < this.nLayer; l++) {
                 for (int n = 0; n < this.nNodes; n++) {
                     output[l][n] =  (1.d - x_euler) * temp0[l][n] + x_euler * temp1[l][n];
-                }   
+                }
             }
             this.tracer0.put(name, output);
-            
+
             temp0 = this.dTdX_0.get(name);
             temp1 = this.dTdX_1.get(name);
             for (int l = 0; l < this.nLayer; l++) {
                 for (int n = 0; n < this.nNodes; n++) {
                     output[l][n] =  (1.d - x_euler) * temp0[l][n] + x_euler * temp1[l][n];
-                }   
+                }
             }
             this.dTdX.put(name, output);
-            
+
             temp0 = this.dTdY_0.get(name);
             temp1 = this.dTdY_1.get(name);
             for (int l = 0; l < this.nLayer; l++) {
                 for (int n = 0; n < this.nNodes; n++) {
                     output[l][n] =  (1.d - x_euler) * temp0[l][n] + x_euler * temp1[l][n];
-                }   
+                }
             }
             this.dTdY.put(name, output);
-            
-        }   
+
+        }
     }
-    
-        
-    
+
+
+
 }
