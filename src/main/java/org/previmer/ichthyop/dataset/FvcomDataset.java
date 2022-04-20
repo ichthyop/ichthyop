@@ -562,6 +562,10 @@ public class FvcomDataset extends AbstractDataset {
         dvdx_0 = dvdx_1;
         dvdy_0 = dvdy_1;
 
+        dzetadx_0 = dzetadx_1;
+        dzetady_0 = dzetady_1;
+        zeta0_0 = zeta0_1;
+
         // Swap arrays for required variables
         for(String name : this.getRequiredVariables().keySet()) {
             tracer0_0.put(name, tracer0_1.get(name));
@@ -776,6 +780,11 @@ public class FvcomDataset extends AbstractDataset {
                 yBarycenter[i] += (1 / 3.) * yNodes[node];
             }
         }
+
+        // initialize the zeta arrays used for the interpolation
+        this.dzetadx = new double[this.nTriangles];
+        this.dzetady = new double[this.nTriangles];
+        this.zeta0 = new double[this.nTriangles];
 
     }
 
