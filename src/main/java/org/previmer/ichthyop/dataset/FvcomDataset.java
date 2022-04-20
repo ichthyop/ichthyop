@@ -75,7 +75,7 @@ public class FvcomDataset extends AbstractDataset {
     private Array v_tp1, v_tp0;
     
     /** Arrays for before/after sigma levels */
-    private Array zeta_tp1, zeta_tp0;
+    private Array zeta_tp1;
     
     private double[] dzetadx_0, dzetadx_1;
     private double[] dzetady_0, dzetady_1;
@@ -98,8 +98,8 @@ public class FvcomDataset extends AbstractDataset {
     /** List of input files */
     private List<String> files;
 
-    /** Index of the file to process. */
-    private int index;
+    // /** Index of the file to process. */
+    // private int index;
 
     /**
      * Time arrow, 1 forward, -1 backward
@@ -505,7 +505,7 @@ public class FvcomDataset extends AbstractDataset {
         // Swap arrays
         u_tp0 = u_tp1;
         v_tp0 = v_tp1;
-        zeta_tp0 = zeta_tp1;
+        // zeta_tp0 = zeta_tp1;
         
         // Swap arrays;
         dudx_0 = dudx_1;
