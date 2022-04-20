@@ -1,18 +1,18 @@
-/* 
- * 
+/*
+ *
  * ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
  * http://www.ichthyop.org
- * 
+ *
  * Copyright (C) IRD (Institut de Recherce pour le Developpement) 2006-2020
  * http://www.ird.fr
- * 
+ *
  * Main developper: Philippe VERLEY (philippe.verley@ird.fr), Nicolas Barrier (nicolas.barrier@ird.fr)
  * Contributors (alphabetically sorted):
  * Gwendoline ANDRES, Sylvain BONHOMMEAU, Bruno BLANKE, Timothée BROCHIER,
  * Christophe HOURDIN, Mariem JELASSI, David KAPLAN, Fabrice LECORNU,
  * Christophe LETT, Christian MULLON, Carolina PARADA, Pierrick PENVEN,
  * Stephane POUS, Nathan PUTMAN.
- * 
+ *
  * Ichthyop is a free Java tool designed to study the effects of physical and
  * biological factors on ichthyoplankton dynamics. It incorporates the most
  * important processes involved in fish early life: spawning, movement, growth,
@@ -20,26 +20,26 @@
  * temperature and salinity fields archived from oceanic models such as NEMO,
  * ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
  * generates output files that can be post-processed easily using graphic and
- * statistical software. 
- * 
+ * statistical software.
+ *
  * To cite Ichthyop, please refer to Lett et al. 2008
  * A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
  * Environmental Modelling & Software 23, no. 9 (September 2008) 1210-1214
  * doi:10.1016/j.envsoft.2008.02.005
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation (version 3 of the License). For a full 
+ * the Free Software Foundation (version 3 of the License). For a full
  * description, see the LICENSE file.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 package org.previmer.ichthyop.dataset;
@@ -66,13 +66,13 @@ public class RequiredVariable {
     private double time_tp1, dt_dataset;
     private boolean isUnlimited;
     private List<Class<?>> requiredByList;
-    
+
     private FvcomDataset fvcom;
-    
+
     private interface Getter {
         public Number get(double[] pGrid, double time);
     }
-    
+
     Getter getter;
 
     public RequiredVariable(String name, Class<?> requiredBy) {
@@ -80,11 +80,11 @@ public class RequiredVariable {
         this.dataset = SimulationManager.getInstance().getDataset();
         if(this.dataset instanceof FvcomDataset) {
             fvcom = (FvcomDataset) this.dataset;
-            getter = (pGrid, time) -> getFVCOM(pGrid, time);   
+            getter = (pGrid, time) -> getFVCOM(pGrid, time);
         } else {
-            getter = (pGrid, time) -> getStandard(pGrid, time);   
+            getter = (pGrid, time) -> getStandard(pGrid, time);
         }
-        
+
         requiredByList = new ArrayList<>();
         requiredByList.add(requiredBy);
     }
@@ -100,7 +100,7 @@ public class RequiredVariable {
     public void setUnlimited(boolean unlim) {
         this.isUnlimited = unlim;
     }
-    
+
     public void addRequiredBy(Class<?> requiredBy) {
         requiredByList.add(requiredBy);
     }
@@ -146,29 +146,45 @@ public class RequiredVariable {
         array_tp0 = this.array_tp1;
         this.array_tp1 = array_tp1;
     }
-    
-    public Number getFVCOM(double[] pGrid, double time) { 
-        
+
+    public Number getFVCOM(double[] pGrid, double time) {
+
+         // getting the value at the T-cell to which the particle belongs
+         double z = pGrid[2];
+         int kz = (int) Math.floor(z);
+         double dist = 1;
+
         double[][] tracer_0 = fvcom.getTracer0(name);
         double[][] dT_dX = fvcom.getDtDx(name);
         double[][] dT_dY = fvcom.getDtDy(name);
-        
+
         int iTriangle = fvcom.findTriangle(pGrid);
         double xB = fvcom.getXBarycenter(iTriangle);
         double yB = fvcom.getYBarycenter(iTriangle);
         double dX = pGrid[0] - xB;
         double dY = pGrid[1] - yB;
-        
-        double output = tracer_0[0][iTriangle] + dT_dX[0][iTriangle] * dX + dT_dY[0][iTriangle] * dY;
+
+        double output_kz = tracer_0[kz][iTriangle] + dT_dX[kz][iTriangle] * dX + dT_dY[kz][iTriangle] * dY;
+        double output_kzp1 = 0;
+
+        if (z >= 0.5 || z <= fvcom.getNLayer() + 0.5) {
+            // if the depth of the particle is between two T layers, we recover the value
+            // at the T layer which is below
+            output_kzp1 = tracer_0[kz + 1][iTriangle] + dT_dX[kz + 1][iTriangle] * dX + dT_dY[kz + 1][iTriangle] * dY;
+            dist = kz + 0.5 - z;
+        }
+
+        double output = dist * output_kz + ( 1 - dist) *output_kzp1;
+
         return output;
-        
+
     }
-    
+
     public  Number get(double[] pGrid, double time) {
         return getter.get(pGrid, time);
     }
 
-    
+
     public Number getStandard(double[] pGrid, double time) {
 
         int[] origin;
@@ -257,7 +273,7 @@ public class RequiredVariable {
 
         if (CO != 0) {
             value /= CO;
-        }      
+        }
         return value;
     }
 
