@@ -235,20 +235,18 @@ public class FvcomDataset extends AbstractDataset {
     @Override
     public double depth2z(double x, double y, double depth) {
 
-        //-----------------------------------------------
+        // -----------------------------------------------
         // Return z[grid] corresponding to depth[meters]
         double z;
         int lk = nLayer;
-        while ((lk > 0) && (getDepth(x, y, lk) < depth)) {
+        while ((lk >= 0) && (getDepth(x, y, lk) < depth)) {
             lk--;
         }
-        if (lk == (nLayer)) {
+        if (lk == (0)) {
             z = (double) lk;
         } else {
             double pr = getDepth(x, y, lk);
-            z = Math.max(0.d,
-                    (double) lk
-                    + (depth - pr) / (getDepth(x, y, lk - 1) - pr));
+            z = Math.max(0.d, (double) lk + (depth - pr) / (getDepth(x, y, lk - 1) - pr));
         }
         return (z);
 
