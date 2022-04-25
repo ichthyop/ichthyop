@@ -21,7 +21,7 @@ mortality and recruitment. The tool uses as input time series of velocity,
 temperature and salinity fields archived from oceanic models such as NEMO,
 ROMS, MARS or SYMPHONIE. It runs with a user-friendly graphic interface and
 generates output files that can be post-processed easily using graphic and
-statistical software. 
+statistical software.
 
 To cite Ichthyop, please refer to Lett et al. 2008
 A Lagrangian Tool for Modelling Ichthyoplankton Dynamics
@@ -30,7 +30,7 @@ doi:10.1016/j.envsoft.2008.02.005
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation (version 3 of the License). For a full 
+the Free Software Foundation (version 3 of the License). For a full
 description, see the LICENSE file.
 
 This program is distributed in the hope that it will be useful,
@@ -53,7 +53,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <packaging>jar</packaging>
     <name>Ichthyop</name>
     <description></description>
-    
+
     <!-- Project properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,7 +61,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <maven.compiler.target>1.8</maven.compiler.target>
         <mainClass>org.previmer.ichthyop.ui.IchthyopApp</mainClass>
     </properties>
-    
+
     <!-- Libraries declarations -->
 
     <!-- Address to the libraries repositories -->
@@ -71,14 +71,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <id>default</id>
             <url>http://repo.maven.apache.org/maven2/</url>
         </repository>
-        
+
         <!-- Local repository -->
         <repository>
             <id>project.local</id>
             <name>project</name>
             <url>file:${project.basedir}/local/</url>
         </repository>
-        
+
         <!-- NetCDF releases repository -->
         <repository>
             <snapshots>
@@ -88,7 +88,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <name>libs-release</name>
             <url>https://artifacts.unidata.ucar.edu/repository/unidata-releases/</url>
         </repository>
-        
+
         <!-- NetCDF snapshots repository -->
         <repository>
             <id>amap-maven-snapshots</id>
@@ -96,17 +96,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <url>https://artifacts.unidata.ucar.edu/repository/unidata-snapshots/</url>
         </repository>
     </repositories>
-    
+
     <build>
-        
+
         <filters>
             <filter>
                 src/main/filters/IchthyopApp.filters
-            </filter>                     
+            </filter>
         </filters>
 
         <resources>
-            
+
             <resource>
                 <directory>src/main/resources/</directory>
                 <excludes>
@@ -114,18 +114,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </excludes>
                 <filtering>true</filtering>
             </resource>
-            
+
             <resource>
                 <directory>src/main/resources/</directory>
                 <excludes>
                     <exclude>*.properties</exclude>
                 </excludes>
             </resource>
-            
+
         </resources>
-               
+
         <plugins>
-           
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
             <!-- Copy dependencies in lib folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -148,7 +157,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Link the jar with the dependencies in libs folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -165,7 +174,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </archive>
                 </configuration>
             </plugin>
-                        
+
             <!-- Create a jar with dependencies inside -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -193,7 +202,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Execute the jar file on "Run Project" -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -203,18 +212,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     <execution>
                         <id>default-cli</id>
                         <goals>
-                            <goal>exec</goal>                            
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
                             <executable>${java.home}/bin/java</executable>
                             <commandlineArgs>-classpath "${project.build.directory}/lib" -jar "${project.build.directory}/${project.build.finalName}.jar"</commandlineArgs>
                         </configuration>
                     </execution>
-                </executions>  
+                </executions>
             </plugin>
-            
-            
-        </plugins>      
+
+
+        </plugins>
     </build>
     <dependencies>
         <dependency>
@@ -230,7 +239,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
-            <version>2.0.6</version>
+            <version>2.0.6.1</version>
         </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
