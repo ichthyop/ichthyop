@@ -1,5 +1,6 @@
 package org.previmer.ichthyop;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
@@ -44,11 +45,11 @@ public class TestFvcomGrid extends SimulationManagerAccessor {
 
         i = 50;
         assertEquals(364483.3333333333, dataset.getXBarycenter(i));
-        assertEquals( 5150171.0000000000, dataset.getYBarycenter(i));
+        assertEquals(5150171.0000000000, dataset.getYBarycenter(i));
 
         i = 10000;
         assertEquals(449900.8333333333, dataset.getXBarycenter(i), delta);
-        assertEquals( 5420727.0000000000, dataset.getYBarycenter(i), delta);
+        assertEquals(5420727.0000000000, dataset.getYBarycenter(i), delta);
 
         i = 20000;
         assertEquals(377839.7083333333, dataset.getXBarycenter(i), delta);
@@ -88,6 +89,25 @@ public class TestFvcomGrid extends SimulationManagerAccessor {
         i = 15000;
         assertEquals(516110.0000000000, xNodes[i]);
         assertEquals(5220771.0000000000, yNodes[i]);
+
+    }
+
+    @Test
+    public void testNeighbours() {
+
+        int[][] neighbouringTriangles = dataset.getNeighbours();
+
+        int i = 10000;
+        int[] expected = new int[] { 9999, 10001, 10159 };
+        assertArrayEquals(expected, neighbouringTriangles[i]);
+
+        i = 0;
+        expected = new int[] { 183, -1, 1 };
+        assertArrayEquals(expected, neighbouringTriangles[i]);
+
+        i = 500;
+        expected = new int[] { 499, 501, 754 };
+        assertArrayEquals(expected, neighbouringTriangles[i]);
 
     }
 

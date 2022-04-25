@@ -1198,6 +1198,8 @@ public class FvcomDataset extends AbstractDataset {
         return this.yNodes;
     }
 
-
+    public int[][] getNeighbours() {
+        return this.neighbouringTriangles;
+    }
 
 }
