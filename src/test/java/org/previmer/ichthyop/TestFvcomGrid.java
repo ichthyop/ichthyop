@@ -39,20 +39,24 @@ public class TestFvcomGrid extends SimulationManagerAccessor {
         double delta = 1;
 
         int i = 0;
-        assertEquals(410871.84, dataset.getXBarycenter(i), delta);
-        assertEquals(4921664.5, dataset.getYBarycenter(i), delta);
+        assertEquals(410871.8333333333, dataset.getXBarycenter(i), delta);
+        assertEquals(4921664.6666666670, dataset.getYBarycenter(i), delta);
 
         i = 50;
-        assertEquals(364483.3438, dataset.getXBarycenter(i), delta);
-        assertEquals(5150171.0000, dataset.getYBarycenter(i), delta);
+        assertEquals(364483.3333333333, dataset.getXBarycenter(i));
+        assertEquals( 5150171.0000000000, dataset.getYBarycenter(i));
 
         i = 10000;
-        assertEquals(449900.8438, dataset.getXBarycenter(i), delta);
-        assertEquals(5420727.0000, dataset.getYBarycenter(i), delta);
+        assertEquals(449900.8333333333, dataset.getXBarycenter(i), delta);
+        assertEquals( 5420727.0000000000, dataset.getYBarycenter(i), delta);
 
         i = 20000;
-        assertEquals(377839.7188, dataset.getXBarycenter(i), delta);
-        assertEquals(5545715.5000, dataset.getYBarycenter(i), delta);
+        assertEquals(377839.7083333333, dataset.getXBarycenter(i), delta);
+        assertEquals(5545715.3333333330, dataset.getYBarycenter(i), delta);
+
+        i = 25000;
+        assertEquals(496360.3333333333, dataset.getXBarycenter(i), delta);
+        assertEquals(5231497.3333333330, dataset.getYBarycenter(i), delta);
 
     }
 

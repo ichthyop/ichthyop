@@ -761,7 +761,7 @@ public class FvcomDataset extends AbstractDataset {
                     getLogger().warning("Error");
                 }
             }
-            xNodes[i] /= 3.;
+            xBarycenter[i] /= 3.;
         }
 
         yBarycenter = new double[this.nTriangles];
