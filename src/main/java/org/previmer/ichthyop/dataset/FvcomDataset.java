@@ -45,6 +45,7 @@
 package org.previmer.ichthyop.dataset;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -91,6 +92,9 @@ public class FvcomDataset extends AbstractDataset {
     private double[] dHdx;
     private double[] dHdy;
     private double[] H0;
+
+    private double lonMin, latMin;
+    private double lonMax, latMax;
 
     /**
      * NetCDF file object
@@ -380,7 +384,7 @@ public class FvcomDataset extends AbstractDataset {
     /** We consider that points are always out of edge. */
     @Override
     public boolean isOnEdge(double[] pGrid) {
-        return false;
+        return (pGrid[0] >= lonMax) || (pGrid[0] <= lonMin) || (pGrid[1] >= latMax) || (pGrid[1] <= latMin);
     }
 
     @Override
@@ -448,22 +452,22 @@ public class FvcomDataset extends AbstractDataset {
 
     @Override
     public double getLatMin() {
-        return 0;
+        return this.latMin;
     }
 
     @Override
     public double getLatMax() {
-        return 0;
+        return this.latMax;
     }
 
     @Override
     public double getLonMin() {
-        return 0;
+        return this.lonMin;
     }
 
     @Override
     public double getLonMax() {
-        return 0;
+        return this.lonMax;
     }
 
     @Override
@@ -724,6 +728,13 @@ public class FvcomDataset extends AbstractDataset {
 
         xNodes = this.read_coordinates(this.strXVarName);
         yNodes = this.read_coordinates(this.strYVarName);
+
+        double[] extremeLon = getExtremeValue(xNodes);
+        double[] extremeLat = getExtremeValue(yNodes);
+        this.lonMin = extremeLon[0];
+        this.lonMax = extremeLon[1];
+        this.latMin = extremeLat[0];
+        this.latMax = extremeLat[1];
 
         // reads the bathymetry on the nodes (as the coordinates)
         Array HArray = ncIn.findVariable(strBathy).read();
@@ -1204,6 +1215,15 @@ public class FvcomDataset extends AbstractDataset {
 
     public double[] getSigma() {
         return this.sigma;
+    }
+
+    public double[] getExtremeValue(double[] input) {
+        int N = input.length;
+        double[] copy = Arrays.copyOf(input, N);
+        Arrays.sort(copy);
+        double vMin = copy[0];
+        double vMax = copy[N - 1];
+        return new double[] {vMin, vMax};
     }
 
 }

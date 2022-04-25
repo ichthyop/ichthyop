@@ -135,4 +135,14 @@ public class TestFvcomGrid extends SimulationManagerAccessor {
 
     }
 
+    @Test
+    public void testDomain() {
+
+        assertEquals(73550.0, dataset.getLonMin());
+        assertEquals(583047.0, dataset.getLonMax());
+        assertEquals(4916091.5, dataset.getLatMin());
+        assertEquals(5797668.5, dataset.getLatMax());
+
+    }
+
 }
