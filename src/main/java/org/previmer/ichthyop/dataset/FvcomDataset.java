@@ -336,6 +336,16 @@ public class FvcomDataset extends AbstractDataset {
         return this.nLayer;
     }
 
+    /** Return number of nodes */
+    public int getNNodes() {
+        return this.nNodes;
+    }
+
+    /** Return number of triangles (elements) */
+    public int getNTriangles() {
+        return this.nTriangles;
+    }
+
     @Override
     public double get_dVy(double[] pGrid, double time) {
         return getSpeed(pGrid, time, v_tp0, v_tp1, dvdx_0, dvdx_1, dvdy_0, dvdy_1);
@@ -1165,5 +1175,7 @@ public class FvcomDataset extends AbstractDataset {
             this.dTdY.put(name, output);
         }
     }
+
+
 
 }
