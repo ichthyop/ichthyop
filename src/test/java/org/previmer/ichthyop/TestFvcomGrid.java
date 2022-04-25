@@ -111,4 +111,28 @@ public class TestFvcomGrid extends SimulationManagerAccessor {
 
     }
 
+    @Test
+    public void testSigLev() {
+
+        assertEquals(10, dataset.getNLayer());
+
+        double[] sigma = dataset.getSigma();
+        double[] expected = new double[] { -0.0, -0.03162277, -0.08944271, -0.1643168, -0.2529822, -0.3535534, -0.464758,
+                -0.5856619, -0.7155418, -0.853815, -1 };
+
+        assertArrayEquals(expected, sigma, 0.00001);
+
+    }
+
+    @Test
+    public void testFindTriangle() {
+
+        assertEquals(777, dataset.findTriangle(new double[]{300000, 5400000.0}));
+        assertEquals(14155, dataset.findTriangle(new double[]{300000, 5600000.0}));
+        assertEquals(8252, dataset.findTriangle(new double[]{500000, 5400000.0}));
+        assertEquals(-999, dataset.findTriangle(new double[]{580000, 5400000.0}));
+        assertEquals(22655, dataset.findTriangle(new double[]{580000, 5052800.0}));
+
+    }
+
 }

@@ -1202,4 +1202,8 @@ public class FvcomDataset extends AbstractDataset {
         return this.neighbouringTriangles;
     }
 
+    public double[] getSigma() {
+        return this.sigma;
+    }
+
 }
