@@ -756,19 +756,25 @@ public class FvcomDataset extends AbstractDataset {
             for (int p = 0; p < 3; p++) {
                 int node = this.triangleNodes[i][p];
                 try {
-                    xBarycenter[i] += (1 / 3.) * xNodes[node];
+                    xBarycenter[i] += xNodes[node];
                 } catch (Exception ex) {
                     getLogger().warning("Error");
                 }
             }
+            xNodes[i] /= 3.;
         }
 
         yBarycenter = new double[this.nTriangles];
         for (int i = 0; i < this.nTriangles; i++) {
             for (int p = 0; p < 3; p++) {
                 int node = this.triangleNodes[i][p];
-                yBarycenter[i] += (1 / 3.) * yNodes[node];
+                try {
+                    yBarycenter[i] += yNodes[node];
+                } catch (Exception ex) {
+                    getLogger().warning("Error");
+                }
             }
+            yBarycenter[i] /= 3.;
         }
 
         // initialize the zeta arrays used for the interpolation
@@ -1135,6 +1141,14 @@ public class FvcomDataset extends AbstractDataset {
         return yBarycenter[iTriangle];
     }
 
+    public double[] getXBarycenter() {
+        return xBarycenter;
+    }
+
+    public double[] getYBarycenter() {
+        return yBarycenter;
+    }
+
     private void updateTracerFields(double time) {
 
         double x_euler = (dt_HyMo - Math.abs(time_tp1 - time)) / dt_HyMo;
@@ -1174,6 +1188,14 @@ public class FvcomDataset extends AbstractDataset {
             }
             this.dTdY.put(name, output);
         }
+    }
+
+    public double[] getXNodes() {
+        return this.xNodes;
+    }
+
+    public double[] getYNodes() {
+        return this.yNodes;
     }
 
 
