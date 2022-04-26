@@ -133,7 +133,7 @@ public class BuoyancyAction extends AbstractAction {
             MOLECULAR_VISCOSITY = Double.valueOf(getParameter(key));
         }
         
-        particleDensity = Float.valueOf(getParameter("particle_density"));
+
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
@@ -147,7 +147,7 @@ public class BuoyancyAction extends AbstractAction {
         }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
-        buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
+
         /*
          * Check whether there is a density CSV file
          */
@@ -162,6 +162,9 @@ public class BuoyancyAction extends AbstractAction {
             }
             loadDensities(pathname);
             buoyancyModel = BuoyancyModel.DENSITY_AS_AGE_FUNCTION;
+        } else { 
+            particleDensity = Float.valueOf(getParameter("particle_density"));
+            buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
         }
     }
 
