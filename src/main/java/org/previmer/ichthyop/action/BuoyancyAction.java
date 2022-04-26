@@ -71,8 +71,8 @@ public class BuoyancyAction extends AbstractAction {
 ///////////////////////////////
     private static double MEAN_MINOR_AXIS = 0.05f;   // l 
     private static double MEAN_MAJOR_AXIS = 0.14f;   // d
-    final private static double LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS + 0.5f);   // log value (constant)
-    final private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
+    private static double LOGN;
+    private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
     final private static double g = 980.0f; // [cm/s2]
     final private static double DR350 = 28.106331f;
     final private static double C1 = 4.8314f * Math.pow(10, -4);
@@ -124,6 +124,13 @@ public class BuoyancyAction extends AbstractAction {
         key = "mean_minor_axis";
         if (!isNull(key)) {
             MEAN_MINOR_AXIS = Double.valueOf(getParameter(key));
+        }
+        
+        LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS + 0.5f);   // log value (constant)
+        
+        key = "molecular_viscosity";
+        if (!isNull(key)) {
+            MOLECULAR_VISCOSITY = Double.valueOf(getParameter(key));
         }
         
         particleDensity = Float.valueOf(getParameter("particle_density"));
