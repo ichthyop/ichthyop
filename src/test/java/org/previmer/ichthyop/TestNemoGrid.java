@@ -157,7 +157,7 @@ public class TestNemoGrid extends SimulationManagerAccessor {
 
     @BeforeAll
     public void prepareData() throws Exception {
-        String fileName = getClass().getClassLoader().getResource("test-nemo3d.xml").getFile();
+        String fileName = getClass().getClassLoader().getResource("test-nemo/test-nemo3d.xml").getFile();
         getSimulationManager().getParameterManager().setConfigurationFile(new File(fileName));
         nemoGrid = new NemoGrid();
         nemoGrid.loadParameters();

@@ -125,7 +125,7 @@ public class TestRomsGrid extends SimulationManagerAccessor {
 
     @BeforeAll
     public void prepareData() throws Exception {
-        String fileName = getClass().getClassLoader().getResource("test-roms3d.xml").getFile();
+        String fileName = getClass().getClassLoader().getResource("test-roms/test-roms3d.xml").getFile();
         getSimulationManager().getParameterManager().setConfigurationFile(new File(fileName));
 
         romsGrid = new RomsGrid();
