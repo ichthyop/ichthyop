@@ -133,6 +133,6 @@ public class TestRomsGrid extends SimulationManagerAccessor {
         romsGrid.openDataset();
         romsGrid.getDimNC();
         romsGrid.readConstantField();
-        romsGrid.reconstructDepth();
+        //romsGrid.reconstructDepth();
     }
 }

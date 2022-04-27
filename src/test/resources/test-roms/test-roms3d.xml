@@ -207,7 +207,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter>
                 <key>input_path</key>
                 <long_name>Input path</long_name>
-                <value>/home/barrier/Work/ichthyop/test-roms</value>
+                <value>src/test/resources/test-roms</value>
                 <default>input</default>
                 <format>path</format>
                 <description>Folder containing the ROMS NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders and can only "see" the files located in this folder that matches the "File filter".</description>
@@ -222,7 +222,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <parameter hidden="true">
                 <key>grid_file</key>
                 <long_name>Grid file</long_name>
-                <value>/home/barrier/Work/ichthyop/test-roms/txla_hindcast_agg.nc</value>
+                <value>txla_hindcast_agg.nc</value>
                 <default>txla_hindcast_agg.nc</default>
                 <format>file</format>
                 <description>Separate grid file for ROMS configuration. In some simulations, lon, lat and mask are archived in separate grid file. In most cases this parameter should be empty.</description>

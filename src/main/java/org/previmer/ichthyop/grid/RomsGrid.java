@@ -42,9 +42,11 @@
 
 package org.previmer.ichthyop.grid;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.ui.LonLatConverter;
 import org.previmer.ichthyop.ui.LonLatConverter.LonLatFormat;
 
@@ -129,16 +131,18 @@ public class RomsGrid extends AbstractGrid {
     public void setUp() throws Exception {
         loadParameters();
         openDataset();
-        // openLocation(getParameter("input_path"));
         getDimNC();
         shrinkGrid();
         readConstantField();
         getDimGeogArea();
-
+        ncIn.close();
     }
 
     public void openDataset() throws IOException {
-        ncIn = NetcdfDataset.openDataset(this.meshFile);
+
+        String path = IOTools.resolvePath(getParameter("input_path"));
+        File mesh = new File(path, this.meshFile);
+        ncIn = NetcdfDataset.openDataset(mesh.getAbsolutePath());
     }
 
     /**
@@ -430,37 +434,36 @@ public class RomsGrid extends AbstractGrid {
         Array arrLon, arrLat, arrMask, arrH, arrPm, arrPn;
         Index index;
 
-        NetcdfFile ncGrid = NetcdfDataset.openDataset(this.meshFile);
         try {
-            arrLon = ncGrid.findVariable(strLon).read(origin, size);
+            arrLon = ncIn.findVariable(strLon).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset longitude. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
-            arrLat = ncGrid.findVariable(strLat).read(origin, size);
+            arrLat = ncIn.findVariable(strLat).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset latitude. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
-            arrMask = ncGrid.findVariable(strMask).read(origin, size);
+            arrMask = ncIn.findVariable(strMask).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset mask. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
-            arrH = ncGrid.findVariable(strBathy).read(origin, size);
+            arrH = ncIn.findVariable(strBathy).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset bathymetry. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
         try {
-            arrPm = ncGrid.findVariable(strPm).read(origin, size);
+            arrPm = ncIn.findVariable(strPm).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset pm metrics. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
@@ -468,13 +471,12 @@ public class RomsGrid extends AbstractGrid {
         }
 
         try {
-            arrPn = ncGrid.findVariable(strPn).read(origin, size);
+            arrPn = ncIn.findVariable(strPn).read(origin, size);
         } catch (IOException | InvalidRangeException e) {
             IOException ioex = new IOException("Problem reading dataset pn metrics. " + e.toString());
             ioex.setStackTrace(e.getStackTrace());
             throw ioex;
         }
-        ncGrid.close();
 
         lonRho = new double[get_ny()][get_nx()];
         latRho = new double[get_ny()][get_nx()];
@@ -589,7 +591,6 @@ public class RomsGrid extends AbstractGrid {
     void readLonLat() throws IOException {
 
         Array arrLon, arrLat;
-        NetcdfFile ncGrid = NetcdfDataset.openDataset(this.meshFile);
         try {
             arrLon = ncIn.findVariable(strLon).read();
         } catch (IOException ex) {
@@ -604,7 +605,6 @@ public class RomsGrid extends AbstractGrid {
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
-        ncGrid.close();
 
         latRho = new double[get_ny()][get_nx()];
         lonRho = new double[get_ny()][get_nx()];
