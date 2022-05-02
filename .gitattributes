@@ -1,3 +1,4 @@
 input/nemo-indian-new-mesh-mask.nc filter=lfs diff=lfs merge=lfs -text
 src/test/resources/test-nemo/orca2_track.nc filter=lfs diff=lfs merge=lfs -text
 src/test/resources/test-roms/txla_hindcast_agg.nc filter=lfs diff=lfs merge=lfs -text
+src/test/resources/mars-example.nc filter=lfs diff=lfs merge=lfs -text
