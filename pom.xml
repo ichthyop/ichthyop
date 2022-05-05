@@ -49,7 +49,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.previmer</groupId>
     <artifactId>ichthyop</artifactId>
-    <version>3.3.11</version>
+    <version>3.3.12</version>
     <packaging>jar</packaging>
     <name>Ichthyop</name>
     <description></description>
@@ -235,7 +235,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
-            <version>4.6.6</version>
+            <version>5.4.1</version>
         </dependency>
         <dependency>
             <groupId>ml.options</groupId>
@@ -272,6 +272,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     <artifactId>jnlp</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.7.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

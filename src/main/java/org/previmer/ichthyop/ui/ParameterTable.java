@@ -46,10 +46,14 @@ package org.previmer.ichthyop.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -57,31 +61,23 @@ import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.previmer.ichthyop.calendar.InterannualCalendar;
-import org.previmer.ichthyop.io.XBlock;
-import org.previmer.ichthyop.io.XParameter;
-import java.awt.event.ActionEvent;
-import java.text.ParseException;
-import java.util.logging.Level;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
-import org.previmer.ichthyop.calendar.Day360Calendar;
-import org.previmer.ichthyop.manager.TimeManager;
+
+import org.previmer.ichthyop.io.XBlock;
+import org.previmer.ichthyop.io.XParameter;
 
 /**
  *
@@ -142,7 +138,7 @@ public class ParameterTable extends JMultiCellEditorsTable {
                     break;
                 case BOOLEAN:
                     editorModel.addEditorForRow(row,
-                            new DefaultCellEditor(new JComboBox<String>(new String[] { "true", "false" })));
+                    new DefaultCellEditor(new JComboBox<String>(new String[] { "true", "false" })));
                     break;
                 case DURATION:
                     editorModel.addEditorForRow(row, new DateEditor(DateEditor.DURATION, value));
@@ -248,38 +244,38 @@ public class ParameterTable extends JMultiCellEditorsTable {
     }
 
     private void setupDateEditor(XBlock block) {
-        Calendar calendar;
+        // Calendar calendar;
 
-        String origin = "1900/01/01 00:00";
-        if (null != model.block) {
-            if (null != block.getXParameter("time_origin")) {
-                origin = block.getXParameter("time_origin").getValue();
-            }
-        }
-        Calendar calendar_o = Calendar.getInstance();
-        try {
-            calendar_o.setTime(TimeManager.INPUT_DATE_FORMAT.parse(origin));
-        } catch (ParseException ex) {
-            calendar_o.setTimeInMillis(0);
-        }
-        int year_o = calendar_o.get(Calendar.YEAR);
-        int month_o = calendar_o.get(Calendar.MONTH);
-        int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
-        int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
-        int minute_o = calendar_o.get(Calendar.MINUTE);
-        if (block.getXParameter("calendar_type").getValue().equals("climato")) {
-            calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
-        } else {
-            calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
-        }
-        for (int i = 0; i < getRowCount() - 1; i++) {
-            TableCellEditor editor = getRowEditorModel().getEditor(i);
-            if (null != editor) {
-                if (editor instanceof DateEditor) {
-                    ((DateEditor) editor).setCalendar(calendar);
-                }
-            }
-        }
+        // String origin = "1900/01/01 00:00";
+        // if (null != model.block) {
+        //     if (null != block.getXParameter("time_origin")) {
+        //         origin = block.getXParameter("time_origin").getValue();
+        //     }
+        // }
+        // Calendar calendar_o = Calendar.getInstance();
+        // try {
+        //     calendar_o.setTime(TimeManager.INPUT_DATE_FORMAT.parse(origin));
+        // } catch (ParseException ex) {
+        //     calendar_o.setTimeInMillis(0);
+        // }
+        // int year_o = calendar_o.get(Calendar.YEAR);
+        // int month_o = calendar_o.get(Calendar.MONTH);
+        // int day_o = calendar_o.get(Calendar.DAY_OF_MONTH);
+        // int hour_o = calendar_o.get(Calendar.HOUR_OF_DAY);
+        // int minute_o = calendar_o.get(Calendar.MINUTE);
+        // if (block.getXParameter("calendar_type").getValue().equals("climato")) {
+        //     calendar = new Day360Calendar(year_o, month_o, day_o, hour_o, minute_o);
+        // } else {
+        //     calendar = new InterannualCalendar(year_o, month_o, day_o, hour_o, minute_o);
+        // }
+        // for (int i = 0; i < getRowCount() - 1; i++) {
+        //     TableCellEditor editor = getRowEditorModel().getEditor(i);
+        //     if (null != editor) {
+        //         if (editor instanceof DateEditor) {
+        //             ((DateEditor) editor).setCalendar(calendar);
+        //         }
+        //     }
+        // }
     }
 
     @Override

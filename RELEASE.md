@@ -4,11 +4,20 @@
 
 ### New features
 
-- Possibility to select the output format (usefull for Windows users).
+- Adding the reading of noleap calendars.
+- Possibility to select the NetCDF output format (usefull for Windows users).
+- Adding some unit tests (NetCDF time)
+- Adding the possibility to save density maps instead of trajectories.
+- Adding saving of a `drifter` variable in order to use for mapping
+- Adding possibility to use NetCDF file compression (new set of parameters)
 
 ### Bug fix
 
-- Consideration of the case where HH:mm is not provided in units (issues #22) 
+- Consideration of the case where HH:mm:ss is not provided in units (issues #22) 
+- Consideration of the case where time is provided as HH:mm instead of HH:mm:ss (issue #32)
+- If NetCDF time cannot be properly read in NetCDF (wrong units), use the string provided in the `time_origin` parameter.
+- Adding the case when time units is in `minutes since ...`
+- Correct a bug in the writting of time in the Ichthyop console.
 
 ## Changes in 3.3.11
 

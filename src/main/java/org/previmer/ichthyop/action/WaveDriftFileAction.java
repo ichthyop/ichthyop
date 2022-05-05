@@ -21,7 +21,7 @@ import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 
 /**
  *
@@ -250,7 +250,7 @@ public class WaveDriftFileAction extends AbstractAction {
             }
             try {
 
-                ncIn = NetcdfDataset.openDataset(filename);
+                ncIn = NetcdfDatasets.openDataset(filename);
             } catch (Exception ex) {
                 IOException ioex = new IOException("Error opening dataset " + filename + " ==> " + ex.toString());
                 ioex.setStackTrace(ex.getStackTrace());

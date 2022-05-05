@@ -71,8 +71,8 @@ public class BuoyancyAction extends AbstractAction {
 ///////////////////////////////
     private static double MEAN_MINOR_AXIS = 0.05f;   // l 
     private static double MEAN_MAJOR_AXIS = 0.14f;   // d
-    final private static double LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS + 0.5f);   // log value (constant)
-    final private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
+    private static double LOGN;
+    private static double MOLECULAR_VISCOSITY = 0.01f; // [g/cm/s]
     final private static double g = 980.0f; // [cm/s2]
     final private static double DR350 = 28.106331f;
     final private static double C1 = 4.8314f * Math.pow(10, -4);
@@ -126,7 +126,14 @@ public class BuoyancyAction extends AbstractAction {
             MEAN_MINOR_AXIS = Double.valueOf(getParameter(key));
         }
         
-        particleDensity = Float.valueOf(getParameter("particle_density"));
+        LOGN = Math.log(2.f * MEAN_MAJOR_AXIS / MEAN_MINOR_AXIS + 0.5f);   // log value (constant)
+        
+        key = "molecular_viscosity";
+        if (!isNull(key)) {
+            MOLECULAR_VISCOSITY = Double.valueOf(getParameter(key));
+        }
+        
+
         salinity_field = getParameter("salinity_field");
         temperature_field = getParameter("temperature_field");
         isGrowth = getSimulationManager().getActionManager().isEnabled("action.growth");
@@ -140,7 +147,7 @@ public class BuoyancyAction extends AbstractAction {
         }
         getSimulationManager().getDataset().requireVariable(temperature_field, getClass());
         getSimulationManager().getDataset().requireVariable(salinity_field, getClass());
-        buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
+
         /*
          * Check whether there is a density CSV file
          */
@@ -155,6 +162,9 @@ public class BuoyancyAction extends AbstractAction {
             }
             loadDensities(pathname);
             buoyancyModel = BuoyancyModel.DENSITY_AS_AGE_FUNCTION;
+        } else { 
+            particleDensity = Float.valueOf(getParameter("particle_density"));
+            buoyancyModel = BuoyancyModel.CONSTANT_DENSITY;
         }
     }
 
