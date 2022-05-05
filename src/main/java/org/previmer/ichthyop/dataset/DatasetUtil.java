@@ -482,6 +482,8 @@ public class DatasetUtil {
             finalDate = dateUnit.plusSeconds(time);
         } else if (units.contains("hour")) {
             finalDate = dateUnit.plusHours(time);
+        } else if (units.contains("minute")) {
+            finalDate = dateUnit.plusMinutes(time);
         } else {
             finalDate = dateUnit.plusDays(time);
         }
@@ -569,7 +571,7 @@ public class DatasetUtil {
             subUnits = subUnits.replace("t", " ");
             dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             dateUnit = LocalDateTime.parse(subUnits, dateFormatter);
-        } else { 
+        } else {
             endIndex = units.length();
             String subUnits = units.substring(beginIndex, endIndex).trim();
             subUnits = subUnits.replace("t", " ");
