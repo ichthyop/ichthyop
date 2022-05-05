@@ -280,9 +280,9 @@
               <SubComponents>
                 <Component class="javax.swing.JButton" name="btnExpand">
                   <Properties>
-                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                    <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                       <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="expand" methodName="expand"/>
-                    </Property>
+                    </Property> -->
                     <Property name="focusable" type="boolean" value="false"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
                     <Property name="name" type="java.lang.String" value="btnExpand" noResource="true"/>
@@ -291,9 +291,9 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="btnCollapse">
                   <Properties>
-                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                    <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                       <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="collapse" methodName="collapse"/>
-                    </Property>
+                    </Property> -->
                     <Property name="focusable" type="boolean" value="false"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
                     <Property name="name" type="java.lang.String" value="btnCollapse" noResource="true"/>
@@ -302,9 +302,9 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="btnUpper">
                   <Properties>
-                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                    <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                       <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="upper" methodName="upper"/>
-                    </Property>
+                    </Property> -->
                     <Property name="focusable" type="boolean" value="false"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
                     <Property name="name" type="java.lang.String" value="btnUpper" noResource="true"/>
@@ -313,9 +313,9 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="btnLower">
                   <Properties>
-                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                    <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                       <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="lower" methodName="lower"/>
-                    </Property>
+                    </Property> -->
                     <Property name="focusable" type="boolean" value="false"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
                     <Property name="name" type="java.lang.String" value="btnLower" noResource="true"/>
@@ -392,7 +392,7 @@
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                             <TitledBorder title="Block">
-                              <Property name="titleX" resourceKey="pnlBlockInfo.border.title"/>
+                              <!-- <Property name="titleX" resourceKey="pnlBlockInfo.border.title"/> -->
                             </TitledBorder>
                           </Border>
                         </Property>
@@ -432,9 +432,9 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="ckBoxBlock">
                           <Properties>
-                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                               <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="setBlockEnabled" methodName="setBlockEnabled"/>
-                            </Property>
+                            </Property> -->
                             <Property name="name" type="java.lang.String" value="ckBoxBlock" noResource="true"/>
                           </Properties>
                         </Component>
@@ -445,7 +445,7 @@
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                             <TitledBorder title="Parameters">
-                              <Property name="titleX" resourceKey="pnlParameters.border.title"/>
+                              <!-- <Property name="titleX" resourceKey="pnlParameters.border.title"/> -->
                             </TitledBorder>
                           </Border>
                         </Property>
@@ -501,7 +501,7 @@
                             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                               <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                                 <TitledBorder title="Parameter">
-                                  <Property name="titleX" resourceKey="pnlParameterInfo.border.title"/>
+                                  <!-- <Property name="titleX" resourceKey="pnlParameterInfo.border.title"/> -->
                                 </TitledBorder>
                               </Border>
                             </Property>
@@ -538,9 +538,9 @@
                         </Container>
                         <Component class="javax.swing.JButton" name="btnUndo">
                           <Properties>
-                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                               <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="undo" methodName="undo"/>
-                            </Property>
+                            </Property> -->
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="DejaVu Sans" size="12" style="0"/>
                             </Property>
@@ -549,9 +549,9 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="btnRedo">
                           <Properties>
-                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                               <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="redo" methodName="redo"/>
-                            </Property>
+                            </Property> -->
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="DejaVu Sans" size="12" style="0"/>
                             </Property>
@@ -560,9 +560,9 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="btnAddValue">
                           <Properties>
-                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                               <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="addSerialValue" methodName="addSerialValue"/>
-                            </Property>
+                            </Property> -->
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="DejaVu Sans" size="12" style="0"/>
                             </Property>
@@ -571,9 +571,9 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="btnRemoveValue">
                           <Properties>
-                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                               <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="removeSerialValue" methodName="removeSerialValue"/>
-                            </Property>
+                            </Property> -->
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="DejaVu Sans" size="12" style="0"/>
                             </Property>
@@ -582,9 +582,9 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="ckBoxHiddenParameter">
                           <Properties>
-                            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
                               <action class="org.previmer.ichthyop.ui.JConfigurationPanel" id="showHiddenParameters" methodName="showHiddenParameters"/>
-                            </Property>
+                            </Property> -->
                             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                               <Font name="DejaVu Sans" size="12" style="0"/>
                             </Property>
