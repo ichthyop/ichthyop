@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
 ICHTHYOP, a Lagrangian tool for simulating ichthyoplankton dynamics
@@ -44,7 +43,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <!-- Maven properties -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.previmer</groupId>
@@ -57,9 +57,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <!-- Project properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <mainClass>org.previmer.ichthyop.ui.IchthyopApp</mainClass>
+        <javafx.version>13</javafx.version>
+        <javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
     </properties>
     
     <!-- Libraries declarations -->
@@ -125,6 +127,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </resources>
                
         <plugins>
+        
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <!-- Default configuration for running -->
+                        <!-- Usage: mvn clean javafx:run -->
+                        <id>default-cli</id>
+                        <configuration>
+                            <mainClass>org.previmer.ichthyop.ui.JavaFXIchthyop</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
            
             <!-- Copy dependencies in lib folder -->
             <plugin>
@@ -230,7 +248,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
-            <version>2.0.6</version>
+            <version>2.0.6.1</version>
         </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
@@ -284,6 +302,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <artifactId>junit-jupiter-engine</artifactId>
             <version>5.7.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
     </dependencies>
 </project>
