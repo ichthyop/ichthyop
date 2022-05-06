@@ -70,15 +70,15 @@
       <SubComponents>
         <Component class="javax.swing.JButton" name="btnChoosePath">
           <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="org.previmer.ichthyop.ui.BackupSnapshotsView" id="changePath" methodName="changePath"/>
-            </Property>
+            </Property> -->
             <Property name="name" type="java.lang.String" value="btnChoosePath" noResource="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblName">
           <Properties>
-            <Property name="text" type="java.lang.String" resourceKey="lblName.text"/>
+            <!-- <Property name="text" type="java.lang.String" resourceKey="lblName.text"/> -->
             <Property name="name" type="java.lang.String" value="lblName" noResource="true"/>
           </Properties>
         </Component>
@@ -93,7 +93,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="lblPath">
           <Properties>
-            <Property name="text" type="java.lang.String" resourceKey="lblPath.text"/>
+            <!-- <Property name="text" type="java.lang.String" resourceKey="lblPath.text"/> -->
             <Property name="name" type="java.lang.String" value="lblPath" noResource="true"/>
           </Properties>
         </Component>
@@ -113,7 +113,7 @@
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
                 <TitledBorder title="How to export maps ?">
-                  <Property name="titleX" resourceKey="pnlInfo.border.title"/>
+                  <!-- <Property name="titleX" resourceKey="pnlInfo.border.title"/> -->
                 </TitledBorder>
               </Border>
             </Property>
@@ -149,7 +149,7 @@
           <SubComponents>
             <Component class="javax.swing.JLabel" name="lblInfo">
               <Properties>
-                <Property name="text" type="java.lang.String" resourceKey="lblInfo.text"/>
+                <!-- <Property name="text" type="java.lang.String" resourceKey="lblInfo.text"/> -->
                 <Property name="name" type="java.lang.String" value="lblInfo" noResource="true"/>
               </Properties>
             </Component>
@@ -157,17 +157,17 @@
         </Container>
         <Component class="javax.swing.JButton" name="btnCancel">
           <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="org.previmer.ichthyop.ui.ExportMapsView" id="cancel" methodName="cancel"/>
-            </Property>
+            </Property> -->
             <Property name="name" type="java.lang.String" value="btnCancel" noResource="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="btnSave">
           <Properties>
-            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+            <!-- <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
               <action class="org.previmer.ichthyop.ui.ExportMapsView" id="save" methodName="save"/>
-            </Property>
+            </Property> -->
             <Property name="name" type="java.lang.String" value="btnSave" noResource="true"/>
           </Properties>
         </Component>
