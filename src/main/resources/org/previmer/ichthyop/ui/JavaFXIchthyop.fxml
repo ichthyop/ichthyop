@@ -4,9 +4,11 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="702.0" prefWidth="889.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
    <children>
@@ -28,11 +30,34 @@
         <menus>
           <Menu mnemonicParsing="false" text="Configuration">
             <items>
-                  <MenuItem mnemonicParsing="false" text="New" />
-                  <MenuItem mnemonicParsing="false" text="Open" />
-              <MenuItem mnemonicParsing="false" text="Close" />
-                  <MenuItem mnemonicParsing="false" text="Save" />
+                  <MenuItem mnemonicParsing="false" text="New">
+                     <graphic>
+                        <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/menu-new.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <MenuItem mnemonicParsing="false" text="Open">
+                     <graphic>
+                        <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/menu-open.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+              <MenuItem mnemonicParsing="false" text="Close">
+                     <graphic>
+                        <ImageView fitHeight="150.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@resources/images/ico32/menu-close.png" />
+                           </image>
+                        </ImageView>
+                     </graphic></MenuItem>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Save" />
                   <MenuItem mnemonicParsing="false" text="Save As" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
@@ -44,12 +69,23 @@
           </Menu>
             <Menu mnemonicParsing="false" text="Mapping">
               <items>
-                <MenuItem mnemonicParsing="false" text="Action 1" />
+                <MenuItem disable="true" mnemonicParsing="false" text="Make maps" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Export to KMZ" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Cancel" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Open Netcdf" />
               </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Animation">
               <items>
-                <MenuItem mnemonicParsing="false" text="Action 1" />
+                <MenuItem disable="true" mnemonicParsing="false" text="Start animation (forward)" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Start animation (backward)" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Stop animation" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Open maps" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Save As" />
+                  <MenuItem mnemonicParsing="false" text="Delete" />
               </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
