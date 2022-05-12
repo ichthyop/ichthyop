@@ -196,52 +196,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </executions>
             </plugin>
             
-            <!-- Create a ".exe" file -->
-            <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
-                <version>1.7.25</version>
-                <executions>
-                    <execution>
-                        <id>l4j-clui</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>console</headerType>
-                            <outfile>${project.build.directory}/${project.build.finalName}.exe</outfile>
-                            <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
-                            <errTitle>encc</errTitle>
-                            <classPath>
-                                <mainClass>${mainClass}</mainClass>
-                                <addDependencies>true</addDependencies>
-                                <preCp>anything</preCp>
-                            </classPath>
-                            <jre>
-                                <minVersion>${maven.compiler.source}.0</minVersion>
-                                <opts>
-                                    <opt>-Djava.endorsed.dirs=./endorsed</opt>
-                                </opts>
-                            </jre>
-                            <versionInfo>
-                                <fileVersion>${maven.compiler.source}.0.0</fileVersion>
-                                <txtFileVersion>${maven.compiler.source}</txtFileVersion>
-                                <fileDescription>${project.name}</fileDescription>
-                                <copyright>CeCILL-B</copyright>
-                                <productVersion>${maven.compiler.source}.0.0</productVersion>
-                                <txtProductVersion>${maven.compiler.source}</txtProductVersion>
-                                <productName>${project.build.finalName}</productName>
-                                <originalFilename>${project.build.finalName}.exe</originalFilename>
-                                <!-- internalName is mandatory -->
-                                <internalName>${project.build.finalName}</internalName>
-                            </versionInfo>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            
-                        <!-- Execute the jar file on "Run Project" -->
+            <!-- Execute the jar file on "Run Project" -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
