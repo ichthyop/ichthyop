@@ -317,16 +317,18 @@ abstract class RomsCommon extends AbstractDataset {
      * @throws an IOException if an error occurs while reading the dimensions.
      */
     void getDimNC() throws Exception {
+        
+        NetcdfFile ncGrid = NetcdfDatasets.openDataset(gridFile);
 
         try {
-            nx = ncIn.findDimension(strXiDim).getLength();
+            nx = ncGrid.findDimension(strXiDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset grid dimensions XI. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
             throw ioex;
         }
         try {
-            ny = ncIn.findDimension(strEtaDim).getLength();
+            ny = ncGrid.findDimension(strEtaDim).getLength();
         } catch (Exception ex) {
             IOException ioex = new IOException("Error reading dataset grid dimensions ETA. " + ex.toString());
             ioex.setStackTrace(ex.getStackTrace());
