@@ -100,4 +100,14 @@ public class TestXMLGrid extends SimulationManagerAccessor {
         assertEquals("grid-mars", marsGrid.getKey());
     }
     
+    @Test void testAddingGrid() { 
+        XGrid regularGrid = new XGrid("grid-regular", "regular");
+        assertEquals(true, regularGrid.isEnabled());
+        assertEquals(GridType.REGULAR, regularGrid.getType());
+        assertEquals("grid-regular", regularGrid.getKey());
+        grids.add(regularGrid);
+        assertEquals(4, grids.size());
+        
+    }
+    
 }

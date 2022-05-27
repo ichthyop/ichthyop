@@ -147,8 +147,8 @@ public class GridFile {
     /**
      * Add an empty "grid" child to the current "grids" tree.
      */
-    public void addGrid(String key) {
-        grids.put(key, new XGrid(key));
+    public void addGrid(String key, String type) {
+        grids.put(key, new XGrid(key, type));
     }
     
     /** Create the "grids" HashMap object. */
