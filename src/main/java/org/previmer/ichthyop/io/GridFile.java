@@ -106,7 +106,7 @@ public class GridFile {
     public void setFile(File file) {
         this.file = file;
     }
-    
+            
     /** Load an XML file and regenerate the structure of the grids architecture. */
     void load() {
 
@@ -184,7 +184,7 @@ public class GridFile {
     }
     
     /** Get the grid object based and convert it into a list */
-    public Collection<XGrid> getGrids() {
+    public List<XGrid> getGrids() {
         List<XGrid> list = new ArrayList<>(grids.values().size());
         if (null != sortedKey) {
             Iterator<String> it = sortedKey.iterator();
