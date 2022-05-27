@@ -41,8 +41,18 @@
  */
 
 package org.previmer.ichthyop.io;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+
+import org.jdom2.Content;
+import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.previmer.GridType;
+import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  * Class that manages XML tree for grid settings. Adapted from XZone.java. It
@@ -69,6 +79,8 @@ public class XGrid extends org.jdom2.Element  {
     /** Specific grid parameters */
     final public static String PARAMETERS = "parameters";
     
+    public List<XParameter> listParameters = new ArrayList<>();
+    
     public XGrid(Element xzone) {
         super(GRID);
         if (xzone != null) {
@@ -76,9 +88,14 @@ public class XGrid extends org.jdom2.Element  {
         }
     }
 
-    public XGrid(String key) {
+    public XGrid(String key, String type) {
         super(GRID);
         setKey(key);
+        setType(type.toUpperCase());
+    }
+    
+    public List<XParameter> getParameters() { 
+        return this.listParameters;   
     }
     
     public void setKey(String key) {
@@ -86,6 +103,13 @@ public class XGrid extends org.jdom2.Element  {
             addContent(new Element(KEY));
         }
         getChild(KEY).setText(key);
+    }
+    
+    public void setType(String type) {
+        if (null == getChild(TYPE)) {
+            addContent(new Element(TYPE));
+        }
+        getChild(TYPE).setText(type);
     }
         
     public String getKey() {
@@ -111,6 +135,32 @@ public class XGrid extends org.jdom2.Element  {
         } else {
             return true;
         }
+    }
+    
+    public void setParameters(String paramFile) {
+        if(null != getChild(PARAMETERS)) { 
+            return;
+        } else {
+           addContent(this.load(paramFile));
+        }
+    }
+        
+    private Element load(String file) {
+        SAXBuilder sxb = new SAXBuilder();
+        try {
+            Element racine = sxb.build(file).getRootElement().clone();
+            racine.detach();
+            return racine;
+        } catch (JDOMException | IOException e) {
+            SimulationManager.getLogger().log(Level.SEVERE, null, e);
+            return null;
+        }
+    }
+    
+    public void setListParameters() { 
+        Content parameters = getChild(PARAMETERS);
+           
+        
     }
     
     
