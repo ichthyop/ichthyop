@@ -46,8 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.jdom2.Content;
-import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
@@ -143,6 +141,7 @@ public class XGrid extends org.jdom2.Element  {
         } else {
            addContent(this.load(paramFile));
         }
+        this.setListParameters();
     }
         
     private Element load(String file) {
@@ -156,11 +155,29 @@ public class XGrid extends org.jdom2.Element  {
             return null;
         }
     }
-    
+
+    /** Get the list of parameters */
     public void setListParameters() { 
-        Content parameters = getChild(PARAMETERS);
-           
-        
+        for(Element element : getChild(PARAMETERS).getChildren()) {
+            listParameters.add(new XParameter(element));   
+        }
+
+    }
+            
+    /** Add a parameter to the parameter list */
+    public void addParameters(XParameter parameter) { 
+        listParameters.add(parameter);
+        getChild(PARAMETERS).addContent(parameter);   
+    }
+    
+    /** Method to recover a parameter name based on the key value */
+    public XParameter getParameter(String key) { 
+        for(XParameter param : listParameters) {
+            if(param.getKey().compareTo(key) == 0) {
+                return param;   
+            }
+        }
+        return null;       
     }
     
     
