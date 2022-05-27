@@ -100,7 +100,8 @@ public class TestXMLGrid extends SimulationManagerAccessor {
         assertEquals("grid-mars", marsGrid.getKey());
     }
     
-    @Test void testAddingGrid() { 
+    @Test 
+    public void testAddingGrid() { 
         XGrid regularGrid = new XGrid("grid-regular", "regular");
         assertEquals(true, regularGrid.isEnabled());
         assertEquals(GridType.REGULAR, regularGrid.getType());
@@ -108,6 +109,13 @@ public class TestXMLGrid extends SimulationManagerAccessor {
         grids.add(regularGrid);
         assertEquals(4, grids.size());
         
+    }
+    
+    @Test
+    public void testAddingParameters() {
+        String paramFile = getClass().getClassLoader().getResource("test-xmlgrid/grid-params-nemo.xml").getFile();
+        XGrid nemoGrid = grids.get(0);
+        nemoGrid.setParameters(paramFile);
     }
     
 }
