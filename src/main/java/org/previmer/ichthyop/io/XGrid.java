@@ -42,6 +42,7 @@
 
 package org.previmer.ichthyop.io;
 import org.jdom2.Element;
+import org.previmer.GridType;
 
 /**
  * Class that manages XML tree for grid settings. Adapted from XZone.java. It
@@ -62,6 +63,12 @@ public class XGrid extends org.jdom2.Element  {
     /** Type of the grid (NEMO, ROMS, MARS, REGULAR, FVCOM) */
     final public static String TYPE = "type";
     
+    /** Type of the grid (NEMO, ROMS, MARS, REGULAR, FVCOM) */
+    final public static String ENABLED = "enabled";
+    
+    /** Specific grid parameters */
+    final public static String PARAMETERS = "parameters";
+    
     public XGrid(Element xzone) {
         super(GRID);
         if (xzone != null) {
@@ -80,9 +87,31 @@ public class XGrid extends org.jdom2.Element  {
         }
         getChild(KEY).setText(key);
     }
-    
+        
     public String getKey() {
         return getChildTextNormalize(KEY);
     }
+    
+    public GridType getType() {
+        return GridType.valueOf(getChildTextNormalize(TYPE));
+    }
+    
+    /** Enables or disable the current grid. */
+    public void setEnabled(boolean enabled) {
+        if (null == getChild(ENABLED)) {
+            addContent(new Element(ENABLED));
+        }
+        getChild(ENABLED).setText(String.valueOf(enabled));
+    }
+    
+    /** Returns whether the grid is enabled or not. */
+    public boolean isEnabled() {
+        if (null != getChild(ENABLED)) {
+            return Boolean.valueOf(getChildTextNormalize(ENABLED));
+        } else {
+            return true;
+        }
+    }
+    
     
 }
