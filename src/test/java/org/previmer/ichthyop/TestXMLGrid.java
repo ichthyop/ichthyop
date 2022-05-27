@@ -49,16 +49,18 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
+import org.jdom2.Element;
 import org.junit.jupiter.api.BeforeAll;
 
 import org.junit.jupiter.api.Test;
 import org.previmer.GridType;
 import org.previmer.ichthyop.io.GridFile;
 import org.previmer.ichthyop.io.XGrid;
+import org.previmer.ichthyop.io.XParameter;
 import org.junit.jupiter.api.TestInstance;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TestXMLGrid extends SimulationManagerAccessor {
+public class TestXMLGrid {
     
     private List<XGrid> grids;
     
@@ -115,7 +117,31 @@ public class TestXMLGrid extends SimulationManagerAccessor {
     public void testAddingParameters() {
         String paramFile = getClass().getClassLoader().getResource("test-xmlgrid/grid-params-nemo.xml").getFile();
         XGrid nemoGrid = grids.get(0);
+        nemoGrid.setParameters(paramFile);        
+    }
+    
+    @Test
+    public void testParameterValues() { 
+        
+        // Getting the parameters for the NEMO grid
+        XGrid nemoGrid = grids.get(0);
+        
+        // Copy the params from the nemo grid param template to the grid file
+        String paramFile = getClass().getClassLoader().getResource("test-xmlgrid/grid-params-nemo.xml").getFile();
         nemoGrid.setParameters(paramFile);
+        
+        // test shrink_domain parameter
+        XParameter param = nemoGrid.getParameter("shrink_domain");
+        assertEquals("shrink_domain", param.getKey());   
+        String description = "Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If \"true\", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If \"false\", the Northwest corner and the Southeast corner parameters are ignored by the application.";    
+        assertEquals(description, param.getDescription());
+        
+        // test the input_path parameter.
+        param = nemoGrid.getParameter("input_path");
+        assertEquals("input", param.getDefault());   
+        assertEquals("my_folder", param.getValue());
+        assertEquals("path", param.getFormat().toString());
+        
     }
     
 }
