@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grids>
+  <grid>
+    <type>NEMO</type>
+    <enabled>true</enabled>
+    <key>grid-nemo</key>
+  </grid>
+    <grid>
+    <type>ROMS</type>
+    <enabled>false</enabled>
+    <key>grid-roms</key>
+  </grid>
+    <grid>
+    <type>MARS</type>
+    <key>grid-mars</key>
+    <parameters>
+    </parameters>
+  </grid>
+
+</grids>
