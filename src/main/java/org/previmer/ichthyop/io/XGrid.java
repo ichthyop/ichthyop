@@ -137,10 +137,9 @@ public class XGrid extends org.jdom2.Element  {
     
     public void setParameters(String paramFile) {
         if(null != getChild(PARAMETERS)) { 
-            return;
-        } else {
-           addContent(this.load(paramFile));
+            this.removeChild(PARAMETERS);
         }
+        addContent(this.load(paramFile));
         this.setListParameters();
     }
         
