@@ -4,7 +4,7 @@
     <parameter>
         <key>input_path</key>
         <long_name>Input path</long_name>
-        <value>input</value>
+        <value>my_folder</value>
         <format>path</format>
         <default>input</default>
         <description>Folder containing the NEMO NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders.</description>

@@ -4,11 +4,15 @@
     <type>NEMO</type>
     <enabled>true</enabled>
     <key>grid-nemo</key>
+    <parameters>
+    </parameters>
   </grid>
     <grid>
     <type>ROMS</type>
     <enabled>false</enabled>
     <key>grid-roms</key>
+    <parameters>
+    </parameters>
   </grid>
     <grid>
     <type>MARS</type>
