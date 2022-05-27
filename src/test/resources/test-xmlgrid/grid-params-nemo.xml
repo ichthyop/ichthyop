@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<parameters>
+    <parameter>
+        <key>input_path</key>
+        <long_name>Input path</long_name>
+        <value>input</value>
+        <format>path</format>
+        <default>input</default>
+        <description>Folder containing the NEMO NetCDF files. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders.</description>
+    </parameter>
+    <parameter>
+        <key>skip_sorting</key>
+        <long_name>Skip NetCDF file sorting</long_name>
+        <value>false</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>Ichthyop chronologically sorts the list of NetCDF input files by comparing the first value of the time variable of each file. Depending on the number of files, the speed for accessing and reading the files, the sorting might take very long time at simulation setup. If the files are already chronologically sorted thanks to their names, you should skip the sorting to increase performance.</description>
+    </parameter>
+    <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>false</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
+    </parameter>
+</parameters>
