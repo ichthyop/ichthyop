@@ -105,7 +105,7 @@ A particle is considered to be out of domain when :math:`x \leq 1` (no possible 
 
 The excluded domain is represented below:
 
-.. figure:: _static/in_on_edge_roms.*
+.. figure:: _static/is_on_edge_roms.*
    :width: 600 px
    :align: center
     
