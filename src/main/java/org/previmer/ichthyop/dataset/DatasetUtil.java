@@ -451,9 +451,14 @@ public class DatasetUtil {
         Array timeArr = nc.findVariable(strTime).read();
         long time = (long) timeArr.getDouble(timeArr.getIndex().set(index));
         
+        String units;
         // Converts string into lower case.
-        String units = attrUnits.getStringValue().toLowerCase();
-        
+        if (attrUnits != null) {
+            units = attrUnits.getStringValue().toLowerCase();
+        } else {
+            units = TimeManager.getInstance().getTimeOfOrigin();
+        }
+
         nc.close();
         
         return getDate(time, units);
