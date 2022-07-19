@@ -108,6 +108,11 @@ public class ZoneEditorPanel extends javax.swing.JPanel
     }
 
     private void addChangeListeners(PropertyChangeListener pl, ActionListener al) {
+        
+        // Add property change listener to all the current elements.
+        // It is used for instance to control events of when a widget property 
+        // (button color for instance) has changed and we want to use this new property
+        // to other widgets 
         ckBoxEnabled.addPropertyChangeListener(pl);
         cbBoxType.addPropertyChangeListener(pl);
         ckBoxBathyMask.addPropertyChangeListener(pl);
