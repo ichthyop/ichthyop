@@ -63,7 +63,9 @@ import org.previmer.ichthyop.manager.SimulationManager;
 
 /**
  * Class that manages the different grid used in the model. Adpated from
- * ZoneFile.java. It contains the settings for different grids defined.
+ * ZoneFile.java. It contains the settings for different grids defined. 
+ * 
+ * It uses XML libraries
  * 
  */
 public class GridFile {
