@@ -72,6 +72,10 @@ public class Version {
         this.date = date;
         this.number = number;
     }
+    
+    public static Version getLatest() {
+        return VALUES[VALUES.length - 1];
+    }
 
     public boolean priorTo(Version version) {
         if (null == date) {

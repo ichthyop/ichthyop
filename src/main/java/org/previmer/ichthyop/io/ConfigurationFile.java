@@ -122,7 +122,7 @@ public class ConfigurationFile {
             String date = structure.getRootElement().getChild(VERSION).getAttributeValue(DATE);
             return new Version(number, date);
         } else {
-            return Version.V30B;
+            return Version.getLatest();
         }
     }
 
