@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameters>
+    <parameter>
+        <key>input_path</key>
+        <long_name>Input path</long_name>
+        <value>input</value>
+        <format>path</format>
+        <default>input</default>
+        <description>Folder containing the Grid NetCDF file. Relative pathnames are supported. For instance, 'input' or 'input/' or './input' or './input/' are equivalent. Notice the application ignores the subfolders.</description>
+    </parameter>
+    <parameter>
+        <key>shrink_domain</key>
+        <long_name>Shrink simulated domain</long_name>
+        <value>false</value>
+        <default>false</default>
+        <format>boolean</format>
+        <description>Shrink the size of the domain for running the simulation. It avoids to download the whole data when you are working on a localized area. If "true", you must define the coordinates of the Northwest corner and the Southeast corner of the resized area. If "false", the Northwest corner and the Southeast corner parameters are ignored by the application.</description>
+    </parameter>
+    <parameter>
+        <key>north-west-corner.lat</key>
+        <long_name>Latitude of Northwest corner [North degree]</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+        <format>lonlat</format>
+        <default>0.0</default>
+    </parameter>
+    <parameter>
+        <key>north-west-corner.lon</key>
+        <long_name>Longitude of Northwest corner [East degree]</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Northwest corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+        <format>lonlat</format>
+        <default>0.0</default>
+    </parameter>
+    <parameter>
+        <key>south-east-corner.lat</key>
+        <long_name>Latitude of Southeast corner [North degree]</long_name>
+        <value>0.0</value>
+        <description>Set the latitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+        <format>lonlat</format>
+        <default>0.0</default>
+    </parameter>
+    <parameter>
+        <key>south-east-corner.lon</key>
+        <long_name>Longitude of Southeast corner [East degree]</long_name>
+        <value>0.0</value>
+        <description>Set the longitude of Southeast corner for resizing the simulated domain. You can change the coordinate format when editing the value.</description>
+        <format>lonlat</format>
+        <default>0.0</default>
+    </parameter>
+    <parameter>
+        <key>byte_mask_pattern</key>
+        <long_name>Mask file pattern</long_name>
+        <value>*mask*.nc</value>
+        <default>*mask*.nc</default>
+        <description>Filename filter for identifying the "mask" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the dimensions x, y, z and the variable land/ocean mask at T points</description>
+    </parameter>
+    <parameter>
+        <key>field_dim_x</key>
+        <long_name>Dimension in the X-direction</long_name>
+        <value>x</value>
+        <default>x</default>
+        <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_dim_y</key>
+        <long_name>Dimension in the Y-direction</long_name>
+        <value>y</value>
+        <default>y</default>
+        <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_dim_z</key>
+        <long_name>Dimension in the vertical direction</long_name>
+        <value>z</value>
+        <default>z</default>
+        <description>Name of the NetCDF dimension in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_mask</key>
+        <long_name>Land/ocean mask at T points</long_name>
+        <value>fmask</value>
+        <default>fmask</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_lat</key>
+        <long_name>Latitude of Rho points</long_name>
+        <value>nav_lat</value>
+        <default>nav_lat</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_lon</key>
+        <long_name>Longitude of Rho points</long_name>
+        <value>nav_lon</value>
+        <default>nav_lon</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>hgr_pattern</key>
+        <long_name>HGR file pattern</long_name>
+        <value>*hgr*.nc</value>
+        <default>*hgr*.nc</default>
+        <description>Filename filter for identifying the "HGR" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file e1t, e2t, e1v and e2u variables.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_e1t</key>
+        <long_name>Zonal scale factor at T points</long_name>
+        <value>e1t</value>
+        <default>e1t</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_e2t</key>
+        <long_name>Meridional scale factor at T points</long_name>
+        <value>e2t</value>
+        <default>e2t</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_e1v</key>
+        <long_name>Zonal scale factor at V points</long_name>
+        <value>e1v</value>
+        <default>e1v</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_e2u</key>
+        <long_name>Meridional scale factor at U points</long_name>
+        <value>e2u</value>
+        <default>e2u</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>zgr_pattern</key>
+        <long_name>ZGR file pattern</long_name>
+        <value>*zgr*.nc</value>
+        <default>*zgr*.nc</default>
+        <description>Filename filter for identifying the "ZGR" NetCDF output file. Accepted metacharacters * (for any String) and ? (for any single character). The application expects to find in this file the variables depth at T points, depth at W points and vertical scale factor at T points.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_e3t</key>
+        <long_name>Vertical scale factor at T points</long_name>
+        <value>e3t_ps</value>
+        <default>e3t_ps</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_e3u</key>
+        <long_name>Vertical scale factor at U points</long_name>
+        <value>e3u_ps</value>
+        <default>e3u_ps</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_e3v</key>
+        <long_name>Vertical scale factor at V points</long_name>
+        <value>e3v_ps</value>
+        <default>e3v_ps</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_gdept</key>
+        <long_name>Depth at T points</long_name>
+        <value>gdept</value>
+        <default>gdept</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter>
+        <key>field_var_gdepw</key>
+        <long_name>Depth at W points</long_name>
+        <value>gdepw</value>
+        <default>gdepw</default>
+        <description>Name of the NetCDF variable in the hydrodynamic dataset.</description>
+    </parameter>
+    <parameter hidden="true">
+        <key>class_name</key>
+        <long_name>Java Class file</long_name>
+        <value>org.previmer.ichthyop.grid.NemoGrid</value>
+        <default>org.previmer.ichthyop.grid.NemoGrid</default>
+        <format>class</format>
+        <description>The Java class called by the application to implement this dataset.</description>
+    </parameter>
+</parameters>
