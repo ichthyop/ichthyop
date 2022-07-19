@@ -5,11 +5,22 @@
  */
 package org.previmer.ichthyop.ui;
 
-/**
+import java.io.File;
+import java.util.Collection;
+import java.util.Vector;
+
+import javax.swing.table.DefaultTableModel;
+
+import org.previmer.ichthyop.io.GridFile;
+import org.previmer.ichthyop.io.XGrid;
+
+/** Class that manages the GUI for the edition of grid parameters.
  *
  * @author barrier
  */
 public class GridEditorPanel extends javax.swing.JPanel {
+    
+    private GridFile gridFile;
 
     /**
      * Creates new form GridEditorPanel
@@ -30,7 +41,7 @@ public class GridEditorPanel extends javax.swing.JPanel {
         gridSaveButton = new javax.swing.JButton();
         gridSaveAsButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
-        jTable1 = new javax.swing.JTable();
+        gridListTable = new javax.swing.JTable();
         gridAddButton = new javax.swing.JButton();
         gridRemoveButton = new javax.swing.JButton();
         gridUpButton = new javax.swing.JButton();
@@ -51,7 +62,7 @@ public class GridEditorPanel extends javax.swing.JPanel {
         gridFileNameLabel = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        gridParamsTable = new javax.swing.JTable();
 
         jTextField1.setText("jTextField1");
 
@@ -69,7 +80,7 @@ public class GridEditorPanel extends javax.swing.JPanel {
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel1.setName("Grids"); // NOI18N
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        gridListTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -124,7 +135,7 @@ public class GridEditorPanel extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTable1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(gridListTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(33, 33, 33)
@@ -141,7 +152,7 @@ public class GridEditorPanel extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTable1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(gridListTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(gridAddButton, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -255,11 +266,11 @@ public class GridEditorPanel extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        gridFileNameLabel.setText("");
+        gridFileNameLabel.setText("jLabel3");
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        gridParamsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
                 {null, null},
@@ -289,14 +300,14 @@ public class GridEditorPanel extends javax.swing.JPanel {
                 "Param. name", "Param. value"
             }
         ) {
-            Class<?>[] types = new Class [] {
+            Class[] types = new Class [] {
                 java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
                 false, true
             };
 
-            public Class<?> getColumnClass(int columnIndex) {
+            public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
 
@@ -304,8 +315,8 @@ public class GridEditorPanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jTable2.setEnabled(false);
-        jScrollPane1.setViewportView(jTable2);
+        gridParamsTable.setEnabled(false);
+        jScrollPane1.setViewportView(gridParamsTable);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -370,6 +381,35 @@ public class GridEditorPanel extends javax.swing.JPanel {
     public String getFilename() {
         return gridFileNameLabel.getText();
     }
+    
+    private Vector<Vector<String>> array2Vector(Collection<XGrid> zones) {
+        Vector<Vector<String>> vector = new Vector<>();
+        for (XGrid xGrid : zones) {
+            Vector<String> v = new Vector<>();
+            v.addElement(xGrid.getKey());
+            vector.addElement(v);
+        }
+        return vector;
+    }
+    
+    public void loadGridFromFile(File file) throws Exception {
+        gridFileNameLabel.setText(file.getAbsolutePath());
+        gridFileNameLabel.setToolTipText(gridFileNameLabel.getText());
+        gridFile = new GridFile(file);
+        DefaultTableModel model = new DefaultTableModel();
+        Vector<String> dummyHeader = new Vector<>();
+        dummyHeader.addElement("");
+        model.setDataVector(array2Vector(gridFile.getGrids()), dummyHeader);
+        this.gridListTable.setModel(model);
+        setPanelGridEnabled(false);
+        if (this.gridListTable.getRowCount() > 0) {
+            this.gridListTable.getSelectionModel().setSelectionInterval(0, 0);
+        }
+    }
+    
+    public void setPanelGridEnabled(final boolean enabled) {
+
+    }
 
     private void gridAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridAddButtonActionPerformed
         // TODO add your handling code here:
@@ -414,6 +454,8 @@ public class GridEditorPanel extends javax.swing.JPanel {
     private javax.swing.JTextField gridFileNameTextField;
     private javax.swing.JButton gridFileSelectButton;
     private javax.swing.JTextField gridIdTextField;
+    private javax.swing.JTable gridListTable;
+    private javax.swing.JTable gridParamsTable;
     private javax.swing.JButton gridRemoveButton;
     private javax.swing.JButton gridSaveAsButton;
     private javax.swing.JButton gridSaveButton;
@@ -428,8 +470,6 @@ public class GridEditorPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }
