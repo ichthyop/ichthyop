@@ -255,7 +255,7 @@ public class GridEditorPanel extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        gridFileNameLabel.setText("jLabel3");
+        gridFileNameLabel.setText("");
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -365,6 +365,10 @@ public class GridEditorPanel extends javax.swing.JPanel {
     
     public void save() {
         this.gridSaveButton.doClick();
+    }
+    
+    public String getFilename() {
+        return gridFileNameLabel.getText();
     }
 
     private void gridAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridAddButtonActionPerformed
