@@ -340,7 +340,7 @@ public class UpdateManager extends AbstractManager {
     }
 
     public Version getApplicationVersion() {
-        return Version.VALUES[Version.VALUES.length - 1];
+        return Version.getLatest();
     }
 
     public Version getConfigurationVersion() {
