@@ -197,4 +197,9 @@ public class GridFile {
         return list;
     }
     
+    /** Returns getter for a specific grid, based from key */
+    public XGrid getGrid(String key) {
+        return grids.get(key);
+    }
+    
 }
