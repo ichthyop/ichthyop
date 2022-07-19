@@ -147,8 +147,8 @@ public class GridEditor extends AbstractCellEditor implements ActionListener, Ta
 
                             int answer = ((Integer) value).intValue();
                             if (answer == JOptionPane.OK_OPTION) {
-                                //gridEditor.save();
-                                //textField.setText(gridEditor.getFilename());
+                                gridEditorPanel.save();
+                                textField.setText(gridEditorPanel.getFilename());
                                 fireEditingStopped();
                             } else {
                                 fireEditingCanceled();
@@ -299,5 +299,5 @@ public class GridEditor extends AbstractCellEditor implements ActionListener, Ta
             int column) {
         textField.setText(value.toString());
         return panel;
-    }
+    }     
 }
