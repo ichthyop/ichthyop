@@ -92,6 +92,10 @@ public class XGrid extends org.jdom2.Element  {
         setType(type.toUpperCase());
     }
     
+    public void clearParameters() {
+        this.listParameters.clear();
+    }
+    
     public List<XParameter> getParameters() { 
         return this.listParameters;   
     }
