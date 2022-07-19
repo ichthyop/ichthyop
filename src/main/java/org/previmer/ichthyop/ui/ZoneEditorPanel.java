@@ -319,6 +319,7 @@ public class ZoneEditorPanel extends javax.swing.JPanel
         zone.setEnabled(enabled);
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             if (null != zone && hasZoneChanged) {
