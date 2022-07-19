@@ -170,6 +170,9 @@ public class ParameterTable extends JMultiCellEditorsTable {
                 case ZONEFILE:
                     editorModel.addEditorForRow(row, new ZoneEditor(xparam.getTemplate()));
                     break;
+                case GRIDFILE:
+                    editorModel.addEditorForRow(row, new GridEditor(xparam.getTemplate()));
+                    break;
                 case LONLAT:
                     editorModel.addEditorForRow(row, new LonLatEditor());
                     break;
