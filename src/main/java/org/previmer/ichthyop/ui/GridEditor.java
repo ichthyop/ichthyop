@@ -75,7 +75,8 @@ import org.previmer.ichthyop.Template;
 import org.previmer.ichthyop.io.IOTools;
 import org.previmer.ichthyop.manager.SimulationManager;
 
-/**
+/** Class that manages the configuration of grid files from the parameter
+ * table.
  *
  * @author Philippe Verley <philippe dot verley at ird dot fr>
  */
@@ -224,7 +225,7 @@ public class GridEditor extends AbstractCellEditor implements ActionListener, Ta
                     }
                     textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
                     try {
-                        //gridEditor.loadZonesFromFile(fileChooser.getSelectedFile());
+                        gridEditorPanel.loadGridFromFile(fileChooser.getSelectedFile());
                         dialog.setVisible(true);
                     } catch (Exception ex) {
                         Logger.getLogger(GridEditor.class.getName()).log(Level.SEVERE, null, ex);
