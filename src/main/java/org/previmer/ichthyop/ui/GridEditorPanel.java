@@ -9,6 +9,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Vector;
 
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.previmer.ichthyop.io.GridFile;
@@ -18,10 +20,8 @@ import org.previmer.ichthyop.io.XGrid;
  *
  * @author barrier
  */
-public class GridEditorPanel extends javax.swing.JPanel {
+public class GridEditorPanel extends javax.swing.JPanel implements ListSelectionListener {
     
-    private GridFile gridFile;
-
     /**
      * Creates new form GridEditorPanel
      */
@@ -300,14 +300,14 @@ public class GridEditorPanel extends javax.swing.JPanel {
                 "Param. name", "Param. value"
             }
         ) {
-            Class[] types = new Class [] {
+            Class<?>[] types = new Class [] {
                 java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
                 false, true
             };
 
-            public Class getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
 
@@ -374,43 +374,6 @@ public class GridEditorPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
     
-    public void save() {
-        this.gridSaveButton.doClick();
-    }
-    
-    public String getFilename() {
-        return gridFileNameLabel.getText();
-    }
-    
-    private Vector<Vector<String>> array2Vector(Collection<XGrid> zones) {
-        Vector<Vector<String>> vector = new Vector<>();
-        for (XGrid xGrid : zones) {
-            Vector<String> v = new Vector<>();
-            v.addElement(xGrid.getKey());
-            vector.addElement(v);
-        }
-        return vector;
-    }
-    
-    public void loadGridFromFile(File file) throws Exception {
-        gridFileNameLabel.setText(file.getAbsolutePath());
-        gridFileNameLabel.setToolTipText(gridFileNameLabel.getText());
-        gridFile = new GridFile(file);
-        DefaultTableModel model = new DefaultTableModel();
-        Vector<String> dummyHeader = new Vector<>();
-        dummyHeader.addElement("");
-        model.setDataVector(array2Vector(gridFile.getGrids()), dummyHeader);
-        this.gridListTable.setModel(model);
-        setPanelGridEnabled(false);
-        if (this.gridListTable.getRowCount() > 0) {
-            this.gridListTable.getSelectionModel().setSelectionInterval(0, 0);
-        }
-    }
-    
-    public void setPanelGridEnabled(final boolean enabled) {
-
-    }
-
     private void gridAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridAddButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_gridAddButtonActionPerformed
@@ -472,4 +435,73 @@ public class GridEditorPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
+    
+    private GridFile gridFile;
+    private XGrid grid;
+    private boolean hasGridChanged;
+    
+    public void save() {
+        this.gridSaveButton.doClick();
+    }
+
+    public String getFilename() {
+        return gridFileNameLabel.getText();
+    }
+
+    private Vector<Vector<String>> array2Vector(Collection<XGrid> zones) {
+        Vector<Vector<String>> vector = new Vector<>();
+        for (XGrid xGrid : zones) {
+            Vector<String> v = new Vector<>();
+            v.addElement(xGrid.getKey());
+            vector.addElement(v);
+        }
+        return vector;
+    }
+
+    public void loadGridFromFile(File file) throws Exception {
+        gridFileNameLabel.setText(file.getAbsolutePath());
+        gridFileNameLabel.setToolTipText(gridFileNameLabel.getText());
+        gridFile = new GridFile(file);
+        DefaultTableModel model = new DefaultTableModel();
+        Vector<String> dummyHeader = new Vector<>();
+        dummyHeader.addElement("");
+        model.setDataVector(array2Vector(gridFile.getGrids()), dummyHeader);
+        this.gridListTable.setModel(model);
+        setPanelGridEnabled(false);
+        if (this.gridListTable.getRowCount() > 0) {
+            this.gridListTable.getSelectionModel().setSelectionInterval(0, 0);
+        }
+    }
+
+    public void setPanelGridEnabled(final boolean enabled) {
+
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (!e.getValueIsAdjusting()) {
+            if (null != grid && hasGridChanged) {
+                updateGrid(grid);
+            }
+            if (gridListTable.getSelectedRow() >= 0) {
+                String key = (String) this.gridListTable.getModel().getValueAt(gridListTable.getSelectedRow(), 0);
+                grid = gridFile.getGrid(key);
+                displayGrid(grid);
+            }
+        }
+    }
+    
+    
+    private void updateGrid(XGrid grid) {
+        
+        grid.setEnabled(gridEnabledCheckBox.isSelected());
+        grid.setType((String)gridTypeComboBox.getSelectedItem());
+        grid.clearParameters();
+        
+    }
+    
+    private void displayGrid(XGrid grid) {
+
+    }
+    
 }
