@@ -189,8 +189,10 @@ public class XGrid extends org.jdom2.Element  {
 
     /** Get the list of parameters */
     public void setListParameters() {
-        for (Element element : getChild(PARAMETERS).getChildren()) {
-            listParameters.add(new XParameter(element));
+        if (getChild(PARAMETERS) != null) {
+            for (Element element : getChild(PARAMETERS).getChildren()) {
+                listParameters.add(new XParameter(element));
+            }
         }
     }
             
