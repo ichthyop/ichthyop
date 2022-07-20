@@ -86,12 +86,13 @@ public class XGrid extends org.jdom2.Element  {
     /** Specific grid parameters */
     final public static String PARAMETERS = "parameters";
     
-    public List<XParameter> listParameters = new ArrayList<>();
+    private List<XParameter> listParameters = new ArrayList<>();
     
     public XGrid(Element xzone) {
         super(GRID);
         if (xzone != null) {
             addContent(xzone.cloneContent());
+            this.setListParameters();
         }
     }
 
@@ -99,6 +100,7 @@ public class XGrid extends org.jdom2.Element  {
         super(GRID);
         setKey(key);
         setType(type.toUpperCase());
+        this.setListParameters();
     }
     
     public void clearParameters() {
@@ -169,11 +171,11 @@ public class XGrid extends org.jdom2.Element  {
         if(null != getChild(PARAMETERS)) { 
             this.removeChild(PARAMETERS);
         }
-        addContent(this.load(paramFile));
+        addContent(this.loadParamsFromTemplate(paramFile));
         this.setListParameters();
     }
         
-    private Element load(String file) {
+    private Element loadParamsFromTemplate(String file) {
         SAXBuilder sxb = new SAXBuilder();
         try {
             Element racine = sxb.build(file).getRootElement().clone();
