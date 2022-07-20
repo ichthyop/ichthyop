@@ -74,6 +74,15 @@ public class XGrid extends org.jdom2.Element  {
     /** Type of the grid (NEMO, ROMS, MARS, REGULAR, FVCOM) */
     final public static String ENABLED = "enabled";
     
+    /** Defines whether the grid is 3D or not */
+    final public static String IS3D = "is3d";
+    
+    /** Type of the grid (NEMO, ROMS, MARS, REGULAR, FVCOM) */
+    final public static String CENTRAL_LONGITUDE = "central_longitude";
+    
+    /** Type of the grid (NEMO, ROMS, MARS, REGULAR, FVCOM) */
+    final public static String GRID_FILE = "grid_file";
+
     /** Specific grid parameters */
     final public static String PARAMETERS = "parameters";
     
@@ -139,6 +148,23 @@ public class XGrid extends org.jdom2.Element  {
         }
     }
     
+    /** Returns whether the grid is enabled or not. */
+    public boolean is3DEnabled() {
+        if (null != getChild(IS3D)) {
+            return Boolean.valueOf(getChildTextNormalize(IS3D));
+        } else {
+            return true;
+        }
+    }
+    
+    /** Enables or disable the current grid. */
+    public void set3DEnabled(boolean enabled) {
+        if (null == getChild(IS3D)) {
+            addContent(new Element(IS3D));
+        }
+        getChild(IS3D).setText(String.valueOf(enabled));
+    }
+    
     public void setParameters(String paramFile) {
         if(null != getChild(PARAMETERS)) { 
             this.removeChild(PARAMETERS);
@@ -160,11 +186,10 @@ public class XGrid extends org.jdom2.Element  {
     }
 
     /** Get the list of parameters */
-    public void setListParameters() { 
-        for(Element element : getChild(PARAMETERS).getChildren()) {
-            listParameters.add(new XParameter(element));   
+    public void setListParameters() {
+        for (Element element : getChild(PARAMETERS).getChildren()) {
+            listParameters.add(new XParameter(element));
         }
-
     }
             
     /** Add a parameter to the parameter list */
@@ -183,5 +208,34 @@ public class XGrid extends org.jdom2.Element  {
         return null;       
     }
     
+    public void setCentralLongitude(String value) {
+        if (null == getChild(CENTRAL_LONGITUDE)) {
+            addContent(new Element(CENTRAL_LONGITUDE));
+        }
+        getChild(CENTRAL_LONGITUDE).setText(value);
+    }
+    
+    public float getCentralLongitude() {
+        if (null != getChild(CENTRAL_LONGITUDE)) {
+            return Float.valueOf(getChild(CENTRAL_LONGITUDE).getText());
+        } else {
+            return 0;   
+        }
+    }
+    
+    public void setGridMeshFile(String value) {
+        if (null == getChild(GRID_FILE)) {
+            addContent(new Element(GRID_FILE));
+        }
+        getChild(GRID_FILE).setText(value);
+    }
+    
+    public String getsetGridMeshFile() {
+        if (null != getChild(GRID_FILE)) {
+            return getChild(GRID_FILE).getText();
+        } else {
+            return null;   
+        }
+    }
     
 }
