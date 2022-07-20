@@ -106,6 +106,10 @@ ActionListener {
                 return canEdit [columnIndex];
             }
         });
+        //gridListTable.setName("gridListTable"); // NOI18N
+        gridListTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        gridListTable.setShowVerticalLines(false);
+        gridListTable.getSelectionModel().addListSelectionListener(this);
 
         gridAddButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/previmer/ichthyop/ui/resources/images/ico32/list-add.png"))); // NOI18N
         gridAddButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
