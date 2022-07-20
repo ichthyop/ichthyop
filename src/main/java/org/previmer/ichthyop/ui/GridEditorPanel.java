@@ -9,20 +9,25 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.event.TableModelListener;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import org.previmer.ichthyop.io.GridFile;
 import org.previmer.ichthyop.io.XGrid;
+import org.previmer.ichthyop.io.XParameter;
 
 
 /** Class that manages the GUI for the edition of grid parameters.
@@ -73,6 +78,7 @@ ActionListener {
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         gridParamsTable = new javax.swing.JTable();
+        gridParamDescriptionLabel = new javax.swing.JLabel();
 
         jTextField1.setText("jTextField1");
 
@@ -282,15 +288,32 @@ ActionListener {
                     .addComponent(jLabel5)
                     .addComponent(gridFileNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(gridFileSelectButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(238, Short.MAX_VALUE))
         );
 
-        gridFileNameLabel.setText("jLabel3");
+        gridFileNameLabel.setText("Grid Filename");
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         gridParamsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
                 {null, null},
                 {null, null},
                 {null, null},
@@ -335,6 +358,11 @@ ActionListener {
             }
         });
         gridParamsTable.setEnabled(false);
+        gridParamsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                gridParamsTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(gridParamsTable);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -343,38 +371,40 @@ ActionListener {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 524, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE)
+                .addComponent(jScrollPane1)
                 .addContainerGap())
         );
+
+        gridParamDescriptionLabel.setText("Parameter description");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(gridSaveButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(gridSaveAsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(36, 36, 36)
-                        .addComponent(gridFileNameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 544, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(gridFileNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(gridParamDescriptionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -384,11 +414,12 @@ ActionListener {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(gridSaveAsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(gridFileNameLabel)
-                    .addComponent(gridSaveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(gridSaveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(gridParamDescriptionLabel))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -443,6 +474,30 @@ ActionListener {
         }
     }//GEN-LAST:event_gridFileSelectButtonActionPerformed
 
+    /**
+     * Action that is taken when the table is edited
+     */
+    private void gridParamsTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_gridParamsTableMouseClicked
+        // TODO add your handling code here:
+        int row = this.gridParamsTable.rowAtPoint(evt.getPoint());
+        int col = gridParamsTable.columnAtPoint(evt.getPoint());
+        String toto1 = (String) this.gridParamsTable.getModel().getValueAt(row, col);
+        if (row >= 0 && col >= 0) {
+            if (this.gridParamsTable.isCellEditable(row, col)) {
+                this.gridParamsTable.editCellAt(row, col);
+            }
+            
+            String toto2 = (String) this.gridParamsTable.getModel().getValueAt(row, col);
+            
+            hasGridChanged = true;
+            gridSaveButton.setEnabled(true);
+            XParameter param = grid.getParameter((String) this.gridParamsTable.getModel().getValueAt(row, 0));            
+            gridParamDescriptionLabel.setText(param.getDescription());
+        }
+
+   
+    }// GEN-LAST:event_gridParamsTableMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox grid3DCheckBox;
@@ -455,6 +510,7 @@ ActionListener {
     private javax.swing.JButton gridFileSelectButton;
     private javax.swing.JTextField gridIdTextField;
     private javax.swing.JTable gridListTable;
+    private javax.swing.JLabel gridParamDescriptionLabel;
     private javax.swing.JTable gridParamsTable;
     private javax.swing.JButton gridRemoveButton;
     private javax.swing.JButton gridSaveAsButton;
@@ -528,6 +584,35 @@ ActionListener {
         }
     }
     
+    /**
+     *  Clean the parameter table for the given grid.
+     */
+    private void cleanParamTable() {
+        int nRow = gridParamsTable.getModel().getRowCount();
+        int nCol = gridParamsTable.getModel().getColumnCount();
+        for(int i = 0; i < nRow; i++) {
+            for(int j = 0; j < nCol; j++) {
+                gridParamsTable.getModel().setValueAt("", i, j);
+            }
+        }
+    }
+    
+    /**
+     * Render the parameter table given the grid parameters.
+     */
+    private void renderParamTable() {
+        List<XParameter> parameters = grid.getParameters();
+        cleanParamTable();
+        int nRow = parameters.size();
+        int nCol = gridParamsTable.getModel().getColumnCount();
+        for(int i = 0; i < nRow; i++) {
+            XParameter param = parameters.get(i);
+            param.getKey();
+            gridParamsTable.getModel().setValueAt(param.getKey(), i, 0);
+            gridParamsTable.getModel().setValueAt(param.getValue(), i, 1);
+        }
+    }
+    
     
     /**
      * If the grid parameters have been changed using the GUI, the grid element is
@@ -555,6 +640,7 @@ ActionListener {
         this.gridIdTextField.setText(grid.getKey());
         this.gridFileNameTextField.setText(grid.getsetGridMeshFile());
         addChangeListeners(this, this);
+        this.renderParamTable();
     }
     
     public void propertyChange(PropertyChangeEvent evt) {
@@ -577,8 +663,7 @@ ActionListener {
         this.grid3DCheckBox.addActionListener(al);
         this.gridCentralLongitudeComboBox.addActionListener(al);
         this.gridIdTextField.addActionListener(al);
-        this.gridFileNameTextField.addActionListener(al);
-        
+        this.gridFileNameTextField.addActionListener(al);      
     }
 
     @Override
